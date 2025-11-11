@@ -1,16 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerAttacker : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private PlayerManager _manager;
+    private InputHandler _input;
+
+    public void Init(PlayerManager manager, InputHandler input)
     {
-        
+        _manager = manager;
+        _input = input;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

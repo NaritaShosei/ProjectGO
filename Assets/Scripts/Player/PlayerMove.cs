@@ -2,24 +2,24 @@
 
 public class PlayerMove : MonoBehaviour
 {
-    private PlayerInput _inputActions;
+    private PlayerManager _manager;
+    private InputHandler _input;
 
-    private void Awake()
+    [SerializeField] private Rigidbody _rb;
+
+    public void Init(PlayerManager manager, InputHandler input)
     {
-        InitializeAction();
+        _manager = manager;
+        _input = input;
     }
 
-    private void InitializeAction()
+    private void Update()
     {
-        _inputActions = new PlayerInput();
-
-        _inputActions.Enable();
-
-        _inputActions.Player.Move.performed += (context) => Move();
+        
     }
 
     private void Move()
     {
-        Debug.Log("Test");
+        Vector2 vel = _input.MoveInput;
     }
 }
