@@ -2,9 +2,9 @@
 
 public class EnemyController : MonoBehaviour
 {
-    public float maxHealth;
-    public float currentHealth;
-    public float moveSpeed;
+    public float MaxHealth;
+    public float CurrentHealth;
+    public float MoveSpeed;
     void Start()
     {
         
