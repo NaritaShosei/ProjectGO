@@ -1,16 +1,25 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private PlayerInput _inputActions;
+
+    private void Awake()
     {
-        
+        InitializeAction();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void InitializeAction()
     {
-        
+        _inputActions = new PlayerInput();
+
+        _inputActions.Enable();
+
+        _inputActions.Player.Move.performed += (context) => Move();
+    }
+
+    private void Move()
+    {
+        Debug.Log("Test");
     }
 }
