@@ -1,11 +1,10 @@
 {
   "dependencies": {
     "com.cysharp.unitask": {
-      "version": "2.5.10",
+      "version": "file:com.cysharp.unitask",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.ai.assistant": {
       "version": "1.0.0-pre.12",
@@ -96,9 +95,9 @@
       "depth": 1,
       "source": "registry",
       "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
         "com.unity.modules.androidjni": "1.0.0",
         "com.unity.modules.uielements": "1.0.0",
-        "com.unity.modules.physics": "1.0.0",
         "com.unity.modules.screencapture": "1.0.0"
       },
       "url": "https://packages.unity.com"
@@ -209,8 +208,8 @@
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.collections": "2.4.2",
-        "com.unity.burst": "1.7.2"
+        "com.unity.burst": "1.7.2",
+        "com.unity.collections": "2.4.2"
       },
       "url": "https://packages.unity.com"
     },
