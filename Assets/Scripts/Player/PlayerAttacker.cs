@@ -16,7 +16,7 @@ public class PlayerAttacker : MonoBehaviour
     [Header("Animator")]
     [SerializeField] private Animator _animator;
 
-    private AttackData _currentCombData;
+    private AttackData _currentComboData;
     private bool _isAttacking;
     private bool _isCharging;
     private float _chargeTimer;
@@ -30,7 +30,7 @@ public class PlayerAttacker : MonoBehaviour
 
         _input.OnLightAttack += HandleComboAttack;
 
-        _currentCombData = _firstComboData;
+        _currentComboData = _firstComboData;
     }
 
     #region 弱攻撃コンボ
@@ -40,7 +40,7 @@ public class PlayerAttacker : MonoBehaviour
         if (_isAttacking) { return; }
         _cts = new CancellationTokenSource();
 
-        await PerformComboAttack(_currentCombData, _cts.Token);
+        await PerformComboAttack(_currentComboData, _cts.Token);
     }
 
     private async UniTask PerformComboAttack(AttackData attack, CancellationToken token)
@@ -56,7 +56,7 @@ public class PlayerAttacker : MonoBehaviour
         await UniTask.Delay((int)(attack.MotionDuration * 1000), false, PlayerLoopTiming.Update, token);
 
         // コンボ継続可能なら次段へ
-        _currentCombData = attack.NextCombo != null ? attack.NextCombo : _firstComboData;
+        _currentComboData = attack.NextCombo != null ? attack.NextCombo : _firstComboData;
 
         _isAttacking = false;
     }
