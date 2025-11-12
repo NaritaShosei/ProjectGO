@@ -1,0 +1,33 @@
+﻿using UnityEngine;
+
+[CreateAssetMenu(menuName = "GameData/AttackData", fileName = "AttackData")]
+public class AttackData : ScriptableObject
+{
+    [Header("基本情報")]
+    [SerializeField] private string _attackName;
+    [SerializeField] private float _power;
+    [SerializeField] private float _range;
+    [SerializeField] private float _speed;
+    [SerializeField] private float _knockbackForce;
+
+    [Header("モーション設定")]
+    [SerializeField] private AnimationClip _animationClip;
+    [SerializeField] private AudioClip _soundEffect;
+    [SerializeField] private float _motionDuration;
+
+    [Header("次の攻撃（コンボ遷移）")]
+    [SerializeField] private AttackData _nextCombo;
+
+    // ===== プロパティ =====
+    public string AttackName => _attackName;
+    public float Power => _power;
+    public float Range => _range;
+    public float Speed => _speed;
+    public float KnockbackForce => _knockbackForce;
+
+    public AnimationClip AnimationClip => _animationClip;
+    public AudioClip SoundEffect => _soundEffect;
+    public float MotionDuration => _motionDuration;
+
+    public AttackData NextCombo => _nextCombo;
+}
