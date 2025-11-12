@@ -5,6 +5,7 @@ public class PlayerMove : MonoBehaviour
     private PlayerManager _manager;
     private InputHandler _input;
 
+    [Header("Rigidbody")]
     [SerializeField] private Rigidbody _rb;
 
     public void Init(PlayerManager manager, InputHandler input)
