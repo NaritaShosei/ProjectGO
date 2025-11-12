@@ -26,6 +26,9 @@ public class PlayerMove : MonoBehaviour
         Vector3 right = _manager.MainCamera.transform.right * vel.x;
         Vector3 forward = _manager.MainCamera.transform.forward * vel.y;
 
-        _rb.linearVelocity = (right + forward) * _manager.PlayerMoveSpeed;
+        Vector3 moveDir = (right + forward).normalized;
+        moveDir.y = 0;
+
+        _rb.linearVelocity = moveDir * _manager.PlayerMoveSpeed;
     }
 }
