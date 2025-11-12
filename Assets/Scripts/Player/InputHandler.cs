@@ -8,8 +8,8 @@ public class InputHandler : MonoBehaviour
 
     private void OnEnable()
     {
-        _input.Player.Move.performed += cts => MoveInput = cts.ReadValue<Vector2>();
-        _input.Player.Move.canceled += cts => MoveInput = Vector2.zero;
+        _input.Player.Move.performed += ctx => MoveInput = ctx.ReadValue<Vector2>();
+        _input.Player.Move.canceled += ctx => MoveInput = Vector2.zero;
 
         _input.Enable();
     }
