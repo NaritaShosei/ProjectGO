@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -40,7 +41,20 @@ public class PlayerAttacker : MonoBehaviour
         if (_isAttacking) { return; }
         _cts = new CancellationTokenSource();
 
-        await PerformComboAttack(_currentComboData, _cts.Token);
+        try
+        {
+            await PerformComboAttack(_currentComboData, _cts.Token);
+        }
+
+        catch (OperationCanceledException)
+        {
+            // 正常終了
+        }
+
+        catch (Exception ex)
+        {
+            Debug.LogError($"コンボ攻撃キャンセル時に予期せぬエラー: {ex}");
+        }
     }
 
     private async UniTask PerformComboAttack(AttackData attack, CancellationToken token)
