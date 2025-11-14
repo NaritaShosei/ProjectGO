@@ -8,7 +8,8 @@ public class AttackData : ScriptableObject
     [SerializeField] private float _power;
     [SerializeField] private float _range;
     [SerializeField] private float _speed;
-    [SerializeField] private float _knockbackForce;
+    [SerializeField,Tooltip("ノックバックの強さ")] private float _knockbackForce;
+    [SerializeField, Tooltip("ノックバックの向き")] private Vector3 _knockbackDirection;
 
     [Header("モーション設定")]
     [SerializeField] private AnimationClip _animationClip;
@@ -23,7 +24,14 @@ public class AttackData : ScriptableObject
     public float Power => _power;
     public float Range => _range;
     public float Speed => _speed;
+    /// <summary>
+    /// ノックバックの強さ
+    /// </summary>
     public float KnockbackForce => _knockbackForce;
+    /// <summary>
+    /// ノックバックの向き
+    /// </summary>
+    public Vector3 KnockbackDirection => _knockbackDirection;
 
     public AnimationClip AnimationClip => _animationClip;
     public AudioClip SoundEffect => _soundEffect;
