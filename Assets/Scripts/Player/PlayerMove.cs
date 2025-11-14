@@ -19,20 +19,46 @@ public class PlayerMove : MonoBehaviour
     private void Update()
     {
         Move();
+        RotateToCameraForward();
         MoveAnimation();
     }
 
     private void Move()
     {
         Vector2 vel = _input.MoveInput;
+        Camera camera = _manager.MainCamera;
 
-        Vector3 right = _manager.MainCamera.transform.right * vel.x;
-        Vector3 forward = _manager.MainCamera.transform.forward * vel.y;
+        // 入力がゼロに近いなら移動なし
+        float inputMag = vel.magnitude;
+        if (inputMag < 0.01f)
+        {
+            _rb.linearVelocity = Vector3.zero;
+            return;
+        }
 
+        Vector3 right = camera.transform.right * vel.x;
+        Vector3 forward = camera.transform.forward * vel.y;
+
+        // 方向だけ正規化
         Vector3 moveDir = (right + forward).normalized;
-        moveDir.y = 0;
+        moveDir.y = 0f;
 
-        _rb.linearVelocity = moveDir * _manager.PlayerMoveSpeed;
+        // 入力の大きさを速度に反映
+        float speed = _manager.PlayerMoveSpeed * inputMag;
+
+        _rb.linearVelocity = moveDir * speed;
+    }
+
+
+    private void RotateToCameraForward()
+    {
+        Camera camera = _manager.MainCamera;
+
+        Vector3 targetDirection = camera.transform.forward;
+
+        targetDirection.y = 0;
+
+        transform.forward = targetDirection;
     }
 
     private void MoveAnimation()
@@ -44,7 +70,7 @@ public class PlayerMove : MonoBehaviour
         _animator.SetFloat("MoveForward", vel.y);
 
         // 遷移条件
-        float speed = vel.magnitude; 
+        float speed = vel.magnitude;
         _animator.SetFloat("Speed", speed);
     }
 }
