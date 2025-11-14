@@ -299,6 +299,7 @@ GameObject:
   - component: {fileID: 365390049}
   - component: {fileID: 365390048}
   - component: {fileID: 365390050}
+  - component: {fileID: 365390051}
   m_Layer: 0
   m_Name: Spawner
   m_TagString: Untagged
@@ -321,11 +322,6 @@ MonoBehaviour:
   _enemyInstanceManager: {fileID: 365390050}
   _phaseSettings:
   - SpawnSettings:
-    - Enemy: {fileID: 1974885989822541271, guid: e5ac10e7b1e216e4c835edce8a8001e6, type: 3}
-      SpawnTransform: {fileID: 961150687}
-    - Enemy: {fileID: 1974885989822541271, guid: e5ac10e7b1e216e4c835edce8a8001e6, type: 3}
-      SpawnTransform: {fileID: 961150687}
-  - SpawnSettings:
     - Enemy: {fileID: 5698726695406806029, guid: 53f444c4be743a143a1431f8f8a2c9fc, type: 3}
       SpawnTransform: {fileID: 961150687}
     - Enemy: {fileID: 5698726695406806029, guid: 53f444c4be743a143a1431f8f8a2c9fc, type: 3}
@@ -334,6 +330,13 @@ MonoBehaviour:
     - Enemy: {fileID: 5698726695406806029, guid: 53f444c4be743a143a1431f8f8a2c9fc, type: 3}
       SpawnTransform: {fileID: 961150687}
     - Enemy: {fileID: 5698726695406806029, guid: 53f444c4be743a143a1431f8f8a2c9fc, type: 3}
+      SpawnTransform: {fileID: 961150687}
+    - Enemy: {fileID: 5698726695406806029, guid: 53f444c4be743a143a1431f8f8a2c9fc, type: 3}
+      SpawnTransform: {fileID: 961150687}
+  - SpawnSettings:
+    - Enemy: {fileID: 1974885989822541271, guid: e5ac10e7b1e216e4c835edce8a8001e6, type: 3}
+      SpawnTransform: {fileID: 961150687}
+    - Enemy: {fileID: 1974885989822541271, guid: e5ac10e7b1e216e4c835edce8a8001e6, type: 3}
       SpawnTransform: {fileID: 961150687}
   - SpawnSettings:
     - Enemy: {fileID: 5698726695406806029, guid: 53f444c4be743a143a1431f8f8a2c9fc, type: 3}
@@ -368,7 +371,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8beba595b3734d5478a93895fca2c1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyInstanceManager
+  _objectPoolManager: {fileID: 365390051}
   _spawnParent: {fileID: 0}
+--- !u!114 &365390051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365390047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb69741bf13488647b1b3a65284cd689, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolManager
 --- !u!1 &961150686
 GameObject:
   m_ObjectHideFlags: 0
