@@ -34,8 +34,6 @@ public class PlayerAttacker : MonoBehaviour
     [SerializeField] private Animator _animator;
 
     private AttackData _currentComboData;
-    private bool _isAttacking;
-    private bool _isCharging;
     private float _chargeTimer;
 
     private CancellationTokenSource _cts;
@@ -55,9 +53,12 @@ public class PlayerAttacker : MonoBehaviour
 
     #region 弱攻撃コンボ
 
+    /// <summary>
+    /// 攻撃を開始する
+    /// </summary>
     private async void HandleComboAttack()
     {
-        if (_isAttacking || _isCharging) { return; }
+        if (!_manager.CanAttack) { return; }
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
@@ -65,9 +66,12 @@ public class PlayerAttacker : MonoBehaviour
         await SafeRun(() => PerformComboAttack(_currentComboData, _cts.Token));
     }
 
+    /// <summary>
+    /// 与えられた攻撃のデータを基に攻撃
+    /// </summary>
     private async UniTask PerformComboAttack(AttackData attack, CancellationToken token)
     {
-        _isAttacking = true;
+        _manager.StartAttack();
 
         if (attack.AnimationClip && _animator)
             _animator.Play(attack.AnimationClip.name);
@@ -80,11 +84,14 @@ public class PlayerAttacker : MonoBehaviour
         // コンボ継続可能なら次段へ
         _currentComboData = attack.NextCombo != null ? attack.NextCombo : _firstComboData;
 
-        _isAttacking = false;
+        _manager.EndAction();
 
         StartComboResetTimer();
     }
 
+    /// <summary>
+    /// コンボをリセットするタイマーを始動
+    /// </summary>
     private void StartComboResetTimer()
     {
         CancelAndDisposeComboReset();
@@ -94,6 +101,9 @@ public class PlayerAttacker : MonoBehaviour
         _ = RunComboResetTimer(_comboResetCts.Token);
     }
 
+    /// <summary>
+    /// タイマーを動かし、コンボをリセット
+    /// </summary>
     private async UniTask RunComboResetTimer(CancellationToken token)
     {
         try
@@ -107,6 +117,9 @@ public class PlayerAttacker : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// コンボをリセット
+    /// </summary>
     private void ResetCombo()
     {
         _currentComboData = _firstComboData;
@@ -116,10 +129,13 @@ public class PlayerAttacker : MonoBehaviour
 
     #region 溜め攻撃
 
+    /// <summary>
+    /// チャージを開始
+    /// </summary>
     private async void StartCharge()
     {
-        if (_isAttacking || _isCharging) { return; }
-        _isCharging = true;
+        if (!_manager.CanStartCharge) { return; }
+        _manager.StartCharge();
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
@@ -130,11 +146,14 @@ public class PlayerAttacker : MonoBehaviour
         await SafeRun(() => UpdateTimer(_cts.Token));
     }
 
+    /// <summary>
+    /// チャージ終了時の条件に応じて攻撃のデータを設定
+    /// </summary>
     private async void ReleaseCharge()
     {
-        if (!_isCharging) return;
+        if (!_manager.IsCharging) return;
 
-        _isCharging = false;
+        _manager.EndAction();
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
@@ -155,21 +174,27 @@ public class PlayerAttacker : MonoBehaviour
         ResetCombo();
     }
 
+    /// <summary>
+    /// 与えられた攻撃のデータを基に攻撃
+    /// </summary>
     private async UniTask PerformHeavyAttack(AttackData data, CancellationToken token)
     {
-        _isAttacking = true;
+        _manager.StartAttack();
 
         if (data.AnimationClip && _animator)
             _animator.Play(data.AnimationClip.name);
 
         await UniTask.Delay(TimeSpan.FromSeconds(data.MotionDuration), false, PlayerLoopTiming.Update, token);
 
-        _isAttacking = false;
+        _manager.EndAction();
     }
 
+    /// <summary>
+    /// チャージ時間の計算
+    /// </summary>
     private async UniTask UpdateTimer(CancellationToken token)
     {
-        while (_isCharging)
+        while (_manager.IsCharging)
         {
             token.ThrowIfCancellationRequested();
             _chargeTimer += Time.deltaTime;
@@ -180,6 +205,9 @@ public class PlayerAttacker : MonoBehaviour
 
     #region 共通ユーティリティ
 
+    /// <summary>
+    /// UniTaskすべてでtry/catchをすると長くなるのでまとめる
+    /// </summary>
     private async UniTask SafeRun(Func<UniTask> func)
     {
         try { await func(); }
@@ -187,6 +215,9 @@ public class PlayerAttacker : MonoBehaviour
         catch (Exception ex) { Debug.LogError($"攻撃中にエラー: {ex}"); }
     }
 
+    /// <summary>
+    /// 攻撃のCTSを止める
+    /// </summary>
     private void CancelAndDisposeCTS()
     {
         if (_cts == null) return;
@@ -195,6 +226,9 @@ public class PlayerAttacker : MonoBehaviour
         _cts = null;
     }
 
+    /// <summary>
+    /// タイマーのCTSを止める
+    /// </summary>
     private void CancelAndDisposeComboReset()
     {
         if (_comboResetCts == null) return;
