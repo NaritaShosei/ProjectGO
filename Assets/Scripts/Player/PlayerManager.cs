@@ -2,10 +2,11 @@
 
 public class PlayerManager : MonoBehaviour
 {
-    [Header("Playerのコンポーネント")]
+    [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
     [SerializeField] private PlayerAttacker _attacker;
     [SerializeField] private InputHandler _input;
+    [SerializeField] private Animator _animator;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
     public Camera MainCamera { get; private set; }
@@ -33,8 +34,8 @@ public class PlayerManager : MonoBehaviour
 
     private void Awake()
     {
-        _move.Init(this, _input);
-        _attacker.Init(this, _input);
+        _move.Init(this, _input, _animator);
+        _attacker.Init(this, _input, _animator);
         MainCamera = Camera.main;
     }
 

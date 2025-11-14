@@ -103,6 +103,7 @@ MonoBehaviour:
   _move: {fileID: 4829912816786645349}
   _attacker: {fileID: 5501165089670775405}
   _input: {fileID: 6162494699344732187}
+  _animator: {fileID: 9113894252415423701}
   _data: {fileID: 11400000, guid: 0045afd6d64130b409d591fe99534c27, type: 2}
 --- !u!114 &4829912816786645349
 MonoBehaviour:
@@ -137,7 +138,6 @@ MonoBehaviour:
   _chargeData:
     _chargeTime: 0.5
     _superChargeTime: 1.5
-  _animator: {fileID: 0}
 --- !u!114 &6162494699344732187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,11 +202,24 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 95427079828222264, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 66ef498077266994281b781896bd19be, type: 2}
+    - target: {fileID: 95427079828222264, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
+--- !u!95 &9113894252415423701 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 95427079828222264, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
+  m_PrefabInstance: {fileID: 9162583219658237421}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &9162284899462946157 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4206142737954944, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
