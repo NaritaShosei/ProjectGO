@@ -7,6 +7,7 @@ public class PlayerAttacker : MonoBehaviour
 {
     private PlayerManager _manager;
     private InputHandler _input;
+    private Animator _animator;
 
     [Header("攻撃のデータ")]
     [SerializeField, Tooltip("コンボの最初の攻撃")] private AttackData _firstComboData;
@@ -30,19 +31,17 @@ public class PlayerAttacker : MonoBehaviour
         public float SuperChargeTime => _superChargeTime;
     }
 
-    [Header("Animator")]
-    [SerializeField] private Animator _animator;
-
     private AttackData _currentComboData;
     private float _chargeTimer;
 
     private CancellationTokenSource _cts;
     private CancellationTokenSource _comboResetCts;
 
-    public void Init(PlayerManager manager, InputHandler input)
+    public void Init(PlayerManager manager, InputHandler input, Animator animator)
     {
         _manager = manager;
         _input = input;
+        _animator = animator;
 
         _input.OnLightAttack += HandleComboAttack;
         _input.OnChargeStart += StartCharge;
