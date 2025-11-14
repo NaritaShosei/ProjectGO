@@ -45,8 +45,10 @@ public class Skeleton : EnemyBase
         dir.Normalize();
 
         // Instantiate（将来的にはオブジェクトプールを使うかも）
-        var bullet = Instantiate(_enemyBulletPrefab, _firePoint.position, Quaternion.LookRotation(dir));
-        Debug.Log($"{dir}");
+        var poolable = PoolManager.Get(_enemyBulletPrefab.gameObject);
+        var bullet = poolable as EnemyBullet;
+        bullet.transform.position = _firePoint.position;
+        bullet.transform.rotation = Quaternion.LookRotation(dir);
         bullet.Init(dir, _bulletSpeed);
     }
 

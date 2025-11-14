@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class EnemyBase : MonoBehaviour
+public class EnemyBase : MonoBehaviour , IPoolable
 {
     [Header("Enemyのコンポーネント")]
     [SerializeField] private EnemyMove _move;
@@ -19,6 +19,8 @@ public class EnemyBase : MonoBehaviour
     protected EnemyMove Move => _move;
     // 現在のHP
     private float _currentHp;
+    public Action OnRelease { get; set; }
+    public ObjectPoolManager PoolManager { get ; set; }
 
     // 外部に通知するためのイベント
     public event Action OnDeath;
@@ -28,6 +30,7 @@ public class EnemyBase : MonoBehaviour
     // プレイヤーなど外部参照の初期化
     public virtual void Init(Transform playerTransform)
     {
+        gameObject.SetActive(true);
         _playerTransform = playerTransform;
         _move?.Init(playerTransform);
 
@@ -121,8 +124,8 @@ public class EnemyBase : MonoBehaviour
         // TODO:エフェクトやスコア加算、音などの処理
 
 
-        // とりあえず即破棄
-        Destroy(gameObject);
+        OnRelease?.Invoke();
+
     }
 
     // オブジェクトが破棄されるときの後片付け（念のため）

@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyInstanceManager : MonoBehaviour
 {
     private readonly List<EnemyBase> _enemiesOnField = new List<EnemyBase>();
-
+    [SerializeField]ObjectPoolManager _objectPoolManager;
     /// <summary>
     /// フィールド上に敵が一体もいなければ true
     /// </summary>
@@ -43,9 +43,10 @@ public class EnemyInstanceManager : MonoBehaviour
 
         // 親を指定して生成（null なら 自分自身）
         var parent = _spawnParent != null ? _spawnParent : this.transform;
-
-        var e = Instantiate(enemyPrefab, pos, rot, parent);
+        var poolobj = _objectPoolManager.Get(enemyPrefab.gameObject);
+        var e = poolobj as EnemyBase;
         e.Init(playerTransform);
+        e.transform.SetPositionAndRotation(pos, rot);
 
         // 登録
         _enemiesOnField.Add(e);
