@@ -4,19 +4,22 @@ public class PlayerMove : MonoBehaviour
 {
     private PlayerManager _manager;
     private InputHandler _input;
+    private Animator _animator;
 
     [Header("Rigidbody")]
     [SerializeField] private Rigidbody _rb;
 
-    public void Init(PlayerManager manager, InputHandler input)
+    public void Init(PlayerManager manager, InputHandler input, Animator animator)
     {
         _manager = manager;
         _input = input;
+        _animator = animator;
     }
 
     private void Update()
     {
         Move();
+        MoveAnimation();
     }
 
     private void Move()
@@ -30,5 +33,15 @@ public class PlayerMove : MonoBehaviour
         moveDir.y = 0;
 
         _rb.linearVelocity = moveDir * _manager.PlayerMoveSpeed;
+    }
+
+    private void MoveAnimation()
+    {
+        Vector2 vel = _input.MoveInput;
+        _animator.SetFloat("MoveRight", vel.x);
+        _animator.SetFloat("MoveForward", vel.y);
+
+        float speed = vel.magnitude; 
+        _animator.SetFloat("Speed", speed);
     }
 }
