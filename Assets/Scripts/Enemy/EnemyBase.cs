@@ -61,10 +61,9 @@ public class EnemyBase : MonoBehaviour
     {
         if (_timeSinceLastAttack < _attackInterval) return;
 
-        // 準備OK。アニメやエフェクトあればここで再生
+        // アニメやエフェクトあればここで再生
         PlayAttackAnimation();
 
-        // 実際の弾の生成・発射
         AttackAction();
 
         _timeSinceLastAttack = 0f;
