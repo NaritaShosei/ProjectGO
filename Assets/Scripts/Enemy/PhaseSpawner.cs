@@ -1,147 +1,125 @@
-﻿using System.Collections;
-using UnityEngine;
-using UnityEngine.Events;
+﻿using UnityEngine;
+using Cysharp.Threading.Tasks;
+using System.Threading;
+using System;
+[Serializable]
+public struct PhaseSpawnSettings
+{
+    public EnemyBase Enemy;         // スポーンする敵プレハブ
+    public Transform SpawnTransform;// スポーン位置
+}
+
+[Serializable]
+public struct PhaseSettings
+{
+    public PhaseSpawnSettings[] SpawnSettings; // フェーズごとのスポーン設定
+}
 
 /// <summary>
 /// フェーズ制の敵スポーンマネージャー
-/// 10秒ごとにフェーズが進行し、フェーズに応じて敵をスポーンする
-/// Inspectorでプレハブ・プレイヤー・スポーン範囲・係数などを調節可能
+/// 外部から StartSpawning() を呼んで開始。敵が全滅するか時間経過で次フェーズへ移行する。
 /// </summary>
 public class PhaseSpawner : MonoBehaviour
 {
     [Header("Spawn settings")]
-    [SerializeField] private GameObject _enemyPrefab;            // スポーンする敵プレハブ
-    [SerializeField] private Transform _playerTransform;         // プレイヤー（nullならワールド原点基準）
-    [SerializeField] private Transform[] _spawnPoints;           // 指定スパーンポイントがある場合はこちらを優先
-    [SerializeField] private float _spawnRadius = 8f;            // プレイヤー周りにランダムに出すときの半径
+    [SerializeField] private EnemyInstanceManager _enemyInstanceManager; // 敵インスタンス管理マネージャー
+    [SerializeField] private PhaseSettings[] _phaseSettings;    // フェーズごとのスポーン設定
+    [SerializeField] private Transform _playerTransform;    // プレイヤーのTransform（敵の移動初期化用）
 
-    [Header("Phase timing")]
-    [SerializeField] private float _phaseDuration = 10f;         // フェーズ継続時間（秒） — 要件: 10秒
-    [SerializeField] private float _initialDelay = 0.5f;         // 最初のフェーズ開始前の遅延
-
-    [Header("Difficulty scaling")]
-    [SerializeField] private int _baseEnemiesPerPhase = 1;       // フェーズ1あたりの基本スポーン数（フェーズ番号を掛ける）
-    [SerializeField] private float _enemyCountMultiplier = 1.0f; // フェーズごとの増加係数（例: 1.2ならゆっくり増える）
-    [SerializeField] private float _enemyHealthPerPhase = 1.0f;  // 敵の基本体力（フェーズで掛ける）
-
-    [Header("Misc")]
-    [SerializeField] private bool _autoStart = true;
-    [SerializeField] private bool _useSpawnPoints = false;       // spawnPoints配列を優先するか
-    [SerializeField] private int _maxPhases = 999;               // 無限にしないなら上限を
-
-    [Header("Events")]
-    [SerializeField] private UnityEvent<int> _onPhaseStart;      // フェーズ開始時（引数: フェーズ番号）
-    [SerializeField] private UnityEvent<int> _onPhaseEnd;        // フェーズ終了時
+    // フェーズ開始時にフェーズ番号(int)を渡す（1始まりにするか0始まりにするかは仕様で統一）
+    public event Action<int> OnPhaseStart;
+    public event Action<int> OnPhaseEnd;
 
     private bool _running = false;
-    private int _currentPhase = 0;
-    private Coroutine _phaseCoroutine;
+    public bool IsRunning => _running;
+    private int _currentPhaseIndex = 0; // 0-based index
 
-    private void Start()
+    private CancellationTokenSource _cts;
+
+    private void OnDisable()
     {
-        if (_autoStart) StartSpawning();
+        // シーン切替や破棄時に確実に止める
+        StopSpawning();
     }
 
     public void StartSpawning()
     {
         if (_running) return;
         _running = true;
-        _phaseCoroutine = StartCoroutine(PhaseLoop());
+
+        // 既存のCTSがあればキャンセルして破棄
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = new CancellationTokenSource();
+
+        // fire-and-forget でループを開始
+        PhaseLoop(_cts.Token).Forget();
     }
 
     public void StopSpawning()
     {
         if (!_running) return;
         _running = false;
-        if (_phaseCoroutine != null) StopCoroutine(_phaseCoroutine);
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
     }
 
     public void ResetSpawning()
     {
         StopSpawning();
-        _currentPhase = 0;
+        _currentPhaseIndex = 0;
         StartSpawning();
     }
 
-    private IEnumerator PhaseLoop()
+    private async UniTaskVoid PhaseLoop(CancellationToken token)
     {
-        // optional initial delay
-        yield return new WaitForSeconds(_initialDelay);
+        // TODO:フェーズ開始前バフ選択などを待つ処理を追加する場合はここに実装
+        // イベント待ち()
 
-        while (_running && _currentPhase < _maxPhases)
+        while (_running && _currentPhaseIndex < _phaseSettings.Length && !token.IsCancellationRequested)
         {
-            _currentPhase++;
-            _onPhaseStart?.Invoke(_currentPhase);
+            int phaseNumberForEvent = _currentPhaseIndex + 1; // 表示用は1始まりに
+            OnPhaseStart?.Invoke(phaseNumberForEvent);
 
-            // フェーズ中のスポーン（ここではフェーズ開始直後にスポーンして、フェーズ中は待つ）
-            DoSpawnForPhase(_currentPhase);
+            // フェーズのスポーン処理
+            var spawnSettings = _phaseSettings[_currentPhaseIndex].SpawnSettings;
+            if (spawnSettings != null)
+            {
+                for (int i = 0; i < spawnSettings.Length; i++)
+                {
+                    var s = spawnSettings[i];
+                    if (s.Enemy == null || s.SpawnTransform == null)
+                    {
+                        Debug.LogWarning($"Phase {_currentPhaseIndex} spawn[{i}] has null reference.");
+                        continue;
+                    }
+                    _enemyInstanceManager.Spawn(s.Enemy, s.SpawnTransform,_playerTransform);
+                }
+            }
 
-            // フェーズの経過を待つ
-            yield return new WaitForSeconds(_phaseDuration);
+            // フェーズ終了条件：敵が全滅 を待つ
+            var waitForDefeat = UniTask.WaitUntil(() => _enemyInstanceManager.AllEnemiesDefeated, cancellationToken: token);
 
-            _onPhaseEnd?.Invoke(_currentPhase);
+            try
+            {
+                await UniTask.WhenAny(waitForDefeat);
+            }
+            catch (OperationCanceledException)
+            {
+                // キャンセルされたらループ抜け
+                break;
+            }
+
+            OnPhaseEnd?.Invoke(phaseNumberForEvent);
+
+            _currentPhaseIndex++;
         }
 
         _running = false;
     }
 
-    private void DoSpawnForPhase(int phase)
-    {
-        // 敵の数を決める（例: baseEnemiesPerPhase * phase ^ multiplier）
-        // 誤魔化しなしに単純に計算
-        float scaled = _baseEnemiesPerPhase * Mathf.Pow(phase, _enemyCountMultiplier);
-        int spawnCount = Mathf.Max(1, Mathf.FloorToInt(scaled));
-
-        for (int i = 0; i < spawnCount; i++)
-        {
-            Vector3 pos = ChooseSpawnPosition();
-            var go = Instantiate(_enemyPrefab, pos, Quaternion.identity);
-            ApplyPhaseToEnemy(go, phase, i);
-        }
-    }
-
-    private Vector3 ChooseSpawnPosition()
-    {
-        if (_useSpawnPoints && _spawnPoints != null && _spawnPoints.Length > 0)
-        {
-            // ランダムにスパーンポイントを選ぶ
-            var t = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
-            return t.position;
-        }
-
-        // プレイヤー周りにランダムに出す（2Dなら z=0）
-        Vector3 center = (_playerTransform != null) ? _playerTransform.position : Vector3.zero;
-        // 円形ランダム（プレイヤーからspawnRadiusくらいの距離に出る）
-        float angle = Random.Range(0f, Mathf.PI * 2f);
-        float r = Random.Range(_spawnRadius * 0.5f, _spawnRadius); // 中心寄りも出したければ0にする
-        Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * r;
-        return center + offset;
-    }
-
-    private void ApplyPhaseToEnemy(GameObject enemyObj, int phase, int indexInPhase)
-    {
-        if (enemyObj == null) return;
-
-        // 例: 敵のHealthコンポーネントやステータスを探して強化する
-        // 下のは任意：敵プレハブが EnemyController というスクリプトを持っている想定
-        var em = enemyObj.GetComponent<EnemyMove>();
-        if (em != null)
-        { 
-            em._targetTransform = _playerTransform;
-        }
-        var ec = enemyObj.GetComponent<EnemyController>();
-        if (ec != null)
-        {
-            // 体力を増やす（実際のEnemyControllerに合わせて調整してね）
-            ec.MaxHealth *= (1f + (phase - 1) * _enemyHealthPerPhase * 0.1f);
-            ec.CurrentHealth = ec.MaxHealth;
-
-            // スピードや攻撃力も変えたいならここで調整
-            ec.MoveSpeed *= 1f + (phase - 1) * 0.02f;
-        }
-    }
-
-    // デバッグ用にInspectorからフェーズを進める
+    // デバッグ用にInspectorからフェーズを開始
     [ContextMenu("Advance Phase (debug)")]
     private void DebugAdvancePhase()
     {
@@ -150,9 +128,5 @@ public class PhaseSpawner : MonoBehaviour
             StartSpawning();
             return;
         }
-        // フェーズループを止めて1フェーズ分スキップ的に処理する
-        StopSpawning();
-        _currentPhase++;
-        DoSpawnForPhase(_currentPhase);
     }
 }
