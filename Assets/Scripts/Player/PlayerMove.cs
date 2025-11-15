@@ -64,16 +64,13 @@ public class PlayerMove : MonoBehaviour
 
         Camera camera = _manager.MainCamera;
 
-        Vector3 camRight = camera.transform.right;
+        // 前後左右の移動すべて正面を向くようにするためカメラの正面のみ考慮
         Vector3 camForward = camera.transform.forward;
 
         camForward.y = 0;
-        camRight.y = 0;
-
-        Vector3 moveDir = camForward * vel.y + camRight * vel.x;
 
         // 線形補間で滑らかに回転
-        var dir = Vector3.Lerp(transform.forward, moveDir.normalized, _rotateSmooth);
+        var dir = Vector3.Lerp(transform.forward, camForward.normalized, _rotateSmooth);
 
         transform.rotation = Quaternion.LookRotation(dir);
     }
