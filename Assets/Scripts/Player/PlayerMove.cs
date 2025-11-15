@@ -11,7 +11,7 @@ public class PlayerMove : MonoBehaviour
     [Header("Rigidbody")]
     [SerializeField] private Rigidbody _rb;
 
-    [Header("回転速度")]
+    [Header("回転方向への補間率 (0〜1)")]
     [SerializeField, Range(0, 1)] private float _rotateSmooth = 0.5f;
 
     public void Init(PlayerManager manager, InputHandler input, Animator animator)
