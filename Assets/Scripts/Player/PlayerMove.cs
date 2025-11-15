@@ -2,12 +2,17 @@
 
 public class PlayerMove : MonoBehaviour
 {
+    private const float INPUT_THRESHOLD = 0.001f;
+
     private PlayerManager _manager;
     private InputHandler _input;
     private Animator _animator;
 
     [Header("Rigidbody")]
     [SerializeField] private Rigidbody _rb;
+
+    [Header("回転速度")]
+    [SerializeField, Range(0, 1)] private float _rotateSmooth = 0.5f;
 
     public void Init(PlayerManager manager, InputHandler input, Animator animator)
     {
@@ -30,7 +35,7 @@ public class PlayerMove : MonoBehaviour
 
         // 入力がゼロに近いなら移動なし
         float inputMag = vel.magnitude;
-        if (inputMag < 0.01f)
+        if (inputMag < INPUT_THRESHOLD)
         {
             _rb.linearVelocity = Vector3.zero;
             return;
@@ -52,13 +57,25 @@ public class PlayerMove : MonoBehaviour
 
     private void RotateToCameraForward()
     {
+        Vector2 vel = _input.MoveInput;
+
+        // 入力がゼロに近いときは回転しない
+        if (vel.magnitude < INPUT_THRESHOLD) { return; }
+
         Camera camera = _manager.MainCamera;
 
-        Vector3 targetDirection = camera.transform.forward;
+        Vector3 camRight = camera.transform.right;
+        Vector3 camForward = camera.transform.forward;
 
-        targetDirection.y = 0;
+        camForward.y = 0;
+        camRight.y = 0;
 
-        transform.forward = targetDirection;
+        Vector3 moveDir = camForward * vel.y + camRight * vel.x;
+
+        // 線形補間で滑らかに回転
+        var dir = Vector3.Lerp(transform.forward, moveDir.normalized, _rotateSmooth);
+
+        transform.rotation = Quaternion.LookRotation(dir);
     }
 
     private void MoveAnimation()
