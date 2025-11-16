@@ -53,6 +53,19 @@ public class PlayerAttacker : MonoBehaviour
         _currentComboData = _firstComboData;
     }
 
+    private void OnDestroy()
+    {
+        if (_input != null)
+        {
+            _input.OnLightAttack -= HandleComboAttack;
+            _input.OnChargeStart -= StartCharge;
+            _input.OnChargeEnd -= ReleaseCharge;
+        }
+
+        CancelAndDisposeCTS();
+        CancelAndDisposeComboReset();
+    }
+
     #region 弱攻撃コンボ
 
     /// <summary>
