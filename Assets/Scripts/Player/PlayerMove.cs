@@ -14,6 +14,12 @@ public class PlayerMove : MonoBehaviour
     [Header("回転方向への補間率 (0〜1)")]
     [SerializeField, Range(0, 1)] private float _rotateSmooth = 0.5f;
 
+    /// <summary>
+    /// 移動可能な時は入力を反映
+    /// </summary>
+    private Vector2 _moveInput => _manager.CanMove ? _input.MoveInput : Vector2.zero;
+
+
     public void Init(PlayerManager manager, InputHandler input, Animator animator)
     {
         _manager = manager;
@@ -30,7 +36,7 @@ public class PlayerMove : MonoBehaviour
 
     private void Move()
     {
-        Vector2 vel = _input.MoveInput;
+        Vector2 vel = _moveInput;
         Camera camera = _manager.MainCamera;
 
         // 入力がゼロに近いなら移動なし
@@ -57,7 +63,7 @@ public class PlayerMove : MonoBehaviour
 
     private void RotateToCameraForward()
     {
-        Vector2 vel = _input.MoveInput;
+        Vector2 vel = _moveInput;
 
         // 入力がゼロに近いときは回転しない
         if (vel.magnitude < INPUT_THRESHOLD) { return; }
@@ -77,7 +83,7 @@ public class PlayerMove : MonoBehaviour
 
     private void MoveAnimation()
     {
-        Vector2 vel = _input.MoveInput;
+        Vector2 vel = _moveInput;
 
         // BlendTreeに関する値
         _animator.SetFloat("MoveRight", vel.x);
