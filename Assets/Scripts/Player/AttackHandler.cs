@@ -2,6 +2,8 @@
 
 public class AttackHandler : MonoBehaviour
 {
+    [Header("PlayerのTransform")]
+    [SerializeField] private Transform _playerTransform;
     [Header("攻撃の判定位置")]
     [SerializeField] private Transform _attackPoint;
 
@@ -24,13 +26,14 @@ public class AttackHandler : MonoBehaviour
 
         foreach (var coll in colls)
         {
-            if (!coll.TryGetComponent(out IEnemy enemy)) { continue; }
+            if (!coll.TryGetComponent(out IEnemy enemy)) continue;
+
+            // data のノックバック方向（ローカル）をプレイヤー向きに変換
+            Vector3 worldDir = _playerTransform.TransformDirection(data.KnockbackDirection);
+
+            Vector3 knockbackForce = worldDir.normalized * data.KnockbackForce;
 
             enemy.AddDamage(data.Power);
-
-            // ノックバックの方向・強さを計算
-            var knockbackForce = data.KnockbackForce * data.KnockbackDirection;
-
             enemy.AddKnockBackForce(knockbackForce);
         }
     }
