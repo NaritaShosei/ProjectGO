@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: TeatComboAttackData 2
   m_EditorClassIdentifier: Assembly-CSharp::AttackData
   _attackName: "\u30B3\u30F3\u30DC3"
-  _power: 0
-  _range: 0
-  _speed: 0
-  _knockbackForce: 0
-  _animationClip: {fileID: 0}
+  _power: 1
+  _range: 1
+  _speed: 1
+  _knockbackForce: 1
+  _knockbackDirection: {x: 0, y: 1, z: 0}
+  _animationClip: {fileID: -203655887218126122, guid: 9bb80a9e4bc06fc409b1d90d86c98282, type: 3}
   _soundEffect: {fileID: 0}
-  _motionDuration: 0.4
+  _motionDuration: 1
   _nextCombo: {fileID: 0}

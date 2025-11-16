@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : MonoBehaviour, ICharacter
 {
     [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
     [SerializeField] private PlayerAttacker _attacker;
     [SerializeField] private InputHandler _input;
     [SerializeField] private Animator _animator;
+    [SerializeField] private Transform _targetTransform;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
     public Camera MainCamera { get; private set; }
@@ -69,6 +70,16 @@ public class PlayerManager : MonoBehaviour
     public void EndAction()
     {
         ChangeState(PlayerState.None);
+    }
+
+    public void AddDamage(float damage)
+    {
+        Debug.Log($"Playerに {damage} ダメージ");
+    }
+
+    public Transform GetTargetTransform()
+    {
+        return _targetTransform;
     }
     #endregion
 }

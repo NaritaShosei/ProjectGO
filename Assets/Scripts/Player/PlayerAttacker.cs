@@ -21,6 +21,9 @@ public class PlayerAttacker : MonoBehaviour
     [Header("チャージのデータ")]
     [SerializeField] private ChargeData _chargeData;
 
+    [Header("実際の攻撃を依頼するコンポーネント")]
+    [SerializeField] private AttackHandler _attackHandler;
+
     [System.Serializable]
     private struct ChargeData
     {
@@ -50,6 +53,19 @@ public class PlayerAttacker : MonoBehaviour
         _currentComboData = _firstComboData;
     }
 
+    private void OnDestroy()
+    {
+        if (_input != null)
+        {
+            _input.OnLightAttack -= HandleComboAttack;
+            _input.OnChargeStart -= StartCharge;
+            _input.OnChargeEnd -= ReleaseCharge;
+        }
+
+        CancelAndDisposeCTS();
+        CancelAndDisposeComboReset();
+    }
+
     #region 弱攻撃コンボ
 
     /// <summary>
@@ -61,6 +77,8 @@ public class PlayerAttacker : MonoBehaviour
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
+
+        _attackHandler.SetupData(_currentComboData);
 
         await SafeRun(() => PerformComboAttack(_currentComboData, _cts.Token));
     }
@@ -166,6 +184,8 @@ public class PlayerAttacker : MonoBehaviour
             selected = _chargedAttackData;
 
         Debug.Log($"{selected.AttackName}発動（時間: {_chargeTimer:F2}s）");
+
+        _attackHandler.SetupData(selected);
 
         await SafeRun(() => PerformHeavyAttack(selected, _cts.Token));
 
