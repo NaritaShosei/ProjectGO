@@ -2,8 +2,6 @@
 
 public class PlayerStats
 {
-    private PlayerManager _manager;
-
     private float _maxHp;
     private float _maxStamina;
     private float _currentHp;
@@ -16,9 +14,8 @@ public class PlayerStats
     public float MaxStamina => _maxStamina;
     public bool IsDead => _currentHp <= 0;
 
-    public PlayerStats(PlayerManager manager, CharacterData data)
+    public PlayerStats(CharacterData data)
     {
-        _manager = manager;
         _maxHp = data.MaxHP;
         _maxStamina = data.MaxStamina;
         _currentHp = _maxHp;

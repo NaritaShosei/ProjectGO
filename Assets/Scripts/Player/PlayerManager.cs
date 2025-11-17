@@ -43,7 +43,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
     {
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
-        _stats = new PlayerStats(this, _data);
+        _stats = new PlayerStats(_data);
         MainCamera = Camera.main;
 
         OnDead += Dead;
