@@ -97,7 +97,11 @@ public class PlayerManager : MonoBehaviour, ICharacter
         {
             Debug.Log("DEAD");
             OnDead?.Invoke();
+            return;
         }
+
+        // ダメージを受けた際に攻撃をキャンセル
+        _attacker.CancelAttack();
     }
 
     public Transform GetTargetTransform()
