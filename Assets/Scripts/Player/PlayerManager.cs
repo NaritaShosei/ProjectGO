@@ -49,11 +49,16 @@ public class PlayerManager : MonoBehaviour, ICharacter
         OnDead += Dead;
     }
 
+    private void OnDestroy()
+    {
+        OnDead -= Dead;
+    }
+
     private void ChangeState(PlayerState state)
     {
         if (CurrentState == PlayerState.Dead)
         {
-            Debug.Log("死亡済みのためステートを変更できません");
+            Debug.Log("死亡済みのためステートを変更できません"); return;
         }
 
         if (state == CurrentState)

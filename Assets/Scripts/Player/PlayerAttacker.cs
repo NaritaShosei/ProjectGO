@@ -64,6 +64,11 @@ public class PlayerAttacker : MonoBehaviour
             _input.OnChargeEnd -= ReleaseCharge;
         }
 
+        if (_manager != null)
+        {
+            _manager.OnDead -= Dead;
+        }
+
         CancelAndDisposeCTS();
         CancelAndDisposeComboReset();
     }
