@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerManager : MonoBehaviour, ICharacter
 {
@@ -10,9 +11,10 @@ public class PlayerManager : MonoBehaviour, ICharacter
     [SerializeField] private Transform _targetTransform;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
+
+    private PlayerStats _stats;
+
     public Camera MainCamera { get; private set; }
-    public string PlayerName => _data.Name;
-    public float PlayerMoveSpeed => _data.MoveSpeed;
 
     public PlayerState CurrentState { get; private set; }
 
@@ -24,24 +26,36 @@ public class PlayerManager : MonoBehaviour, ICharacter
     {
         PlayerState.Dodge => false,
         PlayerState.Attack => false,
+        PlayerState.Dead => false,
         _ => true
     };
     public bool CanDodge => CurrentState switch
     {
         PlayerState.Dodge => false,
         PlayerState.Attack => false,
+        PlayerState.Dead => false,
         _ => true
     };
 
+    public event Action OnDead;
+
     private void Awake()
     {
-        _move.Init(this, _input, _animator);
+        _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
+        _stats = new PlayerStats(this, _data);
         MainCamera = Camera.main;
+
+        OnDead += Dead;
     }
 
     private void ChangeState(PlayerState state)
     {
+        if (CurrentState == PlayerState.Dead)
+        {
+            Debug.Log("死亡済みのためステートを変更できません");
+        }
+
         if (state == CurrentState)
         {
             Debug.Log("ステートに変化がありません"); return;
@@ -67,6 +81,11 @@ public class PlayerManager : MonoBehaviour, ICharacter
         ChangeState(PlayerState.Dodge);
     }
 
+    private void Dead()
+    {
+        ChangeState(PlayerState.Dead);
+    }
+
     public void EndAction()
     {
         ChangeState(PlayerState.None);
@@ -74,7 +93,11 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
     public void AddDamage(float damage)
     {
-        Debug.Log($"Playerに {damage} ダメージ");
+        if (!_stats.TryAddDamage(damage))
+        {
+            Debug.Log("DEAD");
+            OnDead?.Invoke();
+        }
     }
 
     public Transform GetTargetTransform()
@@ -90,4 +113,5 @@ public enum PlayerState
     Attack,
     Charge,
     Dodge,
+    Dead,
 }
