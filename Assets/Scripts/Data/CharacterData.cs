@@ -7,8 +7,10 @@ public class CharacterData : ScriptableObject
     [SerializeField] private string _name;
     [Header("キャラクターのパラメータ")]
     [SerializeField] private float _maxHP;
+    [SerializeField] private float _maxStamina;
     [SerializeField] private float _moveSpeed;
     public string Name => _name;
     public float MaxHP => _maxHP;
+    public float MaxStamina => _maxStamina;
     public float MoveSpeed => _moveSpeed;
 }
