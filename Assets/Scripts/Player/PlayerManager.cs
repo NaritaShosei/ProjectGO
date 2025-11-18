@@ -109,7 +109,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
         _attacker.CancelAttack();
     }
 
-    public Transform GetTargetTransform()
+    public Transform GetTargetCenter()
     {
         return _targetTransform;
     }

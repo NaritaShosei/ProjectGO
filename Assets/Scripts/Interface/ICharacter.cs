@@ -3,5 +3,5 @@
 public interface ICharacter 
 {
     public void AddDamage(float damage);
-    public Transform GetTargetTransform();
+    public Transform GetTargetCenter();
 }
