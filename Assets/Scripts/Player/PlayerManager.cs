@@ -28,7 +28,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
     public bool CanStartCharge => _flags == PlayerStateFlags.None;
     public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
     public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging);
-    public bool CanDodge => !HasFlag(PlayerStateFlags.Dodging) && !HasFlag(PlayerStateFlags.DodgeLocked);
+    public bool CanDodge => !HasFlag(PlayerStateFlags.Dodging | PlayerStateFlags.DodgeLocked);
 
     public event Action OnDead;
 
@@ -69,11 +69,18 @@ public class PlayerManager : MonoBehaviour, ICharacter
     }
 
     /// <summary>
-    /// 全ての状態をクリア
+    /// 死亡状態以外の全ての状態をクリア
     /// </summary>
     private void Clear()
     {
-        _flags = PlayerStateFlags.None;
+        if (HasFlag(PlayerStateFlags.Dead))
+        {
+            _flags = PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked;
+        }
+        else
+        {
+            _flags = PlayerStateFlags.None;
+        }
     }
     #endregion
 
@@ -153,8 +160,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
         }
 
         await UniTask.Delay(TimeSpan.FromSeconds(delay), false, PlayerLoopTiming.Update, token);
-
-        RemoveFlags(PlayerStateFlags.Invincible);
     }
     public Transform GetTargetCenter()
     {
