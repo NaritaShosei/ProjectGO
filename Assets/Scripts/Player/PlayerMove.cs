@@ -173,4 +173,12 @@ public class PlayerMove : MonoBehaviour
 
         Debug.Log("回避完全終了");
     }
+
+    private void OnDestroy()
+    {
+        if (_cts is null) { return; }
+        _cts.Cancel();
+        _cts.Dispose();
+        _cts = null;
+    }
 }

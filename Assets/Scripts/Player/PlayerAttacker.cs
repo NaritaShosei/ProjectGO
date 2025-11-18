@@ -247,7 +247,7 @@ public class PlayerAttacker : MonoBehaviour
     /// </summary>
     private void CancelAndDisposeCTS()
     {
-        if (_cts == null) return;
+        if (_cts is null) { return; }
         _cts.Cancel();
         _cts.Dispose();
         _cts = null;
@@ -258,7 +258,7 @@ public class PlayerAttacker : MonoBehaviour
     /// </summary>
     private void CancelAndDisposeComboReset()
     {
-        if (_comboResetCts == null) return;
+        if (_comboResetCts is null) { return; }
         _comboResetCts.Cancel();
         _comboResetCts.Dispose();
         _comboResetCts = null;
