@@ -86,6 +86,11 @@ public class PlayerManager : MonoBehaviour, ICharacter
         ChangeState(PlayerState.Dodge);
     }
 
+    public void StartInvincible()
+    {
+        ChangeState(PlayerState.Invincible);
+    }
+
     public void EndAction()
     {
         ChangeState(PlayerState.None);
@@ -116,9 +121,14 @@ public class PlayerManager : MonoBehaviour, ICharacter
             return;
         }
 
-        string clipName = _damageThreshold <= damage ? _data.BigHitClip.name : _data.SmallHitClip.name;
+        AnimationClip selectedClip = _damageThreshold <= damage ? _data.BigHitClip : _data.SmallHitClip;
 
-        _animator.Play(clipName);
+        if (selectedClip == null)
+        {
+            Debug.LogError($"{damage}ダメージに対応するダメージリアクションアニメーションがアサインされていません");
+            return;
+        }
+        _animator.Play(selectedClip.name);
 
         // ダメージを受けた際に攻撃をキャンセル
         _attacker.CancelAttack();
@@ -126,13 +136,13 @@ public class PlayerManager : MonoBehaviour, ICharacter
         // 状態をリセット
         EndAction();
 
-        ChangeState(PlayerState.Invincible);
+        StartInvincible();
 
         _cts = new CancellationTokenSource();
 
         try
         {
-            await CancelInvincible(_cts.Token);
+            await CancelInvincible(selectedClip, _cts.Token);
         }
 
         catch (OperationCanceledException)
@@ -151,13 +161,13 @@ public class PlayerManager : MonoBehaviour, ICharacter
         }
     }
 
-    private async UniTask CancelInvincible(CancellationToken token)
+    private async UniTask CancelInvincible(AnimationClip hitClip, CancellationToken token)
     {
         float delay = _data.HitStopDuration;
 
-        if (_data.SmallHitClip != null)
+        if (hitClip != null)
         {
-            delay += _data.SmallHitClip.length;
+            delay += hitClip.length;
         }
 
         await UniTask.Delay(TimeSpan.FromSeconds(delay), false, PlayerLoopTiming.Update, token);
