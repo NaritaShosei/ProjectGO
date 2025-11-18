@@ -24,8 +24,8 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
 
     // 状態の遷移条件
-    public bool CanAttack => _flags == PlayerStateFlags.None;
-    public bool CanStartCharge => _flags == PlayerStateFlags.None;
+    public bool CanAttack => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Charging);
+    public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking);
     public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
     public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging);
     public bool CanDodge => !HasFlag(PlayerStateFlags.Dodging | PlayerStateFlags.DodgeLocked);
@@ -61,11 +61,11 @@ public class PlayerManager : MonoBehaviour, ICharacter
     }
 
     /// <summary>
-    /// 指定した状態を持っているか
+    /// 指定した状態のいずれかを持っているか
     /// </summary>
-    public bool HasFlag(PlayerStateFlags flag)
+    public bool HasFlag(PlayerStateFlags flags)
     {
-        return (_flags & flag) != 0;
+        return (_flags & flags) != 0;
     }
 
     /// <summary>
