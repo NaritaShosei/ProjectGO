@@ -155,7 +155,7 @@ public class PlayerMove : MonoBehaviour
 
         _rb.linearVelocity = Vector3.zero;
 
-        _manager.RemoveFlags(PlayerStateFlags.Dodging | PlayerStateFlags.MoveLocked);
+        _manager.RemoveFlags(PlayerStateFlags.Dodging);
 
         Debug.Log("回避動作終了、無敵時間開始");
 
