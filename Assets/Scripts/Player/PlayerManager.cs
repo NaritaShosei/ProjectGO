@@ -75,10 +75,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
     {
         _flags = PlayerStateFlags.None;
     }
-    public void EndAction()
-    {
-        Clear();
-    }
     #endregion
 
     public async void AddDamage(float damage)
@@ -115,9 +111,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
         // ダメージを受けた際に攻撃をキャンセル
         _attacker.CancelAttack();
 
-        // 状態をリセット
-        EndAction();
-
         AddFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked | PlayerStateFlags.Invincible);
 
         _cts = new CancellationTokenSource();
@@ -139,7 +132,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
         finally
         {
             // 念のため
-            EndAction();
+            RemoveFlags(PlayerStateFlags.Invincible);
         }
     }
 
@@ -161,7 +154,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
         await UniTask.Delay(TimeSpan.FromSeconds(delay), false, PlayerLoopTiming.Update, token);
 
-        EndAction();
+        RemoveFlags(PlayerStateFlags.Invincible);
     }
     public Transform GetTargetCenter()
     {
