@@ -136,10 +136,10 @@ public class PlayerManager : MonoBehaviour, ICharacter
         {
             Debug.LogError($"無敵時間でエラー{ex}");
         }
+
         finally
         {
-            // 念のため
-            RemoveFlags(PlayerStateFlags.Invincible);
+            RemoveFlags(PlayerStateFlags.Invincible | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
         }
     }
 
