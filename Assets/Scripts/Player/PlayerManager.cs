@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerManager : MonoBehaviour, ICharacter
 {
@@ -16,33 +17,19 @@ public class PlayerManager : MonoBehaviour, ICharacter
     [Header("ダメージリアクションの閾値")]
     [SerializeField] private float _damageThreshold = 10;
 
+    private PlayerStateFlags _flags;
     private PlayerStats _stats;
     private CancellationTokenSource _cts;
 
     public Camera MainCamera { get; private set; }
 
-    public PlayerState CurrentState { get; private set; }
 
     // 状態の遷移条件
-    public bool CanAttack => CurrentState == PlayerState.None;
-    public bool CanStartCharge => CurrentState == PlayerState.None;
-    public bool IsCharging => CurrentState == PlayerState.Charge;
-    public bool CanMove => CurrentState switch
-    {
-        PlayerState.Dodge => false,
-        PlayerState.Attack => false,
-        PlayerState.Dead => false,
-        PlayerState.Invincible => false,
-        _ => true
-    };
-    public bool CanDodge => CurrentState switch
-    {
-        PlayerState.Dodge => false,
-        PlayerState.Attack => false,
-        PlayerState.Dead => false,
-        PlayerState.Invincible => false,
-        _ => true
-    };
+    public bool CanAttack => _flags == PlayerStateFlags.None;
+    public bool CanStartCharge => _flags == PlayerStateFlags.None;
+    public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
+    public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging);
+    public bool CanDodge => !HasFlag(PlayerStateFlags.Dodging) && !HasFlag(PlayerStateFlags.DodgeLocked);
 
     public event Action OnDead;
 
@@ -56,56 +43,54 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
     #region 状態遷移
 
-    private void ChangeState(PlayerState state)
+    /// <summary>
+    /// 状態を追加
+    /// </summary>
+    public void AddFlags(PlayerStateFlags flags)
     {
-        if (CurrentState == PlayerState.Dead)
-        {
-            Debug.Log("死亡済みのためステートを変更できません"); return;
-        }
-
-        if (state == CurrentState)
-        {
-            Debug.Log("ステートに変化がありません"); return;
-        }
-
-        CurrentState = state;
+        _flags |= flags;
+        Debug.Log($"[状態追加] 現在: {_flags}");
     }
 
-    public void StartAttack()
+    /// <summary>
+    /// 状態を削除
+    /// </summary>
+    public void RemoveFlags(PlayerStateFlags flags)
     {
-        ChangeState(PlayerState.Attack);
+        _flags &= ~flags;
+        Debug.Log($"[状態削除] 現在: {_flags}");
     }
 
-    public void StartCharge()
+    /// <summary>
+    /// 指定した状態を持っているか
+    /// </summary>
+    public bool HasFlag(PlayerStateFlags flag)
     {
-        ChangeState(PlayerState.Charge);
+        return (_flags & flag) != 0;
     }
 
-    public void StartDodge()
+    /// <summary>
+    /// 全ての状態をクリア
+    /// </summary>
+    private void Clear()
     {
-        ChangeState(PlayerState.Dodge);
+        _flags = PlayerStateFlags.None;
     }
-
-    public void StartInvincible()
-    {
-        ChangeState(PlayerState.Invincible);
-    }
-
     public void EndAction()
     {
-        ChangeState(PlayerState.None);
+        Clear();
     }
     #endregion
 
     public async void AddDamage(float damage)
     {
-        if (CurrentState == PlayerState.Dead)
+        if (HasFlag(PlayerStateFlags.Dead))
         {
             Debug.Log("死亡しているためダメージを受けません");
             return;
         }
 
-        if (CurrentState == PlayerState.Invincible)
+        if (HasFlag(PlayerStateFlags.Invincible))
         {
             Debug.Log("無敵中のためダメージを受けません");
             return;
@@ -115,9 +100,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
         if (!_stats.TryAddDamage(damage))
         {
-            Debug.Log("DEAD");
-            ChangeState(PlayerState.Dead);
-            OnDead?.Invoke();
+            Dead();
             return;
         }
 
@@ -136,7 +119,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
         // 状態をリセット
         EndAction();
 
-        StartInvincible();
+        AddFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked | PlayerStateFlags.Invincible);
 
         _cts = new CancellationTokenSource();
 
@@ -159,6 +142,13 @@ public class PlayerManager : MonoBehaviour, ICharacter
             // 念のため
             EndAction();
         }
+    }
+
+    private void Dead()
+    {
+        Debug.Log("DEAD");
+        AddFlags(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
+        OnDead?.Invoke();
     }
 
     private async UniTask CancelInvincible(AnimationClip hitClip, CancellationToken token)
@@ -188,12 +178,18 @@ public class PlayerManager : MonoBehaviour, ICharacter
     }
 }
 
-public enum PlayerState
+/// <summary>
+/// プレイヤーの状態フラグ（複数同時に持てる）
+/// </summary>
+[Flags]
+public enum PlayerStateFlags
 {
-    None,
-    Attack,
-    Charge,
-    Dodge,
-    Dead,
-    Invincible,
+    None = 0,
+    Attacking = 1 << 0,   // 攻撃中
+    Dodging = 1 << 1,   // 回避中
+    Invincible = 1 << 2,   // 無敵
+    MoveLocked = 1 << 3,   // 移動不能
+    Dead = 1 << 4,   // 死亡
+    Charging = 1 << 5,   // チャージ中
+    DodgeLocked = 1 << 6, // 回避不能
 }
