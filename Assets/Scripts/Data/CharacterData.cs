@@ -4,11 +4,20 @@
 public class CharacterData : ScriptableObject
 {
     [Header("キャラクターの名前")]
-    [SerializeField] private string _name;
+    [SerializeField] private string _name = "";
     [Header("キャラクターのパラメータ")]
-    [SerializeField] private float _maxHP;
-    [SerializeField] private float _moveSpeed;
+    [SerializeField] private float _maxHP = 50;
+    [SerializeField] private float _maxStamina = 50;
+    [SerializeField] private float _moveSpeed = 5;
+    [SerializeField] private float _hitStopDuration = 0.2f;
+    [Header("モーション設定")]
+    [SerializeField] private AnimationClip _smallHitClip;
+    [SerializeField] private AnimationClip _bigHitClip;
     public string Name => _name;
     public float MaxHP => _maxHP;
+    public float MaxStamina => _maxStamina;
     public float MoveSpeed => _moveSpeed;
+    public float HitStopDuration => _hitStopDuration;
+    public AnimationClip SmallHitClip => _smallHitClip;
+    public AnimationClip BigHitClip => _bigHitClip;
 }

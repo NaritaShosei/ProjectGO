@@ -7,6 +7,7 @@ public class PlayerMove : MonoBehaviour
     private PlayerManager _manager;
     private InputHandler _input;
     private Animator _animator;
+    private CharacterData _data;
 
     [Header("Rigidbody")]
     [SerializeField] private Rigidbody _rb;
@@ -20,11 +21,12 @@ public class PlayerMove : MonoBehaviour
     private Vector2 _moveInput => _manager.CanMove ? _input.MoveInput : Vector2.zero;
 
 
-    public void Init(PlayerManager manager, InputHandler input, Animator animator)
+    public void Init(PlayerManager manager, InputHandler input, Animator animator, CharacterData data)
     {
         _manager = manager;
         _input = input;
         _animator = animator;
+        _data = data;
     }
 
     private void Update()
@@ -55,7 +57,7 @@ public class PlayerMove : MonoBehaviour
         moveDir.y = 0f;
 
         // 入力の大きさを速度に反映
-        float speed = _manager.PlayerMoveSpeed * inputMag;
+        float speed = _data.MoveSpeed * inputMag;
 
         _rb.linearVelocity = moveDir * speed;
     }

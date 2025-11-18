@@ -50,6 +50,8 @@ public class PlayerAttacker : MonoBehaviour
         _input.OnChargeStart += StartCharge;
         _input.OnChargeEnd += ReleaseCharge;
 
+        _manager.OnDead += Dead;
+
         _currentComboData = _firstComboData;
     }
 
@@ -60,6 +62,11 @@ public class PlayerAttacker : MonoBehaviour
             _input.OnLightAttack -= HandleComboAttack;
             _input.OnChargeStart -= StartCharge;
             _input.OnChargeEnd -= ReleaseCharge;
+        }
+
+        if (_manager != null)
+        {
+            _manager.OnDead -= Dead;
         }
 
         CancelAndDisposeCTS();
@@ -267,6 +274,14 @@ public class PlayerAttacker : MonoBehaviour
     {
         CancelAndDisposeCTS();
         Debug.Log("攻撃をキャンセルするメソッドが実行");
+    }
+
+    /// <summary>
+    /// 死亡時に行動をキャンセル
+    /// </summary>
+    public void Dead()
+    {
+        CancelAttack();
     }
     #endregion
 }
