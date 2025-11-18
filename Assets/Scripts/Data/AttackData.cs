@@ -4,10 +4,10 @@
 public class AttackData : ScriptableObject
 {
     [Header("基本情報")]
-    [SerializeField] private string _attackName;
+    [SerializeField] private string _attackName = "";
     [SerializeField] private float _power = 1;
     [SerializeField, Tooltip("攻撃の範囲(直径)")] private float _range = 1;
-    [SerializeField] private float _speed;
+    [SerializeField] private float _speed = 5;
     [SerializeField, Tooltip("ノックバックの強さ")] private float _knockbackForce = 1;
     [SerializeField, Tooltip("ノックバックの向き")] private Vector3 _knockbackDirection = Vector3.up;
 

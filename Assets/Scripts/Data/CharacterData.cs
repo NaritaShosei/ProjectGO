@@ -11,11 +11,13 @@ public class CharacterData : ScriptableObject
     [SerializeField] private float _moveSpeed = 5;
     [SerializeField] private float _hitStopDuration = 0.2f;
     [Header("モーション設定")]
-    [SerializeField] private AnimationClip _hitClip;
+    [SerializeField] private AnimationClip _smallHitClip;
+    [SerializeField] private AnimationClip _bigHitClip;
     public string Name => _name;
     public float MaxHP => _maxHP;
     public float MaxStamina => _maxStamina;
     public float MoveSpeed => _moveSpeed;
     public float HitStopDuration => _hitStopDuration;
-    public AnimationClip HitClip => _hitClip;
+    public AnimationClip SmallHitClip => _smallHitClip;
+    public AnimationClip BigHitClip => _bigHitClip;
 }
