@@ -274,6 +274,13 @@ public class PlayerAttacker : MonoBehaviour
     public void CancelAttack()
     {
         CancelAndDisposeCTS();
+
+        _manager.RemoveFlags(
+            PlayerStateFlags.Attacking |
+            PlayerStateFlags.MoveLocked |
+            PlayerStateFlags.DodgeLocked |
+            PlayerStateFlags.Charging);
+
         Debug.Log("攻撃をキャンセルするメソッドが実行");
     }
 
