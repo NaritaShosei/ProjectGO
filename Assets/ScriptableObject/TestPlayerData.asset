@@ -16,5 +16,7 @@ MonoBehaviour:
   _maxHP: 50
   _maxStamina: 0
   _moveSpeed: 10
+  _dodgeSpeed: 15
   _hitStopDuration: 0.2
-  _hitClip: {fileID: -203655887218126122, guid: 032060a5226308345960d931ff2ca2d7, type: 3}
+  _smallHitClip: {fileID: -203655887218126122, guid: 032060a5226308345960d931ff2ca2d7, type: 3}
+  _bigHitClip: {fileID: -203655887218126122, guid: e82f8ec7e8d684f439febaa0be5834d9, type: 3}
