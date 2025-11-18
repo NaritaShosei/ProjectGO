@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -125,10 +126,31 @@ public class PlayerMove : MonoBehaviour
 
         dodgeDir.y = 0f;
 
+        if (_cts is not null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
+
         _cts = new CancellationTokenSource();
 
         // 回避アニメーションはここで実行
-        await DodgeAsync(dodgeDir, _cts.Token);
+
+        try
+        {
+            await DodgeAsync(dodgeDir, _cts.Token);
+        }
+
+        catch (OperationCanceledException)
+        {
+            // 正常キャンセル
+        }
+
+        catch (Exception ex)
+        {
+            Debug.LogError($"回避キャンセル中にエラー：{ex}");
+        }
     }
 
     private async UniTask DodgeAsync(Vector3 direction, CancellationToken token)
