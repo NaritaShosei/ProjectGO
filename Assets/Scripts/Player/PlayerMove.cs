@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Cysharp.Threading.Tasks;
+using System.Threading;
+using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -20,6 +22,7 @@ public class PlayerMove : MonoBehaviour
     /// </summary>
     private Vector2 _moveInput => _manager.CanMove ? _input.MoveInput : Vector2.zero;
 
+    private CancellationTokenSource _cts;
 
     public void Init(PlayerManager manager, InputHandler input, Animator animator, CharacterData data)
     {
@@ -27,6 +30,8 @@ public class PlayerMove : MonoBehaviour
         _input = input;
         _animator = animator;
         _data = data;
+
+        _input.OnDodge += Dodge;
     }
 
     private void Update()
@@ -38,6 +43,8 @@ public class PlayerMove : MonoBehaviour
 
     private void Move()
     {
+        if (!_manager.CanMove) { return; }
+
         Vector2 vel = _moveInput;
         Camera camera = _manager.MainCamera;
 
@@ -94,5 +101,76 @@ public class PlayerMove : MonoBehaviour
         // 遷移条件
         float speed = vel.magnitude;
         _animator.SetFloat("Speed", speed);
+    }
+
+    private async void Dodge()
+    {
+        if (!_manager.CanDodge) return;
+
+        Vector2 input = _input.MoveInput;
+        Vector3 dodgeDir;
+
+        if (input.magnitude > INPUT_THRESHOLD)
+        {
+            Camera camera = _manager.MainCamera;
+            Vector3 right = camera.transform.right * input.x;
+            Vector3 forward = camera.transform.forward * input.y;
+            dodgeDir = (right + forward).normalized;
+        }
+        else
+        {
+            dodgeDir = transform.forward;
+        }
+
+        dodgeDir.y = 0f;
+
+        _cts = new CancellationTokenSource();
+
+        // 回避アニメーションはここで実行
+        await DodgeAsync(dodgeDir, _cts.Token);
+    }
+
+    private async UniTask DodgeAsync(Vector3 direction, CancellationToken token)
+    {
+        _manager.AddFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible);
+
+        Debug.Log("回避中");
+
+        float dodgeSpeed = _data.DodgeSpeed;
+        float duration = _data.DodgeDuration;
+
+        if (_data.DodgeClip)
+        {
+            duration += _data.DodgeClip.length;
+        }
+
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            _rb.linearVelocity = direction * dodgeSpeed;
+            elapsed += Time.deltaTime;
+            await UniTask.Yield(token);
+        }
+
+        _rb.linearVelocity = Vector3.zero;
+
+        _manager.RemoveFlags(PlayerStateFlags.Dodging | PlayerStateFlags.MoveLocked);
+
+        Debug.Log("回避動作終了、無敵時間開始");
+
+        // 無敵時間
+        if (_data.InvincibleDuration > 0)
+        {
+            await UniTask.Delay(
+                System.TimeSpan.FromSeconds(_data.InvincibleDuration),
+                cancellationToken: token
+            );
+        }
+
+        // 無敵終了
+        _manager.RemoveFlags(PlayerStateFlags.Invincible);
+
+        Debug.Log("回避完全終了");
     }
 }
