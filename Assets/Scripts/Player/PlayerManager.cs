@@ -98,6 +98,8 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
     public void AddDamage(float damage)
     {
+        if (CurrentState == PlayerState.Dead) { return; }
+
         if (!_stats.TryAddDamage(damage))
         {
             Debug.Log("DEAD");
@@ -107,6 +109,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
         // ダメージを受けた際に攻撃をキャンセル
         _attacker.CancelAttack();
+        EndAction();
     }
 
     public Transform GetTargetCenter()
