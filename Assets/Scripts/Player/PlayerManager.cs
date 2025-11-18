@@ -149,11 +149,17 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
     private async UniTask CancelInvincible(CancellationToken token)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(_data.HitClip.length + _data.HitStopDuration), false, PlayerLoopTiming.Update, token);
+        float delay = _data.HitStopDuration;
+
+        if (_data.HitClip != null)
+        {
+            delay += _data.HitClip.length;
+        }
+
+        await UniTask.Delay(TimeSpan.FromSeconds(delay), false, PlayerLoopTiming.Update, token);
 
         EndAction();
     }
-
     public Transform GetTargetCenter()
     {
         return _targetTransform;
