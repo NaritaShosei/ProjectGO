@@ -13,6 +13,8 @@ public class PlayerManager : MonoBehaviour, ICharacter
     [SerializeField] private Transform _targetTransform;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
+    [Header("ダメージリアクションの閾値")]
+    [SerializeField] private float _damageThreshold = 10;
 
     private PlayerStats _stats;
     private CancellationTokenSource _cts;
@@ -114,7 +116,9 @@ public class PlayerManager : MonoBehaviour, ICharacter
             return;
         }
 
-        _animator.Play(_data.HitClip.name);
+        string clipName = _damageThreshold <= damage ? _data.BigHitClip.name : _data.SmallHitClip.name;
+
+        _animator.Play(clipName);
 
         // ダメージを受けた際に攻撃をキャンセル
         _attacker.CancelAttack();
@@ -151,9 +155,9 @@ public class PlayerManager : MonoBehaviour, ICharacter
     {
         float delay = _data.HitStopDuration;
 
-        if (_data.HitClip != null)
+        if (_data.SmallHitClip != null)
         {
-            delay += _data.HitClip.length;
+            delay += _data.SmallHitClip.length;
         }
 
         await UniTask.Delay(TimeSpan.FromSeconds(delay), false, PlayerLoopTiming.Update, token);
