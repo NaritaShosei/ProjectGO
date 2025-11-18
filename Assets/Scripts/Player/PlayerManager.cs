@@ -126,7 +126,25 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
         _cts = new CancellationTokenSource();
 
-        await CancelInvincible(_cts.Token);
+        try
+        {
+            await CancelInvincible(_cts.Token);
+        }
+
+        catch (OperationCanceledException)
+        {
+            // 正常キャンセル
+        }
+
+        catch (Exception ex)
+        {
+            Debug.LogError($"無敵時間でエラー{ex}");
+        }
+        finally
+        {
+            // 念のため
+            EndAction();
+        }
     }
 
     private async UniTask CancelInvincible(CancellationToken token)
