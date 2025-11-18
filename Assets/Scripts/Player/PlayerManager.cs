@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
+using System.Threading;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour, ICharacter
@@ -13,6 +15,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
     [SerializeField] private CharacterData _data;
 
     private PlayerStats _stats;
+    private CancellationTokenSource _cts;
 
     public Camera MainCamera { get; private set; }
 
@@ -27,6 +30,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
         PlayerState.Dodge => false,
         PlayerState.Attack => false,
         PlayerState.Dead => false,
+        PlayerState.Invincible => false,
         _ => true
     };
     public bool CanDodge => CurrentState switch
@@ -34,6 +38,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
         PlayerState.Dodge => false,
         PlayerState.Attack => false,
         PlayerState.Dead => false,
+        PlayerState.Invincible => false,
         _ => true
     };
 
@@ -46,6 +51,8 @@ public class PlayerManager : MonoBehaviour, ICharacter
         _stats = new PlayerStats(_data);
         MainCamera = Camera.main;
     }
+
+    #region 状態遷移
 
     private void ChangeState(PlayerState state)
     {
@@ -61,8 +68,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
 
         CurrentState = state;
     }
-
-    #region 状態遷移
 
     public void StartAttack()
     {
@@ -83,10 +88,23 @@ public class PlayerManager : MonoBehaviour, ICharacter
     {
         ChangeState(PlayerState.None);
     }
+    #endregion
 
-    public void AddDamage(float damage)
+    public async void AddDamage(float damage)
     {
-        if (CurrentState == PlayerState.Dead) { return; }
+        if (CurrentState == PlayerState.Dead)
+        {
+            Debug.Log("死亡しているためダメージを受けません");
+            return;
+        }
+
+        if (CurrentState == PlayerState.Invincible)
+        {
+            Debug.Log("無敵中のためダメージを受けません");
+            return;
+        }
+
+        CancelAndDisposeCTS();
 
         if (!_stats.TryAddDamage(damage))
         {
@@ -96,8 +114,25 @@ public class PlayerManager : MonoBehaviour, ICharacter
             return;
         }
 
+        _animator.Play(_data.HitClip.name);
+
         // ダメージを受けた際に攻撃をキャンセル
         _attacker.CancelAttack();
+
+        // 状態をリセット
+        EndAction();
+
+        ChangeState(PlayerState.Invincible);
+
+        _cts = new CancellationTokenSource();
+
+        await CancelInvincible(_cts.Token);
+    }
+
+    private async UniTask CancelInvincible(CancellationToken token)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(_data.HitClip.length + _data.HitStopDuration), false, PlayerLoopTiming.Update, token);
+
         EndAction();
     }
 
@@ -105,7 +140,14 @@ public class PlayerManager : MonoBehaviour, ICharacter
     {
         return _targetTransform;
     }
-    #endregion
+
+    private void CancelAndDisposeCTS()
+    {
+        if (_cts == null) return;
+        _cts.Cancel();
+        _cts.Dispose();
+        _cts = null;
+    }
 }
 
 public enum PlayerState
@@ -115,4 +157,5 @@ public enum PlayerState
     Charge,
     Dodge,
     Dead,
+    Invincible,
 }
