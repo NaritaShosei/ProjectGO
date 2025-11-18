@@ -95,7 +95,7 @@ public class PlayerAttacker : MonoBehaviour
     /// </summary>
     private async UniTask PerformComboAttack(AttackData attack, CancellationToken token)
     {
-        _manager.StartAttack();
+        _manager.AddFlags(PlayerStateFlags.Attacking | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
 
         if (attack.AnimationClip && _animator)
             _animator.Play(attack.AnimationClip.name);
@@ -108,7 +108,7 @@ public class PlayerAttacker : MonoBehaviour
         // コンボ継続可能なら次段へ
         _currentComboData = attack.NextCombo != null ? attack.NextCombo : _firstComboData;
 
-        _manager.EndAction();
+        _manager.RemoveFlags(PlayerStateFlags.Attacking | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
 
         StartComboResetTimer();
     }
@@ -159,7 +159,7 @@ public class PlayerAttacker : MonoBehaviour
     private async void StartCharge()
     {
         if (!_manager.CanStartCharge) { return; }
-        _manager.StartCharge();
+        _manager.AddFlags(PlayerStateFlags.Charging);
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
@@ -177,7 +177,7 @@ public class PlayerAttacker : MonoBehaviour
     {
         if (!_manager.IsCharging) return;
 
-        _manager.EndAction();
+        _manager.RemoveFlags(PlayerStateFlags.Charging);
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
@@ -205,14 +205,15 @@ public class PlayerAttacker : MonoBehaviour
     /// </summary>
     private async UniTask PerformHeavyAttack(AttackData data, CancellationToken token)
     {
-        _manager.StartAttack();
+        _manager.AddFlags(PlayerStateFlags.Attacking | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
+
 
         if (data.AnimationClip && _animator)
             _animator.Play(data.AnimationClip.name);
 
         await UniTask.Delay(TimeSpan.FromSeconds(data.MotionDuration), false, PlayerLoopTiming.Update, token);
 
-        _manager.EndAction();
+        _manager.RemoveFlags(PlayerStateFlags.Attacking | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
     }
 
     /// <summary>
