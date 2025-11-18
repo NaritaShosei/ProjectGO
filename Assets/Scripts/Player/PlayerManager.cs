@@ -45,13 +45,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
         _attacker.Init(this, _input, _animator);
         _stats = new PlayerStats(_data);
         MainCamera = Camera.main;
-
-        OnDead += Dead;
-    }
-
-    private void OnDestroy()
-    {
-        OnDead -= Dead;
     }
 
     private void ChangeState(PlayerState state)
@@ -86,11 +79,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
         ChangeState(PlayerState.Dodge);
     }
 
-    private void Dead()
-    {
-        ChangeState(PlayerState.Dead);
-    }
-
     public void EndAction()
     {
         ChangeState(PlayerState.None);
@@ -103,6 +91,7 @@ public class PlayerManager : MonoBehaviour, ICharacter
         if (!_stats.TryAddDamage(damage))
         {
             Debug.Log("DEAD");
+            ChangeState(PlayerState.Dead);
             OnDead?.Invoke();
             return;
         }
