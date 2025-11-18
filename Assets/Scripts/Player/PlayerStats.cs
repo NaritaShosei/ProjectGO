@@ -25,6 +25,7 @@ public class PlayerStats
     /// <summary>
     /// ダメージを受ける。HPが0になったらfalseを返す
     /// </summary>
+    /// <param name="damage">ダメージ量</param>
     public bool TryAddDamage(float damage)
     {
         if (damage < 0)
@@ -41,6 +42,7 @@ public class PlayerStats
     /// <summary>
     /// スタミナを消費する。消費できた場合はtrueを返す
     /// </summary>
+    /// <param name="amount">消費する量</param>
     public bool TryUseStamina(float amount)
     {
         if (amount < 0)
@@ -61,6 +63,7 @@ public class PlayerStats
     /// <summary>
     /// HPを回復する
     /// </summary>
+    /// <param name="amount">回復する量</param>
     public void RecoverHp(float amount)
     {
         _currentHp = Mathf.Min(_maxHp, _currentHp + amount);
@@ -69,14 +72,17 @@ public class PlayerStats
     /// <summary>
     /// スタミナを回復する
     /// </summary>
+    /// <param name="amount">回復する量</param>
     public void RecoverStamina(float amount)
     {
         _currentStamina = Mathf.Min(_maxStamina, _currentStamina + amount);
     }
 
+
     /// <summary>
     /// 時間経過でスタミナを自動回復
     /// </summary>
+    /// <param name="regenRate">一秒間に回復する量</param>
     public void UpdateStaminaRegeneration(float regenRate)
     {
         if (_currentStamina < _maxStamina)
