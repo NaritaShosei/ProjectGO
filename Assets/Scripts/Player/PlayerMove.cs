@@ -43,7 +43,8 @@ public class PlayerMove : MonoBehaviour
 
     private void Move()
     {
-        if (!_manager.CanMove) { return; }
+        // 回避中のみvelocityの上書きを避けたいため早期リターン
+        if (_manager.HasFlag(PlayerStateFlags.Dodging)) { return; }
 
         Vector2 vel = _moveInput;
         Camera camera = _manager.MainCamera;
