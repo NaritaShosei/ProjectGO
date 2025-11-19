@@ -35,7 +35,7 @@ public class PlayerStats
         }
 
         _currentHp = Mathf.Max(0, _currentHp - damage);
-        Debug.Log(_currentHp);
+        Debug.Log($"現在のHP:{_currentHp}");
         return !IsDead;
     }
 
@@ -56,6 +56,7 @@ public class PlayerStats
             return false;
         }
 
+        Debug.Log($"現在のスタミナ:{_currentStamina}");
         _currentStamina -= amount;
         return true;
     }

@@ -18,6 +18,9 @@ public class PlayerMove : MonoBehaviour
     [Header("回転方向への補間率 (0〜1)")]
     [SerializeField, Range(0, 1)] private float _rotateSmooth = 0.5f;
 
+    [Header("回避攻撃に派生可能な時間")]
+    [SerializeField] private float _canDodgeAttackLimit = 0.5f;
+
     /// <summary>
     /// 移動可能な時は入力を反映
     /// </summary>
@@ -107,7 +110,7 @@ public class PlayerMove : MonoBehaviour
 
     private async void Dodge()
     {
-        if (!_manager.CanDodge) return;
+        if (!_manager.CanDodge(_data.DodgeStamina)) return;
 
         Vector2 input = _input.MoveInput;
         Vector3 dodgeDir;
@@ -179,14 +182,15 @@ public class PlayerMove : MonoBehaviour
         _rb.linearVelocity = Vector3.zero;
 
         _manager.RemoveFlags(PlayerStateFlags.Dodging);
+        _manager.AddFlags(PlayerStateFlags.CanDodgeAttack);
 
-        Debug.Log("回避動作終了、無敵時間開始");
+        Debug.Log("回避動作終了、無敵時間開始、回避攻撃派生可能");
 
         // 無敵時間
         if (_data.InvincibleDuration > 0)
         {
             await UniTask.Delay(
-                System.TimeSpan.FromSeconds(_data.InvincibleDuration),
+                TimeSpan.FromSeconds(_data.InvincibleDuration),
                 cancellationToken: token
             );
         }
