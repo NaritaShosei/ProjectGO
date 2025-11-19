@@ -9,6 +9,7 @@ public class CharacterData : ScriptableObject
     [SerializeField] private float _maxHP = 50;
     [SerializeField] private float _maxStamina = 50;
     [SerializeField] private float _moveSpeed = 5;
+    [SerializeField] private float _staminaRegenRate = 10;
     [SerializeField] private float _dodgeStamina = 5;
     [SerializeField] private float _dodgeSpeed = 10;
     [SerializeField] private float _dodgeDuration = 0.2f;
@@ -22,6 +23,7 @@ public class CharacterData : ScriptableObject
     public float MaxHP => _maxHP;
     public float MaxStamina => _maxStamina;
     public float MoveSpeed => _moveSpeed;
+    public float StaminaRegenRate => _staminaRegenRate;
     public float DodgeStamina => _dodgeStamina;
     public float DodgeSpeed => _dodgeSpeed;
     public float DodgeDuration => _dodgeDuration;

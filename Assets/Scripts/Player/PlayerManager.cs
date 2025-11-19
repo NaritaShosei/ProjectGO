@@ -45,6 +45,14 @@ public class PlayerManager : MonoBehaviour, ICharacter
         MainCamera = Camera.main;
     }
 
+    private void Update()
+    {
+        if (!HasFlag(PlayerStateFlags.Dead))
+        {
+            _stats.UpdateStaminaRegeneration(_data.StaminaRegenRate);
+        }
+    }
+
     #region 状態遷移
 
     /// <summary>
