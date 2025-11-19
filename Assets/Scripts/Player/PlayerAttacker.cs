@@ -13,7 +13,8 @@ public class PlayerAttacker : MonoBehaviour
     [SerializeField, Tooltip("コンボの最初の攻撃")] private AttackData _firstComboData;
     [SerializeField, Tooltip("チャージしない攻撃")] private AttackData _heavyAttackData;
     [SerializeField, Tooltip("中チャージ攻撃")] private AttackData _chargedAttackData;
-    [SerializeField, Tooltip("強チャージ攻撃")] private AttackData _superChargedAttack;
+    [SerializeField, Tooltip("強チャージ攻撃")] private AttackData _superChargedAttackData;
+    [SerializeField, Tooltip("回避攻撃")] private AttackData _dodgeAttackData;
 
     [Header("コンボが途切れる時間")]
     [SerializeField] private float _comboResetTime = 2;
@@ -182,10 +183,12 @@ public class PlayerAttacker : MonoBehaviour
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
 
-        AttackData selected = _heavyAttackData;
+        // 回避攻撃可能時は回避攻撃になる
+        AttackData selected = _manager.CanDodgeAttack ? _dodgeAttackData : _heavyAttackData;
 
+        // チャージ時間に応じて攻撃のデータを変更
         if (_chargeTimer > _chargeData.SuperChargeTime)
-            selected = _superChargedAttack;
+            selected = _superChargedAttackData;
 
         else if (_chargeTimer > _chargeData.ChargeTime)
             selected = _chargedAttackData;
