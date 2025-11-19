@@ -211,7 +211,7 @@ public class PlayerMove : MonoBehaviour
     private async UniTask ResetCanDodgeAttackAsync()
     {
         // 回避攻撃可能時間時間
-        if (_data.InvincibleDuration > 0)
+        if (_data.CanDodgeAttackDuration > 0)
         {
             await UniTask.Delay(
                 TimeSpan.FromSeconds(_data.CanDodgeAttackDuration),
