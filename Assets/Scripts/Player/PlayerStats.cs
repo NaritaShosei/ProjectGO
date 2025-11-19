@@ -56,8 +56,8 @@ public class PlayerStats
             return false;
         }
 
-        Debug.Log($"現在のスタミナ:{_currentStamina}");
         _currentStamina -= amount;
+        Debug.Log($"現在のスタミナ:{_currentStamina}");
         return true;
     }
 
