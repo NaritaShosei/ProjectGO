@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour, ICharacter
+public class PlayerManager : MonoBehaviour, IPlayer
 {
     [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
@@ -28,8 +28,13 @@ public class PlayerManager : MonoBehaviour, ICharacter
     public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking);
     public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
     public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Dead);
-    public bool CanDodge => !HasFlag(PlayerStateFlags.Dodging | PlayerStateFlags.DodgeLocked | PlayerStateFlags.Dead);
+    public bool TryDodge(float staminaCost)
+    {
+        if (HasFlag(PlayerStateFlags.Dodging | PlayerStateFlags.DodgeLocked | PlayerStateFlags.Dead))
+            return false;
 
+        return _stats.TryUseStamina(staminaCost);
+    }
     public event Action OnDead;
 
     private void Awake()
@@ -38,6 +43,14 @@ public class PlayerManager : MonoBehaviour, ICharacter
         _attacker.Init(this, _input, _animator);
         _stats = new PlayerStats(_data);
         MainCamera = Camera.main;
+    }
+
+    private void Update()
+    {
+        if (!HasFlag(PlayerStateFlags.Dead))
+        {
+            _stats.UpdateStaminaRegeneration(_data.StaminaRegenRate);
+        }
     }
 
     #region 状態遷移
@@ -68,20 +81,6 @@ public class PlayerManager : MonoBehaviour, ICharacter
         return (_flags & flags) != 0;
     }
 
-    /// <summary>
-    /// 死亡状態以外の全ての状態をクリア
-    /// </summary>
-    private void Clear()
-    {
-        if (HasFlag(PlayerStateFlags.Dead))
-        {
-            _flags = PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked;
-        }
-        else
-        {
-            _flags = PlayerStateFlags.None;
-        }
-    }
     #endregion
 
     public async void AddDamage(float damage)
@@ -189,4 +188,5 @@ public enum PlayerStateFlags
     Dead = 1 << 4,   // 死亡
     Charging = 1 << 5,   // チャージ中
     DodgeLocked = 1 << 6, // 回避不能
+    CanDodgeAttack = 1 << 7, // 回避攻撃に派生可能
 }
