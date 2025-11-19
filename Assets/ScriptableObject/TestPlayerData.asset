@@ -16,9 +16,11 @@ MonoBehaviour:
   _maxHP: 50
   _maxStamina: 100
   _moveSpeed: 10
+  _staminaRegenRate: 10
   _dodgeStamina: 5
   _dodgeSpeed: 15
   _dodgeDuration: 1
+  _canDodgeAttackDuration: 0.5
   _hitStopDuration: 0.2
   _invincibleDuration: 0.2
   _smallHitClip: {fileID: -203655887218126122, guid: 032060a5226308345960d931ff2ca2d7, type: 3}
