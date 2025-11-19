@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour, ICharacter
+public class PlayerManager : MonoBehaviour, IPlayer
 {
     [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
