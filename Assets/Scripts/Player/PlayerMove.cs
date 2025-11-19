@@ -110,7 +110,7 @@ public class PlayerMove : MonoBehaviour
 
     private async void Dodge()
     {
-        if (!_manager.CanDodge(_data.DodgeStamina)) return;
+        if (!_manager.TryDodge(_data.DodgeStamina)) return;
 
         Vector2 input = _input.MoveInput;
         Vector3 dodgeDir;
