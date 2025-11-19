@@ -13,6 +13,7 @@ public class CharacterData : ScriptableObject
     [SerializeField] private float _dodgeStamina = 5;
     [SerializeField] private float _dodgeSpeed = 10;
     [SerializeField] private float _dodgeDuration = 0.2f;
+    [SerializeField] private float _canDodgeAttackDuration = 0.5f;
     [SerializeField] private float _hitStopDuration = 0.2f;
     [SerializeField] private float _invincibleDuration = 0.2f;
     [Header("モーション設定")]
@@ -27,6 +28,7 @@ public class CharacterData : ScriptableObject
     public float DodgeStamina => _dodgeStamina;
     public float DodgeSpeed => _dodgeSpeed;
     public float DodgeDuration => _dodgeDuration;
+    public float CanDodgeAttackDuration => _canDodgeAttackDuration;
     public float HitStopDuration => _hitStopDuration;
     public float InvincibleDuration => _invincibleDuration;
     public AnimationClip SmallHitClip => _smallHitClip;

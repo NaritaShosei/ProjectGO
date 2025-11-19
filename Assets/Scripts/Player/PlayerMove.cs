@@ -186,19 +186,41 @@ public class PlayerMove : MonoBehaviour
 
         Debug.Log("回避動作終了、無敵時間開始、回避攻撃派生可能");
 
+        UniTask[] tasks = { ResetCanDodgeAttackAsync(), ResetInvincibleAsync() };
+
+        await UniTask.WhenAll(tasks);
+
+        Debug.Log("回避完全終了");
+    }
+
+    private async UniTask ResetInvincibleAsync()
+    {
         // 無敵時間
         if (_data.InvincibleDuration > 0)
         {
             await UniTask.Delay(
                 TimeSpan.FromSeconds(_data.InvincibleDuration),
-                cancellationToken: token
+                cancellationToken: destroyCancellationToken
             );
         }
 
         // 無敵終了
         _manager.RemoveFlags(PlayerStateFlags.Invincible);
+    }
 
-        Debug.Log("回避完全終了");
+    private async UniTask ResetCanDodgeAttackAsync()
+    {
+        // 回避攻撃可能時間時間
+        if (_data.InvincibleDuration > 0)
+        {
+            await UniTask.Delay(
+                TimeSpan.FromSeconds(_data.CanDodgeAttackDuration),
+                cancellationToken: destroyCancellationToken
+            );
+        }
+
+        // 回避攻撃可能終了
+        _manager.RemoveFlags(PlayerStateFlags.CanDodgeAttack);
     }
 
     private void OnDestroy()
