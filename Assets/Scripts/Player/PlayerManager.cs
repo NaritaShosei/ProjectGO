@@ -28,6 +28,8 @@ public class PlayerManager : MonoBehaviour, IPlayer
     public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking);
     public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
     public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Dead);
+    public bool CanDodgeAttack => HasFlag(PlayerStateFlags.CanDodgeAttack) && !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Charging | PlayerStateFlags.Attacking);
+
     public bool TryDodge(float staminaCost)
     {
         if (HasFlag(PlayerStateFlags.Dodging | PlayerStateFlags.DodgeLocked | PlayerStateFlags.Dead))
