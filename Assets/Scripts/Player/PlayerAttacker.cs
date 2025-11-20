@@ -42,6 +42,7 @@ public class PlayerAttacker : MonoBehaviour
 
     private CancellationTokenSource _cts;
     private CancellationTokenSource _comboResetCts;
+    private CancellationTokenSource _heavyComboCts;
 
     public void Init(PlayerManager manager, InputHandler input, Animator animator)
     {
@@ -74,6 +75,7 @@ public class PlayerAttacker : MonoBehaviour
 
         CancelAndDisposeCTS();
         CancelAndDisposeComboReset();
+        CancelAndDisposeHeavyComboReset();
     }
 
     #region 弱攻撃コンボ
@@ -232,12 +234,15 @@ public class PlayerAttacker : MonoBehaviour
     {
         _manager.AddFlags(PlayerStateFlags.CanHeavyCombo);
 
-        _ = CloseWindow(_superComboResetTime);
+        CancelAndDisposeHeavyComboReset();
+        _heavyComboCts = new CancellationTokenSource();
+
+        _ = CloseWindow(_superComboResetTime, _heavyComboCts.Token);
     }
 
-    private async UniTask CloseWindow(float time)
+    private async UniTask CloseWindow(float time, CancellationToken token)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(time));
+        await UniTask.Delay(TimeSpan.FromSeconds(time), false, PlayerLoopTiming.Update, token);
         _manager.RemoveFlags(PlayerStateFlags.CanHeavyCombo);
     }
 
@@ -309,6 +314,17 @@ public class PlayerAttacker : MonoBehaviour
         _comboResetCts.Cancel();
         _comboResetCts.Dispose();
         _comboResetCts = null;
+    }
+
+    /// <summary>
+    /// チャージ攻撃のコンボCTSを止める
+    /// </summary>
+    private void CancelAndDisposeHeavyComboReset()
+    {
+        if (_heavyComboCts is null) { return; }
+        _heavyComboCts.Cancel();
+        _heavyComboCts.Dispose();
+        _heavyComboCts = null;
     }
 
     #endregion
