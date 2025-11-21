@@ -191,4 +191,5 @@ public enum PlayerStateFlags
     Charging = 1 << 5,   // チャージ中
     DodgeLocked = 1 << 6, // 回避不能
     CanDodgeAttack = 1 << 7, // 回避攻撃に派生可能
+    CanHeavyCombo = 1 << 8, // 強攻撃からコンボ派生可能
 }

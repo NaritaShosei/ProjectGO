@@ -14,10 +14,12 @@ public class PlayerAttacker : MonoBehaviour
     [SerializeField, Tooltip("チャージしない攻撃")] private AttackData _heavyAttackData;
     [SerializeField, Tooltip("中チャージ攻撃")] private AttackData _chargedAttackData;
     [SerializeField, Tooltip("強チャージ攻撃")] private AttackData _superChargedAttackData;
+    [SerializeField, Tooltip("強チャージ攻撃からの派生攻撃")] private AttackData _superSpinAttackData;
     [SerializeField, Tooltip("回避攻撃")] private AttackData _dodgeAttackData;
 
     [Header("コンボが途切れる時間")]
     [SerializeField] private float _comboResetTime = 2;
+    [SerializeField] private float _superComboResetTime = 1;
 
     [Header("チャージのデータ")]
     [SerializeField] private ChargeData _chargeData;
@@ -40,6 +42,7 @@ public class PlayerAttacker : MonoBehaviour
 
     private CancellationTokenSource _cts;
     private CancellationTokenSource _comboResetCts;
+    private CancellationTokenSource _heavyComboCts;
 
     public void Init(PlayerManager manager, InputHandler input, Animator animator)
     {
@@ -72,6 +75,7 @@ public class PlayerAttacker : MonoBehaviour
 
         CancelAndDisposeCTS();
         CancelAndDisposeComboReset();
+        CancelAndDisposeHeavyComboReset();
     }
 
     #region 弱攻撃コンボ
@@ -180,6 +184,8 @@ public class PlayerAttacker : MonoBehaviour
 
         _manager.RemoveFlags(PlayerStateFlags.Charging);
 
+        if (TryHeavyCombo()) { return; }
+
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
 
@@ -210,13 +216,56 @@ public class PlayerAttacker : MonoBehaviour
     {
         _manager.AddFlags(PlayerStateFlags.Attacking | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
 
-
         if (data.AnimationClip && _animator)
             _animator.Play(data.AnimationClip.name);
 
         await UniTask.Delay(TimeSpan.FromSeconds(data.MotionDuration), false, PlayerLoopTiming.Update, token);
 
+        // 最大溜め攻撃だった場合は派生可能ウィンドウ ON
+        if (data == _superChargedAttackData)
+        {
+            StartHeavyComboWindow();
+        }
+
         _manager.RemoveFlags(PlayerStateFlags.Attacking | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
+    }
+
+    private void StartHeavyComboWindow()
+    {
+        _manager.AddFlags(PlayerStateFlags.CanHeavyCombo);
+
+        CancelAndDisposeHeavyComboReset();
+        _heavyComboCts = new CancellationTokenSource();
+
+        _ = SafeRun(() => CloseWindow(_superComboResetTime, _heavyComboCts.Token));
+    }
+
+    private async UniTask CloseWindow(float time, CancellationToken token)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(time), false, PlayerLoopTiming.Update, token);
+        _manager.RemoveFlags(PlayerStateFlags.CanHeavyCombo);
+    }
+
+
+    /// <summary>
+    /// 強攻撃からのコンボ派生
+    /// </summary>
+    private bool TryHeavyCombo()
+    {
+        if (!_manager.HasFlag(PlayerStateFlags.CanHeavyCombo)) return false;
+
+        // 受け取るデータは最大溜め → 派生先（回転叩きつけ）
+        _attackHandler.SetupData(_superSpinAttackData);
+
+        CancelAndDisposeCTS();
+        _cts = new CancellationTokenSource();
+
+        _ = SafeRun(() => PerformHeavyAttack(_superSpinAttackData, _cts.Token));
+
+        // 成功したら派生フラグを消す
+        _manager.RemoveFlags(PlayerStateFlags.CanHeavyCombo);
+
+        return true;
     }
 
     /// <summary>
@@ -265,6 +314,17 @@ public class PlayerAttacker : MonoBehaviour
         _comboResetCts.Cancel();
         _comboResetCts.Dispose();
         _comboResetCts = null;
+    }
+
+    /// <summary>
+    /// チャージ攻撃のコンボCTSを止める
+    /// </summary>
+    private void CancelAndDisposeHeavyComboReset()
+    {
+        if (_heavyComboCts is null) { return; }
+        _heavyComboCts.Cancel();
+        _heavyComboCts.Dispose();
+        _heavyComboCts = null;
     }
 
     #endregion
