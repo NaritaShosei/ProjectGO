@@ -38,6 +38,7 @@ public class PlayerAttacker : MonoBehaviour
     }
 
     private AttackData _currentComboData;
+
     private float _chargeTimer;
 
     private CancellationTokenSource _cts;
@@ -259,6 +260,8 @@ public class PlayerAttacker : MonoBehaviour
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
+
+        Debug.Log($"{_superSpinAttackData.AttackName}発動");
 
         _ = SafeRun(() => PerformHeavyAttack(_superSpinAttackData, _cts.Token));
 
