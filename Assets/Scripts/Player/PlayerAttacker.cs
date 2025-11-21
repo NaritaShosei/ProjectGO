@@ -237,7 +237,7 @@ public class PlayerAttacker : MonoBehaviour
         CancelAndDisposeHeavyComboReset();
         _heavyComboCts = new CancellationTokenSource();
 
-        _ = CloseWindow(_superComboResetTime, _heavyComboCts.Token);
+        _ = SafeRun(() => CloseWindow(_superComboResetTime, _heavyComboCts.Token));
     }
 
     private async UniTask CloseWindow(float time, CancellationToken token)
