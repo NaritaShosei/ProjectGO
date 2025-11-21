@@ -158,6 +158,7 @@ public class PlayerMove : MonoBehaviour
 
     private async UniTask DodgeAsync(Vector3 direction, CancellationToken token)
     {
+        _manager.RemoveFlags(PlayerStateFlags.Charging);
         _manager.AddFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible);
 
         Debug.Log("回避中");
