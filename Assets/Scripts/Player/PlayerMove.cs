@@ -18,9 +18,6 @@ public class PlayerMove : MonoBehaviour
     [Header("回転方向への補間率 (0〜1)")]
     [SerializeField, Range(0, 1)] private float _rotateSmooth = 0.5f;
 
-    [Header("回避攻撃に派生可能な時間")]
-    [SerializeField] private float _canDodgeAttackLimit = 0.5f;
-
     /// <summary>
     /// 移動可能な時は入力を反映
     /// </summary>
