@@ -42,17 +42,17 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     private void Awake()
     {
+        MainCamera = Camera.main;
+
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
         _stats = new PlayerStats(_data);
         _stats.OnHealthChange += _playerUIManager.HPGauge.UpdateGauge;
         _stats.OnStaminaChange += _playerUIManager.StaminaGauge.UpdateGauge;
 
-    }
-
-    private void Start()
-    {
-        MainCamera = Camera.main;
+        // ゲージの初期値を設定
+        _playerUIManager.HPGauge.Init(_data.MaxHP, _data.MaxHP);
+        _playerUIManager.StaminaGauge.Init(_data.MaxStamina, _data.MaxStamina);
     }
 
     private void Update()

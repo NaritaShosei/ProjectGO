@@ -13,6 +13,18 @@ public class GaugeView : MonoBehaviour
 
     public void Init(float current, float max)
     {
+        if (max <= 0f)
+        {
+            Debug.LogWarning("最大値が0のため0除算が起きてしまいます。");
+            return;
+        }
+
+        if (_gauge == null || _backgroundGauge == null)
+        {
+            Debug.LogError("Imageコンポーネントがアタッチされていません。");
+            return;
+        }
+
         var amount = current / max;
 
         _gauge.fillAmount = amount;
@@ -21,6 +33,18 @@ public class GaugeView : MonoBehaviour
 
     public void UpdateGauge(float current, float max)
     {
+        if (max <= 0f)
+        {
+            Debug.LogWarning("最大値が0のため0除算が起きてしまいます。");
+            return;
+        }
+
+        if (_gauge == null || _backgroundGauge == null)
+        {
+            Debug.LogError("Imageコンポーネントがアタッチされていません。");
+            return;
+        }
+
         var amount = current / max;
         _gauge.fillAmount = amount;
 
