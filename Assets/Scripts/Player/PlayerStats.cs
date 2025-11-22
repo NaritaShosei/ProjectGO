@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerStats
 {
@@ -7,12 +8,17 @@ public class PlayerStats
     private float _currentHp;
     private float _currentStamina;
 
-    // 外部から参照できるようにプロパティを公開
-    public float CurrentHp => _currentHp;
-    public float CurrentStamina => _currentStamina;
-    public float MaxHp => _maxHp;
-    public float MaxStamina => _maxStamina;
     public bool IsDead => _currentHp <= 0;
+
+    /// <summary>
+    /// 第一引数現在の値、第二引数最大値
+    /// </summary>
+    public event Action<float, float> OnHealthChange;
+
+    /// <summary>
+    /// 第一引数現在の値、第二引数最大値
+    /// </summary>
+    public event Action<float, float> OnStaminaChange;
 
     public PlayerStats(CharacterData data)
     {
@@ -35,6 +41,9 @@ public class PlayerStats
         }
 
         _currentHp = Mathf.Max(0, _currentHp - damage);
+
+        OnHealthChange?.Invoke(_currentHp, _maxHp);
+
         Debug.Log($"現在のHP:{_currentHp}");
         return !IsDead;
     }
@@ -57,6 +66,9 @@ public class PlayerStats
         }
 
         _currentStamina -= amount;
+
+        OnStaminaChange?.Invoke(_currentStamina, _maxStamina);
+
         Debug.Log($"現在のスタミナ:{_currentStamina}");
         return true;
     }
@@ -68,6 +80,8 @@ public class PlayerStats
     public void RecoverHp(float amount)
     {
         _currentHp = Mathf.Min(_maxHp, _currentHp + amount);
+
+        OnHealthChange?.Invoke(_currentHp, _maxHp);
     }
 
     /// <summary>
@@ -77,6 +91,7 @@ public class PlayerStats
     public void RecoverStamina(float amount)
     {
         _currentStamina = Mathf.Min(_maxStamina, _currentStamina + amount);
+        OnStaminaChange?.Invoke(_currentStamina, _maxStamina);
     }
 
 
