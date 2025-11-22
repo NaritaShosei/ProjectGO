@@ -48,8 +48,9 @@ public class GaugeView : MonoBehaviour
         var amount = current / max;
         _gauge.fillAmount = amount;
 
-        // 再生中のアニメーションを中断
-        _gaugeSeq?.Kill();
+        // ゲージが減ったときのみ再生中のアニメーションを中断
+        if (amount >= _backgroundGauge.fillAmount)
+            _gaugeSeq?.Kill();
 
         // HPゲージを更新した後少し遅らせて背景のゲージを更新
         _gaugeSeq = DOTween.Sequence().
