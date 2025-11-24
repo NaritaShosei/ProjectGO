@@ -20,7 +20,6 @@ public class EnemyBase : MonoBehaviour , IPoolable
     // 現在のHP
     private float _currentHp;
     public Action OnRelease { get; set; }
-    public ObjectPoolManager PoolManager { get ; set; }
 
     // 外部に通知するためのイベント
     public event Action OnDeath;
@@ -32,7 +31,7 @@ public class EnemyBase : MonoBehaviour , IPoolable
     {
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
-        _move?.Init(playerTransform);
+        _move?.Init(playerTransform,10);
 
         // HP 初期化など
         _currentHp = (_data != null && _data.MaxHP > 0f) ? _data.MaxHP : 1f;

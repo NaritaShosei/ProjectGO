@@ -3,19 +3,18 @@ using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour, IPoolable
 {
-    [SerializeField] private float _damage = 10f;
+    [SerializeField] private AttackData _attackData;
     [SerializeField] private float _lifetime = 10f;
     private float _timer;
     public Action OnRelease { get; set; }
-    public ObjectPoolManager PoolManager { get; set; }
 
-    public void Init(Vector3 direction, float speed)
+    public void Init(Vector3 direction)
     {
         gameObject.SetActive(true);
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.linearVelocity = direction.normalized * speed;
+        direction.y = 0f; // 高さ方向の影響を無視
+        rb.linearVelocity = direction.normalized * _attackData.Speed;
         _timer = 0f;
-        Debug.Log($"Bullet fired with velocity: {rb.linearVelocity}");
     }
     private void Update()
     {
@@ -24,9 +23,10 @@ public class EnemyBullet : MonoBehaviour, IPoolable
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<PlayerManager>(out var player))
+        if (other.TryGetComponent<IPlayer>(out var player))
         {
-            //player.TakeDamage(_damage);
+            player.AddDamage(_attackData.Power);
+            Debug.Log($"Bullet hit {player} for {_attackData.Power} damage.");
             ReturnToPool();
         }
 
