@@ -167,6 +167,9 @@ public class PlayerAttacker : MonoBehaviour
         if (!_manager.CanStartCharge) { return; }
         _manager.AddFlags(PlayerStateFlags.Charging);
 
+        _animator.SetLayerWeight(1, 1);
+        _animator.SetBool("Charge", true);
+
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
 
@@ -182,6 +185,9 @@ public class PlayerAttacker : MonoBehaviour
     private async void ReleaseCharge()
     {
         if (!_manager.IsCharging) return;
+
+        _animator.SetLayerWeight(1, 0);
+        _animator.SetBool("Charge", false);
 
         _manager.RemoveFlags(PlayerStateFlags.Charging);
 
