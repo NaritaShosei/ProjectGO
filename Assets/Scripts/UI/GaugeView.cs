@@ -64,7 +64,7 @@ public class GaugeView : MonoBehaviour
             }
         }
 
-        _gaugeSeq.Kill();
+        _gaugeSeq?.Kill();
 
         // HPゲージを更新した後少し遅らせて背景のゲージを更新
         _gaugeSeq = DOTween.Sequence().
