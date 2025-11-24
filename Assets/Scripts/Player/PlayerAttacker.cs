@@ -56,6 +56,7 @@ public class PlayerAttacker : MonoBehaviour
         _input.OnChargeEnd += ReleaseCharge;
 
         _manager.OnDead += Dead;
+        _manager.OnDodge += CancelAttack;
 
         _currentComboData = _firstComboData;
     }

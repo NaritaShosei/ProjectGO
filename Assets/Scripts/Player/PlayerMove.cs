@@ -137,8 +137,6 @@ public class PlayerMove : MonoBehaviour
 
         _cts = new CancellationTokenSource();
 
-        // 回避アニメーションはここで実行
-
         try
         {
             await DodgeAsync(dodgeDir, _cts.Token);
@@ -157,6 +155,7 @@ public class PlayerMove : MonoBehaviour
 
     private async UniTask DodgeAsync(Vector3 direction, CancellationToken token)
     {
+        _manager.OnDodgeInvoke();
         _manager.RemoveFlags(PlayerStateFlags.Charging);
         _manager.AddFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible);
 

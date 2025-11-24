@@ -39,6 +39,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
         return _stats.TryUseStamina(staminaCost);
     }
     public event Action OnDead;
+    public event Action OnDodge;
 
     private void Awake()
     {
@@ -168,6 +169,10 @@ public class PlayerManager : MonoBehaviour, IPlayer
         }
     }
 
+    public void OnDodgeInvoke()
+    {
+        OnDodge?.Invoke();
+    }
     private void Dead()
     {
         Debug.Log("DEAD");
