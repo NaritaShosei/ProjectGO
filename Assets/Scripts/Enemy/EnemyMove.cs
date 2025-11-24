@@ -19,9 +19,13 @@ public class EnemyMove : MonoBehaviour
 
     public bool IsNearPlayerFlag => _isNearPlayer;
 
-    public void Init(Transform playerTransform)
+    public void Init(Transform playerTransform, float moveSpeed)
     {
-        if (_navMeshAgent == null) _navMeshAgent = GetComponent<NavMeshAgent>();
+        if (_navMeshAgent == null)
+        {
+            _navMeshAgent = GetComponent<NavMeshAgent>();
+        }
+        _navMeshAgent.speed = moveSpeed;
         _targetTransform = playerTransform;
         _selfTransform = transform;
 
@@ -41,7 +45,7 @@ public class EnemyMove : MonoBehaviour
         _isNearPlayer = distance <= _distanceToPlayer;
 
         // 近ければ停止（Agent の挙動を止める）
-        bool onSight = Physics.Raycast(_selfTransform.position, _targetTransform.position - _selfTransform.position, out RaycastHit hitInfo, _distanceToPlayer, LayerMask.GetMask("Default","Player"));
+        bool onSight = Physics.Raycast(_selfTransform.position, _targetTransform.position - _selfTransform.position, out RaycastHit hitInfo, _distanceToPlayer, LayerMask.GetMask("Default", "Player"));
         if (_isNearPlayer && onSight)
         {
             _selfTransform.LookAt(new Vector3(_targetTransform.position.x, _selfTransform.position.y, _targetTransform.position.z));
