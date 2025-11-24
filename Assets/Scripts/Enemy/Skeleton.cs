@@ -45,11 +45,11 @@ public class Skeleton : EnemyBase
         dir.Normalize();
 
         // Instantiate（将来的にはオブジェクトプールを使うかも）
-        var poolable = PoolManager.Get(_enemyBulletPrefab.gameObject);
-        var bullet = poolable as EnemyBullet;
+        var bullet = PoolManager.Instance.Spawn(_enemyBulletPrefab);
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = Quaternion.LookRotation(dir);
-        bullet.Init(dir, _bulletSpeed);
+        bullet.Init(dir);
+
     }
 
     // デバッグ用: 発射位置を Gizmo で可視化
