@@ -24,7 +24,15 @@ public class PoolManager : MonoBehaviour
     public void Register<T>(T prefab, int initialSize = 0) where T : Component, IPoolable
     {
         int key = prefab.GetInstanceID();
-        if (_pools.ContainsKey(key)) return;
+        if (_pools.TryGetValue(key, out var existing))
+        {
+            // 既に同じ T で登録済みなら何もしない
+            if (existing is SimplePool<T>) return;
+
+            // 別の T で登録されている場合は警告だけ出して無視
+            Debug.LogError($"[PoolManager] Prefab '{prefab.name}' は既に別の型でプール登録されています。\n要求された型: {typeof(T)}");
+            return;
+        }
         var pool = new SimplePool<T>(prefab, initialSize, _poolRoot);
         _pools[key] = pool;
     }
@@ -37,15 +45,26 @@ public class PoolManager : MonoBehaviour
             Register(prefab, 0);
             obj = _pools[key];
         }
-        var pool = obj as SimplePool<T>;
-        return pool.Get();
+        if (obj is SimplePool<T> pool)
+        {
+            return pool.Get();
+        }
+
+        Debug.LogError($"[PoolManager] Prefab '{prefab.name}' のプール型が要求された型 {typeof(T)} と一致しません。");
+        return null;
     }
 
     public void Despawn<T>(T prefab, T instance) where T : Component, IPoolable
     {
         int key = prefab.GetInstanceID();
         if (!_pools.TryGetValue(key, out var obj)) return;
-        var pool = obj as SimplePool<T>;
-        pool.Release(instance);
+        if (obj is SimplePool<T> pool)
+        {
+            pool.Release(instance);
+        }
+        else
+        {
+            Debug.LogError($"[PoolManager] Prefab '{prefab.name}' のプール型が要求された型 {typeof(T)} と一致しません。");
+        }
     }
 }
