@@ -10,7 +10,8 @@ public class PlayerManager : MonoBehaviour, IPlayer
     [SerializeField] private PlayerAttacker _attacker;
     [SerializeField] private InputHandler _input;
     [SerializeField] private Animator _animator;
-    [SerializeField] private Transform _targetTransform;
+    [SerializeField] private Transform _targetCenter;
+    [SerializeField] private PlayerUIManager _playerUIManager;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
     [Header("ダメージリアクションの閾値")]
@@ -41,17 +42,39 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     private void Awake()
     {
+        MainCamera = Camera.main;
+
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
         _stats = new PlayerStats(_data);
-        MainCamera = Camera.main;
+        _stats.OnHealthChange += _playerUIManager.HPGauge.UpdateGauge;
+        _stats.OnStaminaChange += _playerUIManager.StaminaGauge.UpdateGauge;
+
+        if (_playerUIManager == null)
+        {
+            Debug.LogError("PlayerUIManagerが設定されていません", this);
+            return;
+        }
+
+        // ゲージの初期値を設定
+        _playerUIManager.HPGauge.Init(_data.MaxHP, _data.MaxHP);
+        _playerUIManager.StaminaGauge.Init(_data.MaxStamina, _data.MaxStamina);
     }
 
     private void Update()
     {
-        if (!HasFlag(PlayerStateFlags.Dead))
+        if (!HasFlag(PlayerStateFlags.Dead) && !HasFlag(PlayerStateFlags.Dodging))
         {
             _stats.UpdateStaminaRegeneration(_data.StaminaRegenRate);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (_stats != null)
+        {
+            _stats.OnHealthChange -= _playerUIManager.HPGauge.UpdateGauge;
+            _stats.OnStaminaChange -= _playerUIManager.StaminaGauge.UpdateGauge;
         }
     }
 
@@ -164,7 +187,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
     }
     public Transform GetTargetCenter()
     {
-        return _targetTransform;
+        return _targetCenter;
     }
 
     private void CancelAndDisposeCTS()
