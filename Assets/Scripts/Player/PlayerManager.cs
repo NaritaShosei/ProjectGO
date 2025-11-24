@@ -57,7 +57,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     private void Update()
     {
-        if (!HasFlag(PlayerStateFlags.Dead))
+        if (!HasFlag(PlayerStateFlags.Dead) && !HasFlag(PlayerStateFlags.Dodging))
         {
             _stats.UpdateStaminaRegeneration(_data.StaminaRegenRate);
         }
