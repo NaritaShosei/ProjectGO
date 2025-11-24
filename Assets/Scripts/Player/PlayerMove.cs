@@ -65,8 +65,10 @@ public class PlayerMove : MonoBehaviour
         Vector3 moveDir = (right + forward).normalized;
         moveDir.y = 0f;
 
+        float moveSpeed = _manager.IsCharging ? _data.SlowMoveSpeed : _data.MoveSpeed;
+
         // 入力の大きさを速度に反映
-        float speed = _data.MoveSpeed * inputMag;
+        float speed = moveSpeed * inputMag;
 
         _rb.linearVelocity = moveDir * speed;
     }
@@ -94,7 +96,7 @@ public class PlayerMove : MonoBehaviour
 
     private void MoveAnimation()
     {
-        Vector2 vel = _moveInput;
+        Vector2 vel = _input.MoveInput;
 
         // BlendTreeに関する値
         _animator.SetFloat("MoveRight", vel.x);
@@ -160,25 +162,24 @@ public class PlayerMove : MonoBehaviour
 
         Debug.Log("回避中");
 
+        _animator.SetTrigger("Dodge");
+
         float dodgeSpeed = _data.DodgeSpeed;
-        float duration = _data.DodgeDuration;
 
-        if (_data.DodgeClip)
-        {
-            duration += _data.DodgeClip.length;
-        }
+        // アニメーションが始まるまで1フレーム待つ
+        await UniTask.Yield(PlayerLoopTiming.Update, token);
 
-        float elapsed = 0f;
-
-        while (elapsed < duration)
+        // normalizedTime が 1.0 になるまでループ
+        while (!IsDodgeAnimationFinished())
         {
             _rb.linearVelocity = direction * dodgeSpeed;
-            elapsed += Time.deltaTime;
-            await UniTask.Yield(token);
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
         }
 
+        // 止める
         _rb.linearVelocity = Vector3.zero;
 
+        // 回避終了処理
         _manager.RemoveFlags(PlayerStateFlags.Dodging);
         _manager.AddFlags(PlayerStateFlags.CanDodgeAttack);
 
@@ -190,6 +191,7 @@ public class PlayerMove : MonoBehaviour
 
         Debug.Log("回避完全終了");
     }
+
 
     private async UniTask ResetInvincibleAsync()
     {
@@ -219,6 +221,17 @@ public class PlayerMove : MonoBehaviour
 
         // 回避攻撃可能終了
         _manager.RemoveFlags(PlayerStateFlags.CanDodgeAttack);
+    }
+
+    /// <summary>
+    /// Dodgeステートが終わったかチェックする
+    /// TODO:ここはアニメーション管理クラス側で見るようにしたい
+    /// </summary>
+    private bool IsDodgeAnimationFinished()
+    {
+        var stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+        return stateInfo.IsName("Dodge") && stateInfo.normalizedTime >= 1;
     }
 
     private void OnDestroy()
