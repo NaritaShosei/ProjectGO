@@ -353,6 +353,12 @@ public class PlayerAttacker : MonoBehaviour
             PlayerStateFlags.DodgeLocked |
             PlayerStateFlags.Charging);
 
+        if (_animator != null)
+        {
+            _animator.SetLayerWeight(1, 0);
+            _animator.SetBool("Charge", false);
+        }
+
         Debug.Log("攻撃をキャンセルするメソッドが実行");
     }
 
