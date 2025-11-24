@@ -27,7 +27,7 @@ public class PlayerAttacker : MonoBehaviour
     [Header("実際の攻撃を依頼するコンポーネント")]
     [SerializeField] private AttackHandler _attackHandler;
 
-    [System.Serializable]
+    [Serializable]
     private struct ChargeData
     {
         [SerializeField] private float _chargeTime;

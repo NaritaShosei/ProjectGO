@@ -26,7 +26,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     // 状態の遷移条件
     public bool CanAttack => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Charging);
-    public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking);
+    public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking | PlayerStateFlags.Charging);
     public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
     public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Dead);
     public bool CanDodgeAttack => HasFlag(PlayerStateFlags.CanDodgeAttack) && !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Charging | PlayerStateFlags.Attacking);
