@@ -47,14 +47,15 @@ public class PlayerManager : MonoBehaviour, IPlayer
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
         _stats = new PlayerStats(_data);
-        _stats.OnHealthChange += _playerUIManager.HPGauge.UpdateGauge;
-        _stats.OnStaminaChange += _playerUIManager.StaminaGauge.UpdateGauge;
 
         if (_playerUIManager == null)
         {
             Debug.LogError("PlayerUIManagerが設定されていません", this);
             return;
         }
+
+        _stats.OnHealthChange += _playerUIManager.HPGauge.UpdateGauge;
+        _stats.OnStaminaChange += _playerUIManager.StaminaGauge.UpdateGauge;
 
         // ゲージの初期値を設定
         _playerUIManager.HPGauge.Init(_data.MaxHP, _data.MaxHP);
@@ -71,7 +72,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     private void OnDestroy()
     {
-        if (_stats != null)
+        if (_stats != null && _playerUIManager != null)
         {
             _stats.OnHealthChange -= _playerUIManager.HPGauge.UpdateGauge;
             _stats.OnStaminaChange -= _playerUIManager.StaminaGauge.UpdateGauge;
