@@ -46,6 +46,11 @@ public class Skeleton : EnemyBase
 
         // Instantiate（将来的にはオブジェクトプールを使うかも）
         var bullet = PoolManager.Instance.Spawn(_enemyBulletPrefab);
+        if (bullet == null)
+        {
+            Debug.LogError($"[Skeleton] 弾の生成に失敗しました: プレハブ '{_enemyBulletPrefab.name}' の型不一致");
+            return; // 弾の発射をスキップ
+        }
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = Quaternion.LookRotation(dir);
         bullet.Init(dir);

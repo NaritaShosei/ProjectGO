@@ -43,6 +43,11 @@ public class EnemyInstanceManager : MonoBehaviour
         // 親を指定して生成（null なら 自分自身）
         var parent = _spawnParent != null ? _spawnParent : this.transform;
         var e = PoolManager.Instance.Spawn(enemyPrefab);
+        if(e == null)
+        {
+            Debug.LogError("敵の生成に失敗しました。");
+            return;
+        }
         e.Init(playerTransform);
         e.transform.SetPositionAndRotation(pos, rot);
 
