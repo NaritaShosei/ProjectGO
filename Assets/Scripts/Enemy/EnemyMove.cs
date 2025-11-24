@@ -19,9 +19,13 @@ public class EnemyMove : MonoBehaviour
 
     public bool IsNearPlayerFlag => _isNearPlayer;
 
-    public void Init(Transform playerTransform)
+    public void Init(Transform playerTransform,float moveSpeed)
     {
-        if (_navMeshAgent == null) _navMeshAgent = GetComponent<NavMeshAgent>();
+        if (_navMeshAgent == null)
+        {
+            _navMeshAgent = GetComponent<NavMeshAgent>();
+            _navMeshAgent.speed = moveSpeed;
+        }
         _targetTransform = playerTransform;
         _selfTransform = transform;
 
