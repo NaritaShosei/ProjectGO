@@ -17,6 +17,13 @@ public class HealItem : MonoBehaviour, IInteractable
         if (interactor.TryGetComponent(out IHealable component))
         {
             component.Healing(_healValue);
+            OnInteracted();
         }
+    }
+
+    private void OnInteracted()
+    {
+        // とりあえず破壊
+        Destroy(gameObject);
     }
 }
