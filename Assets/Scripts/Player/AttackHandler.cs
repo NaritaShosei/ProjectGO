@@ -2,10 +2,8 @@
 
 public class AttackHandler : MonoBehaviour
 {
-    [Header("PlayerのTransform")]
+    [Header("Playerの中心のTransform")]
     [SerializeField] private Transform _playerTransform;
-    [Header("攻撃の判定位置")]
-    [SerializeField] private Transform _attackPoint;
 
     private AttackData _currentData;
 
@@ -22,7 +20,7 @@ public class AttackHandler : MonoBehaviour
         var data = _currentData;
 
         // 攻撃範囲からIEnemyを継承したオブジェクトを取得し攻撃する
-        var colls = Physics.OverlapSphere(_attackPoint.position, data.Range / 2);
+        var colls = Physics.OverlapSphere(_playerTransform.position + transform.forward * _currentData.Range, data.Radius);
 
         foreach (var coll in colls)
         {
@@ -44,11 +42,11 @@ public class AttackHandler : MonoBehaviour
         if (!Application.isPlaying || !_currentData) { return; }
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(_attackPoint.position, _currentData.Range / 2);
+        Gizmos.DrawWireSphere(_playerTransform.position + transform.forward * _currentData.Range, _currentData.Radius);
 
         // 攻撃方向の表示
         Gizmos.color = Color.yellow;
-        Gizmos.DrawRay(_attackPoint.position, _attackPoint.forward * _currentData.Range / 2);
+        Gizmos.DrawRay(_playerTransform.position, _playerTransform.forward * _currentData.Range);
     }
 #endif
 }
