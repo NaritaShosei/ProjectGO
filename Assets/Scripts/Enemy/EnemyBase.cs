@@ -32,7 +32,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     {
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
-        _move?.Init(playerTransform, 10);
+        _move?.Init(playerTransform, CharactorData.MoveSpeed);
         if(_rb == null)
         {
             _rb = GetComponent<Rigidbody>(); 
