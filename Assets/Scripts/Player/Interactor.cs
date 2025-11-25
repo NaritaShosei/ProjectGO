@@ -34,7 +34,7 @@ public class Interactor : MonoBehaviour
     private void DetectInteractable()
     {
         var pos = transform.position + transform.forward * _interactRange;
-        Collider[] colls = Physics.OverlapSphere(transform.position, _interactRadius, _interactableLayer);
+        Collider[] colls = Physics.OverlapSphere(pos, _interactRadius, _interactableLayer);
 
         IInteractable selected = null;
         float selectedDistance = float.MaxValue;
@@ -51,6 +51,8 @@ public class Interactor : MonoBehaviour
                 }
             }
         }
+
+        _currentInteractable = selected;
 
         UpdateInteractUI();
     }
