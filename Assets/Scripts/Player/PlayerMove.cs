@@ -171,7 +171,6 @@ public class PlayerMove : MonoBehaviour
                 await UniTask.Yield(PlayerLoopTiming.Update, _cts.Token);
             }
 
-
             _rb.linearVelocity = Vector3.zero;
 
             _manager.RemoveFlags(PlayerStateFlags.Dodging);
@@ -181,6 +180,7 @@ public class PlayerMove : MonoBehaviour
 
             UniTask[] tasks = { ResetCanDodgeAttackAsync(), ResetInvincibleAsync() };
 
+            // TODO:これだと無敵や回避攻撃可能状態が切れるまで回避ができない
             await UniTask.WhenAll(tasks);
 
             Debug.Log("回避完全終了");
