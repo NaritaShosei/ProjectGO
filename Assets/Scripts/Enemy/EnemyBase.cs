@@ -30,6 +30,14 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     // プレイヤーなど外部参照の初期化
     public virtual void Init(Transform playerTransform)
     {
+        if (AttackData == null)
+        {
+            Debug.LogError($"{nameof(EnemyBase)}: AttackData is not assigned on {gameObject.name} Prefab");
+        }
+        if (CharacterData == null)
+        {
+            Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
+        }
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
         _move?.Init(playerTransform, CharacterData.MoveSpeed);
@@ -45,14 +53,6 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
-        }
-        if(AttackData == null)
-        {
-            Debug.LogError($"{nameof(EnemyBase)}: AttackData is not assigned on {gameObject.name} Prefab");
-        }
-        if(CharacterData == null)
-        {
-            Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
         }
     }
     private void Update()
