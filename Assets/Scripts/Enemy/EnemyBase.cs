@@ -8,7 +8,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     [SerializeField] private EnemyMove _move;
     [SerializeField] private Animator _animator;
     [Header("データ")]
-    [SerializeField] protected CharacterData CharactorData;
+    [SerializeField] protected CharacterData CharacterData;
     [SerializeField] protected AttackData AttackData;
 
     [Header("攻撃設定")]//この辺あとで別のクラス作る
@@ -32,13 +32,13 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     {
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
-        _move?.Init(playerTransform, CharactorData.MoveSpeed);
+        _move?.Init(playerTransform, CharacterData.MoveSpeed);
         if(_rb == null)
         {
             _rb = GetComponent<Rigidbody>(); 
         }
         // HP 初期化など
-        _currentHp = (CharactorData != null && CharactorData.MaxHP > 0f) ? CharactorData.MaxHP : 1f;
+        _currentHp = (CharacterData != null && CharacterData.MaxHP > 0f) ? CharacterData.MaxHP : 1f;
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
 
@@ -50,7 +50,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
         {
             Debug.LogError($"{nameof(EnemyBase)}: AttackData is not assigned on {gameObject.name} Prefab");
         }
-        if(CharactorData == null)
+        if(CharacterData == null)
         {
             Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
         }
