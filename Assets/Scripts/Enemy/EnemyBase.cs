@@ -94,21 +94,6 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     protected virtual void AttackAction()
     {
     }
-    //ダメージを受ける時に呼ぶ
-    public void TakeDamage(float amount)
-    {
-        if (_isDead) return;
-        if (amount <= 0f) return;
-
-        _currentHp -= amount;
-        // TODO: ヒットエフェクト、ノックバック等をここで呼ぶ
-
-        if (_currentHp <= 0f)
-        {
-            Die();
-        }
-    }
-
     // 強制的に即死させたいとき（EnemyInstanceManager.ForceClearAllEnemies などから呼ぶ）
     public void ForceKill()
     {
@@ -150,7 +135,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     {
         _rb.AddForce(direction, ForceMode.Impulse);
     }
-
+    // ダメージを受ける時に呼ぶ
     public void AddDamage(float amount)
     {
         if (_isDead) return;
