@@ -3,13 +3,14 @@ using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour, IPoolable
 {
-    [SerializeField] private AttackData _attackData;
     [SerializeField] private float _lifetime = 10f;
+    private AttackData _attackData;
     private float _timer;
     public Action OnRelease { get; set; }
 
-    public void Init(Vector3 direction)
+    public void Init(Vector3 direction,AttackData attackData)
     {
+        _attackData = attackData;
         gameObject.SetActive(true);
         Rigidbody rb = GetComponent<Rigidbody>();
         direction.y = 0f; // 高さ方向の影響を無視

@@ -125,6 +125,7 @@ GameObject:
   - component: {fileID: 8830903854527603385}
   - component: {fileID: 5454237317475165029}
   - component: {fileID: 5994581602096874433}
+  - component: {fileID: 3552597646734573625}
   - component: {fileID: 2007560541614232568}
   - component: {fileID: 3326817043070888931}
   - component: {fileID: 9164782496944245235}
@@ -209,6 +210,33 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!54 &3552597646734573625
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7420375411107957416}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!136 &2007560541614232568
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -286,5 +314,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Goblin
   _move: {fileID: 3326817043070888931}
   _animator: {fileID: 0}
-  _data: {fileID: 11400000, guid: c9d839dc4b9f9cb42a8d7312c1bc60d8, type: 2}
-  _attackInterval: 2
+  CharactorData: {fileID: 11400000, guid: c9d839dc4b9f9cb42a8d7312c1bc60d8, type: 2}
+  AttackData: {fileID: 11400000, guid: c5825795b9ccbd74385848586f0c1020, type: 2}
+  _attackInterval: 10

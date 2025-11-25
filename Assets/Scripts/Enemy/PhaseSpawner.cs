@@ -35,7 +35,10 @@ public class PhaseSpawner : MonoBehaviour
     private int _currentPhaseIndex = 0; // 0-based index
 
     private CancellationTokenSource _cts;
-
+    private void Start()
+    {
+        StartSpawning();
+    }
     private void OnDisable()
     {
         // シーン切替や破棄時に確実に止める

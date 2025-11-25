@@ -1,19 +1,20 @@
 ﻿using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
-public class EnemyBase : MonoBehaviour , IPoolable
+[RequireComponent(typeof(Collider), (typeof(Rigidbody)))]
+public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
 {
     [Header("Enemyのコンポーネント")]
     [SerializeField] private EnemyMove _move;
     [SerializeField] private Animator _animator;
     [Header("データ")]
-    [SerializeField] private CharacterData _data;
+    [SerializeField] protected CharacterData CharacterData;
+    [SerializeField] protected AttackData AttackData;
 
     [Header("攻撃設定")]//この辺あとで別のクラス作る
     [SerializeField] private float _attackInterval = 2.0f;
     private float _timeSinceLastAttack = 0.0f;
-
+    private Rigidbody _rb;
     private Transform _playerTransform;
     protected Transform PlayerTransform => _playerTransform;
     protected EnemyMove Move => _move;
@@ -29,12 +30,23 @@ public class EnemyBase : MonoBehaviour , IPoolable
     // プレイヤーなど外部参照の初期化
     public virtual void Init(Transform playerTransform)
     {
+        if (AttackData == null)
+        {
+            Debug.LogError($"{nameof(EnemyBase)}: AttackData is not assigned on {gameObject.name} Prefab");
+        }
+        if (CharacterData == null)
+        {
+            Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
+        }
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
-        _move?.Init(playerTransform,10);
-
+        _move?.Init(playerTransform, CharacterData.MoveSpeed);
+        if(_rb == null)
+        {
+            _rb = GetComponent<Rigidbody>(); 
+        }
         // HP 初期化など
-        _currentHp = (_data != null && _data.MaxHP > 0f) ? _data.MaxHP : 1f;
+        _currentHp = (CharacterData != null && CharacterData.MaxHP > 0f) ? CharacterData.MaxHP : 1f;
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
 
@@ -82,21 +94,6 @@ public class EnemyBase : MonoBehaviour , IPoolable
     protected virtual void AttackAction()
     {
     }
-    //ダメージを受ける時に呼ぶ
-    public void TakeDamage(float amount)
-    {
-        if (_isDead) return;
-        if (amount <= 0f) return;
-
-        _currentHp -= amount;
-        // TODO: ヒットエフェクト、ノックバック等をここで呼ぶ
-
-        if (_currentHp <= 0f)
-        {
-            Die();
-        }
-    }
-
     // 強制的に即死させたいとき（EnemyInstanceManager.ForceClearAllEnemies などから呼ぶ）
     public void ForceKill()
     {
@@ -132,5 +129,30 @@ public class EnemyBase : MonoBehaviour , IPoolable
     {
         // OnDeath は発火済みのはずだが、保険として null にする
         OnDeath = null;
+    }
+
+    public void AddKnockBackForce(Vector3 direction)
+    {
+        _rb.AddForce(direction, ForceMode.Impulse);
+    }
+    // ダメージを受ける時に呼ぶ
+    public void AddDamage(float amount)
+    {
+        if (_isDead) return;
+        if (amount <= 0f) return;
+
+        _currentHp -= amount;
+        Debug.Log($"{nameof(EnemyBase)}: {gameObject.name} took {amount} damage, current HP: {_currentHp}");
+        // TODO: ヒットエフェクト、ノックバック等をここで呼ぶ
+
+        if (_currentHp <= 0f)
+        {
+            Die();
+        }
+    }
+
+    public Transform GetTargetCenter()
+    {
+        return transform;
     }
 }
