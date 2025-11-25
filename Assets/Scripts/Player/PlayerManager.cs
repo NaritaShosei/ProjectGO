@@ -3,11 +3,12 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour, IPlayer
+public class PlayerManager : MonoBehaviour, IPlayer, IHealable
 {
     [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
     [SerializeField] private PlayerAttacker _attacker;
+    [SerializeField] private Interactor _interactor;
     [SerializeField] private InputHandler _input;
     [SerializeField] private Animator _animator;
     [SerializeField] private Transform _targetCenter;
@@ -47,6 +48,8 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
+        _interactor.Init(_input);
+
         _stats = new PlayerStats(_data);
 
         if (_playerUIManager == null)
@@ -167,6 +170,11 @@ public class PlayerManager : MonoBehaviour, IPlayer
         {
             RemoveFlags(PlayerStateFlags.Invincible | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
         }
+    }
+
+    public void Healing(float amount)
+    {
+        _stats.RecoverHp(amount);
     }
 
     public void OnDodgeInvoke()
