@@ -53,7 +53,7 @@ public class Skeleton : EnemyBase
         }
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = Quaternion.LookRotation(dir);
-        bullet.Init(dir);
+        bullet.Init(dir,AttackData);
 
     }
 

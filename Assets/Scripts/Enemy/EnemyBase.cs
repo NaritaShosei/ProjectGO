@@ -1,21 +1,20 @@
 ﻿using System;
 using UnityEngine;
 
-[RequireComponent(typeof(Collider))]
-public class EnemyBase : MonoBehaviour , IPoolable, IEnemy
+[RequireComponent(typeof(Collider), (typeof(Rigidbody)))]
+public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
 {
     [Header("Enemyのコンポーネント")]
     [SerializeField] private EnemyMove _move;
     [SerializeField] private Animator _animator;
     [Header("データ")]
-    [SerializeField] private CharacterData _data;
-    [SerializeField] private AttackData _attackData;
-    public AttackData AttackData => _attackData;
+    [SerializeField] protected CharacterData CharactorData;
+    [SerializeField] protected AttackData AttackData;
 
     [Header("攻撃設定")]//この辺あとで別のクラス作る
     [SerializeField] private float _attackInterval = 2.0f;
     private float _timeSinceLastAttack = 0.0f;
-
+    private Rigidbody _rb;
     private Transform _playerTransform;
     protected Transform PlayerTransform => _playerTransform;
     protected EnemyMove Move => _move;
@@ -33,16 +32,27 @@ public class EnemyBase : MonoBehaviour , IPoolable, IEnemy
     {
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
-        _move?.Init(playerTransform,10);
-
+        _move?.Init(playerTransform, 10);
+        if(_rb == null)
+        {
+            _rb = GetComponent<Rigidbody>(); 
+        }
         // HP 初期化など
-        _currentHp = (_data != null && _data.MaxHP > 0f) ? _data.MaxHP : 1f;
+        _currentHp = (CharactorData != null && CharactorData.MaxHP > 0f) ? CharactorData.MaxHP : 1f;
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
 
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
+        }
+        if(AttackData == null)
+        {
+            Debug.LogError($"{nameof(EnemyBase)}: AttackData is not assigned on {gameObject.name} Prefab");
+        }
+        if(CharactorData == null)
+        {
+            Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
         }
     }
     private void Update()
@@ -138,7 +148,7 @@ public class EnemyBase : MonoBehaviour , IPoolable, IEnemy
 
     public void AddKnockBackForce(Vector3 direction)
     {
-        
+        _rb.AddForce(direction, ForceMode.Impulse);
     }
 
     public void AddDamage(float amount)
