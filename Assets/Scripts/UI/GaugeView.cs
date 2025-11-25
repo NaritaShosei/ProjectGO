@@ -45,16 +45,30 @@ public class GaugeView : MonoBehaviour
             return;
         }
 
-        var amount = current / max;
+        float mainAmount = _gauge.fillAmount;
+        float amount = current / max;
         _gauge.fillAmount = amount;
 
-        // ゲージが減ったときのみ再生中のアニメーションを中断
-        if (amount >= _backgroundGauge.fillAmount)
-            _gaugeSeq?.Kill();
+        GaugeAnimation(mainAmount, amount);
+    }
+
+    private void GaugeAnimation(float mainAmount, float targetAmount)
+    {
+        // 回復
+        if (mainAmount <= targetAmount)
+        {
+            if (_backgroundGauge.fillAmount < mainAmount)
+            {
+                _backgroundGauge.fillAmount = targetAmount;
+                return;
+            }
+        }
+
+        _gaugeSeq?.Kill();
 
         // HPゲージを更新した後少し遅らせて背景のゲージを更新
         _gaugeSeq = DOTween.Sequence().
-            Append(_backgroundGauge.DOFillAmount(amount, _duration)).
+            Append(_backgroundGauge.DOFillAmount(targetAmount, _duration)).
             SetDelay(_delay).
             SetEase(_animEase).
             SetLink(gameObject);

@@ -26,7 +26,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     // 状態の遷移条件
     public bool CanAttack => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Charging);
-    public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking);
+    public bool CanStartCharge => !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Attacking | PlayerStateFlags.Charging);
     public bool IsCharging => HasFlag(PlayerStateFlags.Charging);
     public bool CanMove => !HasFlag(PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Dead);
     public bool CanDodgeAttack => HasFlag(PlayerStateFlags.CanDodgeAttack) && !HasFlag(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.Dodging | PlayerStateFlags.Charging | PlayerStateFlags.Attacking);
@@ -39,6 +39,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
         return _stats.TryUseStamina(staminaCost);
     }
     public event Action OnDead;
+    public event Action OnDodge;
 
     private void Awake()
     {
@@ -47,14 +48,15 @@ public class PlayerManager : MonoBehaviour, IPlayer
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
         _stats = new PlayerStats(_data);
-        _stats.OnHealthChange += _playerUIManager.HPGauge.UpdateGauge;
-        _stats.OnStaminaChange += _playerUIManager.StaminaGauge.UpdateGauge;
 
         if (_playerUIManager == null)
         {
             Debug.LogError("PlayerUIManagerが設定されていません", this);
             return;
         }
+
+        _stats.OnHealthChange += _playerUIManager.HPGauge.UpdateGauge;
+        _stats.OnStaminaChange += _playerUIManager.StaminaGauge.UpdateGauge;
 
         // ゲージの初期値を設定
         _playerUIManager.HPGauge.Init(_data.MaxHP, _data.MaxHP);
@@ -71,7 +73,7 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     private void OnDestroy()
     {
-        if (_stats != null)
+        if (_stats != null && _playerUIManager != null)
         {
             _stats.OnHealthChange -= _playerUIManager.HPGauge.UpdateGauge;
             _stats.OnStaminaChange -= _playerUIManager.StaminaGauge.UpdateGauge;
@@ -167,6 +169,10 @@ public class PlayerManager : MonoBehaviour, IPlayer
         }
     }
 
+    public void OnDodgeInvoke()
+    {
+        OnDodge?.Invoke();
+    }
     private void Dead()
     {
         Debug.Log("DEAD");

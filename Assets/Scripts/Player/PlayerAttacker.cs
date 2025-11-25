@@ -27,7 +27,7 @@ public class PlayerAttacker : MonoBehaviour
     [Header("実際の攻撃を依頼するコンポーネント")]
     [SerializeField] private AttackHandler _attackHandler;
 
-    [System.Serializable]
+    [Serializable]
     private struct ChargeData
     {
         [SerializeField] private float _chargeTime;
@@ -56,6 +56,7 @@ public class PlayerAttacker : MonoBehaviour
         _input.OnChargeEnd += ReleaseCharge;
 
         _manager.OnDead += Dead;
+        _manager.OnDodge += CancelAttack;
 
         _currentComboData = _firstComboData;
     }
@@ -167,6 +168,9 @@ public class PlayerAttacker : MonoBehaviour
         if (!_manager.CanStartCharge) { return; }
         _manager.AddFlags(PlayerStateFlags.Charging);
 
+        _animator.SetLayerWeight(1, 1);
+        _animator.SetBool("Charge", true);
+
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
 
@@ -182,6 +186,9 @@ public class PlayerAttacker : MonoBehaviour
     private async void ReleaseCharge()
     {
         if (!_manager.IsCharging) return;
+
+        _animator.SetLayerWeight(1, 0);
+        _animator.SetBool("Charge", false);
 
         _manager.RemoveFlags(PlayerStateFlags.Charging);
 
@@ -346,6 +353,12 @@ public class PlayerAttacker : MonoBehaviour
             PlayerStateFlags.MoveLocked |
             PlayerStateFlags.DodgeLocked |
             PlayerStateFlags.Charging);
+
+        if (_animator != null)
+        {
+            _animator.SetLayerWeight(1, 0);
+            _animator.SetBool("Charge", false);
+        }
 
         Debug.Log("攻撃をキャンセルするメソッドが実行");
     }

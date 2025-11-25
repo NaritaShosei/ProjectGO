@@ -24,6 +24,7 @@ public class PlayerMove : MonoBehaviour
     private Vector2 _moveInput => _manager.CanMove ? _input.MoveInput : Vector2.zero;
 
     private CancellationTokenSource _cts;
+    private UniTask? _currentDodgeTask = null;
 
     public void Init(PlayerManager manager, InputHandler input, Animator animator, CharacterData data)
     {
@@ -65,8 +66,10 @@ public class PlayerMove : MonoBehaviour
         Vector3 moveDir = (right + forward).normalized;
         moveDir.y = 0f;
 
+        float moveSpeed = _manager.IsCharging ? _data.SlowMoveSpeed : _data.MoveSpeed;
+
         // 入力の大きさを速度に反映
-        float speed = _data.MoveSpeed * inputMag;
+        float speed = moveSpeed * inputMag;
 
         _rb.linearVelocity = moveDir * speed;
     }
@@ -94,7 +97,7 @@ public class PlayerMove : MonoBehaviour
 
     private void MoveAnimation()
     {
-        Vector2 vel = _moveInput;
+        Vector2 vel = _input.MoveInput;
 
         // BlendTreeに関する値
         _animator.SetFloat("MoveRight", vel.x);
@@ -105,90 +108,96 @@ public class PlayerMove : MonoBehaviour
         _animator.SetFloat("Speed", speed);
     }
 
-    private async void Dodge()
+    private void Dodge()
     {
-        if (!_manager.TryDodge(_data.DodgeStamina)) return;
+        // 既に回避タスクが実行中なら無視
+        if (_currentDodgeTask != null && !_currentDodgeTask.Value.Status.IsCompleted())
+            return;
 
-        Vector2 input = _input.MoveInput;
-        Vector3 dodgeDir;
+        if (!_manager.TryDodge(_data.DodgeStamina))
+            return;
 
-        if (input.magnitude > INPUT_THRESHOLD)
-        {
-            Camera camera = _manager.MainCamera;
-            Vector3 right = camera.transform.right * input.x;
-            Vector3 forward = camera.transform.forward * input.y;
-            dodgeDir = (right + forward).normalized;
-        }
-        else
-        {
-            dodgeDir = transform.forward;
-        }
+        _currentDodgeTask = DodgeAsync();
+    }
 
-        dodgeDir.y = 0f;
-
-        if (_cts is not null)
-        {
-            _cts.Cancel();
-            _cts.Dispose();
-            _cts = null;
-        }
-
-        _cts = new CancellationTokenSource();
-
-        // 回避アニメーションはここで実行
-
+    private async UniTask DodgeAsync()
+    {
         try
         {
-            await DodgeAsync(dodgeDir, _cts.Token);
-        }
+            // 方向計算
+            Vector2 input = _input.MoveInput;
+            Vector3 dodgeDir;
 
+            if (input.magnitude > INPUT_THRESHOLD)
+            {
+                Camera camera = _manager.MainCamera;
+                Vector3 right = camera.transform.right * input.x;
+                Vector3 forward = camera.transform.forward * input.y;
+                dodgeDir = (right + forward).normalized;
+            }
+            else
+            {
+                dodgeDir = transform.forward;
+            }
+
+            dodgeDir.y = 0f;
+
+            if (_cts is not null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
+            }
+
+            _cts = new CancellationTokenSource();
+
+            _manager.OnDodgeInvoke();
+            _manager.RemoveFlags(PlayerStateFlags.Charging);
+            _manager.AddFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible);
+
+            Debug.Log("回避中");
+
+            _animator.SetTrigger("Dodge");
+
+            float dodgeSpeed = _data.DodgeSpeed;
+
+            // アニメーションが始まるまで1フレーム待つ
+            await UniTask.Yield(PlayerLoopTiming.Update, _cts.Token);
+
+            // normalizedTime が 1.0 になるまでループ
+            while (!IsDodgeAnimationFinished())
+            {
+                _rb.linearVelocity = dodgeDir * dodgeSpeed;
+                await UniTask.Yield(PlayerLoopTiming.Update, _cts.Token);
+            }
+
+
+            _rb.linearVelocity = Vector3.zero;
+
+            _manager.RemoveFlags(PlayerStateFlags.Dodging);
+            _manager.AddFlags(PlayerStateFlags.CanDodgeAttack);
+
+            Debug.Log("回避動作終了、無敵時間開始、回避攻撃派生可能");
+
+            UniTask[] tasks = { ResetCanDodgeAttackAsync(), ResetInvincibleAsync() };
+
+            await UniTask.WhenAll(tasks);
+
+            Debug.Log("回避完全終了");
+        }
         catch (OperationCanceledException)
         {
             // 正常キャンセル
         }
-
         catch (Exception ex)
         {
-            Debug.LogError($"回避キャンセル中にエラー：{ex}");
+            Debug.LogError($"回避中にエラー：{ex}");
         }
-    }
-
-    private async UniTask DodgeAsync(Vector3 direction, CancellationToken token)
-    {
-        _manager.RemoveFlags(PlayerStateFlags.Charging);
-        _manager.AddFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible);
-
-        Debug.Log("回避中");
-
-        float dodgeSpeed = _data.DodgeSpeed;
-        float duration = _data.DodgeDuration;
-
-        if (_data.DodgeClip)
+        finally
         {
-            duration += _data.DodgeClip.length;
+            _currentDodgeTask = null;
+            _manager.RemoveFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible | PlayerStateFlags.CanDodgeAttack);
         }
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            _rb.linearVelocity = direction * dodgeSpeed;
-            elapsed += Time.deltaTime;
-            await UniTask.Yield(token);
-        }
-
-        _rb.linearVelocity = Vector3.zero;
-
-        _manager.RemoveFlags(PlayerStateFlags.Dodging);
-        _manager.AddFlags(PlayerStateFlags.CanDodgeAttack);
-
-        Debug.Log("回避動作終了、無敵時間開始、回避攻撃派生可能");
-
-        UniTask[] tasks = { ResetCanDodgeAttackAsync(), ResetInvincibleAsync() };
-
-        await UniTask.WhenAll(tasks);
-
-        Debug.Log("回避完全終了");
     }
 
     private async UniTask ResetInvincibleAsync()
@@ -219,6 +228,17 @@ public class PlayerMove : MonoBehaviour
 
         // 回避攻撃可能終了
         _manager.RemoveFlags(PlayerStateFlags.CanDodgeAttack);
+    }
+
+    /// <summary>
+    /// Dodgeステートが終わったかチェックする
+    /// TODO:ここはアニメーション管理クラス側で見るようにしたい
+    /// </summary>
+    private bool IsDodgeAnimationFinished()
+    {
+        var stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+        return stateInfo.IsName("Dodge") && stateInfo.normalizedTime >= 1;
     }
 
     private void OnDestroy()

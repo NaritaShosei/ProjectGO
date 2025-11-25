@@ -24,8 +24,8 @@ public class InputHandler : MonoBehaviour
         _input.Player.Dodge.started += _ => OnDodge?.Invoke();
 
         _input.Player.LightAttack.performed += _ => OnLightAttack?.Invoke();
-        _input.Player.ChargeAttack.started += _ => OnChargeStart?.Invoke();
 
+        _input.Player.ChargeAttack.started += _ => OnChargeStart?.Invoke();
         _input.Player.ChargeAttack.canceled += _ => OnChargeEnd?.Invoke();
 
         _input.Player.Heal.started += _ => OnHeal?.Invoke();
