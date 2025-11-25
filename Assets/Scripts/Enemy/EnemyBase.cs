@@ -2,13 +2,15 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class EnemyBase : MonoBehaviour , IPoolable
+public class EnemyBase : MonoBehaviour , IPoolable, IEnemy
 {
     [Header("Enemyのコンポーネント")]
     [SerializeField] private EnemyMove _move;
     [SerializeField] private Animator _animator;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
+    [SerializeField] private AttackData _attackData;
+    public AttackData AttackData => _attackData;
 
     [Header("攻撃設定")]//この辺あとで別のクラス作る
     [SerializeField] private float _attackInterval = 2.0f;
@@ -132,5 +134,30 @@ public class EnemyBase : MonoBehaviour , IPoolable
     {
         // OnDeath は発火済みのはずだが、保険として null にする
         OnDeath = null;
+    }
+
+    public void AddKnockBackForce(Vector3 direction)
+    {
+        
+    }
+
+    public void AddDamage(float amount)
+    {
+        if (_isDead) return;
+        if (amount <= 0f) return;
+
+        _currentHp -= amount;
+        Debug.Log($"{nameof(EnemyBase)}: {gameObject.name} took {amount} damage, current HP: {_currentHp}");
+        // TODO: ヒットエフェクト、ノックバック等をここで呼ぶ
+
+        if (_currentHp <= 0f)
+        {
+            Die();
+        }
+    }
+
+    public Transform GetTargetCenter()
+    {
+        return transform;
     }
 }

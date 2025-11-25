@@ -119,6 +119,51 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &26352314
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 26352316}
+  - component: {fileID: 26352315}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &26352315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26352314}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6df663ddff2473428aa7cb428059dc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PoolManager
+  _poolRoot: {fileID: 26352316}
+--- !u!4 &26352316
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26352314}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.69505, y: 0, z: 2.84389}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &112179081
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,7 +344,6 @@ GameObject:
   - component: {fileID: 365390049}
   - component: {fileID: 365390048}
   - component: {fileID: 365390050}
-  - component: {fileID: 365390051}
   m_Layer: 0
   m_Name: Spawner
   m_TagString: Untagged
@@ -371,20 +415,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8beba595b3734d5478a93895fca2c1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyInstanceManager
-  _objectPoolManager: {fileID: 365390051}
   _spawnParent: {fileID: 0}
---- !u!114 &365390051
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 365390047}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb69741bf13488647b1b3a65284cd689, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ObjectPoolManager
 --- !u!1 &961150686
 GameObject:
   m_ObjectHideFlags: 0
@@ -829,3 +860,4 @@ SceneRoots:
   - {fileID: 365390049}
   - {fileID: 961150687}
   - {fileID: 183864844}
+  - {fileID: 26352316}
