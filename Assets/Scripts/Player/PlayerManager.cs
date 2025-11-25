@@ -54,7 +54,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
 
         if (_playerUIManager == null)
         {
-            Debug.LogError("PlayerUIManagerが設定されていません", this);
+            Debug.LogWarning("PlayerUIManagerが設定されていません", this);
             return;
         }
 
