@@ -9,7 +9,8 @@ public class GaugeView : MonoBehaviour
     [SerializeField] private float _duration = 0.5f;
     [SerializeField] private float _delay = 0.5f;
     [SerializeField] private Ease _animEase = Ease.Linear;
-    private Sequence _gaugeSeq;
+    private Sequence _backgroundGaugeSeq;
+    private Sequence _mainGaugeSeq;
 
     public void Init(float current, float max)
     {
@@ -47,27 +48,34 @@ public class GaugeView : MonoBehaviour
 
         float mainAmount = _gauge.fillAmount;
         float amount = current / max;
-        _gauge.fillAmount = amount;
 
         GaugeAnimation(mainAmount, amount);
     }
 
     private void GaugeAnimation(float mainAmount, float targetAmount)
     {
-        // 回復
-        if (mainAmount <= targetAmount)
+        _mainGaugeSeq?.Kill();
+        _backgroundGaugeSeq?.Kill();
+
+        // 回復（増える）
+        if (mainAmount < targetAmount)
         {
-            if (_backgroundGauge.fillAmount < mainAmount)
-            {
-                _backgroundGauge.fillAmount = targetAmount;
-                return;
-            }
+            // 背景ゲージを先に瞬時に追いつかせる
+            _backgroundGauge.fillAmount = targetAmount;
+
+            // メインゲージをアニメーションで増やす
+            _mainGaugeSeq = DOTween.Sequence()
+                .Append(_gauge.DOFillAmount(targetAmount, _duration))
+                .SetEase(_animEase)
+                .SetLink(gameObject);
+
+            return;
         }
 
-        _gaugeSeq?.Kill();
+        _gauge.fillAmount = targetAmount;
 
         // HPゲージを更新した後少し遅らせて背景のゲージを更新
-        _gaugeSeq = DOTween.Sequence().
+        _backgroundGaugeSeq = DOTween.Sequence().
             Append(_backgroundGauge.DOFillAmount(targetAmount, _duration)).
             SetDelay(_delay).
             SetEase(_animEase).
