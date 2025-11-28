@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 5501165089670775405}
   - component: {fileID: 6162494699344732187}
   - component: {fileID: 486593262171450012}
+  - component: {fileID: 8919606220226924992}
   m_Layer: 0
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -104,6 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
   _move: {fileID: 4829912816786645349}
   _attacker: {fileID: 5501165089670775405}
+  _modeManager: {fileID: 8919606220226924992}
   _interactor: {fileID: 486593262171450012}
   _input: {fileID: 6162494699344732187}
   _animator: {fileID: 9113894252415423701}
@@ -178,6 +180,21 @@ MonoBehaviour:
   _interactableLayer:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &8919606220226924992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069659634468028064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eeb08d90d6017641a0efd507c20f10e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerModeManager
+  _modeDataList:
+  - {fileID: 11400000, guid: 4d7c8d6cfe413224c9346ad4a37a96f6, type: 2}
+  - {fileID: 11400000, guid: eaf88c4e1d02a9b4e9dd2cf04d0d74e0, type: 2}
 --- !u!1 &7054179824653269757
 GameObject:
   m_ObjectHideFlags: 0
