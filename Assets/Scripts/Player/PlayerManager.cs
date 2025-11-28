@@ -8,6 +8,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
     [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
     [SerializeField] private PlayerAttacker _attacker;
+    [SerializeField] private PlayerModeManager _modeManager;
     [SerializeField] private Interactor _interactor;
     [SerializeField] private InputHandler _input;
     [SerializeField] private Animator _animator;
@@ -49,6 +50,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
         _interactor.Init(_input);
+        _modeManager.Init(this, _attacker, _input);
 
         _stats = new PlayerStats(_data);
 
