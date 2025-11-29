@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class PlayerManager : MonoBehaviour, IPlayer, IHealable
+public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
 {
     [Header("コンポーネント設定")]
     [SerializeField] private PlayerMove _move;
@@ -20,6 +20,8 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
     [SerializeField] private float _damageThreshold = 10;
 
     private PlayerStateFlags _flags;
+    private PlayerModeType _modeType;
+
     private PlayerStats _stats;
     private CancellationTokenSource _cts;
 
@@ -40,8 +42,10 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
 
         return _stats.TryUseStamina(staminaCost);
     }
+
     public event Action OnDead;
     public event Action OnDodge;
+    public event Action<PlayerModeType> OnModeChange;
 
     private void Awake()
     {
@@ -70,7 +74,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
 
     private void Update()
     {
-        if (!HasFlag(PlayerStateFlags.Dead) && !HasFlag(PlayerStateFlags.Dodging))
+        if (!HasFlag(PlayerStateFlags.Dead) && !HasFlag(PlayerStateFlags.Dodging) && !IsModeType(PlayerModeType.Thunder))
         {
             _stats.UpdateStaminaRegeneration(_data.StaminaRegenRate);
         }
@@ -111,6 +115,28 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
     public bool HasFlag(PlayerStateFlags flags)
     {
         return (_flags & flags) != 0;
+    }
+
+    public void ModeChange(PlayerModeType mode)
+    {
+        if (_modeType == mode)
+        {
+            Debug.Log($"{_modeType}から{mode}に切り替えようとしています。かわりません。");
+            return;
+        }
+
+        _modeType = mode;
+
+        // UIなどに通知
+        OnModeChange?.Invoke(_modeType);
+    }
+
+    /// <summary>
+    /// 指定した状態かどうかを返す
+    /// </summary>
+    public bool IsModeType(PlayerModeType mode)
+    {
+        return _modeType == mode;
     }
 
     #endregion
@@ -213,6 +239,11 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealable
         _cts.Dispose();
         _cts = null;
     }
+
+    public bool TryUseStamina(float amount)
+    {
+        return _stats.TryUseStamina(amount);
+    }
 }
 
 /// <summary>
@@ -231,4 +262,10 @@ public enum PlayerStateFlags
     DodgeLocked = 1 << 6, // 回避不能
     CanDodgeAttack = 1 << 7, // 回避攻撃に派生可能
     CanHeavyCombo = 1 << 8, // 強攻撃からコンボ派生可能
+}
+
+public enum PlayerModeType
+{
+    Battle,
+    Thunder,
 }

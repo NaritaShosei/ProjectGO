@@ -102,15 +102,9 @@ public class PlayerModeManager : MonoBehaviour
     {
         return type switch
         {
-            ModeType.ThunderGod => new ThunderGodMode(),
+            ModeType.ThunderGod => new ThunderGodMode(TrySwitchMode),
             ModeType.BattleGod => new BattleGodMode(),
             _ => new BattleGodMode()
         };
-    }
-
-    // 外部から特定のモードクラスを取得
-    public T GetCurrentModeAs<T>() where T : PlayerMode
-    {
-        return _currentMode as T;
     }
 }

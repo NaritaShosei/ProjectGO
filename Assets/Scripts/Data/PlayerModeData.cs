@@ -18,6 +18,9 @@ public class PlayerModeData : ScriptableObject
     [SerializeField, Tooltip("強チャージ攻撃からの派生攻撃")] private AttackData _superChargedComboAttackData;
     [SerializeField, Tooltip("回避攻撃")] private AttackData _dodgeAttackData;
 
+    [Header("モード固有データ")]
+    [SerializeField] private AbilityDataBase _abilityData;
+
     public string ModeName => _modeName;
     public ModeType ModeType => _modeType;
     public CharacterData CharacterData => _characterData;
@@ -27,6 +30,8 @@ public class PlayerModeData : ScriptableObject
     public AttackData SuperChargedAttackData => _superChargedAttackData;
     public AttackData SuperChargedComboAttackData => _superChargedComboAttackData;
     public AttackData DodgeAttackData => _dodgeAttackData;
+
+    public AbilityDataBase AbilityData => _abilityData;
 }
 
 public enum ModeType
