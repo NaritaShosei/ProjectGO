@@ -13,7 +13,11 @@ public abstract class PlayerMode
         _manager = manager;
         _attacker = attacker;
         _data = data;
+
+        OnInit();
     }
+
+    protected virtual void OnInit() { }
 
     public virtual void OnEnter()
     {
