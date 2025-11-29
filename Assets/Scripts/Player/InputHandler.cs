@@ -11,7 +11,7 @@ public class InputHandler : MonoBehaviour
     public event Action OnLightAttack;
     public event Action OnChargeStart;
     public event Action OnChargeEnd;
-    public event Action OnHeal;
+    public event Action OnInteract;
     public event Action OnModeChange;
 
     private void OnEnable()
@@ -28,7 +28,7 @@ public class InputHandler : MonoBehaviour
         _input.Player.ChargeAttack.started += _ => OnChargeStart?.Invoke();
         _input.Player.ChargeAttack.canceled += _ => OnChargeEnd?.Invoke();
 
-        _input.Player.Heal.started += _ => OnHeal?.Invoke();
+        _input.Player.Interact.started += _ => OnInteract?.Invoke();
 
         _input.Player.ModeChange.started += _ => OnModeChange?.Invoke();
 

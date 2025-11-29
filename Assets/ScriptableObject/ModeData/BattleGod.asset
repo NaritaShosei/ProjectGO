@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7afa6c22f69cf54428d8e3e8c5d082c1, type: 3}
+  m_Name: BattleGod
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerModeData
+  _modeName: "\u6226\u795E"
+  _modeType: 0
+  _characterData: {fileID: 11400000, guid: 0045afd6d64130b409d591fe99534c27, type: 2}
+  _firstComboData: {fileID: 11400000, guid: cccaf9db8617da343a59e9462eb78317, type: 2}
+  _heavyAttackData: {fileID: 11400000, guid: 51b4fcc73d3819547a431bc36c33c1c1, type: 2}
+  _chargedAttackData: {fileID: 11400000, guid: 554627b2beed266468e311198b0ef130, type: 2}
+  _superChargedAttackData: {fileID: 11400000, guid: dc50329155cc952499cd5a44595ed07c, type: 2}
+  _superChargedComboAttackData: {fileID: 11400000, guid: 81d8b3a26728ef140892d56adb9b789b, type: 2}
+  _dodgeAttackData: {fileID: 11400000, guid: d813dd1062bcee54186507bf869a873a, type: 2}
