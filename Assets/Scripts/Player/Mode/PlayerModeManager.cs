@@ -26,8 +26,6 @@ public class PlayerModeManager : MonoBehaviour
             Debug.LogError("モードデータが設定されていません");
             return;
         }
-
-        SetMode(0);
     }
 
     public void Init(PlayerManager manager, PlayerAttacker attacker, InputHandler input)
@@ -37,6 +35,8 @@ public class PlayerModeManager : MonoBehaviour
         _input = input;
 
         _input.OnModeChange += TrySwitchMode;
+
+        SetMode(0);
     }
 
     private void OnDisable()
