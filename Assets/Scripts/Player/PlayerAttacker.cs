@@ -9,13 +9,12 @@ public class PlayerAttacker : MonoBehaviour
     private InputHandler _input;
     private Animator _animator;
 
-    [Header("攻撃のデータ")]
-    [SerializeField, Tooltip("コンボの最初の攻撃")] private AttackData _firstComboData;
-    [SerializeField, Tooltip("チャージしない攻撃")] private AttackData _heavyAttackData;
-    [SerializeField, Tooltip("中チャージ攻撃")] private AttackData _chargedAttackData;
-    [SerializeField, Tooltip("強チャージ攻撃")] private AttackData _superChargedAttackData;
-    [SerializeField, Tooltip("強チャージ攻撃からの派生攻撃")] private AttackData _superSpinAttackData;
-    [SerializeField, Tooltip("回避攻撃")] private AttackData _dodgeAttackData;
+    private AttackData _firstComboData;
+    private AttackData _heavyAttackData;
+    private AttackData _chargedAttackData;
+    private AttackData _superChargedAttackData;
+    private AttackData _superChargedComboAttackData;
+    private AttackData _dodgeAttackData;
 
     [Header("コンボが途切れる時間")]
     [SerializeField] private float _comboResetTime = 2;
@@ -57,8 +56,6 @@ public class PlayerAttacker : MonoBehaviour
 
         _manager.OnDead += Dead;
         _manager.OnDodge += CancelAttack;
-
-        _currentComboData = _firstComboData;
     }
 
     private void OnDestroy()
@@ -263,14 +260,14 @@ public class PlayerAttacker : MonoBehaviour
         if (!_manager.HasFlag(PlayerStateFlags.CanHeavyCombo)) return false;
 
         // 受け取るデータは最大溜め → 派生先（回転叩きつけ）
-        _attackHandler.SetupData(_superSpinAttackData);
+        _attackHandler.SetupData(_superChargedComboAttackData);
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
 
-        Debug.Log($"{_superSpinAttackData.AttackName}発動");
+        Debug.Log($"{_superChargedComboAttackData.AttackName}発動");
 
-        _ = SafeRun(() => PerformHeavyAttack(_superSpinAttackData, _cts.Token));
+        _ = SafeRun(() => PerformHeavyAttack(_superChargedComboAttackData, _cts.Token));
 
         // 成功したら派生フラグを消す
         _manager.RemoveFlags(PlayerStateFlags.CanHeavyCombo);
@@ -369,6 +366,20 @@ public class PlayerAttacker : MonoBehaviour
     public void Dead()
     {
         CancelAttack();
+    }
+    /// <summary>
+    /// 攻撃のデータをセット
+    /// </summary>
+    public void SetAttackData(PlayerModeData data)
+    {
+        _firstComboData = data.FirstComboData;
+        _heavyAttackData = data.HeavyAttackData;
+        _chargedAttackData = data.ChargedAttackData;
+        _superChargedAttackData = data.SuperChargedAttackData;
+        _superChargedComboAttackData = data.SuperChargedComboAttackData;
+        _dodgeAttackData = data.DodgeAttackData;
+
+        _currentComboData = _firstComboData;
     }
     #endregion
 }
