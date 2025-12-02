@@ -230,6 +230,11 @@ public class PlayerMove : MonoBehaviour
         _manager.RemoveFlags(PlayerStateFlags.CanDodgeAttack);
     }
 
+    public void SetCharacterData(CharacterData data)
+    {
+        _data = data;
+    }
+
     /// <summary>
     /// Dodgeステートが終わったかチェックする
     /// TODO:ここはアニメーション管理クラス側で見るようにしたい

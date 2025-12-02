@@ -244,6 +244,12 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
     {
         return _stats.TryUseStamina(amount);
     }
+
+    public void SetCharacterData(CharacterData data)
+    {
+        _data = data;
+        _move.SetCharacterData(data);
+    }
 }
 
 /// <summary>

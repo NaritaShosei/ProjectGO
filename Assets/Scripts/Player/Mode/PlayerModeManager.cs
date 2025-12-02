@@ -87,6 +87,9 @@ public class PlayerModeManager : MonoBehaviour
         _currentMode = CreateMode(data.ModeType);
         _currentMode.Init(_manager, _attacker, data);
 
+        _attacker.SetAttackData(data);
+        _manager.SetCharacterData(data.CharacterData);
+
         _currentModeIndex = index;
 
         // 新しいモード開始
