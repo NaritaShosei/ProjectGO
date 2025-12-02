@@ -89,7 +89,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 116
   m_CollisionDetection: 0
 --- !u!114 &2706866274539112478
 MonoBehaviour:
@@ -111,6 +111,7 @@ MonoBehaviour:
   _animator: {fileID: 9113894252415423701}
   _targetCenter: {fileID: 1742057033955039030}
   _playerUIManager: {fileID: 0}
+  _speedManager: {fileID: 0}
   _data: {fileID: 11400000, guid: 0045afd6d64130b409d591fe99534c27, type: 2}
   _damageThreshold: 10
 --- !u!114 &4829912816786645349
@@ -139,12 +140,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feaa444b64128bb46a177018db82cc14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttacker
-  _firstComboData: {fileID: 11400000, guid: cccaf9db8617da343a59e9462eb78317, type: 2}
-  _heavyAttackData: {fileID: 11400000, guid: 51b4fcc73d3819547a431bc36c33c1c1, type: 2}
-  _chargedAttackData: {fileID: 11400000, guid: 554627b2beed266468e311198b0ef130, type: 2}
-  _superChargedAttackData: {fileID: 11400000, guid: dc50329155cc952499cd5a44595ed07c, type: 2}
-  _superSpinAttackData: {fileID: 11400000, guid: 81d8b3a26728ef140892d56adb9b789b, type: 2}
-  _dodgeAttackData: {fileID: 11400000, guid: d813dd1062bcee54186507bf869a873a, type: 2}
   _comboResetTime: 2
   _superComboResetTime: 1
   _chargeData:
@@ -374,6 +369,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1213271810162876, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9013075491222019013}
+    - targetCorrespondingSourceObject: {fileID: 1213271810162876, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4011385577727106655}
   m_SourcePrefab: {fileID: 100100000, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
 --- !u!95 &9113894252415423701 stripped
 Animator:
@@ -403,6 +401,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackHandler
   _playerTransform: {fileID: 1742057033955039030}
+--- !u!114 &4011385577727106655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9163778035456795985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef855f336eef9ba479562b5d2fcdbd91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationEventHandler
+  _speedManager: {fileID: 0}
+  _playerManager: {fileID: 2706866274539112478}
 --- !u!4 &9167315086675512917 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4732730326690744, guid: eadd41f7c18839c46a054791e263e18b, type: 3}
