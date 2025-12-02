@@ -80,6 +80,8 @@ public class PlayerModeManager : MonoBehaviour
 
         var data = _modeDataList[index];
 
+       GetComponentInChildren<Animator>().Play(data.ModeChangeClip.name);
+
         // 前のモード終了
         _currentMode?.OnExit();
 
@@ -94,6 +96,8 @@ public class PlayerModeManager : MonoBehaviour
 
         // 新しいモード開始
         _currentMode.OnEnter();
+
+        _manager.AddFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.ModeChange);
 
         // イベント発火
         OnModeChanged?.Invoke(_currentMode);
