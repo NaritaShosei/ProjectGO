@@ -14,6 +14,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
     [SerializeField] private Animator _animator;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] private PlayerUIManager _playerUIManager;
+    [SerializeField] private SpeedManager _speedManager;
     [Header("データ")]
     [SerializeField] private CharacterData _data;
     [Header("ダメージリアクションの閾値")]
@@ -23,6 +24,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
     private PlayerModeType _modeType;
 
     private PlayerStats _stats;
+    private PlayerAnimator _anim;
     private CancellationTokenSource _cts;
 
     public Camera MainCamera { get; private set; }
@@ -70,6 +72,8 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
         // ゲージの初期値を設定
         _playerUIManager.HPGauge.Init(_data.MaxHP, _data.MaxHP);
         _playerUIManager.StaminaGauge.Init(_data.MaxStamina, _data.MaxStamina);
+
+        _anim = new PlayerAnimator(_speedManager, _animator);
     }
 
     private void Update()
@@ -268,6 +272,7 @@ public enum PlayerStateFlags
     DodgeLocked = 1 << 6, // 回避不能
     CanDodgeAttack = 1 << 7, // 回避攻撃に派生可能
     CanHeavyCombo = 1 << 8, // 強攻撃からコンボ派生可能
+    ModeChange = 1 << 9, // モードチェンジ中
 }
 
 public enum PlayerModeType

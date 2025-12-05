@@ -24,7 +24,7 @@ public class ThunderGodMode : PlayerMode
 
     public override void OnUpdate()
     {
-        if (!_manager.TryUseStamina(_thunderGodData.StaminaDecreasePerSecond * Time.deltaTime))
+        if (!_manager.HasFlag(PlayerStateFlags.ModeChange) && !_manager.TryUseStamina(_thunderGodData.StaminaDecreasePerSecond * Time.deltaTime))
         {
             OnStaminaAllDecrease?.Invoke();
         }

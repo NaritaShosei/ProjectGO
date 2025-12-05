@@ -6,6 +6,7 @@ public class PlayerModeData : ScriptableObject
     [Header("モード情報")]
     [SerializeField] private string _modeName;
     [SerializeField] private ModeType _modeType; // どのStateクラスを使うか指定
+    [SerializeField] private AnimationClip _modeChangeClip;
 
     [Header("モードのキャラクターデータ")]
     [SerializeField] private CharacterData _characterData;
@@ -23,6 +24,7 @@ public class PlayerModeData : ScriptableObject
 
     public string ModeName => _modeName;
     public ModeType ModeType => _modeType;
+    public AnimationClip ModeChangeClip => _modeChangeClip;
     public CharacterData CharacterData => _characterData;
     public AttackData FirstComboData => _firstComboData;
     public AttackData HeavyAttackData => _heavyAttackData;

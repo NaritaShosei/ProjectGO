@@ -1243,6 +1243,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1751777100}
   - component: {fileID: 1751777099}
+  - component: {fileID: 1751777101}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -1279,6 +1280,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1751777101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1751777098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6aba813023b7f854799877564aadfe6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedManager
+  _slow:
+    _slowSpeed: 0.5
+    _slowDuration: 0.5
 --- !u!1 &1753382663
 GameObject:
   m_ObjectHideFlags: 0
@@ -1530,6 +1546,10 @@ PrefabInstance:
       value: Capsule
       objectReference: {fileID: 0}
     - target: {fileID: 2706866274539112478, guid: 6b79bb02f5d0d0b4cb8c004c7a432726, type: 3}
+      propertyPath: _speedManager
+      value: 
+      objectReference: {fileID: 1751777101}
+    - target: {fileID: 2706866274539112478, guid: 6b79bb02f5d0d0b4cb8c004c7a432726, type: 3}
       propertyPath: _playerUIManager
       value: 
       objectReference: {fileID: 1751777099}
@@ -1573,6 +1593,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4011385577727106655, guid: 6b79bb02f5d0d0b4cb8c004c7a432726, type: 3}
+      propertyPath: _speedManager
+      value: 
+      objectReference: {fileID: 1751777101}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
