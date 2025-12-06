@@ -73,6 +73,9 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
         _playerUIManager.HPGauge.Init(_data.MaxHP, _data.MaxHP);
         _playerUIManager.StaminaGauge.Init(_data.MaxStamina, _data.MaxStamina);
 
+        OnModeChange += _playerUIManager.ModeView.UpdateView;
+        _playerUIManager.ModeView.UpdateView(_modeType);
+
         _anim = new PlayerAnimator(_speedManager, _animator);
     }
 
@@ -90,6 +93,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
         {
             _stats.OnHealthChange -= _playerUIManager.HPGauge.UpdateGauge;
             _stats.OnStaminaChange -= _playerUIManager.StaminaGauge.UpdateGauge;
+            OnModeChange -= _playerUIManager.ModeView.UpdateView;
         }
     }
 

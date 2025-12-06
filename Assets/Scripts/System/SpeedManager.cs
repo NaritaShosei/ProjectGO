@@ -5,6 +5,7 @@ public class SpeedManager : MonoBehaviour, ISpeedManager
 {
     [SerializeField] private Slow _slow;
 
+    /// <summary> 戻り値はスピードの倍率 </summary>
     public event Action<float> OnSpeedChanged;
     public Slow Slow => _slow;
 
