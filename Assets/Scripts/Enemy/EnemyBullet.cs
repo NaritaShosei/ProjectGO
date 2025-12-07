@@ -1,12 +1,13 @@
 ﻿using System;
 using UnityEngine;
 
-public class EnemyBullet : MonoBehaviour, IPoolable
+public class EnemyBullet : MonoBehaviour, IPoolable ,ISpeedChange
 {
     [SerializeField] private float _lifetime = 10f;
     private AttackData _attackData;
     private float _timer;
     public Action OnRelease { get; set; }
+    public float TimeScale { get ; set ; }
 
     public void Init(Vector3 direction,AttackData attackData)
     {
@@ -19,7 +20,7 @@ public class EnemyBullet : MonoBehaviour, IPoolable
     }
     private void Update()
     {
-        _timer += Time.deltaTime;
+        _timer += Time.deltaTime * TimeScale;
         if (_timer >= _lifetime) ReturnToPool();
     }
     private void OnTriggerEnter(Collider other)
@@ -35,5 +36,11 @@ public class EnemyBullet : MonoBehaviour, IPoolable
     void ReturnToPool()
     {
         OnRelease?.Invoke();
+    }
+    public void OnSpeedChange(float scale)
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.linearVelocity = rb.linearVelocity.normalized * _attackData.Speed * scale;
+        TimeScale = scale;
     }
 }

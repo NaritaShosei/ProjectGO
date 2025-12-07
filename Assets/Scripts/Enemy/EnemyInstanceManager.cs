@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class EnemyInstanceManager : MonoBehaviour
 {
+    [SerializeField] SpeedManager _speedManager;
     private readonly List<EnemyBase> _enemiesOnField = new List<EnemyBase>();
+    private readonly List<ISpeedChange> _speedChangeOnField = new List<ISpeedChange>();
     /// <summary>
     /// フィールド上に敵が一体もいなければ true
     /// </summary>
@@ -14,6 +16,13 @@ public class EnemyInstanceManager : MonoBehaviour
     /// 生成時の親（ヒエラルキー整理用）。必要なら Inspector で指定。
     /// </summary>
     [SerializeField] private Transform _spawnParent;
+    private float _timeScale = 1f;
+
+    private void Start()
+    {
+        _speedManager.OnSpeedChanged += SpeedChange;
+    }
+
     /// <summary>
     /// 外部から敵を登録したい場合に使う。重複登録は無視される。
     /// </summary>
@@ -43,14 +52,14 @@ public class EnemyInstanceManager : MonoBehaviour
         // 親を指定して生成（null なら 自分自身）
         var parent = _spawnParent != null ? _spawnParent : this.transform;
         var e = PoolManager.Instance.Spawn(enemyPrefab);
-        if(e == null)
+        if (e == null)
         {
             Debug.LogError("敵の生成に失敗しました。");
             return;
         }
-        e.Init(playerTransform);
+        e.Init(playerTransform, this);
         e.transform.SetPositionAndRotation(pos, rot);
-
+        RegisterSpeed(e.GetComponent<ISpeedChange>());
         // 登録
         _enemiesOnField.Add(e);
 
@@ -67,7 +76,20 @@ public class EnemyInstanceManager : MonoBehaviour
 
         e.OnDeath += handler;
     }
-
+    public void RegisterSpeed(ISpeedChange speedChange)
+    {
+        _speedChangeOnField.Add(speedChange);
+        speedChange.OnSpeedChange(_timeScale);
+    }
+    public void SpeedChange(float scale)
+    {
+        Debug.Log($"全体のTimeScaleを{scale}に");
+        _timeScale = scale;
+        foreach (var s in _speedChangeOnField)
+        {
+            s.OnSpeedChange(scale);
+        }
+    }
     /// <summary>
     /// 外部から個別に解除したいときに使う。
     /// </summary>

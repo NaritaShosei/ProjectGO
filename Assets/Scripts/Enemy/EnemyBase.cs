@@ -1,8 +1,12 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
+using Unity.Behavior;
 using UnityEngine;
+using UnityEngine.AI;
+using Action = System.Action;
 
 [RequireComponent(typeof(Collider), (typeof(Rigidbody)))]
-public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
+public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
 {
     [Header("Enemyのコンポーネント")]
     [SerializeField] private EnemyMove _move;
@@ -12,23 +16,29 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     [SerializeField] protected AttackData AttackData;
 
     [Header("攻撃設定")]//この辺あとで別のクラス作る
+    [SerializeField]private float _stunInterval = 2.0f;
     [SerializeField] private float _attackInterval = 2.0f;
     private float _timeSinceLastAttack = 0.0f;
+    private float _stunTimer = 0.0f;
     private Rigidbody _rb;
     private Transform _playerTransform;
     protected Transform PlayerTransform => _playerTransform;
     protected EnemyMove Move => _move;
+    protected EnemyInstanceManager InstanceManager { get; private set; }
     // 現在のHP
     private float _currentHp;
     public Action OnRelease { get; set; }
+    public float TimeScale { get; set; }
 
     // 外部に通知するためのイベント
     public event Action OnDeath;
 
+    private bool　_isStunned = false;
     private bool _isDead = false;
 
+    private NavMeshAgent _agent;
     // プレイヤーなど外部参照の初期化
-    public virtual void Init(Transform playerTransform)
+    public virtual void Init(Transform playerTransform,EnemyInstanceManager manager)
     {
         if (AttackData == null)
         {
@@ -41,26 +51,45 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
         _move?.Init(playerTransform, CharacterData.MoveSpeed);
-        if(_rb == null)
+        if (_rb == null)
         {
-            _rb = GetComponent<Rigidbody>(); 
+            _rb = GetComponent<Rigidbody>();
         }
         // HP 初期化など
         _currentHp = (CharacterData != null && CharacterData.MaxHP > 0f) ? CharacterData.MaxHP : 1f;
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
-
+        _stunTimer = _stunInterval;
+        _agent = GetComponent<NavMeshAgent>();
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
         }
+        if (TryGetComponent<BehaviorGraphAgent>(out var behaviorGraphAgent))
+        {
+            behaviorGraphAgent.SetVariableValue("PlayerTransform", _playerTransform);
+            behaviorGraphAgent.SetVariableValue("Enemy", this);
+        }
     }
     private void Update()
     {
+        //スタン中の処理
+        if (_isStunned)
+        {
+            Debug.Log($"{gameObject.name}がスタンから回復するまであと{_stunTimer} 秒");
+            _stunTimer -= Time.deltaTime * TimeScale;
+            if( _stunTimer < 0 )
+            {
+                _isStunned = false;
+                _agent.enabled = true;
+                Debug.Log("スタン回復");
+            }
+            return;
+        }
         if (_playerTransform == null || _isDead) return;
 
         // 時間更新
-        _timeSinceLastAttack += Time.deltaTime;
+        _timeSinceLastAttack += Time.deltaTime * TimeScale;
 
         // 近接判定は EnemyMove が保持しているフラグを読む
         bool isNear = (_move != null) ? _move.IsNearPlayerFlag : false;
@@ -71,7 +100,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
         }
         //遠ければ EnemyMove が NavMesh で追跡してくれる前提
     }
-    private void TryAttack()
+    public void TryAttack()
     {
         if (_timeSinceLastAttack < _attackInterval) return;
 
@@ -133,7 +162,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
 
     public void AddKnockBackForce(Vector3 direction)
     {
+        Debug.Log("敵がノックバック");
+        _agent.enabled = false;
         _rb.AddForce(direction, ForceMode.Impulse);
+        _isStunned = true;
+        _stunTimer = _stunInterval;
     }
     // ダメージを受ける時に呼ぶ
     public void AddDamage(float amount)
@@ -154,5 +187,12 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy
     public Transform GetTargetCenter()
     {
         return transform;
+    }
+
+    public void OnSpeedChange(float scale)
+    {
+        Debug.Log($"{gameObject.name}のスピード倍率:{scale}");
+        _move.SetNavMeshData(CharacterData.MoveSpeed * scale);
+        TimeScale = scale;
     }
 }
