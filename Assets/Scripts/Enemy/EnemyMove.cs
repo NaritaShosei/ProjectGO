@@ -37,6 +37,7 @@ public class EnemyMove : MonoBehaviour
     }
     public void SetNavMeshData(float moveSpeed)
     {
+        if (_navMeshAgent == null) return;
         _navMeshAgent.speed = moveSpeed;
     }
     private void Update()

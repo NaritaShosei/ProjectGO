@@ -7,7 +7,7 @@ public class EnemyBullet : MonoBehaviour, IPoolable ,ISpeedChange
     private AttackData _attackData;
     private float _timer;
     public Action OnRelease { get; set; }
-    public float TimeScale { get ; set ; }
+    public float TimeScale { get; set; } = 1.0f;
 
     public void Init(Vector3 direction,AttackData attackData)
     {

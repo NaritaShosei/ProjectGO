@@ -20,9 +20,18 @@ public class EnemyInstanceManager : MonoBehaviour
 
     private void Start()
     {
-        _speedManager.OnSpeedChanged += SpeedChange;
+        if (_speedManager != null)
+        {
+            _speedManager.OnSpeedChanged += SpeedChange;
+        }
     }
-
+    private void OnDestroy()
+    {
+        if (_speedManager != null)
+        {
+            _speedManager.OnSpeedChanged -= SpeedChange;
+        }
+    }
     /// <summary>
     /// 外部から敵を登録したい場合に使う。重複登録は無視される。
     /// </summary>
@@ -59,7 +68,7 @@ public class EnemyInstanceManager : MonoBehaviour
         }
         e.Init(playerTransform, this);
         e.transform.SetPositionAndRotation(pos, rot);
-        RegisterSpeed(e.GetComponent<ISpeedChange>());
+        RegisterSpeed(e);//eはEnemyBaseでISpeedChangeを継承している
         // 登録
         _enemiesOnField.Add(e);
 
@@ -78,15 +87,29 @@ public class EnemyInstanceManager : MonoBehaviour
     }
     public void RegisterSpeed(ISpeedChange speedChange)
     {
+        if (speedChange == null) return;
         _speedChangeOnField.Add(speedChange);
         speedChange.OnSpeedChange(_timeScale);
+    }
+    public void UnRegisterSpeed(ISpeedChange speedChange)
+    {
+        if (speedChange == null) return;
+        _speedChangeOnField.Remove(speedChange);
     }
     public void SpeedChange(float scale)
     {
         Debug.Log($"全体のTimeScaleを{scale}に");
         _timeScale = scale;
-        foreach (var s in _speedChangeOnField)
+
+        // 無効な参照をスキップ
+        for (int i = _speedChangeOnField.Count - 1; i >= 0; i--)
         {
+            var s = _speedChangeOnField[i];
+            if (s == null)
+            {
+                _speedChangeOnField.RemoveAt(i);
+                continue;
+            }
             s.OnSpeedChange(scale);
         }
     }

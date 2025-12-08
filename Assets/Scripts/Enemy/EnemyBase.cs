@@ -28,7 +28,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
     // 現在のHP
     private float _currentHp;
     public Action OnRelease { get; set; }
-    public float TimeScale { get; set; }
+    public float TimeScale { get; set; } = 1.0f;
 
     // 外部に通知するためのイベント
     public event Action OnDeath;
@@ -37,6 +37,13 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
     private bool _isDead = false;
 
     private NavMeshAgent _agent;
+    private void OnDisable()
+    {
+        if(InstanceManager != null)
+        {
+            InstanceManager.UnRegisterSpeed(this);
+        }
+    }
     // プレイヤーなど外部参照の初期化
     public virtual void Init(Transform playerTransform,EnemyInstanceManager manager)
     {
@@ -81,7 +88,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
             if( _stunTimer < 0 )
             {
                 _isStunned = false;
-                _agent.enabled = true;
+                if(_agent != null)
+                {
+                    _agent.enabled = true;
+                }
                 Debug.Log("スタン回復");
             }
             return;
@@ -163,7 +173,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
     public void AddKnockBackForce(Vector3 direction)
     {
         Debug.Log("敵がノックバック");
-        _agent.enabled = false;
+        if(_agent !=  null)
+        {
+            _agent.enabled = false;
+        }
         _rb.AddForce(direction, ForceMode.Impulse);
         _isStunned = true;
         _stunTimer = _stunInterval;
@@ -192,7 +205,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
     public void OnSpeedChange(float scale)
     {
         Debug.Log($"{gameObject.name}のスピード倍率:{scale}");
-        _move.SetNavMeshData(CharacterData.MoveSpeed * scale);
+        if (_move != null)
+        {
+            _move.SetNavMeshData(CharacterData.MoveSpeed * scale);
+        }
         TimeScale = scale;
     }
 }
