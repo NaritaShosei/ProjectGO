@@ -220,7 +220,7 @@ Rigidbody:
   m_GameObject: {fileID: 7420375411107957416}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 1000
+  m_LinearDamping: 1
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -317,6 +317,7 @@ MonoBehaviour:
   _animator: {fileID: 0}
   CharacterData: {fileID: 11400000, guid: de1ded22d61e1c8438cf2a5f69fe7885, type: 2}
   AttackData: {fileID: 11400000, guid: 298ba7d8ccaaad743b44d12320ef6c40, type: 2}
+  _stunInterval: 2
   _attackInterval: 2
   _enemyBulletPrefab: {fileID: 8373044949685681501, guid: 9dab1ea769fbb2a42a62fdf41f338da1, type: 3}
   _firePoint: {fileID: 8896956548794464570}
@@ -328,12 +329,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7420375411107957416}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraphAgent
-  m_Graph: {fileID: -8200169554606346553, guid: 15982a8c1efed6b498b170c6d57951c9, type: 2}
+  m_Graph: {fileID: 4938545465189858555, guid: 1efa986fa3aacce45a4104ab3546d0c1, type: 2}
   m_BlackboardVariableOverridesList:
   - rid: 9098335026324963483
   m_OriginalGraph: {fileID: -8200169554606346553, guid: 15982a8c1efed6b498b170c6d57951c9, type: 2}
