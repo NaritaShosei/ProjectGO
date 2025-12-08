@@ -99,7 +99,7 @@ public class PlayerMove : MonoBehaviour
     {
         Vector2 vel = _input.MoveInput;
 
-        if (vel.sqrMagnitude > 0.01f)
+        if (vel.sqrMagnitude > INPUT_THRESHOLD)
         {
             vel = vel.normalized;
         }
