@@ -36,7 +36,7 @@ public class PlayerModeManager : MonoBehaviour
 
         _input.OnModeChange += TrySwitchMode;
 
-        SetMode(0);
+        _attacker.SetAttackData(_modeDataList[0]);
     }
 
     private void OnDisable()
@@ -80,7 +80,7 @@ public class PlayerModeManager : MonoBehaviour
 
         var data = _modeDataList[index];
 
-       GetComponentInChildren<Animator>().Play(data.ModeChangeClip.name);
+        GetComponentInChildren<Animator>().Play(data.ModeChangeClip.name);
 
         // 前のモード終了
         _currentMode?.OnExit();

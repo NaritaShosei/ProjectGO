@@ -99,6 +99,15 @@ public class PlayerMove : MonoBehaviour
     {
         Vector2 vel = _input.MoveInput;
 
+        if (vel.sqrMagnitude > INPUT_THRESHOLD)
+        {
+            vel = vel.normalized;
+        }
+        else
+        {
+            vel = Vector2.zero;
+        }
+
         // BlendTreeに関する値
         _animator.SetFloat("MoveRight", vel.x);
         _animator.SetFloat("MoveForward", vel.y);
@@ -229,7 +238,6 @@ public class PlayerMove : MonoBehaviour
         // 回避攻撃可能終了
         _manager.RemoveFlags(PlayerStateFlags.CanDodgeAttack);
     }
-
     public void SetCharacterData(CharacterData data)
     {
         _data = data;
@@ -243,7 +251,20 @@ public class PlayerMove : MonoBehaviour
     {
         var stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
 
-        return stateInfo.IsName("Dodge") && stateInfo.normalizedTime >= 1;
+        // Dodgeタグでなければまだ
+        if (!stateInfo.IsTag("Dodge"))
+            return false;
+
+        // 遷移中なら「もう終わっている扱い」で true を返す
+        if (_animator.IsInTransition(0))
+            return true;
+
+        // ループしないクリップは 0.95 以上で終了扱い
+        if (!stateInfo.loop)
+            return stateInfo.normalizedTime >= 0.95f;
+
+        // ループする場合のみ 1.0 比較
+        return stateInfo.normalizedTime >= 1f;
     }
 
     private void OnDestroy()
