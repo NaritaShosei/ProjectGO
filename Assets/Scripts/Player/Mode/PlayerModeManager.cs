@@ -35,6 +35,8 @@ public class PlayerModeManager : MonoBehaviour
         _input = input;
 
         _input.OnModeChange += TrySwitchMode;
+
+        _attacker.SetAttackData(_modeDataList[0]);
     }
 
     private void OnDisable()
