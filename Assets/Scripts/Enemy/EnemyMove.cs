@@ -35,7 +35,11 @@ public class EnemyMove : MonoBehaviour
             _lastUpdateTime = Time.time - _updateInterval;
         }
     }
-
+    public void SetNavMeshData(float moveSpeed)
+    {
+        if (_navMeshAgent == null) return;
+        _navMeshAgent.speed = moveSpeed;
+    }
     private void Update()
     {
         if (_targetTransform == null || _navMeshAgent == null) return;
@@ -49,20 +53,21 @@ public class EnemyMove : MonoBehaviour
         if (_isNearPlayer && onSight)
         {
             _selfTransform.LookAt(new Vector3(_targetTransform.position.x, _selfTransform.position.y, _targetTransform.position.z));
-            if (!_navMeshAgent.isStopped)
+            if (_navMeshAgent.enabled && !_navMeshAgent.isStopped)
             {
                 _navMeshAgent.isStopped = true;
             }
             return;
         }
         // 近くないなら追いかける。更新は閾値／間隔を満たした場合のみ
-        if (Time.time - _lastUpdateTime >= _updateInterval)
+        if (_navMeshAgent.enabled && Time.time - _lastUpdateTime >= _updateInterval)
         {
             float moved = Vector3.Distance(_lastTargetPosition, _targetTransform.position);
             if (moved >= _targetMoveThreshold || _navMeshAgent.pathPending || _navMeshAgent.remainingDistance <= 0f)
             {
                 _navMeshAgent.isStopped = false;
                 _navMeshAgent.SetDestination(_targetTransform.position);
+                Debug.Log("SetPos");
                 _lastTargetPosition = _targetTransform.position;
                 _lastUpdateTime = Time.time;
             }
