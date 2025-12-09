@@ -6,7 +6,7 @@ using UnityEngine.AI;
 using Action = System.Action;
 
 [RequireComponent(typeof(Collider), (typeof(Rigidbody)))]
-public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
+public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
 {
     [Header("Enemyのコンポーネント")]
     [SerializeField] private EnemyMove _move;
@@ -16,7 +16,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
     [SerializeField] protected AttackData AttackData;
 
     [Header("攻撃設定")]//この辺あとで別のクラス作る
-    [SerializeField]private float _stunInterval = 2.0f;
+    [SerializeField] private float _stunInterval = 2.0f;
     [SerializeField] private float _attackInterval = 2.0f;
     private float _timeSinceLastAttack = 0.0f;
     private float _stunTimer = 0.0f;
@@ -33,19 +33,19 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
     // 外部に通知するためのイベント
     public event Action OnDeath;
 
-    private bool　_isStunned = false;
+    private bool _isStunned = false;
     private bool _isDead = false;
 
     private NavMeshAgent _agent;
     private void OnDisable()
     {
-        if(InstanceManager != null)
+        if (InstanceManager != null)
         {
             InstanceManager.UnRegisterSpeed(this);
         }
     }
     // プレイヤーなど外部参照の初期化
-    public virtual void Init(Transform playerTransform,EnemyInstanceManager manager)
+    public virtual void Init(Transform playerTransform, EnemyInstanceManager manager)
     {
         if (AttackData == null)
         {
@@ -85,10 +85,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
         {
             Debug.Log($"{gameObject.name}がスタンから回復するまであと{_stunTimer} 秒");
             _stunTimer -= Time.deltaTime * TimeScale;
-            if( _stunTimer < 0 )
+            Debug.Log(_rb.linearVelocity);
+            if (_stunTimer < 0 && Physics.Raycast(transform.position - Vector3.down * 1.5f, Vector3.down, 0.1f))
             {
                 _isStunned = false;
-                if(_agent != null)
+                if (_agent != null)
                 {
                     _agent.enabled = true;
                 }
@@ -172,12 +173,12 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy,ISpeedChange
 
     public void AddKnockBackForce(Vector3 direction)
     {
-        Debug.Log("敵がノックバック");
-        if(_agent !=  null)
+        Debug.Log($"敵がノックバック{direction}");
+        _rb.linearVelocity = direction;
+        if (_agent != null)
         {
             _agent.enabled = false;
         }
-        _rb.AddForce(direction, ForceMode.Impulse);
         _isStunned = true;
         _stunTimer = _stunInterval;
     }
