@@ -18,6 +18,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     [Header("攻撃設定")]//この辺あとで別のクラス作る
     [SerializeField] private float _stunInterval = 2.0f;
     [SerializeField] private float _attackInterval = 2.0f;
+
+    [Header("マテリアル")]
+    [SerializeField] protected Material _defaultMaterial;
+    [SerializeField] protected Material _damagedMaterial;
+
     private float _timeSinceLastAttack = 0.0f;
     private float _stunTimer = 0.0f;
     private Rigidbody _rb;
@@ -37,6 +42,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     private bool _isDead = false;
 
     private NavMeshAgent _agent;
+    private Renderer[] _renderers;
     private void OnDisable()
     {
         if (InstanceManager != null)
@@ -54,6 +60,15 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         if (CharacterData == null)
         {
             Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
+        }
+        if(_renderers == null)
+        {
+            _renderers = gameObject.GetComponentsInChildren<Renderer>();
+            if(_defaultMaterial == null || _damagedMaterial == null)
+            {
+                Debug.LogError("マテリアルをセットしてください。");
+                UnityEditor.EditorApplication.isPlaying = false;
+            }
         }
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
@@ -94,6 +109,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
                     _agent.enabled = true;
                 }
                 Debug.Log("スタン回復");
+                for (int i = 0; i < _renderers.Length; i++)
+                {
+                    _renderers[i].material = _defaultMaterial;
+                }
             }
             return;
         }
@@ -196,6 +215,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             Die();
         }
+        for(int i = 0; i < _renderers.Length; i++)
+        {
+            _renderers[i].material = _damagedMaterial;
+        }
+        
     }
 
     public Transform GetTargetCenter()
