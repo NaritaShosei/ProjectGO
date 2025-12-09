@@ -17,8 +17,18 @@ public class AnimationEventHandler : MonoBehaviour
     {
         _slow.ChangeSlow(true);
 
-        await UniTask.Delay(TimeSpan.FromSeconds(_slow.SlowDuration), cancellationToken: destroyCancellationToken);
-
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(_slow.SlowDuration), cancellationToken: destroyCancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // 正常
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
         _slow.ChangeSlow(false);
         _playerManager.RemoveFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.ModeChange);
     }

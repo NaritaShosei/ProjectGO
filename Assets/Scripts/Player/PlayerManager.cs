@@ -58,6 +58,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
         _interactor.Init(_input);
         _modeManager.Init(this, _attacker, _input);
 
+        _anim = new PlayerAnimator(_speedManager, _animator);
         _stats = new PlayerStats(_data);
 
         if (_playerUIManager == null)
@@ -75,8 +76,6 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
 
         OnModeChange += _playerUIManager.ModeView.UpdateView;
         _playerUIManager.ModeView.UpdateView(_modeType);
-
-        _anim = new PlayerAnimator(_speedManager, _animator);
     }
 
     private void Update()
