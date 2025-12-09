@@ -42,6 +42,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     private bool _isDead = false;
 
     private NavMeshAgent _agent;
+    private Renderer[] _renderers;
     private void OnDisable()
     {
         if (InstanceManager != null)
@@ -59,6 +60,15 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         if (CharacterData == null)
         {
             Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
+        }
+        if(_renderers == null)
+        {
+            _renderers = gameObject.GetComponentsInChildren<Renderer>();
+            if(_defaultMaterial == null || _damagedMaterial == null)
+            {
+                Debug.LogError("マテリアルをセットしてください。");
+                UnityEditor.EditorApplication.isPlaying = false;
+            }
         }
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
@@ -99,8 +109,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
                     _agent.enabled = true;
                 }
                 Debug.Log("スタン回復");
-                var mat = GetComponent<Material>();
-                mat = _defaultMaterial;
+                for (int i = 0; i < _renderers.Length; i++)
+                {
+                    _renderers[i].material = _defaultMaterial;
+                }
             }
             return;
         }
@@ -203,8 +215,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             Die();
         }
-        var mat = GetComponent<Material>();
-        mat = _damagedMaterial;
+        for(int i = 0; i < _renderers.Length; i++)
+        {
+            _renderers[i].material = _damagedMaterial;
+        }
+        
     }
 
     public Transform GetTargetCenter()
