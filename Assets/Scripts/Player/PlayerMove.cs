@@ -131,6 +131,7 @@ public class PlayerMove : MonoBehaviour
 
     private async UniTask DodgeAsync()
     {
+        var col = GetComponent<Collider>();
         try
         {
             // 方向計算
@@ -170,6 +171,8 @@ public class PlayerMove : MonoBehaviour
 
             float dodgeSpeed = _data.DodgeSpeed;
 
+            col.enabled = false;
+
             // アニメーションが始まるまで1フレーム待つ
             await UniTask.Yield(PlayerLoopTiming.Update, _cts.Token);
 
@@ -205,6 +208,7 @@ public class PlayerMove : MonoBehaviour
         finally
         {
             _currentDodgeTask = null;
+            col.enabled = true;
             _manager.RemoveFlags(PlayerStateFlags.Dodging | PlayerStateFlags.Invincible | PlayerStateFlags.CanDodgeAttack);
         }
     }
