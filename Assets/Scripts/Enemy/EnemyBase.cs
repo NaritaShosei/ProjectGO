@@ -18,6 +18,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     [Header("攻撃設定")]//この辺あとで別のクラス作る
     [SerializeField] private float _stunInterval = 2.0f;
     [SerializeField] private float _attackInterval = 2.0f;
+
+    [Header("マテリアル")]
+    [SerializeField] protected Material _defaultMaterial;
+    [SerializeField] protected Material _damagedMaterial;
+
     private float _timeSinceLastAttack = 0.0f;
     private float _stunTimer = 0.0f;
     private Rigidbody _rb;
@@ -94,6 +99,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
                     _agent.enabled = true;
                 }
                 Debug.Log("スタン回復");
+                var mat = GetComponent<Material>();
+                mat = _defaultMaterial;
             }
             return;
         }
@@ -196,6 +203,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             Die();
         }
+        var mat = GetComponent<Material>();
+        mat = _damagedMaterial;
     }
 
     public Transform GetTargetCenter()
