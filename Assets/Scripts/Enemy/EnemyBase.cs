@@ -69,9 +69,6 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             if (_defaultMaterial == null || _damagedMaterial == null)
             {
                 Debug.LogError("マテリアルをセットしてください。");
-#if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-#endif
             }
         }
         gameObject.SetActive(true);
