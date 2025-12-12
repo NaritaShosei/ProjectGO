@@ -70,6 +70,13 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             {
                 Debug.LogError("マテリアルをセットしてください。");
             }
+            else
+            {
+                for (int i = 0; i < _renderers.Length; i++)
+                {
+                    _renderers[i].material = _defaultMaterial;
+                }
+            }
         }
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
