@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class EnemyBullet : MonoBehaviour, IPoolable ,ISpeedChange
+public class EnemyBullet : MonoBehaviour, IPoolable, ISpeedChange
 {
     [SerializeField] private float _lifetime = 10f;
     private AttackData _attackData;
@@ -9,7 +9,7 @@ public class EnemyBullet : MonoBehaviour, IPoolable ,ISpeedChange
     public Action OnRelease { get; set; }
     public float TimeScale { get; set; } = 1.0f;
 
-    public void Init(Vector3 direction,AttackData attackData)
+    public void Init(Vector3 direction, AttackData attackData)
     {
         _attackData = attackData;
         gameObject.SetActive(true);
@@ -42,5 +42,6 @@ public class EnemyBullet : MonoBehaviour, IPoolable ,ISpeedChange
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.linearVelocity = rb.linearVelocity.normalized * _attackData.Speed * scale;
         TimeScale = scale;
+        Debug.Log($"BulletSpeed = {rb.linearVelocity}");
     }
 }

@@ -78,6 +78,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
                 }
             }
         }
+        InstanceManager = manager;
         gameObject.SetActive(true);
         _playerTransform = playerTransform;
         _move?.Init(playerTransform, CharacterData.MoveSpeed);

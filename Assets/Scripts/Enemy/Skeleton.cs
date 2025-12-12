@@ -52,10 +52,10 @@ public class Skeleton : EnemyBase
             Debug.LogError($"[Skeleton] 弾の生成に失敗しました: プレハブ '{_enemyBulletPrefab.name}' の型不一致");
             return; // 弾の発射をスキップ
         }
-        //InstanceManager.RegisterSpeed(bullet);
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = Quaternion.LookRotation(dir);
         bullet.Init(dir,AttackData);
+        InstanceManager.RegisterSpeed(bullet);
 
     }
 
