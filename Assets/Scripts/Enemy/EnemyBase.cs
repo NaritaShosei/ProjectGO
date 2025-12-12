@@ -25,6 +25,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
 
     private float _timeSinceLastAttack = 0.0f;
     private float _stunTimer = 0.0f;
+    private float _beforePosY = 0.0f;
+
     private Rigidbody _rb;
     private Transform _playerTransform;
     protected Transform PlayerTransform => _playerTransform;
@@ -93,15 +95,14 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             behaviorGraphAgent.SetVariableValue("Enemy", this);
         }
     }
-    private void Update()
+    private void FixedUpdate()
     {
-        //スタン中の処理
-        if (_isStunned)
+        if(_isStunned)
         {
             Debug.Log($"{gameObject.name}がスタンから回復するまであと{_stunTimer} 秒");
-            _stunTimer -= Time.deltaTime * TimeScale;
-            Debug.Log(_rb.linearVelocity);
-            if (_stunTimer < 0 && Physics.Raycast(transform.position - Vector3.down * 1.5f, Vector3.down, 0.1f))
+            _stunTimer -= Time.fixedDeltaTime * TimeScale;
+            Debug.Log(Mathf.Abs(transform.position.y - _beforePosY));
+            if (_stunTimer < 0 && Mathf.Abs(transform.position.y - _beforePosY) < 0.0001f)
             {
                 _isStunned = false;
                 if (_agent != null)
@@ -114,6 +115,14 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
                     _renderers[i].material = _defaultMaterial;
                 }
             }
+            _beforePosY = transform.position.y;
+        }
+    }
+    private void Update()
+    {
+        //スタン中の処理
+        if (_isStunned)
+        {
             return;
         }
         if (_playerTransform == null || _isDead) return;
