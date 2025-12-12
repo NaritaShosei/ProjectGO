@@ -209,6 +209,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         }
         _isStunned = true;
         _stunTimer = _stunInterval;
+        _beforePosY = transform.position.y;
     }
     // ダメージを受ける時に呼ぶ
     public void AddDamage(float amount)
