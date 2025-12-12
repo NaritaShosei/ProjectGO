@@ -63,10 +63,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             Debug.LogError($"{nameof(EnemyBase)}: CharacterData is not assigned on {gameObject.name} Prefab");
         }
-        if(_renderers == null)
+        if (_renderers == null)
         {
             _renderers = gameObject.GetComponentsInChildren<Renderer>();
-            if(_defaultMaterial == null || _damagedMaterial == null)
+            if (_defaultMaterial == null || _damagedMaterial == null)
             {
                 Debug.LogError("マテリアルをセットしてください。");
                 UnityEditor.EditorApplication.isPlaying = false;
@@ -79,11 +79,13 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             _rb = GetComponent<Rigidbody>();
         }
+        _rb.isKinematic = true;
         // HP 初期化など
         _currentHp = (CharacterData != null && CharacterData.MaxHP > 0f) ? CharacterData.MaxHP : 1f;
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
         _stunTimer = _stunInterval;
+        _isStunned = false;
         _agent = GetComponent<NavMeshAgent>();
         if (_animator == null)
         {
@@ -97,7 +99,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     }
     private void FixedUpdate()
     {
-        if(_isStunned)
+        if (_isStunned)
         {
             Debug.Log($"{gameObject.name}がスタンから回復するまであと{_stunTimer} 秒");
             _stunTimer -= Time.fixedDeltaTime * TimeScale;
@@ -109,6 +111,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
                 {
                     _agent.enabled = true;
                 }
+                _rb.isKinematic = true;
                 Debug.Log("スタン回復");
                 for (int i = 0; i < _renderers.Length; i++)
                 {
@@ -202,6 +205,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     public void AddKnockBackForce(Vector3 direction)
     {
         Debug.Log($"敵がノックバック{direction}");
+        _rb.isKinematic = false;
         _rb.linearVelocity = direction;
         if (_agent != null)
         {
@@ -225,11 +229,11 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             Die();
         }
-        for(int i = 0; i < _renderers.Length; i++)
+        for (int i = 0; i < _renderers.Length; i++)
         {
             _renderers[i].material = _damagedMaterial;
         }
-        
+
     }
 
     public Transform GetTargetCenter()
