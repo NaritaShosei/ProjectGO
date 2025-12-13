@@ -143,7 +143,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         Debug.Log("スタン回復");
         for (int i = 0; i < _renderers.Length; i++)
         {
-            _renderers[i].material = _defaultMaterial;
+            if(_renderers[i] != null)
+            {
+                _renderers[i].material = _defaultMaterial;
+            } 
         }
     }
     public void TryAttack()
