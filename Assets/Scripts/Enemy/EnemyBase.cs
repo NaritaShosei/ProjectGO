@@ -85,8 +85,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
         _stunTimer = _stunInterval;
-        CureStunned();
         _agent = GetComponent<NavMeshAgent>();
+        CureStunned();
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
