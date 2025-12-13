@@ -70,13 +70,6 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             {
                 Debug.LogError("マテリアルをセットしてください。");
             }
-            else
-            {
-                for (int i = 0; i < _renderers.Length; i++)
-                {
-                    _renderers[i].material = _defaultMaterial;
-                }
-            }
         }
         InstanceManager = manager;
         gameObject.SetActive(true);
@@ -92,8 +85,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         _isDead = false;
         _timeSinceLastAttack = _attackInterval;
         _stunTimer = _stunInterval;
-        _isStunned = false;
         _agent = GetComponent<NavMeshAgent>();
+        CureStunned();
         if (_animator == null)
         {
             _animator = GetComponentInChildren<Animator>();
@@ -103,6 +96,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             behaviorGraphAgent.SetVariableValue("PlayerTransform", _playerTransform);
             behaviorGraphAgent.SetVariableValue("Enemy", this);
         }
+        Debug.Log($"{nameof(EnemyBase)}: Initialized {gameObject.name} \nHP:{_currentHp}\nisStunned{_isStunned}");
     }
     private void FixedUpdate()
     {
@@ -110,20 +104,9 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         {
             Debug.Log($"{gameObject.name}がスタンから回復するまであと{_stunTimer} 秒");
             _stunTimer -= Time.fixedDeltaTime * TimeScale;
-            Debug.Log(Mathf.Abs(transform.position.y - _beforePosY));
             if (_stunTimer < 0 && Mathf.Abs(transform.position.y - _beforePosY) < 0.0001f)
             {
-                _isStunned = false;
-                if (_agent != null)
-                {
-                    _agent.enabled = true;
-                }
-                _rb.isKinematic = true;
-                Debug.Log("スタン回復");
-                for (int i = 0; i < _renderers.Length; i++)
-                {
-                    _renderers[i].material = _defaultMaterial;
-                }
+                CureStunned();
             }
             _beforePosY = transform.position.y;
         }
@@ -148,6 +131,23 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             TryAttack();
         }
         //遠ければ EnemyMove が NavMesh で追跡してくれる前提
+    }
+    private void CureStunned()
+    {
+        _isStunned = false;
+        if (_agent != null)
+        {
+            _agent.enabled = true;
+        }
+        _rb.isKinematic = true;
+        Debug.Log("スタン回復");
+        for (int i = 0; i < _renderers.Length; i++)
+        {
+            if(_renderers[i] != null)
+            {
+                _renderers[i].material = _defaultMaterial;
+            } 
+        }
     }
     public void TryAttack()
     {
