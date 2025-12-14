@@ -23,6 +23,9 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     [SerializeField] protected Material _defaultMaterial;
     [SerializeField] protected Material _damagedMaterial;
 
+    [Header("アイテムドロップ")]
+    [SerializeField] protected ItemDropData[] _itemDropDatas;
+
     private float _timeSinceLastAttack = 0.0f;
     private float _stunTimer = 0.0f;
     private float _beforePosY = 0.0f;
@@ -45,6 +48,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
 
     private NavMeshAgent _agent;
     private Renderer[] _renderers;
+
+    private ItemDropper _itemDropper;
     private void OnDisable()
     {
         if (InstanceManager != null)
@@ -70,6 +75,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             {
                 Debug.LogError("マテリアルをセットしてください。");
             }
+        }
+        if (_itemDropper == null)
+        {
+            _itemDropper = new ItemDropper();
         }
         InstanceManager = manager;
         gameObject.SetActive(true);
@@ -143,10 +152,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         Debug.Log("スタン回復");
         for (int i = 0; i < _renderers.Length; i++)
         {
-            if(_renderers[i] != null)
+            if (_renderers[i] != null)
             {
                 _renderers[i].material = _defaultMaterial;
-            } 
+            }
         }
     }
     public void TryAttack()
@@ -196,7 +205,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         }
 
         // TODO:エフェクトやスコア加算、音などの処理
-
+        for (int i = 0; i < _itemDropDatas.Length; i++)
+        {
+            _itemDropper.DropItem(_itemDropDatas[i], transform.position);
+        }
 
         OnRelease?.Invoke();
 
