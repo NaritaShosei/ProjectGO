@@ -49,7 +49,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     private NavMeshAgent _agent;
     private Renderer[] _renderers;
 
-    private ItemDropper _itemDropper;
+    private ItemDropper _itemDropper = new ItemDropper();
     private void OnDisable()
     {
         if (InstanceManager != null)
@@ -75,10 +75,6 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             {
                 Debug.LogError("マテリアルをセットしてください。");
             }
-        }
-        if (_itemDropper == null)
-        {
-            _itemDropper = new ItemDropper();
         }
         InstanceManager = manager;
         gameObject.SetActive(true);
@@ -205,7 +201,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         }
 
         // TODO:エフェクトやスコア加算、音などの処理
-        if(_itemDropDatas != null)
+        if (_itemDropDatas != null)
         {
             for (int i = 0; i < _itemDropDatas.Length; i++)
             {
