@@ -6,12 +6,12 @@ public class ItemDropper
     {
         if (itemDropData.ItemPrefab == null)
         {
-            Debug.LogWarning("ItemDropData is null. No item will be dropped.");
+            Debug.LogWarning("アイテムのプレハブが設定されていません");
             return;
         }
         // ドロップ確率に基づいてアイテムをドロップするかどうかを決定
         int randomValue = Random.Range(0, 10000);
-        if (randomValue <= itemDropData.DropChance)
+        if (randomValue < itemDropData.DropChance)
         {
             for (int i = 0; i < itemDropData.DropCount; i++)
             {

@@ -205,11 +205,13 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         }
 
         // TODO:エフェクトやスコア加算、音などの処理
-        for (int i = 0; i < _itemDropDatas.Length; i++)
+        if(_itemDropDatas != null)
         {
-            _itemDropper.DropItem(_itemDropDatas[i], transform.position);
+            for (int i = 0; i < _itemDropDatas.Length; i++)
+            {
+                _itemDropper.DropItem(_itemDropDatas[i], transform.position);
+            }
         }
-
         OnRelease?.Invoke();
 
     }
