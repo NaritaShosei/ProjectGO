@@ -1,23 +1,34 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class ItemDropper
 {
-    public void DropItem(ItemDropData itemDropData, Vector3 dropPosition)
+    public void DropItem(in ItemDropData itemDropData, Vector3 dropPositionOnGround)
     {
         if (itemDropData.ItemPrefab == null)
         {
-            Debug.LogWarning("ƒAƒCƒeƒ€‚ÌƒvƒŒƒnƒu‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+            Debug.LogWarning("ã‚¢ã‚¤ãƒ†ãƒ ã®ãƒ—ãƒ¬ãƒãƒ–ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“");
             return;
         }
-        // ƒhƒƒbƒvŠm—¦‚ÉŠî‚Ã‚¢‚ÄƒAƒCƒeƒ€‚ğƒhƒƒbƒv‚·‚é‚©‚Ç‚¤‚©‚ğŒˆ’è
+        // ãƒ‰ãƒ­ãƒƒãƒ—ç¢ºç‡ã«åŸºã¥ã„ã¦ã‚¢ã‚¤ãƒ†ãƒ ã‚’ãƒ‰ãƒ­ãƒƒãƒ—ã™ã‚‹ã‹ã©ã†ã‹ã‚’æ±ºå®š
         int randomValue = Random.Range(0, 10000);
         if (randomValue < itemDropData.DropChance)
         {
             for (int i = 0; i < itemDropData.DropCount; i++)
             {
-                // ƒAƒCƒeƒ€‚ÌƒCƒ“ƒXƒ^ƒ“ƒX‚ğ¶¬
-                GameObject itemInstance = UnityEngine.Object.Instantiate(itemDropData.ItemPrefab, dropPosition, Quaternion.identity);
-                // •K—v‚É‰‚¶‚ÄAƒAƒCƒeƒ€‚Ì‰Šú‰»ˆ—‚ğ‚±‚±‚É’Ç‰Á
+                // ã‚¢ã‚¤ãƒ†ãƒ ã®ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ç”Ÿæˆ
+                GameObject itemInstance = UnityEngine.Object.Instantiate(itemDropData.ItemPrefab);
+                // å¿…è¦ã«å¿œã˜ã¦ã€ã‚¢ã‚¤ãƒ†ãƒ ã®åˆæœŸåŒ–å‡¦ç†ã‚’ã“ã“ã«è¿½åŠ 
+                if (itemInstance.TryGetComponent<Collider>(out var collider))
+                {
+                    // ã‚¢ã‚¤ãƒ†ãƒ ãŒåœ°é¢ã«åŸ‹ã¾ã‚‰ãªã„ã‚ˆã†ã«ä½ç½®ã‚’èª¿æ•´
+                    dropPositionOnGround.y += collider.bounds.extents.y;
+                }
+                else
+                {
+                    Debug.LogWarning("ã‚¢ã‚¤ãƒ†ãƒ ã®ãƒ—ãƒ¬ãƒãƒ–ã«Colliderã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒå­˜åœ¨ã—ã¾ã›ã‚“ã€‚ä½ç½®èª¿æ•´ãŒæ­£ã—ãè¡Œã‚ã‚Œãªã„å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚");
+                }
+
+                itemInstance.transform.position = dropPositionOnGround;
             }
         }
     }
