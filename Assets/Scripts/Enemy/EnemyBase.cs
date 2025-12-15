@@ -203,9 +203,16 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         // TODO:エフェクトやスコア加算、音などの処理
         if (_itemDropDatas != null)
         {
-            for (int i = 0; i < _itemDropDatas.Length; i++)
+            if(Physics.Raycast(transform.position,Vector3.down,out var hitInfo,float.MaxValue,LayerMask.GetMask("Ground")))
             {
-                _itemDropper.DropItem(_itemDropDatas[i], transform.position);
+                for (int i = 0; i < _itemDropDatas.Length; i++)
+                {
+                    _itemDropper.DropItem(_itemDropDatas[i], hitInfo.point);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("敵の足元に地面が見つからなかったのでアイテムを生成しませんでした。\nもし足元に地面がある場合は地面のレイヤー設定を確認してください。");
             }
         }
         OnRelease?.Invoke();
