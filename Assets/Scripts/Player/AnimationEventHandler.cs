@@ -15,6 +15,7 @@ public class AnimationEventHandler : MonoBehaviour
 
     public async void OnSlowStart()
     {
+        if (_playerManager.IsModeType(PlayerModeType.Battle)) { return; }
         _slow.ChangeSlow(true);
 
         try
@@ -30,6 +31,10 @@ public class AnimationEventHandler : MonoBehaviour
             Debug.LogException(e);
         }
         _slow.ChangeSlow(false);
-        _playerManager.RemoveFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.ModeChange);
+    }
+
+    public void RemoveLocked()
+    {
+        _playerManager.RemoveFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.ModeChange | PlayerStateFlags.DodgeLocked);
     }
 }
