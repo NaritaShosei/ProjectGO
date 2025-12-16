@@ -21,7 +21,16 @@ public class Interactor : MonoBehaviour
     {
         if (_currentInteractable == null) { return; }
 
-        _currentInteractable.Interact(gameObject);
+        // TODO:一旦雑に条件設定
+        if (!FindAnyObjectByType<PlayerManager>().HasFlag(
+            PlayerStateFlags.Attacking |
+            PlayerStateFlags.Dodging |
+            PlayerStateFlags.Dead |
+            PlayerStateFlags.Charging |
+            PlayerStateFlags.ModeChange
+            ))
+
+            _currentInteractable.Interact(gameObject);
     }
 
     private void Update()
