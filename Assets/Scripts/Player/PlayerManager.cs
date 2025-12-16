@@ -220,6 +220,9 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
     {
         Debug.Log("DEAD");
         AddFlags(PlayerStateFlags.Dead | PlayerStateFlags.MoveLocked | PlayerStateFlags.DodgeLocked);
+
+        _animator.Play("Dead");
+
         OnDead?.Invoke();
     }
 
