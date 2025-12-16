@@ -714,6 +714,7 @@ MonoBehaviour:
   _slow:
     _slowSpeed: 0.04
     _slowDuration: 6.28
+    _isSlow: 0
 --- !u!114 &365390052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1087,7 +1088,7 @@ GameObject:
   - component: {fileID: 1635062588}
   - component: {fileID: 1635062587}
   - component: {fileID: 1635062586}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
