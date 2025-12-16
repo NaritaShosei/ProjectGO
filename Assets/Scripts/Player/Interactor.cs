@@ -10,10 +10,12 @@ public class Interactor : MonoBehaviour
     [Header("インタラクト可能なレイヤー")]
     [SerializeField] private LayerMask _interactableLayer;
 
+    private PlayerManager _playerManager;
     private IInteractable _currentInteractable;
 
-    public void Init(InputHandler input)
+    public void Init(PlayerManager playerManager, InputHandler input)
     {
+        _playerManager = playerManager;
         input.OnInteract += Interact;
     }
 
@@ -21,7 +23,16 @@ public class Interactor : MonoBehaviour
     {
         if (_currentInteractable == null) { return; }
 
-        _currentInteractable.Interact(gameObject);
+        // TODO:一旦雑に条件設定
+        if (!_playerManager.HasFlag(
+            PlayerStateFlags.Attacking |
+            PlayerStateFlags.Dodging |
+            PlayerStateFlags.Dead |
+            PlayerStateFlags.Charging |
+            PlayerStateFlags.ModeChange
+            ))
+
+            _currentInteractable.Interact(gameObject);
     }
 
     private void Update()

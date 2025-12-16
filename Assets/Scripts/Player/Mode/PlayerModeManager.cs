@@ -97,7 +97,7 @@ public class PlayerModeManager : MonoBehaviour
         // 新しいモード開始
         _currentMode.OnEnter();
 
-        _manager.AddFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.ModeChange);
+        _manager.AddFlags(PlayerStateFlags.MoveLocked | PlayerStateFlags.ModeChange | PlayerStateFlags.DodgeLocked);
 
         // イベント発火
         OnModeChanged?.Invoke(_currentMode);

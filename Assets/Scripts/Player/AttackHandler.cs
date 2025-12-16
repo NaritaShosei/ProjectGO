@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 public class AttackHandler : MonoBehaviour
 {
@@ -6,6 +7,39 @@ public class AttackHandler : MonoBehaviour
     [SerializeField] private Transform _playerTransform;
 
     private AttackData _currentData;
+    private AttackAreaView _view;
+    [SerializeField] private Material _material;
+    [SerializeField] private int _time = 1;
+
+    private class AttackAreaView
+    {
+        private GameObject _sphere;
+
+        public void Init(AttackData data, Vector3 position, Material material, int time)
+        {
+            _sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            _sphere.transform.position = position;
+            _sphere.transform.localScale = Vector3.one * data.Radius * 2f; // 半径 × 2
+            var renderer = _sphere.GetComponent<Renderer>();
+            renderer.material = new Material(material);
+
+            Destroy(_sphere.GetComponent<Collider>()); // 判定用じゃないなら消す
+
+            _ = Run(time);
+        }
+
+        private async UniTask Run(int time)
+        {
+            await UniTask.Delay(time);
+
+            Destroy(_sphere);
+        }
+    }
+
+    private void Awake()
+    {
+        _view = new AttackAreaView();
+    }
 
     public void SetupData(AttackData data)
     {
@@ -21,6 +55,8 @@ public class AttackHandler : MonoBehaviour
 
         // 攻撃範囲からIEnemyを継承したオブジェクトを取得し攻撃する
         var colls = Physics.OverlapSphere(_playerTransform.position + transform.forward * _currentData.Range, data.Radius);
+
+        _view.Init(data, _playerTransform.position + transform.forward * _currentData.Range, _material, _time);
 
         foreach (var coll in colls)
         {

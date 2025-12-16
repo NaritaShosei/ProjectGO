@@ -55,7 +55,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IHealth, IStamina
 
         _move.Init(this, _input, _animator, _data);
         _attacker.Init(this, _input, _animator);
-        _interactor.Init(_input);
+        _interactor.Init(this, _input);
         _modeManager.Init(this, _attacker, _input);
 
         _anim = new PlayerAnimator(_speedManager, _animator);

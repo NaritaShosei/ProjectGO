@@ -228,6 +228,10 @@ PrefabInstance:
       propertyPath: _speedManager
       value: 
       objectReference: {fileID: 365390051}
+    - target: {fileID: 9013075491222019013, guid: 6b79bb02f5d0d0b4cb8c004c7a432726, type: 3}
+      propertyPath: _time
+      value: 500
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -712,9 +716,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpeedManager
   _slow:
-    _slowSpeed: 0.04
-    _slowDuration: 6.28
-    _isSlow: 0
+    _slowSpeed: 0.5
+    _slowDuration: 0.9
 --- !u!114 &365390052
 MonoBehaviour:
   m_ObjectHideFlags: 0
