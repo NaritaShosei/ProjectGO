@@ -23,8 +23,9 @@ public class PlayerAttacker : MonoBehaviour
     [Header("チャージのデータ")]
     [SerializeField] private ChargeData _chargeData;
 
-    [Header("実際の攻撃を依頼するコンポーネント")]
+    [Header("攻撃に関連するコンポーネント")]
     [SerializeField] private AttackHandler _attackHandler;
+    [SerializeField] private GameObject _effect;
 
     [Serializable]
     private struct ChargeData
@@ -56,6 +57,8 @@ public class PlayerAttacker : MonoBehaviour
 
         _manager.OnDead += Dead;
         _manager.OnDodge += CancelAttack;
+
+        _effect.SetActive(false);
     }
 
     private void OnDestroy()
@@ -106,8 +109,12 @@ public class PlayerAttacker : MonoBehaviour
 
         Debug.Log($"弱攻撃: {attack.AttackName}");
 
+        EffectSwitch(true);
+
         // 将来的にはAnimationEventで管理したいが、一旦時間で管理
         await UniTask.Delay(TimeSpan.FromSeconds(attack.MotionDuration), false, PlayerLoopTiming.Update, token);
+
+        EffectSwitch(false);
 
         // コンボ継続可能なら次段へ
         _currentComboData = attack.NextCombo != null ? attack.NextCombo : _firstComboData;
@@ -208,7 +215,11 @@ public class PlayerAttacker : MonoBehaviour
 
         _attackHandler.SetupData(selected);
 
+        EffectSwitch(true);
+
         await SafeRun(() => PerformHeavyAttack(selected, _cts.Token));
+
+        EffectSwitch(false);
 
         CancelAndDisposeComboReset();
         ResetCombo();
@@ -267,7 +278,11 @@ public class PlayerAttacker : MonoBehaviour
 
         Debug.Log($"{_superChargedComboAttackData.AttackName}発動");
 
+        EffectSwitch(true);
+
         _ = SafeRun(() => PerformHeavyAttack(_superChargedComboAttackData, _cts.Token));
+
+        EffectSwitch(false);
 
         // 成功したら派生フラグを消す
         _manager.RemoveFlags(PlayerStateFlags.CanHeavyCombo);
@@ -334,6 +349,11 @@ public class PlayerAttacker : MonoBehaviour
         _heavyComboCts = null;
     }
 
+    private void EffectSwitch(bool visible)
+    {
+        if (_effect is not null)
+            _effect.SetActive(visible);
+    }
     #endregion
 
     #region 外部呼出し
@@ -350,6 +370,8 @@ public class PlayerAttacker : MonoBehaviour
             PlayerStateFlags.MoveLocked |
             PlayerStateFlags.DodgeLocked |
             PlayerStateFlags.Charging);
+
+        EffectSwitch(false);
 
         if (_animator != null)
         {
