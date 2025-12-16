@@ -23,6 +23,9 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
     [SerializeField] protected Material _defaultMaterial;
     [SerializeField] protected Material _damagedMaterial;
 
+    [Header("アイテムドロップ")]
+    [SerializeField] protected ItemDropData[] _itemDropDatas;
+
     private float _timeSinceLastAttack = 0.0f;
     private float _stunTimer = 0.0f;
     private float _beforePosY = 0.0f;
@@ -45,6 +48,8 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
 
     private NavMeshAgent _agent;
     private Renderer[] _renderers;
+
+    private ItemDropper _itemDropper = new ItemDropper();
     private void OnDisable()
     {
         if (InstanceManager != null)
@@ -143,10 +148,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         Debug.Log("スタン回復");
         for (int i = 0; i < _renderers.Length; i++)
         {
-            if(_renderers[i] != null)
+            if (_renderers[i] != null)
             {
                 _renderers[i].material = _defaultMaterial;
-            } 
+            }
         }
     }
     public void TryAttack()
@@ -196,8 +201,20 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         }
 
         // TODO:エフェクトやスコア加算、音などの処理
-
-
+        if (_itemDropDatas != null)
+        {
+            if(Physics.Raycast(transform.position,Vector3.down,out var hitInfo,float.MaxValue,LayerMask.GetMask("Ground")))
+            {
+                for (int i = 0; i < _itemDropDatas.Length; i++)
+                {
+                    _itemDropper.DropItem(_itemDropDatas[i], hitInfo.point);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("敵の足元に地面が見つからなかったのでアイテムを生成しませんでした。\nもし足元に地面がある場合は地面のレイヤー設定を確認してください。");
+            }
+        }
         OnRelease?.Invoke();
 
     }
