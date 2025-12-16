@@ -196,7 +196,7 @@ public class PlayerAttacker : MonoBehaviour
 
         _manager.RemoveFlags(PlayerStateFlags.Charging);
 
-        if (TryHeavyCombo()) { return; }
+        if (await TryHeavyCombo()) { return; }
 
         CancelAndDisposeCTS();
         _cts = new CancellationTokenSource();
@@ -266,7 +266,7 @@ public class PlayerAttacker : MonoBehaviour
     /// <summary>
     /// 強攻撃からのコンボ派生
     /// </summary>
-    private bool TryHeavyCombo()
+    private async UniTask<bool> TryHeavyCombo()
     {
         if (!_manager.HasFlag(PlayerStateFlags.CanHeavyCombo)) return false;
 
@@ -280,7 +280,7 @@ public class PlayerAttacker : MonoBehaviour
 
         EffectSwitch(true);
 
-        _ = SafeRun(() => PerformHeavyAttack(_superChargedComboAttackData, _cts.Token));
+        await SafeRun(() => PerformHeavyAttack(_superChargedComboAttackData, _cts.Token));
 
         EffectSwitch(false);
 
