@@ -278,7 +278,7 @@ MonoBehaviour:
   _selfTransform: {fileID: 0}
   _targetTransform: {fileID: 0}
   _targetMoveThreshold: 0.5
-  _updateInterval: 0.2
+  _updateInterval: 0
 --- !u!195 &9164782496944245235
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -321,6 +321,10 @@ MonoBehaviour:
   _attackInterval: 10
   _defaultMaterial: {fileID: 2100000, guid: 923a74497391aae4d9f0972855b9d5a7, type: 2}
   _damagedMaterial: {fileID: 2100000, guid: 1abc8ef5711ebce47948f7ac2f996d92, type: 2}
+  _itemDropDatas:
+  - ItemPrefab: {fileID: 836584889023632094, guid: 6a4f7f7f9566e234aa9643de07180aea, type: 3}
+    DropCount: 1
+    DropChance: 10000
 --- !u!114 &1299456849042352539
 MonoBehaviour:
   m_ObjectHideFlags: 0
