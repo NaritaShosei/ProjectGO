@@ -16,17 +16,16 @@ public class PlayerStateManager
         OnStateChanged?.Invoke(oldState, newState);
     }
 
-    public bool CanAttack() => CurrentState is PlayerState.Idle or PlayerState.Moving;
+    public bool CanAttack() => CurrentState is PlayerState.Idle;
     public bool CanMove() => CurrentState != PlayerState.Attacking
                           && CurrentState != PlayerState.Dodge
                           && CurrentState != PlayerState.Damaged
                           && CurrentState != PlayerState.Dead;
-    public bool CanDodge() => CurrentState is PlayerState.Idle or PlayerState.Moving;
+    public bool CanDodge() => CurrentState is PlayerState.Idle;
 }   
 public enum PlayerState
 {
     Idle,
-    Moving,
     Attacking,
     Dodge,
     Damaged,
