@@ -1,16 +1,21 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    [SerializeField] private PlayerMovement _move;
+    [SerializeField] private InputHandler _input;
+    [SerializeField] private MoveData _moveData;
+    private PlayerStateManager _playerStateManager;
+
+    private void Awake()
     {
-        
+        Init();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Init()
     {
-        
+        _playerStateManager = new PlayerStateManager();
+        _move.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(),_moveData);
     }
 }
