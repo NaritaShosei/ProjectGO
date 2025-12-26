@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
+using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -11,6 +13,8 @@ public class PlayerMovement : MonoBehaviour
         _input = input;
         _cameraManager = cameraManager;
         _moveData = data;
+
+        _input.OnDodge += OnDodge;
     }
 
     const float INPUT_THRESHOLD = 0.001f;
@@ -80,5 +84,43 @@ public class PlayerMovement : MonoBehaviour
             targetRotation,
             rotateSpeed * Time.deltaTime
         );
+    }
+
+    private async void OnDodge()
+    {
+        var vec = _input.MoveInput;
+
+        if (!_playerStateManager.CanDodge()) { return; }
+
+        _playerStateManager.ChangeState(PlayerState.Dodge);
+
+        var input = _input.MoveInput;
+        Vector3 dodgeDir;
+
+        if (input.magnitude > INPUT_THRESHOLD)
+        {
+            var camera = _cameraManager.MainCamera;
+            var right = camera.transform.right * input.x;
+            var forward = camera.transform.forward * input.y;
+            dodgeDir = (right + forward).normalized;
+        }
+        else
+        {
+            dodgeDir = transform.forward;
+        }
+
+        dodgeDir.y = 0f;
+
+        float t = 0;
+
+        while (t < _moveData.DodgeDuration)
+        {
+            _rb.linearVelocity = _moveData.DodgeSpeed * dodgeDir;
+
+            t += Time.deltaTime;
+            await UniTask.Yield(destroyCancellationToken);
+        }
+
+        _playerStateManager.ChangeState(PlayerState.Idle);
     }
 }
