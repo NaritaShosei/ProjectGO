@@ -26,11 +26,23 @@ public class PlayerMovement : MonoBehaviour
     private CameraManager _cameraManager;
     private MoveData _moveData;
 
+    #region イベント関数
+
     private void Update()
     {
         Move();
         Rotate();
     }
+
+    private void OnDestroy()
+    {
+        if (_input != null)
+        {
+            _input.OnDodge -= OnDodge;
+        }
+    }
+
+    #endregion
 
     private void Move()
     {
@@ -88,8 +100,6 @@ public class PlayerMovement : MonoBehaviour
 
     private async void OnDodge()
     {
-        var vec = _input.MoveInput;
-
         if (!_playerStateManager.CanDodge()) { return; }
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
