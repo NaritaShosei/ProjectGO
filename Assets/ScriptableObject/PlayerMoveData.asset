@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2bdec4187dfb9624ba88d878822d13e4, type: 3}
-  m_Name: ThunderGodData
-  m_EditorClassIdentifier: Assembly-CSharp::ThunderGodData
-  _staminaDecreasePerSecond: 33.39
+  m_Script: {fileID: 11500000, guid: 8c5c8a10daa056d42bd3aa7c5ca6c09a, type: 3}
+  m_Name: PlayerMoveData
+  m_EditorClassIdentifier: Assembly-CSharp::MoveData
+  _moveSpeed: 10
+  _rotateSpeed: 8.56
