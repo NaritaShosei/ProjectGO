@@ -1,4 +1,5 @@
 ﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -123,14 +124,20 @@ public class PlayerMovement : MonoBehaviour
 
         float t = 0;
 
-        while (t < _moveData.DodgeDuration)
+        try
         {
-            _rb.linearVelocity = _moveData.DodgeSpeed * dodgeDir;
+            while (t < _moveData.DodgeDuration)
+            {
+                _rb.linearVelocity = _moveData.DodgeSpeed * dodgeDir;
 
-            t += Time.deltaTime;
-            await UniTask.Yield(destroyCancellationToken);
+                t += Time.deltaTime;
+                await UniTask.Yield(destroyCancellationToken);
+            }
         }
-
+        catch (OperationCanceledException)
+        {
+            // 正常終了
+        }
         _playerStateManager.ChangeState(PlayerState.Idle);
     }
 }
