@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text;
-using UnityEditor;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackDataRepository", menuName = "GameData/AttackDataRepository")]
@@ -39,6 +37,8 @@ public class AttackDataRepository : ScriptableObject
 
         foreach (var attack in _attackDatabase)
         {
+            if (attack == null) { continue; }
+
             string key = GetCacheKey(
                 attack.Mode,
                 attack.AttackType,
