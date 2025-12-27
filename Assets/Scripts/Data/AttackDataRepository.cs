@@ -1,0 +1,61 @@
+﻿using System.Collections.Generic;
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "AttackDataRepository", menuName = "GameData/AttackDataRepository")]
+public class AttackDataRepository : ScriptableObject
+{
+
+    public AttackData_main GetAttackData(
+        CombatMode mode,
+        AttackType type,
+        int comboIndex,
+        ChargeLevel charge)
+    {
+        // 初回アクセス時に辞書登録
+        if (_attackCache == null)
+        {
+            BuildCache();
+        }
+
+        string key = GetCacheKey(mode, type, comboIndex, charge);
+
+        if (_attackCache.TryGetValue(key, out AttackData_main data))
+        {
+            return data;
+        }
+
+        return null;
+    }
+
+    [SerializeField] private List<AttackData_main> _attackDatabase;
+
+    // キャッシュ用Dictionary
+    private Dictionary<string, AttackData_main> _attackCache;
+    private void BuildCache()
+    {
+        _attackCache = new Dictionary<string, AttackData_main>();
+
+        foreach (var attack in _attackDatabase)
+        {
+            string key = GetCacheKey(
+                attack.Mode,
+                attack.AttackType,
+                attack.ComboIndex,
+                attack.RequiredCharge
+            );
+
+            _attackCache[key] = attack;
+        }
+    }
+
+    private string GetCacheKey(
+        CombatMode mode,
+        AttackType type,
+        int comboIndex,
+        ChargeLevel charge)
+    {
+        return $"{mode}_{type}_{comboIndex}_{charge}";
+    }
+}
