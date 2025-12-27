@@ -1,9 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
     public void Init(PlayerStateManager playerStateManager, InputHandler input)
     {
+        // チャージ時間を基準に降順にソート
+        _chargeThreshold.OrderByDescending(x => x.TimeThreshold);
+
         _stateManager = playerStateManager;
 
         input.OnLightAttack += PerformLightAttack;
@@ -26,7 +30,12 @@ public class PlayerAttack : MonoBehaviour
 
     // 設定
     [SerializeField] private float _comboResetTime = 1.5f;
-    [SerializeField] private float[] _heavyChargeThresholds = { 0.5f, 1.5f }; // 溜め1, 溜め2
+    [SerializeField]
+    private ChargeThreshold[] _chargeThreshold = new ChargeThreshold[]
+    {
+        new ChargeThreshold { TimeThreshold = 0.5f, Level = ChargeLevel.Level1 },
+        new ChargeThreshold { TimeThreshold = 1.5f, Level = ChargeLevel.Level2 }
+    };
 
     // 状態
     private int _currentComboIndex = 0;
@@ -153,7 +162,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private AttackData_main GetAttackData(AttackInput input)
     {
-        ChargeLevel chargeLevel = input.GetChargeLevel(_heavyChargeThresholds);
+        ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
 
         return _attackRepository.GetAttackData(
             _currentMode,
@@ -185,16 +194,31 @@ public class PlayerAttack : MonoBehaviour
     }
 }
 
+[System.Serializable]
+public struct ChargeThreshold
+{
+    public float TimeThreshold;
+    public ChargeLevel Level;
+}
+
 public struct AttackInput
 {
     public AttackType AttackType;
     public float ChargeTime;           // チャージした時間
     public bool WasChargeReleased;     // チャージが解放されたか
 
-    public ChargeLevel GetChargeLevel(float[] chargeThresholds)
+    public ChargeLevel GetChargeLevel(ChargeThreshold[] thresholds)
     {
-        if (ChargeTime >= chargeThresholds[1]) return ChargeLevel.Level2;
-        if (ChargeTime >= chargeThresholds[0]) return ChargeLevel.Level1;
+        if (thresholds == null || thresholds.Length == 0)
+            return ChargeLevel.None;
+
+        // 降順でソート済みと仮定
+        for (int i = thresholds.Length - 1; i >= 0; i--)
+        {
+            if (ChargeTime >= thresholds[i].TimeThreshold)
+                return thresholds[i].Level;
+        }
+
         return ChargeLevel.None;
     }
 }
