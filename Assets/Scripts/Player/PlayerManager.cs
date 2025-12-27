@@ -4,6 +4,7 @@ public class PlayerManager : MonoBehaviour
 {
 
     [SerializeField] private PlayerMovement _move;
+    [SerializeField] private PlayerAttack _attack;
     [SerializeField] private InputHandler _input;
     [SerializeField] private MoveData _moveData;
     private PlayerStateManager _playerStateManager;
@@ -16,6 +17,7 @@ public class PlayerManager : MonoBehaviour
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
-        _move.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(),_moveData);
+        _move.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
+        _attack.Init(_playerStateManager, _input);
     }
 }
