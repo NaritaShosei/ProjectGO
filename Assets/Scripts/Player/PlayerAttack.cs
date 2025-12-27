@@ -12,12 +12,20 @@ public class PlayerAttack : MonoBehaviour
         _input = input;
 
         _input.OnLightAttack += PerformLightAttack;
-        _input.OnLightAttack += BufferDodgeAttack;
 
         _input.OnChargeStart += StartCharge;
-        _input.OnChargeStart += BufferDodgeAttack;
-
         _input.OnChargeEnd += ReleaseCharge;
+
+        // 設定に応じて登録するイベントを変更
+        switch (_dodgeAttackConfig.DodgeAttackType)
+        {
+            case DodgeAttackType.LightAttack:
+                _input.OnLightAttack += BufferDodgeAttack;
+                break;
+            case DodgeAttackType.HeavyAttack:
+                _input.OnChargeStart += BufferDodgeAttack;
+                break;
+        }
     }
 
     /// <summary>
@@ -70,8 +78,21 @@ public class PlayerAttack : MonoBehaviour
         if (_input != null)
         {
             _input.OnLightAttack -= PerformLightAttack;
+
             _input.OnChargeStart -= StartCharge;
+
             _input.OnChargeEnd -= ReleaseCharge;
+
+            // 設定に応じて解除するイベントを変更
+            switch (_dodgeAttackConfig.DodgeAttackType)
+            {
+                case DodgeAttackType.LightAttack:
+                    _input.OnLightAttack += BufferDodgeAttack;
+                    break;
+                case DodgeAttackType.HeavyAttack:
+                    _input.OnChargeStart += BufferDodgeAttack;
+                    break;
+            }
         }
     }
 
