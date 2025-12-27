@@ -47,7 +47,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     public void ResetCombo()
     {
-        _currentComboIndex = 0;
+        _currentAttackId = -1;
     }
 
     // 依存関係
@@ -67,7 +67,7 @@ public class PlayerAttack : MonoBehaviour
     };
 
     // 状態
-    private int _currentComboIndex = 0;
+    private int _currentAttackId = -1;
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private CombatMode _currentMode = CombatMode.Warrior;
@@ -147,9 +147,6 @@ public class PlayerAttack : MonoBehaviour
         if (!CanAttack()) return;
         Debug.Log("チャージ開始");
 
-        // コンボをリセット
-        ResetCombo();
-
         _chargeStartTime = Time.time;
 
         _stateManager.ChangeState(PlayerState.Charging);
@@ -181,47 +178,59 @@ public class PlayerAttack : MonoBehaviour
     private void ExecuteAttack(AttackInput input)
     {
         // 適切な攻撃データを取得
-        AttackData_main attackData = GetAttackData(input);
+        AttackData_main attackData = GetNextAttack(input);
 
         if (attackData == null)
         {
-            Debug.LogWarning($"攻撃データが見つかりません: {input.AttackType}, コンボ{_currentComboIndex}");
+            Debug.LogWarning($"攻撃データが見つかりません: {input.AttackType}");
             return;
         }
 
+        // IDの上書き
+        _currentAttackId = attackData.AttackId;
+
         // 攻撃実行
-        bool success = _attackExecutor.Execute(attackData, input);
+        _attackExecutor.Execute(attackData, input);
 
-        if (success)
-        {
-            _lastAttackTime = Time.time;
-
-            // コンボを進める
-            if (attackData.NextComboAttackId != -1)
-            {
-                _currentComboIndex++;
-            }
-            else
-            {
-                // コンボ終端に到達
-                _currentComboIndex = 0;
-            }
-        }
+        _lastAttackTime = Time.time;
     }
 
     /// <summary>
     /// 攻撃データを取得
     /// </summary>
-    private AttackData_main GetAttackData(AttackInput input)
+    private AttackData_main GetNextAttack(AttackInput input)
     {
-        ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
+        // コンボ継続中か判定
+        bool isInComboWindow = Time.time - _lastAttackTime <= _comboResetTime;
 
-        return _attackRepository.GetAttackData(
-            _currentMode,
-            input.AttackType,
-            _currentComboIndex,
-            chargeLevel
-        );
+        if (isInComboWindow && _currentAttackId != -1)
+        {
+            // 現在の攻撃データを取得
+            var currentAttack = _attackRepository.GetAttackById(_currentAttackId);
+
+            // 次のコンボが存在するか
+            if (currentAttack != null && currentAttack.NextComboAttackId != -1)
+            {
+                var nextAttack = _attackRepository.GetAttackById(currentAttack.NextComboAttackId);
+
+                if (nextAttack != null && IsCompatibleAttack(nextAttack, input))
+                {
+                    return nextAttack;
+                }
+            }
+        }
+
+        // 新規コンボ開始
+        ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
+        return _attackRepository.GetAttackData(_currentMode, input.AttackType, 0, chargeLevel);
+    }
+
+    private bool IsCompatibleAttack(AttackData_main attack, AttackInput input)
+    {
+        // 攻撃タイプが一致するか
+        if (attack.AttackType != input.AttackType) return false;
+
+        return true;
     }
 
     /// <summary>

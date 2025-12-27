@@ -4,6 +4,17 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AttackDataRepository", menuName = "GameData/AttackDataRepository")]
 public class AttackDataRepository : ScriptableObject
 {
+    public AttackData_main GetAttackById(int attackId)
+    {
+        if (_attackCacheIDBase == null) BuildCache();
+
+        if (_attackCacheIDBase.TryGetValue(attackId, out AttackData_main data))
+        {
+            return data;
+        }
+
+        return null;
+    }
 
     public AttackData_main GetAttackData(
         CombatMode mode,
@@ -31,9 +42,12 @@ public class AttackDataRepository : ScriptableObject
 
     // キャッシュ用Dictionary
     private Dictionary<string, AttackData_main> _attackCache;
+    private Dictionary<int, AttackData_main> _attackCacheIDBase;
+
     private void BuildCache()
     {
-        _attackCache = new Dictionary<string, AttackData_main>();
+        _attackCache = new();
+        _attackCacheIDBase = new();
 
         foreach (var attack in _attackDatabase)
         {
@@ -46,6 +60,7 @@ public class AttackDataRepository : ScriptableObject
                 attack.RequiredCharge
             );
 
+            _attackCacheIDBase[attack.AttackId] = attack;
             _attackCache[key] = attack;
         }
     }
