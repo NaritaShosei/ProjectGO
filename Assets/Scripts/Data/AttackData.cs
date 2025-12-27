@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(menuName = "GameData/AttackData", fileName = "AttackData")]
 public class AttackData : ScriptableObject
 {
     [Header("基本情報")]

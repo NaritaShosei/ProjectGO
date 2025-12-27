@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b36dc6ea8ab36384faeccc609b77ee3f, type: 3}
+  m_Name: AttackDataRepository
+  m_EditorClassIdentifier: Assembly-CSharp::AttackDataRepository
+  _attackDatabase:
+  - {fileID: 11400000, guid: 36488aeff4a746946881151edbcf68c2, type: 2}
+  - {fileID: 11400000, guid: 7e09c3ed3f466e44c9a627e5afe7552d, type: 2}
+  - {fileID: 11400000, guid: 153dcfd9afcff3b45bf0886ea0162715, type: 2}
+  - {fileID: 11400000, guid: c46b75f9f60d07c479f9a75d148fbe2c, type: 2}
+  - {fileID: 11400000, guid: 51210054f9602574ea34ff5b3fd702ac, type: 2}
+  - {fileID: 11400000, guid: 84da26b3cb4937c49a3994a7e8e8c43d, type: 2}

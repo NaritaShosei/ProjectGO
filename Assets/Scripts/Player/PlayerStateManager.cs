@@ -22,11 +22,14 @@ public class PlayerStateManager
                           && CurrentState != PlayerState.Damaged
                           && CurrentState != PlayerState.Dead;
     public bool CanDodge() => CurrentState is PlayerState.Idle;
-}   
+
+    public bool IsCharging() => CurrentState is PlayerState.Charging;
+}
 public enum PlayerState
 {
     Idle,
     Attacking,
+    Charging,
     Dodge,
     Damaged,
     Dead,
