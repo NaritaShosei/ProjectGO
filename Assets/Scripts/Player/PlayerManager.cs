@@ -14,6 +14,14 @@ public class PlayerManager : MonoBehaviour
         Init();
     }
 
+    private void OnDestroy()
+    {
+        if (_move != null)
+        {
+            _move.OnEndDodge -= _attack.FinishDodge;
+        }
+    }
+
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
