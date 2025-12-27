@@ -1,10 +1,11 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public event Action OnEndDodge;
+
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         CameraManager cameraManager,
@@ -139,5 +140,7 @@ public class PlayerMovement : MonoBehaviour
             // 正常終了
         }
         _playerStateManager.ChangeState(PlayerState.Idle);
+
+        OnEndDodge?.Invoke();
     }
 }

@@ -9,10 +9,37 @@ public class PlayerAttack : MonoBehaviour
         _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
 
         _stateManager = playerStateManager;
+        _input = input;
 
-        input.OnLightAttack += PerformLightAttack;
-        input.OnChargeStart += StartCharge;
-        input.OnChargeEnd += ReleaseCharge;
+        _input.OnLightAttack += PerformLightAttack;
+
+        _input.OnChargeStart += StartCharge;
+        _input.OnChargeEnd += ReleaseCharge;
+
+        // 設定に応じて登録するイベントを変更
+        switch (_dodgeAttackConfig.DodgeAttackType)
+        {
+            case DodgeAttackType.LightAttack:
+                _input.OnLightAttack += BufferDodgeAttack;
+                break;
+            case DodgeAttackType.HeavyAttack:
+                _input.OnChargeStart += BufferDodgeAttack;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 回避終了処理
+    /// </summary>
+    public void FinishDodge()
+    {
+        // 回避攻撃が有効 & 攻撃ボタンが押されていた場合
+        if (_dodgeAttackConfig.IsEnabled && _hasBufferedDodgeAttack)
+        {
+            PerformDodgeAttack();
+        }
+
+        _hasBufferedDodgeAttack = false;
     }
 
     /// <summary>
@@ -25,8 +52,10 @@ public class PlayerAttack : MonoBehaviour
 
     // 依存関係
     private PlayerStateManager _stateManager;
+    private InputHandler _input;
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private AttackDataRepository _attackRepository;
+    [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
 
     // 設定
     [SerializeField] private float _comboResetTime = 1.5f;
@@ -42,6 +71,56 @@ public class PlayerAttack : MonoBehaviour
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private CombatMode _currentMode = CombatMode.Warrior;
+    private bool _hasBufferedDodgeAttack = false;
+
+    private void OnDestroy()
+    {
+        if (_input != null)
+        {
+            _input.OnLightAttack -= PerformLightAttack;
+
+            _input.OnChargeStart -= StartCharge;
+
+            _input.OnChargeEnd -= ReleaseCharge;
+
+            // 設定に応じて解除するイベントを変更
+            switch (_dodgeAttackConfig.DodgeAttackType)
+            {
+                case DodgeAttackType.LightAttack:
+                    _input.OnLightAttack -= BufferDodgeAttack;
+                    break;
+                case DodgeAttackType.HeavyAttack:
+                    _input.OnChargeStart -= BufferDodgeAttack;
+                    break;
+            }
+        }
+    }
+
+    private void BufferDodgeAttack()
+    {
+        // 回避中じゃなければ無視
+        if (_stateManager.CurrentState != PlayerState.Dodge) { return; }
+
+        // 回避攻撃が有効な場合のみバッファ
+        if (_dodgeAttackConfig.IsEnabled)
+        {
+            _hasBufferedDodgeAttack = true;
+        }
+    }
+
+    /// <summary>
+    /// 回避攻撃を実行
+    /// </summary>
+    private void PerformDodgeAttack()
+    {
+        if (!CanAttack()) return;
+
+        var input = _dodgeAttackConfig.CreateAttackInput();
+
+        // 回避攻撃はコンボをリセット
+        ResetCombo();
+        ExecuteAttack(input);
+    }
 
     /// <summary>
     /// 弱攻撃を実行
@@ -60,7 +139,6 @@ public class PlayerAttack : MonoBehaviour
 
         ExecuteAttack(input);
     }
-
     /// <summary>
     /// チャージ開始
     /// </summary>
@@ -69,6 +147,7 @@ public class PlayerAttack : MonoBehaviour
         if (!CanAttack()) return;
         Debug.Log("チャージ開始");
 
+        // コンボをリセット
         ResetCombo();
 
         _chargeStartTime = Time.time;
@@ -94,33 +173,6 @@ public class PlayerAttack : MonoBehaviour
 
         _stateManager.ChangeState(PlayerState.Idle);
         ExecuteAttack(input);
-    }
-
-    /// <summary>
-    /// 回避攻撃を実行
-    /// </summary>
-    private void PerformDodgeAttack()
-    {
-        if (!CanAttack()) return;
-
-        var input = new AttackInput
-        {
-            AttackType = AttackType.DodgeAttack,
-            ChargeTime = 0f,
-        };
-
-        // 回避攻撃はコンボをリセット
-        ResetCombo();
-        ExecuteAttack(input);
-    }
-
-    /// <summary>
-    /// モードを切り替え
-    /// </summary>
-    private void SwitchMode(CombatMode newMode)
-    {
-        _currentMode = newMode;
-        ResetCombo();
     }
 
     /// <summary>

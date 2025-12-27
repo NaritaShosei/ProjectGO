@@ -14,10 +14,21 @@ public class PlayerManager : MonoBehaviour
         Init();
     }
 
+    private void OnDestroy()
+    {
+        if (_move != null)
+        {
+            _move.OnEndDodge -= _attack.FinishDodge;
+        }
+    }
+
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
         _move.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
         _attack.Init(_playerStateManager, _input);
+
+        // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
+        _move.OnEndDodge += _attack.FinishDodge;
     }
 }
