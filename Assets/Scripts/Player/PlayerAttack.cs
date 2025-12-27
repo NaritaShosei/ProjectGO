@@ -213,7 +213,7 @@ public struct AttackInput
             return ChargeLevel.None;
 
         // 降順でソート済みと仮定
-        for (int i = thresholds.Length - 1; i >= 0; i--)
+        for (int i = 0; i < thresholds.Length; i++)
         {
             if (ChargeTime >= thresholds[i].TimeThreshold)
                 return thresholds[i].Level;
