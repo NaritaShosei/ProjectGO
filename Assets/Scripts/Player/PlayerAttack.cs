@@ -87,10 +87,10 @@ public class PlayerAttack : MonoBehaviour
             switch (_dodgeAttackConfig.DodgeAttackType)
             {
                 case DodgeAttackType.LightAttack:
-                    _input.OnLightAttack += BufferDodgeAttack;
+                    _input.OnLightAttack -= BufferDodgeAttack;
                     break;
                 case DodgeAttackType.HeavyAttack:
-                    _input.OnChargeStart += BufferDodgeAttack;
+                    _input.OnChargeStart -= BufferDodgeAttack;
                     break;
             }
         }
