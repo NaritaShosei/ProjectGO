@@ -12,7 +12,11 @@ public class PlayerAttack : MonoBehaviour
         _input = input;
 
         _input.OnLightAttack += PerformLightAttack;
+        _input.OnLightAttack += BufferDodgeAttack;
+
         _input.OnChargeStart += StartCharge;
+        _input.OnChargeStart += BufferDodgeAttack;
+
         _input.OnChargeEnd += ReleaseCharge;
     }
 
@@ -21,11 +25,13 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     public void FinishDodge()
     {
-        // 回避攻撃が有効 & 攻撃ボタンが押されている場合
-        if (_dodgeAttackConfig.IsEnabled && IsAttackButtonHeld())
+        // 回避攻撃が有効 & 攻撃ボタンが押されていた場合
+        if (_dodgeAttackConfig.IsEnabled && _hasBufferedDodgeAttack)
         {
             PerformDodgeAttack();
         }
+
+        _hasBufferedDodgeAttack = false;
     }
 
     /// <summary>
@@ -57,6 +63,7 @@ public class PlayerAttack : MonoBehaviour
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private CombatMode _currentMode = CombatMode.Warrior;
+    private bool _hasBufferedDodgeAttack = false;
 
     private void OnDestroy()
     {
@@ -65,6 +72,18 @@ public class PlayerAttack : MonoBehaviour
             _input.OnLightAttack -= PerformLightAttack;
             _input.OnChargeStart -= StartCharge;
             _input.OnChargeEnd -= ReleaseCharge;
+        }
+    }
+
+    private void BufferDodgeAttack()
+    {
+        // 回避中じゃなければ無視
+        if (_stateManager.CurrentState != PlayerState.Dodge) { return; }
+
+        // 回避攻撃が有効な場合のみバッファ
+        if (_dodgeAttackConfig.IsEnabled)
+        {
+            _hasBufferedDodgeAttack = true;
         }
     }
 
@@ -80,15 +99,6 @@ public class PlayerAttack : MonoBehaviour
         // 回避攻撃はコンボをリセット
         ResetCombo();
         ExecuteAttack(input);
-    }
-
-    /// <summary>
-    /// 攻撃ボタンが押されているかチェック
-    /// </summary>
-    private bool IsAttackButtonHeld()
-    {
-        // InputSystemで押下状態を取得
-        return _input.IsLightAttackHeld || _input.IsChargeAttackHeld;
     }
 
     /// <summary>

@@ -7,10 +7,6 @@ public class InputHandler : MonoBehaviour
 
     public Vector2 MoveInput { get; private set; }
 
-    // ボタン押下状態 
-    public bool IsLightAttackHeld { get; private set; }
-    public bool IsChargeAttackHeld { get; private set; }
-
     // イベント
     public event Action OnDodge;
     public event Action OnLightAttack;
@@ -30,22 +26,12 @@ public class InputHandler : MonoBehaviour
         // 回避
         _input.Player.Dodge.started += _ => OnDodge?.Invoke();
 
-        // 弱攻撃 (押下状態も記録)
-        _input.Player.LightAttack.started += _ => IsLightAttackHeld = true;
+        // 弱攻撃 
         _input.Player.LightAttack.performed += _ => OnLightAttack?.Invoke();
-        _input.Player.LightAttack.canceled += _ => IsLightAttackHeld = false;
 
-        // 強攻撃 (押下状態も記録)
-        _input.Player.ChargeAttack.started += ctx =>
-        {
-            IsChargeAttackHeld = true;
-            OnChargeStart?.Invoke();
-        };
-        _input.Player.ChargeAttack.canceled += ctx =>
-        {
-            IsChargeAttackHeld = false;
-            OnChargeEnd?.Invoke();
-        };
+        // 強攻撃
+        _input.Player.ChargeAttack.started += _ => OnChargeStart?.Invoke();
+        _input.Player.ChargeAttack.canceled += _ => OnChargeEnd?.Invoke();
 
         // インタラクト
         _input.Player.Interact.started += _ => OnInteract?.Invoke();
