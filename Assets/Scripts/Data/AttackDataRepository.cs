@@ -8,7 +8,12 @@ public class AttackDataRepository : ScriptableObject
     {
         if (_attackCacheIDBase == null) BuildCache();
 
-        return _attackCacheIDBase[attackId];
+        if (_attackCacheIDBase.TryGetValue(attackId, out AttackData_main data))
+        {
+            return data;
+        }
+
+        return null;
     }
 
     public AttackData_main GetAttackData(
