@@ -34,7 +34,7 @@ public class AttackData_main : ScriptableObject
 
     [SerializeField] private float _comboWindowStart;     // コンボ受付開始時間
     [SerializeField] private float _comboWindowEnd;       // コンボ受付終了時間
-    [SerializeField] private int _nextComboAttackId;      // 次のコンボ攻撃ID
+    [SerializeField] private int _nextComboAttackId = -1;      // 次のコンボ攻撃ID
 }
 
 // 攻撃の段階（チャージレベル）
