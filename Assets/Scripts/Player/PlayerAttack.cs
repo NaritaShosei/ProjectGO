@@ -213,7 +213,7 @@ public class PlayerAttack : MonoBehaviour
             {
                 var nextAttack = _attackRepository.GetAttackById(currentAttack.NextComboAttackId);
 
-                if (nextAttack != null)
+                if (nextAttack != null && IsCompatibleAttack(nextAttack, input))
                 {
                     return nextAttack;
                 }
@@ -223,6 +223,14 @@ public class PlayerAttack : MonoBehaviour
         // 新規コンボ開始
         ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
         return _attackRepository.GetAttackData(_currentMode, input.AttackType, 0, chargeLevel);
+    }
+
+    private bool IsCompatibleAttack(AttackData_main attack, AttackInput input)
+    {
+        // 攻撃タイプが一致するか
+        if (attack.AttackType != input.AttackType) return false;
+
+        return true;
     }
 
     /// <summary>
