@@ -6,7 +6,7 @@ public class PlayerAttack : MonoBehaviour
     public void Init(PlayerStateManager playerStateManager, InputHandler input)
     {
         // チャージ時間を基準に降順にソート
-        _chargeThreshold.OrderByDescending(x => x.TimeThreshold);
+        _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
 
         _stateManager = playerStateManager;
 
