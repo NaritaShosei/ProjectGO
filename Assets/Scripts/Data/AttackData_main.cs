@@ -40,17 +40,23 @@ public class AttackData_main : ScriptableObject
 // 攻撃の段階（チャージレベル）
 public enum ChargeLevel
 {
-    None = 0,      // 溜めなし
-    Level1 = 1,    // 溜め1
-    Level2 = 2     // 溜め2
+    [InspectorName("溜めなし")]
+    None = 0,
+    [InspectorName("溜め1")]
+    Level1 = 1,
+    [InspectorName("溜め2")]
+    Level2 = 2
 }
 
 // 攻撃タイプ
 public enum AttackType
 {
-    LightAttack,        // R1弱攻撃
-    HeavyAttack,        // R2強攻撃
-    DodgeAttack         // 回避攻撃
+    [InspectorName("弱攻撃")]
+    LightAttack,
+    [InspectorName("強攻撃")]
+    HeavyAttack,
+    [InspectorName("回避攻撃")]
+    DodgeAttack
 }
 
 // モード
