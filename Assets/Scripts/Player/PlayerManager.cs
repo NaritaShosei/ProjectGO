@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerManager : MonoBehaviour, IPlayer
+public class PlayerManager : MonoBehaviour, IPlayer, IStamina
 {
     public Transform GetTargetCenter()
     {
@@ -19,6 +19,10 @@ public class PlayerManager : MonoBehaviour, IPlayer
         if (_playerStateManager.IsDead()) { return; }
 
         _playerStats.TakeDamage(damage);
+    }
+    public bool TryUseStamina(float amount)
+    {
+        return _playerStats.UseStamina(amount);
     }
 
     [SerializeField] private PlayerMovement _move;
@@ -56,7 +60,13 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
         _playerStats.OnDead += OnPlayerDead;
 
-        _move?.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
+        _move?.Init(
+            _playerStateManager,
+            _input,
+            ServiceLocator.Get<CameraManager>(),
+            _moveData,
+            this);
+
         // キャラクターデータを作成していないため、仮の数値を注入
         _attackExecutor?.Init(100);
         _attack?.Init(_playerStateManager, _input, _attackExecutor);
