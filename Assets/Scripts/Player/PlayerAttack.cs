@@ -3,13 +3,14 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public void Init(PlayerStateManager playerStateManager, InputHandler input)
+    public void Init(PlayerStateManager playerStateManager, InputHandler input,AttackExecutor executor)
     {
         // チャージ時間を基準に降順にソート
         _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
 
         _stateManager = playerStateManager;
         _input = input;
+        _attackExecutor = executor;
 
         _input.OnLightAttack += PerformLightAttack;
 
@@ -53,7 +54,7 @@ public class PlayerAttack : MonoBehaviour
     // 依存関係
     private PlayerStateManager _stateManager;
     private InputHandler _input;
-    [SerializeField] private AttackExecutor _attackExecutor;
+    private AttackExecutor _attackExecutor;
     [SerializeField] private AttackDataRepository _attackRepository;
     [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
 
