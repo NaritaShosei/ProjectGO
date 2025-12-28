@@ -4,6 +4,8 @@ using UnityEngine;
 public class PlayerStats
 {
     public event Action OnDead;
+    public event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnStaminaChanged;
 
     public PlayerStats(StatsData data)
     {
@@ -18,6 +20,8 @@ public class PlayerStats
     {
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
 
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+
         if (_currentHealth <= 0)
         {
             OnDead?.Invoke();
@@ -27,6 +31,8 @@ public class PlayerStats
     public void Heal(float amount)
     {
         _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
+
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
     public bool UseStamina(float amount)
@@ -37,6 +43,8 @@ public class PlayerStats
         }
 
         _currentStamina = Mathf.Max(0, _currentStamina - amount);
+
+        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
         return true;
     }
 
@@ -44,6 +52,8 @@ public class PlayerStats
     {
         float regenAmountThisFrame = regenPerSecond * Time.deltaTime;
         _currentStamina = Mathf.Min(_maxStamina, _currentStamina + regenAmountThisFrame);
+
+        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
     }
 
     private float _maxHealth;
