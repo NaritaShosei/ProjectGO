@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
     public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) { return; }
-
+        // TODO:被弾ダメージ計算を考慮する
         _playerStats.TakeDamage(damage);
     }
     public bool TryUseStamina(float amount)

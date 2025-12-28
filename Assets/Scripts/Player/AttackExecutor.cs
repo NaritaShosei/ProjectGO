@@ -13,7 +13,7 @@ public class AttackExecutor : MonoBehaviour
     public void Execute(AttackData_main data, AttackInput input)
     {
         _lastAttackData = data;
-
+        // TODO:クリティカルがない
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
 
