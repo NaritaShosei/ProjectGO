@@ -9,11 +9,15 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     public void Healing(float amount)
     {
+        if (_playerStateManager.IsDead()) { return; }
+
         _playerStats.Heal(amount);
     }
 
     public void TakeDamage(float damage)
     {
+        if (_playerStateManager.IsDead()) { return; }
+
         _playerStats.TakeDamage(damage);
     }
 
@@ -34,6 +38,11 @@ public class PlayerManager : MonoBehaviour, IPlayer
 
     private void OnDestroy()
     {
+        if (_playerStats != null)
+        {
+            _playerStats.OnDead -= OnPlayerDead;
+        }
+
         if (_move != null)
         {
             _move.OnEndDodge -= _attack.FinishDodge;
@@ -43,7 +52,9 @@ public class PlayerManager : MonoBehaviour, IPlayer
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
-        _playerStats = new PlayerStats(_statData, _playerStateManager);
+        _playerStats = new PlayerStats(_statData);
+
+        _playerStats.OnDead += OnPlayerDead;
 
         _move?.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
         // キャラクターデータを作成していないため、仮の数値を注入
@@ -55,5 +66,9 @@ public class PlayerManager : MonoBehaviour, IPlayer
         {
             _move.OnEndDodge += _attack.FinishDodge;
         }
+    }
+    private void OnPlayerDead()
+    {
+        _playerStateManager.ChangeState(PlayerState.Dead);
     }
 }
