@@ -1004,7 +1004,8 @@ MonoBehaviour:
   _input: {fileID: 1298887707}
   _attackExecutor: {fileID: 1298887713}
   _moveData: {fileID: 11400000, guid: f10a1004f7e70b543b0e1fca85473f85, type: 2}
-  _statData: {fileID: 11400000, guid: 5d5c70d4e0afdc443bd990fc4aabdc40, type: 2}
+  _playerData: {fileID: 11400000, guid: 862fa5b289065334e96cdbce15ecf7f3, type: 2}
+  _targetCenter: {fileID: 1298887711}
 --- !u!4 &1298887711
 Transform:
   m_ObjectHideFlags: 0
