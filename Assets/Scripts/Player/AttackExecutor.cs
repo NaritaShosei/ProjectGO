@@ -23,7 +23,7 @@ public class AttackExecutor : MonoBehaviour
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                enemy.AddDamage(_attackPower * data.DamageMultiplier);
+                enemy.TakeDamage(_attackPower * data.DamageMultiplier);
             }
         }
     }

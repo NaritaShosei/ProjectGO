@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
-public interface ICharacter 
+public interface ICharacter : IHealth
 {
-    public void AddDamage(float damage);
     public Transform GetTargetCenter();
 }
