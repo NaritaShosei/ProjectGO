@@ -51,9 +51,16 @@ public class PlayerStats
     public void RegenerateStamina(float regenPerSecond)
     {
         float regenAmountThisFrame = regenPerSecond * Time.deltaTime;
+        float previousStamina = _currentStamina;
         _currentStamina = Mathf.Min(_maxStamina, _currentStamina + regenAmountThisFrame);
 
-        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
+        // float 同士をほぼ同じか比較
+        // 差が大きければ回復したとみなし、イベント発火
+        if (!Mathf.Approximately(previousStamina, _currentStamina))
+        {
+            OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
+        }
+
     }
 
     private float _maxHealth;
