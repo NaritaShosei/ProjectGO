@@ -7,6 +7,9 @@ public class AttackExecutor : MonoBehaviour
         _attackPower = power;
     }
 
+    /// <summary>
+    /// 与えられたデータを基に攻撃
+    /// </summary>
     public void Execute(AttackData_main data, AttackInput input)
     {
         _lastAttackData = data;
