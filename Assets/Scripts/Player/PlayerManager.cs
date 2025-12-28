@@ -32,6 +32,9 @@ public class PlayerManager : MonoBehaviour
         _attack?.Init(_playerStateManager, _input, _attackExecutor);
 
         // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
-        _move.OnEndDodge += _attack.FinishDodge;
+        if (_move != null && _attack != null)
+        {
+            _move.OnEndDodge += _attack.FinishDodge;
+        }
     }
 }
