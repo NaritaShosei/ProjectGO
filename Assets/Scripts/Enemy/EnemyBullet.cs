@@ -27,7 +27,7 @@ public class EnemyBullet : MonoBehaviour, IPoolable, ISpeedChange
     {
         if (other.TryGetComponent<IPlayer>(out var player))
         {
-            player.AddDamage(_attackData.Power);
+            player.TakeDamage(_attackData.Power);
             Debug.Log($"Bullet hit {player} for {_attackData.Power} damage.");
             ReturnToPool();
         }

@@ -9,7 +9,7 @@ public class Goblin : EnemyBase
         {
             if (hit.TryGetComponent<IPlayer>(out var player))
             {
-                player.AddDamage(AttackData.Power);
+                player.TakeDamage(AttackData.Power);
                 Debug.Log($"{nameof(gameObject)}がプレイヤーに{AttackData.Power}ダメージ！");
             }
         }

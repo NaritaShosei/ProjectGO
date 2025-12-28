@@ -28,9 +28,9 @@ public class AttackData_main : ScriptableObject
     [SerializeField] private int _comboIndex;              // コンボの何段目か（0始まり）
     [SerializeField] private ChargeLevel _requiredCharge;  // 必要なチャージレベル
 
-    [SerializeField] private float _damageMultiplier;
-    [SerializeField] private float _attackRange;
-    [SerializeField] private float _attackRadius;
+    [SerializeField] private float _damageMultiplier = 1;
+    [SerializeField] private float _attackRange = 1;
+    [SerializeField] private float _attackRadius = 1;
     [SerializeField] private string _animationName;
     [SerializeField] private float _animationDuration;
 

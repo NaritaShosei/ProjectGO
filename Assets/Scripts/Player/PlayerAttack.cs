@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using Cysharp.Threading.Tasks;
+using System;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public void Init(PlayerStateManager playerStateManager, InputHandler input,AttackExecutor executor)
+    public void Init(PlayerStateManager playerStateManager, InputHandler input, AttackExecutor executor)
     {
         // チャージ時間を基準に降順にソート
         _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
@@ -41,6 +43,14 @@ public class PlayerAttack : MonoBehaviour
         }
 
         _hasBufferedDodgeAttack = false;
+    }
+
+    /// <summary>
+    /// アニメーションイベントで呼ぶ想定の攻撃終了関数
+    /// </summary>
+    public void FinishAttack()
+    {
+        _stateManager.ChangeState(PlayerState.Idle);
     }
 
     /// <summary>
@@ -187,6 +197,8 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        _stateManager.ChangeState(PlayerState.Attacking);
+
         // IDの上書き
         _currentAttackId = attackData.AttackId;
 
@@ -194,6 +206,16 @@ public class PlayerAttack : MonoBehaviour
         _attackExecutor.Execute(attackData, input);
 
         _lastAttackTime = Time.time;
+
+        // デバッグ用
+        // TODO:アニメーションが付いたら消す
+        FinishAttack(attackData);
+    }
+
+    private async void FinishAttack(AttackData_main data)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(data.AnimationDuration), false, PlayerLoopTiming.Update, destroyCancellationToken);
+        FinishAttack();
     }
 
     /// <summary>

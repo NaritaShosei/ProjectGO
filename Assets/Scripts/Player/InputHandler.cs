@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class InputHandler : MonoBehaviour
 {
-    private PlayerInput _input;
-
     public Vector2 MoveInput { get; private set; }
 
     // イベント
@@ -14,6 +12,8 @@ public class InputHandler : MonoBehaviour
     public event Action OnChargeEnd;
     public event Action OnInteract;
     public event Action OnModeChange;
+
+    private PlayerInput _input;
 
     private void OnEnable()
     {

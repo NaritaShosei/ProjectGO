@@ -4,6 +4,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AttackDataRepository", menuName = "GameData/AttackDataRepository")]
 public class AttackDataRepository : ScriptableObject
 {
+    /// <summary>
+    /// IDを基に攻撃データを検索
+    /// </summary>
     public AttackData_main GetAttackById(int attackId)
     {
         if (_attackCacheIDBase == null) BuildCache();
@@ -16,6 +19,9 @@ public class AttackDataRepository : ScriptableObject
         return null;
     }
 
+    /// <summary>
+    /// 与えられた攻撃の内容を基に一致する攻撃を検索
+    /// </summary>
     public AttackData_main GetAttackData(
         CombatMode mode,
         AttackType type,

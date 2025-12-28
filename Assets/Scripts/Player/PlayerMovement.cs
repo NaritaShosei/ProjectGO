@@ -9,12 +9,14 @@ public class PlayerMovement : MonoBehaviour
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         CameraManager cameraManager,
-        MoveData data)
+        MoveData data,
+        IStamina stamina)
     {
         _playerStateManager = playerStateManager;
         _input = input;
         _cameraManager = cameraManager;
         _moveData = data;
+        _stamina = stamina;
 
         _input.OnDodge += OnDodge;
     }
@@ -27,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private InputHandler _input;
     private CameraManager _cameraManager;
     private MoveData _moveData;
+    private IStamina _stamina;
 
     #region イベント関数
 
@@ -103,6 +106,11 @@ public class PlayerMovement : MonoBehaviour
     private async void OnDodge()
     {
         if (!_playerStateManager.CanDodge()) { return; }
+
+        if (!_stamina.TryUseStamina(_moveData.DodgeStaminaCost))
+        {
+            return; // スタミナ不足で回避不可
+        }
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
 

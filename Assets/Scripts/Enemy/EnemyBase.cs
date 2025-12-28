@@ -240,7 +240,7 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
         _beforePosY = transform.position.y;
     }
     // ダメージを受ける時に呼ぶ
-    public void AddDamage(float amount)
+    public void TakeDamage(float amount)
     {
         if (_isDead) return;
         if (amount <= 0f) return;
@@ -273,5 +273,10 @@ public class EnemyBase : MonoBehaviour, IPoolable, IEnemy, ISpeedChange
             _move.SetNavMeshData(CharacterData.MoveSpeed * scale);
         }
         TimeScale = scale;
+    }
+
+    public void Healing(float amount)
+    {
+        throw new NotImplementedException();
     }
 }
