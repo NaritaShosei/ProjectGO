@@ -105,12 +105,12 @@ public class PlayerMovement : MonoBehaviour
 
     private async void OnDodge()
     {
+        if (!_playerStateManager.CanDodge()) { return; }
+
         if (!_stamina.TryUseStamina(_moveData.DodgeStaminaCost))
         {
             return; // スタミナ不足で回避不可
         }
-
-        if (!_playerStateManager.CanDodge()) { return; }
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
 

@@ -188,8 +188,6 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ExecuteAttack(AttackInput input)
     {
-        _stateManager.ChangeState(PlayerState.Attacking);
-
         // 適切な攻撃データを取得
         AttackData_main attackData = GetNextAttack(input);
 
@@ -198,6 +196,8 @@ public class PlayerAttack : MonoBehaviour
             Debug.LogWarning($"攻撃データが見つかりません: {input.AttackType}");
             return;
         }
+
+        _stateManager.ChangeState(PlayerState.Attacking);
 
         // IDの上書き
         _currentAttackId = attackData.AttackId;
@@ -214,7 +214,7 @@ public class PlayerAttack : MonoBehaviour
 
     private async void FinishAttack(AttackData_main data)
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(data.AnimationDuration));
+        await UniTask.Delay(TimeSpan.FromSeconds(data.AnimationDuration), false, PlayerLoopTiming.Update, destroyCancellationToken);
         FinishAttack();
     }
 
