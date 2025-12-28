@@ -30,7 +30,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
     [SerializeField] private InputHandler _input;
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private MoveData _moveData;
-    [SerializeField] private StatsData _statData;
+    [SerializeField] private PlayerData _playerData;
     [SerializeField] private Transform _targetCenter;
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
@@ -38,6 +38,11 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
     private void Awake()
     {
         Init();
+    }
+
+    private void Update()
+    {
+        RegenerateStamina();
     }
 
     private void OnDestroy()
@@ -56,7 +61,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
-        _playerStats = new PlayerStats(_statData);
+        _playerStats = new PlayerStats(_playerData.Stats);
 
         _playerStats.OnDead += OnPlayerDead;
 
@@ -67,8 +72,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
             _moveData,
             this);
 
-        // キャラクターデータを作成していないため、仮の数値を注入
-        _attackExecutor?.Init(100);
+        _attackExecutor?.Init(_playerData.AttackPower);
         _attack?.Init(_playerStateManager, _input, _attackExecutor);
 
         // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
@@ -77,6 +81,12 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
             _move.OnEndDodge += _attack.FinishDodge;
         }
     }
+
+    private void RegenerateStamina()
+    {
+        _playerStats.RegenerateStamina(_playerData.StaminaRegenPerSecond);
+    }
+
     private void OnPlayerDead()
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
