@@ -25,6 +25,11 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
         return _playerStats.UseStamina(amount);
     }
 
+    public float GetDodgeStaminaCost()
+    {
+        return _playerData.DodgeStaminaCost;
+    }
+
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
     [SerializeField] private InputHandler _input;

@@ -107,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanDodge()) { return; }
 
-        if (!_stamina.TryUseStamina(_moveData.DodgeStaminaCost))
+        if (!_stamina.TryUseStamina(_stamina.GetDodgeStaminaCost()))
         {
             return; // スタミナ不足で回避不可
         }
