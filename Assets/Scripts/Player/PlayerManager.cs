@@ -1,7 +1,21 @@
 ﻿using UnityEngine;
 
-public class PlayerManager : MonoBehaviour
+public class PlayerManager : MonoBehaviour, IPlayer
 {
+    public Transform GetTargetCenter()
+    {
+        return _targetCenter;
+    }
+
+    public void Healing(float amount)
+    {
+        _playerStats.Heal(amount);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        _playerStats.TakeDamage(damage);
+    }
 
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
@@ -9,6 +23,7 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private MoveData _moveData;
     [SerializeField] private StatsData _statData;
+    [SerializeField] private Transform _targetCenter;
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
 
