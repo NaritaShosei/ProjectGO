@@ -27,6 +27,7 @@ public class PlayerManager : MonoBehaviour
     {
         _playerStateManager = new PlayerStateManager();
         _move.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
+        // キャラクターデータを作成していないため、仮の数値を注入
         _attackExecutor.Init(100);
         _attack.Init(_playerStateManager, _input, _attackExecutor);
 
