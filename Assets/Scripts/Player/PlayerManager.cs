@@ -8,7 +8,9 @@ public class PlayerManager : MonoBehaviour
     [SerializeField] private InputHandler _input;
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private MoveData _moveData;
+    [SerializeField] private StatsData _statData;
     private PlayerStateManager _playerStateManager;
+    private PlayerStats _playerStats;
 
     private void Awake()
     {
@@ -26,6 +28,8 @@ public class PlayerManager : MonoBehaviour
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
+        _playerStats = new PlayerStats(_statData, _playerStateManager);
+
         _move?.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
         // キャラクターデータを作成していないため、仮の数値を注入
         _attackExecutor?.Init(100);
