@@ -26,10 +26,10 @@ public class PlayerManager : MonoBehaviour
     private void Init()
     {
         _playerStateManager = new PlayerStateManager();
-        _move.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
+        _move?.Init(_playerStateManager, _input, ServiceLocator.Get<CameraManager>(), _moveData);
         // キャラクターデータを作成していないため、仮の数値を注入
-        _attackExecutor.Init(100);
-        _attack.Init(_playerStateManager, _input, _attackExecutor);
+        _attackExecutor?.Init(100);
+        _attack?.Init(_playerStateManager, _input, _attackExecutor);
 
         // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
         _move.OnEndDodge += _attack.FinishDodge;
