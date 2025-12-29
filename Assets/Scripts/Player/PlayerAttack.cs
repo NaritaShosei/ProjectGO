@@ -102,6 +102,10 @@ public class PlayerAttack : MonoBehaviour
 
             _input.OnChargeEnd -= ReleaseCharge;
 
+            _input.OnModeChange -= ChangeMode;
+
+            _modeController.OnModeChanged -= OnModeChanged;
+
             // 設定に応じて解除するイベントを変更
             switch (_dodgeAttackConfig.DodgeAttackType)
             {
