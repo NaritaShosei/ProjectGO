@@ -211,7 +211,7 @@ public class PlayerAttack : MonoBehaviour
         _currentAttackId = attackData.AttackId;
 
         // 攻撃実行
-        _attackExecutor.Execute(attackData, input, _modeController.ModeData);
+        _attackExecutor.Execute(attackData, input, _modeController);
 
         _lastAttackTime = Time.time;
 
