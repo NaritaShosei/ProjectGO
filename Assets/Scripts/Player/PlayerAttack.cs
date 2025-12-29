@@ -5,7 +5,10 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public void Init(PlayerStateManager playerStateManager, InputHandler input, AttackExecutor executor)
+    public void Init(PlayerStateManager playerStateManager,
+        InputHandler input,
+        AttackExecutor executor,
+                IModeController modeController)
     {
         // チャージ時間を基準に降順にソート
         _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
@@ -13,11 +16,16 @@ public class PlayerAttack : MonoBehaviour
         _stateManager = playerStateManager;
         _input = input;
         _attackExecutor = executor;
+        _modeController = modeController;
 
         _input.OnLightAttack += PerformLightAttack;
 
         _input.OnChargeStart += StartCharge;
         _input.OnChargeEnd += ReleaseCharge;
+
+        _input.OnModeChange += ChangeMode;
+
+        _modeController.OnModeChanged += OnModeChanged;
 
         // 設定に応じて登録するイベントを変更
         switch (_dodgeAttackConfig.DodgeAttackType)
@@ -65,6 +73,7 @@ public class PlayerAttack : MonoBehaviour
     private PlayerStateManager _stateManager;
     private InputHandler _input;
     private AttackExecutor _attackExecutor;
+    private IModeController _modeController;
     [SerializeField] private AttackDataRepository _attackRepository;
     [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
 
@@ -81,11 +90,12 @@ public class PlayerAttack : MonoBehaviour
     private int _currentAttackId = -1;
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
-    private CombatMode _currentMode = CombatMode.Warrior;
     private bool _hasBufferedDodgeAttack = false;
 
     private void OnDestroy()
     {
+        _modeController.OnModeChanged -= OnModeChanged;
+
         if (_input != null)
         {
             _input.OnLightAttack -= PerformLightAttack;
@@ -93,6 +103,9 @@ public class PlayerAttack : MonoBehaviour
             _input.OnChargeStart -= StartCharge;
 
             _input.OnChargeEnd -= ReleaseCharge;
+
+            _input.OnModeChange -= ChangeMode;
+
 
             // 設定に応じて解除するイベントを変更
             switch (_dodgeAttackConfig.DodgeAttackType)
@@ -203,7 +216,7 @@ public class PlayerAttack : MonoBehaviour
         _currentAttackId = attackData.AttackId;
 
         // 攻撃実行
-        _attackExecutor.Execute(attackData, input);
+        _attackExecutor.Execute(attackData, input, _modeController.ModeData);
 
         _lastAttackTime = Time.time;
 
@@ -245,7 +258,7 @@ public class PlayerAttack : MonoBehaviour
 
         // 新規コンボ開始
         ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
-        return _attackRepository.GetAttackData(_currentMode, input.AttackType, 0, chargeLevel);
+        return _attackRepository.GetAttackData(_modeController.CurrentMode, input.AttackType, 0, chargeLevel);
     }
 
     private bool IsCompatibleAttack(AttackData_main attack, AttackInput input)
@@ -276,9 +289,28 @@ public class PlayerAttack : MonoBehaviour
             ResetCombo();
         }
     }
+
+    private void ChangeMode()
+    {
+        if (!_stateManager.CanModeChange()) { return; }
+
+        var newMode = _modeController.CurrentMode == PlayerMode.Warrior
+            ? PlayerMode.Thunder
+            : PlayerMode.Warrior;
+
+        _modeController.SwitchMode(newMode);
+    }
+
+    private void OnModeChanged(PlayerMode newMode)
+    {
+        // モード変更時の処理(エフェクト、SE再生など)
+        Debug.Log($"モード変更: {newMode}");
+
+        ResetCombo();
+    }
 }
 
-[System.Serializable]
+[Serializable]
 public struct ChargeThreshold
 {
     public float TimeThreshold;

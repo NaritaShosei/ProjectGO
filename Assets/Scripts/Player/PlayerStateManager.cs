@@ -26,6 +26,8 @@ public class PlayerStateManager
     public bool IsCharging() => CurrentState is PlayerState.Charging;
 
     public bool IsDead() => CurrentState is PlayerState.Dead;
+
+    public bool CanModeChange() => CurrentState is PlayerState.Idle;
 }
 public enum PlayerState
 {

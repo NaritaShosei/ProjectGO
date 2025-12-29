@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerManager : MonoBehaviour, IPlayer, IStamina
+public class Player : MonoBehaviour, IPlayer, IStamina
 {
     public Transform GetTargetCenter()
     {
@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
     public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) { return; }
-
+        // TODO:被弾ダメージ計算を考慮する
         _playerStats.TakeDamage(damage);
     }
     public bool TryUseStamina(float amount)
@@ -25,10 +25,16 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
         return _playerStats.UseStamina(amount);
     }
 
+    public float GetDodgeStaminaCost()
+    {
+        return _playerData.DodgeStaminaCost;
+    }
+
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
     [SerializeField] private InputHandler _input;
     [SerializeField] private AttackExecutor _attackExecutor;
+    [SerializeField] private PlayerModeController _modeController;
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private Transform _targetCenter;
@@ -70,10 +76,11 @@ public class PlayerManager : MonoBehaviour, IPlayer, IStamina
             _input,
             ServiceLocator.Get<CameraManager>(),
             _moveData,
-            this);
+            this,
+            _modeController);
 
         _attackExecutor?.Init(_playerData.AttackPower);
-        _attack?.Init(_playerStateManager, _input, _attackExecutor);
+        _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
 
         // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
         if (_move != null && _attack != null)

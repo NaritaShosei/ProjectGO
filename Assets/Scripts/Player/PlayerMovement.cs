@@ -10,13 +10,15 @@ public class PlayerMovement : MonoBehaviour
         InputHandler input,
         CameraManager cameraManager,
         MoveData data,
-        IStamina stamina)
+        IStamina stamina,
+        IModeController modeController)
     {
         _playerStateManager = playerStateManager;
         _input = input;
         _cameraManager = cameraManager;
         _moveData = data;
         _stamina = stamina;
+        _modeController = modeController;
 
         _input.OnDodge += OnDodge;
     }
@@ -30,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     private CameraManager _cameraManager;
     private MoveData _moveData;
     private IStamina _stamina;
+    private IModeController _modeController;
 
     #region イベント関数
 
@@ -70,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
         var moveDir = (right + forward).normalized;
         moveDir.y = 0;
 
-        var speed = _moveData.MoveSpeed * inputMag;
+        var speed = _modeController.ModeData.MoveSpeed * inputMag;
 
         _rb.linearVelocity = moveDir * speed;
     }
@@ -107,7 +110,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanDodge()) { return; }
 
-        if (!_stamina.TryUseStamina(_moveData.DodgeStaminaCost))
+        if (!_stamina.TryUseStamina(_stamina.GetDodgeStaminaCost()))
         {
             return; // スタミナ不足で回避不可
         }

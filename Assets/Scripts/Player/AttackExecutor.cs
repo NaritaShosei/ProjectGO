@@ -10,10 +10,10 @@ public class AttackExecutor : MonoBehaviour
     /// <summary>
     /// 与えられたデータを基に攻撃
     /// </summary>
-    public void Execute(AttackData_main data, AttackInput input)
+    public void Execute(AttackData_main data, AttackInput input, ModeData modeData)
     {
         _lastAttackData = data;
-
+        // TODO:クリティカルがない
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
 
@@ -23,7 +23,7 @@ public class AttackExecutor : MonoBehaviour
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                enemy.TakeDamage(_attackPower * data.DamageMultiplier);
+                enemy.TakeDamage(_attackPower * data.DamageMultiplier * modeData.AttackMultiplier);
             }
         }
     }

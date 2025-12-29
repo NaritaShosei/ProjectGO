@@ -6,7 +6,7 @@ public class AttackData_main : ScriptableObject
 {
     public int AttackId => _attackId;
     public string AttackName => _attackName;
-    public CombatMode Mode => _mode;
+    public PlayerMode Mode => _mode;
     public AttackType AttackType => _attackType;
     public int ComboIndex => _comboIndex;
     public ChargeLevel RequiredCharge => _requiredCharge;
@@ -23,7 +23,7 @@ public class AttackData_main : ScriptableObject
 
     [SerializeField] private int _attackId;
     [SerializeField] private string _attackName;
-    [SerializeField] private CombatMode _mode;
+    [SerializeField] private PlayerMode _mode;
     [SerializeField] private AttackType _attackType;
     [SerializeField] private int _comboIndex;              // コンボの何段目か（0始まり）
     [SerializeField] private ChargeLevel _requiredCharge;  // 必要なチャージレベル
@@ -62,7 +62,7 @@ public enum AttackType
 }
 
 // モード
-public enum CombatMode
+public enum PlayerMode
 {
     [InspectorName("闘神")]
     Warrior,   // 闘神モード

@@ -23,7 +23,7 @@ public class AttackDataRepository : ScriptableObject
     /// 与えられた攻撃の内容を基に一致する攻撃を検索
     /// </summary>
     public AttackData_main GetAttackData(
-        CombatMode mode,
+        PlayerMode mode,
         AttackType type,
         int comboIndex,
         ChargeLevel charge)
@@ -72,7 +72,7 @@ public class AttackDataRepository : ScriptableObject
     }
 
     private string GetCacheKey(
-        CombatMode mode,
+        PlayerMode mode,
         AttackType type,
         int comboIndex,
         ChargeLevel charge)

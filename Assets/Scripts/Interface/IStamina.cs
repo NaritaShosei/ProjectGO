@@ -3,4 +3,5 @@
 public interface IStamina
 {
     public bool TryUseStamina(float amount);
+    public float GetDodgeStaminaCost();
 }
