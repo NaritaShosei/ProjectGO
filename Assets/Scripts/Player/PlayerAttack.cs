@@ -94,6 +94,8 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDestroy()
     {
+        _modeController.OnModeChanged -= OnModeChanged;
+
         if (_input != null)
         {
             _input.OnLightAttack -= PerformLightAttack;
@@ -104,7 +106,6 @@ public class PlayerAttack : MonoBehaviour
 
             _input.OnModeChange -= ChangeMode;
 
-            _modeController.OnModeChanged -= OnModeChanged;
 
             // 設定に応じて解除するイベントを変更
             switch (_dodgeAttackConfig.DodgeAttackType)
