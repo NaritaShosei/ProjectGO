@@ -20,16 +20,6 @@ public class PlayerModeController : MonoBehaviour, IModeController
         OnModeChanged?.Invoke(newMode);
     }
 
-    public ModeData GetCurrentModeData()
-    {
-        if (_players.TryGetValue(_currentMode, out var data))
-        {
-            return data;
-        }
-
-        return null;
-    }
-
     [SerializeField] private ModeData _warriorData;
     [SerializeField] private ModeData _thunderData;
 
@@ -55,5 +45,15 @@ public class PlayerModeController : MonoBehaviour, IModeController
         {
             _players.Add(PlayerMode.Thunder, _thunderData);
         }
+    }
+
+    private ModeData GetCurrentModeData()
+    {
+        if (_players.TryGetValue(_currentMode, out var data))
+        {
+            return data;
+        }
+
+        return null;
     }
 }
