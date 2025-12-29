@@ -8,7 +8,7 @@ public class PlayerAttack : MonoBehaviour
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         AttackExecutor executor,
-        PlayerModeController modeController)
+                IModeController modeController)
     {
         // チャージ時間を基準に降順にソート
         _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
@@ -16,7 +16,7 @@ public class PlayerAttack : MonoBehaviour
         _stateManager = playerStateManager;
         _input = input;
         _attackExecutor = executor;
-        _playerModeController = modeController;
+        _modeController = modeController;
 
         _input.OnLightAttack += PerformLightAttack;
 
@@ -25,7 +25,7 @@ public class PlayerAttack : MonoBehaviour
 
         _input.OnModeChange += ChangeMode;
 
-        _playerModeController.OnModeChanged += OnModeChanged;
+        _modeController.OnModeChanged += OnModeChanged;
 
         // 設定に応じて登録するイベントを変更
         switch (_dodgeAttackConfig.DodgeAttackType)
@@ -73,7 +73,7 @@ public class PlayerAttack : MonoBehaviour
     private PlayerStateManager _stateManager;
     private InputHandler _input;
     private AttackExecutor _attackExecutor;
-    private PlayerModeController _playerModeController;
+    private IModeController _modeController;
     [SerializeField] private AttackDataRepository _attackRepository;
     [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
 
@@ -211,7 +211,7 @@ public class PlayerAttack : MonoBehaviour
         _currentAttackId = attackData.AttackId;
 
         // 攻撃実行
-        _attackExecutor.Execute(attackData, input);
+        _attackExecutor.Execute(attackData, input, _modeController);
 
         _lastAttackTime = Time.time;
 
@@ -253,7 +253,7 @@ public class PlayerAttack : MonoBehaviour
 
         // 新規コンボ開始
         ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
-        return _attackRepository.GetAttackData(_playerModeController.CurrentMode, input.AttackType, 0, chargeLevel);
+        return _attackRepository.GetAttackData(_modeController.CurrentMode, input.AttackType, 0, chargeLevel);
     }
 
     private bool IsCompatibleAttack(AttackData_main attack, AttackInput input)
@@ -289,11 +289,11 @@ public class PlayerAttack : MonoBehaviour
     {
         if (!_stateManager.CanModeChange()) { return; }
 
-        var newMode = _playerModeController.CurrentMode == PlayerMode.Warrior
+        var newMode = _modeController.CurrentMode == PlayerMode.Warrior
             ? PlayerMode.Thunder
             : PlayerMode.Warrior;
 
-        _playerModeController.SwitchMode(newMode);
+        _modeController.SwitchMode(newMode);
     }
 
     private void OnModeChanged(PlayerMode newMode)
