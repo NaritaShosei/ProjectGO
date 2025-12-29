@@ -76,7 +76,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
             _input,
             ServiceLocator.Get<CameraManager>(),
             _moveData,
-            this);
+            this,
+            _modeController);
 
         _attackExecutor?.Init(_playerData.AttackPower);
         _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
