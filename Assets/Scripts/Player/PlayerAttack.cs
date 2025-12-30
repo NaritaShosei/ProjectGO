@@ -202,7 +202,7 @@ public class PlayerAttack : MonoBehaviour
     private void ExecuteAttack(AttackInput input)
     {
         // 適切な攻撃データを取得
-        AttackData_main attackData = GetNextAttack(input);
+        AttackData attackData = GetNextAttack(input);
 
         if (attackData == null)
         {
@@ -225,7 +225,7 @@ public class PlayerAttack : MonoBehaviour
         FinishAttack(attackData);
     }
 
-    private async void FinishAttack(AttackData_main data)
+    private async void FinishAttack(AttackData data)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(data.AnimationDuration), false, PlayerLoopTiming.Update, destroyCancellationToken);
         FinishAttack();
@@ -234,7 +234,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃データを取得
     /// </summary>
-    private AttackData_main GetNextAttack(AttackInput input)
+    private AttackData GetNextAttack(AttackInput input)
     {
         // コンボ継続中か判定
         bool isInComboWindow = Time.time - _lastAttackTime <= _comboResetTime;
@@ -261,7 +261,7 @@ public class PlayerAttack : MonoBehaviour
         return _attackRepository.GetAttackData(_modeController.CurrentMode, input.AttackType, 0, chargeLevel);
     }
 
-    private bool IsCompatibleAttack(AttackData_main attack, AttackInput input)
+    private bool IsCompatibleAttack(AttackData attack, AttackInput input)
     {
         // 攻撃タイプが一致するか
         if (attack.AttackType != input.AttackType) return false;

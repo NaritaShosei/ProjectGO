@@ -10,7 +10,7 @@ public class AttackExecutor : MonoBehaviour
     /// <summary>
     /// 与えられたデータを基に攻撃
     /// </summary>
-    public void Execute(AttackData_main data, AttackInput input, ModeData modeData)
+    public void Execute(AttackData data, AttackInput input, ModeData modeData)
     {
         _lastAttackData = data;
         // TODO:クリティカルがない
@@ -33,7 +33,7 @@ public class AttackExecutor : MonoBehaviour
     [SerializeField] private LayerMask _layer;
 
     // デバッグ用
-    private AttackData_main _lastAttackData;
+    private AttackData _lastAttackData;
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {

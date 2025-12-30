@@ -7,11 +7,11 @@ public class AttackDataRepository : ScriptableObject
     /// <summary>
     /// IDを基に攻撃データを検索
     /// </summary>
-    public AttackData_main GetAttackById(int attackId)
+    public AttackData GetAttackById(int attackId)
     {
         if (_attackCacheIDBase == null) BuildCache();
 
-        if (_attackCacheIDBase.TryGetValue(attackId, out AttackData_main data))
+        if (_attackCacheIDBase.TryGetValue(attackId, out AttackData data))
         {
             return data;
         }
@@ -22,7 +22,7 @@ public class AttackDataRepository : ScriptableObject
     /// <summary>
     /// 与えられた攻撃の内容を基に一致する攻撃を検索
     /// </summary>
-    public AttackData_main GetAttackData(
+    public AttackData GetAttackData(
         PlayerMode mode,
         AttackType type,
         int comboIndex,
@@ -36,7 +36,7 @@ public class AttackDataRepository : ScriptableObject
 
         string key = GetCacheKey(mode, type, comboIndex, charge);
 
-        if (_attackCache.TryGetValue(key, out AttackData_main data))
+        if (_attackCache.TryGetValue(key, out AttackData data))
         {
             return data;
         }
@@ -44,11 +44,11 @@ public class AttackDataRepository : ScriptableObject
         return null;
     }
 
-    [SerializeField] private List<AttackData_main> _attackDatabase;
+    [SerializeField] private List<AttackData> _attackDatabase;
 
     // キャッシュ用Dictionary
-    private Dictionary<string, AttackData_main> _attackCache;
-    private Dictionary<int, AttackData_main> _attackCacheIDBase;
+    private Dictionary<string, AttackData> _attackCache;
+    private Dictionary<int, AttackData> _attackCacheIDBase;
 
     private void BuildCache()
     {
