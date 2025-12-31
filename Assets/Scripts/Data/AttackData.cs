@@ -1,43 +1,71 @@
 ﻿using UnityEngine;
 
+[CreateAssetMenu(fileName = "AttackData", menuName = "GameData/AttackData")]
+
 public class AttackData : ScriptableObject
 {
-    [Header("基本情報")]
-    [SerializeField] private string _attackName = "";
-    [SerializeField] private float _power = 1;
-    [SerializeField, Tooltip("攻撃の射程距離")] private float _range = 1;
-    [SerializeField, Tooltip("攻撃の範囲(半径)")] private float _radius = 1;
-    [SerializeField] private float _speed = 5;
-    [SerializeField, Tooltip("ノックバックの強さ")] private float _knockbackForce = 1;
-    [SerializeField, Tooltip("ノックバックの向き")] private Vector3 _knockbackDirection = Vector3.up;
-
-    [Header("モーション設定")]
-    [SerializeField] private AnimationClip _animationClip;
-    [SerializeField] private AudioClip _soundEffect;
-    [Header("アニメーションがないとき用の仮のモーション時間")]
-    [SerializeField] private float _motionDuration = 1;
-
-    [Header("次の攻撃（コンボ遷移）")]
-    [SerializeField] private AttackData _nextCombo;
-
-    // ===== プロパティ =====
+    public int AttackId => _attackId;
     public string AttackName => _attackName;
-    public float Power => _power;
-    public float Range => _range;
-    public float Radius => _radius;
-    public float Speed => _speed;
-    /// <summary>
-    /// ノックバックの強さ
-    /// </summary>
-    public float KnockbackForce => _knockbackForce;
-    /// <summary>
-    /// ノックバックの向き
-    /// </summary>
-    public Vector3 KnockbackDirection => _knockbackDirection;
+    public PlayerMode Mode => _mode;
+    public AttackType AttackType => _attackType;
+    public int ComboIndex => _comboIndex;
+    public ChargeLevel RequiredCharge => _requiredCharge;
 
-    public AnimationClip AnimationClip => _animationClip;
-    public AudioClip SoundEffect => _soundEffect;
-    public float MotionDuration => _animationClip ? _animationClip.length : _motionDuration;
+    public float DamageMultiplier => _damageMultiplier;
+    public float AttackRange => _attackRange;
+    public float AttackRadius => _attackRadius;
+    public string AnimationName => _animationName;
+    public float AnimationDuration => _animationDuration;
 
-    public AttackData NextCombo => _nextCombo;
+    public float ComboWindowStart => _comboWindowStart;
+    public float ComboWindowEnd => _comboWindowEnd;
+    public int NextComboAttackId => _nextComboAttackId;
+
+    [SerializeField] private int _attackId;
+    [SerializeField] private string _attackName;
+    [SerializeField] private PlayerMode _mode;
+    [SerializeField] private AttackType _attackType;
+    [SerializeField] private int _comboIndex;              // コンボの何段目か（0始まり）
+    [SerializeField] private ChargeLevel _requiredCharge;  // 必要なチャージレベル
+
+    [SerializeField] private float _damageMultiplier = 1;
+    [SerializeField] private float _attackRange = 1;
+    [SerializeField] private float _attackRadius = 1;
+    [SerializeField] private string _animationName;
+    [SerializeField] private float _animationDuration;
+
+    [SerializeField] private float _comboWindowStart;     // コンボ受付開始時間
+    [SerializeField] private float _comboWindowEnd;       // コンボ受付終了時間
+    [SerializeField] private int _nextComboAttackId = -1;      // 次のコンボ攻撃ID
+}
+
+// 攻撃の段階（チャージレベル）
+public enum ChargeLevel
+{
+    [InspectorName("溜めなし")]
+    None = 0,
+    [InspectorName("溜め1")]
+    Level1 = 1,
+    [InspectorName("溜め2")]
+    Level2 = 2
+}
+
+// 攻撃タイプ
+public enum AttackType
+{
+    [InspectorName("弱攻撃")]
+    LightAttack,
+    [InspectorName("強攻撃")]
+    HeavyAttack,
+    [InspectorName("回避攻撃")]
+    DodgeAttack
+}
+
+// モード
+public enum PlayerMode
+{
+    [InspectorName("闘神")]
+    Warrior,   // 闘神モード
+    [InspectorName("雷神")]
+    Thunder    // 雷神モード
 }
