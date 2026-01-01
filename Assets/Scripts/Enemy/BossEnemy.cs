@@ -11,8 +11,12 @@
 public abstract class BossEnemy : Enemy
 {
     public int CurrentPhase => _currentPhase;
+    public override void TakeDamage(AttackContext context)
+    {
 
-    [SerializeField] private int _currentPhase = 1;
+    }
+
+    private int _currentPhase = 1;
 
     protected override void Awake()
     {
@@ -37,10 +41,5 @@ public abstract class BossEnemy : Enemy
     {
         // ボス専用の死亡演出用フック
         // 今は何もしない
-    }
-
-    public override void TakeDamage(AttackContext context)
-    {
-
     }
 }
