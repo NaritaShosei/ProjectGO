@@ -21,19 +21,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         return _targetCenter;
     }
 
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(AttackContext context)
     {
-        _currentHP -= damage;
+        _currentHP -= context.Damage;
 
         if (_currentHP <= 0f)
         {
             OnDeath();
         }
-    }
-
-    public void Healing(float amount)
-    {
-        // 回復するかも
     }
 
     [SerializeField] private EnemyData _enemyData;
