@@ -19,7 +19,11 @@ public class AttackExecutor : MonoBehaviour
 
         Debug.Log($"{data.AttackName}で攻撃");
 
-        var context = new AttackContext() { Damage = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier };
+        var context = new AttackContext
+        {
+            Damage = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier,
+            PlayerMode = data.Mode
+        };
 
         foreach (var col in cols)
         {
@@ -54,4 +58,5 @@ public class AttackExecutor : MonoBehaviour
 public struct AttackContext
 {
     public float Damage;
+    public PlayerMode PlayerMode;
 }
