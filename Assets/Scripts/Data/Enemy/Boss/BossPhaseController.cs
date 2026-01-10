@@ -15,9 +15,10 @@ public class BossPhaseController : MonoBehaviour
         _attackIndex = 0;
         _timer = 0f;
 
-        if (!IsPhaseEnd)
+        _phaseIndex++;
+
+        if (_phaseIndex < _phases.Length)
         {
-            _phaseIndex++;
             _current = _phases[_phaseIndex];
         }
     }
