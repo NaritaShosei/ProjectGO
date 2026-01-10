@@ -1,4 +1,7 @@
-﻿// NOTE:
+﻿using System;
+using UnityEngine;
+
+// NOTE:
 // BossEnemy は「ボス用の基盤クラス」
 // ・フェーズという概念
 // ・即死しない死亡処理
@@ -8,7 +11,7 @@
 
 public abstract class BossEnemy : Enemy
 {
-    public int CurrentPhase => _currentPhase;
+    public event Action OnPhaseChange;
 
     public override void TakeDamage(AttackContext context)
     {
@@ -24,13 +27,7 @@ public abstract class BossEnemy : Enemy
         }
     }
 
-    private int _currentPhase = 1;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        _currentPhase = 1;
-    }
+    [SerializeField] protected private BossPhaseController _bossPhaseController;
 
     protected virtual bool CanTakeDamage(AttackContext context)
     {
@@ -44,21 +41,21 @@ public abstract class BossEnemy : Enemy
         // Destroy はしない
     }
 
-    protected void ChangePhase(int nextPhase)
-    {
-        if (_currentPhase == nextPhase) return;
-
-        _currentPhase = nextPhase;
-        OnPhaseChanged(nextPhase);
-    }
-
-    protected virtual void OnPhaseChanged(int phase)
-    {
-    }
-
     protected override void OnDeath()
     {
         // 最終フェーズ専用の死亡演出用
         // オブジェクトの非有効化などはここで行う想定
+    }
+
+    /// <summary>
+    /// フェーズが終了していないときのみ次のフェーズに移行する
+    /// </summary>
+    protected virtual void PhaseChange()
+    {
+        if (!_bossPhaseController.IsPhaseEnd)
+        {
+            _bossPhaseController.SetPhase();
+            OnPhaseChange?.Invoke();
+        }
     }
 }
