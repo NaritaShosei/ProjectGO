@@ -9,8 +9,8 @@ public abstract class BossAttackBase : ScriptableObject
     /// </summary>
     public abstract void Execute(BossAttackContext context);
 
-    [SerializeField] protected private float _interval;
-    [SerializeField] protected private float _damage;
+    [SerializeField] protected float _interval;
+    [SerializeField] protected float _damage;
 }
 
 public struct BossAttackContext

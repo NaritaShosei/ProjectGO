@@ -30,7 +30,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         }
     }
 
-    [SerializeField] protected private EnemyData _data;
+    [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     protected float _currentHP;
 
