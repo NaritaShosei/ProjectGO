@@ -18,6 +18,7 @@ public class BossPhaseController : MonoBehaviour
         if (!IsPhaseEnd)
         {
             _phaseIndex++;
+            _current = _phases[_phaseIndex];
         }
     }
 

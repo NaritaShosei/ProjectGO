@@ -10,7 +10,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
 
     public Transform GetTargetCenter()
     {
-        return _targetCenter; ;
+        return _targetCenter;
     }
 
     public void TakeDamage(AttackContext context)
