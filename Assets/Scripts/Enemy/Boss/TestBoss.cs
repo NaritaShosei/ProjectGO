@@ -3,6 +3,7 @@
 public class TestBoss : BossEnemy
 {
     [SerializeField] private EnemyArmer _armer;
+    [SerializeField] private BossCore _core;
 
     private void Start()
     {
@@ -27,8 +28,18 @@ public class TestBoss : BossEnemy
     {
         PhaseChange();
 
-        // 最低限：死亡
-        OnDeath();
+        BreakCore();
+
+        if (_bossPhaseController.IsPhaseEnd)
+        {
+            // 最低限：死亡
+            OnDeath();
+        }
+    }
+
+    private void BreakCore()
+    {
+        _core.gameObject.SetActive(false);
     }
 
     protected override void OnDeath()

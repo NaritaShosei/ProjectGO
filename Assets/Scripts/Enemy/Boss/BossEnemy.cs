@@ -56,6 +56,12 @@ public abstract class BossEnemy : Enemy
         {
             _bossPhaseController.SetPhase();
             OnPhaseChange?.Invoke();
+
+            _data = _bossPhaseController.CurrentPhase.Data;
+
+            _currentHP = _data.MaxHP;
+
+            Debug.Log("フェーズ変更");
         }
     }
 }

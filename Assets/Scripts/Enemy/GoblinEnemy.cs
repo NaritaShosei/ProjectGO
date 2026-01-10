@@ -19,7 +19,7 @@ public class GoblinEnemy : Enemy
 
         float distance = Vector3.Distance(transform.position, _player.position);
 
-        if (distance > Data.AttackRange)
+        if (distance > _data.AttackRange)
         {
             MoveToPlayer(deltaTime);
         }
@@ -35,12 +35,12 @@ public class GoblinEnemy : Enemy
 
         dir.y = 0;
 
-        transform.position += dir * Data.MoveSpeed * deltaTime;
+        transform.position += dir * _data.MoveSpeed * deltaTime;
     }
 
     private void TryAttack()
     {
-        if (Time.time - _lastAttackTime < Data.AttackCooldown)
+        if (Time.time - _lastAttackTime < _data.AttackCooldown)
             return;
 
         _lastAttackTime = Time.time;
@@ -51,25 +51,25 @@ public class GoblinEnemy : Enemy
     private void PerformAttack()
     {
         Collider[] hits = Physics.OverlapSphere(
-            transform.position + transform.forward * Data.AttackRange,
-            Data.AttackRadius
+            transform.position + transform.forward * _data.AttackRange,
+            _data.AttackRadius
         );
 
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent<IPlayer>(out var player))
             {
-                player.TakeDamage(Data.AttackDamage);
+                player.TakeDamage(_data.AttackDamage);
             }
         }
     }
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (Data == null) return;
+        if (_data == null) return;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + transform.forward * Data.AttackRange, Data.AttackRadius);
+        Gizmos.DrawWireSphere(transform.position + transform.forward * _data.AttackRange, _data.AttackRadius);
     }
 #endif
 }
