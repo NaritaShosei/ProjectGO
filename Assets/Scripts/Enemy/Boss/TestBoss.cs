@@ -3,7 +3,12 @@
 public class TestBoss : BossEnemy
 {
     [SerializeField] private EnemyArmer _armer;
-    [SerializeField] private BossCore _core;
+
+    private void Start()
+    {
+        // TODO:雑にTransform取得
+        _bossPhaseController.Init(FindAnyObjectByType<Player>().transform);
+    }
 
     protected override void UpdateEnemy(float deltaTime)
     {

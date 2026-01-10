@@ -8,7 +8,7 @@ public class GoblinEnemy : Enemy
     protected override void Awake()
     {
         base.Awake();
-        // とりあえず雑に取得
+        // TODO:とりあえず雑に取得
         _player = FindAnyObjectByType<Player>().transform;
     }
 
