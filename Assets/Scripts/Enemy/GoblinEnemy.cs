@@ -12,6 +12,7 @@ public class GoblinEnemy : Enemy
         _player = FindAnyObjectByType<Player>().transform;
     }
 
+    // TODO:移動や攻撃は別クラスで定義
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_player == null) return;
