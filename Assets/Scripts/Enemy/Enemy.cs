@@ -10,7 +10,6 @@
 
 public abstract class Enemy : MonoBehaviour, IEnemy
 {
-    public EnemyData Data => _enemyData;
     public void AddKnockBackForce(Vector3 direction)
     {
         // ノックバック
@@ -31,13 +30,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         }
     }
 
-    [SerializeField] private EnemyData _enemyData;
+    [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     protected float _currentHP;
 
     protected virtual void Awake()
     {
-        _currentHP = _enemyData.MaxHP;
+        _currentHP = _data.MaxHP;
     }
 
     protected virtual void OnDeath()

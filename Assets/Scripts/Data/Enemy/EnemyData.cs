@@ -17,6 +17,8 @@ public class EnemyData : ScriptableObject
     [Header("Movement")]
     [SerializeField] private float _moveSpeed = 3f;
 
+    // TODO:攻撃データはわけて作る
+
     [Header("Attack")]
     [SerializeField] private float _attackRange = 1.5f;
     [SerializeField] private float _attackRadius = 1.0f;
