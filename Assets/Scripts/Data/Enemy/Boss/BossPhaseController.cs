@@ -4,6 +4,11 @@ public class BossPhaseController : MonoBehaviour
 {
     public bool IsPhaseEnd => _phaseIndex >= _phases.Length;
 
+    public void Init(Transform player)
+    {
+        _player = player;
+    }
+
     public void SetPhase()
     {
         _attackIndex = 0;
