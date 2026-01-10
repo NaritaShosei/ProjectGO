@@ -1,9 +1,8 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "BossAttackData", menuName = "GameData/BossAttackData")]
 public abstract class BossAttackBase : ScriptableObject
 {
-    public float Interval;
+    public float Interval => _interval;
 
     /// <summary>
     /// 攻撃実行（各攻撃で中身を書く）
