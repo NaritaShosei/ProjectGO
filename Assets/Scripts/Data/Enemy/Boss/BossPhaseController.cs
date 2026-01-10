@@ -3,6 +3,7 @@
 public class BossPhaseController : MonoBehaviour
 {
     public bool IsPhaseEnd => _phaseIndex >= _phases.Length;
+    public BossPhaseData CurrentPhase => _current;
 
     public void Init(Transform player)
     {
