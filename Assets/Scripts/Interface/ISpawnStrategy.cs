@@ -1,4 +1,4 @@
 ﻿public interface ISpawnStrategy
 {
-    void Spawn(SpawnData data);
+    void Spawn();
 }

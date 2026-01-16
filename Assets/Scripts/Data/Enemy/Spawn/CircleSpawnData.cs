@@ -9,25 +9,27 @@ public class CircleSpawnData : SpawnData
 
     public override ISpawnStrategy CreateStrategy(EnemyManager enemyManager)
     {
-        return new CircleSpawnStrategy(enemyManager);
+        return new CircleSpawnStrategy(enemyManager, this);
     }
 
     [SerializeField] private Vector3 _center;
     [SerializeField] private float _radius;
 }
 
-public class CircleSpawnStrategy : ISpawnStrategy
+public struct CircleSpawnStrategy : ISpawnStrategy
 {
     private readonly EnemyManager _enemyManager;
+    private readonly CircleSpawnData _spawnData;
 
-    public CircleSpawnStrategy(EnemyManager enemyManager)
+    public CircleSpawnStrategy(EnemyManager enemyManager, CircleSpawnData spawnData)
     {
         _enemyManager = enemyManager;
+        _spawnData = spawnData;
     }
 
-    public void Spawn(SpawnData data)
+    public void Spawn()
     {
-        var d = (CircleSpawnData)data;
+        var d = _spawnData;
 
         for (int i = 0; i < d.Enemies.Length; i++)
         {
