@@ -1,0 +1,28 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+public class EnemyManager : MonoBehaviour
+{
+    public void Spawn(GameObject original, Vector3 pos)
+    {
+        var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
+
+        if (obj.TryGetComponent(out IEnemy enemy))
+        {
+            enemy.OnDead += RemoveList;
+            _enemies.Add(enemy);
+        }
+
+        else { Destroy(obj); Debug.LogWarning("IEnemyを継承していないオブジェクトを生成したため、破壊しました"); }
+    }
+
+    private List<IEnemy> _enemies;
+
+    private void RemoveList(IEnemy enemy)
+    {
+        if (enemy != null)
+        {
+            _enemies.Remove(enemy);
+        }
+    }
+}
