@@ -9,7 +9,7 @@ public class EnemyManager : MonoBehaviour
 
         if (obj.TryGetComponent(out IEnemy enemy))
         {
-            enemy.OnDead += RemoveList;
+            enemy.OnDead += HandleEnemyDead;
             _enemies.Add(enemy);
         }
 
@@ -18,10 +18,11 @@ public class EnemyManager : MonoBehaviour
 
     private List<IEnemy> _enemies;
 
-    private void RemoveList(IEnemy enemy)
+    private void HandleEnemyDead(IEnemy enemy)
     {
         if (enemy != null)
         {
+            enemy.OnDead -= HandleEnemyDead;
             _enemies.Remove(enemy);
         }
     }
