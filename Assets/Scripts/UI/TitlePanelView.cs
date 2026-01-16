@@ -14,7 +14,15 @@ public class TitlePanelView : MonoBehaviour
 
     private void Start()
     {
+        // ボタンのクリックイベントにリスナーを追加
         _modeSelectButton.onClick.AddListener(() => OnModeSelectButton?.Invoke());
         _optionButton.onClick.AddListener(() => OnOptionButton?.Invoke());
+    }
+
+    private void OnDestroy()
+    {
+        // ボタンのクリックイベントからリスナーを削除
+        _modeSelectButton.onClick.RemoveAllListeners();
+        _optionButton.onClick.RemoveAllListeners();
     }
 }

@@ -18,13 +18,18 @@ public class SceneTransitionManager : MonoBehaviour
     /// </summary>
     public void TransitionToTitle()
     {
-        LoadSceneAsync("Title");
+        StartCoroutine(LoadSceneAsync("Title"));
     }
 
 
     private void Awake()
     {
         ServiceLocator.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister<SceneTransitionManager>();
     }
 
     /// <summary>

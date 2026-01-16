@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TitlePanerController : MonoBehaviour
+public class TitlePanelController : MonoBehaviour
 {
     [SerializeField]
     private TitlePanelView _titlePaneView;
@@ -15,8 +15,16 @@ public class TitlePanerController : MonoBehaviour
     private void Start()
     {
         _sceneTransitionManager = ServiceLocator.Get<SceneTransitionManager>();
+        // イベントハンドラの登録
         _titlePaneView.OnModeSelectButton += HandleModeSelectButton;
         _titlePaneView.OnOptionButton += HandleOptionButton;
+    }
+
+    private void OnDestroy()
+    {
+        // イベントハンドラの登録解除
+        _titlePaneView.OnModeSelectButton -= HandleModeSelectButton;
+        _titlePaneView.OnOptionButton -= HandleOptionButton;
     }
 
     private void HandleModeSelectButton()
