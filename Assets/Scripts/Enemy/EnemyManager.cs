@@ -16,7 +16,7 @@ public class EnemyManager : MonoBehaviour
         else { Destroy(obj); Debug.LogWarning("IEnemyを継承していないオブジェクトを生成したため、破壊しました"); }
     }
 
-    private List<IEnemy> _enemies;
+    private List<IEnemy> _enemies = new();
 
     private void HandleEnemyDead(IEnemy enemy)
     {
@@ -25,5 +25,12 @@ public class EnemyManager : MonoBehaviour
             enemy.OnDead -= HandleEnemyDead;
             _enemies.Remove(enemy);
         }
+    }
+
+
+    // デバッグ用
+    private void OnGUI()
+    {
+        GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
     }
 }
