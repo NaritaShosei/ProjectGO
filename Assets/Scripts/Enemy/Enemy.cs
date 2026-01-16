@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 // NOTE:
 // この GoblinEnemy は「基盤用の最小実装」です。
@@ -10,6 +11,7 @@
 
 public abstract class Enemy : MonoBehaviour, IEnemy
 {
+    public event Action<IEnemy> OnDead;
     public void AddKnockBackForce(Vector3 direction)
     {
         // ノックバック
@@ -41,6 +43,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected virtual void OnDeath()
     {
+        OnDead?.Invoke(this);
         Destroy(gameObject);
     }
 
