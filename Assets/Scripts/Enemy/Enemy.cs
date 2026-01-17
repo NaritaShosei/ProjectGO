@@ -25,6 +25,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     public virtual void TakeDamage(AttackContext context)
     {
+        if (_isDead) { return; }
+
         _currentHP -= context.Damage;
 
         if (_currentHP <= 0f)
@@ -37,6 +39,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     [SerializeField] private Transform _targetCenter;
     protected float _currentHP;
 
+    protected bool _isDead; // 軽い実装のため bool のフラグを使用
+
     protected virtual void Awake()
     {
         _currentHP = _data.MaxHP;
@@ -47,7 +51,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     /// </summary>
     protected virtual void OnDeath()
     {
+        if (_isDead) { return; }
+
         OnDead?.Invoke(this);
+        _isDead = true;
         OnDeathInternal();
     }
 
@@ -60,6 +67,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected virtual void Update()
     {
+        if (_isDead) { return; }
         UpdateEnemy(Time.deltaTime);
     }
 }
