@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using Cysharp.Threading.Tasks;
 
 public class SceneTransitionManager : MonoBehaviour
 {
@@ -8,17 +8,17 @@ public class SceneTransitionManager : MonoBehaviour
     /// 任意シーンへ遷移する
     /// </summary>
     /// <param name="sceneName">遷移先のシーン</param>
-    public void TransitionToScene(string sceneName)
+    public async UniTask TransitionToScene(string sceneName)
     {
-        StartCoroutine(LoadSceneAsync(sceneName));
+        await LoadSceneAsync(sceneName);
     }
 
     /// <summary>
     /// タイトルへ遷移する
     /// </summary>
-    public void TransitionToTitle()
+    public async UniTask TransitionToTitle()
     {
-        StartCoroutine(LoadSceneAsync("Title"));
+        await LoadSceneAsync("Title");
     }
 
 
@@ -36,14 +36,9 @@ public class SceneTransitionManager : MonoBehaviour
     /// シーン遷移を非同期で行う汎用コルーチン
     /// </summary>
     /// <param name="sceneName">遷移先</param>
-    private IEnumerator LoadSceneAsync(string sceneName)
+    private async UniTask LoadSceneAsync(string sceneName)
     {
         Debug.Log($"{sceneName}：へ遷移する");
-
-        var asyncOperation = SceneManager.LoadSceneAsync(sceneName);
-        while (!asyncOperation.isDone)
-        {
-            yield return null;
-        }
+        await SceneManager.LoadSceneAsync(sceneName);
     }
 }

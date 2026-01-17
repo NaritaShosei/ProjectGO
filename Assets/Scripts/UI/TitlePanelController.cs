@@ -42,12 +42,12 @@ public class TitlePanelController : MonoBehaviour
         }
     }
 
-    private void HandleModeSelectButton()
+    private async void HandleModeSelectButton()
     {
-        _sceneTransitionManager.TransitionToScene(_modeSelectSceneName);
+        await _sceneTransitionManager.TransitionToScene(_modeSelectSceneName);
     }
-    private void HandleOptionButton()
+    private async void HandleOptionButton()
     {
-        _sceneTransitionManager.TransitionToScene(_optionSceneName);
+        await _sceneTransitionManager.TransitionToScene(_optionSceneName);
     }
 }
