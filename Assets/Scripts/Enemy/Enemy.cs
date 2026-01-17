@@ -53,8 +53,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     {
         if (_isDead) { return; }
 
-        OnDead?.Invoke(this);
         _isDead = true;
+        OnDead?.Invoke(this);
         OnDeathInternal();
     }
 
