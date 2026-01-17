@@ -41,8 +41,9 @@ public abstract class BossEnemy : Enemy
         // Destroy はしない
     }
 
-    protected override void OnDeath()
+    protected override void OnDeathInternal()
     {
+        base.OnDeathInternal();
         // 最終フェーズ専用の死亡演出用
         // オブジェクトの非有効化などはここで行う想定
     }

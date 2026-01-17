@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class EnemyArmer : MonoBehaviour, IEnemy
 {
+    public event Action<IEnemy> OnDead;
+
     public bool IsBroken => _hp <= 0;
     public void AddKnockBackForce(Vector3 direction)
     {
@@ -21,6 +24,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
 
         if (_hp <= 0)
         {
+            OnDead?.Invoke(this);
             Break();
         }
     }
