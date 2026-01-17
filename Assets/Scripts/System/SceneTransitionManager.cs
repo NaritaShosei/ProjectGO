@@ -24,7 +24,10 @@ public class SceneTransitionManager : MonoBehaviour
 
     private void Awake()
     {
-        ServiceLocator.Register(this);
+        if (!ServiceLocator.IsRegistered<SceneTransitionManager>())
+        {
+            ServiceLocator.Register(this);
+        }
     }
 
     private void OnDestroy()

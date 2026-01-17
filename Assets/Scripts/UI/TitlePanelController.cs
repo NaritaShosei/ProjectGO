@@ -14,9 +14,7 @@ public class TitlePanelController : MonoBehaviour
 
     private void Start()
     {
-        _sceneTransitionManager = ServiceLocator.Get<SceneTransitionManager>();
-
-        if (_sceneTransitionManager == null)
+        if (!ServiceLocator.TryGet(out _sceneTransitionManager))
         {
             Debug.LogError("SceneTransitionManager is not registered in ServiceLocator.", this);
             return;
