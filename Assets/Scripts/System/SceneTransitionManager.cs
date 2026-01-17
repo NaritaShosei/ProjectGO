@@ -21,18 +21,23 @@ public class SceneTransitionManager : MonoBehaviour
         await LoadSceneAsync("Title");
     }
 
+    private bool _isRegistered = false;
 
     private void Awake()
     {
         if (!ServiceLocator.IsRegistered<SceneTransitionManager>())
         {
             ServiceLocator.Register(this);
+            _isRegistered = true;
         }
     }
 
     private void OnDestroy()
     {
-        ServiceLocator.Unregister<SceneTransitionManager>();
+        if (_isRegistered)
+        {
+            ServiceLocator.Unregister<SceneTransitionManager>();
+        }
     }
 
     /// <summary>
