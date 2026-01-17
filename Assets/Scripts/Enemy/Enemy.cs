@@ -12,6 +12,7 @@ using UnityEngine;
 public abstract class Enemy : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+
     public void AddKnockBackForce(Vector3 direction)
     {
         // ノックバック
@@ -41,6 +42,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _currentHP = _data.MaxHP;
     }
 
+    /// <summary>
+    /// 死亡時処理
+    /// </summary>
     protected virtual void OnDeath()
     {
         OnDead?.Invoke(this);

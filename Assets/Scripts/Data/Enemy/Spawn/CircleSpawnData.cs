@@ -9,6 +9,7 @@ public class CircleSpawnData : SpawnData
 
     public override ISpawnStrategy CreateStrategy(EnemyManager enemyManager)
     {
+        // 円形生成の ISpawnStrategy
         return new CircleSpawnStrategy(enemyManager, this);
     }
 
@@ -31,6 +32,7 @@ public struct CircleSpawnStrategy : ISpawnStrategy
     {
         var d = _spawnData;
 
+        // Data に対応するパラメーターで円形に配置して生成
         for (int i = 0; i < d.Enemies.Length; i++)
         {
             float angle = i * Mathf.PI * 2f / d.Enemies.Length;
