@@ -48,6 +48,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     protected virtual void OnDeath()
     {
         OnDead?.Invoke(this);
+        OnDeathInternal();
+    }
+
+    protected virtual void OnDeathInternal()
+    {
         Destroy(gameObject);
     }
 
