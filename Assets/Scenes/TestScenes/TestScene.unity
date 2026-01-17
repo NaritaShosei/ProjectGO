@@ -655,7 +655,7 @@ GameObject:
   - component: {fileID: 880924929}
   - component: {fileID: 880924928}
   - component: {fileID: 880924931}
-  - component: {fileID: 880924930}
+  - component: {fileID: 880924932}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -690,20 +690,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &880924930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 880924927}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ae16deae2d70a847aba0bc6835163e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TEst
-  spawnDataRepository: {fileID: 11400000, guid: 11e8b71ffac42e141b38ddd97ea556d8, type: 2}
-  enemyManager: {fileID: 880924931}
 --- !u!114 &880924931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -716,6 +702,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5057605c4c88c8946b84461c0746413f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
+--- !u!114 &880924932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 880924927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
+  _phases:
+  - {fileID: 11400000, guid: 12eccd1d70b310f48afd123f51e842fa, type: 2}
+  - {fileID: 11400000, guid: bb21d761ab6e9c6428be9be979b7a9f3, type: 2}
+  _spawnDataRepository: {fileID: 11400000, guid: 11e8b71ffac42e141b38ddd97ea556d8, type: 2}
+  _enemyManager: {fileID: 880924931}
 --- !u!1 &1058445997
 GameObject:
   m_ObjectHideFlags: 0
