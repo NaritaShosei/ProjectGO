@@ -10,11 +10,16 @@ public class BossPhaseController : MonoBehaviour
         _player = player;
     }
 
+    /// <summary>
+    /// 次のフェーズへ遷移し、関連する状態を初期化する
+    /// </summary>
     public void SetPhase()
     {
+        // 状態のリセット
         _attackIndex = 0;
         _timer = 0f;
 
+        // フェーズを進める
         _phaseIndex++;
 
         if (_phaseIndex < _phases.Length)
@@ -23,12 +28,16 @@ public class BossPhaseController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Bossクラスのほうで呼ばれるUpdate関数の代わり
+    /// </summary>
     public void Tick()
     {
         if (_current == null || _current.Attacks.Length == 0) return;
 
         _timer += Time.deltaTime;
 
+        // データにある攻撃を順番に実行する
         var attack = _current.Attacks[_attackIndex];
 
         if (_timer >= attack.Interval)

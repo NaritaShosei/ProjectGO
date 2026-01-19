@@ -42,9 +42,8 @@ public class TestBoss : BossEnemy
         _core.gameObject.SetActive(false);
     }
 
-    protected override void OnDeath()
+    protected override void OnDeathInternal()
     {
-        Destroy(gameObject);
+        base.OnDeathInternal();
     }
-
 }
