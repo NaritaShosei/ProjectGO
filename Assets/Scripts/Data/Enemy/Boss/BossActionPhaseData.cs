@@ -2,7 +2,7 @@
 
 [CreateAssetMenu(fileName = "BossPhaseData", menuName = "GameData/BossPhaseData")]
 
-public class BossPhaseData : ScriptableObject
+public class BossActionPhaseData : ScriptableObject
 {
     public BossAttackBase[] Attacks => _attacks;
     public EnemyData Data => _data;

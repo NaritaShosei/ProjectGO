@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-public class BossPhaseController : MonoBehaviour
+public class BossActionPhaseController : MonoBehaviour
 {
     public bool IsPhaseEnd => _phaseIndex >= _phases.Length;
-    public BossPhaseData CurrentPhase => _current;
+    public BossActionPhaseData CurrentPhase => _current;
 
     public void Init(Transform player)
     {
@@ -54,10 +54,10 @@ public class BossPhaseController : MonoBehaviour
         }
     }
 
-    [SerializeField] private BossPhaseData[] _phases;
+    [SerializeField] private BossActionPhaseData[] _phases;
     private Transform _player;
 
-    private BossPhaseData _current;
+    private BossActionPhaseData _current;
     private int _attackIndex;
     private int _phaseIndex;
     private float _timer;
