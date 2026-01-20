@@ -98,4 +98,11 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
     }
+
+    // デバッグ用
+    private void OnGUI()
+    {
+        GUI.Label(new Rect(10, 50, 500, 300), $"残りHP：{_playerStats.CurrentHealth}");
+        GUI.Label(new Rect(10, 100, 500, 300), $"残りスタミナ：{_playerStats.CurrentStamina}");
+    }
 }

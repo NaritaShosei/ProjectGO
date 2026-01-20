@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class PlayerStats
 {
+    public float CurrentHealth => _currentHealth;
+    public float CurrentStamina => _currentStamina;
+
     public event Action OnDead;
     public event Action<float, float> OnHealthChanged;
     public event Action<float, float> OnStaminaChanged;
