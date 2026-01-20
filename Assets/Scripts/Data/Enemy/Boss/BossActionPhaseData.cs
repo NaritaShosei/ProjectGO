@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "BossPhaseData", menuName = "GameData/BossPhaseData")]
+[CreateAssetMenu(fileName = "BossActionPhaseData", menuName = "GameData/BossActionPhase")]
 
-public class BossPhaseData : ScriptableObject
+public class BossActionPhaseData : ScriptableObject
 {
     public BossAttackBase[] Attacks => _attacks;
     public EnemyData Data => _data;

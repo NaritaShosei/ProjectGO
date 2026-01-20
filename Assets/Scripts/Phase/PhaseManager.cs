@@ -9,6 +9,7 @@ public class PhaseManager : MonoBehaviour
 
     [Header("敵生成設定")]
     [SerializeField] private SpawnDataRepository _spawnDataRepository;
+    [SerializeField] private SpawnData _bossSpawnData;
 
     [Header("依存関係")]
     [SerializeField] private EnemyManager _enemyManager;
@@ -104,7 +105,14 @@ public class PhaseManager : MonoBehaviour
         else if (_currentPhase.PhaseType == PhaseType.Boss)
         {
             // ボスフェーズは特定のSpawnDataを使うか、直接生成するか
-            _context.CurrentSpawnData = null;
+            if (_bossSpawnData == null)
+            {
+                Debug.LogError("BossSpawnDataが未設定です");
+                enabled = false;
+                return;
+            }
+
+            _context.CurrentSpawnData = _bossSpawnData;
         }
         else
         {

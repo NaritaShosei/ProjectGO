@@ -27,7 +27,7 @@ public abstract class BossEnemy : Enemy
         }
     }
 
-    [SerializeField] protected private BossPhaseController _bossPhaseController;
+    [SerializeField] protected private BossActionPhaseController _bossPhaseController;
 
     protected virtual bool CanTakeDamage(AttackContext context)
     {
