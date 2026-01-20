@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba454a2f6d480e649bf6078092511ffe, type: 3}
+  m_Name: EnemyData
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  _maxHP: 100
+  _moveSpeed: 3
+  _attackRange: 3.36
+  _attackRadius: 13.15
+  _attackCooldown: 1.85
+  _attackDamage: 10

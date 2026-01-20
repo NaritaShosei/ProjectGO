@@ -19,11 +19,17 @@ public class AttackExecutor : MonoBehaviour
 
         Debug.Log($"{data.AttackName}で攻撃");
 
+        var context = new AttackContext
+        {
+            Damage = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier,
+            PlayerMode = data.Mode
+        };
+
         foreach (var col in cols)
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                enemy.TakeDamage(_attackPower * data.DamageMultiplier * modeData.AttackMultiplier);
+                enemy.TakeDamage(context);
             }
         }
     }
@@ -47,4 +53,10 @@ public class AttackExecutor : MonoBehaviour
         Gizmos.DrawLine(transform.position, pos);
     }
 #endif
+}
+
+public struct AttackContext
+{
+    public float Damage;
+    public PlayerMode PlayerMode;
 }
