@@ -105,6 +105,13 @@ public class PhaseManager : MonoBehaviour
         else if (_currentPhase.PhaseType == PhaseType.Boss)
         {
             // ボスフェーズは特定のSpawnDataを使うか、直接生成するか
+            if (_bossSpawnData == null)
+            {
+                Debug.LogError("BossSpawnDataが未設定です");
+                enabled = false;
+                return;
+            }
+
             _context.CurrentSpawnData = _bossSpawnData;
         }
         else

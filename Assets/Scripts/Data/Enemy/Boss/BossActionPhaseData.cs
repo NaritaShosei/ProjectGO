@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "BossPhaseData", menuName = "GameData/BossPhaseData")]
+[CreateAssetMenu(fileName = "BossActionPhaseData", menuName = "GameData/BossActionPhase")]
 
 public class BossActionPhaseData : ScriptableObject
 {
