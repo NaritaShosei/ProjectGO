@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public abstract class PhaseData : ScriptableObject
+public abstract class SequenceBase : ScriptableObject
 {
     public PhaseType PhaseType => _phaseType;
 
@@ -33,7 +33,7 @@ public enum PhaseType
 public struct PhaseContext
 {
     public EnemyManager EnemyManager;
-    // public SkillUIManager SkillUIManager;
+    public ISkillSelectUIManager SkillUIManager;
     public SpawnData CurrentSpawnData;
 
     // 状態
