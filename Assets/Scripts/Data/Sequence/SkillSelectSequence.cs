@@ -11,6 +11,12 @@ public class SkillSelectSequence : SequenceBase
 
     public override void OnPhaseStart(PhaseContext context)
     {
+        if (context.SkillUIManager == null)
+        {
+            Debug.LogWarning("SkillUIManagerがnullなので、スキル選択UIを表示できません");
+            return;
+        }
+
         context.SkillUIManager.Show();
     }
 
