@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
-public class SkillSelectPhase : PhaseData
+[CreateAssetMenu(fileName = "SkillSelectSequence", menuName = "GameData/Sequence/SkillSelectSequence")]
+
+public class SkillSelectSequence : SequenceData
 {
     public override bool IsComplete(PhaseContext context)
     {

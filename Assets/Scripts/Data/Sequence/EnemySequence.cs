@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "EnemyPhase", menuName = "GameData/Phase/EnemyPhase")]
-public class EnemyPhase : PhaseData
+[CreateAssetMenu(fileName = "EnemySequence", menuName = "GameData/Sequence/EnemySequence")]
+public class EnemySequence : SequenceData
 {
     public override bool IsComplete(PhaseContext context)
     {

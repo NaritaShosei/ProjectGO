@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public abstract class PhaseData : ScriptableObject
+public abstract class SequenceData : ScriptableObject
 {
     public PhaseType PhaseType => _phaseType;
 

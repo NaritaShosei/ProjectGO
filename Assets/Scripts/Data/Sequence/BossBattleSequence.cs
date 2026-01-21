@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "BossBattlePhase", menuName = "GameData/Phase/BossBattlePhase")]
+[CreateAssetMenu(fileName = "BossBattleSequence", menuName = "GameData/Sequence/BossBattleSequence")]
 
-public class BossBattlePhase : PhaseData
+public class BossBattleSequence : SequenceData
 {
     public override bool IsComplete(PhaseContext context)
     {
