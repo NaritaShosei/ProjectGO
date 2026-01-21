@@ -18,7 +18,7 @@ public class TestBoss : BossEnemy
         _bossPhaseController.Tick();
     }
 
-    protected override bool CanTakeDamage(AttackContext context)
+    protected override bool CanTakeDamage(DamageContext context)
     {
         // 核が出てない間は本体は無敵
         return _armer.IsBroken;

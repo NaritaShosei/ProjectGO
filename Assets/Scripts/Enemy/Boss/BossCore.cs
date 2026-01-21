@@ -15,14 +15,14 @@ public class BossCore : MonoBehaviour, IEnemy
         return _targetCenter;
     }
 
-    public void TakeDamage(AttackContext context)
+    public void TakeDamage(DamageContext context)
     {
         if (context.PlayerMode != PlayerMode.Thunder)
             return;
 
         // TODO:雑にボスにダメージを与える橋渡しになっているため、仕様によって変更の余地
 
-        _boss.TakeDamage(new AttackContext
+        _boss.TakeDamage(new DamageContext
         {
             Damage = context.Damage * _damageMultiplier,
             PlayerMode = context.PlayerMode

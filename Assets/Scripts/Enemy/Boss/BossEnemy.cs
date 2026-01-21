@@ -13,7 +13,7 @@ public abstract class BossEnemy : Enemy
 {
     public event Action OnPhaseChange;
 
-    public override void TakeDamage(AttackContext context)
+    public override void TakeDamage(DamageContext context)
     {
         // 派生側で「今ダメージが通るか？」を判断させる
         if (!CanTakeDamage(context)) { return; }
@@ -29,7 +29,7 @@ public abstract class BossEnemy : Enemy
 
     [SerializeField] protected private BossActionPhaseController _bossPhaseController;
 
-    protected virtual bool CanTakeDamage(AttackContext context)
+    protected virtual bool CanTakeDamage(DamageContext context)
     {
         // デフォルトは通る
         return true;
