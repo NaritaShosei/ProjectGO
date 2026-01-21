@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
@@ -25,13 +26,22 @@ public class AttackExecutor : MonoBehaviour
             PlayerMode = data.Mode
         };
 
+        // 攻撃直前スキルを発動
+        context.OnBeforeAttack?.Invoke();
+
         foreach (var col in cols)
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
+                // ヒットの瞬間(敵毎)スキルを発動
+                context.OnHit?.Invoke();
+
                 enemy.TakeDamage(context);
             }
         }
+
+        // 攻撃直後スキルの発動
+        context.OnAfterAttack?.Invoke();
     }
 
     private float _attackPower;
@@ -54,9 +64,17 @@ public class AttackExecutor : MonoBehaviour
     }
 #endif
 }
-
 public struct AttackContext
 {
     public float Damage;
     public PlayerMode PlayerMode;
+
+    /// <summary>攻撃開始直前</summary>
+    public Action OnBeforeAttack;
+
+    /// <summary>攻撃終了直後</summary>
+    public Action OnAfterAttack;
+
+    /// <summary>敵にヒットした瞬間</summary>
+    public Action OnHit;
 }
