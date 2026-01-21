@@ -33,7 +33,7 @@ public enum PhaseType
 public struct PhaseContext
 {
     public EnemyManager EnemyManager;
-    // public SkillUIManager SkillUIManager;
+    public ISkillSelectUIManager SkillUIManager;
     public SpawnData CurrentSpawnData;
 
     // 状態
