@@ -5,7 +5,7 @@ public class SequenceManager : MonoBehaviour
     public bool IsAllPhasesComplete => _currentPhaseIndex >= _phases.Length;
 
     [Header("フェーズ設定")]
-    [SerializeField] private SequenceData[] _phases;
+    [SerializeField] private SequenceBase[] _phases;
 
     [Header("敵生成設定")]
     [SerializeField] private SpawnDataRepository _spawnDataRepository;
@@ -17,7 +17,7 @@ public class SequenceManager : MonoBehaviour
 
     private int _currentPhaseIndex = 0;
     private int _enemyPhaseCount = 0;  // 何番目の雑魚敵フェーズか
-    private SequenceData _currentPhase;
+    private SequenceBase _currentPhase;
     private PhaseContext _context;
     private float _phaseStartTime;
 

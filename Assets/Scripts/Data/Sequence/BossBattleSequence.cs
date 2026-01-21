@@ -2,7 +2,7 @@
 
 [CreateAssetMenu(fileName = "BossBattleSequence", menuName = "GameData/Sequence/BossBattleSequence")]
 
-public class BossBattleSequence : SequenceData
+public class BossBattleSequence : SequenceBase
 {
     public override bool IsComplete(PhaseContext context)
     {

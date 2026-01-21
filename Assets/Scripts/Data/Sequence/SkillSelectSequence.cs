@@ -2,7 +2,7 @@
 
 [CreateAssetMenu(fileName = "SkillSelectSequence", menuName = "GameData/Sequence/SkillSelectSequence")]
 
-public class SkillSelectSequence : SequenceData
+public class SkillSelectSequence : SequenceBase
 {
     public override bool IsComplete(PhaseContext context)
     {
@@ -18,10 +18,4 @@ public class SkillSelectSequence : SequenceData
     {
         // 毎フレームの更新
     }
-}
-
-
-public interface ISkillSelectUIManager
-{
-    public void Show();
 }
