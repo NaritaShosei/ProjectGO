@@ -13,7 +13,7 @@ public class SequenceManager : MonoBehaviour
 
     [Header("依存関係")]
     [SerializeField] private EnemyManager _enemyManager;
-    // [SerializeField] private SkillUIManager _skillUIManager;
+    [SerializeField] private SkillUIManager _skillUIManager;
 
     private int _currentPhaseIndex = 0;
     private int _enemyPhaseCount = 0;  // 何番目の雑魚敵フェーズか
@@ -52,18 +52,18 @@ public class SequenceManager : MonoBehaviour
         _context = new PhaseContext
         {
             EnemyManager = _enemyManager,
-            // SkillUIManager = _skillUIManager
+            SkillUIManager = _skillUIManager
         };
 
         // EnemyManagerのイベント購読
         _enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
         _enemyManager.OnBossDefeated += HandleBossDefeated;
 
-        // SkillUIManagerのイベント購読
-        //if (_skillUIManager != null)
-        //{
-        //    _skillUIManager.OnSkillSelected += HandleSkillSelected;
-        //}
+       // SkillUIManagerのイベント購読
+        if (_skillUIManager != null)
+        {
+            _skillUIManager.OnSkillSelected += HandleSkillSelected;
+        }
     }
 
     private void UpdateContext()
@@ -159,9 +159,9 @@ public class SequenceManager : MonoBehaviour
             _enemyManager.OnBossDefeated -= HandleBossDefeated;
         }
 
-        //if (_skillUIManager != null)
-        //{
-        //    _skillUIManager.OnSkillSelected -= HandleSkillSelected;
-        //}
+        if (_skillUIManager != null)
+        {
+            _skillUIManager.OnSkillSelected -= HandleSkillSelected;
+        }
     }
 }
