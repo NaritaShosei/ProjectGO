@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "BossBattlePhaseData", menuName = "GameData/Phase/BossBattlePhase")]
-
-public class BossBattlePhaseData : PhaseData
+[CreateAssetMenu(fileName = "EnemyPhase", menuName = "GameData/Phase/EnemyPhase")]
+public class EnemyPhase : PhaseData
 {
     public override bool IsComplete(PhaseContext context)
     {
-        return context.BossDefeated;
+        return context.RemainingEnemies == 0;
     }
 
     public override void OnPhaseStart(PhaseContext context)
@@ -21,6 +20,6 @@ public class BossBattlePhaseData : PhaseData
 
     public override void OnPhaseUpdate(PhaseContext context)
     {
-        // 毎フレームの更新処理
+        // 時間経過の更新など
     }
 }
