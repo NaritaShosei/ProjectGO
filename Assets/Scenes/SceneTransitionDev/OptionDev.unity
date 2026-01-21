@@ -844,6 +844,7 @@ GameObject:
   - component: {fileID: 352080882}
   - component: {fileID: 352080881}
   - component: {fileID: 352080880}
+  - component: {fileID: 352080884}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -934,6 +935,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &352080884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 352080879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67aed6b1098998942be43603706596b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TitleUIManager
+  _optionModel: {fileID: 1807126784}
+  _optionView: {fileID: 1807126782}
+  _optionUIPanel: {fileID: 1807126778}
 --- !u!1 &465289887
 GameObject:
   m_ObjectHideFlags: 0
@@ -4260,6 +4276,7 @@ GameObject:
   - component: {fileID: 1807126779}
   - component: {fileID: 1807126781}
   - component: {fileID: 1807126780}
+  - component: {fileID: 1807126784}
   - component: {fileID: 1807126782}
   m_Layer: 5
   m_Name: OptionPanel
@@ -4343,6 +4360,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6687196d59d6b464b81660791bb52ab8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OptionView
+  _backButton: {fileID: 943453111}
+  _ResetButton: {fileID: 2116451150}
+  _SaveButton: {fileID: 654722703}
+  _controllerVibrationsToggle: {fileID: 1814177701}
+  _cameraMoveSpeedSlider: {fileID: 1059198177}
+  _cameraRotationSensitivitySlider: {fileID: 984827094}
+  _bgmVolumeSlider: {fileID: 101654872}
+  _seVolumeSlider: {fileID: 1906838213}
+  _voiceVolumeSlider: {fileID: 1047348986}
+--- !u!114 &1807126784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1807126778}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd92be7a30ab652478bf85690122473f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OptionModel
 --- !u!1 &1814177699
 GameObject:
   m_ObjectHideFlags: 0
