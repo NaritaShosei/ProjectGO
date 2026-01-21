@@ -4,9 +4,13 @@ public class SkillBase : ScriptableObject, ISkill
 {
     public int Priority => _priority;
 
-    public virtual AttackContext Apply(AttackContext context)
+    public virtual DamageContext Apply(ref AttackContext context)
     {
-        return context;
+        return new DamageContext()
+        {
+            Damage = context.Damage,
+            PlayerMode = context.PlayerMode,
+        };
     }
 
     public virtual bool CanApply(AttackContext context,AttackData data)

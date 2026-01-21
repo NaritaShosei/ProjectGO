@@ -13,5 +13,5 @@
     /// <summary>
     /// スキルを発動する
     /// </summary>
-    public AttackContext Apply(AttackContext context);
+    public DamageContext Apply(ref AttackContext context);
 }

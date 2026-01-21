@@ -23,7 +23,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         return _targetCenter;
     }
 
-    public virtual void TakeDamage(AttackContext context)
+    public virtual void TakeDamage(DamageContext context)
     {
         if (_isDead) { return; }
 

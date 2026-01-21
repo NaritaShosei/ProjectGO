@@ -29,24 +29,24 @@ public class AttackExecutor : MonoBehaviour
         };
 
         // スキルの検索等はここで
-        var skillContext = skill.Apply(context);
+        var skillContext = skill.Apply(ref context);
 
         // 攻撃直前スキルを発動
-        skillContext.OnBeforeAttack?.Invoke();
+        context.OnBeforeAttack?.Invoke();
 
         foreach (var col in cols)
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
                 // ヒットの瞬間(敵毎)スキルを発動
-                skillContext.OnHit?.Invoke();
+                context.OnHit?.Invoke();
 
-                enemy.TakeDamage(context);
+                enemy.TakeDamage(skillContext);
             }
         }
 
         // 攻撃直後スキルの発動
-        skillContext.OnAfterAttack?.Invoke();
+        context.OnAfterAttack?.Invoke();
     }
 
     private float _attackPower;
@@ -69,6 +69,10 @@ public class AttackExecutor : MonoBehaviour
     }
 #endif
 }
+
+/// <summary>
+/// Playerの攻撃やスキルに扱う情報
+/// </summary>
 public struct AttackContext
 {
     public float Damage;
@@ -82,4 +86,13 @@ public struct AttackContext
 
     /// <summary>敵にヒットした瞬間</summary>
     public Action OnHit;
+}
+
+/// <summary>
+/// Enemyが攻撃を受ける際に扱う情報
+/// </summary>
+public struct DamageContext
+{
+    public float Damage;
+    public PlayerMode PlayerMode;
 }
