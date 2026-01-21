@@ -8,7 +8,7 @@
     /// <summary>
     /// 発動条件
     /// </summary>
-    public bool CanApply(AttackContext context);
+    public bool CanApply(AttackContext context,AttackData data);
 
     /// <summary>
     /// スキルを発動する

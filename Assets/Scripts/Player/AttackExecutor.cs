@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
+    // デバッグ用
+    [SerializeField] private SkillBase skill;
     public void Init(float power)
     {
         _attackPower = power;
@@ -26,22 +28,25 @@ public class AttackExecutor : MonoBehaviour
             PlayerMode = data.Mode
         };
 
+        // スキルの検索等はここで
+        var skillContext = skill.Apply(context);
+
         // 攻撃直前スキルを発動
-        context.OnBeforeAttack?.Invoke();
+        skillContext.OnBeforeAttack?.Invoke();
 
         foreach (var col in cols)
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
                 // ヒットの瞬間(敵毎)スキルを発動
-                context.OnHit?.Invoke();
+                skillContext.OnHit?.Invoke();
 
                 enemy.TakeDamage(context);
             }
         }
 
         // 攻撃直後スキルの発動
-        context.OnAfterAttack?.Invoke();
+        skillContext.OnAfterAttack?.Invoke();
     }
 
     private float _attackPower;
