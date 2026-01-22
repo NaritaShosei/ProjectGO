@@ -1,22 +1,23 @@
 ﻿using UnityEngine;
 
-public class PhaseManager : MonoBehaviour
+public class SequenceManager : MonoBehaviour
 {
     public bool IsAllPhasesComplete => _currentPhaseIndex >= _phases.Length;
 
     [Header("フェーズ設定")]
-    [SerializeField] private PhaseData[] _phases;
+    [SerializeField] private SequenceBase[] _phases;
 
     [Header("敵生成設定")]
     [SerializeField] private SpawnDataRepository _spawnDataRepository;
+    [SerializeField] private SpawnData _bossSpawnData;
 
     [Header("依存関係")]
     [SerializeField] private EnemyManager _enemyManager;
-    // [SerializeField] private SkillUIManager _skillUIManager;
+    [SerializeField] private SkillUIManager _skillUIManager;
 
     private int _currentPhaseIndex = 0;
     private int _enemyPhaseCount = 0;  // 何番目の雑魚敵フェーズか
-    private PhaseData _currentPhase;
+    private SequenceBase _currentPhase;
     private PhaseContext _context;
     private float _phaseStartTime;
 
@@ -51,18 +52,18 @@ public class PhaseManager : MonoBehaviour
         _context = new PhaseContext
         {
             EnemyManager = _enemyManager,
-            // SkillUIManager = _skillUIManager
+            SkillUIManager = _skillUIManager
         };
 
         // EnemyManagerのイベント購読
         _enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
         _enemyManager.OnBossDefeated += HandleBossDefeated;
 
-        // SkillUIManagerのイベント購読
-        //if (_skillUIManager != null)
-        //{
-        //    _skillUIManager.OnSkillSelected += HandleSkillSelected;
-        //}
+       // SkillUIManagerのイベント購読
+        if (_skillUIManager != null)
+        {
+            _skillUIManager.OnSkillSelected += HandleSkillSelected;
+        }
     }
 
     private void UpdateContext()
@@ -104,7 +105,14 @@ public class PhaseManager : MonoBehaviour
         else if (_currentPhase.PhaseType == PhaseType.Boss)
         {
             // ボスフェーズは特定のSpawnDataを使うか、直接生成するか
-            _context.CurrentSpawnData = null;
+            if (_bossSpawnData == null)
+            {
+                Debug.LogError("BossSpawnDataが未設定です");
+                enabled = false;
+                return;
+            }
+
+            _context.CurrentSpawnData = _bossSpawnData;
         }
         else
         {
@@ -151,9 +159,9 @@ public class PhaseManager : MonoBehaviour
             _enemyManager.OnBossDefeated -= HandleBossDefeated;
         }
 
-        //if (_skillUIManager != null)
-        //{
-        //    _skillUIManager.OnSkillSelected -= HandleSkillSelected;
-        //}
+        if (_skillUIManager != null)
+        {
+            _skillUIManager.OnSkillSelected -= HandleSkillSelected;
+        }
     }
 }

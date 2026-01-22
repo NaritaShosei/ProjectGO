@@ -1,0 +1,17 @@
+﻿public interface ISkill
+{
+    /// <summary>
+    /// 発動優先度
+    /// </summary>
+    public int Priority { get; }
+
+    /// <summary>
+    /// 発動条件
+    /// </summary>
+    public bool CanApply(AttackContext context,AttackData data);
+
+    /// <summary>
+    /// スキルを発動する
+    /// </summary>
+    public DamageContext Apply(ref AttackContext context);
+}

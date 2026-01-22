@@ -16,7 +16,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
         return _targetCenter;
     }
 
-    public void TakeDamage(AttackContext context)
+    public void TakeDamage(DamageContext context)
     {
         if (context.PlayerMode != PlayerMode.Warrior) { return; }
 

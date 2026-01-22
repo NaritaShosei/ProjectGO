@@ -15,5 +15,5 @@ public interface IEnemy : ICharacter
     /// <summary>
     /// 攻撃の内容を渡して、内部でダメージ計算をする
     /// </summary>
-    public void TakeDamage(AttackContext context);
+    public void TakeDamage(DamageContext context);
 }

@@ -130,10 +130,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab08d01979a6c1c4cbafb1ce60adc259, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestBoss
-  _enemyData: {fileID: 11400000, guid: 4d72027c23dc078418ace48323c4131f, type: 2}
+  _data: {fileID: 11400000, guid: 4d72027c23dc078418ace48323c4131f, type: 2}
   _targetCenter: {fileID: 2830082553299517670}
   _bossPhaseController: {fileID: 7123889049726571300}
   _armer: {fileID: 3501119557689287186}
+  _core: {fileID: 3206612795821594701}
 --- !u!114 &7123889049726571300
 MonoBehaviour:
   m_ObjectHideFlags: 0
