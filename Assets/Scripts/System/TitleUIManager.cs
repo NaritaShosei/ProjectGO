@@ -36,7 +36,7 @@ public class TitleUIManager : MonoBehaviour
 
         // イベントハンドラの登録
         _titlePanelView.OnModeSelectButton += HandleModeSelectButton;
-        _titlePanelView.OnOptionButton += OpunOptuonMenu;
+        _titlePanelView.OnOptionButton += OpenOptionMenu;
     }
 
     private void OnDestroy()
@@ -45,7 +45,7 @@ public class TitleUIManager : MonoBehaviour
         {
             // イベントハンドラの登録解除
             _titlePanelView.OnModeSelectButton -= HandleModeSelectButton;
-            _titlePanelView.OnOptionButton -= ClauseOptionButton;
+            _titlePanelView.OnOptionButton -= OpenOptionMenu;
         }
     }
 
@@ -57,18 +57,20 @@ public class TitleUIManager : MonoBehaviour
         await _sceneTransitionManager.TransitionToScene(_modeSelectSceneName);
     }
 
-    private void ClauseOptionButton()
+    private void CloseOptionButton()
     {
+        _optionPresenter.OnCloseRequested -= CloseOptionButton;
+        _optionPresenter.OnSettingsSaved -= ApplySettingsToGame;
         _optionPresenter.Dispose();
         _optionUIPanel.SetActive(false);
     }
 
-    private void OpunOptuonMenu()
+    private void OpenOptionMenu()
     {
         _optionUIPanel.SetActive(true);
         _optionPresenter = new OptionPresenter(_optionView, _optionModel);
 
-        _optionPresenter.OnCloseRequested += ClauseOptionButton;
+        _optionPresenter.OnCloseRequested += CloseOptionButton;
         _optionPresenter.OnSettingsSaved += ApplySettingsToGame;
     }
 

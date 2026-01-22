@@ -53,18 +53,34 @@ public class OptionView : MonoBehaviour
     private void Start()
     {
         //戻るボタン回り
-        _backButton.onClick.AddListener(() => OnBackButtonClicked());
-        _ResetButton.onClick.AddListener(() => OnResetButtonClicked());
-        _SaveButton.onClick.AddListener(() => OnSaveButtonClicked());
+        _backButton.onClick.AddListener(() => OnBackButtonClicked?.Invoke());
+        _ResetButton.onClick.AddListener(() => OnResetButtonClicked?.Invoke());
+        _SaveButton.onClick.AddListener(() => OnSaveButtonClicked?.Invoke());
 
         //コントローラー設定
-        _controllerVibrationsToggle.onValueChanged.AddListener((value) => OnControllerVibrationsToggleChanged(value));
-        _cameraMoveSpeedSlider.onValueChanged.AddListener((value) => OnCameraMoveSpeedSliderChanged(value));
-        _cameraRotationSensitivitySlider.onValueChanged.AddListener((value) => OnCameraRotationSensitivitySliderChanged(value));
+        _controllerVibrationsToggle.onValueChanged.AddListener((value) => OnControllerVibrationsToggleChanged?.Invoke(value));
+        _cameraMoveSpeedSlider.onValueChanged.AddListener((value) => OnCameraMoveSpeedSliderChanged?.Invoke(value));
+        _cameraRotationSensitivitySlider.onValueChanged.AddListener((value) => OnCameraRotationSensitivitySliderChanged?.Invoke(value));
 
         //音量設定
-        _bgmVolumeSlider.onValueChanged.AddListener((value) => OnBGMVolumeSliderChanged(value));
-        _seVolumeSlider.onValueChanged.AddListener((value) => OnSEVolumeSliderChanged(value));
-        _voiceVolumeSlider.onValueChanged.AddListener((value) => OnVoiceVolumeSliderChanged(value));
+        _bgmVolumeSlider.onValueChanged.AddListener((value) => OnBGMVolumeSliderChanged?.Invoke(value));
+        _seVolumeSlider.onValueChanged.AddListener((value) => OnSEVolumeSliderChanged?.Invoke(value));
+        _voiceVolumeSlider.onValueChanged.AddListener((value) => OnVoiceVolumeSliderChanged?.Invoke(value));
+    }
+
+    private void OnDestroy()
+    {
+        //戻るボタン回り
+        _backButton.onClick.RemoveAllListeners();
+        _ResetButton.onClick.RemoveAllListeners();
+        _SaveButton.onClick.RemoveAllListeners();
+        //コントローラー設定
+        _controllerVibrationsToggle.onValueChanged.RemoveAllListeners();
+        _cameraMoveSpeedSlider.onValueChanged.RemoveAllListeners();
+        _cameraRotationSensitivitySlider.onValueChanged.RemoveAllListeners();
+        //音量設定
+        _bgmVolumeSlider.onValueChanged.RemoveAllListeners();
+        _seVolumeSlider.onValueChanged.RemoveAllListeners();
+        _voiceVolumeSlider.onValueChanged.RemoveAllListeners();
     }
 }
