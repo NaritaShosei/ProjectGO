@@ -59,14 +59,24 @@ public class TitleUIManager : MonoBehaviour
 
     private void CloseOptionButton()
     {
-        _optionPresenter.OnCloseRequested -= CloseOptionButton;
-        _optionPresenter.OnSettingsSaved -= ApplySettingsToGame;
-        _optionPresenter.Dispose();
+        if (_optionPresenter != null)
+        {
+            _optionPresenter.OnCloseRequested -= CloseOptionButton;
+            _optionPresenter.OnSettingsSaved -= ApplySettingsToGame;
+            _optionPresenter.Dispose();
+            _optionPresenter = null;
+        }
         _optionUIPanel.SetActive(false);
     }
 
     private void OpenOptionMenu()
     {
+        // 既に開いている場合リターン
+        if (_optionUIPanel.activeSelf && _optionPresenter != null)
+        {
+            return;
+        }
+
         _optionUIPanel.SetActive(true);
         _optionPresenter = new OptionPresenter(_optionView, _optionModel);
 
