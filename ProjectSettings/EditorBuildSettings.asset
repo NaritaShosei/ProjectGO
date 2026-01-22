@@ -12,8 +12,14 @@ EditorBuildSettings:
     path: Assets/Scenes/SceneTransitionDev/OptionDev.unity
     guid: b803499d4da2092448fa3cafab55dd30
   - enabled: 1
-    path: Assets/Scenes/SceneTransitionDev/TestInGame.unity
+    path: Assets/Scenes/SceneTransitionDev/InGameScene.unity
     guid: 3400b34f6a1bd7746aa68b0d02bd6b03
+  - enabled: 1
+    path: Assets/Scenes/SceneTransitionDev/BossModeScene.unity
+    guid: ad04d49c61f9ce6438318940f4129bb4
+  - enabled: 1
+    path: Assets/Scenes/SceneTransitionDev/PracticeModeScene.unity
+    guid: 0d787548687a698498171c4839cf8cc4
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 957e69c2a6cc3a142bc73a80b29469db, type: 3}
