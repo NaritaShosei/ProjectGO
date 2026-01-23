@@ -4,23 +4,58 @@ using UnityEngine;
 [Serializable]
 public class GameSetting
 {
-    [Header("コントローラー設定")]
-    public bool IsControllerVibrations = true;
-    [Range(0f, 1f)] public float CameraMoveSpeed = 0.5f;
-    [Range(0f, 1f)] public float CameraRotationSensitivity = 0.5f;
+    // プロパティ
+    public bool IsControllerVibrations
+    {
+        get => isControllerVibrations;
+        set => isControllerVibrations = value;
+    }
 
-    [Header("音量設定")]
-    [Range(0f, 1f)] public float BGMVolume = 0.5f;
-    [Range(0f, 1f)] public float SEVolume = 0.5f;
-    [Range(0f, 1f)] public float VoiceVolume = 0.5f;
+    public float CameraMoveSpeed
+    {
+        get => cameraMoveSpeed;
+        set => cameraMoveSpeed = Mathf.Clamp01(value);
+    }
+
+    public float CameraRotationSensitivity
+    {
+        get => cameraRotationSensitivity;
+        set => cameraRotationSensitivity = Mathf.Clamp01(value);
+    }
+
+    public float BGMVolume
+    {
+        get => bgmVolume;
+        set => bgmVolume = Mathf.Clamp01(value);
+    }
+
+    public float SEVolume
+    {
+        get => seVolume;
+        set => seVolume = Mathf.Clamp01(value);
+    }
+
+    public float VoiceVolume
+    {
+        get => voiceVolume;
+        set => voiceVolume = Mathf.Clamp01(value);
+    }
 
     public GameSetting Clone()
     {
         return (GameSetting)this.MemberwiseClone();
     }
 
-    public static GameSetting GetDefault()
-    {
-        return new GameSetting();
-    }
+    // 静的な読み取り専用デフォルト値
+    public static readonly GameSetting Default = new GameSetting();
+
+    [Header("コントローラー設定")]
+    [SerializeField] private bool isControllerVibrations = true;
+    [SerializeField, Range(0f, 1f)] private float cameraMoveSpeed = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float cameraRotationSensitivity = 0.5f;
+
+    [Header("音量設定")]
+    [SerializeField, Range(0f, 1f)] private float bgmVolume = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float seVolume = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float voiceVolume = 0.5f;
 }
