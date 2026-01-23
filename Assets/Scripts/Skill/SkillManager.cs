@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SkillManager : MonoBehaviour
@@ -37,6 +38,19 @@ public class SkillManager : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 与えられた数分ランダムにスキルを取得
+    /// </summary>
+    public List<SkillBase> GetSelectableSkills(int count)
+    {
+        return _skillDataBase.GetAllSkills()
+            .Where(s => !_ownedSkillIDs.Contains(s.ID))
+            .OrderBy(_ => Random.value)
+            .Take(count)
+            .ToList();
+    }
+
 
     [SerializeField] private SkillDataBase _skillDataBase;
 
