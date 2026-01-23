@@ -34,7 +34,7 @@ public struct SequenceContext
 {
     public SkillManager SkillManager;
     public EnemyManager EnemyManager;
-    public ISkillSelectView SkillUIManager;
+    public ISkillSelectView SkillSelectView;
     public SpawnData CurrentSpawnData;
 
     public int SkillSelectCount;

@@ -54,7 +54,7 @@ public class SequenceManager : MonoBehaviour
         _context = new SequenceContext
         {
             EnemyManager = _enemyManager,
-            SkillUIManager = _skillUIManager,
+            SkillSelectView = _skillUIManager,
             SkillManager = _skillManager,
             SkillSelectCount = _skillSelectCount,
         };

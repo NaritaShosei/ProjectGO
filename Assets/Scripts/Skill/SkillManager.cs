@@ -21,7 +21,7 @@ public class SkillManager : MonoBehaviour
     /// <summary>
     /// 開放済みのIDを取得する
     /// </summary>
-    public List<int> GetOwnedSkillIDs() => _ownedSkillIDs;
+    public IReadOnlyList<int> GetOwnedSkillIDs() => _ownedSkillIDs.ToList();
 
     /// <summary>
     /// スキルの列挙を返す
@@ -54,5 +54,5 @@ public class SkillManager : MonoBehaviour
 
     [SerializeField] private SkillDataBase _skillDataBase;
 
-    private List<int> _ownedSkillIDs = new List<int>();
+    private HashSet<int> _ownedSkillIDs = new HashSet<int>();
 }
