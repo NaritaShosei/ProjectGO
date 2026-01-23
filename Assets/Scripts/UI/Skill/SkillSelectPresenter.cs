@@ -25,7 +25,7 @@ public class SkillSelectPresenter
                 s.ID,
                 s.Name,
                 s.Explanation,
-                null // 必要なら SkillBase に持たせる
+                s.Icon
             ))
             .ToList();
 
