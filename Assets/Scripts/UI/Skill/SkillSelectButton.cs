@@ -11,7 +11,11 @@ public class SkillSelectButton : MonoBehaviour
         _explanationText.text = viewData.Explanation;
         _icon.sprite = viewData.Icon;
 
-        _selectButton.onClick.AddListener(onClick.Invoke);
+        _selectButton.onClick.RemoveAllListeners();
+        if (onClick != null)
+        {
+            _selectButton.onClick.AddListener(onClick.Invoke);
+        }
     }
 
     [SerializeField] private Button _selectButton;
