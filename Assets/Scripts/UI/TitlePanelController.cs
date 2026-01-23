@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// テスト機能、タイトルパネルのコントローラー
+/// </summary>
 public class TitlePanelController : MonoBehaviour
 {
     [SerializeField]
