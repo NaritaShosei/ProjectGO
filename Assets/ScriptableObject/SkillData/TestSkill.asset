@@ -9,7 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 724da7254266e4149bc5e26b34291889, type: 3}
-  m_Name: BossBattleSequenceData
-  m_EditorClassIdentifier: Assembly-CSharp::BossBattlePhaseData
-  _sequenceType: 2
+  m_Script: {fileID: 11500000, guid: dc5a41248bd5bc44d95784974901c564, type: 3}
+  m_Name: TestSkill
+  m_EditorClassIdentifier: Assembly-CSharp::TestSkill
+  _id: 1
+  _priority: 0
+  _name: Test1
+  _explanation: "\u3059\u3079\u3066\u540C\u3058\u30B9\u30AD\u30EB"

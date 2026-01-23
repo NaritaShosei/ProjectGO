@@ -2,39 +2,42 @@
 
 public abstract class SequenceBase : ScriptableObject
 {
-    public PhaseType PhaseType => _phaseType;
+    public SequenceType SequenceType => _sequenceType;
 
     /// <summary>
-    /// フェーズが完了したかチェック
+    /// シークエンスが完了したかチェック
     /// </summary>
-    public abstract bool IsComplete(PhaseContext context);
+    public abstract bool IsComplete(SequenceContext context);
 
     /// <summary>
-    /// フェーズ開始時の処理
+    /// シークエンス開始時の処理
     /// </summary>
-    public abstract void OnPhaseStart(PhaseContext context);
+    public abstract void OnSequenceStart(SequenceContext context);
 
     /// <summary>
-    /// フェーズ更新処理
+    /// シークエンス更新処理
     /// </summary>
-    public abstract void OnPhaseUpdate(PhaseContext context);
+    public abstract void OnSequenceUpdate(SequenceContext context);
 
     [Header("基本設定")]
-    [SerializeField] protected PhaseType _phaseType;
+    [SerializeField] protected SequenceType _sequenceType;
 }
 
-public enum PhaseType
+public enum SequenceType
 {
-    Enemy,      // 雑魚敵フェーズ
-    Skill,      // スキル獲得フェーズ
-    Boss        // ボスフェーズ
+    Enemy,      // 雑魚敵シークエンス
+    Skill,      // スキル獲得シークエンス
+    Boss        // ボスシークエンス
 }
 
-public struct PhaseContext
+public struct SequenceContext
 {
+    public SkillManager SkillManager;
     public EnemyManager EnemyManager;
-    public ISkillSelectUIManager SkillUIManager;
+    public ISkillSelectView SkillSelectView;
     public SpawnData CurrentSpawnData;
+
+    public int SkillSelectCount;
 
     // 状態
     public int RemainingEnemies;    // 残り敵数

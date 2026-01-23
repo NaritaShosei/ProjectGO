@@ -4,12 +4,12 @@
 
 public class BossBattleSequence : SequenceBase
 {
-    public override bool IsComplete(PhaseContext context)
+    public override bool IsComplete(SequenceContext context)
     {
         return context.BossDefeated;
     }
 
-    public override void OnPhaseStart(PhaseContext context)
+    public override void OnSequenceStart(SequenceContext context)
     {
         // 敵生成処理
         if (context.CurrentSpawnData != null)
@@ -19,7 +19,7 @@ public class BossBattleSequence : SequenceBase
         }
     }
 
-    public override void OnPhaseUpdate(PhaseContext context)
+    public override void OnSequenceUpdate(SequenceContext context)
     {
         // 毎フレームの更新処理
     }
