@@ -2,10 +2,10 @@
 
 public class SequenceManager : MonoBehaviour
 {
-    public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequences.Length;
+    public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequenceDataBase.Sequences.Count;
 
     [Header("シークエンス設定")]
-    [SerializeField] private SequenceBase[] _sequences;
+    [SerializeField] private SequenceDataBase _sequenceDataBase;
     [SerializeField] private int _skillSelectCount = 3;
 
     [Header("敵生成設定")]
@@ -78,14 +78,14 @@ public class SequenceManager : MonoBehaviour
 
     private void StartSequence(int sequenceIndex)
     {
-        if (sequenceIndex >= _sequences.Length)
+        if (sequenceIndex >= _sequenceDataBase.Sequences.Count)
         {
             OnAllSequenceComplete();
             return;
         }
 
         _currentSequenceIndex = sequenceIndex;
-        _currentSequence = _sequences[sequenceIndex];
+        _currentSequence = _sequenceDataBase.Sequences[sequenceIndex];
         _sequenceStartTime = Time.time;
 
         // コンテキストのリセット
