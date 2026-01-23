@@ -4,7 +4,6 @@ using UnityEngine;
 [Serializable]
 public class GameSetting
 {
-    // プロパティ
     public bool IsControllerVibrations
     {
         get => isControllerVibrations;
@@ -41,13 +40,22 @@ public class GameSetting
         set => voiceVolume = Mathf.Clamp01(value);
     }
 
+    /// <summary>
+    /// 現在の設定のコピーを返す
+    /// </summary>
+    /// <returns></returns>
     public GameSetting Clone()
     {
         return (GameSetting)this.MemberwiseClone();
     }
 
-    // 静的な読み取り専用デフォルト値
-    public static readonly GameSetting Default = new GameSetting();
+    /// <summary>
+    /// 初期の値を返す
+    /// </summary>
+    public static GameSetting GetDefault()
+    {
+        return _default.Clone();
+    }
 
     [Header("コントローラー設定")]
     [SerializeField] private bool isControllerVibrations = true;
@@ -58,4 +66,6 @@ public class GameSetting
     [SerializeField, Range(0f, 1f)] private float bgmVolume = 0.5f;
     [SerializeField, Range(0f, 1f)] private float seVolume = 0.5f;
     [SerializeField, Range(0f, 1f)] private float voiceVolume = 0.5f;
+
+    private static readonly GameSetting _default = new GameSetting();
 }
