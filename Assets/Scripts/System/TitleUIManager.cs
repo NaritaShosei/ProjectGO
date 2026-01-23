@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class TitleUIManager : MonoBehaviour
 {
@@ -6,11 +7,7 @@ public class TitleUIManager : MonoBehaviour
     [SerializeField]
     private TitlePanelView _titlePanelView;
 
-    [Header("シーン遷移先")]
-    [SerializeField]
-    private string _modeSelectSceneName;
-
-    // オプション関連
+    [Header("オプションパネル設定")]
     [SerializeField]
     private OptionModel _optionModel;
     [SerializeField]
@@ -18,8 +15,18 @@ public class TitleUIManager : MonoBehaviour
     [SerializeField]
     private GameObject _optionUIPanel;
 
+    [Header("モードセレクトパネル設定")]
+    [SerializeField]
+    private ModeSelectModel _modeSelectModel;
+    [SerializeField]
+    private ModeSelectView _modeSelectView;
+    [SerializeField]
+    private GameObject _modeSelectPanel;
+    private ModeSelectPresenter _modeSelectPresenter;
+
     private SceneTransitionManager _sceneTransitionManager;
     private OptionPresenter _optionPresenter;
+
 
     private void Start()
     {
@@ -35,8 +42,8 @@ public class TitleUIManager : MonoBehaviour
         }
 
         // イベントハンドラの登録
-        _titlePanelView.OnModeSelectButton += HandleModeSelectButton;
-        _titlePanelView.OnOptionButton += OpenOptionMenu;
+        _titlePanelView.OnModeSelectButton += OpenModeSelectPanel;
+        _titlePanelView.OnOptionButton += OpenOptionPanel;
     }
 
     private void OnDestroy()
@@ -44,32 +51,61 @@ public class TitleUIManager : MonoBehaviour
         if (_titlePanelView != null)
         {
             // イベントハンドラの登録解除
-            _titlePanelView.OnModeSelectButton -= HandleModeSelectButton;
-            _titlePanelView.OnOptionButton -= OpenOptionMenu;
+            _titlePanelView.OnModeSelectButton -= OpenModeSelectPanel;
+            _titlePanelView.OnOptionButton -= OpenOptionPanel;
         }
     }
 
     /// <summary>
-    /// 仮実装、ゆくゆくはモードセレクトパネルを表示する予定
+    /// モードセレクトパネルを開く
     /// </summary>
-    private async void HandleModeSelectButton()
+    private void OpenModeSelectPanel()
     {
-        await _sceneTransitionManager.TransitionToScene(_modeSelectSceneName);
-    }
-
-    private void CloseOptionButton()
-    {
-        if (_optionPresenter != null)
+        if (_modeSelectPanel.activeSelf && _modeSelectPresenter != null)
         {
-            _optionPresenter.OnCloseRequested -= CloseOptionButton;
-            _optionPresenter.OnSettingsSaved -= ApplySettingsToGame;
-            _optionPresenter.Dispose();
-            _optionPresenter = null;
+            return;
         }
-        _optionUIPanel.SetActive(false);
+
+        // モードセレクトパネルを表示
+        _modeSelectPanel.SetActive(true);
+        _modeSelectPresenter = new ModeSelectPresenter(_modeSelectView, _modeSelectModel);
+
+        // イベントハンドラの登録
+        _modeSelectPresenter.OnSceneSelected += SceneTransitionToScene;
+        _modeSelectPresenter.OnModeSelectCloseRequested += CloseModeSelectPanel;
     }
 
-    private void OpenOptionMenu()
+    /// <summary>
+    /// モードセレクトパネルを閉じる
+    /// </summary>
+    private void CloseModeSelectPanel()
+    {
+        if (_modeSelectPresenter != null)
+        {
+            _modeSelectPresenter.OnSceneSelected -= SceneTransitionToScene;
+            _modeSelectPresenter.OnModeSelectCloseRequested -= CloseModeSelectPanel;
+            _modeSelectPresenter.Dispose();
+            _modeSelectPresenter = null;
+        }
+        _modeSelectPanel.SetActive(false);
+    }
+
+    private async void SceneTransitionToScene(string sceneName)
+    {
+        try
+        {
+            await _sceneTransitionManager.TransitionToScene(sceneName);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"シーン遷移中にエラーが発生しました: {ex.Message}", this);
+        }
+    }
+
+    /// <summary>
+    /// オプション画面を開く
+    /// </summary>
+    private void OpenOptionPanel()
     {
         // 既に開いている場合リターン
         if (_optionUIPanel.activeSelf && _optionPresenter != null)
@@ -80,10 +116,24 @@ public class TitleUIManager : MonoBehaviour
         _optionUIPanel.SetActive(true);
         _optionPresenter = new OptionPresenter(_optionView, _optionModel);
 
-        _optionPresenter.OnCloseRequested += CloseOptionButton;
+        _optionPresenter.OnOptionCloseRequested += CloseOptionPanel;
         _optionPresenter.OnSettingsSaved += ApplySettingsToGame;
     }
 
+    /// <summary>
+    /// オプション画面を閉じる
+    /// </summary>
+    private void CloseOptionPanel()
+    {
+        if (_optionPresenter != null)
+        {
+            _optionPresenter.OnOptionCloseRequested -= CloseOptionPanel;
+            _optionPresenter.OnSettingsSaved -= ApplySettingsToGame;
+            _optionPresenter.Dispose();
+            _optionPresenter = null;
+        }
+        _optionUIPanel.SetActive(false);
+    }
 
     /// <summary>
     /// 今は使わない予定、未実装
