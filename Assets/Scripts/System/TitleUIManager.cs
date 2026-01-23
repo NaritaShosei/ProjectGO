@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class TitleUIManager : MonoBehaviour
 {
@@ -60,6 +61,11 @@ public class TitleUIManager : MonoBehaviour
     /// </summary>
     private void OpenModeSelectPanel()
     {
+        if (_modeSelectPanel.activeSelf && _modeSelectPresenter != null)
+        {
+            return;
+        }
+
         // モードセレクトパネルを表示
         _modeSelectPanel.SetActive(true);
         _modeSelectPresenter = new ModeSelectPresenter(_modeSelectView, _modeSelectModel);
@@ -76,6 +82,7 @@ public class TitleUIManager : MonoBehaviour
     {
         if (_modeSelectPresenter != null)
         {
+            _modeSelectPresenter.OnSceneSelected -= SceneTransitionToScene;
             _modeSelectPresenter.OnModeSelectCloseRequested -= CloseModeSelectPanel;
             _modeSelectPresenter.Dispose();
             _modeSelectPresenter = null;
@@ -85,7 +92,14 @@ public class TitleUIManager : MonoBehaviour
 
     private async void SceneTransitionToScene(string sceneName)
     {
-        await _sceneTransitionManager.TransitionToScene(sceneName);
+        try
+        {
+            await _sceneTransitionManager.TransitionToScene(sceneName);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"シーン遷移中にエラーが発生しました: {ex.Message}", this);
+        }
     }
 
     /// <summary>

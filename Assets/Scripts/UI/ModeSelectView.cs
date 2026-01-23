@@ -19,6 +19,14 @@ public class ModeSelectView : MonoBehaviour
     [SerializeField]
     private Button _backButton;
 
+    private void Awake()
+    {
+        Debug.Assert(_inGameModeButton != null, "[ModeSelectView] _inGameModeButton が未設定です");
+        Debug.Assert(_bossModeButton != null, "[ModeSelectView] _bossModeButton が未設定です");
+        Debug.Assert(_practiceModeButton != null, "[ModeSelectView] _practiceModeButton が未設定です");
+        Debug.Assert(_backButton != null, "[ModeSelectView] _backButton が未設定です");
+    }
+
     private void Start()
     {
         // ボタンのクリックイベントにリスナーを追加

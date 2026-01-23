@@ -25,6 +25,11 @@ public class OptionModel : MonoBehaviour
     /// <param name="settings">変更済みの設定</param>
     public void Apply(GameSetting settings)
     {
+        if (settings == null)
+        {
+            Debug.LogError("[OptionModel] Applyにnullが渡されました");
+            return;
+        }
         _currentGameSettings = settings.Clone();
         Debug.Log("[OptionModel] 設定を適用しました");
     }
