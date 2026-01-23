@@ -44,6 +44,12 @@ public class SkillManager : MonoBehaviour
     /// </summary>
     public List<SkillBase> GetSelectableSkills(int count)
     {
+        if (_skillDataBase == null)
+        {
+            Debug.LogWarning("SkillDataBaseが未設定です");
+            return new List<SkillBase>();
+        }
+
         return _skillDataBase.GetAllSkills()
             .Where(s => !_ownedSkillIDs.Contains(s.ID))
             .OrderBy(_ => Random.value)

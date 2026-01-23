@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
-public class SkillSelectPresenter
+public class SkillSelectPresenter:IDisposable
 {
     public SkillSelectPresenter(
       SkillManager skillManager,
@@ -30,6 +31,11 @@ public class SkillSelectPresenter
             .ToList();
 
         _view.Show(viewData);
+    }
+
+    public void Dispose()
+    {
+        _view.OnSkillSelected -= OnSkillSelected;
     }
 
     private readonly SkillManager _skillManager;
