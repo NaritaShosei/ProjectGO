@@ -2,10 +2,11 @@
 
 public class SequenceManager : MonoBehaviour
 {
-    public bool IsAllPhasesComplete => _currentPhaseIndex >= _phases.Length;
+    public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequences.Length;
 
-    [Header("フェーズ設定")]
-    [SerializeField] private SequenceBase[] _phases;
+    [Header("シークエンス設定")]
+    [SerializeField] private SequenceBase[] _sequences;
+    [SerializeField] private int _skillSelectCount = 3;
 
     [Header("敵生成設定")]
     [SerializeField] private SpawnDataRepository _spawnDataRepository;
@@ -13,13 +14,14 @@ public class SequenceManager : MonoBehaviour
 
     [Header("依存関係")]
     [SerializeField] private EnemyManager _enemyManager;
-    [SerializeField] private SkillUIManager _skillUIManager;
+    [SerializeField] private SkillSelectView _skillUIManager;
+    [SerializeField] private SkillManager _skillManager;
 
-    private int _currentPhaseIndex = 0;
-    private int _enemyPhaseCount = 0;  // 何番目の雑魚敵フェーズか
-    private SequenceBase _currentPhase;
-    private PhaseContext _context;
-    private float _phaseStartTime;
+    private int _currentSequenceIndex = 0;
+    private int _enemySequenceCount = 0;  // 何番目の雑魚敵シークエンスか
+    private SequenceBase _currentSequence;
+    private SequenceContext _context;
+    private float _sequenceStartTime;
 
     private void Start()
     {
@@ -31,35 +33,37 @@ public class SequenceManager : MonoBehaviour
         }
 
         InitializeContext();
-        StartPhase(0);
+        StartSequence(0);
     }
 
     private void Update()
     {
-        if (_currentPhase == null || IsAllPhasesComplete) return;
+        if (_currentSequence == null || IsAllSequencesComplete) return;
 
         UpdateContext();
-        _currentPhase.OnPhaseUpdate(_context);
+        _currentSequence.OnSequenceUpdate(_context);
 
-        if (_currentPhase.IsComplete(_context))
+        if (_currentSequence.IsComplete(_context))
         {
-            NextPhase();
+            NextSequence();
         }
     }
 
     private void InitializeContext()
     {
-        _context = new PhaseContext
+        _context = new SequenceContext
         {
             EnemyManager = _enemyManager,
-            SkillUIManager = _skillUIManager
+            SkillUIManager = _skillUIManager,
+            SkillManager = _skillManager,
+            SkillSelectCount = _skillSelectCount,
         };
 
         // EnemyManagerのイベント購読
         _enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
         _enemyManager.OnBossDefeated += HandleBossDefeated;
 
-       // SkillUIManagerのイベント購読
+        // SkillUIManagerのイベント購読
         if (_skillUIManager != null)
         {
             _skillUIManager.OnSkillSelected += HandleSkillSelected;
@@ -69,42 +73,42 @@ public class SequenceManager : MonoBehaviour
     private void UpdateContext()
     {
         _context.RemainingEnemies = _enemyManager.GetEnemyCount();
-        _context.ElapsedTime = Time.time - _phaseStartTime;
+        _context.ElapsedTime = Time.time - _sequenceStartTime;
     }
 
-    private void StartPhase(int phaseIndex)
+    private void StartSequence(int sequenceIndex)
     {
-        if (phaseIndex >= _phases.Length)
+        if (sequenceIndex >= _sequences.Length)
         {
-            OnAllPhasesComplete();
+            OnAllSequenceComplete();
             return;
         }
 
-        _currentPhaseIndex = phaseIndex;
-        _currentPhase = _phases[phaseIndex];
-        _phaseStartTime = Time.time;
+        _currentSequenceIndex = sequenceIndex;
+        _currentSequence = _sequences[sequenceIndex];
+        _sequenceStartTime = Time.time;
 
         // コンテキストのリセット
         _context.ElapsedTime = 0f;
         _context.DefeatedCount = 0;
         _context.SkillSelected = false;
 
-        // 雑魚敵フェーズの場合、対応するSpawnDataを設定
-        if (_currentPhase.PhaseType == PhaseType.Enemy)
+        // 雑魚敵シークエンスの場合、対応するSpawnDataを設定
+        if (_currentSequence.SequenceType == SequenceType.Enemy)
         {
-            if (_enemyPhaseCount < _spawnDataRepository.SpawnDatas.Length)
+            if (_enemySequenceCount < _spawnDataRepository.SpawnDatas.Length)
             {
-                _context.CurrentSpawnData = _spawnDataRepository.SpawnDatas[_enemyPhaseCount];
-                _enemyPhaseCount++;
+                _context.CurrentSpawnData = _spawnDataRepository.SpawnDatas[_enemySequenceCount];
+                _enemySequenceCount++;
             }
             else
             {
-                Debug.LogWarning($"SpawnDataが不足しています。EnemyPhase: {_enemyPhaseCount}");
+                Debug.LogWarning($"SpawnDataが不足しています。EnemySequence: {_enemySequenceCount}");
             }
         }
-        else if (_currentPhase.PhaseType == PhaseType.Boss)
+        else if (_currentSequence.SequenceType == SequenceType.Boss)
         {
-            // ボスフェーズは特定のSpawnDataを使うか、直接生成するか
+            // ボスシークエンスは特定のSpawnDataを使うか、直接生成するか
             if (_bossSpawnData == null)
             {
                 Debug.LogError("BossSpawnDataが未設定です");
@@ -119,20 +123,20 @@ public class SequenceManager : MonoBehaviour
             _context.CurrentSpawnData = null;
         }
 
-        Debug.Log($"フェーズ開始: {_currentPhase.PhaseType} (Phase {phaseIndex + 1})");
+        Debug.Log($"シークエンス開始: {_currentSequence.SequenceType} (Sequence {sequenceIndex + 1})");
 
-        _currentPhase.OnPhaseStart(_context);
+        _currentSequence.OnSequenceStart(_context);
     }
 
-    private void NextPhase()
+    private void NextSequence()
     {
-        Debug.Log($"フェーズ完了: {_currentPhase.PhaseType}");
-        StartPhase(_currentPhaseIndex + 1);
+        Debug.Log($"シークエンス完了: {_currentSequence.SequenceType}");
+        StartSequence(_currentSequenceIndex + 1);
     }
 
-    private void OnAllPhasesComplete()
+    private void OnAllSequenceComplete()
     {
-        Debug.Log("全フェーズクリア！");
+        Debug.Log("全シークエンスクリア！");
         // ゲームクリア処理
     }
 
@@ -146,7 +150,7 @@ public class SequenceManager : MonoBehaviour
         _context.BossDefeated = true;
     }
 
-    private void HandleSkillSelected()
+    private void HandleSkillSelected(int skillid)
     {
         _context.SkillSelected = true;
     }

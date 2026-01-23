@@ -4,12 +4,12 @@
 
 public class SkillSelectSequence : SequenceBase
 {
-    public override bool IsComplete(PhaseContext context)
+    public override bool IsComplete(SequenceContext context)
     {
         return context.SkillSelected;
     }
 
-    public override void OnPhaseStart(PhaseContext context)
+    public override void OnSequenceStart(SequenceContext context)
     {
         if (context.SkillUIManager == null)
         {
@@ -22,7 +22,7 @@ public class SkillSelectSequence : SequenceBase
         _presenter.Open(context.SkillSelectCount);
     }
 
-    public override void OnPhaseUpdate(PhaseContext context)
+    public override void OnSequenceUpdate(SequenceContext context)
     {
         // 毎フレームの更新
     }
