@@ -17,11 +17,15 @@ public class SkillSelectSequence : SequenceBase
             return;
         }
 
-        context.SkillUIManager.Show();
+        _presenter = new SkillSelectPresenter(context.SkillManager,context.SkillUIManager);
+
+        _presenter.Open(context.SkillSelectCount);
     }
 
     public override void OnPhaseUpdate(PhaseContext context)
     {
         // 毎フレームの更新
     }
+
+    private SkillSelectPresenter _presenter;
 }
