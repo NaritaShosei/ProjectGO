@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
-    // デバッグ用
-    [SerializeField] private SkillBase skill;
-    public void Init(float power)
+    public void Init(float power, SkillManager manager)
     {
         _attackPower = power;
+        _skillManager = manager;
     }
 
     /// <summary>
@@ -28,8 +29,9 @@ public class AttackExecutor : MonoBehaviour
             PlayerMode = data.Mode
         };
 
-        // スキルの検索等はここで
-        var skillContext = skill.Apply(ref context);
+        // 取得済みスキルの中から条件に合うものを取得して適用
+        var applicableSkills = GetApplicableSkills(context, data);
+        var damageContext = ApplySkills(ref context, applicableSkills);
 
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
@@ -41,7 +43,7 @@ public class AttackExecutor : MonoBehaviour
                 // ヒットの瞬間(敵毎)スキルを発動
                 context.OnHit?.Invoke();
 
-                enemy.TakeDamage(skillContext);
+                enemy.TakeDamage(damageContext);
             }
         }
 
@@ -50,6 +52,44 @@ public class AttackExecutor : MonoBehaviour
     }
 
     private float _attackPower;
+    private SkillManager _skillManager;
+
+    /// <summary>
+    /// 条件に合う取得済みスキルを優先度順に取得
+    /// </summary>
+    private List<SkillBase> GetApplicableSkills(AttackContext context, AttackData data)
+    {
+        if (_skillManager == null)
+        {
+            return new List<SkillBase>();
+        }
+
+        return _skillManager.GetOwnedSkills()
+            .Where(skill => skill.CanApply(context, data))
+            .OrderByDescending(skill => skill.Priority)
+            .ToList();
+    }
+
+    /// <summary>
+    /// 複数のスキルを順番に適用
+    /// </summary>
+    private DamageContext ApplySkills(ref AttackContext context, List<SkillBase> skills)
+    {
+        var damageContext = new DamageContext
+        {
+            Damage = context.Damage,
+            PlayerMode = context.PlayerMode,
+        };
+
+        foreach (var skill in skills)
+        {
+            // 各スキルが前のスキルの結果を受け取って処理
+            context.Damage = damageContext.Damage;
+            damageContext = skill.Apply(ref context);
+        }
+
+        return damageContext;
+    }
 
     [SerializeField] private LayerMask _layer;
 
