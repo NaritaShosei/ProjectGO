@@ -79,7 +79,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
             this,
             _modeController);
 
-        _attackExecutor?.Init(_playerData.AttackPower);
+        _attackExecutor?.Init(_playerData.AttackPower, ServiceLocator.Get<SkillManager>());
+
         _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
 
         // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
