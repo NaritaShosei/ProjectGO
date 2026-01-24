@@ -21,21 +21,17 @@ public class ResultPanelPresenter
 
     private ResultPanelView _resultPanelView;
     private ResultPanelModel _resultPanelModel;
+
+    private const string TitleClearedText = "ゲームクリア";
+    private const string TitleGameOverText = "ゲームオーバー";
+
     private void InitializeResultPanel()
     {
         // Modelから結果データを取得してUIに反映
         var resultData = _resultPanelModel.GetResultData();
 
-        // 概要
-        if (resultData.IsCleared)
-        {
-            _resultPanelView.SetTitleText("Cleared");
-        }
-        else
-        {
-            _resultPanelView.SetTitleText("GameOver");
-        }
-
+        // クリアしたか否か
+        _resultPanelView.SetTitleText(resultData.IsCleared ? TitleClearedText : TitleGameOverText);
         _resultPanelView.SetClearWaveCount($"突破ウェーブ数: {resultData.ClearWaveCount.ToString()}");
         // 戦績
         _resultPanelView.SetKillCount($"撃破数: {resultData.KillCount.ToString()}");
