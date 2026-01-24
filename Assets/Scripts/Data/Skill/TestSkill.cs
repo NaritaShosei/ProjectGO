@@ -15,6 +15,6 @@ public class TestSkill : SkillBase
 
     public override bool CanApply(AttackContext context, AttackData data)
     {
-        return data.ComboIndex == 2;
+        return data.RequiredCharge == ChargeLevel.Level2;
     }
 }
