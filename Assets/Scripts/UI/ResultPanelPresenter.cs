@@ -36,13 +36,13 @@ public class ResultPanelPresenter
             _resultPanelView.SetTitleText("GameOver");
         }
 
-        _resultPanelView.SetClearWaveCount(resultData.ClearWaveCountText);
+        _resultPanelView.SetClearWaveCount($"突破ウェーブ数: {resultData.ClearWaveCount.ToString()}");
         // 戦績
-        _resultPanelView.SetKillCount(resultData.KillCountText);
-        _resultPanelView.SetComboCount(resultData.ComboCountText);
-        _resultPanelView.SetDamageCount(resultData.DamageCountText);
-        _resultPanelView.SetTakeDamageCount(resultData.TakeDamageCountText);
-        _resultPanelView.SetHealingCount(resultData.HealingCountText);
+        _resultPanelView.SetKillCount($"撃破数: {resultData.KillCount.ToString()}");
+        _resultPanelView.SetComboCount($"最大コンボ数: {resultData.ComboCount.ToString()}");
+        _resultPanelView.SetDamageCount($"累計与ダメージ: {resultData.DamageCount.ToString()}");
+        _resultPanelView.SetTakeDamageCount($"累計被ダメージ: {resultData.TakeDamageCount.ToString()}");
+        _resultPanelView.SetHealingCount($"累計回復量: {resultData.HealingCount.ToString()}");
         // ビルド構成
         _resultPanelView.SetBuildBalance(resultData.BuildBalanceText);
         _resultPanelView.SetSkillList(resultData.SkillListText);

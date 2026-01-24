@@ -18,7 +18,7 @@ public class SceneTransitionManager : MonoBehaviour
     /// </summary>
     public async UniTask TransitionToTitle()
     {
-        await LoadSceneAsync("Title");
+        await LoadSceneAsync("TitleScene");
     }
 
     public async UniTask TransitionToResult()
