@@ -79,10 +79,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
             this,
             _modeController);
 
-        if (ServiceLocator.TryGet(out SkillManager skillManager))
-        {
-            _attackExecutor?.Init(_playerData.AttackPower, skillManager);
-        }
+        _attackExecutor?.Init(_playerData.AttackPower, ServiceLocator.Get<SkillManager>());
 
         _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
 
