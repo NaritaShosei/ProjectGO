@@ -24,7 +24,7 @@ public class SkillManager : MonoBehaviour
     public IReadOnlyList<int> GetOwnedSkillIDs() => _ownedSkillIDs.ToList();
 
     /// <summary>
-    /// スキルの列挙を返す
+    /// 取得済みスキルの列挙を返す
     /// </summary>
     public IEnumerable<SkillBase> GetOwnedSkills()
     {
@@ -61,4 +61,17 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private SkillDataBase _skillDataBase;
 
     private HashSet<int> _ownedSkillIDs = new HashSet<int>();
+
+    private void Awake()
+    {
+        ServiceLocator.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        if (ServiceLocator.IsRegistered<SkillManager>())
+        {
+            ServiceLocator.Unregister<SkillManager>();
+        }
+    }
 }
