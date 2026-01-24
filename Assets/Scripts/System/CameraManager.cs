@@ -11,4 +11,12 @@ public class CameraManager : MonoBehaviour
 
         ServiceLocator.Register(this);
     }
+
+    private void OnDestroy()
+    {
+        if (ServiceLocator.IsRegistered<CameraManager>())
+        {
+            ServiceLocator.Unregister<CameraManager>();
+        }
+    }
 }
