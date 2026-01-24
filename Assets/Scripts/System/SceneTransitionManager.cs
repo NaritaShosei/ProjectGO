@@ -21,11 +21,21 @@ public class SceneTransitionManager : MonoBehaviour
         await LoadSceneAsync("Title");
     }
 
+    public async UniTask TransitionToResult()
+    {
+        await LoadSceneAsync("Result");
+    }
+
     private void Awake()
     {
         if (!ServiceLocator.IsRegistered<SceneTransitionManager>())
         {
             ServiceLocator.Register(this);
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
