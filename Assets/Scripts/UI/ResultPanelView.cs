@@ -20,12 +20,12 @@ public class ResultPanelView : MonoBehaviour
     public void SetComboCount(string text) => _comboCount.text = text;
     public void SetDamageCount(string text) => _damageCount.text = text;
     public void SetTakeDamageCount(string text) => _takeDamageCount.text = text;
-    public void SetHealingCount(string text) => _healingCounr.text = text;
+    public void SetHealingCount(string text) => _healingCount.text = text;
 
     // ビルド構成
     public void SetBuildBalance(string text) => _buildBalance.text = text;
     public void SetSkillList(string text) => _skillList.text = text;
-    public void SetFinalStats(string text) => _FinalStatass.text = text;
+    public void SetFinalStats(string text) => _finalStatass.text = text;
 
     [Header("概要")]
     [SerializeField]
@@ -45,11 +45,11 @@ public class ResultPanelView : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI _takeDamageCount;
     [SerializeField]
-    private TextMeshProUGUI _healingCounr;
+    private TextMeshProUGUI _healingCount;
     [SerializeField]
     private Button _showBuildButton;
     [SerializeField]
-    private Button _buckOverviewButton;
+    private Button _backOverviewButton;
 
     [Header("ビルド構成")]
     [SerializeField]
@@ -57,7 +57,7 @@ public class ResultPanelView : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI _skillList;
     [SerializeField]
-    private TextMeshProUGUI _FinalStatass;
+    private TextMeshProUGUI _finalStatass;
     [SerializeField]
     private Button _transitionToTitleButton;
     [SerializeField]
@@ -67,7 +67,7 @@ public class ResultPanelView : MonoBehaviour
     {
         _showRecordButton.onClick.AddListener (() => OnShowRecord?.Invoke());
         _showBuildButton.onClick.AddListener (() => OnShowBuild?.Invoke());
-        _buckOverviewButton.onClick.AddListener (() => OnShowOverview?.Invoke());
+        _backOverviewButton.onClick.AddListener (() => OnShowOverview?.Invoke());
         _buckRecordButton.onClick.AddListener (() => OnShowRecord?.Invoke());
         _transitionToTitleButton.onClick.AddListener (() => OnTransitionToTitle?.Invoke());
     }
@@ -76,7 +76,7 @@ public class ResultPanelView : MonoBehaviour
     {
         _showRecordButton.onClick.RemoveAllListeners();
         _showBuildButton.onClick.RemoveAllListeners();
-        _buckOverviewButton.onClick.RemoveAllListeners();
+        _backOverviewButton.onClick.RemoveAllListeners();
         _buckRecordButton.onClick.RemoveAllListeners();
         _transitionToTitleButton.onClick.RemoveAllListeners();
     }

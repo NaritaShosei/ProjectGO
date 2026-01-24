@@ -41,7 +41,7 @@ public class SceneTransitionManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (ServiceLocator.IsRegistered<SceneTransitionManager>())
+        if (ServiceLocator.TryGet(out SceneTransitionManager current) && ReferenceEquals(current, this))
         {
             ServiceLocator.Unregister<SceneTransitionManager>();
         }

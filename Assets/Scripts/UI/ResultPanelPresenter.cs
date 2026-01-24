@@ -24,7 +24,7 @@ public class ResultPanelPresenter
     private void InitializeResultPanel()
     {
         // Modelから結果データを取得してUIに反映
-        var resultData = _resultPanelModel.GetTestResultData();
+        var resultData = _resultPanelModel.GetResultData();
 
         // 概要
         if (resultData.IsCleared)

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-public class ResultPanelModel
+﻿public class ResultPanelModel
 {
     /// <summary>
     /// 未実装: ゲームロジックからリザルトデータを取得する
@@ -18,7 +16,7 @@ public class ResultPanelModel
     /// <returns></returns>
     public ResultData GetTestResultData()
     {
-        Debug.Assert(true, "未実装: ゲームロジックからリザルトデータを取得する");
+        UnityEngine.Debug.LogWarning("未実装: ゲームロジックからリザルトデータを取得する");
         ResultData resultData = new ResultData(
             true
             , "クリアウェーブ数: 10/10"

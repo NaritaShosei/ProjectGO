@@ -25,6 +25,13 @@ public class ResultUIManager : MonoBehaviour
             Debug.LogError("SceneTransitionManager is not registered in ServiceLocator.", this);
             return;
         }
+
+        if (_resultPanelView == null || _overviewPanel == null || _recordPanel == null || _buildPanel == null)
+        {
+            Debug.LogError("ResultUIManager の参照が未設定です。", this);
+            return;
+        }
+
         // Modelの初期化
         _resultPanelModel = new ResultPanelModel();
         // Presenterの初期化
@@ -34,7 +41,7 @@ public class ResultUIManager : MonoBehaviour
         _resultPanelPresenter.OnShowRecord += ShowRecordPanel;
         _resultPanelPresenter.OnShowBuild += ShowBuildPanel;
         _resultPanelPresenter.OnTransitionToTitle += TransitionToTitle;
-        
+
         // 初期パネル表示
         ShowOverviewPanel();
     }
@@ -75,6 +82,6 @@ public class ResultUIManager : MonoBehaviour
 
     private async void TransitionToTitle()
     {
-        await _sceneTransitionManager.TransitionToScene("TitleScene");
+        await _sceneTransitionManager.TransitionToTitle();
     }
 }
