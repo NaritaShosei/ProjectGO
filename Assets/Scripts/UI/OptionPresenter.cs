@@ -6,7 +6,7 @@ public class OptionPresenter
     // 保存リクエスト。UIManagerが使う、なお未実装
     public event Action<GameSetting> OnSettingsSaved;
     // 閉じるリクエスト、UIManegerが使う
-    public event Action OnCloseRequested;
+    public event Action OnOptionCloseRequested;
     public OptionPresenter(OptionView view, OptionModel model)
     {
         this._optionView = view;
@@ -86,7 +86,7 @@ public class OptionPresenter
         Debug.Log("[OptionPresenter] 変更を破棄して閉じます");
 
         // 閉じるリクエストを送る（実際に閉じるのはControllerの仕事）
-        OnCloseRequested?.Invoke();
+        OnOptionCloseRequested?.Invoke();
     }
 
     private void HandleReset()

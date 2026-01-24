@@ -1,0 +1,41 @@
+﻿using UnityEngine;
+
+[CreateAssetMenu(fileName = "SkillSelectSequence", menuName = "GameData/Sequence/SkillSelectSequence")]
+
+public class SkillSelectSequence : SequenceBase
+{
+    public override bool IsComplete(SequenceContext context)
+    {
+        return context.SkillSelected;
+    }
+
+    public override void OnSequenceStart(SequenceContext context)
+    {
+        if (context.SkillSelectView == null || context.SkillManager == null)
+        {
+            Debug.LogWarning("SkillSelectViewまたはSkillManagerがnullなので、スキル選択UIを表示できません");
+            return;
+        }
+
+        // 既存のPresenterがあればイベント購読を解除
+        _presenter?.Dispose();
+
+        _presenter = new SkillSelectPresenter(context.SkillManager, context.SkillSelectView);
+
+        _presenter.Open(context.SkillSelectCount);
+    }
+
+    public override void OnSequenceUpdate(SequenceContext context)
+    {
+        // 毎フレームの更新
+
+        // フェーズ終了時にpresenterを破棄
+        if (context.SkillSelected)
+        {
+            _presenter.Dispose();
+            _presenter = null;
+        }
+    }
+
+    private SkillSelectPresenter _presenter;
+}
