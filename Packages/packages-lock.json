@@ -34,8 +34,8 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.2d.common": {
-      "version": "12.0.1",
-      "depth": 1,
+      "version": "12.0.2",
+      "depth": 2,
       "source": "registry",
       "dependencies": {
         "com.unity.burst": "1.8.4",
@@ -117,6 +117,16 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.2d.tooling": {
+      "version": "1.0.2",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.2d.common": "12.0.2",
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.ai.assistant": {
       "version": "1.0.0-pre.12",
       "depth": 0,
@@ -189,7 +199,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.25",
+      "version": "1.8.26",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -247,7 +257,7 @@
       "dependencies": {}
     },
     "com.unity.feature.2d": {
-      "version": "2.0.1",
+      "version": "2.0.2",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
@@ -258,7 +268,8 @@
         "com.unity.2d.spriteshape": "13.0.0",
         "com.unity.2d.tilemap": "1.0.0",
         "com.unity.2d.tilemap.extras": "6.0.1",
-        "com.unity.2d.aseprite": "3.0.1"
+        "com.unity.2d.aseprite": "3.0.1",
+        "com.unity.2d.tooling": "1.0.2"
       }
     },
     "com.unity.ide.rider": {
@@ -296,7 +307,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.multiplayer.center": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "depth": 0,
       "source": "builtin",
       "dependencies": {

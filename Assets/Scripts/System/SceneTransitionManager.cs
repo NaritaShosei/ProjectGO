@@ -23,7 +23,7 @@ public class SceneTransitionManager : MonoBehaviour
 
     public async UniTask TransitionToResult()
     {
-        await LoadSceneAsync("Result");
+        await LoadSceneAsync("ResultScene");
     }
 
     private void Awake()
