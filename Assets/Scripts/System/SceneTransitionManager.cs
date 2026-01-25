@@ -18,7 +18,12 @@ public class SceneTransitionManager : MonoBehaviour
     /// </summary>
     public async UniTask TransitionToTitle()
     {
-        await LoadSceneAsync("Title");
+        await LoadSceneAsync("TitleScene");
+    }
+
+    public async UniTask TransitionToResult()
+    {
+        await LoadSceneAsync("ResultScene");
     }
 
     private void Awake()
@@ -26,12 +31,17 @@ public class SceneTransitionManager : MonoBehaviour
         if (!ServiceLocator.IsRegistered<SceneTransitionManager>())
         {
             ServiceLocator.Register(this);
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
 
     private void OnDestroy()
     {
-        if (ServiceLocator.IsRegistered<SceneTransitionManager>())
+        if (ServiceLocator.TryGet(out SceneTransitionManager current) && ReferenceEquals(current, this))
         {
             ServiceLocator.Unregister<SceneTransitionManager>();
         }
