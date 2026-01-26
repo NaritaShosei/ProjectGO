@@ -16,4 +16,9 @@ public interface IEnemy : ICharacter
     /// 攻撃の内容を渡して、内部でダメージ計算をする
     /// </summary>
     public void TakeDamage(DamageContext context);
+
+    /// <summary>
+    /// Playerの参照をもらう
+    /// </summary>
+    public void Init(IPlayer player);
 }

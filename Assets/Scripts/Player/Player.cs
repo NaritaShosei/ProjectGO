@@ -1,7 +1,22 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Player : MonoBehaviour, IPlayer, IStamina
 {
+    public event Action OnDead;
+    public void Init(SkillManager skillManager, CameraManager cameraManager)
+    {
+        _attackExecutor?.Init(_playerData.AttackPower, skillManager);
+
+        _move?.Init(
+           _playerStateManager,
+           _input,
+           cameraManager,
+           _moveData,
+           this,
+           _modeController);
+    }
+
     public Transform GetTargetCenter()
     {
         return _targetCenter;
@@ -43,7 +58,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
 
     private void Awake()
     {
-        Init();
+        InitInternal();
     }
 
     private void Update()
@@ -64,31 +79,34 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         }
     }
 
-    private void Init()
+    private void InitInternal()
+    {
+        CreateInternalObjects();
+        InitComponent();
+        BindEvents();
+    }
+
+    private void CreateInternalObjects()
     {
         _playerStateManager = new PlayerStateManager();
         _playerStats = new PlayerStats(_playerData.Stats);
+    }
 
+    private void InitComponent()
+    {
+        _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
+    }
+
+    private void BindEvents()
+    {
         _playerStats.OnDead += OnPlayerDead;
 
-        _move?.Init(
-            _playerStateManager,
-            _input,
-            ServiceLocator.Get<CameraManager>(),
-            _moveData,
-            this,
-            _modeController);
-
-        _attackExecutor?.Init(_playerData.AttackPower, ServiceLocator.Get<SkillManager>());
-
-        _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
-
-        // 回避終了時のイベントに回避攻撃に派生するメソッドを登録
         if (_move != null && _attack != null)
         {
             _move.OnEndDodge += _attack.FinishDodge;
         }
     }
+
 
     private void RegenerateStamina()
     {
@@ -98,6 +116,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     private void OnPlayerDead()
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
+        OnDead?.Invoke();
     }
 
     // デバッグ用

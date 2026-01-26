@@ -29,6 +29,11 @@ public class BossCore : MonoBehaviour, IEnemy
         });
     }
 
+    public void Init(IPlayer player)
+    {
+        // プレイヤーの参照は不要
+    }
+
     [SerializeField] private TestBoss _boss;
     [SerializeField] private float _damageMultiplier = 1f;
     [SerializeField] private Transform _targetCenter;

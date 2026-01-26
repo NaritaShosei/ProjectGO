@@ -28,6 +28,10 @@ public class EnemyArmer : MonoBehaviour, IEnemy
             Break();
         }
     }
+    public void Init(IPlayer player)
+    {
+        // プレイヤーの参照は不要
+    }
 
     [SerializeField] private float _hp = 50;
     [SerializeField] private GameObject _core;

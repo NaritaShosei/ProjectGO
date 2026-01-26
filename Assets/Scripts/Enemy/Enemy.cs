@@ -13,6 +13,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
 
+    public void Init(IPlayer player)
+    {
+        _playerTransform = player.GetTargetCenter();
+    }
+
     public void AddKnockBackForce(Vector3 direction)
     {
         // ノックバック
@@ -37,6 +42,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
+
+    protected Transform _playerTransform;
+
     protected float _currentHP;
 
     protected bool _isDead; // 軽い実装のため bool のフラグを使用

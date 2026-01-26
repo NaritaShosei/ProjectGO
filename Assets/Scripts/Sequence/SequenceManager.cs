@@ -1,8 +1,28 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
 {
+    public event Action OnAllSequencesComplete;
     public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequenceDataBase.Sequences.Count;
+
+    public void Init(EnemyManager enemyManager)
+    {
+        if (enemyManager == null)
+        {
+            Debug.LogError("EnemyManagerが未設定です");
+            enabled = false;
+            return;
+        }
+
+        _enemyManager = enemyManager;
+        InitializeContext();
+    }
+
+    public void StartSequence()
+    {
+        StartSequence(0);
+    }
 
     [Header("シークエンス設定")]
     [SerializeField] private SequenceDataBase _sequenceDataBase;
@@ -13,10 +33,10 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private SpawnData _bossSpawnData;
 
     [Header("依存関係")]
-    [SerializeField] private EnemyManager _enemyManager;
     [SerializeField] private SkillSelectView _skillUIManager;
     [SerializeField] private SkillManager _skillManager;
 
+    private EnemyManager _enemyManager;
     private int _currentSequenceIndex = 0;
     private int _enemySequenceCount = 0;  // 何番目の雑魚敵シークエンスか
     private SequenceBase _currentSequence;
@@ -31,9 +51,6 @@ public class SequenceManager : MonoBehaviour
             enabled = false;
             return;
         }
-
-        InitializeContext();
-        StartSequence(0);
     }
 
     private void Update()
@@ -81,6 +98,7 @@ public class SequenceManager : MonoBehaviour
         if (sequenceIndex >= _sequenceDataBase.Sequences.Count)
         {
             OnAllSequenceComplete();
+            _currentSequence = null;
             return;
         }
 
@@ -138,6 +156,7 @@ public class SequenceManager : MonoBehaviour
     {
         Debug.Log("全シークエンスクリア！");
         // ゲームクリア処理
+        OnAllSequencesComplete?.Invoke();
     }
 
     private void HandleEnemyDefeated()

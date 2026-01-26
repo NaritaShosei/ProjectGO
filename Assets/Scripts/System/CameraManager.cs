@@ -8,15 +8,5 @@ public class CameraManager : MonoBehaviour
     private void Awake()
     {
         _mainCamera = Camera.main;
-
-        ServiceLocator.Register(this);
-    }
-
-    private void OnDestroy()
-    {
-        if (ServiceLocator.IsRegistered<CameraManager>())
-        {
-            ServiceLocator.Unregister<CameraManager>();
-        }
     }
 }
