@@ -2,22 +2,14 @@
 
 public class GoblinEnemy : Enemy
 {
-    private Transform _player;
     private float _lastAttackTime;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        // TODO:とりあえず雑に取得
-        _player = FindAnyObjectByType<Player>().transform;
-    }
 
     // TODO:移動や攻撃は別クラスで定義
     protected override void UpdateEnemy(float deltaTime)
     {
-        if (_player == null) return;
+        if (_playerTransform == null) return;
 
-        float distance = Vector3.Distance(transform.position, _player.position);
+        float distance = Vector3.Distance(transform.position, _playerTransform.position);
 
         if (distance > _data.AttackRange)
         {
@@ -31,7 +23,7 @@ public class GoblinEnemy : Enemy
 
     private void MoveToPlayer(float deltaTime)
     {
-        Vector3 dir = (_player.position - transform.position).normalized;
+        Vector3 dir = (_playerTransform.position - transform.position).normalized;
 
         dir.y = 0;
 

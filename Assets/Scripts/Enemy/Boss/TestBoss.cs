@@ -8,7 +8,7 @@ public class TestBoss : BossEnemy
     private void Start()
     {
         // TODO:雑にTransform取得
-        _bossPhaseController.Init(FindAnyObjectByType<Player>().transform);
+        _bossPhaseController.Init(_playerTransform);
     }
 
     protected override void UpdateEnemy(float deltaTime)
