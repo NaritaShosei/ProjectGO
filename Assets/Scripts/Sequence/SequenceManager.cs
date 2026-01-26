@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
 {
+    public Action OnAllSequencesComplete;
     public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequenceDataBase.Sequences.Count;
 
     [Header("シークエンス設定")]
@@ -138,6 +140,7 @@ public class SequenceManager : MonoBehaviour
     {
         Debug.Log("全シークエンスクリア！");
         // ゲームクリア処理
+        OnAllSequencesComplete?.Invoke();
     }
 
     private void HandleEnemyDefeated()
