@@ -3,10 +3,45 @@
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private SequenceManager _sequenceManager;
+    [SerializeField] private Player _player;
+    [SerializeField] private EnemyManager _enemyManager;
+    [SerializeField] private SkillManager _skillManager;
+    [SerializeField] private CameraManager _cameraManager;
+
     private SceneTransitionManager _sceneTransitionManager;
 
     private void Start()
     {
+        InitPlayer();
+        InitSequence();
+        InitEnemyManager();
+        StartGame();
+    }
+
+    private void OnDestroy()
+    {
+        if (_sequenceManager != null)
+        {
+            _sequenceManager.OnAllSequencesComplete -= HandleGameComplete;
+        }
+    }
+
+    private void InitPlayer()
+    {
+        _player.Init(_skillManager, _cameraManager);
+
+        _player.OnDead += HandleGameComplete;
+    }
+
+    private void InitEnemyManager()
+    {
+        _enemyManager.Init(_player);
+    }
+
+    private void InitSequence()
+    {
+        _sequenceManager.Init(_enemyManager);
+
         if (!ServiceLocator.TryGet(out _sceneTransitionManager))
         {
             Debug.LogError("SceneTransitionManagerが登録されていません");
@@ -18,12 +53,9 @@ public class GameManager : MonoBehaviour
         _sequenceManager.OnAllSequencesComplete += HandleGameComplete;
     }
 
-    private void OnDestroy()
+    private void StartGame()
     {
-        if (_sequenceManager != null)
-        {
-            _sequenceManager.OnAllSequencesComplete -= HandleGameComplete;
-        }
+        _sequenceManager.StartSequence();
     }
 
     private async void HandleGameComplete()

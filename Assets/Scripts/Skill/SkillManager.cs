@@ -61,17 +61,4 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private SkillDataBase _skillDataBase;
 
     private HashSet<int> _ownedSkillIDs = new HashSet<int>();
-
-    private void Awake()
-    {
-        ServiceLocator.Register(this);
-    }
-
-    private void OnDestroy()
-    {
-        if (ServiceLocator.IsRegistered<SkillManager>())
-        {
-            ServiceLocator.Unregister<SkillManager>();
-        }
-    }
 }
