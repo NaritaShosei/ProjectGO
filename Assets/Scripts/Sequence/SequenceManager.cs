@@ -8,8 +8,14 @@ public class SequenceManager : MonoBehaviour
 
     public void Init(EnemyManager enemyManager)
     {
-        _enemyManager = enemyManager;
+        if (enemyManager == null)
+        {
+            Debug.LogError("EnemyManagerが未設定です");
+            enabled = false;
+            return;
+        }
 
+        _enemyManager = enemyManager;
         InitializeContext();
     }
 
