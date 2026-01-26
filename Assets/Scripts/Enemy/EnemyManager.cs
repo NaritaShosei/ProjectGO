@@ -10,10 +10,24 @@ public class EnemyManager : MonoBehaviour
     public void Init(IPlayer player)
     {
         _player = player;
+
+        if (player == null)
+        {
+            Debug.LogError("EnemyManager.Init: player が null です");
+            enabled = false;
+            return;
+        }
+        _player = player;
     }
 
     public void Spawn(GameObject original, Vector3 pos)
     {
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
 
         if (obj.TryGetComponent(out IEnemy enemy))
