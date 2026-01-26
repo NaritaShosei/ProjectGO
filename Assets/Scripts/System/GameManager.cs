@@ -24,6 +24,11 @@ public class GameManager : MonoBehaviour
         {
             _sequenceManager.OnAllSequencesComplete -= HandleGameComplete;
         }
+
+        if (_player != null)
+        {
+            _player.OnDead -= HandleGameComplete;
+        }
     }
 
     private void InitPlayer()
