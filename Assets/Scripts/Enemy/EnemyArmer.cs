@@ -30,7 +30,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     }
     public void Init(IPlayer player)
     {
-
+        // プレイヤーの参照は不要
     }
 
     [SerializeField] private float _hp = 50;
