@@ -7,6 +7,11 @@ public class EnemyManager : MonoBehaviour
     public event Action OnEnemyDefeated;
     public event Action OnBossDefeated;
 
+    public void Init(IPlayer player)
+    {
+        _player = player;
+    }
+
     public void Spawn(GameObject original, Vector3 pos)
     {
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
@@ -14,6 +19,7 @@ public class EnemyManager : MonoBehaviour
         if (obj.TryGetComponent(out IEnemy enemy))
         {
             enemy.OnDead += HandleEnemyDead;
+            enemy.Init(_player);
             _enemies.Add(enemy);
         }
 
@@ -44,6 +50,7 @@ public class EnemyManager : MonoBehaviour
     }
 
     private List<IEnemy> _enemies = new();
+    private IPlayer _player;
 
     private void HandleEnemyDead(IEnemy enemy)
     {
