@@ -13,8 +13,8 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         InitPlayer();
-        InitSequence();
         InitEnemyManager();
+        InitSequence();
         StartGame();
     }
 
