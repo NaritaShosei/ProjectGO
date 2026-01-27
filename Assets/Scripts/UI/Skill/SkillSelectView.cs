@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class SkillSelectView : MonoBehaviour, ISkillSelectView
 {
@@ -8,6 +9,8 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
 
     public void Show(List<SkillViewData> skills)
     {
+        EventSystem.current.SetSelectedGameObject(_buttons[0].gameObject.gameObject);
+
         for (int i = 0; i < _buttons.Length; i++)
         {
             int index = i;
