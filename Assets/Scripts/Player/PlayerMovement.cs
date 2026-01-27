@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    const float INPUT_THRESHOLD = 0.001f;
+
     public event Action OnEndDodge;
 
     public void Init(PlayerStateManager playerStateManager,
@@ -22,8 +24,6 @@ public class PlayerMovement : MonoBehaviour
 
         _input.OnDodge += OnDodge;
     }
-
-    const float INPUT_THRESHOLD = 0.001f;
 
     [SerializeField] private Rigidbody _rb;
 
