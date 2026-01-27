@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InputHandler : MonoBehaviour
 {
@@ -13,7 +14,28 @@ public class InputHandler : MonoBehaviour
     public event Action OnInteract;
     public event Action OnModeChange;
 
+    /// <summary>
+    /// PlayerのActionMapの有効か非有効化の切り替え。
+    /// </summary>
+    /// /// <param name="enable">trueで有効化</param>
+    public void EnableInput(bool enable)
+    {
+        if (enable)
+        {
+            _input.Player.Enable();
+        }
+        else
+        {
+            _input.Player.Disable();
+        }
+    }
+
     private PlayerInput _input;
+
+    private void Awake()
+    {
+        ServiceLocator.Register(this);
+    }
 
     private void OnEnable()
     {
@@ -39,11 +61,19 @@ public class InputHandler : MonoBehaviour
         // モードチェンジ
         _input.Player.ModeChange.started += _ => OnModeChange?.Invoke();
 
-        _input.Enable();
+        EnableInput(true);
     }
 
     private void OnDisable()
     {
-        _input?.Disable();
+        EnableInput(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (ServiceLocator.IsRegistered<InputHandler>())
+        {
+            ServiceLocator.Unregister<InputHandler>();
+        }
     }
 }
