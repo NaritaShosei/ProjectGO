@@ -47,7 +47,9 @@ public class GameManager : MonoBehaviour
 
     private void InitSequence()
     {
-        _sequenceManager.Init(_enemyManager, _skillManager);
+        var input = ServiceLocator.Get<InputHandler>();
+
+        _sequenceManager.Init(_enemyManager, _skillManager, input);
 
         _sceneTransitionManager = ServiceLocator.Get<SceneTransitionManager>();
 

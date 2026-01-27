@@ -10,6 +10,11 @@ public class EnemySequence : SequenceBase
 
     public override void OnSequenceStart(SequenceContext context)
     {
+        if (context.InputHandler != null)
+        {
+            context.InputHandler.EnableInput(true);
+        }
+
         // 敵生成処理
         if (context.CurrentSpawnData != null)
         {

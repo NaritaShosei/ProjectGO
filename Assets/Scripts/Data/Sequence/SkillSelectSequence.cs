@@ -11,6 +11,11 @@ public class SkillSelectSequence : SequenceBase
 
     public override void OnSequenceStart(SequenceContext context)
     {
+        if (context.InputHandler != null)
+        {
+            context.InputHandler.EnableInput(false);
+        }
+
         if (context.SkillSelectView == null || context.SkillManager == null)
         {
             Debug.LogWarning("SkillSelectViewまたはSkillManagerがnullなので、スキル選択UIを表示できません");
