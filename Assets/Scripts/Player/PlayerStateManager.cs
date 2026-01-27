@@ -22,6 +22,7 @@ public class PlayerStateManager
                           && CurrentState != PlayerState.Damaged
                           && CurrentState != PlayerState.Dead;
     public bool CanDodge() => CurrentState is PlayerState.Idle;
+    public bool IsDodging() => CurrentState is PlayerState.Dodge;
 
     public bool IsCharging() => CurrentState is PlayerState.Charging;
 

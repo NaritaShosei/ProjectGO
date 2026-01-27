@@ -4,17 +4,19 @@ using UnityEngine;
 public class Player : MonoBehaviour, IPlayer, IStamina
 {
     public event Action OnDead;
-    public void Init(SkillManager skillManager, CameraManager cameraManager)
+    public void Init(SkillManager skillManager, CameraManager cameraManager, InputHandler input)
     {
         _attackExecutor?.Init(_playerData.AttackPower, skillManager);
 
         _move?.Init(
            _playerStateManager,
-           _input,
+           input,
            cameraManager,
            _moveData,
            this,
            _modeController);
+
+        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController);
     }
 
     public Transform GetTargetCenter()
@@ -32,6 +34,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) { return; }
+        if (_playerStateManager.IsDodging()) { return; }
+
         // TODO:被弾ダメージ計算を考慮する
         _playerStats.TakeDamage(damage);
     }
@@ -47,12 +51,12 @@ public class Player : MonoBehaviour, IPlayer, IStamina
 
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
-    [SerializeField] private InputHandler _input;
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private PlayerModeController _modeController;
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private Transform _targetCenter;
+
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
 
@@ -82,7 +86,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     private void InitInternal()
     {
         CreateInternalObjects();
-        InitComponent();
         BindEvents();
     }
 
@@ -90,11 +93,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     {
         _playerStateManager = new PlayerStateManager();
         _playerStats = new PlayerStats(_playerData.Stats);
-    }
-
-    private void InitComponent()
-    {
-        _attack?.Init(_playerStateManager, _input, _attackExecutor, _modeController);
     }
 
     private void BindEvents()
