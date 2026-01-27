@@ -17,7 +17,7 @@ public class InputHandler : MonoBehaviour
     /// <summary>
     /// PlayerのActionMapの有効か非有効化の切り替え。
     /// </summary>
-    /// /// <param name="enable">trueで有効化</param>
+    /// <param name="enable">trueで有効化</param>
     public void EnableInput(bool enable)
     {
         if (enable)
