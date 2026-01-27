@@ -6,16 +6,17 @@ public class SequenceManager : MonoBehaviour
     public event Action OnAllSequencesComplete;
     public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequenceDataBase.Sequences.Count;
 
-    public void Init(EnemyManager enemyManager)
+    public void Init(EnemyManager enemyManager,SkillManager skillManager)
     {
-        if (enemyManager == null)
+        if (enemyManager == null || skillManager == null)
         {
-            Debug.LogError("EnemyManagerが未設定です");
+            Debug.LogError("EnemyManager、またはSkillManagerが未設定です");
             enabled = false;
             return;
         }
 
         _enemyManager = enemyManager;
+        _skillManager = skillManager;
         InitializeContext();
     }
 
@@ -34,8 +35,8 @@ public class SequenceManager : MonoBehaviour
 
     [Header("依存関係")]
     [SerializeField] private SkillSelectView _skillUIManager;
-    [SerializeField] private SkillManager _skillManager;
 
+    private SkillManager _skillManager;
     private EnemyManager _enemyManager;
     private int _currentSequenceIndex = 0;
     private int _enemySequenceCount = 0;  // 何番目の雑魚敵シークエンスか

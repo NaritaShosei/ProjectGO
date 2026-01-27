@@ -12,9 +12,9 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        InitSequence();
         InitPlayer();
         InitEnemyManager();
-        InitSequence();
         StartGame();
     }
 
@@ -33,7 +33,9 @@ public class GameManager : MonoBehaviour
 
     private void InitPlayer()
     {
-        _player.Init(_skillManager, _cameraManager);
+        var input = ServiceLocator.Get<InputHandler>();
+
+        _player.Init(_skillManager, _cameraManager, input);
 
         _player.OnDead += HandleGameComplete;
     }
@@ -45,14 +47,9 @@ public class GameManager : MonoBehaviour
 
     private void InitSequence()
     {
-        _sequenceManager.Init(_enemyManager);
+        _sequenceManager.Init(_enemyManager, _skillManager);
 
-        if (!ServiceLocator.TryGet(out _sceneTransitionManager))
-        {
-            Debug.LogError("SceneTransitionManagerが登録されていません");
-            enabled = false;
-            return;
-        }
+        _sceneTransitionManager = ServiceLocator.Get<SceneTransitionManager>();
 
         // SequenceManagerのイベントを購読
         _sequenceManager.OnAllSequencesComplete += HandleGameComplete;
