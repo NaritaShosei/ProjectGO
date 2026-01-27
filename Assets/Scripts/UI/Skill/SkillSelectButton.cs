@@ -1,9 +1,14 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class SkillSelectButton : MonoBehaviour
+public class SkillSelectButton : MonoBehaviour,
+    IPointerEnterHandler,
+    IPointerExitHandler,
+    ISelectHandler,
+    IDeselectHandler
 {
     public void Setup(SkillViewData viewData, Action onClick)
     {
@@ -18,8 +23,58 @@ public class SkillSelectButton : MonoBehaviour
         }
     }
 
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        OnHovered(); // マウスが乗ったとき
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        OnUnhovered(); // マウスが離れたとき
+    }
+
+    public void OnDeselect(BaseEventData eventData)
+    {
+        OnDeselected(); // 方向キー等で選択された時
+    }
+
+    public void OnSelect(BaseEventData eventData)
+    {
+        OnSelected(); // 方向キー等で選択が解除された時
+    }
+
     [SerializeField] private Button _selectButton;
     [SerializeField] private TextMeshProUGUI _nameText;
     [SerializeField] private TextMeshProUGUI _explanationText;
     [SerializeField] private Image _icon;
+
+    private void OnHovered()
+    {
+        Debug.Log("マウスが乗った");
+        Highlight(true);
+    }
+
+    private void OnUnhovered()
+    {
+        Debug.Log("マウスが離れた");
+        Highlight(false);
+    }
+
+    private void OnSelected()
+    {
+        Debug.Log("方向キー等で選択された");
+        Highlight(true);
+    }
+
+
+    private void OnDeselected()
+    {
+        Debug.Log("方向キー等で選択が解除された");
+        Highlight(false);
+    }
+
+    private void Highlight(bool isOn)
+    {
+        // 色変更 / 枠表示 / アニメーションなど
+    }
 }
