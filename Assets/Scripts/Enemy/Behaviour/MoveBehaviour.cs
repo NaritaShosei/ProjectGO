@@ -11,7 +11,7 @@ public class MoveBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        if (_player == null) { Debug.Log("return"); return; }
+        if (_player == null) { return; }
 
         Vector3 dir = (_player.position - _self.position).normalized;
         dir.y = 0;

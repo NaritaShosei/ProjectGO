@@ -11,15 +11,15 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        if (_player == null) return;
+        if (_player == null) { return; }
 
         float distance = Vector3.Distance(
             _self.position,
             _player.position
         );
 
-        if (distance > _data.AttackRange) return;
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) return;
+        if (distance > _data.AttackRange) { return; }
+        if (Time.time - _lastAttackTime < _data.AttackCooldown) { return; }
 
         _lastAttackTime = Time.time;
 
