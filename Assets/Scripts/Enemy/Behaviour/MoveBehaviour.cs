@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.AppUI.Core;
+using UnityEngine;
 
 public class MoveBehaviour : IEnemyBehaviour
 {
@@ -16,6 +17,8 @@ public class MoveBehaviour : IEnemyBehaviour
         Vector3 dir = _player.position - _self.position;
         dir.y = 0;
         dir = dir.normalized;
+
+        _self.position += dir * _data.MoveSpeed * deltaTime;
     }
 
     private Transform _self;
