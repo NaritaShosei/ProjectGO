@@ -35,12 +35,12 @@ public class SkillSelectButton : MonoBehaviour,
 
     public void OnDeselect(BaseEventData eventData)
     {
-        OnDeselected(); // 方向キー等で選択された時
+        OnDeselected(); // 方向キー等で選択が解除された時
     }
 
     public void OnSelect(BaseEventData eventData)
     {
-        OnSelected(); // 方向キー等で選択が解除された時
+        OnSelected(); // 方向キー等で選択された時
     }
 
     [SerializeField] private Button _selectButton;
