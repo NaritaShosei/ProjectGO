@@ -42,7 +42,22 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     {
         _stats = new EnemyStats(_data);
 
+        _stats.OnHealthZero += _stats.Kill;
+
         _stats.OnDead += OnDeath;
+    }
+    protected virtual void Update()
+
+    {
+        if (_isDead) { return; }
+        UpdateEnemy(Time.deltaTime);
+    }
+
+    private void OnDestroy()
+    {
+        _stats.OnHealthZero -= _stats.Kill;
+
+        _stats.OnDead -= OnDeath;
     }
 
     /// <summary>
@@ -64,9 +79,4 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected abstract void UpdateEnemy(float deltaTime);
 
-    protected virtual void Update()
-    {
-        if (_isDead) { return; }
-        UpdateEnemy(Time.deltaTime);
-    }
 }
