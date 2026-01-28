@@ -14,20 +14,21 @@ public class GoblinEnemy : Enemy
     {
         base.Init(player);
 
+        _context = new EnemyContext();
         _runner = new EnemyBehaviourRunner();
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
 
-        move.Init(this, _data, _playerTransform);
-        attack.Init(this, _data, _playerTransform);
+        move.Init(this, _data, _playerTransform, _context);
+        attack.Init(this, _data, _playerTransform, _context);
 
         _runner.Add(move);
         _runner.Add(attack);
     }
 
-
     private EnemyBehaviourRunner _runner;
+    private EnemyContext _context;
 
     protected override void Awake()
     {
@@ -36,10 +37,12 @@ public class GoblinEnemy : Enemy
 
     protected override void UpdateEnemy(float deltaTime)
     {
+        if (_runner == null) { return; }
         _runner.Tick(deltaTime);
     }
 
 #if UNITY_EDITOR
+    // デバッグ用にシーンビューで球体を描く
     private void OnDrawGizmosSelected()
     {
         if (_data == null) return;

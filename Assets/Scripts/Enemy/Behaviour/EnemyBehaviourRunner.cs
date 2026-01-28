@@ -2,8 +2,6 @@
 
 public class EnemyBehaviourRunner
 {
-    private readonly List<IEnemyBehaviour> _behaviours = new();
-
     public void Add(IEnemyBehaviour behaviour)
     {
         _behaviours.Add(behaviour);
@@ -16,4 +14,6 @@ public class EnemyBehaviourRunner
             behaviour.Tick(deltaTime);
         }
     }
+
+    private readonly List<IEnemyBehaviour> _behaviours = new();
 }
