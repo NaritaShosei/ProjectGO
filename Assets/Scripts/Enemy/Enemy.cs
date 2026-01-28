@@ -8,7 +8,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
 
-    public void Init(IPlayer player)
+    public virtual void Init(IPlayer player)
     {
         _playerTransform = player.GetTargetCenter();
     }

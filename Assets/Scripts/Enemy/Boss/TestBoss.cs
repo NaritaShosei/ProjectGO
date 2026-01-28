@@ -26,6 +26,8 @@ public class TestBoss : BossEnemy
 
     protected override void OnBossHPZero()
     {
+        base.OnBossHPZero();
+
         BreakCore();
 
         if (_bossPhaseController.IsPhaseEnd)
