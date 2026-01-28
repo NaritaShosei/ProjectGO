@@ -1,5 +1,13 @@
 ﻿using UnityEngine;
 
+// NOTE:
+// この GoblinEnemy は「基盤用の最小実装」です。
+// ・複雑なAI
+// ・スキル
+// ・状態遷移
+// は意図的に入れていません。
+// 拡張する場合はこのクラスを参考に派生 or 分離してください。
+
 public class GoblinEnemy : Enemy
 {
     private float _lastAttackTime;

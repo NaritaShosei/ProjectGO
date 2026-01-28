@@ -1,14 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-// NOTE:
-// この GoblinEnemy は「基盤用の最小実装」です。
-// ・複雑なAI
-// ・スキル
-// ・状態遷移
-// は意図的に入れていません。
-// 拡張する場合はこのクラスを参考に派生 or 分離してください。
-
+/// <summary>
+/// Enemyの基底クラス
+/// </summary>
 public abstract class Enemy : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
@@ -32,26 +27,22 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     {
         if (_isDead) { return; }
 
-        _currentHP -= context.Damage;
-
-        if (_currentHP <= 0f)
-        {
-            OnDeath();
-        }
+        _stats.TakeDamage(context.Damage);
     }
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
 
+    protected EnemyStats _stats;
     protected Transform _playerTransform;
-
-    protected float _currentHP;
 
     protected bool _isDead; // 軽い実装のため bool のフラグを使用
 
     protected virtual void Awake()
     {
-        _currentHP = _data.MaxHP;
+        _stats = new EnemyStats(_data);
+
+        _stats.OnDead += OnDeath;
     }
 
     /// <summary>
