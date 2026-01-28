@@ -17,11 +17,14 @@ public class MoveBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        if (!_context.CanMove) return;
-        if (_player == null) return;
+        // 攻撃の条件に満たしていなかったら早期リターン
+        if (!_context.CanMove) { return; }
+        if (_player == null) { return; }
 
-        Vector3 dir = (_player.position - _self.position).normalized;
+        // TODO:雑に移動しているため場合によっては修正が必要
+        Vector3 dir = (_player.position - _self.position);
         dir.y = 0;
+        dir = dir.normalized;
 
         _self.position += dir * _data.MoveSpeed * deltaTime;
     }

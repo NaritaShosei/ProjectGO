@@ -17,26 +17,31 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        if (_player == null) return;
+        if (_player == null) { return; }
 
+        // 距離計算
         _context.DistanceToPlayer = Vector3.Distance(
             _self.position,
             _player.position
         );
 
-        if (_context.DistanceToPlayer > _data.AttackRange) return;
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) return;
+        // 攻撃の条件に満たしていなかったら早期リターン
+        if (_context.DistanceToPlayer > _data.AttackRange) { return; }
+        if (Time.time - _lastAttackTime < _data.AttackCooldown) { return; }
 
+        // 攻撃を実行
         _context.IsAttacking = true;
         _lastAttackTime = Time.time;
 
         PerformAttack();
 
+        // TODO:IsAttackingが1フレーム内でリセットされているのでアニメーションなどに対応させる必要あり
         _context.IsAttacking = false;
     }
 
     private void PerformAttack()
     {
+        // 球体をつくり、その範囲内にいるPlayerに攻撃
         Collider[] hits = Physics.OverlapSphere(
             _self.position + _self.forward * _data.AttackRange,
             _data.AttackRadius
@@ -44,7 +49,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         foreach (var hit in hits)
         {
-            if (hit.TryGetComponent<IPlayer>(out var player))
+            if (hit.TryGetComponent(out IPlayer player))
             {
                 player.TakeDamage(_data.AttackDamage);
             }
