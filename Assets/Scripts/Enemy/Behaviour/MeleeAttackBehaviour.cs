@@ -2,27 +2,41 @@
 
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
-    public void Init(Enemy owner, EnemyData data, Transform player)
+    public void Init(
+        Enemy owner,
+        EnemyData data,
+        Transform player,
+        EnemyContext context
+    )
     {
         _self = owner.transform;
         _player = player;
         _data = data;
+        _context = context;
     }
 
     public void Tick(float deltaTime)
     {
-        if (_player == null) { return; }
+        if (_player == null) return;
 
-        float distance = Vector3.Distance(
+        _context.DistanceToPlayer = Vector3.Distance(
             _self.position,
             _player.position
         );
 
-        if (distance > _data.AttackRange) { return; }
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) { return; }
+        if (_context.DistanceToPlayer > _data.AttackRange) return;
+        if (Time.time - _lastAttackTime < _data.AttackCooldown) return;
 
+        _context.IsAttacking = true;
         _lastAttackTime = Time.time;
 
+        PerformAttack();
+
+        _context.IsAttacking = false;
+    }
+
+    private void PerformAttack()
+    {
         Collider[] hits = Physics.OverlapSphere(
             _self.position + _self.forward * _data.AttackRange,
             _data.AttackRadius
@@ -40,6 +54,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private Transform _self;
     private Transform _player;
     private EnemyData _data;
+    private EnemyContext _context;
 
     private float _lastAttackTime;
 }
