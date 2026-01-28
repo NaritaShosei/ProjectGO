@@ -13,10 +13,9 @@ public class MoveBehaviour : IEnemyBehaviour
     {
         if (_player == null) { return; }
 
-        Vector3 dir = (_player.position - _self.position).normalized;
+        Vector3 dir = _player.position - _self.position;
         dir.y = 0;
-
-        _self.position += dir * _data.MoveSpeed * deltaTime;
+        dir = dir.normalized;
     }
 
     private Transform _self;
