@@ -28,6 +28,11 @@ public class OptionView : MonoBehaviour
     public void SetSEVolume(float value) => _seVolumeSlider.value = value;
     public void SetVoiceVolume(float value) => _voiceVolumeSlider.value = value;
 
+    public void ShowThisPanel()
+    {
+        EventSystem.current.SetSelectedGameObject(_controllerVibrationsToggle.gameObject);
+    }
+
     [Header("戻るボタン回り")]
     [SerializeField]
     private Button _backButton;
@@ -68,14 +73,8 @@ public class OptionView : MonoBehaviour
         _bgmVolumeSlider.onValueChanged.AddListener((value) => OnBGMVolumeSliderChanged?.Invoke(value));
         _seVolumeSlider.onValueChanged.AddListener((value) => OnSEVolumeSliderChanged?.Invoke(value));
         _voiceVolumeSlider.onValueChanged.AddListener((value) => OnVoiceVolumeSliderChanged?.Invoke(value));
-
-        ShowThisPanel();
     }
 
-    private void ShowThisPanel()
-    {
-        EventSystem.current.SetSelectedGameObject(_controllerVibrationsToggle.gameObject);
-    }
 
     private void OnDestroy()
     {

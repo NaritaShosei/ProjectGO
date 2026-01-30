@@ -116,6 +116,7 @@ public class TitleUIManager : MonoBehaviour
         }
 
         _optionUIPanel.SetActive(true);
+        _optionView.ShowThisPanel();
         _optionPresenter = new OptionPresenter(_optionView, _optionModel);
 
         _optionPresenter.OnOptionCloseRequested += CloseOptionPanel;
