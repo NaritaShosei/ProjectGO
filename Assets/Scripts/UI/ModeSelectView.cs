@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityEngine.EventSystems;
 
 public class ModeSelectView : MonoBehaviour
 {
@@ -8,6 +9,11 @@ public class ModeSelectView : MonoBehaviour
     public event Action OnBossModeButton;
     public event Action OnPracticeModeButton;
     public event Action OnBackButton;
+
+    public void ShowDhisPanel()
+    {
+        EventSystem.current.SetSelectedGameObject(_inGameModeButton.gameObject);
+    }
 
     [Header("ボタン")]
     [SerializeField]
@@ -34,6 +40,8 @@ public class ModeSelectView : MonoBehaviour
         _bossModeButton.onClick.AddListener(() => OnBossModeButton?.Invoke());
         _practiceModeButton.onClick.AddListener(() => OnPracticeModeButton?.Invoke());
         _backButton.onClick.AddListener(() => OnBackButton?.Invoke());
+
+        ShowDhisPanel();
     }
 
     private void OnDestroy()

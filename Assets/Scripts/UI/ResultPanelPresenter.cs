@@ -43,21 +43,23 @@ public class ResultPanelPresenter
         _resultPanelView.SetBuildBalance(resultData.BuildBalanceText);
         _resultPanelView.SetSkillList(resultData.SkillListText);
         _resultPanelView.SetFinalStats(resultData.FinalStatsText);
+
+        _resultPanelView.ShowOverviewPanel();
     }
 
     private void HandleShowOverview()
     {
-        OnShowOverview?.Invoke();
+        _resultPanelView.ShowOverviewPanel();
     }
 
     private void HandleShowRecord()
     {
-        OnShowRecord?.Invoke();
+        _resultPanelView.ShowRecordPanel();
     }
 
     private void HandleShowBuild()
     {
-        OnShowBuild?.Invoke();
+        _resultPanelView.ShowBuildPanel();
     }
 
     private void HandleTransitionToTitle()

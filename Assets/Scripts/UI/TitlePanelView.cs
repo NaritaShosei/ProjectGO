@@ -1,11 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityEngine.EventSystems;
 
 public class TitlePanelView : MonoBehaviour
 {
     public event Action OnModeSelectButton;
     public event Action OnOptionButton;
+
+    public void ShowDhisPanel()
+    {
+        EventSystem.current.SetSelectedGameObject(_modeSelectButton.gameObject);
+    }
 
     [SerializeField]
     private Button _modeSelectButton;
@@ -17,6 +23,8 @@ public class TitlePanelView : MonoBehaviour
         // ボタンのクリックイベントにリスナーを追加
         _modeSelectButton.onClick.AddListener(() => OnModeSelectButton?.Invoke());
         _optionButton.onClick.AddListener(() => OnOptionButton?.Invoke());
+
+        ShowDhisPanel();
     }
 
     private void OnDestroy()

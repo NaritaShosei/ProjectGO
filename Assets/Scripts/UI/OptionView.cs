@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
+using UnityEngine.EventSystems;
+
 public class OptionView : MonoBehaviour
 {
     //戻るボタン回り
@@ -66,6 +68,13 @@ public class OptionView : MonoBehaviour
         _bgmVolumeSlider.onValueChanged.AddListener((value) => OnBGMVolumeSliderChanged?.Invoke(value));
         _seVolumeSlider.onValueChanged.AddListener((value) => OnSEVolumeSliderChanged?.Invoke(value));
         _voiceVolumeSlider.onValueChanged.AddListener((value) => OnVoiceVolumeSliderChanged?.Invoke(value));
+
+        ShowDhisPanel();
+    }
+
+    private void ShowDhisPanel()
+    {
+        EventSystem.current.SetSelectedGameObject(_controllerVibrationsToggle.gameObject);
     }
 
     private void OnDestroy()
