@@ -33,9 +33,9 @@ public class ResultPanelView : MonoBehaviour
     [Header("ビルド構成")]
     [SerializeField] private TextMeshProUGUI _buildBalance;
     [SerializeField] private TextMeshProUGUI _skillList;
-    [SerializeField] private TextMeshProUGUI _finalStatass;
+    [SerializeField] private TextMeshProUGUI _finalStatas;
     [SerializeField] private Button _transitionToTitleButton;
-    [SerializeField] private Button _buckRecordButton;
+    [SerializeField] private Button _backRecordButton;
 
     // Presenter向けの設定適用メソッド
     public void SetTitleText(string text) => _titleText.text = text;
@@ -47,24 +47,21 @@ public class ResultPanelView : MonoBehaviour
     public void SetHealingCount(string text) => _healingCount.text = text;
     public void SetBuildBalance(string text) => _buildBalance.text = text;
     public void SetSkillList(string text) => _skillList.text = text;
-    public void SetFinalStats(string text) => _finalStatass.text = text;
+    public void SetFinalStats(string text) => _finalStatas.text = text;
 
     // パネル表示メソッド(選択も自動で行う)
     public void ShowOverviewPanel()
     {
-        SwitchPanel(_overviewPanel);
         EventSystem.current.SetSelectedGameObject(_showRecordButton.gameObject);
     }
 
     public void ShowRecordPanel()
     {
-        SwitchPanel(_recordPanel);
         EventSystem.current.SetSelectedGameObject(_showBuildButton.gameObject);
     }
 
     public void ShowBuildPanel()
     {
-        SwitchPanel(_buildPanel);
         EventSystem.current.SetSelectedGameObject(_transitionToTitleButton.gameObject);
     }
 
@@ -73,7 +70,7 @@ public class ResultPanelView : MonoBehaviour
         _showRecordButton.onClick.AddListener(() => OnShowRecord?.Invoke());
         _showBuildButton.onClick.AddListener(() => OnShowBuild?.Invoke());
         _backOverviewButton.onClick.AddListener(() => OnShowOverview?.Invoke());
-        _buckRecordButton.onClick.AddListener(() => OnShowRecord?.Invoke());
+        _backRecordButton.onClick.AddListener(() => OnShowRecord?.Invoke());
         _transitionToTitleButton.onClick.AddListener(() => OnTransitionToTitle?.Invoke());
     }
 
@@ -82,14 +79,7 @@ public class ResultPanelView : MonoBehaviour
         _showRecordButton.onClick.RemoveAllListeners();
         _showBuildButton.onClick.RemoveAllListeners();
         _backOverviewButton.onClick.RemoveAllListeners();
-        _buckRecordButton.onClick.RemoveAllListeners();
+        _backRecordButton.onClick.RemoveAllListeners();
         _transitionToTitleButton.onClick.RemoveAllListeners();
     }
-    private void SwitchPanel(GameObject activePanel)
-    {
-        _overviewPanel.SetActive(_overviewPanel == activePanel);
-        _recordPanel.SetActive(_recordPanel == activePanel);
-        _buildPanel.SetActive(_buildPanel == activePanel);
-    }
-
 }

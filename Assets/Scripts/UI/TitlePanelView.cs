@@ -8,7 +8,7 @@ public class TitlePanelView : MonoBehaviour
     public event Action OnModeSelectButton;
     public event Action OnOptionButton;
 
-    public void ShowDhisPanel()
+    public void ShowThisPanel()
     {
         EventSystem.current.SetSelectedGameObject(_modeSelectButton.gameObject);
     }
@@ -24,7 +24,7 @@ public class TitlePanelView : MonoBehaviour
         _modeSelectButton.onClick.AddListener(() => OnModeSelectButton?.Invoke());
         _optionButton.onClick.AddListener(() => OnOptionButton?.Invoke());
 
-        ShowDhisPanel();
+        ShowThisPanel();
     }
 
     private void OnDestroy()

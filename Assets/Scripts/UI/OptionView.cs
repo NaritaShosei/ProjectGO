@@ -69,10 +69,10 @@ public class OptionView : MonoBehaviour
         _seVolumeSlider.onValueChanged.AddListener((value) => OnSEVolumeSliderChanged?.Invoke(value));
         _voiceVolumeSlider.onValueChanged.AddListener((value) => OnVoiceVolumeSliderChanged?.Invoke(value));
 
-        ShowDhisPanel();
+        ShowThisPanel();
     }
 
-    private void ShowDhisPanel()
+    private void ShowThisPanel()
     {
         EventSystem.current.SetSelectedGameObject(_controllerVibrationsToggle.gameObject);
     }

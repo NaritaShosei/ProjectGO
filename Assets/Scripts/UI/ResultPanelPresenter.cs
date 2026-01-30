@@ -50,16 +50,19 @@ public class ResultPanelPresenter
     private void HandleShowOverview()
     {
         _resultPanelView.ShowOverviewPanel();
+        OnShowOverview?.Invoke();
     }
 
     private void HandleShowRecord()
     {
         _resultPanelView.ShowRecordPanel();
+        OnShowRecord?.Invoke();
     }
 
     private void HandleShowBuild()
     {
         _resultPanelView.ShowBuildPanel();
+        OnShowBuild?.Invoke();
     }
 
     private void HandleTransitionToTitle()

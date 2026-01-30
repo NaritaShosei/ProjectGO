@@ -10,7 +10,7 @@ public class ModeSelectView : MonoBehaviour
     public event Action OnPracticeModeButton;
     public event Action OnBackButton;
 
-    public void ShowDhisPanel()
+    public void ShowThisPanel()
     {
         EventSystem.current.SetSelectedGameObject(_inGameModeButton.gameObject);
     }
@@ -41,7 +41,7 @@ public class ModeSelectView : MonoBehaviour
         _practiceModeButton.onClick.AddListener(() => OnPracticeModeButton?.Invoke());
         _backButton.onClick.AddListener(() => OnBackButton?.Invoke());
 
-        ShowDhisPanel();
+        ShowThisPanel();
     }
 
     private void OnDestroy()

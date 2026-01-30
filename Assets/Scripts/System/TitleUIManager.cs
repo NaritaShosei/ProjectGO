@@ -69,7 +69,7 @@ public class TitleUIManager : MonoBehaviour
         // モードセレクトパネルを表示
         _modeSelectPanel.SetActive(true);
         _modeSelectPresenter = new ModeSelectPresenter(_modeSelectView, _modeSelectModel);
-        _modeSelectView.ShowDhisPanel();
+        _modeSelectView.ShowThisPanel();
 
         // イベントハンドラの登録
         _modeSelectPresenter.OnSceneSelected += SceneTransitionToScene;
@@ -89,7 +89,7 @@ public class TitleUIManager : MonoBehaviour
             _modeSelectPresenter = null;
         }
         _modeSelectPanel.SetActive(false);
-        _titlePanelView.ShowDhisPanel();
+        _titlePanelView.ShowThisPanel();
     }
 
     private async void SceneTransitionToScene(string sceneName)
@@ -135,7 +135,7 @@ public class TitleUIManager : MonoBehaviour
             _optionPresenter = null;
         }
         _optionUIPanel.SetActive(false);
-        _titlePanelView.ShowDhisPanel();
+        _titlePanelView.ShowThisPanel();
     }
 
     /// <summary>
