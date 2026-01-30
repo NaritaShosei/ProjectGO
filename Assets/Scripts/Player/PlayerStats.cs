@@ -1,22 +1,31 @@
 ﻿using System;
 using UnityEngine;
 
-public class PlayerStats
+public class PlayerStats : IAttackStats
 {
     public float CurrentHealth => _currentHealth;
     public float CurrentStamina => _currentStamina;
 
+    public float AttackPower => _attackPower;
+    public float CriticalRate => _criticalRate;
+
     public event Action OnDead;
     public event Action<float, float> OnHealthChanged;
     public event Action<float, float> OnStaminaChanged;
+    public event Action OnStatsChanged;
 
-    public PlayerStats(StatsData data)
+    public PlayerStats(PlayerData data)
     {
-        _maxHealth = data.MaxHealth;
-        _maxStamina = data.MaxStamina;
+        // HP / スタミナ
+        _maxHealth = data.Stats.MaxHealth;
+        _maxStamina = data.Stats.MaxStamina;
 
         _currentHealth = _maxHealth;
         _currentStamina = _maxStamina;
+
+        // 戦闘ステータス
+        _attackPower = data.AttackPower;
+        _criticalRate = data.CriticalRate;
     }
 
     public void TakeDamage(float damage)
@@ -66,9 +75,20 @@ public class PlayerStats
 
     }
 
+    public void ApplyEvolution(float attackPowerBonus, float criticalRateBonus)
+    {
+        _attackPower = Mathf.Max(0f, _attackPower + attackPowerBonus);
+        _criticalRate += criticalRateBonus;
+
+        OnStatsChanged?.Invoke();
+    }
+
     private float _maxHealth;
     private float _currentHealth;
 
     private float _maxStamina;
     private float _currentStamina;
+    private float _attackPower;
+    private float _criticalRate;
 }
+

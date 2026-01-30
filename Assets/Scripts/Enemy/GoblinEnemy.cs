@@ -30,11 +30,6 @@ public class GoblinEnemy : Enemy
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
 
-    protected override void Awake()
-    {
-        base.Awake();
-    }
-
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_runner == null) { return; }

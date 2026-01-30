@@ -6,7 +6,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     public event Action OnDead;
     public void Init(SkillManager skillManager, CameraManager cameraManager, InputHandler input)
     {
-        _attackExecutor?.Init(_playerData.AttackPower, skillManager);
+        _attackExecutor?.Init(_playerStats, skillManager);
 
         _move?.Init(
            _playerStateManager,
@@ -92,7 +92,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     private void CreateInternalObjects()
     {
         _playerStateManager = new PlayerStateManager();
-        _playerStats = new PlayerStats(_playerData.Stats);
+        _playerStats = new PlayerStats(_playerData);
     }
 
     private void BindEvents()

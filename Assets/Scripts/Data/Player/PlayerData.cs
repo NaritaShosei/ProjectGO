@@ -17,7 +17,7 @@ public class PlayerData : ScriptableObject
     [SerializeField] private float _blockPower;
 
     // クリティカル発生率（0.0〜1.0想定）
-    [SerializeField] private float _criticalRate;
+    [SerializeField, Range(0, 1)] private float _criticalRate = 0.5f;
 
     // 回復量（1回あたり）
     [SerializeField] private float _healAmount;
