@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
-    public void Init(float power, SkillManager manager)
+    public void Init(IAttackStats stats, SkillManager manager)
     {
-        _attackPower = power;
+        _attackStats = stats;
         _skillManager = manager;
     }
+
 
     /// <summary>
     /// 与えられたデータを基に攻撃
@@ -25,13 +26,13 @@ public class AttackExecutor : MonoBehaviour
 
         var context = new AttackContext
         {
-            AttackPower = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier,
+            AttackPower = _attackStats.AttackPower * data.DamageMultiplier * modeData.AttackMultiplier,
             PlayerMode = data.Mode
         };
 
         // 取得済みスキルの中から条件に合うものを取得して適用
         var applicableSkills = GetApplicableSkills(context, data);
-        var damageContext = ApplySkills(ref context, applicableSkills);
+       ApplySkills(ref context, applicableSkills);
 
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
@@ -40,9 +41,12 @@ public class AttackExecutor : MonoBehaviour
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                // ヒットの瞬間(敵毎)スキルを発動
-                context.OnHit?.Invoke();
+                var perHitContext = context; // コピー
+                RollCritical(ref perHitContext, modeData);
 
+                perHitContext.OnHit?.Invoke();
+
+                var damageContext = BuildDamageContext(perHitContext);
                 enemy.TakeDamage(damageContext);
             }
         }
@@ -51,7 +55,7 @@ public class AttackExecutor : MonoBehaviour
         context.OnAfterAttack?.Invoke();
     }
 
-    private float _attackPower;
+    private IAttackStats _attackStats;
     private SkillManager _skillManager;
 
     /// <summary>
@@ -73,7 +77,7 @@ public class AttackExecutor : MonoBehaviour
     /// <summary>
     /// 複数のスキルを順番に適用
     /// </summary>
-    private DamageContext ApplySkills(ref AttackContext context, List<SkillBase> skills)
+    private void ApplySkills(ref AttackContext context, List<SkillBase> skills)
     {
         var damageContext = new DamageContext
         {
@@ -85,10 +89,29 @@ public class AttackExecutor : MonoBehaviour
         {
             // 各スキルが前のスキルの結果を受け取って処理
             context.AttackPower = damageContext.AttackPower;
-            damageContext = skill.Apply(ref context);
+            skill.Apply(ref context);
         }
+    }
 
-        return damageContext;
+    private void RollCritical(ref AttackContext context, ModeData data)
+    {
+        float chance = _attackStats.CriticalRate;
+
+        if (UnityEngine.Random.value < chance)
+        {
+            context.IsCritical = true;
+            context.CriticalMultiplier = data.CriticalDamageMultiplier;
+            context.AttackPower *= context.CriticalMultiplier;
+        }
+    }
+
+    private DamageContext BuildDamageContext(AttackContext context)
+    {
+        return new DamageContext
+        {
+            AttackPower = context.AttackPower,
+            PlayerMode = context.PlayerMode
+        };
     }
 
     [SerializeField] private LayerMask _layer;
@@ -117,6 +140,9 @@ public struct AttackContext
 {
     public float AttackPower;
     public PlayerMode PlayerMode;
+
+    public bool IsCritical;
+    public float CriticalMultiplier;
 
     /// <summary>攻撃開始直前</summary>
     public Action OnBeforeAttack;
