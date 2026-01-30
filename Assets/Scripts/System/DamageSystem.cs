@@ -39,7 +39,7 @@ public static class DamageSystem
 
     private static float GetCriticalDamage(DamageContext attack, DefenseContext defense)
     {
-        if (attack.IsCritical) { return attack.AttackPower; }
+        if (!attack.IsCritical) { return attack.AttackPower; }
 
         else
         {
