@@ -8,7 +8,7 @@ public class TestSkill : SkillBase
         context.OnHit += () => GameObject.CreatePrimitive(PrimitiveType.Sphere).transform.position = new Vector3(Random.Range(-5, 5), 0, Random.Range(-5, 5));
         return new DamageContext()
         {
-            Damage = context.Damage,
+            AttackPower = context.AttackPower,
             PlayerMode = context.PlayerMode,
         };
     }

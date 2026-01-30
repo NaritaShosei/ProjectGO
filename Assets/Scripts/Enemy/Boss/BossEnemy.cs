@@ -18,7 +18,9 @@ public abstract class BossEnemy : Enemy
         // 派生側で「今ダメージが通るか？」を判断させる
         if (!CanTakeDamage(context)) { return; }
 
-        _stats.TakeDamage(context.Damage);
+        int damage = DamageSystem.Calculate(context, _defenceContext);
+
+        _stats.TakeDamage(damage);
     }
 
     [SerializeField] protected private BossActionPhaseController _bossPhaseController;

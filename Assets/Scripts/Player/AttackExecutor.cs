@@ -21,11 +21,11 @@ public class AttackExecutor : MonoBehaviour
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
 
-        Debug.Log($"{data.AttackName}で攻撃");
+        Debug.Log($"{data.Mode}：{data.AttackName}で攻撃");
 
         var context = new AttackContext
         {
-            Damage = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier,
+            AttackPower = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier,
             PlayerMode = data.Mode
         };
 
@@ -77,14 +77,14 @@ public class AttackExecutor : MonoBehaviour
     {
         var damageContext = new DamageContext
         {
-            Damage = context.Damage,
+            AttackPower = context.AttackPower,
             PlayerMode = context.PlayerMode,
         };
 
         foreach (var skill in skills)
         {
             // 各スキルが前のスキルの結果を受け取って処理
-            context.Damage = damageContext.Damage;
+            context.AttackPower = damageContext.AttackPower;
             damageContext = skill.Apply(ref context);
         }
 
@@ -115,7 +115,7 @@ public class AttackExecutor : MonoBehaviour
 /// </summary>
 public struct AttackContext
 {
-    public float Damage;
+    public float AttackPower;
     public PlayerMode PlayerMode;
 
     /// <summary>攻撃開始直前</summary>
@@ -133,6 +133,6 @@ public struct AttackContext
 /// </summary>
 public struct DamageContext
 {
-    public float Damage;
+    public float AttackPower;
     public PlayerMode PlayerMode;
 }

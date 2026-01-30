@@ -20,7 +20,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     {
         if (context.PlayerMode != PlayerMode.Warrior) { return; }
 
-        _hp -= context.Damage;
+        _hp -= context.AttackPower;
 
         if (_hp <= 0)
         {

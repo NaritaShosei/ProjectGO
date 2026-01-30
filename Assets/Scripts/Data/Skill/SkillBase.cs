@@ -12,7 +12,7 @@ public class SkillBase : ScriptableObject, ISkill
     {
         return new DamageContext()
         {
-            Damage = context.Damage,
+            AttackPower = context.AttackPower,
             PlayerMode = context.PlayerMode,
         };
     }

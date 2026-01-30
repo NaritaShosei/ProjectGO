@@ -27,12 +27,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     {
         if (_isDead) { return; }
 
-        _stats.TakeDamage(context.Damage);
+        int damage = DamageSystem.Calculate(context, _defenceContext);
+
+        _stats.TakeDamage(damage);
     }
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
 
+    protected DefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
 
@@ -40,6 +43,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected virtual void Awake()
     {
+        // 雑に生身限定
+        _defenceContext = new DefenseContext()
+        {
+            EnemyType = EnemyType.Flesh,
+        };
+
         _stats = new EnemyStats(_data);
 
         _stats.OnHealthZero += _stats.Kill;
@@ -79,4 +88,17 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected abstract void UpdateEnemy(float deltaTime);
 
+}
+
+public struct DefenseContext
+{
+    public EnemyType EnemyType; // 鎧 / 生身
+}
+
+public enum EnemyType
+{
+    [InspectorName("生身")]
+    Flesh,
+    [InspectorName("鎧")]
+    Armor,
 }

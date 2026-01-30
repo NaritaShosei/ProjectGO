@@ -24,7 +24,7 @@ public class BossCore : MonoBehaviour, IEnemy
 
         _boss.TakeDamage(new DamageContext
         {
-            Damage = context.Damage * _damageMultiplier,
+            AttackPower = context.AttackPower * _damageMultiplier,
             PlayerMode = context.PlayerMode
         });
     }
