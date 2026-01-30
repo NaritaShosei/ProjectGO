@@ -32,7 +32,7 @@ public class AttackExecutor : MonoBehaviour
 
         // 取得済みスキルの中から条件に合うものを取得して適用
         var applicableSkills = GetApplicableSkills(context, data);
-       ApplySkills(ref context, applicableSkills);
+        ApplySkills(ref context, applicableSkills);
 
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
@@ -79,16 +79,8 @@ public class AttackExecutor : MonoBehaviour
     /// </summary>
     private void ApplySkills(ref AttackContext context, List<SkillBase> skills)
     {
-        var damageContext = new DamageContext
-        {
-            AttackPower = context.AttackPower,
-            PlayerMode = context.PlayerMode,
-        };
-
         foreach (var skill in skills)
         {
-            // 各スキルが前のスキルの結果を受け取って処理
-            context.AttackPower = damageContext.AttackPower;
             skill.Apply(ref context);
         }
     }
@@ -110,7 +102,9 @@ public class AttackExecutor : MonoBehaviour
         return new DamageContext
         {
             AttackPower = context.AttackPower,
-            PlayerMode = context.PlayerMode
+            PlayerMode = context.PlayerMode,
+            CriticalMultiplier = context.CriticalMultiplier,
+            IsCritical = context.IsCritical,
         };
     }
 
@@ -161,4 +155,6 @@ public struct DamageContext
 {
     public float AttackPower;
     public PlayerMode PlayerMode;
+    public bool IsCritical;
+    public float CriticalMultiplier;
 }
