@@ -88,7 +88,9 @@ public class AttackExecutor : MonoBehaviour
     private void RollCritical(ref AttackContext context, ModeData data)
     {
         float chance = _attackStats.CriticalRate;
-
+        context.IsCritical = false;
+        context.CriticalMultiplier = 1f;
+        
         if (UnityEngine.Random.value < chance)
         {
             // クリティカル耐性の可能性を考え、ここではクリティカルダメージを求めない
