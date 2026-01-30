@@ -77,7 +77,7 @@ public class PlayerStats : IAttackStats
 
     public void ApplyEvolution(float attackPowerBonus, float criticalRateBonus)
     {
-        _attackPower += attackPowerBonus;
+        _attackPower = Mathf.Max(0f, _attackPower + attackPowerBonus);
         _criticalRate += criticalRateBonus;
 
         OnStatsChanged?.Invoke();
