@@ -91,9 +91,9 @@ public class AttackExecutor : MonoBehaviour
 
         if (UnityEngine.Random.value < chance)
         {
+            // クリティカル耐性の可能性を考え、ここではクリティカルダメージを求めない
             context.IsCritical = true;
             context.CriticalMultiplier = data.CriticalDamageMultiplier;
-            context.AttackPower *= context.CriticalMultiplier;
         }
     }
 

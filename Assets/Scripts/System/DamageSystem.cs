@@ -7,7 +7,7 @@ public static class DamageSystem
         DefenseContext defense)
     {
         float damage =
-            attack.AttackPower
+            GetCriticalDamage(attack, defense)
           * GetEnemyTypeMultiplier(attack.PlayerMode, defense.EnemyType);
 
         return Mathf.RoundToInt(damage);
@@ -35,5 +35,15 @@ public static class DamageSystem
         }
 
         return 1.0f; // 保険
+    }
+
+    private static float GetCriticalDamage(DamageContext attack, DefenseContext defense)
+    {
+        if (attack.IsCritical) { return attack.AttackPower; }
+
+        else
+        {
+            return attack.AttackPower * attack.CriticalMultiplier;
+        }
     }
 }
