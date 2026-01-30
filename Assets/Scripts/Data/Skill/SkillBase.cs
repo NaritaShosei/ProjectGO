@@ -8,13 +8,8 @@ public class SkillBase : ScriptableObject, ISkill
     public string Explanation => _explanation;
     public Sprite Icon => _icon;
 
-    public virtual DamageContext Apply(ref AttackContext context)
+    public virtual void Apply(ref AttackContext context)
     {
-        return new DamageContext()
-        {
-            AttackPower = context.AttackPower,
-            PlayerMode = context.PlayerMode,
-        };
     }
 
     public virtual bool CanApply(AttackContext context, AttackData data)
