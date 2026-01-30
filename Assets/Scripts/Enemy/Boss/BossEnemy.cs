@@ -18,16 +18,19 @@ public abstract class BossEnemy : Enemy
         // 派生側で「今ダメージが通るか？」を判断させる
         if (!CanTakeDamage(context)) { return; }
 
-        _currentHP -= context.Damage;
-
-        // ボスはHP0でも即死しない
-        if (_currentHP <= 0f)
-        {
-            OnBossHPZero();
-        }
+        _stats.TakeDamage(context.Damage);
     }
 
     [SerializeField] protected private BossActionPhaseController _bossPhaseController;
+
+    protected override void Awake()
+    {
+        _stats = new EnemyStats(_data);
+
+        _stats.OnHealthZero += OnBossHPZero;
+
+        _stats.OnDead += OnDeath;
+    }
 
     protected virtual bool CanTakeDamage(DamageContext context)
     {
@@ -39,6 +42,7 @@ public abstract class BossEnemy : Enemy
     {
         // 例：フェーズ遷移、ダウン、形態変化
         // Destroy はしない
+        PhaseChange();
     }
 
     protected override void OnDeathInternal()
@@ -53,16 +57,20 @@ public abstract class BossEnemy : Enemy
     /// </summary>
     protected virtual void PhaseChange()
     {
-        if (!_bossPhaseController.IsPhaseEnd)
+        if (_bossPhaseController.IsPhaseEnd)
         {
-            _bossPhaseController.SetPhase();
-            OnPhaseChange?.Invoke();
-
-            _data = _bossPhaseController.CurrentPhase.Data;
-
-            _currentHP = _data.MaxHP;
-
-            Debug.Log("フェーズ変更");
+            // 最終フェーズ → 本当の死亡
+            _stats.Kill();
+            return;
         }
+
+        _bossPhaseController.SetPhase();
+        OnPhaseChange?.Invoke();
+
+        _data = _bossPhaseController.CurrentPhase.Data;
+        _stats.ResetHP(_data.MaxHP);
+
+        Debug.Log("フェーズ変更");
     }
+
 }
