@@ -49,15 +49,15 @@ public class ResultUIManager : MonoBehaviour
         // CanvasGroupの取得
         if (!_overviewPanel.TryGetComponent(out _overviewCanvasGroup))
         {
-            _overviewPanel.AddComponent<CanvasGroup>();
+            _overviewCanvasGroup = _overviewPanel.AddComponent<CanvasGroup>();
         }
         if (!_recordPanel.TryGetComponent(out _recordCanvasGroup))
         {
-            _recordPanel.AddComponent<CanvasGroup>();
+            _recordCanvasGroup = _recordPanel.AddComponent<CanvasGroup>();
         }
         if (!_buildPanel.TryGetComponent(out _buildCanvasGroup))
         {
-            _buildPanel.AddComponent<CanvasGroup>();
+            _buildCanvasGroup = _buildPanel.AddComponent<CanvasGroup>();
         }
 
         // 初期パネル表示
