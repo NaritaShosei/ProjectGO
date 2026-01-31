@@ -1853,6 +1853,7 @@ GameObject:
   - component: {fileID: 902378201}
   - component: {fileID: 902378203}
   - component: {fileID: 902378202}
+  - component: {fileID: 902378204}
   m_Layer: 5
   m_Name: BuildConfiguration
   m_TagString: Untagged
@@ -1922,6 +1923,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 902378200}
   m_CullTransparentMesh: 1
+--- !u!225 &902378204
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 902378200}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1000255774
 GameObject:
   m_ObjectHideFlags: 0
@@ -2207,6 +2220,7 @@ GameObject:
   - component: {fileID: 1288229331}
   - component: {fileID: 1288229333}
   - component: {fileID: 1288229332}
+  - component: {fileID: 1288229334}
   m_Layer: 5
   m_Name: BattleRecord
   m_TagString: Untagged
@@ -2278,6 +2292,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1288229330}
   m_CullTransparentMesh: 1
+--- !u!225 &1288229334
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1288229330}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1319188783
 GameObject:
   m_ObjectHideFlags: 0
@@ -3576,6 +3602,7 @@ GameObject:
   - component: {fileID: 2127073843}
   - component: {fileID: 2127073845}
   - component: {fileID: 2127073844}
+  - component: {fileID: 2127073846}
   m_Layer: 5
   m_Name: OverviewPanel
   m_TagString: Untagged
@@ -3643,6 +3670,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2127073842}
   m_CullTransparentMesh: 1
+--- !u!225 &2127073846
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2127073842}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -14,6 +14,10 @@ public class ResultUIManager : MonoBehaviour
     [SerializeField]
     private GameObject _buildPanel;
 
+    private CanvasGroup _overviewCanvasGroup;
+    private CanvasGroup _recordCanvasGroup;
+    private CanvasGroup _buildCanvasGroup;
+
     private SceneTransitionManager _sceneTransitionManager;
     private ResultPanelModel _resultPanelModel;
     private ResultPanelPresenter _resultPanelPresenter;
@@ -42,6 +46,20 @@ public class ResultUIManager : MonoBehaviour
         _resultPanelPresenter.OnShowBuild += ShowBuildPanel;
         _resultPanelPresenter.OnTransitionToTitle += TransitionToTitle;
 
+        // CanvasGroupの取得
+        if (!_overviewPanel.TryGetComponent(out _overviewCanvasGroup))
+        {
+            _overviewPanel.AddComponent<CanvasGroup>();
+        }
+        if (!_recordPanel.TryGetComponent(out _recordCanvasGroup))
+        {
+            _recordPanel.AddComponent<CanvasGroup>();
+        }
+        if (!_buildPanel.TryGetComponent(out _buildCanvasGroup))
+        {
+            _buildPanel.AddComponent<CanvasGroup>();
+        }
+
         // 初期パネル表示
         ShowOverviewPanel();
     }
@@ -62,22 +80,31 @@ public class ResultUIManager : MonoBehaviour
     private void ShowOverviewPanel()
     {
         _overviewPanel.SetActive(true);
+        _overviewCanvasGroup.interactable = true;
         _recordPanel.SetActive(false);
+        _recordCanvasGroup.interactable = false;
         _buildPanel.SetActive(false);
+        _buildCanvasGroup.interactable = false;
     }
 
     private void ShowRecordPanel()
     {
         _overviewPanel.SetActive(false);
+        _overviewCanvasGroup.interactable = false;
         _recordPanel.SetActive(true);
+        _recordCanvasGroup.interactable = true;
         _buildPanel.SetActive(false);
+        _buildCanvasGroup.interactable = false;
     }
 
     private void ShowBuildPanel()
     {
         _overviewPanel.SetActive(false);
+        _overviewCanvasGroup.interactable = false;
         _recordPanel.SetActive(false);
+        _recordCanvasGroup.interactable = false;
         _buildPanel.SetActive(true);
+        _buildCanvasGroup.interactable = true;
     }
 
     private async void TransitionToTitle()
