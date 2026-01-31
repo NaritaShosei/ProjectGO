@@ -5,11 +5,12 @@ using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
-    public void Init(float power, SkillManager manager)
+    public void Init(IAttackStats stats, SkillManager manager)
     {
-        _attackPower = power;
+        _attackStats = stats;
         _skillManager = manager;
     }
+
 
     /// <summary>
     /// 与えられたデータを基に攻撃
@@ -21,17 +22,17 @@ public class AttackExecutor : MonoBehaviour
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
 
-        Debug.Log($"{data.AttackName}で攻撃");
+        Debug.Log($"{data.Mode}：{data.AttackName}で攻撃");
 
         var context = new AttackContext
         {
-            Damage = _attackPower * data.DamageMultiplier * modeData.AttackMultiplier,
+            AttackPower = _attackStats.AttackPower * data.DamageMultiplier * modeData.AttackMultiplier,
             PlayerMode = data.Mode
         };
 
         // 取得済みスキルの中から条件に合うものを取得して適用
         var applicableSkills = GetApplicableSkills(context, data);
-        var damageContext = ApplySkills(ref context, applicableSkills);
+        ApplySkills(ref context, applicableSkills);
 
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
@@ -40,9 +41,12 @@ public class AttackExecutor : MonoBehaviour
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                // ヒットの瞬間(敵毎)スキルを発動
-                context.OnHit?.Invoke();
+                var perHitContext = context; // コピー
+                RollCritical(ref perHitContext, modeData);
 
+                perHitContext.OnHit?.Invoke();
+
+                var damageContext = BuildDamageContext(perHitContext);
                 enemy.TakeDamage(damageContext);
             }
         }
@@ -51,7 +55,7 @@ public class AttackExecutor : MonoBehaviour
         context.OnAfterAttack?.Invoke();
     }
 
-    private float _attackPower;
+    private IAttackStats _attackStats;
     private SkillManager _skillManager;
 
     /// <summary>
@@ -73,22 +77,37 @@ public class AttackExecutor : MonoBehaviour
     /// <summary>
     /// 複数のスキルを順番に適用
     /// </summary>
-    private DamageContext ApplySkills(ref AttackContext context, List<SkillBase> skills)
+    private void ApplySkills(ref AttackContext context, List<SkillBase> skills)
     {
-        var damageContext = new DamageContext
-        {
-            Damage = context.Damage,
-            PlayerMode = context.PlayerMode,
-        };
-
         foreach (var skill in skills)
         {
-            // 各スキルが前のスキルの結果を受け取って処理
-            context.Damage = damageContext.Damage;
-            damageContext = skill.Apply(ref context);
+            skill.Apply(ref context);
         }
+    }
 
-        return damageContext;
+    private void RollCritical(ref AttackContext context, ModeData data)
+    {
+        float chance = _attackStats.CriticalRate;
+        context.IsCritical = false;
+        context.CriticalMultiplier = 1f;
+        
+        if (UnityEngine.Random.value < chance)
+        {
+            // クリティカル耐性の可能性を考え、ここではクリティカルダメージを求めない
+            context.IsCritical = true;
+            context.CriticalMultiplier = data.CriticalDamageMultiplier;
+        }
+    }
+
+    private DamageContext BuildDamageContext(AttackContext context)
+    {
+        return new DamageContext
+        {
+            AttackPower = context.AttackPower,
+            PlayerMode = context.PlayerMode,
+            CriticalMultiplier = context.CriticalMultiplier,
+            IsCritical = context.IsCritical,
+        };
     }
 
     [SerializeField] private LayerMask _layer;
@@ -115,8 +134,11 @@ public class AttackExecutor : MonoBehaviour
 /// </summary>
 public struct AttackContext
 {
-    public float Damage;
+    public float AttackPower;
     public PlayerMode PlayerMode;
+
+    public bool IsCritical;
+    public float CriticalMultiplier;
 
     /// <summary>攻撃開始直前</summary>
     public Action OnBeforeAttack;
@@ -133,6 +155,8 @@ public struct AttackContext
 /// </summary>
 public struct DamageContext
 {
-    public float Damage;
+    public float AttackPower;
     public PlayerMode PlayerMode;
+    public bool IsCritical;
+    public float CriticalMultiplier;
 }

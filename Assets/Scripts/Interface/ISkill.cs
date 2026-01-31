@@ -11,7 +11,7 @@
     public bool CanApply(AttackContext context,AttackData data);
 
     /// <summary>
-    /// スキルを発動する
+    /// スキルを発動する,攻撃力の変化などはcontextの内部のパラメーターに行う
     /// </summary>
-    public DamageContext Apply(ref AttackContext context);
+    public void Apply(ref AttackContext context);
 }
