@@ -27,6 +27,19 @@ public class StunEnemy : Enemy
         _runner.Add(attack);
     }
 
+    // TODO: ひとまずここにTakeDamage→EnemyContextの橋渡しを記述しておく。
+    // TODO: 敵を量産するならここじゃないほうがいい
+    public override void TakeDamage(DamageContext context)
+    {
+        base.TakeDamage(context);
+
+        // TODO: スタン攻撃かDamageContextから判別
+        // TODO: スタン攻撃ならEnemyContextにおいてスタン状態に変更
+        // TODO: EnemyクラスからEnemyContextへの参照がない
+        // TODO: ひとまず一つ下のStunEnemyのほうでoverrideして実装しよう
+    }
+
+
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
 

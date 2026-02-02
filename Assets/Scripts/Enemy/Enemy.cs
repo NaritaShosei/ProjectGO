@@ -30,6 +30,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
         _stats.TakeDamage(damage);
+
+        // TODO: スタン攻撃かDamageContextから判別
+        // TODO: スタン攻撃ならEnemyContextにおいてスタン状態に変更
+        // TODO: EnemyクラスからEnemyContextへの参照がない
+        // TODO: ひとまず一つ下のStunEnemyのほうでoverrideして実装しよう
     }
 
     [SerializeField] protected EnemyData _data;

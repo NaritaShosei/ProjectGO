@@ -28,6 +28,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
+        // TODO: 親をEnemyManagerにしているので、Goblinがうまく移動できていない
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
 
         if (obj.TryGetComponent(out IEnemy enemy))
