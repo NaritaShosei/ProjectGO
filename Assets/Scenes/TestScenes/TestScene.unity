@@ -232,11 +232,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e92eb45d5452a4429d56ca46396b6a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillSelectButton
+--- !u!1 &81991127 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5085212601654021014, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
+  m_PrefabInstance: {fileID: 858270829}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &81991128 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5609687742127395116, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
   m_PrefabInstance: {fileID: 858270829}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &81991129 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 1961794358539717462, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
+  m_PrefabInstance: {fileID: 858270829}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &81991130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 81991127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83af039a6f5dea844809d42d661a3444, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationController
+  _animator: {fileID: 81991129}
 --- !u!1 &288090816
 GameObject:
   m_ObjectHideFlags: 0
@@ -873,6 +896,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1298887711}
     m_Modifications:
+    - target: {fileID: 1961794358539717462, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1961794358539717462, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 66ef498077266994281b781896bd19be, type: 2}
+    - target: {fileID: 1961794358539717462, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5085212601654021014, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
       propertyPath: m_Name
       value: Grruzam_BaseModeling_Hammer_Male (1)
@@ -928,7 +963,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5085212601654021014, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 81991130}
   m_SourcePrefab: {fileID: 100100000, guid: 2d6de66be35f49d489a256e222067fcc, type: 3}
 --- !u!1 &880924927
 GameObject:
@@ -1401,6 +1439,7 @@ MonoBehaviour:
   _moveData: {fileID: 11400000, guid: f10a1004f7e70b543b0e1fca85473f85, type: 2}
   _playerData: {fileID: 11400000, guid: 862fa5b289065334e96cdbce15ecf7f3, type: 2}
   _targetCenter: {fileID: 1298887711}
+  _playerAnimationController: {fileID: 81991130}
 --- !u!4 &1298887711
 Transform:
   m_ObjectHideFlags: 0
