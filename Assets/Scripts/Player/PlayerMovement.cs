@@ -57,30 +57,26 @@ public class PlayerMovement : MonoBehaviour
         if (!_playerStateManager.CanMove()) { return; }
 
         var vec = _input.MoveInput;
+        var camera = _cameraManager.MainCamera;
+
         var inputMag = vec.magnitude;
 
-        if (inputMag < INPUT_THRESHOLD) { return; }
-
-        var camera = _cameraManager.MainCamera;
+        if (inputMag < INPUT_THRESHOLD)
+        {
+            _rb.linearVelocity = Vector3.zero;
+            return;
+        }
 
         var right = camera.transform.right * vec.x;
         var forward = camera.transform.forward * vec.y;
 
-        var moveDir = right + forward;
-        moveDir.y = 0f;
-
-        if (moveDir.sqrMagnitude <= 0f) { return; }
-
-        moveDir.Normalize();
+        var moveDir = (right + forward).normalized;
+        moveDir.y = 0;
 
         var speed = _modeController.ModeData.MoveSpeed * inputMag;
 
-        Vector3 nextPos =
-            _rb.position + moveDir * speed * Time.deltaTime;
-
-        _rb.MovePosition(nextPos);
+        _rb.linearVelocity = moveDir * speed;
     }
-
 
     private void Rotate()
     {
@@ -144,14 +140,11 @@ public class PlayerMovement : MonoBehaviour
         {
             while (t < _moveData.DodgeDuration)
             {
-                Vector3 nextPos = _rb.position + dodgeDir * _moveData.DodgeSpeed * Time.deltaTime;
-
-                _rb.MovePosition(nextPos);
+                _rb.linearVelocity = _moveData.DodgeSpeed * dodgeDir;
 
                 t += Time.deltaTime;
                 await UniTask.Yield(destroyCancellationToken);
             }
-
         }
         catch (OperationCanceledException)
         {
