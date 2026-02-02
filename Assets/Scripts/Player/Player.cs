@@ -14,9 +14,12 @@ public class Player : MonoBehaviour, IPlayer, IStamina
            cameraManager,
            _moveData,
            this,
-           _modeController);
+           _modeController,
+           _playerAnimationController);
 
         _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController);
+
+        _playerAnimationController.Init(_playerStateManager, _modeController);
     }
 
     public Transform GetTargetCenter()
@@ -56,6 +59,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private Transform _targetCenter;
+    [SerializeField] private PlayerAnimationController _playerAnimationController;
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
@@ -80,6 +84,11 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         if (_move != null)
         {
             _move.OnEndDodge -= _attack.FinishDodge;
+        }
+
+        if (_playerAnimationController != null)
+        {
+            _playerAnimationController.OnDestroy();
         }
     }
 
