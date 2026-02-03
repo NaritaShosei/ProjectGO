@@ -7,9 +7,6 @@ using Interface;
 /// </summary>
 public class PlayerModeView : MonoBehaviour,IPlayerModeView
 {
-    [Header("Mode Images")]
-    [SerializeField] private Image _raijinUI;
-    [SerializeField] private Image _toujinUI;
     /// <summary>
     /// UIÇÉÇÅ[ÉhÇ…ÇÊÇ¡ÇƒêÿÇËë÷Ç¶ÇÈ
     /// </summary>
@@ -19,4 +16,9 @@ public class PlayerModeView : MonoBehaviour,IPlayerModeView
         _raijinUI.gameObject.SetActive(mode == PlayerMode.Warrior);
         _toujinUI.gameObject.SetActive(mode == PlayerMode.Thunder);
     }
+
+    [Header("Mode Images")]
+    [SerializeField] private Image _raijinUI;
+    [SerializeField] private Image _toujinUI;
+   
 }
