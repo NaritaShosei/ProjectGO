@@ -4,8 +4,13 @@ using UnityEngine;
 public class Player : MonoBehaviour, IPlayer, IStamina
 {
     public event Action OnDead;
+    public event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnStaminaChanged;
     public void Init(SkillManager skillManager, CameraManager cameraManager, InputHandler input)
     {
+        CreateInternalObjects();
+        BindEvents();
+
         _attackExecutor?.Init(_playerStats, skillManager);
 
         _move?.Init(
@@ -14,9 +19,12 @@ public class Player : MonoBehaviour, IPlayer, IStamina
            cameraManager,
            _moveData,
            this,
-           _modeController);
+           _modeController,
+           _playerAnimationController);
 
-        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController);
+        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController);
+
+        _playerAnimationController.Init(_playerStateManager, _modeController);
     }
 
     public Transform GetTargetCenter()
@@ -56,14 +64,10 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private Transform _targetCenter;
+    [SerializeField] private PlayerAnimationController _playerAnimationController;
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
-
-    private void Awake()
-    {
-        InitInternal();
-    }
 
     private void Update()
     {
@@ -75,18 +79,19 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         if (_playerStats != null)
         {
             _playerStats.OnDead -= OnPlayerDead;
+            _playerStats.OnHealthChanged -= HealthChange;
+            _playerStats.OnStaminaChanged -= StaminaChange;
         }
 
         if (_move != null)
         {
             _move.OnEndDodge -= _attack.FinishDodge;
         }
-    }
 
-    private void InitInternal()
-    {
-        CreateInternalObjects();
-        BindEvents();
+        if (_playerAnimationController != null)
+        {
+            _playerAnimationController.OnDestroy();
+        }
     }
 
     private void CreateInternalObjects()
@@ -98,6 +103,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     private void BindEvents()
     {
         _playerStats.OnDead += OnPlayerDead;
+        _playerStats.OnHealthChanged += HealthChange;
+        _playerStats.OnStaminaChanged += StaminaChange;
 
         if (_move != null && _attack != null)
         {
@@ -105,6 +112,15 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         }
     }
 
+    private void HealthChange(float current, float max)
+    {
+        OnHealthChanged?.Invoke(current, max);
+    }
+
+    private void StaminaChange(float current, float max)
+    {
+        OnStaminaChanged?.Invoke(current, max);
+    }
 
     private void RegenerateStamina()
     {
