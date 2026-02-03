@@ -4,8 +4,13 @@ using UnityEngine;
 public class Player : MonoBehaviour, IPlayer, IStamina
 {
     public event Action OnDead;
+    public event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnStaminaChanged;
     public void Init(SkillManager skillManager, CameraManager cameraManager, InputHandler input)
     {
+        CreateInternalObjects();
+        BindEvents();
+
         _attackExecutor?.Init(_playerStats, skillManager);
 
         _move?.Init(
@@ -64,11 +69,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
 
-    private void Awake()
-    {
-        InitInternal();
-    }
-
     private void Update()
     {
         RegenerateStamina();
@@ -79,6 +79,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         if (_playerStats != null)
         {
             _playerStats.OnDead -= OnPlayerDead;
+            _playerStats.OnHealthChanged -= HealthChange;
+            _playerStats.OnStaminaChanged -= StaminaChange;
         }
 
         if (_move != null)
@@ -92,12 +94,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         }
     }
 
-    private void InitInternal()
-    {
-        CreateInternalObjects();
-        BindEvents();
-    }
-
     private void CreateInternalObjects()
     {
         _playerStateManager = new PlayerStateManager();
@@ -107,6 +103,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     private void BindEvents()
     {
         _playerStats.OnDead += OnPlayerDead;
+        _playerStats.OnHealthChanged += HealthChange;
+        _playerStats.OnStaminaChanged += StaminaChange;
 
         if (_move != null && _attack != null)
         {
@@ -114,6 +112,15 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         }
     }
 
+    private void HealthChange(float current, float max)
+    {
+        OnHealthChanged?.Invoke(current, max);
+    }
+
+    private void StaminaChange(float current, float max)
+    {
+        OnStaminaChanged?.Invoke(current, max);
+    }
 
     private void RegenerateStamina()
     {

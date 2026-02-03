@@ -26,6 +26,9 @@ public class PlayerStats : IAttackStats
         // 戦闘ステータス
         _attackPower = data.AttackPower;
         _criticalRate = data.CriticalRate;
+
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
     }
 
     public void TakeDamage(float damage)
