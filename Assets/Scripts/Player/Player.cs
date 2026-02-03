@@ -17,7 +17,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
            _modeController,
            _playerAnimationController);
 
-        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController);
+        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController);
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
     }

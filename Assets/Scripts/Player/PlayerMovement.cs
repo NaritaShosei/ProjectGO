@@ -162,6 +162,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void PlayMoveAnimation()
     {
+        if (_playerStateManager.IsDodging()) { return; }
+
         if (_animationController != null)
         {
             var speed = _rb.linearVelocity.magnitude;
