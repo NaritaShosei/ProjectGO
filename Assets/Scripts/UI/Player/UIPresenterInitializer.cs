@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UIPresenterInitializer : MonoBehaviour
 {
-    [SerializeField] private PlayerModeController _playerModeController;
+    [SerializeField] private PlayerModeController _playerModeController;//‚±‚±‚©‚çƒ‚[ƒh‚Ì•ÏX‚ğŒ©‚é
     [SerializeField] private PlayerModeView _playerModeView;
 
     private PlayerModePresenter _presenter;
