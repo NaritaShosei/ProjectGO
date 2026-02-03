@@ -8,7 +8,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private SkillManager _skillManager;
     [SerializeField] private CameraManager _cameraManager;
 
+    [SerializeField] private PlayerGaugeView _playerGaugeView;
+    private PlayerGaugePresenter _playerGaugePresenter;
+
     private SceneTransitionManager _sceneTransitionManager;
+
 
     private void Start()
     {
@@ -29,6 +33,11 @@ public class GameManager : MonoBehaviour
         {
             _player.OnDead -= HandleGameComplete;
         }
+
+        if (_playerGaugePresenter != null)
+        {
+            _playerGaugePresenter.Dispose();
+        }
     }
 
     private void InitPlayer()
@@ -38,6 +47,8 @@ public class GameManager : MonoBehaviour
         _player.Init(_skillManager, _cameraManager, input);
 
         _player.OnDead += HandleGameComplete;
+
+        _playerGaugePresenter = new PlayerGaugePresenter(health: _player, stamina: _player, _playerGaugeView);
     }
 
     private void InitEnemyManager()

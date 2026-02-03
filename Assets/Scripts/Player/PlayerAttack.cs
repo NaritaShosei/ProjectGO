@@ -8,7 +8,8 @@ public class PlayerAttack : MonoBehaviour
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         AttackExecutor executor,
-                IModeController modeController)
+        IModeController modeController,
+        PlayerAnimationController animationController)
     {
         // チャージ時間を基準に降順にソート
         _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
@@ -17,6 +18,7 @@ public class PlayerAttack : MonoBehaviour
         _input = input;
         _attackExecutor = executor;
         _modeController = modeController;
+        _animationController = animationController;
 
         _input.OnLightAttack += PerformLightAttack;
 
@@ -74,6 +76,7 @@ public class PlayerAttack : MonoBehaviour
     private InputHandler _input;
     private AttackExecutor _attackExecutor;
     private IModeController _modeController;
+    private PlayerAnimationController _animationController;
     [SerializeField] private AttackDataRepository _attackRepository;
     [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
 
@@ -219,6 +222,8 @@ public class PlayerAttack : MonoBehaviour
         _attackExecutor.Execute(attackData, input, _modeController.ModeData);
 
         _lastAttackTime = Time.time;
+
+        _animationController.PlayAttack(_currentAttackId);
 
         // デバッグ用
         // TODO:アニメーションが付いたら消す

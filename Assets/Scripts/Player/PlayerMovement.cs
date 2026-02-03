@@ -13,7 +13,8 @@ public class PlayerMovement : MonoBehaviour
         CameraManager cameraManager,
         MoveData data,
         IStamina stamina,
-        IModeController modeController)
+        IModeController modeController,
+        PlayerAnimationController animationController)
     {
         _playerStateManager = playerStateManager;
         _input = input;
@@ -21,6 +22,7 @@ public class PlayerMovement : MonoBehaviour
         _moveData = data;
         _stamina = stamina;
         _modeController = modeController;
+        _animationController = animationController;
 
         _input.OnDodge += OnDodge;
     }
@@ -33,6 +35,7 @@ public class PlayerMovement : MonoBehaviour
     private MoveData _moveData;
     private IStamina _stamina;
     private IModeController _modeController;
+    private PlayerAnimationController _animationController;
 
     #region イベント関数
 
@@ -40,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Move();
         Rotate();
+        PlayMoveAnimation();
     }
 
     private void OnDestroy()
@@ -116,6 +120,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
+        _animationController.PlayDodge();
 
         var input = _input.MoveInput;
         Vector3 dodgeDir;
@@ -153,5 +158,17 @@ public class PlayerMovement : MonoBehaviour
         _playerStateManager.ChangeState(PlayerState.Idle);
 
         OnEndDodge?.Invoke();
+    }
+
+    private void PlayMoveAnimation()
+    {
+        if (_playerStateManager.IsDodging()) { return; }
+
+        if (_animationController != null)
+        {
+            var speed = _rb.linearVelocity.magnitude;
+
+            _animationController.UpdateMoveAnimation(speed);
+        }
     }
 }
