@@ -36,10 +36,16 @@ public class PlayerAnimationController : MonoBehaviour
     }
 
     [SerializeField] private Animator _animator;
+    private int _baseLayer;
+    private int _bodyLayer;
+
 
     // アニメーションパラメータ名（定数化）
     private static class AnimParams
     {
+        public const string Base = "Base Layer";
+        public const string Body = "BodyUpper";
+
         public static readonly int Speed = Animator.StringToHash("Speed");
         public static readonly int Attack = Animator.StringToHash("Attack");
         public static readonly int AttackId = Animator.StringToHash("AttackId");
@@ -50,12 +56,19 @@ public class PlayerAnimationController : MonoBehaviour
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
     }
 
+    private void Awake()
+    {
+        _baseLayer = _animator.GetLayerIndex(AnimParams.Base);
+        _bodyLayer = _animator.GetLayerIndex(AnimParams.Body);
+    }
+
     private void OnStateChanged(PlayerState oldState, PlayerState newState)
     {
         switch (newState)
         {
             case PlayerState.Charging:
                 _animator.SetBool(AnimParams.IsCharging, true);
+                _animator.SetLayerWeight(_bodyLayer, 1);
                 break;
             case PlayerState.Dead:
                 _animator.SetTrigger(AnimParams.Dead);
@@ -68,6 +81,7 @@ public class PlayerAnimationController : MonoBehaviour
         if (oldState == PlayerState.Charging)
         {
             _animator.SetBool(AnimParams.IsCharging, false);
+            _animator.SetLayerWeight(_bodyLayer, 0);
         }
     }
 
