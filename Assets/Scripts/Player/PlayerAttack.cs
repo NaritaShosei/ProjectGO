@@ -29,6 +29,11 @@ public class PlayerAttack : MonoBehaviour
 
         _modeController.OnModeChanged += OnModeChanged;
 
+        _animationController.OnAttackExecute += ExecutePendingAttack;
+        _animationController.OnAttackComplete += FinishAttack;
+        _animationController.OnComboWindowStart += OnComboWindowStart;
+        _animationController.OnComboWindowEnd += OnComboWindowEnd;
+
         // 設定に応じて登録するイベントを変更
         switch (_dodgeAttackConfig.DodgeAttackType)
         {
@@ -56,19 +61,12 @@ public class PlayerAttack : MonoBehaviour
     }
 
     /// <summary>
-    /// アニメーションイベントで呼ぶ想定の攻撃終了関数
-    /// </summary>
-    public void FinishAttack()
-    {
-        _stateManager.ChangeState(PlayerState.Idle);
-    }
-
-    /// <summary>
     /// コンボをリセット
     /// </summary>
     public void ResetCombo()
     {
         _currentAttackId = -1;
+        _bufferedComboInput = null;
     }
 
     // 依存関係
@@ -94,6 +92,14 @@ public class PlayerAttack : MonoBehaviour
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private bool _hasBufferedDodgeAttack = false;
+    private bool _isInComboWindow = false;
+
+    // 保留中の攻撃データ
+    private AttackData _pendingAttackData;
+    private AttackInput? _pendingAttackInput;
+
+    // バッファされたコンボ入力
+    private AttackInput? _bufferedComboInput;
 
     private void OnDestroy()
     {
@@ -121,6 +127,14 @@ public class PlayerAttack : MonoBehaviour
                     break;
             }
         }
+
+        if (_animationController != null)
+        {
+            _animationController.OnAttackExecute -= ExecutePendingAttack;
+            _animationController.OnAttackComplete -= FinishAttack;
+            _animationController.OnComboWindowStart -= OnComboWindowStart;
+            _animationController.OnComboWindowEnd -= OnComboWindowEnd;
+        }
     }
 
     private void BufferDodgeAttack()
@@ -140,13 +154,13 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void PerformDodgeAttack()
     {
-        if (!CanAttack()) return;
+        if (!CanAttack()) { return; }
 
         var input = _dodgeAttackConfig.CreateAttackInput();
 
         // 回避攻撃はコンボをリセット
         ResetCombo();
-        ExecuteAttack(input);
+        PrepareAttack(input);
     }
 
     /// <summary>
@@ -154,7 +168,18 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void PerformLightAttack()
     {
-        if (!CanAttack()) return;
+        // 攻撃中でコンボウィンドウ内なら、入力をバッファ
+        if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
+        {
+            BufferComboInput(new AttackInput
+            {
+                AttackType = AttackType.LightAttack,
+                ChargeTime = 0f,
+            });
+            return;
+        }
+
+        if (!CanAttack()) { return; }
 
         ResetComboByTime();
 
@@ -164,13 +189,20 @@ public class PlayerAttack : MonoBehaviour
             ChargeTime = 0f,
         };
 
-        ExecuteAttack(input);
+        PrepareAttack(input);
     }
     /// <summary>
     /// チャージ開始
     /// </summary>
     private void StartCharge()
     {
+        // 攻撃中でコンボウィンドウ内なら、チャージ入力の可能性があるのでフラグを立てる
+        if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
+        {
+            _chargeStartTime = Time.time;
+            return;
+        }
+
         if (!CanAttack()) return;
         Debug.Log("チャージ開始");
 
@@ -184,9 +216,22 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ReleaseCharge()
     {
-        if (!_stateManager.IsCharging()) return;
-        Debug.Log("チャージ終了");
         float chargeTime = Time.time - _chargeStartTime;
+
+        // 攻撃中でコンボウィンドウ内なら、入力をバッファ
+        if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
+        {
+            BufferComboInput(new AttackInput
+            {
+                AttackType = AttackType.HeavyAttack,
+                ChargeTime = chargeTime,
+                WasChargeReleased = true
+            });
+            return;
+        }
+
+        if (!_stateManager.IsCharging()) { return; }
+        Debug.Log("チャージ終了");
 
         var input = new AttackInput
         {
@@ -196,13 +241,23 @@ public class PlayerAttack : MonoBehaviour
         };
 
         _stateManager.ChangeState(PlayerState.Idle);
-        ExecuteAttack(input);
+        PrepareAttack(input);
     }
 
     /// <summary>
-    /// 攻撃を実行（内部処理）
+    /// コンボ入力をバッファに保存
     /// </summary>
-    private void ExecuteAttack(AttackInput input)
+    private void BufferComboInput(AttackInput input)
+    {
+        // 既にバッファがある場合は上書き（最新の入力を優先）
+        _bufferedComboInput = input;
+        Debug.Log($"コンボ入力をバッファ: {input.AttackType}");
+    }
+
+    /// <summary>
+    /// 攻撃の準備（アニメーション再生まで）
+    /// </summary>
+    private void PrepareAttack(AttackInput input)
     {
         // 適切な攻撃データを取得
         AttackData attackData = GetNextAttack(input);
@@ -218,22 +273,56 @@ public class PlayerAttack : MonoBehaviour
         // IDの上書き
         _currentAttackId = attackData.AttackId;
 
-        // 攻撃実行
-        _attackExecutor.Execute(attackData, input, _modeController.ModeData);
+        // 攻撃データと入力を保存（アニメーションイベントで実行する）
+        _pendingAttackData = attackData;
+        _pendingAttackInput = input;
 
         _lastAttackTime = Time.time;
 
+        // アニメーション再生のみ
         _animationController.PlayAttack(_currentAttackId);
-
-        // デバッグ用
-        // TODO:アニメーションが付いたら消す
-        FinishAttack(attackData);
     }
 
-    private async void FinishAttack(AttackData data)
+    /// <summary>
+    /// アニメーションイベントから呼ばれる実際の攻撃実行
+    /// </summary>
+    private void ExecutePendingAttack()
     {
-        await UniTask.Delay(TimeSpan.FromSeconds(data.AnimationDuration), false, PlayerLoopTiming.Update, destroyCancellationToken);
-        FinishAttack();
+        if (_pendingAttackData == null || _pendingAttackInput == null)
+        {
+            Debug.LogWarning("保留中の攻撃データがありません");
+            return;
+        }
+
+        // 実際の攻撃実行
+        _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData);
+
+        Debug.Log($"{_pendingAttackData.Mode}：{_pendingAttackData.AttackName}で攻撃実行");
+    }
+
+    /// <summary>
+    /// アニメーションイベントから呼ばれる攻撃終了関数
+    /// </summary>
+    private void FinishAttack()
+    {
+        _stateManager.ChangeState(PlayerState.Idle);
+        _pendingAttackData = null;
+        _pendingAttackInput = null;
+
+        // バッファされたコンボ入力があれば実行
+        if (_bufferedComboInput.HasValue)
+        {
+            var bufferedInput = _bufferedComboInput.Value;
+            _bufferedComboInput = null;
+
+            Debug.Log($"バッファされたコンボを実行: {bufferedInput.AttackType}");
+            PrepareAttack(bufferedInput);
+        }
+        else
+        {
+            // コンボが途切れた
+            ResetCombo();
+        }
     }
 
     /// <summary>
@@ -241,10 +330,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private AttackData GetNextAttack(AttackInput input)
     {
-        // コンボ継続中か判定
-        bool isInComboWindow = Time.time - _lastAttackTime <= _comboResetTime;
-
-        if (isInComboWindow && _currentAttackId != -1)
+        // コンボウィンドウ内かつ、次のコンボが存在する場合
+        if (_isInComboWindow && _currentAttackId != -1)
         {
             // 現在の攻撃データを取得
             var currentAttack = _attackRepository.GetAttackById(_currentAttackId);
@@ -269,7 +356,7 @@ public class PlayerAttack : MonoBehaviour
     private bool IsCompatibleAttack(AttackData attack, AttackInput input)
     {
         // 攻撃タイプが一致するか
-        if (attack.AttackType != input.AttackType) return false;
+        if (attack.AttackType != input.AttackType) { return false; }
 
         return true;
     }
@@ -293,6 +380,16 @@ public class PlayerAttack : MonoBehaviour
         {
             ResetCombo();
         }
+    }
+
+    private void OnComboWindowStart()
+    {
+        _isInComboWindow = true;
+    }
+
+    private void OnComboWindowEnd()
+    {
+        _isInComboWindow = false;
     }
 
     private void ChangeMode()
