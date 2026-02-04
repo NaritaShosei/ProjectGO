@@ -16,19 +16,25 @@ public class GoblinEnemy : Enemy
 
         _context = new EnemyContext();
         _runner = new EnemyBehaviourRunner();
+        _state = new EnemyStateManager();
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
+        var shock = new ShockBehaviour();
 
-        move.Init(this, _data, _playerTransform, _context);
-        attack.Init(this, _data, _playerTransform, _context);
+        move.Init(this, _data, _playerTransform, _context, _state);
+        attack.Init(this, _data, _playerTransform, _context, _state);
+        shock.Init(this, _data, _playerTransform, _context, _state);
 
         _runner.Add(move);
         _runner.Add(attack);
+        _runner.Add(shock);
     }
 
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
+    private EnemyStateManager _state;
+
 
     protected override void UpdateEnemy(float deltaTime)
     {

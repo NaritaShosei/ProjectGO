@@ -1,47 +1,46 @@
 ﻿using UnityEngine;
 
 // NOTE:
-// この GoblinEnemy は「基盤用の最小実装」です。
-// ・複雑なAI
-// ・スキル
-// ・状態遷移
-// は意図的に入れていません。
-// 拡張する場合はこのクラスを参考に派生 or 分離してください。
+// モブ敵のの基底クラスとして作成
 
-public class StunEnemy : Enemy
+public class MobEnemy : Enemy
 {
+    // TODO: _contextへの依存を削除する。
     public override void Init(IPlayer player)
     {
         base.Init(player);
 
         _context = new EnemyContext();
         _runner = new EnemyBehaviourRunner();
+        _state = new EnemyStateManager();
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
+        var shock = new ShockBehaviour();
 
-        move.Init(this, _data, _playerTransform, _context);
-        attack.Init(this, _data, _playerTransform, _context);
+        move.Init(this, _data, _playerTransform, _context, _state);
+        attack.Init(this, _data, _playerTransform, _context, _state);
+        shock.Init(this, _data, _playerTransform, _context, _state);
 
         _runner.Add(move);
         _runner.Add(attack);
+        _runner.Add(shock);
     }
 
-    // TODO: ひとまずここにTakeDamage→EnemyContextの橋渡しを記述しておく。
-    // TODO: 敵を量産するならここじゃないほうがいい
     public override void TakeDamage(DamageContext context)
     {
         base.TakeDamage(context);
 
-        // TODO: スタン攻撃かDamageContextから判別
-        // TODO: スタン攻撃ならEnemyContextにおいてスタン状態に変更
-        // TODO: EnemyクラスからEnemyContextへの参照がない
-        // TODO: ひとまず一つ下のStunEnemyのほうでoverrideして実装しよう
+        // TODO: 雑にThunder攻撃なら必ずShock状態にしている。
+        // TODO: ひとまず必ず感電させているので要修正
+        // if (context.PlayerMode != PlayerMode.Thunder) return;
+        _state.ChangeState(EnemyState.Shock);
     }
 
 
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
+    private EnemyStateManager _state;
 
     protected override void UpdateEnemy(float deltaTime)
     {
@@ -56,8 +55,9 @@ public class StunEnemy : Enemy
         if (_data == null) return;
 
         Gizmos.color = Color.red;
+        // TODO: Debug用機能なので、優先度低い
         // TODO: 当たり判定の中心がtransform.forwardのためずれてしまう。
-        // TODO: 自分が向いている方向を取得して反映しなければいけない・
+        // TODO: 自分が向いている方向を取得して反映しなければいけない
         Gizmos.DrawWireSphere(transform.position + transform.forward * _data.AttackRange, _data.AttackRadius);
     }
 #endif
