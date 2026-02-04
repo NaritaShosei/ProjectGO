@@ -288,6 +288,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ExecutePendingAttack()
     {
+        if (_stateManager.CurrentState != PlayerState.Attacking) { return; }
+
         if (_pendingAttackData == null || _pendingAttackInput == null)
         {
             Debug.LogWarning("保留中の攻撃データがありません");

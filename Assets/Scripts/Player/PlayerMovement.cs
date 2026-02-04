@@ -131,7 +131,7 @@ public class PlayerMovement : MonoBehaviour
                 await UniTask.Yield(destroyCancellationToken);
             }
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException) { return; }
 
         _rb.linearVelocity = Vector3.zero;
         _playerStateManager.ChangeState(PlayerState.Idle);
