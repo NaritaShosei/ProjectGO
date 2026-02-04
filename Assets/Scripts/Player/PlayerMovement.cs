@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
         _modeController = modeController;
         _animationController = animationController;
 
-        _input.OnDodge += OnDodge;
+        _input.OnDodge += Dodge;
     }
 
     [SerializeField] private Rigidbody _rb;
@@ -50,7 +50,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_input != null)
         {
-            _input.OnDodge -= OnDodge;
+            _input.OnDodge -= Dodge;
         }
     }
 
@@ -110,54 +110,50 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
-    private async void OnDodge()
+    private async UniTaskVoid OnDodge()
     {
-        if (!_playerStateManager.CanDodge()) { return; }
-
-        if (!_stamina.TryUseStamina(_stamina.GetDodgeStaminaCost()))
-        {
-            return; // スタミナ不足で回避不可
-        }
+        if (!_playerStateManager.CanDodge()) return;
+        if (!_stamina.TryUseStamina(_stamina.GetDodgeStaminaCost())) return;
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
         _animationController.PlayDodge();
 
-        var input = _input.MoveInput;
-        Vector3 dodgeDir;
+        Vector3 dodgeDir = GetDodgeDirection();
 
-        if (input.magnitude > INPUT_THRESHOLD)
-        {
-            var camera = _cameraManager.MainCamera;
-            var right = camera.transform.right * input.x;
-            var forward = camera.transform.forward * input.y;
-            dodgeDir = (right + forward).normalized;
-        }
-        else
-        {
-            dodgeDir = transform.forward;
-        }
-
-        dodgeDir.y = 0f;
-
-        float t = 0;
+        float t = 0f;
 
         try
         {
             while (t < _moveData.DodgeDuration)
             {
-                _rb.linearVelocity = _moveData.DodgeSpeed * dodgeDir;
-
+                _rb.linearVelocity = dodgeDir * _moveData.DodgeSpeed;
                 t += Time.deltaTime;
                 await UniTask.Yield(destroyCancellationToken);
             }
         }
-        catch (OperationCanceledException)
-        {
-            // 正常終了
-        }
-        _playerStateManager.ChangeState(PlayerState.Idle);
+        catch (OperationCanceledException) { }
 
+        _rb.linearVelocity = Vector3.zero;
+        _playerStateManager.ChangeState(PlayerState.Idle);
         OnEndDodge?.Invoke();
+    }
+
+    private Vector3 GetDodgeDirection()
+    {
+        var input = _input.MoveInput;
+        if (input.magnitude > INPUT_THRESHOLD)
+        {
+            var camera = _cameraManager.MainCamera;
+            var right = camera.transform.right * input.x;
+            var forward = camera.transform.forward * input.y;
+            var dir = right + forward;
+            dir.y = 0f;
+            return dir.normalized;
+        }
+        else
+        {
+            return transform.forward;
+        }
     }
 
     private void PlayMoveAnimation()
@@ -170,5 +166,11 @@ public class PlayerMovement : MonoBehaviour
 
             _animationController.UpdateMoveAnimation(speed);
         }
+    }
+
+    // 匿名関数回避のためのメソッド
+    private void Dodge()
+    {
+        OnDodge().Forget();
     }
 }

@@ -15,7 +15,6 @@ public class PlayerAnimationController : MonoBehaviour
     public event Action OnAttackComplete;
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
-    public event Action OnDodgeComplete;
     public event Action OnAttackExecute;
 
     // アニメーションから呼ばれる関数
@@ -39,10 +38,6 @@ public class PlayerAnimationController : MonoBehaviour
         OnComboWindowEnd?.Invoke();
     }
 
-    public void AnimEvent_DodgeComplete()
-    {
-        OnDodgeComplete?.Invoke();
-    }
     public void UpdateMoveAnimation(float speed)
     {
         _animator.SetFloat(AnimParams.Speed, speed);
@@ -68,14 +63,12 @@ public class PlayerAnimationController : MonoBehaviour
     }
 
     [SerializeField] private Animator _animator;
-    private int _baseLayer;
     private int _bodyLayer;
 
 
     // アニメーションパラメータ名（定数化）
     private static class AnimParams
     {
-        public const string Base = "Base Layer";
         public const string Body = "BodyUpper";
 
         public static readonly int Speed = Animator.StringToHash("Speed");
@@ -90,7 +83,6 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void Awake()
     {
-        _baseLayer = _animator.GetLayerIndex(AnimParams.Base);
         _bodyLayer = _animator.GetLayerIndex(AnimParams.Body);
     }
 
