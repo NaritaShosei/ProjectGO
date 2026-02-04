@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-// TODO: Contextへの依存を削除
 public class MoveBehaviour : IEnemyBehaviour
 {
     public void Init(
@@ -43,9 +42,9 @@ public class MoveBehaviour : IEnemyBehaviour
         _self.position += dir * _data.MoveSpeed * deltaTime;
     }
 
-    bool IsWithinDistance(Vector3 a, Vector3 b, float threshold)
+    bool IsWithinDistance(Vector3 self, Vector3 player, float threshold)
     {
-        float sqrDist = (a - b).sqrMagnitude;
+        float sqrDist = (self - player).sqrMagnitude;
         float sqrThreshold = threshold * threshold;
         return sqrDist <= sqrThreshold;
     }

@@ -24,21 +24,23 @@ public class EnemyStateManager
                           && CurrentState != EnemyState.Shock
                           && CurrentState != EnemyState.NockBack
                           && CurrentState != EnemyState.Dead;
-
-    // TODO: すべてクラスである必要があるのか不明
-    public bool IsAttacking() => CurrentState is EnemyState.Attacking;
-
-    public bool IsBarking() => CurrentState is EnemyState.Barking;
-
-    public bool IsMoving() => CurrentState is EnemyState.Moving;
-
-    public bool IsStun() => CurrentState is EnemyState.Stun;
-
-    public bool IsShock() => CurrentState is EnemyState.Shock;
-
-    public bool IsDead() => CurrentState is EnemyState.Dead;
-
+    
+    // TODO: 削除するかも。今のところ使用予定はない
     public bool CanModeChange() => CurrentState is EnemyState.Idle;
+
+
+    public bool IsAttacking => CurrentState is EnemyState.Attacking; 
+
+    public bool IsBarking => CurrentState is EnemyState.Barking;
+
+    public bool IsMoving => CurrentState is EnemyState.Moving;
+
+    public bool IsStun => CurrentState is EnemyState.Stun;
+
+    public bool IsShock => CurrentState is EnemyState.Shock;
+
+    public bool IsDead => CurrentState is EnemyState.Dead;
+
 }
 public enum EnemyState
 {

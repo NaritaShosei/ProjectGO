@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 // TODO: Contextへの依存を削除
@@ -17,6 +16,9 @@ public class ShockBehaviour : IEnemyBehaviour
         _data = data;
         _context = context;
         _state = state;
+
+        _material = _self.gameObject.GetComponent<Renderer>().material;
+
     }
 
 
@@ -25,7 +27,7 @@ public class ShockBehaviour : IEnemyBehaviour
         if (_player == null) { return; }
 
         // 攻撃の条件に満たしていなかったら早期リターン
-        if (!_state.IsShock()) { return; }
+        if (!_state.IsShock) { return; }
 
         // 感電開始
         if (!_isShocking)
@@ -52,8 +54,8 @@ public class ShockBehaviour : IEnemyBehaviour
         _isShocking = true;
         _remainTime = 5f;
 
-        _material = _self.gameObject.GetComponent<Renderer>().material;
-        // TODO-DEBUG
+
+        // TODO Debug 問題なければ消す
         Debug.Log("感電開始");
     }
 
@@ -65,12 +67,12 @@ public class ShockBehaviour : IEnemyBehaviour
         var repeatValue = Mathf.Repeat(_remainTime, _cycle);
 
         // sin波でフェードさせる
-        float t = (Mathf.Sin((repeatValue / _cycle) * Mathf.PI * 2f) + 1f) * 0.5f;
+        float alpha = (Mathf.Sin((repeatValue / _cycle) * Mathf.PI * 2f) + 1f) * 0.5f;
 
         // 内部時刻_remainTimeにおける明滅状態を反映
         // マテリアル色のアルファ値を変更している
         var color = _material.color;
-        color.a = t;
+        color.a = alpha;
         _material.color = color;
     }
 
@@ -82,15 +84,12 @@ public class ShockBehaviour : IEnemyBehaviour
         color.a = 1;
         _material.color = color;
 
-        //明示的にマテリアルのインスタンスを破棄する。
-        _material = null;
-
         // ShockステートからIdleへ戻す。
         _state.ChangeState(EnemyState.Idle);
         _isShocking=false;
-        // TODO-DEBUG
-        Debug.Log("感電終了");
 
+        // TODO Debug 問題なければ消す
+        Debug.Log("感電終了");
     }
 
     private Transform _self;
