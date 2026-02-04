@@ -103,7 +103,10 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDestroy()
     {
-        _modeController.OnModeChanged -= OnModeChanged;
+        if (_modeController != null)
+        {
+            _modeController.OnModeChanged -= OnModeChanged;
+        }
 
         if (_input != null)
         {
