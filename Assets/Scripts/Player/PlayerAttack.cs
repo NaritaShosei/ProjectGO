@@ -257,10 +257,10 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の準備（アニメーション再生まで）
     /// </summary>
-    private void PrepareAttack(AttackInput input)
+    private void PrepareAttack(AttackInput input, bool allowCombo = false)
     {
         // 適切な攻撃データを取得
-        AttackData attackData = GetNextAttack(input);
+        AttackData attackData = GetNextAttack(input, allowCombo);
 
         if (attackData == null)
         {
@@ -318,7 +318,7 @@ public class PlayerAttack : MonoBehaviour
             _bufferedComboInput = null;
 
             Debug.Log($"バッファされたコンボを実行: {bufferedInput.AttackType}");
-            PrepareAttack(bufferedInput);
+            PrepareAttack(bufferedInput, true);
         }
         else
         {
@@ -330,7 +330,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃データを取得
     /// </summary>
-    private AttackData GetNextAttack(AttackInput input)
+    private AttackData GetNextAttack(AttackInput input, bool allowCombo)
     {
         // コンボウィンドウ内かつ、次のコンボが存在する場合
         if (_isInComboWindow && _currentAttackId != -1)
