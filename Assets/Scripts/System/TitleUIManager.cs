@@ -7,6 +7,8 @@ public class TitleUIManager : MonoBehaviour
     [SerializeField]
     private TitlePanelView _titlePanelView;
 
+    private CanvasGroup _titleCanvasGroup;
+
     [Header("オプションパネル設定")]
     [SerializeField]
     private OptionModel _optionModel;
@@ -15,6 +17,8 @@ public class TitleUIManager : MonoBehaviour
     [SerializeField]
     private GameObject _optionUIPanel;
 
+    private CanvasGroup _optionCanvasGroup;
+
     [Header("モードセレクトパネル設定")]
     [SerializeField]
     private ModeSelectModel _modeSelectModel;
@@ -22,7 +26,9 @@ public class TitleUIManager : MonoBehaviour
     private ModeSelectView _modeSelectView;
     [SerializeField]
     private GameObject _modeSelectPanel;
+
     private ModeSelectPresenter _modeSelectPresenter;
+    private CanvasGroup _modeSelectCanvasGroup;
 
     private SceneTransitionManager _sceneTransitionManager;
     private OptionPresenter _optionPresenter;
@@ -44,6 +50,23 @@ public class TitleUIManager : MonoBehaviour
         // イベントハンドラの登録
         _titlePanelView.OnModeSelectButton += OpenModeSelectPanel;
         _titlePanelView.OnOptionButton += OpenOptionPanel;
+
+        // CanvasGroupの取得
+        if (!_titlePanelView.TryGetComponent (out _titleCanvasGroup))
+        {
+            _titleCanvasGroup = _titlePanelView.gameObject.AddComponent<CanvasGroup>();
+        }
+        if (!_optionUIPanel.TryGetComponent (out _optionCanvasGroup))
+        {
+            _optionCanvasGroup = _optionUIPanel.AddComponent<CanvasGroup>();
+        }
+        if (!_modeSelectPanel.TryGetComponent (out _modeSelectCanvasGroup))
+        {
+            _modeSelectCanvasGroup = _modeSelectPanel.AddComponent<CanvasGroup>();
+        }
+        _titleCanvasGroup.interactable = true;
+        _optionCanvasGroup.interactable = false;
+        _modeSelectCanvasGroup.interactable = false;
     }
 
     private void OnDestroy()
@@ -68,7 +91,11 @@ public class TitleUIManager : MonoBehaviour
 
         // モードセレクトパネルを表示
         _modeSelectPanel.SetActive(true);
+        _modeSelectCanvasGroup.interactable = true;
         _modeSelectPresenter = new ModeSelectPresenter(_modeSelectView, _modeSelectModel);
+        _modeSelectView.ShowThisPanel();
+
+        _titleCanvasGroup.interactable = false;
 
         // イベントハンドラの登録
         _modeSelectPresenter.OnSceneSelected += SceneTransitionToScene;
@@ -87,7 +114,10 @@ public class TitleUIManager : MonoBehaviour
             _modeSelectPresenter.Dispose();
             _modeSelectPresenter = null;
         }
+        _modeSelectCanvasGroup.interactable = false;
         _modeSelectPanel.SetActive(false);
+        _titlePanelView.ShowThisPanel();
+        _titleCanvasGroup.interactable = true;
     }
 
     private async void SceneTransitionToScene(string sceneName)
@@ -113,7 +143,10 @@ public class TitleUIManager : MonoBehaviour
             return;
         }
 
+        _titleCanvasGroup.interactable = false;
         _optionUIPanel.SetActive(true);
+        _optionCanvasGroup.interactable = true;
+        _optionView.ShowThisPanel();
         _optionPresenter = new OptionPresenter(_optionView, _optionModel);
 
         _optionPresenter.OnOptionCloseRequested += CloseOptionPanel;
@@ -132,7 +165,10 @@ public class TitleUIManager : MonoBehaviour
             _optionPresenter.Dispose();
             _optionPresenter = null;
         }
+        _optionCanvasGroup.interactable = false;
         _optionUIPanel.SetActive(false);
+        _titleCanvasGroup.interactable = true;
+        _titlePanelView.ShowThisPanel();
     }
 
     /// <summary>
