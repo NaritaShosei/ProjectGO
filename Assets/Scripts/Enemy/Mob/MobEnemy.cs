@@ -5,7 +5,6 @@
 
 public class MobEnemy : Enemy
 {
-    // TODO: _contextへの依存を削除する。
     public override void Init(IPlayer player)
     {
         base.Init(player);

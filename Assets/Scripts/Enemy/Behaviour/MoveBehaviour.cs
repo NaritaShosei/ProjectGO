@@ -18,7 +18,6 @@ public class MoveBehaviour : IEnemyBehaviour
 
         // 本来は敵ごとにEnemyDataに定義するもの
         _maxApproachLimit = 2f;
-
     }
 
     public void Tick(float deltaTime)
@@ -42,14 +41,6 @@ public class MoveBehaviour : IEnemyBehaviour
         _self.position += dir * _data.MoveSpeed * deltaTime;
     }
 
-    bool IsWithinDistance(Vector3 self, Vector3 player, float threshold)
-    {
-        float sqrDist = (self - player).sqrMagnitude;
-        float sqrThreshold = threshold * threshold;
-        return sqrDist <= sqrThreshold;
-    }
-
-
     private Transform _self;
     private Transform _player;
     private EnemyData _data;
@@ -57,4 +48,11 @@ public class MoveBehaviour : IEnemyBehaviour
     private EnemyStateManager _state;
 
     private float _maxApproachLimit;
+
+    bool IsWithinDistance(Vector3 self, Vector3 player, float threshold)
+    {
+        float sqrDist = (self - player).sqrMagnitude;
+        float sqrThreshold = threshold * threshold;
+        return sqrDist <= sqrThreshold;
+    }
 }

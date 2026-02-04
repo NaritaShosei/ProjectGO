@@ -19,6 +19,7 @@ public class ShockBehaviour : IEnemyBehaviour
 
         _material = _self.gameObject.GetComponent<Renderer>().material;
 
+        _isShocking = false;
     }
 
 
@@ -34,7 +35,7 @@ public class ShockBehaviour : IEnemyBehaviour
         {
             StartShock();
         }
-        
+
         // 感電継続時間内ならreturn
         if (_remainTime > 0)
         {
@@ -48,20 +49,37 @@ public class ShockBehaviour : IEnemyBehaviour
         }
     }
 
-    // TODO: スタン時の挙動を実装
+
+    private Transform _self;
+    private Transform _player;
+    private EnemyData _data;
+    private EnemyContext _context;
+    private EnemyStateManager _state;
+
+    // 感電状態を保持する変数
+    private bool _isShocking = false;
+    private float _remainTime;
+
+    // 点滅表示に使用する変数
+    private float _cycle = 1f;      // 点滅感覚の秒数
+    private Material _material = null;
+
+
+    // スタン開始時のみ
     private void StartShock()
     {
         _isShocking = true;
-        _remainTime = 5f;
+        _remainTime = 5f;       // 5秒間停止
 
 
         // TODO Debug 問題なければ消す
         Debug.Log("感電開始");
     }
 
+    // スタン中
     private void Shock()
     {
-        if(_material == null) {return; }
+        if (_material == null) { return; }
 
         // 0～cycleの範囲の値が得られる
         var repeatValue = Mathf.Repeat(_remainTime, _cycle);
@@ -76,33 +94,22 @@ public class ShockBehaviour : IEnemyBehaviour
         _material.color = color;
     }
 
-    // スタン終了時の挙動
+    // スタン終了時
     private void EndShock()
     {
-        // 表示を戻す。つまり透明度を1に戻す。
-        var color = _material.color;
-        color.a = 1;
-        _material.color = color;
+        if (_material != null) 
+        {
+            // 表示を戻す。つまり透明度を1に戻す。
+            var color = _material.color;
+            color.a = 1;
+            _material.color = color;
+        }
 
         // ShockステートからIdleへ戻す。
         _state.ChangeState(EnemyState.Idle);
-        _isShocking=false;
+        _isShocking = false;
 
         // TODO Debug 問題なければ消す
         Debug.Log("感電終了");
     }
-
-    private Transform _self;
-    private Transform _player;
-    private EnemyData _data;
-    private EnemyContext _context;
-    private EnemyStateManager _state;
-
-    // 感電状態用の変数
-    private bool _isShocking = false;
-    private float _remainTime = -1f;     // 5秒間停止
-
-    // 点滅用の変数
-    private float _cycle = 1f;      // 点滅感覚の秒数
-    private Material _material = null;
 }
