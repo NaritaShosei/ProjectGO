@@ -32,7 +32,7 @@ public class MobEnemy : Enemy
         base.TakeDamage(context);
 
         // TODO: 雑にThunder攻撃なら必ずShock状態にしている。
-        // TODO: ひとまず必ず感電させているので要修正
+        // TODO: プレイヤーのモードの変え方がわからず、ひとまず必ず感電させているので要修正
         // if (context.PlayerMode != PlayerMode.Thunder) return;
         _state.ChangeState(EnemyState.Shock);
     }

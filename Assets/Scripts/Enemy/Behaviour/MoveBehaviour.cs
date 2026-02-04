@@ -16,18 +16,24 @@ public class MoveBehaviour : IEnemyBehaviour
         _data = data;
         _context = context;
         _state = state;
+
+        // 本来は敵ごとにEnemyDataに定義するもの
+        _maxApproachLimit = 2f;
+
     }
 
     public void Tick(float deltaTime)
     {
         // 攻撃の条件に満たしていなかったら早期リターン
-        if (!_state.CanMove()) {  return; }
+        if (!_state.CanMove()) { return; }
         if (!_context.CanMove) { return; }
         if (_player == null) { return; }
 
+
+        // プレイヤーに十分に近ければ動かない
+        if (IsWithinDistance(_self.position, _player.position, _maxApproachLimit)) { return; }
+
         _state.ChangeState(EnemyState.Moving);
-        
-        //TODO: ある程度プレイヤーに近づいたら停止する
 
         // TODO:雑に移動しているため場合によっては修正が必要
         Vector3 dir = (_player.position - _self.position);
@@ -37,9 +43,19 @@ public class MoveBehaviour : IEnemyBehaviour
         _self.position += dir * _data.MoveSpeed * deltaTime;
     }
 
+    bool IsWithinDistance(Vector3 a, Vector3 b, float threshold)
+    {
+        float sqrDist = (a - b).sqrMagnitude;
+        float sqrThreshold = threshold * threshold;
+        return sqrDist <= sqrThreshold;
+    }
+
+
     private Transform _self;
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
     private EnemyStateManager _state;
+
+    private float _maxApproachLimit;
 }
