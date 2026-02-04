@@ -4,7 +4,7 @@ public static class DamageSystem
 {
     public static int Calculate(
         DamageContext attack,
-        DefenseContext defense)
+        EnemyDefenseContext defense)
     {
         float damage =
             GetCriticalDamage(attack, defense)
@@ -37,7 +37,7 @@ public static class DamageSystem
         return 1.0f; // 保険
     }
 
-    private static float GetCriticalDamage(DamageContext attack, DefenseContext defense)
+    private static float GetCriticalDamage(DamageContext attack, EnemyDefenseContext defense)
     {
         if (!attack.IsCritical) { return attack.AttackPower; }
 
