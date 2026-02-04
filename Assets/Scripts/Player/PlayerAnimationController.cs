@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
 {
@@ -11,6 +12,37 @@ public class PlayerAnimationController : MonoBehaviour
         _modeController.OnModeChanged += OnModeChanged;
     }
 
+    public event Action OnAttackComplete;
+    public event Action OnComboWindowStart;
+    public event Action OnComboWindowEnd;
+    public event Action OnDodgeComplete;
+    public event Action OnAttackExecute;
+
+    // アニメーションから呼ばれる関数
+    public void AnimEvent_AttackExecute()
+    {
+        OnAttackExecute?.Invoke();
+    }
+
+    public void AnimEvent_AttackComplete()
+    {
+        OnAttackComplete?.Invoke();
+    }
+
+    public void AnimEvent_ComboWindowStart()
+    {
+        OnComboWindowStart?.Invoke();
+    }
+
+    public void AnimEvent_ComboWindowEnd()
+    {
+        OnComboWindowEnd?.Invoke();
+    }
+
+    public void AnimEvent_DodgeComplete()
+    {
+        OnDodgeComplete?.Invoke();
+    }
     public void UpdateMoveAnimation(float speed)
     {
         _animator.SetFloat(AnimParams.Speed, speed);
