@@ -35,7 +35,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
 
-    protected DefenseContext _defenceContext;
+    protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
 
@@ -44,7 +44,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     protected virtual void Awake()
     {
         // 雑に生身限定
-        _defenceContext = new DefenseContext()
+        _defenceContext = new EnemyDefenseContext()
         {
             EnemyType = EnemyType.Flesh,
         };
@@ -90,7 +90,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
 }
 
-public struct DefenseContext
+public struct EnemyDefenseContext
 {
     public EnemyType EnemyType; // 鎧 / 生身
 }

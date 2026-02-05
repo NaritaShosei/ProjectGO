@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+// ボス用のオブジェクト
 public class EnemyArmer : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;

@@ -6,7 +6,8 @@ public interface IEnemyBehaviour
          Enemy owner,
          EnemyData data,
          Transform player,
-         EnemyContext context
+         EnemyContext context,
+         EnemyStateManager state
      );
     public void Tick(float deltaTime);
 }
