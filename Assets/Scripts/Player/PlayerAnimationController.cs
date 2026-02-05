@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class PlayerAnimationController : MonoBehaviour
 {
@@ -9,6 +10,32 @@ public class PlayerAnimationController : MonoBehaviour
 
         _stateManager.OnStateChanged += OnStateChanged;
         _modeController.OnModeChanged += OnModeChanged;
+    }
+
+    public event Action OnAttackComplete;
+    public event Action OnComboWindowStart;
+    public event Action OnComboWindowEnd;
+    public event Action OnAttackExecute;
+
+    // アニメーションから呼ばれる関数
+    public void AnimEvent_AttackExecute()
+    {
+        OnAttackExecute?.Invoke();
+    }
+
+    public void AnimEvent_AttackComplete()
+    {
+        OnAttackComplete?.Invoke();
+    }
+
+    public void AnimEvent_ComboWindowStart()
+    {
+        OnComboWindowStart?.Invoke();
+    }
+
+    public void AnimEvent_ComboWindowEnd()
+    {
+        OnComboWindowEnd?.Invoke();
     }
 
     public void UpdateMoveAnimation(float speed)
@@ -36,14 +63,12 @@ public class PlayerAnimationController : MonoBehaviour
     }
 
     [SerializeField] private Animator _animator;
-    private int _baseLayer;
     private int _bodyLayer;
 
 
     // アニメーションパラメータ名（定数化）
     private static class AnimParams
     {
-        public const string Base = "Base Layer";
         public const string Body = "BodyUpper";
 
         public static readonly int Speed = Animator.StringToHash("Speed");
@@ -58,7 +83,6 @@ public class PlayerAnimationController : MonoBehaviour
 
     private void Awake()
     {
-        _baseLayer = _animator.GetLayerIndex(AnimParams.Base);
         _bodyLayer = _animator.GetLayerIndex(AnimParams.Body);
     }
 
