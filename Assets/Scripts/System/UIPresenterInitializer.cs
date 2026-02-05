@@ -14,8 +14,6 @@ public class UIPresenterInitializer : MonoBehaviour
     {
         //Presenter生成
         _presenter = new PlayerModePresenter(_playerModeController,_playerModeView);
-
-        _presenter.Initialize();
     }
 
     private void OnDestroy()

@@ -12,13 +12,7 @@ public class PlayerModePresenter
     {
         _modeController = modeController;
         _view = view;
-    }
 
-    /// <summary>
-    /// 初期化処理
-    /// </summary>
-    public void Initialize()
-    {
         // 起動時のUI初期表示
         _view.SetMode(_modeController.CurrentMode);
 
