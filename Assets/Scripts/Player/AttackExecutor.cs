@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -107,6 +107,7 @@ public class AttackExecutor : MonoBehaviour
             PlayerMode = context.PlayerMode,
             CriticalMultiplier = context.CriticalMultiplier,
             IsCritical = context.IsCritical,
+            ElectricShock = context.ElectricShock,
         };
     }
 
@@ -148,6 +149,9 @@ public struct AttackContext
 
     /// <summary>敵にヒットした瞬間</summary>
     public Action OnHit;
+
+    /// <summary>感電</summary>
+    public ElectricShock ElectricShock;
 }
 
 /// <summary>
@@ -159,4 +163,6 @@ public struct DamageContext
     public PlayerMode PlayerMode;
     public bool IsCritical;
     public float CriticalMultiplier;
+
+    public ElectricShock ElectricShock;
 }
