@@ -1,14 +1,9 @@
 ﻿using UnityEngine;
 
 // NOTE:
-// この GoblinEnemy は「基盤用の最小実装」です。
-// ・複雑なAI
-// ・スキル
-// ・状態遷移
-// は意図的に入れていません。
-// 拡張する場合はこのクラスを参考に派生 or 分離してください。
+// モブ敵のの基底クラスとして作成
 
-public class GoblinEnemy : Enemy
+public class MobEnemy : Enemy
 {
     public override void Init(IPlayer player)
     {
@@ -31,10 +26,20 @@ public class GoblinEnemy : Enemy
         _runner.Add(shock);
     }
 
+    public override void TakeDamage(DamageContext context)
+    {
+        base.TakeDamage(context);
+
+        // TODO: 雑にThunder攻撃なら必ずShock状態にしている。
+        // TODO: プレイヤーのモードの変え方がわからず、ひとまず必ず感電させているので要修正
+        // if (context.PlayerMode != PlayerMode.Thunder) return;
+        _state.ChangeState(EnemyState.Shock);
+    }
+
+
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
     private EnemyStateManager _state;
-
 
     protected override void UpdateEnemy(float deltaTime)
     {
@@ -49,6 +54,9 @@ public class GoblinEnemy : Enemy
         if (_data == null) return;
 
         Gizmos.color = Color.red;
+        // TODO: Debug用機能なので、優先度低い
+        // TODO: 当たり判定の中心がtransform.forwardのためずれてしまう。
+        // TODO: 自分が向いている方向を取得して反映しなければいけない
         Gizmos.DrawWireSphere(transform.position + transform.forward * _data.AttackRange, _data.AttackRadius);
     }
 #endif
