@@ -1,13 +1,18 @@
 using UnityEngine;
-
+/// <summary>
+/// Presenter ã‚’ç”Ÿæˆãƒ»åˆæœŸåŒ–ã™ã‚‹ 
+/// </summary>
 public class UIPresenterInitializer : MonoBehaviour
 {
-    [SerializeField] private PlayerModeController _playerModeController;//‚±‚±‚©‚çƒ‚[ƒh‚Ì•ÏX‚ğŒ©‚é
+    //ãƒ¢ãƒ¼ãƒ‰ç®¡ç†
+    [SerializeField] private PlayerModeController _playerModeController;
+    //UIè¡¨ç¤º
     [SerializeField] private PlayerModeView _playerModeView;
-
+    //Presenter
     private PlayerModePresenter _presenter;
     void Start()
     {
+        //Presenterç”Ÿæˆ
         _presenter = new PlayerModePresenter(_playerModeController,_playerModeView);
 
         _presenter.Initialize();

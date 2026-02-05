@@ -3,22 +3,22 @@ using UnityEngine.UI;
 using Interface;
 
 /// <summary>
-/// 現在のプレイヤーモードのUI表示
+/// 迴ｾ蝨ｨ縺ｮ繝励Ξ繧､繝､繝ｼ繝｢繝ｼ繝峨�ｮUI陦ｨ遉ｺ
 /// </summary>
 public class PlayerModeView : MonoBehaviour,IPlayerModeView
 {
     /// <summary>
-    /// UIをモードによって切り替える
+    /// UI繧偵Δ繝ｼ繝峨↓繧医▲縺ｦ蛻�繧頑崛縺医ｋ
     /// </summary>
     /// <param name="mode"></param>
     public void SetMode(PlayerMode mode)
     {
-        _raijinUI.gameObject.SetActive(mode == PlayerMode.Warrior);
-        _toujinUI.gameObject.SetActive(mode == PlayerMode.Thunder);
+        _warriorUI.gameObject.SetActive(mode == PlayerMode.Warrior);
+        _thunderUI.gameObject.SetActive(mode == PlayerMode.Thunder);
     }
 
     [Header("Mode Images")]
-    [SerializeField] private Image _raijinUI;
-    [SerializeField] private Image _toujinUI;
+    [SerializeField] private Image _warriorUI;//髣倡･朸I
+    [SerializeField] private Image _thunderUI;//髮ｷ逾朸I
    
 }
