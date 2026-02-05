@@ -8,7 +8,7 @@ public class TestElectricShockSkill : SkillBase
     {
         context.ElectricShock.GrantEffectProbability += _grantEffectProbability;
         context.ElectricShock.DurationEffect += _durationEffect;
-        context.ElectricShock.UpDamagePercentage += _upDamagePecentage;
+        context.ElectricShock.UpDamagePercentage += _upDamagePercentage;
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -18,7 +18,7 @@ public class TestElectricShockSkill : SkillBase
 
     [SerializeField] private float _grantEffectProbability;              //状態異常付与確率
     [SerializeField] private float _durationEffect;                      //状態異常持続時間
-    [SerializeField] private float _upDamagePecentage;                  //ダメージ上昇率
+    [SerializeField] private float _upDamagePercentage;                  //ダメージ上昇率
 }
 
 /// <summary>
