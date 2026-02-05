@@ -7,6 +7,8 @@ public class TestElectricShockSkill : SkillBase
     public override void Apply(ref AttackContext context)
     {
         context.ElectricShock.GrantEffectProbability += _grantEffectProbability;
+        context.ElectricShock.DurationEffect += _durationEffect;
+        context.ElectricShock.UpDamagePercentage += _upDamagePecentage;
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -16,7 +18,7 @@ public class TestElectricShockSkill : SkillBase
 
     [SerializeField] private float _grantEffectProbability;              //状態異常付与確率
     [SerializeField] private float _durationEffect;                      //状態異常持続時間
-    [SerializeField] private float _upDamagePersentage;                  //ダメージ上昇率
+    [SerializeField] private float _upDamagePecentage;                  //ダメージ上昇率
 }
 
 /// <summary>
@@ -24,14 +26,14 @@ public class TestElectricShockSkill : SkillBase
 /// </summary>
 public struct ElectricShock
 {
-    public ElectricShock(float grantEffectProbability, float effectDuration, float upDamagePersentage)
+    public ElectricShock(float grantEffectProbability, float durationEffect, float upDamagePercentage)
     {
         GrantEffectProbability = grantEffectProbability;
-        EffectDuration = effectDuration;
-        UpDamagePersentage = upDamagePersentage;
+        DurationEffect = durationEffect;
+        UpDamagePercentage = upDamagePercentage;
     }
 
     public float GrantEffectProbability;
-    public float EffectDuration;
-    public float UpDamagePersentage;
+    public float DurationEffect;
+    public float UpDamagePercentage;
 }
