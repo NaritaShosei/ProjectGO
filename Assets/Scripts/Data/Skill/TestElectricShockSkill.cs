@@ -26,13 +26,6 @@ public class TestElectricShockSkill : SkillBase
 /// </summary>
 public struct ElectricShock
 {
-    public ElectricShock(float grantEffectProbability, float durationEffect, float upDamagePercentage)
-    {
-        GrantEffectProbability = grantEffectProbability;
-        DurationEffect = durationEffect;
-        UpDamagePercentage = upDamagePercentage;
-    }
-
     public float GrantEffectProbability;
     public float DurationEffect;
     public float UpDamagePercentage;
