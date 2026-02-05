@@ -10,13 +10,14 @@ public class UIPresenterInitializer : MonoBehaviour
     [SerializeField] private PlayerModeView _playerModeView;
     //Presenter
     private PlayerModePresenter _presenter;
-    void Start()
+    private void Start()
     {
         //Presenter生成
         _presenter = new PlayerModePresenter(_playerModeController,_playerModeView);
 
         _presenter.Initialize();
     }
+
     private void OnDestroy()
     {
         _presenter?.Dispose();

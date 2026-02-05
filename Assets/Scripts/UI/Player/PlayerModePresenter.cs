@@ -13,6 +13,7 @@ public class PlayerModePresenter
         _modeController = modeController;
         _view = view;
     }
+
     /// <summary>
     /// 初期化処理
     /// </summary>
@@ -24,11 +25,11 @@ public class PlayerModePresenter
         // モード変更通知
         _modeController.OnModeChanged += OnModeChanged;
     }
+
     public void Dispose()
     {
         _modeController.OnModeChanged -= OnModeChanged;
     }
-
 
     private readonly IModeController _modeController;
     private readonly IPlayerModeView _view;

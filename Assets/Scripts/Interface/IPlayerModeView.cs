@@ -1,12 +1,11 @@
 namespace Interface
 {
     public interface IPlayerModeView
-
     {
         /// <summary>
-        /// ƒvƒŒƒCƒ„[ƒ‚[ƒh‚Ì•\¦Ø‚è‘Ö‚¦
+        /// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒ¢ãƒ¼ãƒ‰è¡¨ç¤ºã®åˆ‡ã‚Šæ›¿ãˆ
         /// </summary>
         /// <param name="mode"></param>
-        void SetMode(PlayerMode mode);
+       public void SetMode(PlayerMode mode);
     }
 }
