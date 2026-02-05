@@ -5,7 +5,7 @@ public class PlayerData : ScriptableObject
 {
     public StatsData Stats => _stats;
     public float AttackPower => _attackPower;
-    public float BlockPower => _blockPower;
+    public float DefencePower => _blockPower;
     public float CriticalRate => _criticalRate;
     public float HealAmount => _healAmount;
     public float StaminaRegenPerSecond => _staminaRegenPerSecond;

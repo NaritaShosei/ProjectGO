@@ -2,6 +2,9 @@
 
 public static class DamageSystem
 {
+    const int DEFENSE_CONSTANT = 100;
+    const int MIN_DAMAGE = 1;
+
     public static int Calculate(
         DamageContext attack,
         EnemyDefenseContext defense)
@@ -11,6 +14,17 @@ public static class DamageSystem
           * GetEnemyTypeMultiplier(attack.PlayerMode, defense.EnemyType);
 
         return Mathf.RoundToInt(damage);
+    }
+
+    public static float ApplyDamageReduction(
+     float damage,
+     float defensePower)
+    {
+        float reductionRate =
+            defensePower / (defensePower + DEFENSE_CONSTANT);
+
+        return Mathf.Max(
+            MIN_DAMAGE, damage * (1f - reductionRate));
     }
 
     private static float GetEnemyTypeMultiplier(PlayerMode mode, EnemyType type)

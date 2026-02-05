@@ -8,6 +8,7 @@ public class PlayerStats : IAttackStats
 
     public float AttackPower => _attackPower;
     public float CriticalRate => _criticalRate;
+    public float DefensePower => _defensePower;
 
     public event Action OnDead;
     public event Action<float, float> OnHealthChanged;
@@ -26,6 +27,8 @@ public class PlayerStats : IAttackStats
         // 戦闘ステータス
         _attackPower = data.AttackPower;
         _criticalRate = data.CriticalRate;
+
+        _defensePower = data.DefencePower;
     }
 
     public void TakeDamage(float damage)
@@ -83,12 +86,22 @@ public class PlayerStats : IAttackStats
         OnStatsChanged?.Invoke();
     }
 
+    public void AddDefensePower(float defensePowerBonus)
+    {
+        _defensePower = Mathf.Max(0f, _defensePower + defensePowerBonus);
+
+        OnStatsChanged?.Invoke();
+    }
+
     private float _maxHealth;
     private float _currentHealth;
 
     private float _maxStamina;
     private float _currentStamina;
+
     private float _attackPower;
     private float _criticalRate;
+
+    private float _defensePower;
 }
 

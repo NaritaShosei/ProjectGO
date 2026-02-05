@@ -39,12 +39,13 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         _playerStats.Heal(amount);
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float powewr)
     {
         if (_playerStateManager.IsDead()) { return; }
         if (_playerStateManager.IsDodging()) { return; }
 
-        // TODO:被弾ダメージ計算を考慮する
+        float damage = DamageSystem.ApplyDamageReduction(powewr, _playerStats.DefensePower);
+
         _playerStats.TakeDamage(damage);
     }
     public bool TryUseStamina(float amount)
@@ -57,14 +58,14 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         return _playerData.DodgeStaminaCost;
     }
 
+    [SerializeField] private PlayerData _playerData;
+    [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private PlayerModeController _modeController;
-    [SerializeField] private MoveData _moveData;
-    [SerializeField] private PlayerData _playerData;
-    [SerializeField] private Transform _targetCenter;
     [SerializeField] private PlayerAnimationController _playerAnimationController;
+    [SerializeField] private Transform _targetCenter;
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
