@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// TODO: Context‚Ö‚ÌˆË‘¶‚ğíœ
+// TODO: Contextã¸ã®ä¾å­˜ã‚’å‰Šé™¤
 public class ShockBehaviour : IEnemyBehaviour
 {
     public void Init(
@@ -27,16 +27,16 @@ public class ShockBehaviour : IEnemyBehaviour
     {
         if (_player == null) { return; }
 
-        // UŒ‚‚ÌğŒ‚É–‚½‚µ‚Ä‚¢‚È‚©‚Á‚½‚ç‘ŠúƒŠƒ^[ƒ“
+        // æ”»æ’ƒã®æ¡ä»¶ã«æº€ãŸã—ã¦ã„ãªã‹ã£ãŸã‚‰æ—©æœŸãƒªã‚¿ãƒ¼ãƒ³
         if (!_state.IsShock) { return; }
 
-        // Š´“dŠJn
+        // æ„Ÿé›»é–‹å§‹
         if (!_isShocking)
         {
             StartShock();
         }
 
-        // Š´“dŒp‘±ŠÔ“à‚È‚çreturn
+        // æ„Ÿé›»ç¶™ç¶šæ™‚é–“å†…ãªã‚‰return
         if (_remainTime > 0)
         {
             _remainTime -= deltaTime;
@@ -44,7 +44,7 @@ public class ShockBehaviour : IEnemyBehaviour
         }
         else
         {
-            // Š´“dI—¹
+            // æ„Ÿé›»çµ‚äº†æ™‚
             EndShock();
         }
     }
@@ -56,60 +56,60 @@ public class ShockBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private EnemyStateManager _state;
 
-    // Š´“dó‘Ô‚ğ•Û‚·‚é•Ï”
+    // æ„Ÿé›»çŠ¶æ…‹ã‚’ä¿æŒã™ã‚‹å¤‰æ•°
     private bool _isShocking = false;
     private float _remainTime;
 
-    // “_–Å•\¦‚Ég—p‚·‚é•Ï”
-    private float _cycle = 1f;      // “_–ÅŠ´Šo‚Ì•b”
+    // ç‚¹æ»…è¡¨ç¤ºã«ä½¿ç”¨ã™ã‚‹å¤‰æ•°
+    private float _cycle = 1f;      // ç‚¹æ»…æ„Ÿè¦šã®ç§’æ•°
     private Material _material = null;
 
 
-    // ƒXƒ^ƒ“ŠJn‚Ì‚İ
+    // ã‚¹ã‚¿ãƒ³é–‹å§‹æ™‚ã®ã¿
     private void StartShock()
     {
         _isShocking = true;
-        _remainTime = 5f;       // 5•bŠÔ’â~
+        _remainTime = 5f;       // 5ç§’é–“åœæ­¢
 
 
-        // TODO Debug –â‘è‚È‚¯‚ê‚ÎÁ‚·
-        Debug.Log("Š´“dŠJn");
+        // TODO Debug å•é¡Œãªã‘ã‚Œã°æ¶ˆã™
+        Debug.Log("æ„Ÿé›»é–‹å§‹");
     }
 
-    // ƒXƒ^ƒ“’†
+    // ã‚¹ã‚¿ãƒ³ä¸­
     private void Shock()
     {
         if (_material == null) { return; }
 
-        // 0`cycle‚Ì”ÍˆÍ‚Ì’l‚ª“¾‚ç‚ê‚é
+        // 0ï½cycleã®ç¯„å›²ã®å€¤ãŒå¾—ã‚‰ã‚Œã‚‹
         var repeatValue = Mathf.Repeat(_remainTime, _cycle);
 
-        // sin”g‚ÅƒtƒF[ƒh‚³‚¹‚é
+        // sinæ³¢ã§ãƒ•ã‚§ãƒ¼ãƒ‰ã•ã›ã‚‹
         float alpha = (Mathf.Sin((repeatValue / _cycle) * Mathf.PI * 2f) + 1f) * 0.5f;
 
-        // “à•”_remainTime‚É‚¨‚¯‚é–¾–Åó‘Ô‚ğ”½‰f
-        // ƒ}ƒeƒŠƒAƒ‹F‚ÌƒAƒ‹ƒtƒ@’l‚ğ•ÏX‚µ‚Ä‚¢‚é
+        // å†…éƒ¨æ™‚åˆ»_remainTimeã«ãŠã‘ã‚‹æ˜æ»…çŠ¶æ…‹ã‚’åæ˜ 
+        // ãƒãƒ†ãƒªã‚¢ãƒ«è‰²ã®ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã‚’å¤‰æ›´ã—ã¦ã„ã‚‹
         var color = _material.color;
         color.a = alpha;
         _material.color = color;
     }
 
-    // ƒXƒ^ƒ“I—¹
+    // ã‚¹ã‚¿ãƒ³çµ‚äº†æ™‚
     private void EndShock()
     {
         if (_material != null) 
         {
-            // •\¦‚ğ–ß‚·B‚Â‚Ü‚è“§–¾“x‚ğ1‚É–ß‚·B
+            // è¡¨ç¤ºã‚’æˆ»ã™ã€‚ã¤ã¾ã‚Šé€æ˜åº¦ã‚’1ã«æˆ»ã™ã€‚
             var color = _material.color;
             color.a = 1;
             _material.color = color;
         }
 
-        // ShockƒXƒe[ƒg‚©‚çIdle‚Ö–ß‚·B
+        // Shockã‚¹ãƒ†ãƒ¼ãƒˆã‹ã‚‰Idleã¸æˆ»ã™ã€‚
         _state.ChangeState(EnemyState.Idle);
         _isShocking = false;
 
-        // TODO Debug –â‘è‚È‚¯‚ê‚ÎÁ‚·
-        Debug.Log("Š´“dI—¹");
+        // TODO Debug å•é¡Œãªã‘ã‚Œã°æ¶ˆã™
+        Debug.Log("æ„Ÿé›»çµ‚äº†");
     }
 }
