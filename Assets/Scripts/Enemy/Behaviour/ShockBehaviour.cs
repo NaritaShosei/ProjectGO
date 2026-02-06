@@ -71,9 +71,12 @@ public class ShockBehaviour : IEnemyBehaviour
         _isShocking = true;
         _remainTime = 5f;       // 5秒間停止
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 
         // TODO Debug 問題なければ消す
         Debug.Log("感電開始");
+#endif
+
     }
 
     // スタン中
@@ -109,7 +112,11 @@ public class ShockBehaviour : IEnemyBehaviour
         _state.ChangeState(EnemyState.Idle);
         _isShocking = false;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
         // TODO Debug 問題なければ消す
         Debug.Log("感電終了");
+#endif
+
     }
 }

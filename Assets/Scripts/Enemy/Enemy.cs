@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Xml.Serialization;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +8,7 @@ using UnityEngine;
 public abstract class Enemy : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+    // TODO: 鎧が壊れた時のActionを登録
 
     public virtual void Init(IPlayer player)
     {
@@ -29,10 +31,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
+        // TODO; もし鎧を保持していれば鎧だけにがダメージ
+        // TODO: 超過ダメージをどう処理するか
+
         _stats.TakeDamage(damage);
     }
 
+    // TODO: _dataの名前を変えたほうがいい？
     [SerializeField] protected EnemyData _data;
+    [SerializeField] protected MobArmorData _armorData;　// 鎧データの登録
     [SerializeField] private Transform _targetCenter;
 
     protected EnemyDefenseContext _defenceContext;
@@ -46,6 +53,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         // 雑に生身限定
         _defenceContext = new EnemyDefenseContext()
         {
+            // TODO: 鎧の登録があれば鎧、なければ生身
             EnemyType = EnemyType.Flesh,
         };
 
@@ -54,6 +62,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.OnHealthZero += _stats.Kill;
 
         _stats.OnDead += OnDeath;
+
+        // TODO: 鎧Statsを作成、データの初期化をする
     }
     protected virtual void Update()
 
@@ -67,6 +77,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.OnHealthZero -= _stats.Kill;
 
         _stats.OnDead -= OnDeath;
+    }
+
+    /// <summary>
+    /// 鎧破壊時の処理
+    /// </summary>
+    protected virtual void OnArmorBroken()
+    {
+        // TODO: EnemyTypeの変更
+        // TODO: 鎧オブジェクトのDestroy or Disable
     }
 
     /// <summary>
@@ -90,6 +109,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
 }
 
+// 鎧が壊れたことを検知してEnemyTypeを切り替える
 public struct EnemyDefenseContext
 {
     public EnemyType EnemyType; // 鎧 / 生身

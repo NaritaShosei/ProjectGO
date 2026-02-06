@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,9 +32,12 @@ public class EnemyManager : MonoBehaviour
 
         if (obj.TryGetComponent(out IEnemy enemy))
         {
+        
             enemy.OnDead += HandleEnemyDead;
             enemy.Init(_player);
             _enemies.Add(enemy);
+
+            // TODO: さらに階層を深くして鎧持ちであれば鎧オブジェクトの生成を実行させる
         }
 
         else { Destroy(obj); Debug.LogWarning("IEnemyを継承していないオブジェクトを生成したため、破壊しました"); }
