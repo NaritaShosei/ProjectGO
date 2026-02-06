@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "PlayerData", menuName = "GameData/PlayerData")]
 public class PlayerData : ScriptableObject
 {
     public StatsData Stats => _stats;
     public float AttackPower => _attackPower;
-    public float BlockPower => _blockPower;
+    public float DefensePower => _defensePower;
     public float CriticalRate => _criticalRate;
     public float HealAmount => _healAmount;
     public float StaminaRegenPerSecond => _staminaRegenPerSecond;
@@ -14,7 +14,7 @@ public class PlayerData : ScriptableObject
     [SerializeField] private StatsData _stats;
 
     [SerializeField] private float _attackPower;
-    [SerializeField] private float _blockPower;
+    [SerializeField] private float _defensePower;
 
     // クリティカル発生率（0.0〜1.0想定）
     [SerializeField, Range(0, 1)] private float _criticalRate = 0.5f;
