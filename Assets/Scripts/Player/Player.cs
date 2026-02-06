@@ -39,14 +39,14 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         _playerStats.Heal(amount);
     }
 
-    public void TakeDamage(float powewr)
+    public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) { return; }
         if (_playerStateManager.IsDodging()) { return; }
 
-        int damage = DamageSystem.ApplyDamageReduction(powewr, _playerStats.DefensePower);
+        int reductDamage = DamageSystem.ApplyDamageReduction(damage, _playerStats.DefensePower);
 
-        _playerStats.TakeDamage(damage);
+        _playerStats.TakeDamage(reductDamage);
     }
     public bool TryUseStamina(float amount)
     {

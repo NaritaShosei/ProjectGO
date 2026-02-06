@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class PlayerStats : IAttackStats
@@ -28,7 +28,7 @@ public class PlayerStats : IAttackStats
         _attackPower = data.AttackPower;
         _criticalRate = data.CriticalRate;
 
-        _defensePower = data.DefencePower;
+        _defensePower = data.DefensePower;
     }
 
     public void TakeDamage(float damage)
