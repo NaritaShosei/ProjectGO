@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public static class DamageSystem
 {
@@ -16,15 +16,15 @@ public static class DamageSystem
         return Mathf.RoundToInt(damage);
     }
 
-    public static float ApplyDamageReduction(
+    public static int ApplyDamageReduction(
      float damage,
      float defensePower)
     {
         float reductionRate =
             defensePower / (defensePower + DEFENSE_CONSTANT);
 
-        return Mathf.Max(
-            MIN_DAMAGE, damage * (1f - reductionRate));
+        return Mathf.RoundToInt(Mathf.Max(
+            MIN_DAMAGE, damage * (1f - reductionRate)));
     }
 
     private static float GetEnemyTypeMultiplier(PlayerMode mode, EnemyType type)

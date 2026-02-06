@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class Player : MonoBehaviour, IPlayer, IStamina
@@ -44,7 +44,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         if (_playerStateManager.IsDead()) { return; }
         if (_playerStateManager.IsDodging()) { return; }
 
-        float damage = DamageSystem.ApplyDamageReduction(powewr, _playerStats.DefensePower);
+        int damage = DamageSystem.ApplyDamageReduction(powewr, _playerStats.DefensePower);
 
         _playerStats.TakeDamage(damage);
     }
