@@ -4,7 +4,7 @@ public class EnemyStateManager
 {
     public EnemyState CurrentState { get; private set; } = EnemyState.Idle;
 
-    // ó‘Ô•ÏXƒCƒxƒ“ƒg(•K—v‚É‰‚¶‚Ä)
+    // çŠ¶æ…‹å¤‰æ›´ã‚¤ãƒ™ãƒ³ãƒˆ(å¿…è¦ã«å¿œã˜ã¦)
     public event Action<EnemyState, EnemyState> OnStateChanged;
 
     public bool IsAttacking => CurrentState is EnemyState.Attacking;
@@ -37,21 +37,21 @@ public class EnemyStateManager
                           && CurrentState != EnemyState.NockBack
                           && CurrentState != EnemyState.Dead;
     
-    // TODO: íœ‚·‚é‚©‚àB¡‚Ì‚Æ‚±‚ëg—p—\’è‚Í‚È‚¢
+    // TODO: å‰Šé™¤ã™ã‚‹ã‹ã‚‚ã€‚ä»Šã®ã¨ã“ã‚ä½¿ç”¨äºˆå®šã¯ãªã„
     public bool CanModeChange() => CurrentState is EnemyState.Idle;
 
 }
 public enum EnemyState
 {
-    // TODO: "ing"‚ ‚è‚È‚µ‚ğ“ˆê‚·‚é‚×‚«
+    // TODO: "ing"ã‚ã‚Šãªã—ã‚’çµ±ä¸€ã™ã‚‹ã¹ã
     Idle,
     Attacking,
     Barking,
     Moving,
-    Stun,       // •¨—UŒ‚‚É‚æ‚é‹Câ
-    Shock,      // Š´“dUŒ‚‚É‚æ‚éŠ´“d
-    // TODO: NockBack‚©‚ÂŠ´“dó‘Ô‚ğ‘z’è‚·‚é‚È‚ç”p~‚·‚é‚×‚«
-    // TODO: NockBackŒã‚ÉStun, Shock‚ğŠJn‚·‚é‚È‚ç‚ ‚è
+    Stun,       // ç‰©ç†æ”»æ’ƒã«ã‚ˆã‚‹æ°—çµ¶
+    Shock,      // æ„Ÿé›»æ”»æ’ƒã«ã‚ˆã‚‹æ„Ÿé›»
+    // TODO: NockBackã‹ã¤æ„Ÿé›»çŠ¶æ…‹ã‚’æƒ³å®šã™ã‚‹ãªã‚‰å»ƒæ­¢ã™ã‚‹ã¹ã
+    // TODO: NockBackå¾Œã«Stun, Shockã‚’é–‹å§‹ã™ã‚‹ãªã‚‰ã‚ã‚Š
     NockBack,   
     Dead,
 }
