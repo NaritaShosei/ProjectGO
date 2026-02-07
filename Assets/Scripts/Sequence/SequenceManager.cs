@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
@@ -6,7 +6,7 @@ public class SequenceManager : MonoBehaviour
     public event Action OnAllSequencesComplete;
     public bool IsAllSequencesComplete => _currentSequenceIndex >= _sequenceDataBase.Sequences.Count;
 
-    public void Init(EnemyManager enemyManager,SkillManager skillManager,InputHandler inputHandler)
+    public void Init(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
     {
         if (enemyManager == null || skillManager == null)
         {
@@ -18,6 +18,7 @@ public class SequenceManager : MonoBehaviour
         _enemyManager = enemyManager;
         _skillManager = skillManager;
         _inputHandler = inputHandler;
+        _player = player;
         InitializeContext();
     }
 
@@ -40,10 +41,11 @@ public class SequenceManager : MonoBehaviour
     private InputHandler _inputHandler;
     private SkillManager _skillManager;
     private EnemyManager _enemyManager;
+    private SequenceBase _currentSequence;
+    private IPlayer _player;
+    private SequenceContext _context;
     private int _currentSequenceIndex = 0;
     private int _enemySequenceCount = 0;  // 何番目の雑魚敵シークエンスか
-    private SequenceBase _currentSequence;
-    private SequenceContext _context;
     private float _sequenceStartTime;
 
     private void Start()
@@ -78,6 +80,7 @@ public class SequenceManager : MonoBehaviour
             SkillManager = _skillManager,
             SkillSelectCount = _skillSelectCount,
             InputHandler = _inputHandler,
+            Player = _player
         };
 
         // EnemyManagerのイベント購読

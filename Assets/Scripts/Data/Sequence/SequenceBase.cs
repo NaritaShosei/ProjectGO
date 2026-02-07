@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public abstract class SequenceBase : ScriptableObject
 {
@@ -37,6 +37,7 @@ public struct SequenceContext
     public ISkillSelectView SkillSelectView;
     public SpawnData CurrentSpawnData;
     public InputHandler InputHandler;
+    public IPlayer Player;
 
     public int SkillSelectCount;
 
