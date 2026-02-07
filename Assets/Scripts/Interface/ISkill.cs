@@ -4,7 +4,7 @@ public interface ISkill
 {
     /// <summary> 発動優先度 </summary>
     public int Priority { get; }
-    /// <summary> 発動優先度 </summary>
+    /// <summary> 発動タイミング </summary>
     public SkillTiming Timing { get; }
 
     /// <summary> 発動条件 </summary>
