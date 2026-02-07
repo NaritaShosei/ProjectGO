@@ -351,6 +351,12 @@ public class PlayerAttack : MonoBehaviour
                     return nextAttack;
                 }
             }
+
+            else
+            {
+                // コンボウィンドウ内でも次のコンボが存在しない場合は無効
+                return null;
+            }
         }
 
         // 新規コンボ開始

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,7 +18,7 @@ public class AttackExecutor : MonoBehaviour
     public void Execute(AttackData data, AttackInput input, ModeData modeData)
     {
         _lastAttackData = data;
-        // TODO:クリティカルがない
+
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
 
