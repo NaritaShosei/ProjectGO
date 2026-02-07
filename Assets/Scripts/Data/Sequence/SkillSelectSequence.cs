@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "SkillSelectSequence", menuName = "GameData/Sequence/SkillSelectSequence")]
 
@@ -25,7 +25,7 @@ public class SkillSelectSequence : SequenceBase
         // 既存のPresenterがあればイベント購読を解除
         _presenter?.Dispose();
 
-        _presenter = new SkillSelectPresenter(context.SkillManager, context.SkillSelectView);
+        _presenter = new SkillSelectPresenter(context.SkillManager, context.SkillSelectView, context.Player);
 
         _presenter.Open(context.SkillSelectCount);
     }
