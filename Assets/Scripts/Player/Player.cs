@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour, IPlayer, IStamina
 {
+    public float AttackPower => _playerStats.AttackPower;
+    public float CriticalRate => _playerStats.CriticalRate;
     public event Action OnDead;
     public event Action<float, float> OnHealthChanged;
     public event Action<float, float> OnStaminaChanged;
@@ -11,7 +13,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         CreateInternalObjects();
         BindEvents();
 
-        _attackExecutor?.Init(_playerStats, skillManager);
+        _attackExecutor?.Init(this, skillManager);
 
         _move?.Init(
            _playerStateManager,
@@ -56,6 +58,11 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     public float GetDodgeStaminaCost()
     {
         return _playerData.DodgeStaminaCost;
+    }
+
+    public void ApplyEvolution(float attackPowerBonus, float criticalRateBonus)
+    {
+        _playerStats.ApplyEvolution(attackPowerBonus, criticalRateBonus);
     }
 
     [SerializeField] private PlayerData _playerData;
@@ -140,4 +147,5 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         GUI.Label(new Rect(10, 50, 500, 300), $"残りHP：{_playerStats.CurrentHealth}");
         GUI.Label(new Rect(10, 100, 500, 300), $"残りスタミナ：{_playerStats.CurrentStamina}");
     }
+
 }

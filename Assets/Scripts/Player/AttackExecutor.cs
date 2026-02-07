@@ -68,7 +68,7 @@ public class AttackExecutor : MonoBehaviour
             return new List<SkillBase>();
         }
 
-        return _skillManager.GetOwnedSkills()
+        return _skillManager.GetAttackSkills()
             .Where(skill => skill.CanApply(context, data))
             .OrderByDescending(skill => skill.Priority)
             .ToList();

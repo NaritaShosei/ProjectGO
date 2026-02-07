@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerStats : IAttackStats
+public class PlayerStats
 {
     public float CurrentHealth => _currentHealth;
     public float CurrentStamina => _currentStamina;
