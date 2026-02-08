@@ -12,6 +12,8 @@ public interface ISkill
     /// <summary> スキルを発動する,攻撃力の変化などはcontextの内部のパラメーターに行う </summary>
     public void Apply(ref AttackContext context);
 
+    /// <summary> スキル獲得可能かどうか </summary>
+    public bool CanAcquire(int acquireCount);
     /// <summary> スキル獲得時に一度だけ呼ばれる </summary>
     public void OnAcquire(IAttackStats stats, int acquireCount);
 }

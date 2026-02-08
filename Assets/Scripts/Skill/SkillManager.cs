@@ -25,7 +25,12 @@ public class SkillManager : MonoBehaviour
             OnSkillAcquired?.Invoke(skill);
         }
 
-        _ownedSkillIDs.Add(id);
+        // 次のレベルに進めない場合はスキルが出てこないようにする
+        if (!skill.CanAcquire(_skillAcquireCounts[id]))
+        {
+            _ownedSkillIDs.Add(id);
+        }
+
         return true;
     }
 
