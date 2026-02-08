@@ -22,7 +22,7 @@ public class SkillBase : ScriptableObject, ISkill
     {
     }
 
-    public bool CanAcquire(int acquireCount)
+    public virtual bool CanAcquire(int acquireCount)
     {
         return false;
     }
