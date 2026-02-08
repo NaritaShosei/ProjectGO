@@ -10,23 +10,25 @@ public class SkillManager : MonoBehaviour
     /// <summary> スキルのIDを登録し、獲得時効果を適用する </summary>
     public bool TryRegisterSkillId(int id, IAttackStats stats)
     {
-        if (_ownedSkillIDs.Contains(id))
+        if (!_skillAcquireCounts.ContainsKey(id))
         {
-            return false;
+            _skillAcquireCounts[id] = 0;
         }
 
-        _ownedSkillIDs.Add(id);
+        _skillAcquireCounts[id]++;
 
         // スキルを取得して獲得時効果を適用
         var skill = _skillDataBase.GetSkill(id);
         if (skill != null && skill.Timing == SkillTiming.OnAcquire)
         {
-            skill.OnAcquire(stats);
+            skill.OnAcquire(stats, _skillAcquireCounts[id]);
             OnSkillAcquired?.Invoke(skill);
         }
 
+        _ownedSkillIDs.Add(id);
         return true;
     }
+
 
     /// <summary> 開放済みのIDを取得する </summary>
     public IReadOnlyList<int> GetOwnedSkillIDs() => _ownedSkillIDs.ToList();
@@ -79,4 +81,5 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private SkillDataBase _skillDataBase;
 
     private HashSet<int> _ownedSkillIDs = new HashSet<int>();
+    private Dictionary<int, int> _skillAcquireCounts = new();
 }

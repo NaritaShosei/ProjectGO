@@ -18,7 +18,7 @@ public class SkillBase : ScriptableObject, ISkill
         return true;
     }
 
-    public virtual void OnAcquire(IAttackStats stats)
+    public virtual void OnAcquire(IAttackStats stats,int acquireCount)
     {
     }
 
