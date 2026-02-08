@@ -32,10 +32,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
         // TODO; もし鎧を保持していれば鎧だけにがダメージ
-        // TODO: 超過ダメージをどう処理するか
+        // TODO: 超過ダメージを生身に流す
 
         _stats.TakeDamage(damage);
     }
+
+    // TODO: EnemyDeffenceContextのhasShockDebuffを切り替えるメソッド
+
+    // TODO: 10秒後にHasShockDebuffを切り替えるメソッド
+
 
     // TODO: _dataの名前を変えたほうがいい？
     [SerializeField] protected EnemyData _data;
@@ -55,6 +60,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         {
             // TODO: 鎧の登録があれば鎧、なければ生身
             EnemyType = EnemyType.Flesh,
+
+            // TODO: hasShockDebuffをfalseに
         };
 
         _stats = new EnemyStats(_data);
@@ -113,6 +120,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 public struct EnemyDefenseContext
 {
     public EnemyType EnemyType; // 鎧 / 生身
+    // TODO: ここにhasShockDebuffを設定する。
 }
 
 public enum EnemyType

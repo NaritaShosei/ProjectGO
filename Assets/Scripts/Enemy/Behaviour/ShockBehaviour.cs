@@ -49,6 +49,11 @@ public class ShockBehaviour : IEnemyBehaviour
         }
     }
 
+    // TODO: Enemy関連クラスに出てくるRemainをすべてdurationに変更する
+    public void SetRemainTime(int durationTime)
+    {
+        _remainTime = durationTime;
+    }
 
     private Transform _self;
     private Transform _player;
@@ -118,5 +123,6 @@ public class ShockBehaviour : IEnemyBehaviour
         Debug.Log("感電終了");
 #endif
 
+        // TODO: remainTimeだけ初期化しておく。
     }
 }

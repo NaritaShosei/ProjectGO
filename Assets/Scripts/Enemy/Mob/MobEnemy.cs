@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 // NOTE:
 // モブ敵のの基底クラスとして作成
@@ -30,9 +30,12 @@ public class MobEnemy : Enemy
     {
         base.TakeDamage(context);
 
-        // TODO: 雑にThunder攻撃なら必ずShock状態にしている。
-        // TODO: プレイヤーのモードの変え方がわからず、ひとまず必ず感電させているので要修正
-        // if (context.PlayerMode != PlayerMode.Thunder) return;
+        // TODO: 感電している場合はreturn
+
+        // TODO: 以下の内容を別途メソッドにしたほうが見やすい。
+        // TODO: 必ずcontextを参照してで感電する確率を計算させる
+        // TODO: EnemyDeffenceContextのhasShockDebuffをtrue
+        // TODO: _stateを変更する前にShockのremainTimeを書き換えておく。
         _state.ChangeState(EnemyState.Shock);
     }
 
