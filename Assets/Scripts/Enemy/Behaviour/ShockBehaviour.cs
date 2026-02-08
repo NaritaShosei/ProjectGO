@@ -37,9 +37,9 @@ public class ShockBehaviour : IEnemyBehaviour
         }
 
         // 感電継続時間内ならreturn
-        if (_remainTime > 0)
+        if (_durationTime > 0)
         {
-            _remainTime -= deltaTime;
+            _durationTime -= deltaTime;
             Shock();
         }
         else
@@ -47,12 +47,6 @@ public class ShockBehaviour : IEnemyBehaviour
             // 感電終了時
             EndShock();
         }
-    }
-
-    // TODO: Enemy関連クラスに出てくるRemainをすべてdurationに変更する
-    public void SetRemainTime(int durationTime)
-    {
-        _remainTime = durationTime;
     }
 
     private Transform _self;
@@ -63,7 +57,7 @@ public class ShockBehaviour : IEnemyBehaviour
 
     // 感電状態を保持する変数
     private bool _isShocking = false;
-    private float _remainTime;
+    private float _durationTime;
 
     // 点滅表示に使用する変数
     private float _cycle = 1f;      // 点滅感覚の秒数
@@ -74,7 +68,9 @@ public class ShockBehaviour : IEnemyBehaviour
     private void StartShock()
     {
         _isShocking = true;
-        _remainTime = 5f;       // 5秒間停止
+
+        // 継続時間はEnemyStateManagerを参照して更新
+        _durationTime = _state.DurationShockTime;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
@@ -90,7 +86,7 @@ public class ShockBehaviour : IEnemyBehaviour
         if (_material == null) { return; }
 
         // 0～cycleの範囲の値が得られる
-        var repeatValue = Mathf.Repeat(_remainTime, _cycle);
+        var repeatValue = Mathf.Repeat(_durationTime, _cycle);
 
         // sin波でフェードさせる
         float alpha = (Mathf.Sin((repeatValue / _cycle) * Mathf.PI * 2f) + 1f) * 0.5f;
@@ -123,6 +119,7 @@ public class ShockBehaviour : IEnemyBehaviour
         Debug.Log("感電終了");
 #endif
 
-        // TODO: remainTimeだけ初期化しておく。
+        // durationTimeを初期化しておく。
+        _state.SetDurationTime(0);
     }
 }

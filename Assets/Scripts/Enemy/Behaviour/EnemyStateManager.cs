@@ -7,6 +7,8 @@ public class EnemyStateManager
     // 状態変更イベント(必要に応じて)
     public event Action<EnemyState, EnemyState> OnStateChanged;
 
+    public float DurationShockTime { get; private set; } 
+
     public bool IsAttacking => CurrentState is EnemyState.Attacking;
 
     public bool IsBarking => CurrentState is EnemyState.Barking;
@@ -40,6 +42,10 @@ public class EnemyStateManager
     // TODO: 削除するかも。今のところ使用予定はない
     public bool CanModeChange() => CurrentState is EnemyState.Idle;
 
+    public void SetDurationTime(float durationTime)
+    {
+        DurationShockTime = durationTime;
+    }
 }
 public enum EnemyState
 {

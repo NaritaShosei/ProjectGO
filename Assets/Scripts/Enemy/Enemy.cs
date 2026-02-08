@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -37,10 +38,20 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.TakeDamage(damage);
     }
 
-    // TODO: EnemyDeffenceContextのhasShockDebuffを切り替えるメソッド
+    public async void ActivateShockDebuff(int durationSeconds = 10)
+    {
+        _defenceContext.HasShockDebuff = true;
 
-    // TODO: 10秒後にHasShockDebuffを切り替えるメソッド
+        // 10秒後にHasShockDebuffを切り替える
+        await UniTask.Delay(
+            delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
+            delayType: DelayType.DeltaTime,
+            delayTiming: PlayerLoopTiming.Update,　// Enemy自体がUpadateを持っているのでUpdateでいいと判断
+            cancellationToken: destroyCancellationToken
+            );
 
+        _defenceContext.HasShockDebuff = false;
+    }
 
     // TODO: _dataの名前を変えたほうがいい？
     [SerializeField] protected EnemyData _data;
@@ -61,7 +72,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
             // TODO: 鎧の登録があれば鎧、なければ生身
             EnemyType = EnemyType.Flesh,
 
-            // TODO: hasShockDebuffをfalseに
+            HasShockDebuff = false
         };
 
         _stats = new EnemyStats(_data);
@@ -116,11 +127,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
 }
 
-// 鎧が壊れたことを検知してEnemyTypeを切り替える
+// TODO: 鎧が壊れたことを検知してEnemyTypeを切り替える
 public struct EnemyDefenseContext
 {
     public EnemyType EnemyType; // 鎧 / 生身
-    // TODO: ここにhasShockDebuffを設定する。
+    public bool HasShockDebuff; // 感電弱体化状態か
 }
 
 public enum EnemyType
