@@ -13,7 +13,7 @@ public interface ISkill
     public void Apply(ref AttackContext context);
 
     /// <summary> スキル獲得時に一度だけ呼ばれる </summary>
-    public void OnAcquire(IAttackStats stats);
+    public void OnAcquire(IAttackStats stats, int acquireCount);
 }
 
 public enum SkillTiming
