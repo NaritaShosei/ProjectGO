@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class PlayerStats
 {
+    public float MaxHealth => _maxHealth;
+    public float MaxStamina => _maxStamina;
+
     public float CurrentHealth => _currentHealth;
     public float CurrentStamina => _currentStamina;
 
@@ -78,13 +81,18 @@ public class PlayerStats
 
     }
 
-    public void ApplyEvolution(float attackPowerBonus, float criticalRateBonus)
+    public void AddAttackPower(float value)
     {
-        _attackPower = Mathf.Max(0f, _attackPower + attackPowerBonus);
-        _criticalRate += criticalRateBonus;
-
+        _attackPower = Mathf.Max(0f, _attackPower + value);
         OnStatsChanged?.Invoke();
     }
+
+    public void AddCriticalRate(float value)
+    {
+        _criticalRate += value;
+        OnStatsChanged?.Invoke();
+    }
+
 
     public void AddDefensePower(float defensePowerBonus)
     {
@@ -92,6 +100,33 @@ public class PlayerStats
 
         OnStatsChanged?.Invoke();
     }
+
+    public void AddMaxHealth(float value)
+    {
+        if (value <= 0f) { return; }
+
+        _maxHealth += value;
+        _currentHealth += value;
+
+        _currentHealth = Mathf.Min(_currentHealth, _maxHealth);
+
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        OnStatsChanged?.Invoke();
+    }
+
+    public void AddMaxStamina(float value)
+    {
+        if (value <= 0f) { return; }
+
+        _maxStamina += value;
+        _currentStamina += value;
+
+        _currentStamina = Mathf.Min(_currentStamina, _maxStamina);
+
+        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
+        OnStatsChanged?.Invoke();
+    }
+
 
     private float _maxHealth;
     private float _currentHealth;
