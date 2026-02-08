@@ -18,8 +18,13 @@ public class SkillBase : ScriptableObject, ISkill
         return true;
     }
 
-    public virtual void OnAcquire(IAttackStats stats)
+    public virtual void OnAcquire(IAttackStats stats, int acquireCount)
     {
+    }
+
+    public virtual bool CanAcquire(int acquireCount)
+    {
+        return false;
     }
 
     [SerializeField] private int _id;               // 検索用ID
