@@ -52,7 +52,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
             await UniTask.Delay(
                 delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
                 delayType: DelayType.DeltaTime,
-                delayTiming: PlayerLoopTiming.Update, // Enemy自体がUpadateを持っているのでUpdateでいいと判断
+                delayTiming: PlayerLoopTiming.Update, // Enemy自体がUpdateを持っているのでUpdateでいいと判断
                 cancellationToken: _shockCts.Token
                 );
         }
