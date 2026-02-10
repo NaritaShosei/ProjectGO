@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// モブ敵のアーマーの性能データを設定するデータクラス
+/// モブ-鎧のセットを設定するデータクラス
 /// </summary>
 [CreateAssetMenu(fileName = "MobEnemyData", menuName = "GameData/MobEnemyData")]
 public class MobEnemyData : ScriptableObject
