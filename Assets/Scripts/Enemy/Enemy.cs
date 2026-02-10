@@ -14,10 +14,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     public virtual void Init(IPlayer player)
     {
         _playerTransform = player.GetTargetCenter();
-
-        // 再利用の可能性があるので、AwakeではなくInitで
-        // 何度も呼ぶのは微妙かなと思い、Initで呼ぶ方針にしてみました
-        _shockCts = new CancellationTokenSource();
     }
 
     public void AddKnockBackForce(Vector3 direction)
@@ -44,6 +40,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     public async UniTask ActivateShockDebuff(int durationSeconds = 10)
     {
+        _shockCts?.Cancel();
+        _shockCts?.Dispose();
+        _shockCts = new CancellationTokenSource();
+
         _defenceContext.HasShockDebuff = true;
 
         try
@@ -58,7 +58,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         }
         catch (OperationCanceledException)
         {
-            // 死亡時キャンセル
+            // 死亡時 OR 感電キャンセル
         }
 
         _defenceContext.HasShockDebuff = false;
@@ -139,8 +139,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     protected void HandleDead(IEnemy _)
     {
         // _shockCtsの解除
-        _shockCts.Cancel();
-        _shockCts.Dispose();
+        _shockCts?.Cancel();
+        _shockCts?.Dispose();
     }
 
     protected virtual void OnDeathInternal()
