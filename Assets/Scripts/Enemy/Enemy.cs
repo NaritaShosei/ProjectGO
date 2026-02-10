@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 
 /// <summary>
@@ -13,6 +14,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     public virtual void Init(IPlayer player)
     {
         _playerTransform = player.GetTargetCenter();
+
+        // 再利用の可能性があるので、AwakeではなくInitで
+        // 何度も呼ぶのは微妙かなと思い、Initで呼ぶ方針にしてみました
+        _shockCts = new CancellationTokenSource();
     }
 
     public void AddKnockBackForce(Vector3 direction)
@@ -37,17 +42,24 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.TakeDamage(damage);
     }
 
-    public async void ActivateShockDebuff(int durationSeconds = 10)
+    public async UniTask ActivateShockDebuff(int durationSeconds = 10)
     {
         _defenceContext.HasShockDebuff = true;
 
-        // 10秒後にHasShockDebuffを切り替える
-        await UniTask.Delay(
-            delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
-            delayType: DelayType.DeltaTime,
-            delayTiming: PlayerLoopTiming.Update,　// Enemy自体がUpadateを持っているのでUpdateでいいと判断
-            cancellationToken: destroyCancellationToken
-            );
+        try
+        {
+            // 10秒後にHasShockDebuffを切り替える
+            await UniTask.Delay(
+                delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
+                delayType: DelayType.DeltaTime,
+                delayTiming: PlayerLoopTiming.Update, // Enemy自体がUpadateを持っているのでUpdateでいいと判断
+                cancellationToken: _shockCts.Token
+                );
+        }
+        catch (OperationCanceledException)
+        {
+            // 死亡時キャンセル
+        }
 
         _defenceContext.HasShockDebuff = false;
     }
@@ -63,8 +75,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected bool _isDead; // 軽い実装のため bool のフラグを使用
 
+    protected CancellationTokenSource _shockCts;
+
     protected virtual void Awake()
     {
+        // OnDead時の登録
+        OnDead += HandleDead;
+
         // 雑に生身限定
         _defenceContext = new EnemyDefenseContext()
         {
@@ -94,6 +111,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.OnHealthZero -= _stats.Kill;
 
         _stats.OnDead -= OnDeath;
+
+        OnDead -= HandleDead;
     }
 
     /// <summary>
@@ -115,6 +134,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _isDead = true;
         OnDead?.Invoke(this);
         OnDeathInternal();
+    }
+
+    protected void HandleDead(IEnemy _)
+    {
+        // _shockCtsの解除
+        _shockCts.Cancel();
+        _shockCts.Dispose();
     }
 
     protected virtual void OnDeathInternal()
