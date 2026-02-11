@@ -44,7 +44,7 @@ public class MobEnemy : Enemy
         // 鎧がダメージを肩代わり
         if (_defenceContext.EnemyType == EnemyType.Armor)
         {
-            if (_armor != null) damage = Mathf.RoundToInt(_armor.AbsorbDamageAndReturnExcess(damage));
+            if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
         //超過ダメージを生身に流す
