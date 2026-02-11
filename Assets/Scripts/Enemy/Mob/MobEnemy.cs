@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 // NOTE:
 // モブ敵のの基底クラスとして作成
@@ -30,12 +30,8 @@ public class MobEnemy : Enemy
     {
         base.TakeDamage(context);
 
-        // TODO: 雑にThunder攻撃なら必ずShock状態にしている。
-        // TODO: プレイヤーのモードの変え方がわからず、ひとまず必ず感電させているので要修正
-        // if (context.PlayerMode != PlayerMode.Thunder) return;
-        _state.ChangeState(EnemyState.Shock);
+        TryApplyElectricShockSkill(context.ElectricShock);
     }
-
 
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
@@ -45,6 +41,29 @@ public class MobEnemy : Enemy
     {
         if (_runner == null) { return; }
         _runner.Tick(deltaTime);
+    }
+
+    private void TryApplyElectricShockSkill(ElectricShock electricShock)
+    {
+
+        //最低限の感電状態でreturn
+        if (this._defenceContext.HasShockDebuff) return;
+
+        if (CheckProbability(electricShock.GrantEffectProbability))
+        {
+            this.ActivateShockDebuff();
+
+            _state.SetDurationTime(electricShock.DurationEffect);
+
+            _state.ChangeState(EnemyState.Shock);
+        }
+    }
+
+    // 確率計算メソッド
+    // TODO: いろいろなところで使うと思うので、Utilityにできたほうがいいのでは
+    private bool CheckProbability(float probability)
+    {
+        return Random.value < probability;
     }
 
 #if UNITY_EDITOR
