@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// モブのアーマーの抽象クラス
+/// モブのアーマーの具象クラス
 /// </summary>
 public class MobArmor : Armor
 {

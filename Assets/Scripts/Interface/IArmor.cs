@@ -28,7 +28,7 @@ public interface IArmor
     /// </summary>
     /// <param name="damage"></param>
     /// <returns>残りダメージ量</returns>
-    public int AbsorbDamageAndReturnExcess(int damage);
+    public float AbsorbDamageAndReturnExcess(float damage);
 
     /// <summary>
     /// 壊れる

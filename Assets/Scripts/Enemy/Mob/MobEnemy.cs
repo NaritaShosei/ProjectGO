@@ -38,12 +38,13 @@ public class MobEnemy : Enemy
         // 要相談
         if (_isDead) { return; }
 
+        // TODO: そもそもCalculateでfloatにしないのはなぜでしょうか？
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
         // 鎧がダメージを肩代わり
         if (_defenceContext.EnemyType == EnemyType.Armor)
         {
-            if (_armor != null) damage = _armor.AbsorbDamageAndReturnExcess(damage);
+            if (_armor != null) damage = Mathf.RoundToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
         //超過ダメージを生身に流す
@@ -53,7 +54,7 @@ public class MobEnemy : Enemy
     }
 
     // Armorの登録
-    [SerializeField] private IArmor _armor;
+    [SerializeField] private MobArmor _armor;
 
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
@@ -76,6 +77,12 @@ public class MobEnemy : Enemy
         {
             _defenceContext.EnemyType = EnemyType.Flesh;
         }
+    }
+
+    // TODO: Overrideしなくても大丈夫なのか？
+    public void OnDestroy()
+    {
+        _armor.OnBroken -= BreakArmor;
     }
 
     protected override void UpdateEnemy(float deltaTime)

@@ -23,11 +23,11 @@ public abstract class Armor : MonoBehaviour, IArmor
         // _isBroken = false;
     }
 
-    public int AbsorbDamageAndReturnExcess(int damage)
+    public float AbsorbDamageAndReturnExcess(float damage)
     {
         // ダメージ量 - 現在のHp
         // 制限:0以上
-        int excessDamage = Mathf.Max(0, damage - (int)_stats.CurrentHealth);
+        float excessDamage = Mathf.Max(0, damage - _stats.CurrentHealth);
 
         _stats.TakeDamage(damage);
 
