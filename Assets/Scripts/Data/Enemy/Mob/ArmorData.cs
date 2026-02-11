@@ -18,5 +18,5 @@ public class ArmorData : ScriptableObject
     [SerializeField] private float _maxHP = 20f;
 
     // [Header("ArmorPrefab")]
-    // [SerializeField] private GameObeject _armorPrefab = null;
+    // [SerializeField] private GameObject _armorPrefab = null;
 }
