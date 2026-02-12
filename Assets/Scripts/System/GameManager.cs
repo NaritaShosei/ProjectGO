@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
     {
         var input = ServiceLocator.Get<InputHandler>();
 
-        _sequenceManager.Init(_enemyManager, _skillManager, input);
+        _sequenceManager.Init(_enemyManager, _skillManager, input, _player);
 
         _sceneTransitionManager = ServiceLocator.Get<SceneTransitionManager>();
 

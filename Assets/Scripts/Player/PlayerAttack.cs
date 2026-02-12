@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -336,7 +336,7 @@ public class PlayerAttack : MonoBehaviour
     private AttackData GetNextAttack(AttackInput input, bool allowCombo)
     {
         // コンボウィンドウ内かつ、次のコンボが存在する場合
-        if (_isInComboWindow && _currentAttackId != -1)
+        if ((allowCombo || _isInComboWindow) && _currentAttackId != -1)
         {
             // 現在の攻撃データを取得
             var currentAttack = _attackRepository.GetAttackById(_currentAttackId);
@@ -350,6 +350,12 @@ public class PlayerAttack : MonoBehaviour
                 {
                     return nextAttack;
                 }
+            }
+
+            else
+            {
+                // コンボウィンドウ内でも次のコンボが存在しない場合は無効
+                return null;
             }
         }
 

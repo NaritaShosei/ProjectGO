@@ -1,5 +1,5 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public interface IPlayer : ICharacter, IHealth
+public interface IPlayer : ICharacter, IHealth, IAttackStats
 {
 }

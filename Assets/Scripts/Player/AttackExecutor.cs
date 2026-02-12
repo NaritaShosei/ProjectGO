@@ -18,7 +18,7 @@ public class AttackExecutor : MonoBehaviour
     public void Execute(AttackData data, AttackInput input, ModeData modeData)
     {
         _lastAttackData = data;
-        // TODO:クリティカルがない
+
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
 
@@ -68,7 +68,7 @@ public class AttackExecutor : MonoBehaviour
             return new List<SkillBase>();
         }
 
-        return _skillManager.GetOwnedSkills()
+        return _skillManager.GetAttackSkills()
             .Where(skill => skill.CanApply(context, data))
             .OrderByDescending(skill => skill.Priority)
             .ToList();
@@ -90,7 +90,7 @@ public class AttackExecutor : MonoBehaviour
         float chance = _attackStats.CriticalRate;
         context.IsCritical = false;
         context.CriticalMultiplier = 1f;
-        
+
         if (UnityEngine.Random.value < chance)
         {
             // クリティカル耐性の可能性を考え、ここではクリティカルダメージを求めない
