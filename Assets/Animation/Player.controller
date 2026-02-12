@@ -15,7 +15,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.5555556
   _comboWindowStartTime: 0.812
   _comboWindowEndTime: 0.945
-  _attackCompleteTime: 1
 --- !u!1102 &-9082553468938874889
 AnimatorState:
   serializedVersion: 6
@@ -59,7 +58,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.934
   _comboWindowStartTime: 0.712
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1101 &-8335513729436235242
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -125,7 +123,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.796
   _comboWindowStartTime: 0.6
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1107 &-7921176991915141101
 AnimatorStateMachine:
   serializedVersion: 6
@@ -319,7 +316,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.373
   _comboWindowStartTime: 0.709
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1101 &-6781451766408937020
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -523,7 +519,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.064
   _comboWindowStartTime: 0
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1101 &-4137701567808580617
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -605,6 +600,21 @@ AnimatorTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 1
+--- !u!114 &-3690398642286209464
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
+  _attackExecuteTime: 0.4
+  _comboWindowStartTime: 0.6
+  _comboWindowEndTime: 0.8
 --- !u!114 &-3256490987458796464
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -620,7 +630,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.434
   _comboWindowStartTime: 0.364
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1101 &-2604064859348586091
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -865,7 +874,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.656
   _comboWindowStartTime: 0.6
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1101 &2256206346027113931
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1095,7 +1103,8 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -566117095311766102}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: -3690398642286209464}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -1301,7 +1310,6 @@ MonoBehaviour:
   _attackExecuteTime: 0.081
   _comboWindowStartTime: 0
   _comboWindowEndTime: 1
-  _attackCompleteTime: 1
 --- !u!1102 &9207618756179363624
 AnimatorState:
   serializedVersion: 6
