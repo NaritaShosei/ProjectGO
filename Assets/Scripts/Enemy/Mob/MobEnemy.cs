@@ -29,6 +29,20 @@ public class MobEnemy : Enemy
         _runner.Add(move);
         _runner.Add(attack);
         _runner.Add(shock);
+
+        // 鎧登録　データがなければ裸
+        // TODO: 再生成に対応できる場所だろうか？
+        if (_armor != null)
+        {
+            _defenceContext.EnemyType = EnemyType.Armor;
+            _armor.Init(this);
+            _armor.OnBroken += BreakArmor;
+            // TODO: どこかで購読をやめさせなければ→一応BreakArmor内で対応
+        }
+        else
+        {
+            _defenceContext.EnemyType = EnemyType.Flesh;
+        }
     }
 
     public override void TakeDamage(DamageContext context)
@@ -60,29 +74,10 @@ public class MobEnemy : Enemy
     private EnemyContext _context;
     private EnemyStateManager _state;
 
-    protected override void Awake()
-    {
-        base.Awake();
-
-        // 鎧登録　データがなければ裸
-        // TODO: 再生成に対応できる場所だろうか？
-        if (_armor != null)
-        {
-            _defenceContext.EnemyType = EnemyType.Armor;
-            _armor.Init(this);
-            _armor.OnBroken += BreakArmor;
-            // TODO: どこかで購読をやめさせなければ→一応BreakArmor内で対応
-        }
-        else
-        {
-            _defenceContext.EnemyType = EnemyType.Flesh;
-        }
-    }
-
     // TODO: Overrideしなくても大丈夫なのか？
-    public void OnDestroy()
+    private void OnDestroy()
     {
-        _armor.OnBroken -= BreakArmor;
+         if(_armor!=null)_armor.OnBroken -= BreakArmor;
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -113,7 +108,6 @@ public class MobEnemy : Enemy
     private void BreakArmor(IEnemy enemy)
     {
         _defenceContext.EnemyType = EnemyType.Flesh;
-        // TODO: OnBrokenの解除がここでいいのか怪しい
         _armor.OnBroken -= BreakArmor;
     }
 
