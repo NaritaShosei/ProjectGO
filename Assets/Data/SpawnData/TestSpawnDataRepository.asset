@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7ce8f58984e4e2f4aa285cbcd254b26a, type: 3}
-  m_Name: ShockSpawnDataRepository
+  m_Name: TestSpawnDataRepository
   m_EditorClassIdentifier: Assembly-CSharp::SpawnDataRepository
   _spawnDatas:
+  - {fileID: 11400000, guid: 9e4bf824e4040e2488b9b5f6bc6fd2d0, type: 2}
   - {fileID: 11400000, guid: 9e4bf824e4040e2488b9b5f6bc6fd2d0, type: 2}
   - {fileID: 11400000, guid: 9e4bf824e4040e2488b9b5f6bc6fd2d0, type: 2}
