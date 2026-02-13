@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "EnemyData", menuName = "GameData/EnemyData")]
 public class EnemyData : ScriptableObject
@@ -16,6 +16,9 @@ public class EnemyData : ScriptableObject
 
     [Header("Movement")]
     [SerializeField] private float _moveSpeed = 3f;
+
+    // TODO: プレイヤーへの接近距離のパラメータを追加したい。
+    // Moveで近づいた後に一時停止→威嚇などして待機→攻撃時に一気に近づく　みたいな感じがいいのでは
 
     // TODO:攻撃データはわけて作る
 

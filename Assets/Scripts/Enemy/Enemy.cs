@@ -1,4 +1,6 @@
-﻿using System;
+using Cysharp.Threading.Tasks;
+using System;
+using System.Threading;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +9,7 @@ using UnityEngine;
 public abstract class Enemy : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+    public event Action<IEnemy> OnArmorBroken;
 
     public virtual void Init(IPlayer player)
     {
@@ -30,6 +33,35 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
         _stats.TakeDamage(damage);
+
+        // TODO: ここからどう鎧に流すか・・
+        // TODO: ひとまずあきらめてMobEnemyにだけ実装した。
+    }
+
+    public async UniTask ActivateShockDebuff(int durationSeconds = 10)
+    {
+        _shockCts?.Cancel();
+        _shockCts?.Dispose();
+        _shockCts = new CancellationTokenSource();
+
+        _defenceContext.HasShockDebuff = true;
+
+        try
+        {
+            // 10秒後にHasShockDebuffを切り替える
+            await UniTask.Delay(
+                delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
+                delayType: DelayType.DeltaTime,
+                delayTiming: PlayerLoopTiming.Update, // Enemy自体がUpdateを持っているのでUpdateでいいと判断
+                cancellationToken: _shockCts.Token
+                );
+        }
+        catch (OperationCanceledException)
+        {
+            // 死亡時 OR 感電キャンセル
+        }
+
+        _defenceContext.HasShockDebuff = false;
     }
 
     [SerializeField] protected EnemyData _data;
@@ -41,12 +73,19 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected bool _isDead; // 軽い実装のため bool のフラグを使用
 
+    protected CancellationTokenSource _shockCts;
+
     protected virtual void Awake()
     {
+        // OnDead時の登録
+        OnDead += HandleDead;
+
         // 雑に生身限定
         _defenceContext = new EnemyDefenseContext()
         {
             EnemyType = EnemyType.Flesh,
+
+            HasShockDebuff = false
         };
 
         _stats = new EnemyStats(_data);
@@ -54,6 +93,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.OnHealthZero += _stats.Kill;
 
         _stats.OnDead += OnDeath;
+
+        // 鎧生成関連はすべてMobEnemyのほうで実装
     }
     protected virtual void Update()
 
@@ -67,6 +108,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         _stats.OnHealthZero -= _stats.Kill;
 
         _stats.OnDead -= OnDeath;
+
+        OnDead -= HandleDead;
     }
 
     /// <summary>
@@ -81,6 +124,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         OnDeathInternal();
     }
 
+    protected void HandleDead(IEnemy _)
+    {
+        // _shockCtsの解除
+        _shockCts?.Cancel();
+        _shockCts?.Dispose();
+    }
+
     protected virtual void OnDeathInternal()
     {
         Destroy(gameObject);
@@ -90,9 +140,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
 }
 
+// TODO: 鎧が壊れたことを検知してEnemyTypeを切り替える
 public struct EnemyDefenseContext
 {
     public EnemyType EnemyType; // 鎧 / 生身
+    public bool HasShockDebuff; // 感電弱体化状態か
 }
 
 public enum EnemyType
