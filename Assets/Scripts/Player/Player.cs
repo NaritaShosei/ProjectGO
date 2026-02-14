@@ -5,6 +5,17 @@ public class Player : MonoBehaviour, IPlayer, IStamina
 {
     public float AttackPower => _playerStats.AttackPower;
     public float CriticalRate => _playerStats.CriticalRate;
+
+    public float DefensePower => _playerStats.DefensePower;
+
+    public float MaxHealth => _playerStats.MaxHealth;
+
+    public float CurrentHealth => _playerStats.CurrentHealth;
+
+    public float MaxStamina => _playerStats.MaxStamina;
+
+    public float CurrentStamina => _playerStats.CurrentStamina;
+
     public event Action OnDead;
     public event Action<float, float> OnHealthChanged;
     public event Action<float, float> OnStaminaChanged;
@@ -60,10 +71,31 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         return _playerData.DodgeStaminaCost;
     }
 
-    public void ApplyEvolution(float attackPowerBonus, float criticalRateBonus)
+    public void AddAttackPower(float value)
     {
-        _playerStats.ApplyEvolution(attackPowerBonus, criticalRateBonus);
+        _playerStats.AddAttackPower(value);
     }
+
+    public void AddCriticalRate(float value)
+    {
+        _playerStats.AddCriticalRate(value);
+    }
+
+    public void AddDefensePower(float value)
+    {
+        _playerStats.AddDefensePower(value);
+    }
+
+    public void AddMaxHealth(float value)
+    {
+        _playerStats.AddMaxHealth(value);
+    }
+
+    public void AddMaxStamina(float value)
+    {
+        _playerStats.AddMaxStamina(value);
+    }
+
 
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
