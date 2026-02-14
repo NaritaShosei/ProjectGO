@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CriticalUpSkill : SkillBase
 {
-    public override void OnAcquire(IStatUpgradable stats, int acquireCount)
+    public override void OnAcquire(IPlayerStats stats, int acquireCount)
     {
         if (acquireCount < 1 || acquireCount > _criticalUps.Length)
         {
