@@ -4,17 +4,17 @@ public class TestCriticalChanceUp : SkillBase
 {
     public override void OnAcquire(IAttackStats stats, int acquireCount)
     {
-        _upCiriticalRate += stats.CriticalRate;
+        _upCriticalRate += stats.CriticalRate;
     }
 
     public override void Apply(ref AttackContext context)
     {
-        context.CriticalChanceUp.UpCriticalRate += _upCiriticalRate;
+        context.CriticalChanceUp.UpCriticalRate += _upCriticalRate;
         context.CriticalChanceUp.DurationEffect += _durationEffect;
     }
 
     [SerializeField] private float _durationEffect;
-    [SerializeField] private float _upCiriticalRate;
+    [SerializeField] private float _upCriticalRate;
 }
 
 public struct CriticalChanceUp
