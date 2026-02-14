@@ -27,7 +27,11 @@ public class SkillSelectSequence : SequenceBase
 
         _presenter = new SkillSelectPresenter(context.SkillManager, context.SkillSelectView, context.Player);
 
-        _presenter.Open(context.SkillSelectCount);
+        if (!_presenter.Open(context.SkillSelectCount))
+        {
+            // スキル候補がない場合は即座に選択完了とする
+            context.SkillSelected = true;
+        }
     }
 
     public override void OnSequenceUpdate(SequenceContext context)
