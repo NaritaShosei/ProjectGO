@@ -46,7 +46,7 @@ public class SkillSelectSequence : SequenceBase
         // フェーズ終了時にpresenterを破棄
         if (context.SkillSelected)
         {
-            _presenter.Dispose();
+            _presenter?.Dispose();
             _presenter = null;
         }
     }
