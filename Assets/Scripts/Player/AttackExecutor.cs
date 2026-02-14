@@ -152,9 +152,6 @@ public struct AttackContext
 
     /// <summary>感電</summary>
     public ElectricShock ElectricShock;
-
-    /// <summary>クリティカル上昇</summary>
-    public CriticalChanceUp CriticalChanceUp;
 }
 
 /// <summary>
@@ -168,5 +165,4 @@ public struct DamageContext
     public float CriticalMultiplier;
 
     public ElectricShock ElectricShock;
-    public CriticalChanceUp CriticalChanceUp;
 }
