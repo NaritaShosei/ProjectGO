@@ -6,6 +6,12 @@ public class CriticalUpSkill : SkillBase
 {
     public override void OnAcquire(IStatUpgradable stats, int acquireCount)
     {
+        if (acquireCount < 1 || acquireCount > _criticalUps.Length)
+        {
+            Debug.LogWarning($"CriticalUpSkill: acquireCount({acquireCount}) is out of range.");
+            return;
+        }
+
         stats.AddCriticalRate(_criticalUps[acquireCount - 1]);
     }
 
