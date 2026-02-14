@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class SkillSelectPresenter:IDisposable
+public class SkillSelectPresenter : IDisposable
 {
     public SkillSelectPresenter(
         SkillManager skillManager,
         ISkillSelectView view,
-        IAttackStats stats)
+        IPlayerStats stats)
     {
         _skillManager = skillManager;
         _view = view;
@@ -17,7 +17,7 @@ public class SkillSelectPresenter:IDisposable
     }
 
     /// <summary> スキル選択UIを表示する </summary>
-    public void Open(int candidateCount)
+    public bool Open(int candidateCount)
     {
         _currentSkills = _skillManager.GetSelectableSkills(candidateCount);
 
@@ -30,7 +30,13 @@ public class SkillSelectPresenter:IDisposable
             ))
             .ToList();
 
+        if (viewData.Count == 0)
+        {
+            return false;
+        }
+
         _view.Show(viewData);
+        return true;
     }
 
     public void Dispose()
@@ -40,13 +46,13 @@ public class SkillSelectPresenter:IDisposable
 
     private readonly SkillManager _skillManager;
     private readonly ISkillSelectView _view;
-    private readonly IAttackStats _stats;
+    private readonly IPlayerStats _stats;
     private List<SkillBase> _currentSkills;
 
     /// <summary> ボタンが押されたときに呼ばれる </summary>
     private void OnSkillSelected(int skillId)
     {
-        _skillManager.TryRegisterSkillId(skillId, _stats);  
+        _skillManager.TryRegisterSkillId(skillId, _stats);
         _view.Hide();
     }
 }

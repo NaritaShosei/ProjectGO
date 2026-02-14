@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
-    public void Init(IAttackStats stats, SkillManager manager)
+    public void Init(IPlayerStats stats, SkillManager manager)
     {
-        _attackStats = stats;
+        _playerStats = stats;
         _skillManager = manager;
     }
 
@@ -26,7 +26,7 @@ public class AttackExecutor : MonoBehaviour
 
         var context = new AttackContext
         {
-            AttackPower = _attackStats.AttackPower * data.DamageMultiplier * modeData.AttackMultiplier,
+            AttackPower = _playerStats.AttackPower * data.DamageMultiplier * modeData.AttackMultiplier,
             PlayerMode = data.Mode
         };
 
@@ -55,7 +55,7 @@ public class AttackExecutor : MonoBehaviour
         context.OnAfterAttack?.Invoke();
     }
 
-    private IAttackStats _attackStats;
+    private IPlayerStats _playerStats;
     private SkillManager _skillManager;
 
     /// <summary>
@@ -87,7 +87,7 @@ public class AttackExecutor : MonoBehaviour
 
     private void RollCritical(ref AttackContext context, ModeData data)
     {
-        float chance = _attackStats.CriticalRate;
+        float chance = _playerStats.CriticalRate;
         context.IsCritical = false;
         context.CriticalMultiplier = 1f;
 

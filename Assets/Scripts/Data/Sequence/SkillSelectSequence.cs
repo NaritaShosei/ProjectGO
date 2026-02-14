@@ -9,8 +9,11 @@ public class SkillSelectSequence : SequenceBase
         return context.SkillSelected;
     }
 
+
     public override void OnSequenceStart(SequenceContext context)
     {
+        context.SkillSelected = false;
+
         if (context.InputHandler != null)
         {
             context.InputHandler.EnableInput(false);
@@ -18,6 +21,7 @@ public class SkillSelectSequence : SequenceBase
 
         if (context.SkillSelectView == null || context.SkillManager == null)
         {
+            context.SkillSelected = true;
             Debug.LogWarning("SkillSelectViewまたはSkillManagerがnullなので、スキル選択UIを表示できません");
             return;
         }
@@ -27,7 +31,12 @@ public class SkillSelectSequence : SequenceBase
 
         _presenter = new SkillSelectPresenter(context.SkillManager, context.SkillSelectView, context.Player);
 
-        _presenter.Open(context.SkillSelectCount);
+        if (!_presenter.Open(context.SkillSelectCount))
+        {
+            // スキル候補がない場合は即座に選択完了とする
+            context.SkillSelected = true;
+            Debug.Log("スキル候補がないため、スキル選択をスキップします");
+        }
     }
 
     public override void OnSequenceUpdate(SequenceContext context)
