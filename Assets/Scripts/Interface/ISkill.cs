@@ -15,7 +15,7 @@ public interface ISkill
     /// <summary> 獲得回数をみてスキル獲得可能かどうか </summary>
     public bool CanAcquire(int acquireCount);
     /// <summary> スキル獲得時に呼ばれる(acquireCountは累計獲得回数) </summary>
-    public void OnAcquire(IAttackStats stats, int acquireCount);
+    public void OnAcquire(IStatUpgradable stats, int acquireCount);
 }
 
 public enum SkillTiming

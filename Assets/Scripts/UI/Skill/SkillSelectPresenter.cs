@@ -7,7 +7,7 @@ public class SkillSelectPresenter:IDisposable
     public SkillSelectPresenter(
         SkillManager skillManager,
         ISkillSelectView view,
-        IAttackStats stats)
+        IStatUpgradable stats)
     {
         _skillManager = skillManager;
         _view = view;
@@ -40,7 +40,7 @@ public class SkillSelectPresenter:IDisposable
 
     private readonly SkillManager _skillManager;
     private readonly ISkillSelectView _view;
-    private readonly IAttackStats _stats;
+    private readonly IStatUpgradable _stats;
     private List<SkillBase> _currentSkills;
 
     /// <summary> ボタンが押されたときに呼ばれる </summary>

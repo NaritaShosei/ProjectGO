@@ -8,7 +8,7 @@ public class SkillManager : MonoBehaviour
     public event Action<SkillBase> OnSkillAcquired;
 
     /// <summary> スキルのIDを登録し、獲得時効果を適用する </summary>
-    public bool TryRegisterSkillId(int id, IAttackStats stats)
+    public bool TryRegisterSkillId(int id, IStatUpgradable stats)
     {
         if (!_skillAcquireCounts.ContainsKey(id))
         {
