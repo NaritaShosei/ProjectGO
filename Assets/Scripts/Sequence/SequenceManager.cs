@@ -116,7 +116,6 @@ public class SequenceManager : MonoBehaviour
         // コンテキストのリセット
         _context.ElapsedTime = 0f;
         _context.DefeatedCount = 0;
-        _context.SkillSelected = false;
 
         // 雑魚敵シークエンスの場合、対応するSpawnDataを設定
         if (_currentSequence.SequenceType == SequenceType.Enemy)

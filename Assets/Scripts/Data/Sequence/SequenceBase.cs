@@ -30,7 +30,7 @@ public enum SequenceType
     Boss        // ボスシークエンス
 }
 
-public struct SequenceContext
+public class SequenceContext
 {
     public SkillManager SkillManager;
     public EnemyManager EnemyManager;
