@@ -89,7 +89,7 @@ public class PlayerStats
 
     public void AddCriticalRate(float value)
     {
-        _criticalRate += value;
+        _criticalRate = Mathf.Max(0f, _criticalRate + value);
         OnStatsChanged?.Invoke();
     }
 
