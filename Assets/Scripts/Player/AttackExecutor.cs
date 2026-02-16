@@ -30,6 +30,16 @@ public class AttackExecutor : MonoBehaviour
             PlayerMode = data.Mode
         };
 
+        if (data.EnableKnockback)
+        {
+            context.Knockback = new KnockbackContext
+            {
+                Direction = transform.forward,
+                Power = data.KnockbackPower,
+                Upward = data.KnockbackUpward
+            };
+        }
+
         // 取得済みスキルの中から条件に合うものを取得して適用
         var applicableSkills = GetApplicableSkills(context, data);
         ApplySkills(ref context, applicableSkills);
@@ -108,8 +118,10 @@ public class AttackExecutor : MonoBehaviour
             CriticalMultiplier = context.CriticalMultiplier,
             IsCritical = context.IsCritical,
             ElectricShock = context.ElectricShock,
+            Knockback = context.Knockback
         };
     }
+
 
     [SerializeField] private LayerMask _layer;
 
@@ -141,6 +153,8 @@ public struct AttackContext
     public bool IsCritical;
     public float CriticalMultiplier;
 
+    public KnockbackContext? Knockback;
+
     /// <summary>攻撃開始直前</summary>
     public Action OnBeforeAttack;
 
@@ -161,8 +175,21 @@ public struct DamageContext
 {
     public float AttackPower;
     public PlayerMode PlayerMode;
+
     public bool IsCritical;
     public float CriticalMultiplier;
 
     public ElectricShock ElectricShock;
+    /// <summary>
+    /// HasValueで攻撃にノックバック効果があるかを確認。
+    /// Valueでノックバックの方向や威力を取得可能。
+    /// </summary>
+    public KnockbackContext? Knockback;
+}
+
+public struct KnockbackContext
+{
+    public Vector3 Direction;
+    public float Power;
+    public float Upward;
 }
