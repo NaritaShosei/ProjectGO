@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackData", menuName = "GameData/AttackData")]
 
@@ -14,12 +14,14 @@ public class AttackData : ScriptableObject
     public float DamageMultiplier => _damageMultiplier;
     public float AttackRange => _attackRange;
     public float AttackRadius => _attackRadius;
-    public string AnimationName => _animationName;
-    public float AnimationDuration => _animationDuration;
 
-    public float ComboWindowStart => _comboWindowStart;
-    public float ComboWindowEnd => _comboWindowEnd;
     public int NextComboAttackId => _nextComboAttackId;
+
+    public bool EnableHoming => _enableHoming;
+    public float HomingRadius => _homingRadius;
+    public float HomingAngle => _homingAngle;
+    public float HomingStrength => _homingStrength;
+
 
     [SerializeField] private int _attackId;
     [SerializeField] private string _attackName;
@@ -31,12 +33,15 @@ public class AttackData : ScriptableObject
     [SerializeField] private float _damageMultiplier = 1;
     [SerializeField] private float _attackRange = 1;
     [SerializeField] private float _attackRadius = 1;
-    [SerializeField] private string _animationName;
-    [SerializeField] private float _animationDuration;
 
-    [SerializeField] private float _comboWindowStart;     // コンボ受付開始時間
-    [SerializeField] private float _comboWindowEnd;       // コンボ受付終了時間
     [SerializeField] private int _nextComboAttackId = -1;      // 次のコンボ攻撃ID
+
+    [Header("Homing")]
+    [SerializeField] private bool _enableHoming = false;
+    [SerializeField] private float _homingRadius = 5f;
+    [SerializeField] private float _homingAngle = 45f;
+    [SerializeField] private float _homingStrength = 1f; // 1 = 即向く
+
 }
 
 // 攻撃の段階（チャージレベル）

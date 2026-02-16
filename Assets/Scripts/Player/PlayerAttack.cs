@@ -94,6 +94,11 @@ public class PlayerAttack : MonoBehaviour
     private bool _hasBufferedDodgeAttack = false;
     private bool _isInComboWindow = false;
 
+    private bool _isHomingActive;
+    private float _homingStrength;
+    private float _homingRadius;
+    private float _homingAngle;
+
     // 保留中の攻撃データ
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
@@ -138,6 +143,11 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
         }
+    }
+
+    private void Update()
+    {
+        PerformHoming();
     }
 
     private void BufferDodgeAttack()
@@ -282,6 +292,14 @@ public class PlayerAttack : MonoBehaviour
 
         _lastAttackTime = Time.time;
 
+        if (_pendingAttackData.EnableHoming)
+        {
+            _isHomingActive = true;
+            _homingRadius = _pendingAttackData.HomingRadius;
+            _homingAngle = _pendingAttackData.HomingAngle;
+            _homingStrength = _pendingAttackData.HomingStrength;
+        }
+
         // アニメーション再生のみ
         _animationController.PlayAttack(_currentAttackId);
     }
@@ -310,6 +328,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FinishAttack()
     {
+        _isHomingActive = false;
+
         _stateManager.ChangeState(PlayerState.Idle);
         _pendingAttackData = null;
         _pendingAttackInput = null;
@@ -391,6 +411,53 @@ public class PlayerAttack : MonoBehaviour
         {
             ResetCombo();
         }
+    }
+
+    private Transform FindHomingTarget(float radius, float angle)
+    {
+        var hits = Physics.OverlapSphere(transform.position, radius);
+
+        Transform best = null;
+        float bestScore = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            if (!hit.TryGetComponent(out IEnemy _)) { continue; }
+
+            var dir = (hit.transform.position - transform.position).normalized;
+            float angleTo = Vector3.Angle(transform.forward, dir);
+            if (angleTo > angle) { continue; }
+
+            float dist = Vector3.Distance(transform.position, hit.transform.position);
+            if (dist < bestScore)
+            {
+                bestScore = dist;
+                best = hit.transform;
+            }
+        }
+
+        return best;
+    }
+
+    private void PerformHoming()
+    {
+        if (!_isHomingActive) { return; }
+
+        var target = FindHomingTarget(_homingRadius, _homingAngle);
+        if (target == null) { return; }
+
+        var dir = target.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0f) { return; }
+
+        var targetRot = Quaternion.LookRotation(dir);
+
+        // strength = 5〜15くらいが気持ちいい
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRot,
+            Time.deltaTime * _homingStrength
+        );
     }
 
     private void OnComboWindowStart()
