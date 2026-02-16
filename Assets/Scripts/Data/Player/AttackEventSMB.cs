@@ -14,30 +14,31 @@ public class AttackEventSMB : StateMachineBehaviour
     }
 
     public override void OnStateUpdate(
-        Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float t = stateInfo.normalizedTime;
+        if (_controller == null) return;
 
-        if (_controller == null) { return; }
+        float currentTime = stateInfo.normalizedTime * stateInfo.length;
 
-        if (!_attackExecuted && t >= _attackExecuteTime)
+        if (!_attackExecuted && currentTime >= _attackExecuteTime)
         {
             _attackExecuted = true;
             _controller.AnimEvent_AttackExecute();
         }
 
-        if (!_comboStarted && t >= _comboWindowStartTime)
+        if (!_comboStarted && currentTime >= _comboWindowStartTime)
         {
             _comboStarted = true;
             _controller.AnimEvent_ComboWindowStart();
         }
 
-        if (!_comboEnded && t >= _comboWindowEndTime)
+        if (!_comboEnded && currentTime >= _comboWindowEndTime)
         {
             _comboEnded = true;
             _controller.AnimEvent_ComboWindowEnd();
         }
     }
+
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -46,10 +47,11 @@ public class AttackEventSMB : StateMachineBehaviour
 
 
 
-    [Header("Timings (0〜1)")]
-    [SerializeField, Range(0, 1)] private float _attackExecuteTime = 0.4f;
-    [SerializeField, Range(0, 1)] private float _comboWindowStartTime = 0.6f;
-    [SerializeField, Range(0, 1)] private float _comboWindowEndTime = 0.8f;
+    [Header("Timings (seconds)")]
+    [SerializeField] private float _attackExecuteTime = 0.2f;
+    [SerializeField] private float _comboWindowStartTime = 0.35f;
+    [SerializeField] private float _comboWindowEndTime = 0.55f;
+
 
     private PlayerAnimationController _controller;
 
