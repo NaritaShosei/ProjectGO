@@ -25,6 +25,12 @@ public class AttackData : ScriptableObject
     public float KnockbackPower => _knockbackPower;
     public float KnockbackUpward => _knockbackUpward;
 
+    public AttackMoveType MoveType => _moveType;
+    public float MoveDistance => _moveDistance;
+    public float MoveSpeed => _moveSpeed;
+    public float MoveDuration => _moveDuration;
+    public bool StopOnHit => _stopOnHit;
+
     [Header("Basic Info")]
     [SerializeField] private int _attackId;
     [SerializeField] private string _attackName;
@@ -53,6 +59,13 @@ public class AttackData : ScriptableObject
     [SerializeField] private float _homingRadius = 5f;
     [SerializeField] private float _homingAngle = 45f;
     [SerializeField] private float _homingStrength = 10f;
+
+    [Header("Movement")]
+    [SerializeField] private AttackMoveType _moveType = AttackMoveType.None;
+    [SerializeField] private float _moveDistance = 0f;
+    [SerializeField] private float _moveSpeed = 0f;
+    [SerializeField] private float _moveDuration = 0f;
+    [SerializeField] private bool _stopOnHit = true;
 }
 
 // 攻撃の段階（チャージレベル）
@@ -84,4 +97,19 @@ public enum PlayerMode
     Warrior,
     [InspectorName("雷神")]
     Thunder
+}
+
+public enum AttackMoveType
+{
+    [InspectorName("移動なし")]
+    None,   // その場
+
+    [InspectorName("突進")]
+    Dash,   // 直線突進
+
+    [InspectorName("ステップ")]
+    Step,   // 小移動
+
+    [InspectorName("曲線移動 / ホーミング")]
+    Curve,  // 曲線 / ホーミング（将来）
 }
