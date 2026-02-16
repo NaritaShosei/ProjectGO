@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -14,7 +15,8 @@ public class PlayerMovement : MonoBehaviour
         MoveData data,
         IStamina stamina,
         IModeController modeController,
-        PlayerAnimationController animationController)
+        PlayerAnimationController animationController,
+         AttackExecutor attackExecutor)
     {
         _playerStateManager = playerStateManager;
         _input = input;
@@ -25,6 +27,8 @@ public class PlayerMovement : MonoBehaviour
         _animationController = animationController;
 
         _input.OnDodge += Dodge;
+
+        _attackExecutor.OnAttackMoveRequested += HandleAttackMove;
     }
 
     [SerializeField] private Rigidbody _rb;
@@ -36,16 +40,26 @@ public class PlayerMovement : MonoBehaviour
     private IStamina _stamina;
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
+    private AttackExecutor _attackExecutor;
 
     private bool _canChainRoll;
     private float _chainTimer;
+
+    // 攻撃時移動用
+    private CancellationTokenSource _attackMoveCts;
+    private bool _isAttackMoving;
 
     #region イベント関数
 
     private void Update()
     {
-        Move();
-        Rotate();
+        // 攻撃時移動中は通常移動をスキップ
+        if (!_isAttackMoving)
+        {
+            Move();
+            Rotate();
+        }
+
         PlayMoveAnimation();
         UpdateDodgeChain();
     }
@@ -56,9 +70,114 @@ public class PlayerMovement : MonoBehaviour
         {
             _input.OnDodge -= Dodge;
         }
+
+        if (_attackExecutor != null)
+        {
+            _attackExecutor.OnAttackMoveRequested -= HandleAttackMove;
+        }
+
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
     }
 
     #endregion
+
+    /// <summary>
+    /// 攻撃時の移動要求を処理
+    /// </summary>
+    private void HandleAttackMove(AttackMoveRequest request)
+    {
+        // 既存の攻撃移動をキャンセル
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = new CancellationTokenSource();
+
+        PerformAttackMove(request).Forget();
+    }
+
+    /// <summary>
+    /// 攻撃時移動の実行
+    /// </summary>
+    private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
+    {
+        _isAttackMoving = true;
+
+        try
+        {
+            switch (request.MoveType)
+            {
+                case AttackMoveType.Dash:
+                    await DashMove(request);
+                    break;
+                case AttackMoveType.Step:
+                    await StepMove(request);
+                    break;
+                case AttackMoveType.Curve:
+                    await CurveMove(request);
+                    break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // キャンセルされた場合
+        }
+        finally
+        {
+            _isAttackMoving = false;
+            _rb.linearVelocity = Vector3.zero;
+        }
+    }
+
+    /// <summary>
+    /// 突進移動
+    /// </summary>
+    private async UniTask DashMove(AttackMoveRequest request)
+    {
+        float elapsed = 0f;
+        Vector3 moveDir = request.Direction.normalized;
+        moveDir.y = 0;
+
+        while (elapsed < request.Duration)
+        {
+            _rb.linearVelocity = moveDir * request.Speed;
+
+            elapsed += Time.deltaTime;
+            await UniTask.Yield(_attackMoveCts.Token);
+        }
+    }
+
+    /// <summary>
+    /// ステップ移動（小移動）
+    /// </summary>
+    private async UniTask StepMove(AttackMoveRequest request)
+    {
+        float elapsed = 0f;
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + request.Direction.normalized * request.Distance;
+        targetPos.y = startPos.y;
+
+        while (elapsed < request.Duration)
+        {
+            float t = elapsed / request.Duration;
+            // イージング（加速→減速）
+            float smoothT = Mathf.SmoothStep(0, 1, t);
+
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, smoothT);
+            _rb.linearVelocity = (newPos - transform.position) / Time.deltaTime;
+
+            elapsed += Time.deltaTime;
+            await UniTask.Yield(_attackMoveCts.Token);
+        }
+    }
+
+    /// <summary>
+    /// 曲線移動（将来的にホーミングなど）
+    /// </summary>
+    private async UniTask CurveMove(AttackMoveRequest request)
+    {
+        // 現時点では Dash と同じ実装
+        await DashMove(request);
+    }
 
     private void Move()
     {
