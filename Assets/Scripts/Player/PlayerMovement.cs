@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
         _stamina = stamina;
         _modeController = modeController;
         _animationController = animationController;
+        _attackExecutor = attackExecutor;
 
         _input.OnDodge += Dodge;
 
