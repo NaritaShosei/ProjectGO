@@ -21,8 +21,8 @@ MonoBehaviour:
   _damageMultiplier: 1
   _attackRange: 5
   _attackRadius: 5
-  _animationName: 
-  _animationDuration: 0
-  _comboWindowStart: 0
-  _comboWindowEnd: 0
   _nextComboAttackId: 9999
+  _enableHoming: 1
+  _homingRadius: 5
+  _homingAngle: 360
+  _homingStrength: 0.15
