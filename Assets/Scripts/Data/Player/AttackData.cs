@@ -1,7 +1,6 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackData", menuName = "GameData/AttackData")]
-
 public class AttackData : ScriptableObject
 {
     public int AttackId => _attackId;
@@ -22,26 +21,38 @@ public class AttackData : ScriptableObject
     public float HomingAngle => _homingAngle;
     public float HomingStrength => _homingStrength;
 
+    public bool EnableKnockback => _enableKnockback;
+    public float KnockbackPower => _knockbackPower;
+    public float KnockbackUpward => _knockbackUpward;
 
+    [Header("Basic Info")]
     [SerializeField] private int _attackId;
     [SerializeField] private string _attackName;
     [SerializeField] private PlayerMode _mode;
     [SerializeField] private AttackType _attackType;
-    [SerializeField] private int _comboIndex;              // コンボの何段目か（0始まり）
-    [SerializeField] private ChargeLevel _requiredCharge;  // 必要なチャージレベル
+    [SerializeField] private int _comboIndex;
+    [SerializeField] private ChargeLevel _requiredCharge;
 
+    [Header("Damage")]
     [SerializeField] private float _damageMultiplier = 1;
+
+    [Header("Range")]
     [SerializeField] private float _attackRange = 1;
     [SerializeField] private float _attackRadius = 1;
 
-    [SerializeField] private int _nextComboAttackId = -1;      // 次のコンボ攻撃ID
+    [Header("Combo")]
+    [SerializeField] private int _nextComboAttackId = -1;
+
+    [Header("Knockback")]
+    [SerializeField] private bool _enableKnockback = false;
+    [SerializeField] private float _knockbackPower = 5f;
+    [SerializeField] private float _knockbackUpward = 0f;
 
     [Header("Homing")]
     [SerializeField] private bool _enableHoming = false;
     [SerializeField] private float _homingRadius = 5f;
     [SerializeField] private float _homingAngle = 45f;
-    [SerializeField] private float _homingStrength = 10f; // 値が大きいほど速く回転（5〜15推奨）
-
+    [SerializeField] private float _homingStrength = 10f;
 }
 
 // 攻撃の段階（チャージレベル）
@@ -70,7 +81,7 @@ public enum AttackType
 public enum PlayerMode
 {
     [InspectorName("闘神")]
-    Warrior,   // 闘神モード
+    Warrior,
     [InspectorName("雷神")]
-    Thunder    // 雷神モード
+    Thunder
 }
