@@ -42,6 +42,7 @@ public class AttackEventSMB : StateMachineBehaviour
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        if (_controller == null) return;
         _controller.AnimEvent_AttackComplete();
     }
 
