@@ -87,6 +87,8 @@ public class PlayerAttack : MonoBehaviour
         new ChargeThreshold { TimeThreshold = 1.5f, Level = ChargeLevel.Level2 }
     };
 
+    // [SerializeField] private LayerMask _homingLayer = LayerMask.GetMask("Enemy");
+
     // 状態
     private int _currentAttackId = -1;
     private float _lastAttackTime = -999f;
@@ -415,6 +417,7 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform FindHomingTarget(float radius, float angle)
     {
+        // TODO: 敵のレイヤーを設定して、レイヤーマスクを使うようにする
         var hits = Physics.OverlapSphere(transform.position, radius);
 
         Transform best = null;
