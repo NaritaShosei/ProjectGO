@@ -40,7 +40,7 @@ public class AttackData : ScriptableObject
     [SerializeField] private bool _enableHoming = false;
     [SerializeField] private float _homingRadius = 5f;
     [SerializeField] private float _homingAngle = 45f;
-    [SerializeField] private float _homingStrength = 1f; // 1 = 即向く
+    [SerializeField] private float _homingStrength = 10f; // 値が大きいほど速く回転（5〜15推奨）
 
 }
 
