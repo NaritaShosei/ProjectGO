@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
         IStamina stamina,
         IModeController modeController,
         PlayerAnimationController animationController,
-         AttackExecutor attackExecutor)
+        PlayerAttack attack)
     {
         _playerStateManager = playerStateManager;
         _input = input;
@@ -25,11 +25,11 @@ public class PlayerMovement : MonoBehaviour
         _stamina = stamina;
         _modeController = modeController;
         _animationController = animationController;
-        _attackExecutor = attackExecutor;
+        _attack = attack;
 
         _input.OnDodge += Dodge;
 
-        _attackExecutor.OnAttackMoveRequested += HandleAttackMove;
+        _attack.OnAttackMoveRequested += HandleAttackMove;
     }
 
     [SerializeField] private Rigidbody _rb;
@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     private IStamina _stamina;
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
-    private AttackExecutor _attackExecutor;
+    private PlayerAttack _attack;
 
     private bool _canChainRoll;
     private float _chainTimer;
@@ -72,9 +72,9 @@ public class PlayerMovement : MonoBehaviour
             _input.OnDodge -= Dodge;
         }
 
-        if (_attackExecutor != null)
+        if (_attack != null)
         {
-            _attackExecutor.OnAttackMoveRequested -= HandleAttackMove;
+            _attack.OnAttackMoveRequested -= HandleAttackMove;
         }
 
         _attackMoveCts?.Cancel();
