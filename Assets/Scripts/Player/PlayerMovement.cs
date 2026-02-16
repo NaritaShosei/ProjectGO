@@ -1,4 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
@@ -37,6 +37,9 @@ public class PlayerMovement : MonoBehaviour
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
 
+    private bool _canChainRoll;
+    private float _chainTimer;
+
     #region イベント関数
 
     private void Update()
@@ -44,6 +47,7 @@ public class PlayerMovement : MonoBehaviour
         Move();
         Rotate();
         PlayMoveAnimation();
+        UpdateDodgeChain();
     }
 
     private void OnDestroy()
@@ -110,13 +114,24 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
-    private async UniTaskVoid OnDodge()
+    private async UniTaskVoid DodgeInternal(DodgeType type)
     {
-        if (!_playerStateManager.CanDodge()) return;
-        if (!_stamina.TryUseStamina(_stamina.GetDodgeStaminaCost())) return;
+        if (!_playerStateManager.CanDodge()) { return; }
+
+        float staminaCost =
+            type == DodgeType.Step
+            ? _stamina.GetDodgeStaminaCost()
+            : _stamina.GetDodgeStaminaCost(); // 将来分けてもいい
+
+        if (!_stamina.TryUseStamina(staminaCost)) { return; }
+
+        var dodgeData =
+            type == DodgeType.Step
+            ? _moveData.StepDodge
+            : _moveData.RollDodge;
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
-        _animationController.PlayDodge();
+        PlayDodgeAnimation(type);
 
         Vector3 dodgeDir = GetDodgeDirection();
 
@@ -124,17 +139,37 @@ public class PlayerMovement : MonoBehaviour
 
         try
         {
-            while (t < _moveData.DodgeDuration)
+            while (t < dodgeData.Duration)
             {
-                _rb.linearVelocity = dodgeDir * _moveData.DodgeSpeed;
+                _rb.linearVelocity = dodgeDir * dodgeData.Speed;
                 t += Time.deltaTime;
                 await UniTask.Yield(destroyCancellationToken);
             }
         }
-        catch (OperationCanceledException) { return; }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
         _rb.linearVelocity = Vector3.zero;
+
+        OnDodgeEnd(type);
+    }
+
+    private void OnDodgeEnd(DodgeType type)
+    {
         _playerStateManager.ChangeState(PlayerState.Idle);
+
+        if (type == DodgeType.Step)
+        {
+            _canChainRoll = true;
+            _chainTimer = _moveData.StepDodge.ChainWindow;
+        }
+        else
+        {
+            _canChainRoll = false;
+        }
+
         OnEndDodge?.Invoke();
     }
 
@@ -168,9 +203,40 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void PlayDodgeAnimation(DodgeType type)
+    {
+        if (type == DodgeType.Step)
+        {
+            _animationController.PlayStepDodge();
+        }
+        else
+        {
+            _animationController.PlayRollDodge();
+        }
+    }
+
+    private void UpdateDodgeChain()
+    {
+        if (!_canChainRoll) { return; }
+
+        _chainTimer -= Time.deltaTime;
+        if (_chainTimer <= 0f)
+        {
+            _canChainRoll = false;
+        }
+    }
+
     // 匿名関数回避のためのメソッド
     private void Dodge()
     {
-        OnDodge().Forget();
+        if (_canChainRoll)
+        {
+            DodgeInternal(DodgeType.Roll).Forget();
+        }
+        else
+        {
+            DodgeInternal(DodgeType.Step).Forget();
+        }
     }
+
 }

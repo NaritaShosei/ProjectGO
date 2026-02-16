@@ -12,5 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c5c8a10daa056d42bd3aa7c5ca6c09a, type: 3}
   m_Name: PlayerMoveData
   m_EditorClassIdentifier: Assembly-CSharp::MoveData
-  _moveSpeed: 10
-  _rotateSpeed: 8.56
+  _rotateSpeed: 8.63
+  _stepData:
+    Speed: 5
+    Duration: 0.44
+    ChainWindow: 0.2
+  _rollData:
+    Speed: 10
+    Duration: 1.2
+    ChainWindow: -1
