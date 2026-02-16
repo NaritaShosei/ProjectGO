@@ -5,9 +5,6 @@ using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
-    // 攻撃時の移動要求イベント
-    public event Action<AttackMoveRequest> OnAttackMoveRequested;
-
     public void Init(IPlayerStats stats, SkillManager manager)
     {
         _playerStats = stats;
@@ -20,21 +17,6 @@ public class AttackExecutor : MonoBehaviour
     public void Execute(AttackData data, AttackInput input, ModeData modeData)
     {
         _lastAttackData = data;
-
-        // 移動要求を発行
-        if (data.MoveType != AttackMoveType.None)
-        {
-            var moveRequest = new AttackMoveRequest
-            {
-                MoveType = data.MoveType,
-                Distance = data.MoveDistance,
-                Speed = data.MoveSpeed,
-                Duration = data.MoveDuration,
-                Direction = transform.forward,
-                StopOnHit = data.StopOnHit
-            };
-            OnAttackMoveRequested?.Invoke(moveRequest);
-        }
 
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);

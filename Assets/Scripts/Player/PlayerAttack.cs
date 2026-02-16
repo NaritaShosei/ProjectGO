@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    // 攻撃時の移動要求イベント
+    public event Action<AttackMoveRequest> OnAttackMoveRequested;
+
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         AttackExecutor executor,
@@ -300,6 +303,21 @@ public class PlayerAttack : MonoBehaviour
             _homingRadius = _pendingAttackData.HomingRadius;
             _homingAngle = _pendingAttackData.HomingAngle;
             _homingStrength = _pendingAttackData.HomingStrength;
+        }
+
+        // 移動要求を発行
+        if (attackData.MoveType != AttackMoveType.None)
+        {
+            var moveRequest = new AttackMoveRequest
+            {
+                MoveType = attackData.MoveType,
+                Distance = attackData.MoveDistance,
+                Speed = attackData.MoveSpeed,
+                Duration = attackData.MoveDuration,
+                Direction = transform.forward,
+                StopOnHit = attackData.StopOnHit
+            };
+            OnAttackMoveRequested?.Invoke(moveRequest);
         }
 
         // アニメーション再生のみ
