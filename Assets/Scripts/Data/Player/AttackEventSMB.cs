@@ -50,7 +50,7 @@ public class AttackEventSMB : StateMachineBehaviour
     [SerializeField] private float _comboWindowStartTime = 0.35f;
     [SerializeField] private float _comboWindowEndTime = 0.55f;
 
-    private PlayerAnimationController _controller;
+    private IAnimationController _controller;
 
     private bool _attackExecuted;
     private bool _comboStarted;

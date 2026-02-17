@@ -1,0 +1,9 @@
+using UnityEngine;
+
+public interface IAnimationController
+{
+    public void AnimEvent_AttackExecute();
+    public void AnimEvent_AttackComplete();
+    public void AnimEvent_ComboWindowStart();
+    public void AnimEvent_ComboWindowEnd();
+}
