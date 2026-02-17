@@ -154,13 +154,14 @@ public class PlayerMovement : MonoBehaviour
                 _rb.linearVelocity = Vector3.zero;
             }
 
-            if (request.IsPhantom)
+            if (_currentIsPhantom)
             {
                 Physics.IgnoreLayerCollision(
                     LayerMask.NameToLayer("Player"),
                     LayerMask.NameToLayer("Enemy"),
                     false
                 );
+                _currentIsPhantom = false;
             }
         }
     }
