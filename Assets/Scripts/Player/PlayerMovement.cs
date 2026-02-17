@@ -138,29 +138,6 @@ public class PlayerMovement : MonoBehaviour
     private async UniTask DashMove(AttackMoveRequest request)
     {
         float elapsed = 0f;
-        Vector3 moveDir = transform.forward;
-        moveDir.y = 0;
-
-        while (true)
-        {
-            if (elapsed >= request.Duration) { break; }
-
-            if (request.Target &&
-                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
-
-            _rb.linearVelocity = moveDir * request.Speed;
-
-            elapsed += Time.deltaTime;
-            await UniTask.Yield(_attackMoveCts.Token);
-        }
-    }
-
-    /// <summary>
-    /// ステップ移動（小移動）
-    /// </summary>
-    private async UniTask StepMove(AttackMoveRequest request)
-    {
-        float elapsed = 0f;
         Vector3 startPos = transform.position;
         Vector3 targetPos = startPos + transform.forward * request.Distance;
         targetPos.y = startPos.y;
@@ -179,6 +156,29 @@ public class PlayerMovement : MonoBehaviour
 
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, smoothT);
             _rb.linearVelocity = (newPos - transform.position) / Time.deltaTime;
+
+            elapsed += Time.deltaTime;
+            await UniTask.Yield(_attackMoveCts.Token);
+        }
+    }
+
+    /// <summary>
+    /// ステップ移動（小移動）
+    /// </summary>
+    private async UniTask StepMove(AttackMoveRequest request)
+    {
+        float elapsed = 0f;
+        Vector3 moveDir = transform.forward;
+        moveDir.y = 0;
+
+        while (true)
+        {
+            if (elapsed >= request.Duration) { break; }
+
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
+
+            _rb.linearVelocity = moveDir * request.Speed;
 
             elapsed += Time.deltaTime;
             await UniTask.Yield(_attackMoveCts.Token);
