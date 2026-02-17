@@ -22,7 +22,16 @@ MonoBehaviour:
   _attackRange: 1
   _attackRadius: 1
   _nextComboAttackId: 3581
+  _enableKnockback: 0
+  _knockbackPower: 5
+  _knockbackUpward: 0
   _enableHoming: 1
   _homingRadius: 5
   _homingAngle: 360
   _homingStrength: 10
+  _moveType: 0
+  _moveDistance: 0
+  _moveSpeed: 0
+  _moveDuration: 0
+  _stopOnHit: 1
+  _isPhantom: 0
