@@ -103,6 +103,7 @@ public class PlayerAttack : MonoBehaviour
     private float _homingStrength;
     private float _homingRadius;
     private float _homingAngle;
+    private Transform _homingTarget;
 
     // 保留中の攻撃データ
     private AttackData _pendingAttackData;
@@ -303,6 +304,7 @@ public class PlayerAttack : MonoBehaviour
             _homingRadius = _pendingAttackData.HomingRadius;
             _homingAngle = _pendingAttackData.HomingAngle;
             _homingStrength = _pendingAttackData.HomingStrength;
+            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
         }
 
         // 移動要求を発行
@@ -314,7 +316,8 @@ public class PlayerAttack : MonoBehaviour
                 Distance = attackData.MoveDistance,
                 Speed = attackData.MoveSpeed,
                 Duration = attackData.MoveDuration,
-                Direction = transform.forward,
+                Target = _homingTarget,
+                StopDistance = attackData.StopOnHit ? attackData.AttackRange : 0
             };
             OnAttackMoveRequested?.Invoke(moveRequest);
         }
@@ -463,10 +466,9 @@ public class PlayerAttack : MonoBehaviour
     {
         if (!_isHomingActive) { return; }
 
-        var target = FindHomingTarget(_homingRadius, _homingAngle);
-        if (target == null) { return; }
+        if (_homingTarget == null) { return; }
 
-        var dir = target.position - transform.position;
+        var dir = _homingTarget.position - transform.position;
         dir.y = 0f;
         if (dir.sqrMagnitude <= 0f) { return; }
 
@@ -548,5 +550,6 @@ public struct AttackMoveRequest
     public float Distance;
     public float Speed;
     public float Duration;
-    public Vector3 Direction;
+    public Transform Target; // 攻撃時の一番近い敵
+    public float StopDistance; // 敵がいるときに攻撃を止める距離
 }

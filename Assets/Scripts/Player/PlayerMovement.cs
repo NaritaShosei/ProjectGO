@@ -101,6 +101,9 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
     {
+        // すでに攻撃移動中なら新しい移動要求を無視
+        if (_isAttackMoving) { return; }
+
         _isAttackMoving = true;
 
         try
@@ -135,11 +138,16 @@ public class PlayerMovement : MonoBehaviour
     private async UniTask DashMove(AttackMoveRequest request)
     {
         float elapsed = 0f;
-        Vector3 moveDir = request.Direction.normalized;
+        Vector3 moveDir = transform.forward;
         moveDir.y = 0;
 
-        while (elapsed < request.Duration)
+        while (true)
         {
+            if (elapsed >= request.Duration) { break; }
+
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
+
             _rb.linearVelocity = moveDir * request.Speed;
 
             elapsed += Time.deltaTime;
@@ -154,11 +162,17 @@ public class PlayerMovement : MonoBehaviour
     {
         float elapsed = 0f;
         Vector3 startPos = transform.position;
-        Vector3 targetPos = startPos + request.Direction.normalized * request.Distance;
+        Vector3 targetPos = startPos + transform.forward * request.Distance;
         targetPos.y = startPos.y;
 
-        while (elapsed < request.Duration)
+
+        while (true)
         {
+            if (elapsed >= request.Duration) { break; }
+
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
+
             float t = elapsed / request.Duration;
             // イージング（加速→減速）
             float smoothT = Mathf.SmoothStep(0, 1, t);
