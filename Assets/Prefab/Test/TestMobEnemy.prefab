@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2941309941052211890}
   - component: {fileID: 640612532259396523}
   - component: {fileID: -8330086056522255198}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TestMobEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -127,3 +127,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MobEnemy
   _data: {fileID: 11400000, guid: 38cfe4155b237ee43a58717872f9ec03, type: 2}
   _targetCenter: {fileID: 5557725580132027205}
+  _armor: {fileID: 0}
