@@ -90,7 +90,7 @@ public class PlayerAttack : MonoBehaviour
         new ChargeThreshold { TimeThreshold = 1.5f, Level = ChargeLevel.Level2 }
     };
 
-    // [SerializeField] private LayerMask _homingLayer = LayerMask.GetMask("Enemy");
+    [SerializeField] private LayerMask _homingLayer;
 
     // 状態
     private int _currentAttackId = -1;
@@ -321,7 +321,8 @@ public class PlayerAttack : MonoBehaviour
                 Speed = attackData.MoveSpeed,
                 Duration = attackData.MoveDuration,
                 Target = _homingTarget,
-                StopDistance = attackData.StopOnHit ? attackData.AttackRange : 0
+                StopDistance = attackData.StopOnHit ? attackData.AttackRange : 0,
+                IsPhantom = attackData.IsPhantom
             };
             OnAttackMoveRequested?.Invoke(moveRequest);
         }
@@ -441,8 +442,7 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform FindHomingTarget(float radius, float angle)
     {
-        // TODO: 敵のレイヤーを設定して、レイヤーマスクを使うようにする
-        var hits = Physics.OverlapSphere(transform.position, radius);
+        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
 
         Transform best = null;
         float bestScore = float.MaxValue;
@@ -556,4 +556,5 @@ public struct AttackMoveRequest
     public float Duration;
     public Transform Target; // 攻撃時の一番近い敵
     public float StopDistance; // 敵がいるときに攻撃を止める距離
+    public bool IsPhantom; // 攻撃がファントムかどうか
 }

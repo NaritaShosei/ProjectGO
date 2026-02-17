@@ -103,6 +103,15 @@ public class PlayerMovement : MonoBehaviour
     {
         _isAttackMoving = true;
 
+        if (request.IsPhantom)
+        {
+            Physics.IgnoreLayerCollision(
+            LayerMask.NameToLayer("Player"),
+            LayerMask.NameToLayer("Enemy"),
+            true
+        );
+        }
+
         try
         {
             switch (request.MoveType)
@@ -129,6 +138,15 @@ public class PlayerMovement : MonoBehaviour
             if (_rb)
             {
                 _rb.linearVelocity = Vector3.zero;
+            }
+
+            if (request.IsPhantom)
+            {
+                Physics.IgnoreLayerCollision(
+                    LayerMask.NameToLayer("Player"),
+                    LayerMask.NameToLayer("Enemy"),
+                    false
+                );
             }
         }
     }
