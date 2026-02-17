@@ -315,7 +315,6 @@ public class PlayerAttack : MonoBehaviour
                 Speed = attackData.MoveSpeed,
                 Duration = attackData.MoveDuration,
                 Direction = transform.forward,
-                StopOnHit = attackData.StopOnHit
             };
             OnAttackMoveRequested?.Invoke(moveRequest);
         }
@@ -538,4 +537,16 @@ public struct AttackInput
 
         return ChargeLevel.None;
     }
+}
+
+/// <summary>
+/// 攻撃時の移動要求情報
+/// </summary>
+public struct AttackMoveRequest
+{
+    public AttackMoveType MoveType;
+    public float Distance;
+    public float Speed;
+    public float Duration;
+    public Vector3 Direction;
 }

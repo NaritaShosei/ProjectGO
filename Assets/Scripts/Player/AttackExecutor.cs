@@ -142,19 +142,6 @@ public class AttackExecutor : MonoBehaviour
 }
 
 /// <summary>
-/// 攻撃時の移動要求情報
-/// </summary>
-public struct AttackMoveRequest
-{
-    public AttackMoveType MoveType;
-    public float Distance;
-    public float Speed;
-    public float Duration;
-    public Vector3 Direction;
-    public bool StopOnHit;
-}
-
-/// <summary>
 /// Playerの攻撃やスキルに扱う情報
 /// </summary>
 public struct AttackContext
