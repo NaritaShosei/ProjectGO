@@ -125,7 +125,11 @@ public class PlayerMovement : MonoBehaviour
         finally
         {
             _isAttackMoving = false;
-            _rb.linearVelocity = Vector3.zero;
+
+            if (_rb)
+            {
+                _rb.linearVelocity = Vector3.zero;
+            }
         }
     }
 
@@ -168,6 +172,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 moveDir = transform.forward;
         moveDir.y = 0;
 
+        float speed = request.Distance / request.Duration;
+
         while (true)
         {
             if (elapsed >= request.Duration) { break; }
@@ -175,7 +181,7 @@ public class PlayerMovement : MonoBehaviour
             if (request.Target &&
                 Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
 
-            _rb.linearVelocity = moveDir * request.Speed;
+            _rb.linearVelocity = moveDir * speed;
 
             elapsed += Time.deltaTime;
             await UniTask.Yield(_attackMoveCts.Token);
