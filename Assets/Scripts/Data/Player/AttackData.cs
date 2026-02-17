@@ -30,6 +30,7 @@ public class AttackData : ScriptableObject
     public float MoveSpeed => _moveSpeed;
     public float MoveDuration => _moveDuration;
     public bool StopOnHit => _stopOnHit;
+    public bool IsPhantom => _isPhantom;
 
     [Header("Basic Info")]
     [SerializeField] private int _attackId;
@@ -66,6 +67,7 @@ public class AttackData : ScriptableObject
     [SerializeField] private float _moveSpeed = 0f;
     [SerializeField] private float _moveDuration = 0f;
     [SerializeField] private bool _stopOnHit = true;
+    [SerializeField] private bool _isPhantom = false; // すり抜け攻撃かどうか 
 }
 
 // 攻撃の段階（チャージレベル）
