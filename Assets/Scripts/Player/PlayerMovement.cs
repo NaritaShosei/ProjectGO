@@ -101,9 +101,6 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
     {
-        // すでに攻撃移動中なら新しい移動要求を無視
-        if (_isAttackMoving) { return; }
-
         _isAttackMoving = true;
 
         try
