@@ -117,6 +117,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (request.IsPhantom)
         {
+            _currentIsPhantom = true;
+
             Physics.IgnoreLayerCollision(
             LayerMask.NameToLayer("Player"),
             LayerMask.NameToLayer("Enemy"),
