@@ -59,9 +59,9 @@ public class PlayerMovement : MonoBehaviour
         {
             Move();
             Rotate();
+            PlayMoveAnimation();
         }
 
-        PlayMoveAnimation();
         UpdateDodgeChain();
     }
 

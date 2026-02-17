@@ -306,6 +306,10 @@ public class PlayerAttack : MonoBehaviour
             _homingStrength = _pendingAttackData.HomingStrength;
             _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
         }
+        else
+        {
+            _homingTarget = null;
+        }
 
         // 移動要求を発行
         if (attackData.MoveType != AttackMoveType.None)
