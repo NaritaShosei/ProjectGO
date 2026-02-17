@@ -49,6 +49,7 @@ public class PlayerMovement : MonoBehaviour
     // 攻撃時移動用
     private CancellationTokenSource _attackMoveCts;
     private bool _isAttackMoving;
+    private bool _currentIsPhantom;
 
     #region イベント関数
 
@@ -92,6 +93,17 @@ public class PlayerMovement : MonoBehaviour
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = new CancellationTokenSource();
+
+        // 前回のファントム状態をリセット
+        if (_currentIsPhantom)
+        {
+            Physics.IgnoreLayerCollision(
+                LayerMask.NameToLayer("Player"),
+                LayerMask.NameToLayer("Enemy"),
+                false
+            );
+            _currentIsPhantom = false;
+        }
 
         PerformAttackMove(request).Forget();
     }
@@ -164,6 +176,8 @@ public class PlayerMovement : MonoBehaviour
 
         while (true)
         {
+            if (request.Duration <= 0f) { return; }
+
             if (elapsed >= request.Duration) { break; }
 
             if (request.Target &&
@@ -194,6 +208,8 @@ public class PlayerMovement : MonoBehaviour
 
         while (true)
         {
+            if (request.Duration <= 0f) { return; }
+
             if (elapsed >= request.Duration) { break; }
 
             if (request.Target &&
