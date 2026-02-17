@@ -58,12 +58,19 @@ public class PlayerMovement : MonoBehaviour
         // 攻撃時移動中は通常移動をスキップ
         if (!_isAttackMoving)
         {
-            Move();
             Rotate();
             PlayMoveAnimation();
         }
 
         UpdateDodgeChain();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!_isAttackMoving)
+        {
+            Move();
+        }
     }
 
     private void OnDestroy()
@@ -191,10 +198,10 @@ public class PlayerMovement : MonoBehaviour
             float smoothT = Mathf.SmoothStep(0, 1, t);
 
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, smoothT);
-            _rb.linearVelocity = (newPos - transform.position) / Time.deltaTime;
+            _rb.MovePosition(newPos);
 
             elapsed += Time.deltaTime;
-            await UniTask.Yield(_attackMoveCts.Token);
+            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
     }
 
@@ -221,7 +228,7 @@ public class PlayerMovement : MonoBehaviour
             _rb.linearVelocity = moveDir * speed;
 
             elapsed += Time.deltaTime;
-            await UniTask.Yield(_attackMoveCts.Token);
+            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
     }
 
