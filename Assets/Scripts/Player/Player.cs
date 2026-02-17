@@ -26,6 +26,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
 
         _attackExecutor?.Init(this, skillManager);
 
+        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController);
+
         _move?.Init(
            _playerStateManager,
            input,
@@ -33,9 +35,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
            _moveData,
            this,
            _modeController,
-           _playerAnimationController);
-
-        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController);
+           _playerAnimationController,
+           _attack);
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
     }

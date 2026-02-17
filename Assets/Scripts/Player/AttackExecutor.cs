@@ -11,7 +11,6 @@ public class AttackExecutor : MonoBehaviour
         _skillManager = manager;
     }
 
-
     /// <summary>
     /// 与えられたデータを基に攻撃
     /// </summary>
@@ -65,6 +64,8 @@ public class AttackExecutor : MonoBehaviour
         context.OnAfterAttack?.Invoke();
     }
 
+
+    [SerializeField] private LayerMask _layer;
     private IPlayerStats _playerStats;
     private SkillManager _skillManager;
 
@@ -121,9 +122,6 @@ public class AttackExecutor : MonoBehaviour
             Knockback = context.Knockback
         };
     }
-
-
-    [SerializeField] private LayerMask _layer;
 
     // デバッグ用
     private AttackData _lastAttackData;

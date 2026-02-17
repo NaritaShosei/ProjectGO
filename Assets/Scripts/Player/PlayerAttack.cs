@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    // 攻撃時の移動要求イベント
+    public event Action<AttackMoveRequest> OnAttackMoveRequested;
+
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         AttackExecutor executor,
@@ -87,7 +90,7 @@ public class PlayerAttack : MonoBehaviour
         new ChargeThreshold { TimeThreshold = 1.5f, Level = ChargeLevel.Level2 }
     };
 
-    // [SerializeField] private LayerMask _homingLayer = LayerMask.GetMask("Enemy");
+    [SerializeField] private LayerMask _homingLayer;
 
     // 状態
     private int _currentAttackId = -1;
@@ -100,6 +103,7 @@ public class PlayerAttack : MonoBehaviour
     private float _homingStrength;
     private float _homingRadius;
     private float _homingAngle;
+    private Transform _homingTarget;
 
     // 保留中の攻撃データ
     private AttackData _pendingAttackData;
@@ -300,6 +304,27 @@ public class PlayerAttack : MonoBehaviour
             _homingRadius = _pendingAttackData.HomingRadius;
             _homingAngle = _pendingAttackData.HomingAngle;
             _homingStrength = _pendingAttackData.HomingStrength;
+            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
+        }
+        else
+        {
+            _homingTarget = null;
+        }
+
+        // 移動要求を発行
+        if (attackData.MoveType != AttackMoveType.None)
+        {
+            var moveRequest = new AttackMoveRequest
+            {
+                MoveType = attackData.MoveType,
+                Distance = attackData.MoveDistance,
+                Speed = attackData.MoveSpeed,
+                Duration = attackData.MoveDuration,
+                Target = _homingTarget,
+                StopDistance = attackData.StopOnHit ? attackData.AttackRange : 0,
+                IsPhantom = attackData.IsPhantom
+            };
+            OnAttackMoveRequested?.Invoke(moveRequest);
         }
 
         // アニメーション再生のみ
@@ -417,8 +442,7 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform FindHomingTarget(float radius, float angle)
     {
-        // TODO: 敵のレイヤーを設定して、レイヤーマスクを使うようにする
-        var hits = Physics.OverlapSphere(transform.position, radius);
+        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
 
         Transform best = null;
         float bestScore = float.MaxValue;
@@ -446,10 +470,9 @@ public class PlayerAttack : MonoBehaviour
     {
         if (!_isHomingActive) { return; }
 
-        var target = FindHomingTarget(_homingRadius, _homingAngle);
-        if (target == null) { return; }
+        if (_homingTarget == null) { return; }
 
-        var dir = target.position - transform.position;
+        var dir = _homingTarget.position - transform.position;
         dir.y = 0f;
         if (dir.sqrMagnitude <= 0f) { return; }
 
@@ -520,4 +543,18 @@ public struct AttackInput
 
         return ChargeLevel.None;
     }
+}
+
+/// <summary>
+/// 攻撃時の移動要求情報
+/// </summary>
+public struct AttackMoveRequest
+{
+    public AttackMoveType MoveType;
+    public float Distance;
+    public float Speed;
+    public float Duration;
+    public Transform Target; // 攻撃時の一番近い敵
+    public float StopDistance; // 敵がいるときに攻撃を止める距離
+    public bool IsPhantom; // 攻撃がファントムかどうか
 }
