@@ -5,14 +5,14 @@ using System.Collections.Generic;
 // TODO: BehaviourRunner改築後に対応する
 public sealed class EnemyConditionController
 {
-    public EnemyConditionController(Enemy enemy)
+    public EnemyConditionController(IEnemy enemy)
     {
         _enemy = enemy;
     }
 
     public void Tick(float deltaTime)
     {
-        foreach (var item in _queue) 
+        foreach (var item in _active) 
         {
             item.Tick(_enemy, deltaTime);
             // 終了していたら終了リストに登録
@@ -23,7 +23,7 @@ public sealed class EnemyConditionController
         foreach(var item in _finished)
         {
             item.OnExit(_enemy);
-            _queue.Remove(item);
+            _active.Remove(item);
         }
 
         // finishを初期化
@@ -38,7 +38,7 @@ public sealed class EnemyConditionController
     public void ApplyCondition(IEnemyCondition condition)
     {
         if (condition.IsFinished) return;
-        _queue.Add(condition);
+        _active.Add(condition);
         condition.OnEnter(_enemy);
     }
 
@@ -46,6 +46,6 @@ public sealed class EnemyConditionController
     // TODO: ConditionでActionを阻害させるメソッド
 
     private readonly IEnemy _enemy;
-    private readonly List<IEnemyCondition> _queue = new();
+    private readonly List<IEnemyCondition> _active = new();
     private readonly List<IEnemyCondition> _finished = new();
 }
