@@ -64,12 +64,12 @@ public class ElectrifiedBehaviour : IEnemyBehaviour
     private Material _material = null;
 
 
-    // スタン開始時のみ
+    // 感電開始時のみ
     private void StartElectrifiedShock()
     {
         _isElectrifiedShocking = true;
 
-        // 継続時間はEnemyStateManagerを参照して更新
+        // 継続時間はEnemyStateContextを参照して更新
         _durationTime = _state.DurationElectrifiedTime;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -80,7 +80,7 @@ public class ElectrifiedBehaviour : IEnemyBehaviour
 
     }
 
-    // スタン中
+    // 感電中
     private void ElectrifiedShock()
     {
         if (_material == null) { return; }
@@ -98,7 +98,7 @@ public class ElectrifiedBehaviour : IEnemyBehaviour
         _material.color = color;
     }
 
-    // スタン終了時
+    // 感電終了時
     private void EndElectrifiedShock()
     {
         if (_material != null) 

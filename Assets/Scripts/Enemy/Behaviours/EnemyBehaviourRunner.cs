@@ -51,6 +51,7 @@ public class EnemyBehaviourRunner
         _forced.OnEnter();
     }
 
+    // Knockback時など強制発動
     public void ForceExitAttack()
     {
         if (_forced is MeleeAttackBehaviour)
@@ -62,7 +63,9 @@ public class EnemyBehaviourRunner
 
     public void OnActionFinished()
     {
+        _forced?.OnExit();
         _forced = null;
+        _current?.OnExit();
         _current = null;
     }
 
@@ -79,6 +82,7 @@ public class EnemyBehaviourRunner
             return;
         }
 
+        _current?.OnExit();
         _current = null;
     }
 
@@ -102,6 +106,9 @@ public class EnemyBehaviourRunner
 
 }
 
+/// <summary>
+/// 1とかじゃなくもっと大きい数字のほうがわかりやすいかもだけど、そもそもTurnを入れる段階で削るかもしれない。
+/// </summary>
 public enum EnemyBehaviourPriority : int
 {
     None = 0,

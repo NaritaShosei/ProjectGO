@@ -33,7 +33,7 @@ public class EnemyStateContext
     public bool CanMove() => CurrentState != EnemyState.Attack
                           && CurrentState != EnemyState.Bark
                           && CurrentState != EnemyState.Electrified
-                          && CurrentState != EnemyState.NockBack
+                          && CurrentState != EnemyState.KnockBack
                           && CurrentState != EnemyState.Dead;
 
     public void SetElectrifiedTime(float durationTime)
@@ -48,7 +48,7 @@ public enum EnemyState
     Bark,
     Move,
     Electrified,     
-    NockBack,   
+    KnockBack,   
     Down,
     Dead,
 }
