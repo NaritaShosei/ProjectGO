@@ -50,12 +50,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         // 攻撃の条件に満たしていなかったら早期リターン
         if (!_state.CanAttack()) { return false; }
 
-        // 距離計算
-        _context.DistanceToPlayer = Vector3.Distance(
-            _self.position,
-            _player.position
-        );
-
         // 攻撃の条件に満たしていなかったら早期リターン
         if (_context.DistanceToPlayer > _data.AttackRange) { return false; }
         if (Time.time - _lastAttackTime < _data.AttackCooldown) { return false; }
