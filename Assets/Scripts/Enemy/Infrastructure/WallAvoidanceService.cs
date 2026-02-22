@@ -9,7 +9,7 @@ public class WallAvoidanceService : IWallAvoidanceService
     /// <param name="wallMask"></param>
     public WallAvoidanceService(LayerMask wallMask)
     {
-        this.wallMask = wallMask;
+        this._wallMask = wallMask;
     }
 
     public Vector3 CalculateAvoidance(
@@ -19,7 +19,7 @@ public class WallAvoidanceService : IWallAvoidanceService
         float strength
     )
     {
-        if (Physics.Raycast(self, forward, out var hit, detectDistance, wallMask))
+        if (Physics.Raycast(self, forward, out var hit, detectDistance, _wallMask))
         {
             // 反射ベクトル計算
             // つまり壁に対する平行ベクトルを維持し、垂直ベクトルだけ反対方向にしている
@@ -29,6 +29,6 @@ public class WallAvoidanceService : IWallAvoidanceService
         return Vector3.zero;
     }
 
-    private readonly LayerMask wallMask;
+    private readonly LayerMask _wallMask;
 
 }

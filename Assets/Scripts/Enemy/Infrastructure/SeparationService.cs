@@ -9,7 +9,7 @@ public class SeparationService : ISeparationService
     /// <param name="grid"></param>
     public SeparationService(ISpatialHashGrid grid)
     {
-        this.grid = grid;
+        this._grid = grid;
     }
 
     public Vector3 Calculate(
@@ -23,7 +23,7 @@ public class SeparationService : ISeparationService
         var neighbors = EnemyListPool<IEnemy>.Get();
 
         // Gridから近隣情報取得
-        grid.Query(position, radius, neighbors);
+        _grid.Query(position, radius, neighbors);
         Vector3 force = Vector3.zero;
 
         foreach (var other in neighbors)
@@ -50,6 +50,6 @@ public class SeparationService : ISeparationService
         return force * strength;
     }
 
-    private readonly ISpatialHashGrid grid;
+    private readonly ISpatialHashGrid _grid;
 
 }

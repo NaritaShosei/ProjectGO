@@ -9,16 +9,16 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
     /// <param name="maxAttackers"></param>
     public EnemyAttackerSlot(int maxAttackers)
     {
-        this.maxAttackers = Math.Max(1,maxAttackers);
+        this._maxAttackers = Math.Max(1,maxAttackers);
     }
 
     
     public bool TryAcquire(IEnemy enemy)
     {
-        if (attackers.Contains(enemy)) return true;
-        if (attackers.Count >= maxAttackers) return false;
+        if (_attackers.Contains(enemy)) return true;
+        if (_attackers.Count >= _maxAttackers) return false;
 
-        attackers.Add(enemy);
+        _attackers.Add(enemy);
         enemy.OnDead += OnEnemyDead;
         return true;
     }
@@ -26,16 +26,16 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
     public void Release(IEnemy enemy)
     {
         enemy.OnDead -= OnEnemyDead;
-        attackers.Remove(enemy);
+        _attackers.Remove(enemy);
     }
 
     public bool IsAttacker(IEnemy enemy)
     {
-        return attackers.Contains(enemy);
+        return _attackers.Contains(enemy);
     }
 
-    private readonly int maxAttackers;
-    private readonly HashSet<IEnemy> attackers = new();
+    private readonly int _maxAttackers;
+    private readonly HashSet<IEnemy> _attackers = new();
 
     private void OnEnemyDead(IEnemy enemy)
     {
