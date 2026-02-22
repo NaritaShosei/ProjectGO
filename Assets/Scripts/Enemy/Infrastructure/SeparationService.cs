@@ -22,31 +22,36 @@ public class SeparationService : ISeparationService
         // Poolを借りる
         var neighbors = ListPool<IEnemy>.Get();
 
-        // Gridから近隣情報取得
-        _grid.Query(position, radius, neighbors);
         Vector3 force = Vector3.zero;
 
-        foreach (var other in neighbors)
+        try
         {
-            // 自分ならリターン
-            if (other == self) continue;
+            // Gridから近隣情報取得
+            _grid.Query(position, radius, neighbors);
 
-            // ベクトル計算
-            // イプシロン制限あり
-            // (posA - posB)はB→Aのベクトル
-            // 前提としてdist < radiusなので、距離が近いほどforceが大きい
-            Vector3 diff = position - other.GetTargetCenter().position;
-            float dist = diff.magnitude;
+            foreach (var other in neighbors)
+            {
+                // 自分ならリターン
+                if (other == self) continue;
 
-            // TODO: もしイプシロンをほかでも使用するなら定数化する？
-            if (dist <= 0.001f) continue;
+                // ベクトル計算
+                // イプシロン制限あり
+                // (posA - posB)はB→Aのベクトル
+                // 前提としてdist < radiusなので、距離が近いほどforceが大きい
+                Vector3 diff = position - other.GetTargetCenter().position;
+                float dist = diff.magnitude;
 
-            force += diff.normalized * (1f - dist / radius);
+                // TODO: もしイプシロンをほかでも使用するなら定数化する？
+                if (dist <= 0.001f) continue;
+
+                force += diff.normalized * (1f - dist / radius);
+            }
         }
-
-        // 忘れずにPoolを返す
-        ListPool<IEnemy>.Release(neighbors);
-
+        finally 
+        {
+            // 忘れずにPoolを返す
+            ListPool<IEnemy>.Release(neighbors);
+        }
         return force * strength;
     }
 

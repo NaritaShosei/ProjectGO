@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <typeparam name="T"></typeparam>
 public static class ListPool<T>
 {
-    // 32個分先に予約している。最大制限はまだ設定していない。
+    // 最大制限はまだ設定していない。
     private static readonly Stack<List<T>> _pool = new Stack<List<T>>(32);
 
     /// <summary>

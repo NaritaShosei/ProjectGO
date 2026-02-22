@@ -5,11 +5,11 @@ public interface IWallAvoidanceService
     /// <summary>
     /// 壁から離れるベクトルを計算する
     /// </summary>
-    /// <param name="self"></param>
-    /// <param name="forward"></param>
-    /// <param name="detectDistance"></param>
-    /// <param name="strength"></param>
-    /// <returns></returns>
+    /// <param name="self">自身の位置</param>
+    /// <param name="forward">進行方向ベクトル</param>
+    /// <param name="detectDistance">壁検出距離</param>
+    /// <param name="strength">回避力のスケール係数</param>
+    /// <returns>壁を検出すれば反射方向に、なければVector3.zero</returns>
     Vector3 CalculateAvoidance(
         Vector3 self,
         Vector3 forward,
