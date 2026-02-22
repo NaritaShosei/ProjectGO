@@ -1,13 +1,26 @@
-﻿using UnityEngine;
+using UnityEngine;
 
+
+/// <summary>
+/// 中身は後で実装
+/// </summary>
 public class MoveBehaviour : IEnemyBehaviour
 {
+
+    public int Priority { get => (int)EnemyBehaviourPriority.Move; }
+
+    public bool CanEnter() { return true; }
+    public bool CanContinue() { return true; }
+
+    public void OnEnter() { }
+    public void OnExit() { }
+
     public void Init(
         Enemy owner,
         EnemyData data,
         Transform player,
         EnemyContext context,
-        EnemyStateManager state
+        EnemyStateContext state
     )
     {
         _self = owner.transform;
@@ -24,14 +37,13 @@ public class MoveBehaviour : IEnemyBehaviour
     {
         // 攻撃の条件に満たしていなかったら早期リターン
         if (!_state.CanMove()) { return; }
-        if (!_context.CanMove) { return; }
         if (_player == null) { return; }
 
 
         // プレイヤーに十分に近ければ動かない
         if (IsWithinDistance(_self.position, _player.position, _maxApproachLimit)) { return; }
 
-        _state.ChangeState(EnemyState.Moving);
+        _state.ChangeState(EnemyState.Move);
 
         // TODO:雑に移動しているため場合によっては修正が必要
         Vector3 dir = (_player.position - _self.position);
@@ -45,7 +57,7 @@ public class MoveBehaviour : IEnemyBehaviour
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
-    private EnemyStateManager _state;
+    private EnemyStateContext _state;
 
     private float _maxApproachLimit;
 

@@ -15,29 +15,27 @@ public class MobEnemy : Enemy
         base.Init(player);
 
         _context = new EnemyContext();
-        _runner = new EnemyBehaviourRunner();
-        _state = new EnemyStateManager();
+        _runner = new EnemyBehaviourRunner(this);
+        _state = new EnemyStateContext();
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
-        var shock = new ShockBehaviour();
+        var shock = new ElectrifiedBehaviour();
 
         move.Init(this, _data, _playerTransform, _context, _state);
         attack.Init(this, _data, _playerTransform, _context, _state);
         shock.Init(this, _data, _playerTransform, _context, _state);
 
-        _runner.Add(move);
-        _runner.Add(attack);
-        _runner.Add(shock);
+        _runner.Register(move);
+        _runner.Register(attack);
+        _runner.Register(shock);
 
         // 鎧登録　データがなければ裸
-        // TODO: 再生成に対応できる場所だろうか？
         if (_armor != null)
         {
             _defenceContext.EnemyType = EnemyType.Armor;
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
-            // TODO: どこかで購読をやめさせなければ→一応BreakArmor内で対応
         }
         else
         {
@@ -52,7 +50,6 @@ public class MobEnemy : Enemy
         // 要相談
         if (_isDead) { return; }
 
-        // TODO: そもそもCalculateでfloatにしないのはなぜでしょうか？
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
         // 鎧がダメージを肩代わり
@@ -72,9 +69,8 @@ public class MobEnemy : Enemy
 
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
-    private EnemyStateManager _state;
+    private EnemyStateContext _state;
 
-    // TODO: Overrideしなくても大丈夫なのか？
     private void OnDestroy()
     {
          if(_armor!=null)_armor.OnBroken -= BreakArmor;
@@ -96,9 +92,9 @@ public class MobEnemy : Enemy
         {
             this.ActivateShockDebuff().Forget();
 
-            _state.SetDurationTime(electricShock.DurationEffect);
+            _state.SetElectrifiedTime(electricShock.DurationEffect);
 
-            _state.ChangeState(EnemyState.Shock);
+            _state.ChangeState(EnemyState.Electrified);
         }
     }
 
