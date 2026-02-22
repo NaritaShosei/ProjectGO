@@ -4,8 +4,8 @@ using UnityEngine;
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
-    public bool CanEnter() { return true; }
-    public bool CanContinue() { return true; }
+    public bool CanEnter() { return _state.CanAttack(); }
+    public bool CanContinue() { return _state.CurrentState == EnemyState.Attack; }
 
     public void OnEnter() { }
     public void OnExit() { }

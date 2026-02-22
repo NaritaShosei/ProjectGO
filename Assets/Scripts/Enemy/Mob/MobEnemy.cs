@@ -20,15 +20,12 @@ public class MobEnemy : Enemy
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
-        var shock = new ElectrifiedBehaviour();
 
         move.Init(this, _data, _playerTransform, _context, _state);
         attack.Init(this, _data, _playerTransform, _context, _state);
-        shock.Init(this, _data, _playerTransform, _context, _state);
 
         _runner.Register(move);
         _runner.Register(attack);
-        _runner.Register(shock);
 
         // 鎧登録　データがなければ裸
         if (_armor != null)
