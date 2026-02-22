@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     {
         InitSequence();
         InitPlayer();
+        InitCameraManager();
         InitEnemyManager();
         StartGame();
     }
@@ -49,6 +50,11 @@ public class GameManager : MonoBehaviour
         _player.OnDead += HandleGameComplete;
 
         _playerGaugePresenter = new PlayerGaugePresenter(health: _player, stamina: _player, _playerGaugeView);
+    }
+
+    private void InitCameraManager()
+    {
+        _cameraManager.Init(_player);
     }
 
     private void InitEnemyManager()
