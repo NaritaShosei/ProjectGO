@@ -10,7 +10,7 @@ public class MoveBehaviour : IEnemyBehaviour
     public int Priority { get => (int)EnemyBehaviourPriority.Move; }
 
     public bool CanEnter() { return true; }
-    public bool CanContinue() { return true; }
+    public bool CanContinue() { return !IsWithinDistance(_self.position, _player.position, _maxApproachLimit); }
 
     public void OnEnter() { }
     public void OnExit() { }

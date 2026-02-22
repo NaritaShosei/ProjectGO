@@ -4,7 +4,7 @@ using UnityEngine;
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
-    public bool CanEnter() { return _state.CanAttack(); }
+    public bool CanEnter() { return CanAttack(); }
     public bool CanContinue() { return _state.CurrentState == EnemyState.Attack; }
 
     public void OnEnter() { }
@@ -27,20 +27,11 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        if (_player == null) { return; }
-
-        // 攻撃の条件に満たしていなかったら早期リターン
-        if (!_state.CanAttack()) { return; }
-
         // 距離計算
         _context.DistanceToPlayer = Vector3.Distance(
             _self.position,
             _player.position
         );
-
-        // 攻撃の条件に満たしていなかったら早期リターン
-        if (_context.DistanceToPlayer > _data.AttackRange) { return; }
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) { return; }
 
         // 攻撃を実行
         _state.ChangeState(EnemyState.Attack);
@@ -50,6 +41,26 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         // TODO:IsAttackingが1フレーム内でリセットされているのでアニメーションなどに対応させる必要あり
         _state.ChangeState(EnemyState.Idle);
+    }
+
+    private bool CanAttack()
+    {
+        if (_player == null) { return false; }
+
+        // 攻撃の条件に満たしていなかったら早期リターン
+        if (!_state.CanAttack()) { return false; }
+
+        // 距離計算
+        _context.DistanceToPlayer = Vector3.Distance(
+            _self.position,
+            _player.position
+        );
+
+        // 攻撃の条件に満たしていなかったら早期リターン
+        if (_context.DistanceToPlayer > _data.AttackRange) { return false; }
+        if (Time.time - _lastAttackTime < _data.AttackCooldown) { return false; }
+        
+        return true;
     }
 
     private void PerformAttack()
