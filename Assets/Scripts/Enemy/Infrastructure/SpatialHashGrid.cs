@@ -9,7 +9,8 @@ public class SpatialHashGrid : ISpatialHashGrid
     /// <param name="cellSize">Gridの1辺</param>
     public SpatialHashGrid(float cellSize)
     {
-        this.cellSize = cellSize;
+        // 最低限0.1f以上とした。
+        this.cellSize = Mathf.Max(cellSize, 0.1f);
     }
 
     public void Register(IEnemy enemy, Vector3 position)
@@ -56,11 +57,8 @@ public class SpatialHashGrid : ISpatialHashGrid
         enemyGridMap.Remove(enemy);
     }
 
-    public List<IEnemy> Query(Vector3 position, float radius)
+    public void Query(Vector3 position, float radius, List<IEnemy> result)
     {
-        // 初期枠16とする
-        var result = new List<IEnemy>(16);
-
         // どれくらい近いGridまで取得するか
         int range = Mathf.CeilToInt(radius / cellSize);
 
@@ -76,11 +74,10 @@ public class SpatialHashGrid : ISpatialHashGrid
             foreach (var enemy in list)
             {
                 // 対象Enemyが確かにradius内にいるか
-                if ((enemy.GetTargetCenter().transform.position - position).sqrMagnitude <= radius * radius)
+                if ((enemy.GetTargetCenter().position - position).sqrMagnitude <= radius * radius)
                     result.Add(enemy);
             }
         }
-        return result;
     }
 
     private readonly float cellSize;

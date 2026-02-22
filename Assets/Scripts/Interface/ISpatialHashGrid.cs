@@ -31,5 +31,5 @@ public interface ISpatialHashGrid
     /// <param name="position"></param>
     /// <param name="radius"></param>
     /// <returns></returns>
-    List<IEnemy> Query(Vector3 position, float radius);
+    void Query(Vector3 position, float radius, List<IEnemy> result);
 }

@@ -19,8 +19,11 @@ public class SeparationService : ISeparationService
         float strength
     )
     {
+        // Poolを借りる
+        var neighbors = EnemyListPool<IEnemy>.Get();
+
         // Gridから近隣情報取得
-        var neighbors = grid.Query(position, radius);
+        grid.Query(position, radius, neighbors);
         Vector3 force = Vector3.zero;
 
         foreach (var other in neighbors)
@@ -32,7 +35,7 @@ public class SeparationService : ISeparationService
             // イプシロン制限あり
             // (posA - posB)はB→Aのベクトル
             // 前提としてdist < radiusなので、距離が近いほどforceが大きい
-            Vector3 diff = position - other.GetTargetCenter().transform.position;
+            Vector3 diff = position - other.GetTargetCenter().position;
             float dist = diff.magnitude;
 
             // TODO: もしイプシロンをほかでも使用するなら定数化する？
@@ -40,6 +43,9 @@ public class SeparationService : ISeparationService
 
             force += diff.normalized * (1f - dist / radius);
         }
+
+        // 忘れずにPoolを返す
+        EnemyListPool<IEnemy>.Release(neighbors);
 
         return force * strength;
     }
