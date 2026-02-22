@@ -10,7 +10,7 @@ public class ConditionalAttackBoostSkill : SkillBase
         bool isTargetAttackType = data.AttackType == _targetAttackType;
 
         // 必要なコンボ数に到達しているか
-        bool hasRequiredComboCount = data.ComboIndex >= _requiredComboCount;
+        bool hasRequiredComboCount = data.ComboIndex >= _requiredComboIndex;
 
         // コンボの最終段かどうか
         bool isLastCombo = data.NextComboAttackId == -1;
@@ -27,6 +27,6 @@ public class ConditionalAttackBoostSkill : SkillBase
     }
 
     [SerializeField] private float _boostAmount = 0.5f;
-    [SerializeField] private int _requiredComboCount = 1;
+    [SerializeField] private int _requiredComboIndex = 1;
     [SerializeField] private AttackType _targetAttackType = AttackType.LightAttack;
 }
