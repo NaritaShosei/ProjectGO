@@ -1,6 +1,11 @@
 using Unity.Behavior;
 using UnityEngine;
 
+/// <summary>
+/// 作ってみたけど、やり方としてはDoTweenで飛ばすか、
+/// 飛ばすだけにして終了はEnemyが地面に着地したら、とかのほうがいいのか・・
+/// まだAttackContextに対応できていないのでお待ちを・・
+/// </summary>
 public sealed class KnockbackCondition : IEnemyCondition
 {
     public ConditionType Type => ConditionType.Knockback;

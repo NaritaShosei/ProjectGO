@@ -15,9 +15,19 @@ public sealed class EnemyConditionController
         foreach (var item in _queue) 
         {
             item.Tick(_enemy, deltaTime);
-            // 終了していたらはずす
-            if(item.IsFinished) _queue.Remove(item);
+            // 終了していたら終了リストに登録
+            if(item.IsFinished) _finished.Add(item);
         }
+
+        // 終了しているものを_queueから削除
+        foreach(var item in _finished)
+        {
+            item.OnExit(_enemy);
+            _queue.Remove(item);
+        }
+
+        // finishを初期化
+        _finished.Clear();
     }
 
     /// <summary>
@@ -27,7 +37,9 @@ public sealed class EnemyConditionController
     /// <param name="condition"></param>
     public void ApplyCondition(IEnemyCondition condition)
     {
+        if (condition.IsFinished) return;
         _queue.Add(condition);
+        condition.OnEnter(_enemy);
     }
 
     // TODO: Conditionが同じならばはじくために、同じものか調べるメソッド
@@ -35,4 +47,5 @@ public sealed class EnemyConditionController
 
     private readonly IEnemy _enemy;
     private readonly List<IEnemyCondition> _queue = new();
+    private readonly List<IEnemyCondition> _finished = new();
 }
