@@ -8,6 +8,12 @@ public class CameraManager : MonoBehaviour
 
     public void Init(Player player)
     {
+        if (player == null)
+        {
+            Debug.LogError("Player reference is null in CameraManager.Init.");
+            return;
+        }
+
         _playerTransform = player.transform;
         _cinemachineCamera.Follow = _playerTransform;
 
