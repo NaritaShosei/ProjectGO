@@ -47,6 +47,7 @@ public class EnemyBehaviourRunner
     public void ForceBehaviour(IEnemyBehaviour behaviour)
     {
         _current?.OnExit();
+        _forced?.OnExit();
         _forced = behaviour;
         _forced.OnEnter();
     }
