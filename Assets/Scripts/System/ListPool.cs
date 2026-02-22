@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// 本来はいろんなところで使ってもらえるが、一応Enemyのために用意したのでEnemyListPool
 /// GCの削減のために準備した
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public static class EnemyListPool<T>
+public static class ListPool<T>
 {
     // 32個分先に予約している。最大制限はまだ設定していない。
     private static readonly Stack<List<T>> _pool = new Stack<List<T>>(32);

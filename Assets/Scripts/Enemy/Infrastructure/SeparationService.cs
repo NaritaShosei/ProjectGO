@@ -20,7 +20,7 @@ public class SeparationService : ISeparationService
     )
     {
         // Poolを借りる
-        var neighbors = EnemyListPool<IEnemy>.Get();
+        var neighbors = ListPool<IEnemy>.Get();
 
         // Gridから近隣情報取得
         _grid.Query(position, radius, neighbors);
@@ -45,7 +45,7 @@ public class SeparationService : ISeparationService
         }
 
         // 忘れずにPoolを返す
-        EnemyListPool<IEnemy>.Release(neighbors);
+        ListPool<IEnemy>.Release(neighbors);
 
         return force * strength;
     }

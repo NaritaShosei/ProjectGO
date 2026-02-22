@@ -36,7 +36,7 @@ public sealed class EnemyConditionQueue
     public void Tick(IEnemy enemy, float dt)
     {
         // 終了したものを格納する用のPoolをもらってくる
-        var finished = EnemyListPool<IEnemyCondition>.Get();
+        var finished = ListPool<IEnemyCondition>.Get();
         // Activeの処理
         foreach (var condition in _active.Values)
         {
@@ -52,7 +52,7 @@ public sealed class EnemyConditionQueue
             _active.Remove(condition.Type);
         }
         // Poolを返す。
-        EnemyListPool<IEnemyCondition>.Release(finished);
+        ListPool<IEnemyCondition>.Release(finished);
 
         // Pending → Active
         while (_pending.Count > 0)
