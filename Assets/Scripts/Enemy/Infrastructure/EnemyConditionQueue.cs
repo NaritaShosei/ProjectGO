@@ -15,6 +15,7 @@ public sealed class EnemyConditionQueue
     public void Enqueue(IEnemy enemy, IEnemyCondition condition)
     {
         // 同種は最大1
+        // これにより感電の重ねがけが可能になってしまった、どうする？
         if (Has(condition.Type))
         {
             _active[condition.Type].OnExit(enemy);
@@ -58,6 +59,8 @@ public sealed class EnemyConditionQueue
         {
             // _pendingから取り出して
             var next = _pending.Dequeue();
+            if (_active.ContainsKey(next.Type)) continue;
+
             // _activeに追加で初期メソッドを実行
             _active.Add(next.Type, next);
             next.OnEnter(enemy);

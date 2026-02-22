@@ -9,7 +9,7 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
     /// <param name="maxAttackers"></param>
     public EnemyAttackerSlot(int maxAttackers)
     {
-        this.maxAttackers = maxAttackers;
+        this.maxAttackers = Mathf.Max(1,maxAttackers);
     }
 
     
@@ -19,11 +19,13 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
         if (attackers.Count >= maxAttackers) return false;
 
         attackers.Add(enemy);
+        enemy.OnDead += OnEnemyDead;
         return true;
     }
 
     public void Release(IEnemy enemy)
     {
+        enemy.OnDead -= OnEnemyDead;
         attackers.Remove(enemy);
     }
 
@@ -34,4 +36,10 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
     private readonly int maxAttackers;
     private readonly HashSet<IEnemy> attackers = new();
+
+    private void OnEnemyDead(IEnemy enemy)
+    {
+        Release(enemy);
+    }
+
 }
