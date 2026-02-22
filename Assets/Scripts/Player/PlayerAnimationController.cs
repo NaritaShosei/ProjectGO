@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour
+public class PlayerAnimationController : MonoBehaviour,IAnimationController
 {
     public void Init(PlayerStateManager stateManager, IModeController modeController)
     {
