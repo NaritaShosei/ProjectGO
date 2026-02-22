@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using UnityEngine;
+using System;
 
 public class EnemyAttackerSlot : IEnemyAttackerSlot
 {
@@ -9,7 +9,7 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
     /// <param name="maxAttackers"></param>
     public EnemyAttackerSlot(int maxAttackers)
     {
-        this.maxAttackers = Mathf.Max(1,maxAttackers);
+        this.maxAttackers = Math.Max(1,maxAttackers);
     }
 
     
