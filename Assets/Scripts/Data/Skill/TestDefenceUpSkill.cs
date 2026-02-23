@@ -12,6 +12,7 @@ public class TestDefenceUpSkill : SkillBase
     {
         if (acquireCount < 1 || acquireCount > _defenceUps.Length)
         {
+            Debug.LogWarning($"DefenceUpSkill: acquireCount({acquireCount}) is out of range.");
             return;
         }
 

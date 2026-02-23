@@ -12,6 +12,7 @@ public class TestStaminaUpSkill : SkillBase
     {
         if (acquireCount < 1 || acquireCount > _staminaUps.Length)
         {
+            Debug.LogWarning($"StaminaUpSkill: acquireCount({acquireCount}) is out of range.");
             return;
         }
 

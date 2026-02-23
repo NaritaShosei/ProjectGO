@@ -12,6 +12,7 @@ public class TestHPUpSkill : SkillBase
     {
         if (acquireCount < 1 || acquireCount > _hpUps.Length)
         {
+            Debug.LogWarning($"HPUpSkill: acquireCount({acquireCount}) is out of range.");
             return;
         }
 
