@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public interface IEnemyBehaviour
 {
@@ -7,7 +7,13 @@ public interface IEnemyBehaviour
          EnemyData data,
          Transform player,
          EnemyContext context,
-         EnemyStateManager state
+         EnemyStateContext state
      );
+    int Priority { get; }
+
+    bool CanEnter();
+    bool CanContinue();
+    void OnEnter();
     public void Tick(float deltaTime);
+    void OnExit();
 }

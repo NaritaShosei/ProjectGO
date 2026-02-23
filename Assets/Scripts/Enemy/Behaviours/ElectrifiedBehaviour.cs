@@ -1,14 +1,14 @@
 using UnityEngine;
 
 // TODO: Contextへの依存を削除
-public class ShockBehaviour : IEnemyBehaviour
+public class ElectrifiedBehaviour : IEnemyBehaviour
 {
     public void Init(
         Enemy owner,
         EnemyData data,
         Transform player,
         EnemyContext context,
-        EnemyStateManager state
+        EnemyStateContext state
      )
     {
         _self = owner.transform;
@@ -19,7 +19,7 @@ public class ShockBehaviour : IEnemyBehaviour
 
         _material = _self.gameObject.GetComponent<Renderer>().material;
 
-        _isShocking = false;
+        _isElectrifiedShocking = false;
     }
 
 
@@ -28,24 +28,24 @@ public class ShockBehaviour : IEnemyBehaviour
         if (_player == null) { return; }
 
         // 攻撃の条件に満たしていなかったら早期リターン
-        if (!_state.IsShock) { return; }
+        if (!_state.IsElectrified) { return; }
 
         // 感電開始
-        if (!_isShocking)
+        if (!_isElectrifiedShocking)
         {
-            StartShock();
+            StartElectrifiedShock();
         }
 
         // 感電継続時間内ならreturn
         if (_durationTime > 0)
         {
             _durationTime -= deltaTime;
-            Shock();
+            ElectrifiedShock();
         }
         else
         {
             // 感電終了時
-            EndShock();
+            EndElectrifiedShock();
         }
     }
 
@@ -53,10 +53,10 @@ public class ShockBehaviour : IEnemyBehaviour
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
-    private EnemyStateManager _state;
+    private EnemyStateContext _state;
 
     // 感電状態を保持する変数
-    private bool _isShocking = false;
+    private bool _isElectrifiedShocking = false;
     private float _durationTime;
 
     // 点滅表示に使用する変数
@@ -64,13 +64,13 @@ public class ShockBehaviour : IEnemyBehaviour
     private Material _material = null;
 
 
-    // スタン開始時のみ
-    private void StartShock()
+    // 感電開始時のみ
+    private void StartElectrifiedShock()
     {
-        _isShocking = true;
+        _isElectrifiedShocking = true;
 
-        // 継続時間はEnemyStateManagerを参照して更新
-        _durationTime = _state.DurationShockTime;
+        // 継続時間はEnemyStateContextを参照して更新
+        _durationTime = _state.DurationElectrifiedTime;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
@@ -80,8 +80,8 @@ public class ShockBehaviour : IEnemyBehaviour
 
     }
 
-    // スタン中
-    private void Shock()
+    // 感電中
+    private void ElectrifiedShock()
     {
         if (_material == null) { return; }
 
@@ -98,8 +98,8 @@ public class ShockBehaviour : IEnemyBehaviour
         _material.color = color;
     }
 
-    // スタン終了時
-    private void EndShock()
+    // 感電終了時
+    private void EndElectrifiedShock()
     {
         if (_material != null) 
         {
@@ -111,7 +111,7 @@ public class ShockBehaviour : IEnemyBehaviour
 
         // ShockステートからIdleへ戻す。
         _state.ChangeState(EnemyState.Idle);
-        _isShocking = false;
+        _isElectrifiedShocking = false;
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
@@ -120,6 +120,14 @@ public class ShockBehaviour : IEnemyBehaviour
 #endif
 
         // durationTimeを初期化しておく。
-        _state.SetDurationTime(0);
+        _state.SetElectrifiedTime(0);
     }
+
+    public int Priority { get; }
+
+    public bool CanEnter() { return true; }
+    public bool CanContinue() { return true; }
+
+    public void OnEnter() { }
+    public void OnExit() { }
 }

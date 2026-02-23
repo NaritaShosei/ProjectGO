@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 // NOTE:
 // この GoblinEnemy は「基盤用の最小実装」です。
@@ -15,25 +15,22 @@ public class GoblinEnemy : Enemy
         base.Init(player);
 
         _context = new EnemyContext();
-        _runner = new EnemyBehaviourRunner();
-        _state = new EnemyStateManager();
+        _runner = new EnemyBehaviourRunner(this);
+        _state = new EnemyStateContext();
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
-        var shock = new ShockBehaviour();
 
         move.Init(this, _data, _playerTransform, _context, _state);
         attack.Init(this, _data, _playerTransform, _context, _state);
-        shock.Init(this, _data, _playerTransform, _context, _state);
 
-        _runner.Add(move);
-        _runner.Add(attack);
-        _runner.Add(shock);
+        _runner.Register(move);
+        _runner.Register(attack);
     }
 
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
-    private EnemyStateManager _state;
+    private EnemyStateContext _state;
 
 
     protected override void UpdateEnemy(float deltaTime)
