@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DefenceUpSkill", menuName = "GameData/Skill/DefenceUpSkill")]
+[CreateAssetMenu(fileName = "TestDefenceUpSkill", menuName = "GameData/Skill/TestDefenceUpSkill")]
 public class TestDefenceUpSkill : SkillBase
 {
     public override bool CanAcquire(int acquireCount)
@@ -18,6 +18,5 @@ public class TestDefenceUpSkill : SkillBase
 
         stats.AddDefensePower(_defenceUps[acquireCount - 1]);
     }
-
     [SerializeField] private float[] _defenceUps;
 }
