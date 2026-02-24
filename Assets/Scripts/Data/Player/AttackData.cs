@@ -1,7 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackData", menuName = "GameData/AttackData")]
-
 public class AttackData : ScriptableObject
 {
     public int AttackId => _attackId;
@@ -14,29 +13,61 @@ public class AttackData : ScriptableObject
     public float DamageMultiplier => _damageMultiplier;
     public float AttackRange => _attackRange;
     public float AttackRadius => _attackRadius;
-    public string AnimationName => _animationName;
-    public float AnimationDuration => _animationDuration;
 
-    public float ComboWindowStart => _comboWindowStart;
-    public float ComboWindowEnd => _comboWindowEnd;
     public int NextComboAttackId => _nextComboAttackId;
 
+    public bool EnableHoming => _enableHoming;
+    public float HomingRadius => _homingRadius;
+    public float HomingAngle => _homingAngle;
+    public float HomingStrength => _homingStrength;
+
+    public bool EnableKnockback => _enableKnockback;
+    public float KnockbackPower => _knockbackPower;
+    public float KnockbackUpward => _knockbackUpward;
+
+    public AttackMoveType MoveType => _moveType;
+    public float MoveDistance => _moveDistance;
+    public float MoveSpeed => _moveSpeed;
+    public float MoveDuration => _moveDuration;
+    public bool StopOnHit => _stopOnHit;
+    public bool IsPhantom => _isPhantom;
+
+    [Header("Basic Info")]
     [SerializeField] private int _attackId;
     [SerializeField] private string _attackName;
     [SerializeField] private PlayerMode _mode;
     [SerializeField] private AttackType _attackType;
-    [SerializeField] private int _comboIndex;              // コンボの何段目か（0始まり）
-    [SerializeField] private ChargeLevel _requiredCharge;  // 必要なチャージレベル
+    [SerializeField] private int _comboIndex;
+    [SerializeField] private ChargeLevel _requiredCharge;
 
+    [Header("Damage")]
     [SerializeField] private float _damageMultiplier = 1;
+
+    [Header("Range")]
     [SerializeField] private float _attackRange = 1;
     [SerializeField] private float _attackRadius = 1;
-    [SerializeField] private string _animationName;
-    [SerializeField] private float _animationDuration;
 
-    [SerializeField] private float _comboWindowStart;     // コンボ受付開始時間
-    [SerializeField] private float _comboWindowEnd;       // コンボ受付終了時間
-    [SerializeField] private int _nextComboAttackId = -1;      // 次のコンボ攻撃ID
+    [Header("Combo")]
+    [SerializeField] private int _nextComboAttackId = -1;
+
+    [Header("Knockback")]
+    [SerializeField] private bool _enableKnockback = false;
+    [SerializeField] private float _knockbackPower = 5f;
+    [SerializeField] private float _knockbackUpward = 0f;
+
+    [Header("Homing")]
+    [SerializeField] private bool _enableHoming = false;
+    [SerializeField] private float _homingRadius = 5f;
+    [SerializeField] private float _homingAngle = 45f;
+    [SerializeField] private float _homingStrength = 10f;
+
+    [Header("Movement")]
+    [SerializeField] private AttackMoveType _moveType = AttackMoveType.None;
+    [SerializeField] private float _moveDistance = 0f;
+    [SerializeField] private float _moveSpeed = 0f;
+    [SerializeField] private float _moveDuration = 0f;
+    [SerializeField] private bool _stopOnHit = true;
+    [SerializeField] private bool _isPhantom = false; // すり抜け攻撃かどうか 
 }
 
 // 攻撃の段階（チャージレベル）
@@ -65,7 +96,22 @@ public enum AttackType
 public enum PlayerMode
 {
     [InspectorName("闘神")]
-    Warrior,   // 闘神モード
+    Warrior,
     [InspectorName("雷神")]
-    Thunder    // 雷神モード
+    Thunder
+}
+
+public enum AttackMoveType
+{
+    [InspectorName("移動なし")]
+    None,   // その場
+
+    [InspectorName("突進")]
+    Dash,   // 直線突進
+
+    [InspectorName("ステップ")]
+    Step,   // 小移動
+
+    [InspectorName("曲線移動 / ホーミング")]
+    Curve,  // 曲線 / ホーミング（将来）
 }

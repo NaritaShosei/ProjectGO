@@ -1,5 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -14,7 +15,8 @@ public class PlayerMovement : MonoBehaviour
         MoveData data,
         IStamina stamina,
         IModeController modeController,
-        PlayerAnimationController animationController)
+        PlayerAnimationController animationController,
+        PlayerAttack attack)
     {
         _playerStateManager = playerStateManager;
         _input = input;
@@ -23,8 +25,11 @@ public class PlayerMovement : MonoBehaviour
         _stamina = stamina;
         _modeController = modeController;
         _animationController = animationController;
+        _attack = attack;
 
         _input.OnDodge += Dodge;
+
+        _attack.OnAttackMoveRequested += HandleAttackMove;
     }
 
     [SerializeField] private Rigidbody _rb;
@@ -36,14 +41,36 @@ public class PlayerMovement : MonoBehaviour
     private IStamina _stamina;
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
+    private PlayerAttack _attack;
+
+    private bool _canChainRoll;
+    private float _chainTimer;
+
+    // 攻撃時移動用
+    private CancellationTokenSource _attackMoveCts;
+    private bool _isAttackMoving;
+    private bool _currentIsPhantom;
 
     #region イベント関数
 
     private void Update()
     {
-        Move();
-        Rotate();
-        PlayMoveAnimation();
+        // 攻撃時移動中は通常移動をスキップ
+        if (!_isAttackMoving)
+        {
+            Rotate();
+            PlayMoveAnimation();
+        }
+
+        UpdateDodgeChain();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!_isAttackMoving)
+        {
+            Move();
+        }
     }
 
     private void OnDestroy()
@@ -52,9 +79,167 @@ public class PlayerMovement : MonoBehaviour
         {
             _input.OnDodge -= Dodge;
         }
+
+        if (_attack != null)
+        {
+            _attack.OnAttackMoveRequested -= HandleAttackMove;
+        }
+
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
     }
 
     #endregion
+
+    /// <summary>
+    /// 攻撃時の移動要求を処理
+    /// </summary>
+    private void HandleAttackMove(AttackMoveRequest request)
+    {
+        // 既存の攻撃移動をキャンセル
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = new CancellationTokenSource();
+
+        // 前回のファントム状態をリセット
+        if (_currentIsPhantom)
+        {
+            Physics.IgnoreLayerCollision(
+                LayerMask.NameToLayer("Player"),
+                LayerMask.NameToLayer("Enemy"),
+                false
+            );
+            _currentIsPhantom = false;
+        }
+
+        PerformAttackMove(request).Forget();
+    }
+
+    /// <summary>
+    /// 攻撃時移動の実行
+    /// </summary>
+    private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
+    {
+        _isAttackMoving = true;
+
+        if (request.IsPhantom)
+        {
+            _currentIsPhantom = true;
+
+            Physics.IgnoreLayerCollision(
+            LayerMask.NameToLayer("Player"),
+            LayerMask.NameToLayer("Enemy"),
+            true
+        );
+        }
+
+        try
+        {
+            switch (request.MoveType)
+            {
+                case AttackMoveType.Dash:
+                    await DashMove(request);
+                    break;
+                case AttackMoveType.Step:
+                    await StepMove(request);
+                    break;
+                case AttackMoveType.Curve:
+                    await CurveMove(request);
+                    break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // キャンセルされた場合
+        }
+        finally
+        {
+            _isAttackMoving = false;
+
+            if (_rb)
+            {
+                _rb.linearVelocity = Vector3.zero;
+            }
+
+            if (_currentIsPhantom)
+            {
+                Physics.IgnoreLayerCollision(
+                    LayerMask.NameToLayer("Player"),
+                    LayerMask.NameToLayer("Enemy"),
+                    false
+                );
+                _currentIsPhantom = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 突進移動
+    /// </summary>
+    private async UniTask DashMove(AttackMoveRequest request)
+    {
+        float elapsed = 0f;
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + transform.forward * request.Distance;
+        targetPos.y = startPos.y;
+
+
+        while (true)
+        {
+            if (request.Duration <= 0f) { return; }
+
+            if (elapsed >= request.Duration) { break; }
+
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
+
+            float t = elapsed / request.Duration;
+            // イージング（加速→減速）
+            float smoothT = Mathf.SmoothStep(0, 1, t);
+
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, smoothT);
+            _rb.MovePosition(newPos);
+
+            elapsed += Time.fixedDeltaTime;
+            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
+        }
+    }
+
+    /// <summary>
+    /// ステップ移動（小移動）
+    /// </summary>
+    private async UniTask StepMove(AttackMoveRequest request)
+    {
+        float elapsed = 0f;
+        Vector3 moveDir = transform.forward;
+        moveDir.y = 0;
+
+        float speed = request.Distance / request.Duration;
+
+        while (true)
+        {
+            if (request.Duration <= 0f) { return; }
+
+            if (elapsed >= request.Duration) { break; }
+
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
+
+            _rb.linearVelocity = moveDir * speed;
+
+            elapsed += Time.fixedDeltaTime;
+            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
+        }
+    }
+
+    /// <summary>
+    /// 曲線移動（将来的にホーミングなど）
+    /// </summary>
+    private async UniTask CurveMove(AttackMoveRequest request)
+    {
+        // 現時点では Dash と同じ実装
+        await DashMove(request);
+    }
 
     private void Move()
     {
@@ -110,13 +295,24 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
-    private async UniTaskVoid OnDodge()
+    private async UniTaskVoid DodgeInternal(DodgeType type)
     {
-        if (!_playerStateManager.CanDodge()) return;
-        if (!_stamina.TryUseStamina(_stamina.GetDodgeStaminaCost())) return;
+        if (!_playerStateManager.CanDodge()) { return; }
+
+        float staminaCost =
+            type == DodgeType.Step
+            ? _stamina.GetDodgeStaminaCost()
+            : _stamina.GetDodgeStaminaCost(); // 将来分けてもいい
+
+        if (!_stamina.TryUseStamina(staminaCost)) { return; }
+
+        var dodgeData =
+            type == DodgeType.Step
+            ? _moveData.StepDodge
+            : _moveData.RollDodge;
 
         _playerStateManager.ChangeState(PlayerState.Dodge);
-        _animationController.PlayDodge();
+        PlayDodgeAnimation(type);
 
         Vector3 dodgeDir = GetDodgeDirection();
 
@@ -124,17 +320,37 @@ public class PlayerMovement : MonoBehaviour
 
         try
         {
-            while (t < _moveData.DodgeDuration)
+            while (t < dodgeData.Duration)
             {
-                _rb.linearVelocity = dodgeDir * _moveData.DodgeSpeed;
+                _rb.linearVelocity = dodgeDir * dodgeData.Speed;
                 t += Time.deltaTime;
                 await UniTask.Yield(destroyCancellationToken);
             }
         }
-        catch (OperationCanceledException) { return; }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
         _rb.linearVelocity = Vector3.zero;
+
+        OnDodgeEnd(type);
+    }
+
+    private void OnDodgeEnd(DodgeType type)
+    {
         _playerStateManager.ChangeState(PlayerState.Idle);
+
+        if (type == DodgeType.Step)
+        {
+            _canChainRoll = true;
+            _chainTimer = _moveData.StepDodge.ChainWindow;
+        }
+        else
+        {
+            _canChainRoll = false;
+        }
+
         OnEndDodge?.Invoke();
     }
 
@@ -168,9 +384,40 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void PlayDodgeAnimation(DodgeType type)
+    {
+        if (type == DodgeType.Step)
+        {
+            _animationController.PlayStepDodge();
+        }
+        else
+        {
+            _animationController.PlayRollDodge();
+        }
+    }
+
+    private void UpdateDodgeChain()
+    {
+        if (!_canChainRoll) { return; }
+
+        _chainTimer -= Time.deltaTime;
+        if (_chainTimer <= 0f)
+        {
+            _canChainRoll = false;
+        }
+    }
+
     // 匿名関数回避のためのメソッド
     private void Dodge()
     {
-        OnDodge().Forget();
+        if (_canChainRoll)
+        {
+            DodgeInternal(DodgeType.Roll).Forget();
+        }
+        else
+        {
+            DodgeInternal(DodgeType.Step).Forget();
+        }
     }
+
 }

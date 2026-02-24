@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour
+public class PlayerAnimationController : MonoBehaviour,IAnimationController
 {
     public void Init(PlayerStateManager stateManager, IModeController modeController)
     {
@@ -49,9 +49,14 @@ public class PlayerAnimationController : MonoBehaviour
         _animator.SetTrigger(AnimParams.Attack);
     }
 
-    public void PlayDodge()
+    public void PlayStepDodge()
     {
-        _animator.SetTrigger(AnimParams.Dodge);
+        _animator.SetTrigger(AnimParams.Step);
+    }
+
+    public void PlayRollDodge()
+    {
+        _animator.SetTrigger(AnimParams.Roll);
     }
 
     public void OnDestroy()
@@ -74,7 +79,8 @@ public class PlayerAnimationController : MonoBehaviour
         public static readonly int Speed = Animator.StringToHash("Speed");
         public static readonly int Attack = Animator.StringToHash("Attack");
         public static readonly int AttackId = Animator.StringToHash("AttackId");
-        public static readonly int Dodge = Animator.StringToHash("Dodge");
+        public static readonly int Step = Animator.StringToHash("Step");
+        public static readonly int Roll = Animator.StringToHash("Roll");
         public static readonly int IsCharging = Animator.StringToHash("IsCharging");
         public static readonly int Damaged = Animator.StringToHash("Damaged");
         public static readonly int Dead = Animator.StringToHash("Dead");

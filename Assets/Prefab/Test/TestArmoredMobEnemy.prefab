@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2941309941052211890}
   - component: {fileID: 640612532259396523}
   - component: {fileID: -8330086056522255198}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: TestArmoredMobEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,6 +180,10 @@ PrefabInstance:
     - target: {fileID: 8648071829844644719, guid: f709f7f04c8b2ce45b91549924dddaa6, type: 3}
       propertyPath: m_Name
       value: Armor
+      objectReference: {fileID: 0}
+    - target: {fileID: 8648071829844644719, guid: f709f7f04c8b2ce45b91549924dddaa6, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

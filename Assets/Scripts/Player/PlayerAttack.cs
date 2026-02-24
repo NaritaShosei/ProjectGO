@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    // 攻撃時の移動要求イベント
+    public event Action<AttackMoveRequest> OnAttackMoveRequested;
+
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
         AttackExecutor executor,
@@ -87,12 +90,20 @@ public class PlayerAttack : MonoBehaviour
         new ChargeThreshold { TimeThreshold = 1.5f, Level = ChargeLevel.Level2 }
     };
 
+    [SerializeField] private LayerMask _homingLayer;
+
     // 状態
     private int _currentAttackId = -1;
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private bool _hasBufferedDodgeAttack = false;
     private bool _isInComboWindow = false;
+
+    private bool _isHomingActive;
+    private float _homingStrength;
+    private float _homingRadius;
+    private float _homingAngle;
+    private Transform _homingTarget;
 
     // 保留中の攻撃データ
     private AttackData _pendingAttackData;
@@ -138,6 +149,11 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
         }
+    }
+
+    private void Update()
+    {
+        PerformHoming();
     }
 
     private void BufferDodgeAttack()
@@ -282,6 +298,35 @@ public class PlayerAttack : MonoBehaviour
 
         _lastAttackTime = Time.time;
 
+        if (_pendingAttackData.EnableHoming)
+        {
+            _isHomingActive = true;
+            _homingRadius = _pendingAttackData.HomingRadius;
+            _homingAngle = _pendingAttackData.HomingAngle;
+            _homingStrength = _pendingAttackData.HomingStrength;
+            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
+        }
+        else
+        {
+            _homingTarget = null;
+        }
+
+        // 移動要求を発行
+        if (attackData.MoveType != AttackMoveType.None)
+        {
+            var moveRequest = new AttackMoveRequest
+            {
+                MoveType = attackData.MoveType,
+                Distance = attackData.MoveDistance,
+                Speed = attackData.MoveSpeed,
+                Duration = attackData.MoveDuration,
+                Target = _homingTarget,
+                StopDistance = attackData.StopOnHit ? attackData.AttackRange : 0,
+                IsPhantom = attackData.IsPhantom
+            };
+            OnAttackMoveRequested?.Invoke(moveRequest);
+        }
+
         // アニメーション再生のみ
         _animationController.PlayAttack(_currentAttackId);
     }
@@ -310,6 +355,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FinishAttack()
     {
+        _isHomingActive = false;
+
         _stateManager.ChangeState(PlayerState.Idle);
         _pendingAttackData = null;
         _pendingAttackInput = null;
@@ -393,6 +440,52 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    private Transform FindHomingTarget(float radius, float angle)
+    {
+        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
+
+        Transform best = null;
+        float bestScore = float.MaxValue;
+
+        foreach (var hit in hits)
+        {
+            if (!hit.TryGetComponent(out IEnemy _)) { continue; }
+
+            var dir = (hit.transform.position - transform.position).normalized;
+            float angleTo = Vector3.Angle(transform.forward, dir);
+            if (angleTo > angle) { continue; }
+
+            float dist = Vector3.Distance(transform.position, hit.transform.position);
+            if (dist < bestScore)
+            {
+                bestScore = dist;
+                best = hit.transform;
+            }
+        }
+
+        return best;
+    }
+
+    private void PerformHoming()
+    {
+        if (!_isHomingActive) { return; }
+
+        if (_homingTarget == null) { return; }
+
+        var dir = _homingTarget.position - transform.position;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0f) { return; }
+
+        var targetRot = Quaternion.LookRotation(dir);
+
+        // strength = 5〜15くらいが気持ちいい
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRot,
+            Time.deltaTime * _homingStrength
+        );
+    }
+
     private void OnComboWindowStart()
     {
         _isInComboWindow = true;
@@ -450,4 +543,18 @@ public struct AttackInput
 
         return ChargeLevel.None;
     }
+}
+
+/// <summary>
+/// 攻撃時の移動要求情報
+/// </summary>
+public struct AttackMoveRequest
+{
+    public AttackMoveType MoveType;
+    public float Distance;
+    public float Speed;
+    public float Duration;
+    public Transform Target; // 攻撃時の一番近い敵
+    public float StopDistance; // 敵がいるときに攻撃を止める距離
+    public bool IsPhantom; // 攻撃がファントムかどうか
 }

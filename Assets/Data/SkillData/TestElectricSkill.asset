@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TestElectricShockSkill
   _id: 55
   _priority: 0
-  _name: "\u3073\u308A\u3073\u308A"
-  _explanation: "\u611F\u96FB\u3055\u305B\u3061\u3083\u3046\u3088"
+  _name: "\u96F7\u795E\u7E8F\u96F7"
+  _explanation: "\u611F\u96FB\u5C5E\u6027\u3092\u6B66\u5668\u306B\u4ED8\u4E0E +10\uFF05"
   _icon: {fileID: 0}
-  _grantEffectProbability: 100
+  _timing: 0
+  _grantEffectProbability: 0.1
   _durationEffect: 1
   _upDamagePercentage: 0

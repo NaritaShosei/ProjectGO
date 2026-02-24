@@ -18,11 +18,20 @@ MonoBehaviour:
   _attackType: 1
   _comboIndex: 0
   _requiredCharge: 2
-  _damageMultiplier: 1
-  _attackRange: 5
+  _damageMultiplier: 1.5
+  _attackRange: -5
   _attackRadius: 5
-  _animationName: 
-  _animationDuration: 0
-  _comboWindowStart: 0
-  _comboWindowEnd: 0
   _nextComboAttackId: 2176
+  _enableKnockback: 0
+  _knockbackPower: 5
+  _knockbackUpward: 0
+  _enableHoming: 0
+  _homingRadius: 5
+  _homingAngle: 360
+  _homingStrength: 10
+  _moveType: 1
+  _moveDistance: 10
+  _moveSpeed: 5
+  _moveDuration: 0.8
+  _stopOnHit: 0
+  _isPhantom: 1
