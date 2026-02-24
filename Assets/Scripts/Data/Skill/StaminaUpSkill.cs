@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TestStaminaUpSkill", menuName = "GameData/Skill/TestStaminaUpSkill")]
-public class TestStaminaUpSkill : SkillBase
+public class StaminaUpSkill : SkillBase
 {
     public override bool CanAcquire(int acquireCount)
     {
