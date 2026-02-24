@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "TestHpUpSkill", menuName = "GameData/Skill/TestHpUpSkill")]
+[CreateAssetMenu(fileName = "HpUpSkill", menuName = "GameData/Skill/HpUpSkill")]
 public class HPUpSkill : SkillBase
 {
     public override bool CanAcquire(int acquireCount)
