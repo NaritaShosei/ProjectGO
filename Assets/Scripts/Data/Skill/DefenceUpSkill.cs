@@ -17,6 +17,7 @@ public class DefenceUpSkill : SkillBase
         }
 
         stats.AddDefensePower(_defenceUps[acquireCount - 1]);
+        Debug.Log(stats.DefensePower);
     }
     [SerializeField] private float[] _defenceUps;
 }

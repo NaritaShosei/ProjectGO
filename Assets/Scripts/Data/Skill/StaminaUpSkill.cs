@@ -17,6 +17,7 @@ public class StaminaUpSkill : SkillBase
         }
 
         stats.AddMaxStamina(_staminaUps[acquireCount - 1]);
+        Debug.Log(stats.MaxStamina);
     }
 
     [SerializeField] private float[] _staminaUps;

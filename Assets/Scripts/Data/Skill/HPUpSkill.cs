@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "HpUpSkill", menuName = "GameData/Skill/HpUpSkill")]
-public class HPUpSkill : SkillBase
+public class HpUpSkill : SkillBase
 {
     public override bool CanAcquire(int acquireCount)
     {
@@ -17,6 +17,7 @@ public class HPUpSkill : SkillBase
         }
 
         stats.AddMaxHealth(_hpUps[acquireCount - 1]);
+        Debug.Log(stats.MaxHealth);
     }
 
     [SerializeField] private float[] _hpUps;
