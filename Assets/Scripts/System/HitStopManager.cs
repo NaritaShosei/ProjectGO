@@ -39,16 +39,26 @@ public class HitStopManager : MonoBehaviour
         HitStopAsync(duration, timeScale).Forget();
     }
 
+    /// <summary>
+    /// ヒットストップをキャンセル
+    /// </summary>
+    public void CancelHitStop()
+    {
+        _hitStopCts?.Cancel();
+        ApplyScale(1f); // 明示的に戻す
+    }
+
     private readonly List<ISpeedChange> _targets = new();
     private float _currentScale = 1f;
     private CancellationTokenSource _hitStopCts;
 
     private async UniTaskVoid HitStopAsync(float duration, float timeScale)
     {
-
         _hitStopCts?.Cancel();
         _hitStopCts?.Dispose();
-        _hitStopCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        _hitStopCts = cts;
 
         ApplyScale(timeScale);
 
@@ -57,27 +67,30 @@ public class HitStopManager : MonoBehaviour
             await UniTask.Delay(
                 TimeSpan.FromSeconds(duration),
                 delayType: DelayType.UnscaledDeltaTime,
-                cancellationToken: destroyCancellationToken
+                cancellationToken: cts.Token
             );
-
             ApplyScale(1f);
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
-            // ヒットストップがキャンセルされた場合は何もしない
+            // 上書きキャンセル or destroyCancellationToken によるキャンセル
         }
         finally
         {
-            _hitStopCts.Dispose();
-            _hitStopCts = null;
+            // 所有権チェック：自分が生成したCTSがまだ有効なら後始末する
+            // 別タスクにより_hitStopCtsが書き換わっていればスキップ
+            if (ReferenceEquals(_hitStopCts, cts))
+            {
+                _hitStopCts.Dispose();
+                _hitStopCts = null;
+            }
         }
     }
 
     private void ApplyScale(float scale)
     {
         _currentScale = scale;
-
-        foreach (var target in _targets)
+        foreach (var target in _targets.ToArray()) // スナップショット
         {
             target.OnSpeedChange(_currentScale);
         }
