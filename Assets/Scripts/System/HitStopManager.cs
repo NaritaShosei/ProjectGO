@@ -1,6 +1,7 @@
 // HitStopManager.cs
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -40,28 +41,36 @@ public class HitStopManager : MonoBehaviour
 
     private readonly List<ISpeedChange> _targets = new();
     private float _currentScale = 1f;
-    private bool _isActive = false;
+    private CancellationTokenSource _hitStopCts;
 
     private async UniTaskVoid HitStopAsync(float duration, float timeScale)
     {
-        // 実行中なら上書き（キャンセルして再実行）
-        if (_isActive)
-        {
-            // 一旦通常速度に戻してから再発動
-            ApplyScale(1f);
-        }
 
-        _isActive = true;
+        _hitStopCts?.Cancel();
+        _hitStopCts?.Dispose();
+        _hitStopCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+
         ApplyScale(timeScale);
 
-        await UniTask.Delay(
-            TimeSpan.FromSeconds(duration),
-            delayType: DelayType.UnscaledDeltaTime,
-            cancellationToken: destroyCancellationToken
-        );
+        try
+        {
+            await UniTask.Delay(
+                TimeSpan.FromSeconds(duration),
+                delayType: DelayType.UnscaledDeltaTime,
+                cancellationToken: destroyCancellationToken
+            );
 
-        ApplyScale(1f);
-        _isActive = false;
+            ApplyScale(1f);
+        }
+        catch(OperationCanceledException)
+        {
+            // ヒットストップがキャンセルされた場合は何もしない
+        }
+        finally
+        {
+            _hitStopCts.Dispose();
+            _hitStopCts = null;
+        }
     }
 
     private void ApplyScale(float scale)
@@ -76,6 +85,8 @@ public class HitStopManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        _hitStopCts?.Cancel();
+        _hitStopCts?.Dispose();
         _targets.Clear();
     }
 }
