@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class BossCore : MonoBehaviour, IEnemy
@@ -28,6 +28,8 @@ public class BossCore : MonoBehaviour, IEnemy
             PlayerMode = context.PlayerMode
         });
     }
+
+    public  void OnConditionInterrupt() { }
 
     public void Init(IPlayer player)
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 // ボス用のオブジェクト
@@ -33,6 +33,8 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     {
         // プレイヤーの参照は不要
     }
+    public void OnConditionInterrupt() { }
+
 
     [SerializeField] private float _hp = 50;
     [SerializeField] private GameObject _core;

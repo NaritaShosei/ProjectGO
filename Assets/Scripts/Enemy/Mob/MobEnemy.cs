@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 // NOTE:
@@ -17,6 +18,8 @@ public class MobEnemy : Enemy
         _context = new EnemyContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
+
+        _conditionController = new EnemyConditionController(this);
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
@@ -58,7 +61,28 @@ public class MobEnemy : Enemy
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        TryApplyElectricShockSkill(context.ElectricShock);
+
+
+        if(context.Knockback != null)
+        {
+            // Knockback?はそのまま渡せないので。。
+            KnockbackContext temp = (KnockbackContext)context.Knockback;
+            _conditionController.ApplyCondition(new KnockbackCondition(temp));
+        }
+
+        if(CheckProbability(context.ElectricShock.GrantEffectProbability))
+        {
+            // もちろんボスじゃないのでfalse
+            _conditionController.ApplyCondition(
+                new ElectrifiedCondition(context.ElectricShock.DurationEffect,　enemyIsBoss: false));
+
+            this.ActivateShockDebuff().Forget();
+        }
+    }
+
+    public override void OnConditionInterrupt()
+    {
+        _runner.ForceExitAction();
     }
 
     // Armorの登録
@@ -67,6 +91,7 @@ public class MobEnemy : Enemy
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
     private EnemyStateContext _state;
+    private EnemyConditionController _conditionController;
 
     private void OnDestroy()
     {
@@ -76,23 +101,8 @@ public class MobEnemy : Enemy
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_runner == null) { return; }
+        _conditionController.Tick(deltaTime);
         _runner.Tick(deltaTime);
-    }
-
-    private void TryApplyElectricShockSkill(ElectricShock electricShock)
-    {
-
-        //最低限の感電状態でreturn
-        if (this._defenceContext.HasShockDebuff) return;
-
-        if (CheckProbability(electricShock.GrantEffectProbability))
-        {
-            this.ActivateShockDebuff().Forget();
-
-            _state.SetElectrifiedTime(electricShock.DurationEffect);
-
-            _state.ChangeState(EnemyState.Electrified);
-        }
     }
 
     /// <summary>

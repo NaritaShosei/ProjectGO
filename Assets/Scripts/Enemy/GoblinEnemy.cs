@@ -32,7 +32,10 @@ public class GoblinEnemy : Enemy
     private EnemyContext _context;
     private EnemyStateContext _state;
 
-
+    public override void OnConditionInterrupt()
+    {
+        _runner.ForceExitAction();
+    }
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_runner == null) { return; }

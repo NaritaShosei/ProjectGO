@@ -18,7 +18,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     public void AddKnockBackForce(Vector3 direction)
     {
-        // ノックバック
+        transform.position += direction;
     }
 
     public Transform GetTargetCenter()
@@ -63,6 +63,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         _defenceContext.HasShockDebuff = false;
     }
+
+    public abstract void OnConditionInterrupt();
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
@@ -137,6 +139,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
+
 
 }
 

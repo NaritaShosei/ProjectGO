@@ -13,9 +13,10 @@ public sealed class KnockbackCondition : IEnemyCondition
     public bool IsFinished => _time <= 0f;
 
     // Condition作成時にKnockbackの方向を計算
-    public KnockbackCondition(Vector3 dir, float power)
+    public KnockbackCondition(KnockbackContext context)
     {
-        _velocity = dir.normalized * power;
+        // 上方向には対応していない
+        _velocity = context.Direction.normalized * context.Power;
 
         // ノックバック時間固定　
         // あとからいじれるようにするかはプランナーと相談
@@ -24,19 +25,22 @@ public sealed class KnockbackCondition : IEnemyCondition
 
     public void OnEnter(IEnemy enemy)
     {
-        // TODO: IEnemyにVelocityを追加してノックバックを実行する
-        // enemy.Velocity = _velocity;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log("ノックバック開始");
+#endif
     }
 
-    public void Tick(IEnemy enemy, float dt)
+    public void Tick(IEnemy enemy, float deltaTime)
     {
-        _time -= dt;
-        // enemy.transform.position += enemy.Velocity * dt;
+        _time -= deltaTime;
+        enemy.AddKnockBackForce(_velocity * deltaTime);
     }
 
     public void OnExit(IEnemy enemy)
     {
-        // enemy.Velocity = Vector3.zero;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log("ノックバック終了");
+#endif
     }
 
     private float _time;

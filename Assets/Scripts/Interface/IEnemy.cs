@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public interface IEnemy : ICharacter
@@ -21,4 +21,9 @@ public interface IEnemy : ICharacter
     /// Playerの参照をもらう
     /// </summary>
     public void Init(IPlayer player);
+
+    /// <summary>
+    /// ConditionによりActionを阻害する
+    /// </summary>
+    public void OnConditionInterrupt();
 }
