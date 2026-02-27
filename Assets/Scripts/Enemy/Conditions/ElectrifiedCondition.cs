@@ -18,6 +18,8 @@ public sealed class ElectrifiedCondition : IEnemyCondition
         float duration,
         bool enemyIsBoss)
     {
+        if (duration <= 0f)
+            throw new System.ArgumentOutOfRangeException(nameof(duration), "duration must be positive");
         _duration = duration;
         _enemyIsBoss = enemyIsBoss;
     }

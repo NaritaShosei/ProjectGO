@@ -101,8 +101,9 @@ public class MobEnemy : Enemy
 
     protected override void UpdateEnemy(float deltaTime)
     {
-        if (_runner == null) { return; }
+        if (_runner == null || _conditionController == null) { return; }
         _conditionController.Tick(deltaTime);
+        if (_conditionController.BlocksAction) { return; }
         _runner.Tick(deltaTime);
     }
 

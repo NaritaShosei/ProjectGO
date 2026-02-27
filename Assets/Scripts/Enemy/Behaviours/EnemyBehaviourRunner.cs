@@ -22,7 +22,7 @@ public class EnemyBehaviourRunner
     // あとでTurnの処理を今後追加する。
     public void Tick(float deltaTime)
     {
-        if(_owner.ConditionController.BlocksAction) return;
+        if (_owner.ConditionController?.BlocksAction == true) return;
 
         // 現在Behaviourの継続判定
         if (_current != null && _current.CanContinue())
