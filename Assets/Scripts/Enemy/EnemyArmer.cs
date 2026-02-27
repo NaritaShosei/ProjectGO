@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyArmer : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+    public EnemyConditionController ConditionController { get; }
+    public Vector3 Position { get => transform.position; }
 
     public bool IsBroken => _hp <= 0;
     public void AddKnockBackForce(Vector3 direction)
@@ -34,7 +36,10 @@ public class EnemyArmer : MonoBehaviour, IEnemy
         // プレイヤーの参照は不要
     }
     public void OnConditionInterrupt() { }
-
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
 
     [SerializeField] private float _hp = 50;
     [SerializeField] private GameObject _core;

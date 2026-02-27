@@ -3,6 +3,10 @@ using UnityEngine;
 
 public interface IEnemy : ICharacter
 {
+    public EnemyConditionController ConditionController { get; }
+
+    public Vector3 Position { get; }
+
     /// <summary>
     /// 死亡時に発火するイベント
     /// </summary>
@@ -26,4 +30,6 @@ public interface IEnemy : ICharacter
     /// ConditionによりActionを阻害する
     /// </summary>
     public void OnConditionInterrupt();
+
+    public void SetPosition(Vector3 position); 
 }

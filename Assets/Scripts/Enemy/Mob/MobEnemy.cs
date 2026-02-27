@@ -11,6 +11,7 @@ using UnityEngine;
 
 public class MobEnemy : Enemy
 {
+    public override EnemyConditionController ConditionController { get => _conditionController; }    
     public override void Init(IPlayer player)
     {
         base.Init(player);
