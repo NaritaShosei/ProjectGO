@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Player : MonoBehaviour, IPlayer, IStamina
+public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 {
     public float AttackPower => _playerStats.AttackPower;
     public float CriticalRate => _playerStats.CriticalRate;
@@ -15,6 +15,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
     public float MaxStamina => _playerStats.MaxStamina;
 
     public float CurrentStamina => _playerStats.CurrentStamina;
+
+    public float TimeScale { get; set; } = 1f;
 
     public event Action OnDead;
     public event Action<float, float> OnHealthChanged;
@@ -39,6 +41,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina
            _attack);
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
+
+        ServiceLocator.Get<HitStopManager>().Register(this);
     }
 
     public Transform GetTargetCenter()
@@ -97,6 +101,12 @@ public class Player : MonoBehaviour, IPlayer, IStamina
         _playerStats.AddMaxStamina(value);
     }
 
+    public void OnSpeedChange(float timeScale)
+    {
+        TimeScale = timeScale;
+        _playerAnimationController.SetAnimSpeed(timeScale);
+        _move.SetTimeScale(timeScale);
+    }
 
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
