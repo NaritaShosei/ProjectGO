@@ -42,7 +42,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
 
-        ServiceLocator.Get<HitStopManager>().Register(this);
+        ServiceLocator.Get<HitStopManager>().Register(this, HitStopTargetGroup.Player);
     }
 
     public Transform GetTargetCenter()
