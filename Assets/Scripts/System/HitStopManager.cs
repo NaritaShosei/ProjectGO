@@ -1,18 +1,21 @@
-// HitStopManager.cs
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
 
 /// <summary>
-/// ヒットストップを管理するマネージャー
-/// ISpeedChangeを実装したオブジェクトを登録・解除して対象を増減できる
+/// ヒットストップを管理するマネージャー。
+/// グループ別に ISpeedChange を登録し、
+/// HitStopData と命中結果を受け取ってヒットストップを発動する。
 /// </summary>
-public class HitStopManager
+public sealed class HitStopManager : IDisposable
 {
+    // =============================
+    // Constructor
+    // =============================
+
     /// <summary>
-    /// コンストラクタで自身をサービスロケーターに登録
+    /// ヒットストップマネージャーを生成し、ServiceLocator に登録する
     /// </summary>
     public HitStopManager()
     {
@@ -20,94 +23,200 @@ public class HitStopManager
     }
 
     /// <summary>
-    /// ヒットストップ対象を登録
+    /// 指定グループにヒットストップ対象を登録する
     /// </summary>
-    public void Register(ISpeedChange target)
+    public void Register(ISpeedChange target, HitStopTargetGroup group)
     {
-        if (target == null || _targets.Contains(target)) return;
-        _targets.Add(target);
+        if (target == null) return;
+
+        if (_groupTargets.TryGetValue(group, out var list) &&
+            !list.Contains(target))
+        {
+            list.Add(target);
+        }
     }
 
     /// <summary>
-    /// ヒットストップ対象を解除
+    /// 指定グループからヒットストップ対象を解除する
     /// </summary>
-    public void Unregister(ISpeedChange target)
+    public void Unregister(ISpeedChange target, HitStopTargetGroup group)
     {
-        if (target == null || !_targets.Contains(target)) return;
-        _targets.Remove(target);
+        if (target == null) return;
+
+        _groupTargets.GetValueOrDefault(group)?.Remove(target);
     }
 
     /// <summary>
-    /// ヒットストップを発動
+    /// 全グループからヒットストップ対象を解除する
+    /// （オブジェクト破棄時などに使用）
     /// </summary>
-    /// <param name="duration">停止時間（秒）</param>
-    /// <param name="timeScale">停止中のスケール（0で完全停止）</param>
-    public void TriggerHitStop(float duration, float timeScale = 0f)
+    public void UnregisterFromAll(ISpeedChange target)
     {
-        HitStopAsync(duration, timeScale).Forget();
+        if (target == null) return;
+
+        foreach (var list in _groupTargets.Values)
+        {
+            list.Remove(target);
+        }
     }
 
     /// <summary>
-    /// ヒットストップをキャンセル
+    /// HitStopData と命中結果を元にヒットストップを発動する
     /// </summary>
-    public void CancelHitStop()
+    /// <param name="data">攻撃データが持つ HitStopData</param>
+    /// <param name="isWeakPoint">弱点ヒットか</param>
+    /// <param name="isArmorBreak">鎧破壊が発生したか</param>
+    /// <param name="isKill">撃破したか</param>
+    /// <param name="hitEnemyTarget">
+    /// ヒットした敵（HitEnemy グループの絞り込みに使用）
+    /// </param>
+    public void Trigger(
+        HitStopData data,
+        bool isWeakPoint = false,
+        bool isArmorBreak = false,
+        bool isKill = false,
+        ISpeedChange hitEnemyTarget = null)
     {
-        _hitStopCts?.Cancel();
-        ApplyScale(1f); // 明示的に戻す
+        if (data == null) return;
+
+        float duration = data.GetDuration(isWeakPoint, isArmorBreak, isKill);
+
+        ExecuteHitStopAsync(
+            duration,
+            data.TimeScale,
+            data.TargetGroup,
+            hitEnemyTarget
+        ).Forget();
     }
 
-    private readonly List<ISpeedChange> _targets = new();
-    private float _currentScale = 1f;
-    private CancellationTokenSource _hitStopCts;
-
-      private async UniTaskVoid HitStopAsync(float duration, float timeScale)
+    /// <summary>
+    /// 時間・対象を直接指定してヒットストップを発動する
+    /// （必殺技・死亡演出など特殊ケース用）
+    /// </summary>
+    public void TriggerDirect(
+        float duration,
+        HitStopTargetGroup targetGroup,
+        float timeScale = 0f,
+        ISpeedChange hitEnemyTarget = null)
     {
-        _hitStopCts?.Cancel();
-        _hitStopCts?.Dispose();
+        ExecuteHitStopAsync(
+            duration,
+            timeScale,
+            targetGroup,
+            hitEnemyTarget
+        ).Forget();
+    }
 
-        var cts = new CancellationTokenSource();
-        _hitStopCts = cts;
+    /// <summary>
+    /// 現在発動中のヒットストップを即時キャンセルし、速度を元に戻す
+    /// </summary>
+    public void Cancel()
+    {
+        _hitStopCancellation?.Cancel();
+        ApplySpeedScale(1f, ~HitStopTargetGroup.None, null);
+    }
 
-        ApplyScale(timeScale);
+    /// <summary>
+    /// マネージャーを破棄し、全リソースを解放する
+    /// </summary>
+    public void Dispose()
+    {
+        _hitStopCancellation?.Cancel();
+        _hitStopCancellation?.Dispose();
+        _hitStopCancellation = null;
+
+        foreach (var list in _groupTargets.Values)
+        {
+            list.Clear();
+        }
+    }
+
+    /// <summary>
+    /// グループごとのヒットストップ対象一覧
+    /// </summary>
+    private readonly Dictionary<HitStopTargetGroup, List<ISpeedChange>> _groupTargets =
+        new()
+        {
+            { HitStopTargetGroup.Player,     new List<ISpeedChange>() },
+            { HitStopTargetGroup.HitEnemy,   new List<ISpeedChange>() },
+            { HitStopTargetGroup.AllEnemies, new List<ISpeedChange>() },
+            { HitStopTargetGroup.Effects,    new List<ISpeedChange>() },
+            { HitStopTargetGroup.Camera,     new List<ISpeedChange>() },
+        };
+
+    /// <summary>
+    /// 現在発動中のヒットストップ用キャンセルトークン
+    /// </summary>
+    private CancellationTokenSource _hitStopCancellation;
+
+
+    /// <summary>
+    /// ヒットストップの非同期処理本体
+    /// </summary>
+    private async UniTaskVoid ExecuteHitStopAsync(
+        float duration,
+        float timeScale,
+        HitStopTargetGroup targetGroups,
+        ISpeedChange hitEnemyTarget)
+    {
+        // 既存ヒットストップをキャンセル
+        _hitStopCancellation?.Cancel();
+        _hitStopCancellation?.Dispose();
+
+        var cancellation = new CancellationTokenSource();
+        _hitStopCancellation = cancellation;
+
+        ApplySpeedScale(timeScale, targetGroups, hitEnemyTarget);
 
         try
         {
             await UniTask.Delay(
                 TimeSpan.FromSeconds(duration),
-                delayType: DelayType.UnscaledDeltaTime,
-                cancellationToken: cts.Token
+                DelayType.UnscaledDeltaTime,
+                PlayerLoopTiming.Update,
+                cancellation.Token
             );
-            ApplyScale(1f);
+
+            ApplySpeedScale(1f, targetGroups, hitEnemyTarget);
         }
         catch (OperationCanceledException)
         {
-            // 上書きキャンセル or destroyCancellationToken によるキャンセル
+            // キャンセル時は何もしない
         }
         finally
         {
-            // 所有権チェック：自分が生成したCTSがまだ有効なら後始末する
-            // 別タスクにより_hitStopCtsが書き換わっていればスキップ
-            if (ReferenceEquals(_hitStopCts, cts))
+            if (ReferenceEquals(_hitStopCancellation, cancellation))
             {
-                _hitStopCts.Dispose();
-                _hitStopCts = null;
+                _hitStopCancellation.Dispose();
+                _hitStopCancellation = null;
             }
         }
     }
 
-    private void ApplyScale(float scale)
+    /// <summary>
+    /// 指定グループの ISpeedChange に速度変更を適用する
+    /// </summary>
+    private void ApplySpeedScale(
+        float scale,
+        HitStopTargetGroup targetGroups,
+        ISpeedChange hitEnemyTarget)
     {
-        _currentScale = scale;
-        foreach (var target in _targets.ToArray()) // スナップショット
+        foreach (var (group, list) in _groupTargets)
         {
-            target.OnSpeedChange(_currentScale);
-        }
-    }
+            if ((targetGroups & group) == 0) continue;
 
-    private void OnDestroy()
-    {
-        _hitStopCts?.Cancel();
-        _hitStopCts?.Dispose();
-        _targets.Clear();
+            foreach (var target in list.ToArray())
+            {
+                // HitEnemy グループはヒットした敵 1 体のみに適用
+                if (group == HitStopTargetGroup.HitEnemy &&
+                    hitEnemyTarget != null &&
+                    !ReferenceEquals(target, hitEnemyTarget))
+                {
+                    continue;
+                }
+
+                target.OnSpeedChange(scale);
+            }
+        }
     }
 }
