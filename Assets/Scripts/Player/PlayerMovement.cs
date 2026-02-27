@@ -32,6 +32,11 @@ public class PlayerMovement : MonoBehaviour
         _attack.OnAttackMoveRequested += HandleAttackMove;
     }
 
+    public void SetTimeScale(float scale)
+    {
+        _timeScale = scale;
+    }
+
     [SerializeField] private Rigidbody _rb;
 
     private PlayerStateManager _playerStateManager;
@@ -42,6 +47,8 @@ public class PlayerMovement : MonoBehaviour
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
     private PlayerAttack _attack;
+
+    private float _timeScale = 1;
 
     private bool _canChainRoll;
     private float _chainTimer;
@@ -193,7 +200,7 @@ public class PlayerMovement : MonoBehaviour
             if (request.Target &&
                 Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
 
-            float t = elapsed / request.Duration;
+            float t = elapsed / request.Duration * _timeScale;
             // イージング（加速→減速）
             float smoothT = Mathf.SmoothStep(0, 1, t);
 
@@ -225,7 +232,7 @@ public class PlayerMovement : MonoBehaviour
             if (request.Target &&
                 Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
 
-            _rb.linearVelocity = moveDir * speed;
+            _rb.linearVelocity = moveDir * speed * _timeScale;
 
             elapsed += Time.fixedDeltaTime;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
@@ -264,7 +271,7 @@ public class PlayerMovement : MonoBehaviour
 
         var speed = _modeController.ModeData.MoveSpeed * inputMag;
 
-        _rb.linearVelocity = moveDir * speed;
+        _rb.linearVelocity = moveDir * speed * _timeScale;
     }
 
     private void Rotate()
@@ -291,7 +298,7 @@ public class PlayerMovement : MonoBehaviour
         transform.rotation = Quaternion.Slerp(
             transform.rotation,
             targetRotation,
-            rotateSpeed * Time.deltaTime
+            rotateSpeed * Time.deltaTime * _timeScale
         );
     }
 
@@ -323,7 +330,7 @@ public class PlayerMovement : MonoBehaviour
             while (t < dodgeData.Duration)
             {
                 _rb.linearVelocity = dodgeDir * dodgeData.Speed;
-                t += Time.deltaTime;
+                t += Time.deltaTime * _timeScale;
                 await UniTask.Yield(destroyCancellationToken);
             }
         }
@@ -400,7 +407,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_canChainRoll) { return; }
 
-        _chainTimer -= Time.deltaTime;
+        _chainTimer -= Time.deltaTime * _timeScale;
         if (_chainTimer <= 0f)
         {
             _canChainRoll = false;

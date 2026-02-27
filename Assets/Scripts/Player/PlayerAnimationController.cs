@@ -59,6 +59,31 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
         _animator.SetTrigger(AnimParams.Roll);
     }
 
+    public void SetAnimSpeed(float speed)
+    {
+        // 1 のときは元の速度に戻す
+        if (speed == 1f)
+        {
+            // animator.speed = 1f; とせずに、変更前の速度を保存しておいてそこに戻す
+            Debug.Log("[Animator]animator.speed = 1f; とせずに、変更前の速度を保存しておいてそこに戻す");
+            _animator.speed = _beforeAnimSpeed;
+            _isSpeedChanging = false;
+            return;
+        }
+
+        if (_isSpeedChanging)
+        {
+            Debug.LogWarning($"[Animator]現在速度変更中のため、SetAnimSpeedの呼び出しを無視します (requested: {speed})");
+            return;
+        }
+
+        // それ以外のときは現在の速度を保存して倍率適用
+        _beforeAnimSpeed = _animator.speed;
+        _animator.speed *= speed;
+        _isSpeedChanging = true;
+        Debug.Log($"[Animator]SetAnimSpeed: {_animator.speed} (before: {_beforeAnimSpeed}, multiplier: {speed})");
+    }
+
     public void OnDestroy()
     {
         if (_stateManager != null)
@@ -122,4 +147,7 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
 
     private PlayerStateManager _stateManager;
     private IModeController _modeController;
+
+    private float _beforeAnimSpeed = 1f;
+    private bool _isSpeedChanging = false;
 }
