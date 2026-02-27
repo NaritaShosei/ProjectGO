@@ -16,6 +16,9 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // ヒットストップマネージャーを初期化してサービスロケーターに登録
+        new HitStopManager();
+
         InitSequence();
         InitPlayer();
         InitCameraManager();
