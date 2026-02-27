@@ -10,10 +10,6 @@ using System.Threading;
 /// </summary>
 public sealed class HitStopManager : IDisposable
 {
-    // =============================
-    // Constructor
-    // =============================
-
     /// <summary>
     /// ヒットストップマネージャーを生成し、ServiceLocator に登録する
     /// </summary>
