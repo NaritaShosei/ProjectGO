@@ -9,8 +9,16 @@ using UnityEngine;
 /// ヒットストップを管理するマネージャー
 /// ISpeedChangeを実装したオブジェクトを登録・解除して対象を増減できる
 /// </summary>
-public class HitStopManager : MonoBehaviour
+public class HitStopManager
 {
+    /// <summary>
+    /// コンストラクタで自身をサービスロケーターに登録
+    /// </summary>
+    public HitStopManager()
+    {
+        ServiceLocator.Register(this);
+    }
+
     /// <summary>
     /// ヒットストップ対象を登録
     /// </summary>
@@ -52,12 +60,12 @@ public class HitStopManager : MonoBehaviour
     private float _currentScale = 1f;
     private CancellationTokenSource _hitStopCts;
 
-    private async UniTaskVoid HitStopAsync(float duration, float timeScale)
+      private async UniTaskVoid HitStopAsync(float duration, float timeScale)
     {
         _hitStopCts?.Cancel();
         _hitStopCts?.Dispose();
 
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        var cts = new CancellationTokenSource();
         _hitStopCts = cts;
 
         ApplyScale(timeScale);
