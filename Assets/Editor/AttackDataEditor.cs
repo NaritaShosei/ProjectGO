@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(AttackData))]
+[CanEditMultipleObjects]
 public class AttackDataEditor : Editor
 {
     // ---- プロパティの参照 ----
@@ -316,6 +317,7 @@ public class AttackDataEditor : Editor
 
     private void DrawLegend()
     {
+        // 複数選択時は最初の target を参照
         var data = (AttackData)target;
 
         EditorGUILayout.BeginHorizontal();
@@ -355,19 +357,22 @@ public class AttackDataEditor : Editor
     {
         if (!_showPreview) return;
 
-        var data = (AttackData)target;
-
         GetPivotAndDirection(sceneView, out var pivot, out var dir);
-
-        var attackPos = pivot + dir * data.AttackRange;
 
         Handles.matrix = Matrix4x4.identity;
 
-        DrawMovementPreview(pivot, dir, data);
-        DrawHomingPreview(pivot, dir, data);
-        DrawAttackSpherePreview(pivot, attackPos, data);
-        DrawKnockbackArrow(attackPos, dir, data);
-        DrawInfoLabel(attackPos, data);
+        // 複数選択されている全ての AttackData を描画
+        foreach (var t in targets)
+        {
+            var data = (AttackData)t;
+            var attackPos = pivot + dir * data.AttackRange;
+
+            DrawMovementPreview(pivot, dir, data);
+            DrawHomingPreview(pivot, dir, data);
+            DrawAttackSpherePreview(pivot, attackPos, data);
+            DrawKnockbackArrow(attackPos, dir, data);
+            DrawInfoLabel(attackPos, data);
+        }
     }
 
     // =========================================================
