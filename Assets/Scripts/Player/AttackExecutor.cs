@@ -46,18 +46,46 @@ public class AttackExecutor : MonoBehaviour
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
 
+        bool hasHitResult = false;
+        bool isWeakPoint = false;
+        bool isArmorBreak = false;
+        bool isKill = false;
+        ISpeedChange firstHitEnemy = null;
+
         foreach (var col in cols)
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                var perHitContext = context; // コピー
+                var perHitContext = context;
                 RollCritical(ref perHitContext, modeData);
-
                 perHitContext.OnHit?.Invoke();
 
                 var damageContext = BuildDamageContext(perHitContext);
+
+                damageContext.OnHitResult = result =>
+                {
+                    hasHitResult = true;
+                    // より強い結果で上書き
+                    if (result.IsWeakPoint) isWeakPoint = true;
+                    if (result.IsArmorBreak) isArmorBreak = true;
+                    if (result.IsKill) isKill = true;
+                    firstHitEnemy ??= enemy as ISpeedChange;
+                };
+
                 enemy.TakeDamage(damageContext);
             }
+        }
+
+        // 全員分の結果をまとめて1回だけTrigger
+        if (hasHitResult && ServiceLocator.TryGet(out HitStopManager hitStop))
+        {
+            hitStop.Trigger(
+                data: data.HitStopData,
+                isWeakPoint: isWeakPoint,
+                isArmorBreak: isArmorBreak,
+                isKill: isKill,
+                hitEnemyTarget: firstHitEnemy
+            );
         }
 
         // 攻撃直後スキルの発動
@@ -183,11 +211,29 @@ public struct DamageContext
     /// Valueでノックバックの方向や威力を取得可能。
     /// </summary>
     public KnockbackContext? Knockback;
+
+    /// <summary>
+    /// 攻撃がヒットした瞬間に発動するイベント。HitResultでヒットの結果を受け取ることができる。
+    /// </summary>
+    public Action<HitResult> OnHitResult;
 }
 
+/// <summary>
+/// ノックバックの方向や威力などの情報
+/// </summary>
 public struct KnockbackContext
 {
     public Vector3 Direction;
     public float Power;
     public float Upward;
+}
+
+/// <summary>
+/// 攻撃がヒットした際の結果に関する情報
+/// </summary>
+public struct HitResult
+{
+    public bool IsKill;
+    public bool IsArmorBreak;
+    public bool IsWeakPoint;
 }

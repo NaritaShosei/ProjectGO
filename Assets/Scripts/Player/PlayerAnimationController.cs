@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour,IAnimationController
+public class PlayerAnimationController : MonoBehaviour, IAnimationController
 {
     public void Init(PlayerStateManager stateManager, IModeController modeController)
     {
@@ -59,6 +59,29 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
         _animator.SetTrigger(AnimParams.Roll);
     }
 
+    public void SetAnimSpeed(float speed)
+    {
+        Debug.Log($"[SetAnimSpeed] speed={speed}, _isSpeedChanging={_isSpeedChanging}, _beforeAnimSpeed={_beforeAnimSpeed}, animator.speed={_animator.speed}");
+
+        if (speed == 1f)
+        {
+            if (_isSpeedChanging)
+            {
+                _animator.speed = _beforeAnimSpeed;
+                _isSpeedChanging = false;
+            }
+            return;
+        }
+
+        if (!_isSpeedChanging)
+        {
+            _beforeAnimSpeed = _animator.speed;
+            _isSpeedChanging = true;
+        }
+
+        _animator.speed = _beforeAnimSpeed * speed;
+    }
+
     public void OnDestroy()
     {
         if (_stateManager != null)
@@ -70,6 +93,11 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
     [SerializeField] private Animator _animator;
     private int _bodyLayer;
 
+    private PlayerStateManager _stateManager;
+    private IModeController _modeController;
+
+    private float _beforeAnimSpeed = 1f;
+    private bool _isSpeedChanging = false;
 
     // アニメーションパラメータ名（定数化）
     private static class AnimParams
@@ -119,7 +147,4 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
     {
         _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
     }
-
-    private PlayerStateManager _stateManager;
-    private IModeController _modeController;
 }

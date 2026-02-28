@@ -22,9 +22,9 @@ MonoBehaviour:
   _attackRange: -5
   _attackRadius: 5
   _nextComboAttackId: 2176
-  _enableKnockback: 0
+  _enableKnockback: 1
   _knockbackPower: 5
-  _knockbackUpward: 0
+  _knockbackUpward: 2.89
   _enableHoming: 0
   _homingRadius: 5
   _homingAngle: 360
@@ -35,3 +35,10 @@ MonoBehaviour:
   _moveDuration: 0.8
   _stopOnHit: 0
   _isPhantom: 1
+  _hitStopData:
+    _baseDuration: 0.08
+    _timeScale: 0
+    _targetGroup: 11
+    _weakPointMultiplier: 1.2
+    _breakOrKillMultiplier: 1.2
+    _weakAndBreakOrKillMultiplier: 1.4
