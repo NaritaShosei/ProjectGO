@@ -42,7 +42,10 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
 
-        ServiceLocator.Get<HitStopManager>().Register(this, HitStopTargetGroup.Player);
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            hitStopManager.Register(this, HitStopTargetGroup.Player);
+        }
     }
 
     public Transform GetTargetCenter()
@@ -127,6 +130,12 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
     private void OnDestroy()
     {
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+
+            hitStopManager.Unregister(this, HitStopTargetGroup.Player);
+        }
+
         if (_playerStats != null)
         {
             _playerStats.OnDead -= OnPlayerDead;
