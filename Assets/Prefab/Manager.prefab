@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 6852909700255633245}
   - component: {fileID: 6952864451618113907}
   - component: {fileID: 1034990955651455611}
+  - component: {fileID: 3235096991273326282}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -142,3 +143,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIPresenterInitializer
   _playerModeView: {fileID: 0}
   _playerGaugeView: {fileID: 0}
+--- !u!114 &3235096991273326282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4825095714001689550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c94372dc859ad49941082614bce2ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageUIManager
+  _popupPrefab: {fileID: 2541582240696732906, guid: 5b25ef3106ac6054897716eeefc0f548, type: 3}
+  _canvas: {fileID: 0}
+  _enemyManager: {fileID: 8507493287875435819}
+  _preloadCount: 20
