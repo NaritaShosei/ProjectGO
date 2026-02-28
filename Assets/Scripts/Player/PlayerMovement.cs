@@ -329,7 +329,7 @@ public class PlayerMovement : MonoBehaviour
         {
             while (t < dodgeData.Duration)
             {
-                _rb.linearVelocity = dodgeDir * dodgeData.Speed;
+                _rb.linearVelocity = dodgeDir * dodgeData.Speed * _timeScale;
                 t += Time.deltaTime * _timeScale;
                 await UniTask.Yield(destroyCancellationToken);
             }

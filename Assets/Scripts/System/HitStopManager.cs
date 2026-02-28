@@ -125,6 +125,8 @@ public sealed class HitStopManager : IDisposable
         {
             list.Clear();
         }
+
+        ServiceLocator.Unregister<HitStopManager>();
     }
 
     /// <summary>
