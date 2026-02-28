@@ -14,10 +14,15 @@ public class DamageNuber : MonoBehaviour
     [SerializeField] private float _fadeDuration = 0.2f;//フェードの時間
     [SerializeField] private float _popupDistance = 10f;
 
+    private Camera _mainCamera;
     private Vector3 _worldPosition;//敵の座標を収納
-    
 
-    private void Initialize(float value, Vector3 hitPoint, DamageType type)
+    private void Awake()
+    {
+        _mainCamera = Camera.main;
+    }
+
+    public void Initialize(float value, Vector3 hitPoint, DamageType type)
     {
         _worldPosition = hitPoint;//ヒット位置
 
@@ -30,7 +35,7 @@ public class DamageNuber : MonoBehaviour
 
     private void Update()
     {
-        transform.position = Camera.main.WorldToScreenPoint(_worldPosition);
+        transform.position = _mainCamera.WorldToScreenPoint(_worldPosition);
     }
 
     /// <summary>

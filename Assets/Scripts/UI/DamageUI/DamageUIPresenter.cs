@@ -9,7 +9,7 @@ public class DamageUIPresenter : MonoBehaviour
 
     private void OnEnable()
     {
-        //被ダメージのイベントを登録
+        //被ダメージのイベント登録
     }
     private void OnDisable()
     {
