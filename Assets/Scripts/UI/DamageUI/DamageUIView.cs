@@ -5,19 +5,34 @@ using UnityEngine;
 /// </summary>
 public class DamageUIView : MonoBehaviour
 {
-    [SerializeField] private GameObject _prefab;
+    [SerializeField] private DamageNuber _prefab;
     [SerializeField] private Transform _canvasRoot;
 
+    /// <summary>
+    /// 通常ダメージUI
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="worldPos"></param>
     public void ShowNomal(float value, Vector3 worldPos)
     {
         Create(value, worldPos, DamageType.Normal);
     }
 
+    /// <summary>
+    /// 弱点UI 
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="worldPos"></param>
     public void ShowWeak(float value, Vector3 worldPos)
     {
         Create(value, worldPos, DamageType.Weak);
     }
     
+    /// <summary>
+    /// クリティカルUI
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="worldPos"></param>
     public void ShowCritical(float value, Vector3 worldPos)
     {
         Create(value, worldPos, DamageType.Critical);
@@ -25,6 +40,7 @@ public class DamageUIView : MonoBehaviour
 
     private void Create(float value,Vector3 worldPos,DamageType type)
     {
-        //DOTweenでUI生成
+        DamageNuber nuber = Instantiate(_prefab, _canvasRoot);
+        nuber.Initialize(value, worldPos, type);
     }
 }
