@@ -207,7 +207,7 @@ public class PlayerMovement : MonoBehaviour
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, smoothT);
             _rb.MovePosition(newPos);
 
-            elapsed += Time.fixedDeltaTime;
+            elapsed += Time.fixedDeltaTime * _timeScale;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
     }
@@ -234,7 +234,7 @@ public class PlayerMovement : MonoBehaviour
 
             _rb.linearVelocity = moveDir * speed * _timeScale;
 
-            elapsed += Time.fixedDeltaTime;
+            elapsed += Time.fixedDeltaTime * _timeScale;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
     }

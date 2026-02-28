@@ -175,7 +175,6 @@ public sealed class HitStopManager : IDisposable
                 cancellation.Token
             );
 
-            ApplySpeedScale(1f, targetGroups, hitEnemyTarget);
         }
         catch (OperationCanceledException)
         {
@@ -183,6 +182,8 @@ public sealed class HitStopManager : IDisposable
         }
         finally
         {
+            ApplySpeedScale(1f, targetGroups, hitEnemyTarget);
+
             if (ReferenceEquals(_hitStopCancellation, cancellation))
             {
                 _hitStopCancellation.Dispose();
