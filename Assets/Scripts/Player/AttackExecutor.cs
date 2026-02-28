@@ -46,33 +46,46 @@ public class AttackExecutor : MonoBehaviour
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
 
+        bool hasHitResult = false;
+        bool isWeakPoint = false;
+        bool isArmorBreak = false;
+        bool isKill = false;
+        ISpeedChange firstHitEnemy = null;
+
         foreach (var col in cols)
         {
             if (col.TryGetComponent(out IEnemy enemy))
             {
-                var perHitContext = context; // コピー
+                var perHitContext = context;
                 RollCritical(ref perHitContext, modeData);
-
                 perHitContext.OnHit?.Invoke();
 
                 var damageContext = BuildDamageContext(perHitContext);
 
                 damageContext.OnHitResult = result =>
                 {
-                    if (ServiceLocator.TryGet(out HitStopManager hitStop))
-                    {
-                        hitStop.Trigger(
-                            data: data.HitStopData,
-                            isWeakPoint: result.IsWeakPoint,
-                            isArmorBreak: result.IsArmorBreak,
-                            isKill: result.IsKill,
-                            hitEnemyTarget: enemy as ISpeedChange
-                        );
-                    }
+                    hasHitResult = true;
+                    // より強い結果で上書き
+                    if (result.IsWeakPoint) isWeakPoint = true;
+                    if (result.IsArmorBreak) isArmorBreak = true;
+                    if (result.IsKill) isKill = true;
+                    firstHitEnemy ??= enemy as ISpeedChange;
                 };
 
                 enemy.TakeDamage(damageContext);
             }
+        }
+
+        // 全員分の結果をまとめて1回だけTrigger
+        if (hasHitResult && ServiceLocator.TryGet(out HitStopManager hitStop))
+        {
+            hitStop.Trigger(
+                data: data.HitStopData,
+                isWeakPoint: isWeakPoint,
+                isArmorBreak: isArmorBreak,
+                isKill: isKill,
+                hitEnemyTarget: firstHitEnemy
+            );
         }
 
         // 攻撃直後スキルの発動
