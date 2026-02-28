@@ -61,27 +61,22 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
 
     public void SetAnimSpeed(float speed)
     {
-        // 1 のときは元の速度に戻す
+        Debug.Log($"[SetAnimSpeed] speed={speed}, _isSpeedChanging={_isSpeedChanging}, _beforeAnimSpeed={_beforeAnimSpeed}, animator.speed={_animator.speed}");
+            
         if (speed == 1f)
         {
-            // animator.speed = 1f; とせずに、変更前の速度を保存しておいてそこに戻す
-            Debug.Log("[Animator]animator.speed = 1f; とせずに、変更前の速度を保存しておいてそこに戻す");
             _animator.speed = _beforeAnimSpeed;
             _isSpeedChanging = false;
             return;
         }
 
-        if (_isSpeedChanging)
+        if (!_isSpeedChanging)
         {
-            Debug.LogWarning($"[Animator]現在速度変更中のため、SetAnimSpeedの呼び出しを無視します (requested: {speed})");
-            return;
+            _beforeAnimSpeed = _animator.speed;
+            _isSpeedChanging = true;
         }
 
-        // それ以外のときは現在の速度を保存して倍率適用
-        _beforeAnimSpeed = _animator.speed;
-        _animator.speed *= speed;
-        _isSpeedChanging = true;
-        Debug.Log($"[Animator]SetAnimSpeed: {_animator.speed} (before: {_beforeAnimSpeed}, multiplier: {speed})");
+        _animator.speed = _beforeAnimSpeed * speed;
     }
 
     public void OnDestroy()
@@ -95,6 +90,11 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
     [SerializeField] private Animator _animator;
     private int _bodyLayer;
 
+    private PlayerStateManager _stateManager;
+    private IModeController _modeController;
+
+    private float _beforeAnimSpeed = 1f;
+    private bool _isSpeedChanging = false;
 
     // アニメーションパラメータ名（定数化）
     private static class AnimParams
@@ -144,10 +144,4 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
     {
         _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
     }
-
-    private PlayerStateManager _stateManager;
-    private IModeController _modeController;
-
-    private float _beforeAnimSpeed = 1f;
-    private bool _isSpeedChanging = false;
 }
