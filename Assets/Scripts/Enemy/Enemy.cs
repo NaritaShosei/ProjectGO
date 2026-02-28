@@ -11,6 +11,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
 
+    public virtual EnemyConditionController ConditionController { get ; }
+
+    public Vector3 Position { get => transform.position; }
+
+
     public virtual void Init(IPlayer player)
     {
         _playerTransform = player.GetTargetCenter();
@@ -18,7 +23,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     public void AddKnockBackForce(Vector3 direction)
     {
-        // ノックバック
+        transform.position += direction;
     }
 
     public Transform GetTargetCenter()
@@ -63,6 +68,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         _defenceContext.HasShockDebuff = false;
     }
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
+
+
+    public abstract void OnConditionInterrupt();
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
@@ -137,6 +149,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
+
 
 }
 
