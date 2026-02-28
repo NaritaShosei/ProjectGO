@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
@@ -15,6 +15,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     public Vector3 Position { get => transform.position; }
 
+    public float TimeScale { get; set; } = 1f;
+
+    public void OnSpeedChange(float scale)
+    {
+        TimeScale = scale;
+    }
 
     public virtual void Init(IPlayer player)
     {
@@ -59,23 +65,24 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         _defenceContext.HasShockDebuff = true;
 
+        float t = 0f;
+        float duration = durationSeconds;
+
         try
         {
-            // 10秒後にHasShockDebuffを切り替える
-            await UniTask.Delay(
-                delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
-                delayType: DelayType.DeltaTime,
-                delayTiming: PlayerLoopTiming.Update, // Enemy自体がUpdateを持っているのでUpdateでいいと判断
-                cancellationToken: _shockCts.Token
-                );
+            while (t < duration)
+            {
+                t += Time.deltaTime * TimeScale;
+                await UniTask.Yield(_shockCts.Token);
+            }
         }
         catch (OperationCanceledException)
         {
-            // 死亡時 OR 感電キャンセル
         }
 
         _defenceContext.HasShockDebuff = false;
     }
+
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
@@ -90,6 +97,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
+    private HitStopManager _hitStopManager;
 
     protected bool _isDead; // 軽い実装のため bool のフラグを使用
 
@@ -97,6 +105,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
     protected virtual void Awake()
     {
+        _hitStopManager = ServiceLocator.Get<HitStopManager>();
+        _hitStopManager?.Register(this, HitStopTargetGroup.AllEnemies);
+
         // OnDead時の登録
         OnDead += HandleDead;
 
@@ -117,14 +128,17 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         // 鎧生成関連はすべてMobEnemyのほうで実装
     }
     protected virtual void Update()
-
     {
-        if (_isDead) { return; }
-        UpdateEnemy(Time.deltaTime);
+        if (_isDead) return;
+
+        float dt = Time.deltaTime * TimeScale;
+        UpdateEnemy(dt);
     }
 
     private void OnDestroy()
     {
+        _hitStopManager?.UnregisterFromAll(this);
+
         _stats.OnHealthZero -= _stats.Kill;
 
         _stats.OnDead -= OnDeath;

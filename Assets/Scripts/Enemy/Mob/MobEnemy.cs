@@ -61,7 +61,7 @@ public class MobEnemy : Enemy
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        bool isKill = _stats.CurrentHealth <= 0; ;
+        bool isKill = _stats.CurrentHealth <= 0; 
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
         bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
