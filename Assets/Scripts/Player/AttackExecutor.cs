@@ -46,6 +46,7 @@ public class AttackExecutor : MonoBehaviour
         // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
 
+        bool hasHitResult = false;
         bool isWeakPoint = false;
         bool isArmorBreak = false;
         bool isKill = false;
@@ -63,6 +64,7 @@ public class AttackExecutor : MonoBehaviour
 
                 damageContext.OnHitResult = result =>
                 {
+                    hasHitResult = true;
                     // より強い結果で上書き
                     if (result.IsWeakPoint) isWeakPoint = true;
                     if (result.IsArmorBreak) isArmorBreak = true;
@@ -75,7 +77,7 @@ public class AttackExecutor : MonoBehaviour
         }
 
         // 全員分の結果をまとめて1回だけTrigger
-        if (firstHitEnemy != null && ServiceLocator.TryGet(out HitStopManager hitStop))
+        if (hasHitResult && ServiceLocator.TryGet(out HitStopManager hitStop))
         {
             hitStop.Trigger(
                 data: data.HitStopData,

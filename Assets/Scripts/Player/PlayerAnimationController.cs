@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour,IAnimationController
+public class PlayerAnimationController : MonoBehaviour, IAnimationController
 {
     public void Init(PlayerStateManager stateManager, IModeController modeController)
     {
@@ -62,11 +62,14 @@ public class PlayerAnimationController : MonoBehaviour,IAnimationController
     public void SetAnimSpeed(float speed)
     {
         Debug.Log($"[SetAnimSpeed] speed={speed}, _isSpeedChanging={_isSpeedChanging}, _beforeAnimSpeed={_beforeAnimSpeed}, animator.speed={_animator.speed}");
-            
+
         if (speed == 1f)
         {
-            _animator.speed = _beforeAnimSpeed;
-            _isSpeedChanging = false;
+            if (_isSpeedChanging)
+            {
+                _animator.speed = _beforeAnimSpeed;
+                _isSpeedChanging = false;
+            }
             return;
         }
 
