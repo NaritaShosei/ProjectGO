@@ -56,6 +56,21 @@ public class AttackExecutor : MonoBehaviour
                 perHitContext.OnHit?.Invoke();
 
                 var damageContext = BuildDamageContext(perHitContext);
+
+                damageContext.OnHitResult = result =>
+                {
+                    if (ServiceLocator.TryGet(out HitStopManager hitStop))
+                    {
+                        hitStop.Trigger(
+                            data: data.HitStopData,
+                            isWeakPoint: result.IsWeakPoint,
+                            isArmorBreak: result.IsArmorBreak,
+                            isKill: result.IsKill,
+                            hitEnemyTarget: enemy as ISpeedChange
+                        );
+                    }
+                };
+
                 enemy.TakeDamage(damageContext);
             }
         }
@@ -183,11 +198,29 @@ public struct DamageContext
     /// Valueでノックバックの方向や威力を取得可能。
     /// </summary>
     public KnockbackContext? Knockback;
+
+    /// <summary>
+    /// 攻撃がヒットした瞬間に発動するイベント。HitResultでヒットの結果を受け取ることができる。
+    /// </summary>
+    public Action<HitResult> OnHitResult;
 }
 
+/// <summary>
+/// ノックバックの方向や威力などの情報
+/// </summary>
 public struct KnockbackContext
 {
     public Vector3 Direction;
     public float Power;
     public float Upward;
+}
+
+/// <summary>
+/// 攻撃がヒットした際の結果に関する情報
+/// </summary>
+public struct HitResult
+{
+    public bool IsKill;
+    public bool IsArmorBreak;
+    public bool IsWeakPoint;
 }

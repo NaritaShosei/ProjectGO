@@ -13,9 +13,13 @@ public class GameManager : MonoBehaviour
 
     private SceneTransitionManager _sceneTransitionManager;
 
+    private HitStopManager _hitStopManager;
 
     private void Start()
     {
+        // ヒットストップマネージャーを初期化してサービスロケーターに登録
+        _hitStopManager = new HitStopManager();
+
         InitSequence();
         InitPlayer();
         InitCameraManager();
@@ -39,6 +43,8 @@ public class GameManager : MonoBehaviour
         {
             _playerGaugePresenter.Dispose();
         }
+
+        _hitStopManager?.Dispose();
     }
 
     private void InitPlayer()

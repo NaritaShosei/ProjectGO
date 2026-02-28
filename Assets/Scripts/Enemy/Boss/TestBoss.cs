@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class TestBoss : BossEnemy
 {
@@ -35,6 +35,10 @@ public class TestBoss : BossEnemy
             // 最低限：死亡
             OnDeath();
         }
+    }
+
+    public override void OnConditionInterrupt()
+    {
     }
 
     private void BreakCore()
