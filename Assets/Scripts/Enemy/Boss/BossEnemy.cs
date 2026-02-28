@@ -21,6 +21,16 @@ public abstract class BossEnemy : Enemy
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
         _stats.TakeDamage(damage);
+
+        bool isKill = _stats.CurrentHealth <= 0;
+
+        context.OnHitResult?.Invoke(
+            new HitResult
+            {
+                IsKill = isKill,
+                IsArmorBreak = true,
+                IsWeakPoint = true
+            });
     }
 
     [SerializeField] protected private BossActionPhaseController _bossPhaseController;

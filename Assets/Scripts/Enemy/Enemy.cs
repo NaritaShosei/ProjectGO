@@ -11,7 +11,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
 
-    public virtual EnemyConditionController ConditionController { get ; }
+    public virtual EnemyConditionController ConditionController { get; }
 
     public Vector3 Position { get => transform.position; }
 
@@ -39,8 +39,16 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         _stats.TakeDamage(damage);
 
-        // TODO: ここからどう鎧に流すか・・
-        // TODO: ひとまずあきらめてMobEnemyにだけ実装した。
+        bool isKill = _stats.CurrentHealth <= 0;
+        bool isWeakPoint = _defenceContext.EnemyType == EnemyType.Flesh;
+
+        context.OnHitResult?.Invoke(
+            new HitResult
+            {
+                IsKill = isKill,
+                IsArmorBreak = false,
+                IsWeakPoint = isWeakPoint
+            });
     }
 
     public async UniTask ActivateShockDebuff(int durationSeconds = 10)
