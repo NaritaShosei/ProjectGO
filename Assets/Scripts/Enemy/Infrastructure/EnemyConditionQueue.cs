@@ -15,7 +15,6 @@ public sealed class EnemyConditionQueue
     public void Enqueue(IEnemy enemy, IEnemyCondition condition)
     {
         // 同種は最大1
-        // これにより感電の重ねがけが可能になってしまった、どうする？
         if (Has(condition.Type))
         {
             _active[condition.Type].OnExit(enemy);
