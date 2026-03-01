@@ -28,9 +28,12 @@ public class BossCore : MonoBehaviour, IEnemy
         _boss.TakeDamage(new DamageContext
         {
             AttackPower = context.AttackPower * _damageMultiplier,
-            PlayerMode = context.PlayerMode
+            PlayerMode = context.PlayerMode,
+            OnHitResult = context.OnHitResult 
         });
     }
+
+
     public void SetPosition(Vector3 position)
     {
         transform.position = position;

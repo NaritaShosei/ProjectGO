@@ -29,7 +29,15 @@ public class EnemyArmer : MonoBehaviour, IEnemy
         {
             OnDead?.Invoke(this);
             Break();
-        }
+
+            context.OnHitResult?.Invoke(
+                new HitResult
+                {
+                    IsKill = false,
+                    IsArmorBreak = true,
+                    IsWeakPoint = false
+                });
+            }
     }
     public void Init(IPlayer player)
     {
