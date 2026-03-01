@@ -5,6 +5,8 @@ public interface IEnemy : ICharacter
 {
     public EnemyConditionController ConditionController { get; }
 
+    event Action<DamagePopupViewModel> OnDamageDealt;
+
     public Vector3 Position { get; }
 
     /// <summary>

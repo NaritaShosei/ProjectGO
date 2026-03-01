@@ -74,6 +74,8 @@ public class MobEnemy : Enemy
                 IsWeakPoint = isWeakPoint
             });
 
+        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+
         // -------- 追加効果 --------
 
         if (context.Knockback != null)

@@ -7,6 +7,7 @@ public class BossCore : MonoBehaviour, IEnemy
     public EnemyConditionController ConditionController { get; }
     public Vector3 Position { get => transform.position; }
 
+    public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public void AddKnockBackForce(Vector3 direction)
     {
@@ -31,8 +32,8 @@ public class BossCore : MonoBehaviour, IEnemy
             PlayerMode = context.PlayerMode,
             OnHitResult = context.OnHitResult 
         });
-    }
 
+    }
 
     public void SetPosition(Vector3 position)
     {
