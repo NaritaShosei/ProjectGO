@@ -4,10 +4,12 @@ using UnityEngine;
 public class BossCore : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+    public event Action<float, float> OnHealthChanged;
+
     public EnemyConditionController ConditionController { get; }
     public Vector3 Position { get => transform.position; }
 
-    public event Action<DamagePopupViewModel> OnDamageDealt;
+    // public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public void AddKnockBackForce(Vector3 direction)
     {
@@ -40,6 +42,16 @@ public class BossCore : MonoBehaviour, IEnemy
         transform.position = position;
     }
     public  void OnConditionInterrupt() { }
+
+    public void Healing(float amount)
+    {
+
+    }
+
+    public void TakeDamage(float damage)
+    {
+
+    }
 
     public void Init(IPlayer player)
     {

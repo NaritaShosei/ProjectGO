@@ -42,6 +42,7 @@ public abstract class BossEnemy : Enemy
         _stats.OnHealthZero += OnBossHPZero;
 
         _stats.OnDead += OnDeath;
+
     }
 
     protected virtual bool CanTakeDamage(DamageContext context)
