@@ -34,7 +34,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
 
         float afterHp = _hp;
 
-        OnHealthChanged(beforeHp, afterHp);
+        OnHealthChanged?.Invoke(beforeHp, afterHp);
 
         // InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
 
