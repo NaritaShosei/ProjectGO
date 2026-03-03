@@ -7,6 +7,8 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     public event Action<IEnemy> OnDead;
     public EnemyConditionController ConditionController { get; }
 
+    public event Action<float, float> OnHealthChanged; 
+
     // public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public Vector3 Position { get => transform.position; }
@@ -26,7 +28,13 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     {
         if (context.PlayerMode != PlayerMode.Warrior) { return; }
 
+        float beforeHp = _hp;
+
         _hp -= context.AttackPower;
+
+        float afterHp = _hp;
+
+        OnHealthChanged?.Invoke(beforeHp, afterHp);
 
         // InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
 
