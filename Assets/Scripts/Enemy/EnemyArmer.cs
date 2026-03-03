@@ -7,7 +7,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     public event Action<IEnemy> OnDead;
     public EnemyConditionController ConditionController { get; }
 
-    public event Action<DamagePopupViewModel> OnDamageDealt;
+    // public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public Vector3 Position { get => transform.position; }
 
@@ -28,7 +28,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
 
         _hp -= context.AttackPower;
 
-        InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
+        // InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
 
         if (_hp <= 0)
         {
@@ -45,17 +45,19 @@ public class EnemyArmer : MonoBehaviour, IEnemy
         }
     }
 
-    public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
+    /*
+     public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
     {
         OnDamageDealt?.Invoke(
             new DamagePopupViewModel(
                 damage: damage,
                 isWeakPoint: isWeakPoint,
                 isCritical: isCritical,
-                worldPosition: transform.position
+                worldPosition: GetTargetCenter().position
                 )
             );
     }
+    */
 
     public void Init(IPlayer player)
     {
