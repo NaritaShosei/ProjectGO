@@ -10,9 +10,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
-    public event Action<float, float> OnHealthChanged;
 
-    // public event Action<DamagePopupViewModel> OnDamageDealt;
+    public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public virtual EnemyConditionController ConditionController { get; }
 
@@ -59,7 +58,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
                 IsWeakPoint = isWeakPoint
             });
 
-        // InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
     }
 
     public async UniTask ActivateShockDebuff(int durationSeconds = 10)
@@ -93,7 +92,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         transform.position = position;
     }
 
-    /*
     // MobEnemyからInvokeできないのでラップ？している
     public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
     {
@@ -102,20 +100,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
                 damage: damage,
                 isWeakPoint: isWeakPoint,
                 isCritical: isCritical,
-                worldPosition: GetTargetCenter().position
+                worldPosition: transform.position
                 )
             );
-    }
-    */
-
-    public void Healing(float amount)
-    {
-
-    }
-
-    public void TakeDamage(float damage)
-    {
-
     }
 
     public abstract void OnConditionInterrupt();
@@ -151,8 +138,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
         _stats.OnDead += OnDeath;
 
-        _stats.OnHealthChanged += OnHealthChanged;
-
         // 鎧生成関連はすべてMobEnemyのほうで実装
     }
     protected virtual void Update()
@@ -182,8 +167,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _stats.OnHealthZero -= _stats.Kill;
 
         _stats.OnDead -= OnDeath;
-
-        _stats.OnHealthChanged -= OnHealthChanged;
 
         OnDead -= HandleDead;
     }

@@ -5,11 +5,9 @@ using UnityEngine;
 public class EnemyArmer : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
-    public event Action<float, float> OnHealthChanged;
-
     public EnemyConditionController ConditionController { get; }
 
-    // public event Action<DamagePopupViewModel> OnDamageDealt;
+    public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public Vector3 Position { get => transform.position; }
 
@@ -30,7 +28,7 @@ public class EnemyArmer : MonoBehaviour, IEnemy
 
         _hp -= context.AttackPower;
 
-        // InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
+        InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
 
         if (_hp <= 0)
         {
@@ -47,7 +45,6 @@ public class EnemyArmer : MonoBehaviour, IEnemy
         }
     }
 
-    /*
     public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
     {
         OnDamageDealt?.Invoke(
@@ -55,11 +52,10 @@ public class EnemyArmer : MonoBehaviour, IEnemy
                 damage: damage,
                 isWeakPoint: isWeakPoint,
                 isCritical: isCritical,
-                worldPosition: GetTargetCenter().position
+                worldPosition: transform.position
                 )
             );
     }
-    */
 
     public void Init(IPlayer player)
     {
@@ -69,16 +65,6 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
-    }
-
-    public void Healing(float amount)
-    {
-
-    }
-
-    public void TakeDamage(float damage)
-    {
-
     }
 
     [SerializeField] private float _hp = 50;
