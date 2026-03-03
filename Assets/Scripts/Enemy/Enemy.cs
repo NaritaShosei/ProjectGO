@@ -105,9 +105,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     protected virtual void Awake()
     {
-        _hitStopManager = ServiceLocator.Get<HitStopManager>();
-        _hitStopManager?.Register(this, HitStopTargetGroup.AllEnemies);
-
         // OnDead時の登録
         OnDead += HandleDead;
 
@@ -135,10 +132,22 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         UpdateEnemy(dt);
     }
 
-    private void OnDestroy()
+    private void OnEnable()
+    {
+        if (ServiceLocator.TryGet<HitStopManager>(out var manager))
+        {
+            _hitStopManager = manager;
+            _hitStopManager.Register(this, HitStopTargetGroup.AllEnemies);
+        }
+    }
+
+    private void OnDisable()
     {
         _hitStopManager?.UnregisterFromAll(this);
+    }
 
+    private void OnDestroy()
+    {
         _stats.OnHealthZero -= _stats.Kill;
 
         _stats.OnDead -= OnDeath;

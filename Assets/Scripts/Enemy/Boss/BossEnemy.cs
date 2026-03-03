@@ -28,8 +28,8 @@ public abstract class BossEnemy : Enemy
             new HitResult
             {
                 IsKill = isKill,
-                IsArmorBreak = true,
-                IsWeakPoint = true
+                IsArmorBreak = false,
+                IsWeakPoint = _defenceContext.EnemyType == EnemyType.Flesh
             });
     }
 
