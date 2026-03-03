@@ -11,6 +11,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
 
+    public event Action<float,float> OnHealthChanged 
+    {
+        add => _stats.OnHealthChanged += value;
+        remove => _stats.OnHealthChanged -= value;
+    }
+
+    // public event Action<DamagePopupViewModel> OnDamageDealt;
+
     public virtual EnemyConditionController ConditionController { get; }
 
     public Vector3 Position { get => transform.position; }
@@ -55,6 +63,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
                 IsArmorBreak = false,
                 IsWeakPoint = isWeakPoint
             });
+
+        // InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
     }
 
     public async UniTask ActivateShockDebuff(int durationSeconds = 10)
@@ -88,6 +98,20 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         transform.position = position;
     }
 
+    /*
+    // MobEnemyからInvokeできないのでラップ？している
+    public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
+    {
+        OnDamageDealt?.Invoke(
+            new DamagePopupViewModel(
+                damage: damage,
+                isWeakPoint: isWeakPoint,
+                isCritical: isCritical,
+                worldPosition: GetTargetCenter().position
+                )
+            );
+    }
+    */
 
     public abstract void OnConditionInterrupt();
 
