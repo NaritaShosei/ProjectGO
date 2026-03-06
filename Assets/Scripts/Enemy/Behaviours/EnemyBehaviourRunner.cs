@@ -22,12 +22,7 @@ public class EnemyBehaviourRunner
     // あとでTurnの処理を今後追加する。
     public void Tick(float deltaTime)
     {
-        // 強制挙動（Attackなど）
-        if (_forced != null)
-        {
-            _forced.Tick(deltaTime);
-            return;
-        }
+        if (_owner.ConditionController?.BlocksAction == true) return;
 
         // 現在Behaviourの継続判定
         if (_current != null && _current.CanContinue())
@@ -41,35 +36,20 @@ public class EnemyBehaviourRunner
         _current?.Tick(deltaTime);
     }
 
-
-    // ===== Attack / Condition 割り込み =====
-
-    public void ForceBehaviour(IEnemyBehaviour behaviour)
+    public void ForceExitAction()
     {
-        _current?.OnExit();
-        _forced?.OnExit();
-        _forced = behaviour;
-        _forced.OnEnter();
-    }
-
-    // Knockback時など強制発動
-    public void ForceExitAttack()
-    {
-        if (_forced is MeleeAttackBehaviour)
-        {
-            _forced.OnExit();
-            _forced = null;
-        }
-    }
-
-    public void OnActionFinished()
-    {
-        _forced?.OnExit();
-        _forced = null;
         _current?.OnExit();
         _current = null;
     }
 
+
+    // どこかで使うかもなので一応保持
+    private readonly IEnemy _owner;
+
+    private readonly List<IEnemyBehaviour> _behaviours
+        = new List<IEnemyBehaviour>(8);
+
+    private IEnemyBehaviour _current;
 
     private void SelectBehaviour()
     {
@@ -95,16 +75,6 @@ public class EnemyBehaviourRunner
         _current = next;
         _current.OnEnter();
     }
-
-    // どこかで使うかもなので一応保持
-    private readonly IEnemy _owner;
-
-    private readonly List<IEnemyBehaviour> _behaviours
-        = new List<IEnemyBehaviour>(8);
-
-    private IEnemyBehaviour _current;
-    private IEnemyBehaviour _forced;
-
 }
 
 /// <summary>

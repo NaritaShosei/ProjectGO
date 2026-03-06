@@ -16,7 +16,9 @@ public class AttackEventSMB : StateMachineBehaviour
     public override void OnStateUpdate(
     Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_controller == null) return;
+        if (animator.speed == 0f) { return; } // アニメーションが停止している場合は処理しない
+
+        if (_controller == null) { return; }
 
         float currentTime = stateInfo.normalizedTime * stateInfo.length;
 
@@ -41,7 +43,7 @@ public class AttackEventSMB : StateMachineBehaviour
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_controller == null) return;
+        if (_controller == null) { return; }
         _controller.AnimEvent_AttackComplete();
     }
 

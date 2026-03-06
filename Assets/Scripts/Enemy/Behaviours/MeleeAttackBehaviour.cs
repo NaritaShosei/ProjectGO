@@ -5,10 +5,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
     public bool CanEnter() { return CanAttack(); }
-    public bool CanContinue() { return _state.CurrentState == EnemyState.Attack; }
-
-    public void OnEnter() { }
-    public void OnExit() { }
+    public bool CanContinue() { return _isAttack; }
 
     public void Init(
         Enemy owner,
@@ -25,40 +22,62 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _state = state;
     }
 
+    public void OnEnter()
+    {
+        _isAttack = true;
+    }
+
     public void Tick(float deltaTime)
     {
+        if (!_isAttack) return;
+
+        PerformAttack();
+
+        Exit();
+    }
+
+    public void OnExit()
+    {
+        Exit();
+    }
+
+    private Transform _self;
+    private Transform _player;
+    private EnemyData _data;
+    private EnemyContext _context;
+    private EnemyStateContext _state;
+
+    private float _lastAttackTime;
+
+    private bool _isAttack;
+
+    private bool CanAttack()
+    {
+        // Playerが不正ならリターン
+        if (_player == null) { return false; }
+
         // 距離計算
         _context.DistanceToPlayer = Vector3.Distance(
             _self.position,
             _player.position
         );
 
-        // 攻撃を実行
-        _state.ChangeState(EnemyState.Attack);
-        _lastAttackTime = Time.time;
-
-        PerformAttack();
-
-        // TODO:IsAttackingが1フレーム内でリセットされているのでアニメーションなどに対応させる必要あり
-        _state.ChangeState(EnemyState.Idle);
-    }
-
-    private bool CanAttack()
-    {
-        if (_player == null) { return false; }
-
-        // 攻撃の条件に満たしていなかったら早期リターン
-        if (!_state.CanAttack()) { return false; }
-
-        // 攻撃の条件に満たしていなかったら早期リターン
+        // Playerとの距離が遠いならリターン
         if (_context.DistanceToPlayer > _data.AttackRange) { return false; }
+
+        // クールダウンを開けていなければリターン
         if (Time.time - _lastAttackTime < _data.AttackCooldown) { return false; }
         
+        // 攻撃中であればリターン
+        if(_isAttack) { return false; }
+
         return true;
     }
 
     private void PerformAttack()
     {
+        _lastAttackTime = Time.time;
+
         // 球体をつくり、その範囲内にいるPlayerに攻撃
         Collider[] hits = Physics.OverlapSphere(
             _self.position + _self.forward * _data.AttackRange,
@@ -74,13 +93,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         }
     }
 
-    private Transform _self;
-    private Transform _player;
-    private EnemyData _data;
-    private EnemyContext _context;
-    private EnemyStateContext _state;
-
-    private float _lastAttackTime;
-
-
+    private void Exit()
+    {
+        _isAttack = false;
+    }
 }

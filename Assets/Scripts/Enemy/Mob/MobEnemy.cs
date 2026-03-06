@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 // NOTE:
@@ -10,6 +11,7 @@ using UnityEngine;
 
 public class MobEnemy : Enemy
 {
+    public override EnemyConditionController ConditionController { get => _conditionController; }    
     public override void Init(IPlayer player)
     {
         base.Init(player);
@@ -17,6 +19,8 @@ public class MobEnemy : Enemy
         _context = new EnemyContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
+
+        _conditionController = new EnemyConditionController(this);
 
         var move = new MoveBehaviour();
         var attack = new MeleeAttackBehaviour();
@@ -42,12 +46,11 @@ public class MobEnemy : Enemy
 
     public override void TakeDamage(DamageContext context)
     {
-        // 本当はよくないが、鎧をMobEnemyだけに持たせる都合で
-        // TakeDamageを完全にここに持ってくる
-        // 要相談
         if (_isDead) { return; }
 
         int damage = DamageSystem.Calculate(context, _defenceContext);
+
+        bool armorWasAlive = _defenceContext.EnemyType == EnemyType.Armor;
 
         // 鎧がダメージを肩代わり
         if (_defenceContext.EnemyType == EnemyType.Armor)
@@ -58,7 +61,43 @@ public class MobEnemy : Enemy
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        TryApplyElectricShockSkill(context.ElectricShock);
+        bool isKill = _stats.CurrentHealth <= 0; 
+        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
+        bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
+
+        // -------- HitResult通知 --------
+        context.OnHitResult?.Invoke(
+            new HitResult
+            {
+                IsKill = isKill,
+                IsArmorBreak = isArmorBreak,
+                IsWeakPoint = isWeakPoint
+            });
+
+        // InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+
+        // -------- 追加効果 --------
+
+        if (context.Knockback != null)
+        {
+            // Knockback?はそのまま渡せないので。。
+            KnockbackContext temp = (KnockbackContext)context.Knockback;
+            _conditionController.ApplyCondition(new KnockbackCondition(temp));
+        }
+
+        if(CheckProbability(context.ElectricShock.GrantEffectProbability))
+        {
+            // もちろんボスじゃないのでfalse
+            _conditionController.ApplyCondition(
+                new ElectrifiedCondition(context.ElectricShock.DurationEffect,　enemyIsBoss: false));
+
+            this.ActivateShockDebuff().Forget();
+        }
+    }
+
+    public override void OnConditionInterrupt()
+    {
+        _runner.ForceExitAction();
     }
 
     // Armorの登録
@@ -67,6 +106,7 @@ public class MobEnemy : Enemy
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
     private EnemyStateContext _state;
+    private EnemyConditionController _conditionController;
 
     private void OnDestroy()
     {
@@ -75,24 +115,10 @@ public class MobEnemy : Enemy
 
     protected override void UpdateEnemy(float deltaTime)
     {
-        if (_runner == null) { return; }
+        if (_runner == null || _conditionController == null) { return; }
+        _conditionController.Tick(deltaTime);
+        if (_conditionController.BlocksAction) { return; }
         _runner.Tick(deltaTime);
-    }
-
-    private void TryApplyElectricShockSkill(ElectricShock electricShock)
-    {
-
-        //最低限の感電状態でreturn
-        if (this._defenceContext.HasShockDebuff) return;
-
-        if (CheckProbability(electricShock.GrantEffectProbability))
-        {
-            this.ActivateShockDebuff().Forget();
-
-            _state.SetElectrifiedTime(electricShock.DurationEffect);
-
-            _state.ChangeState(EnemyState.Electrified);
-        }
     }
 
     /// <summary>

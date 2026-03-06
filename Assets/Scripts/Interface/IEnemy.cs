@@ -1,8 +1,16 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public interface IEnemy : ICharacter
 {
+    public EnemyConditionController ConditionController { get; }
+
+    public event Action<float, float> OnHealthChanged;
+
+    // event Action<DamagePopupViewModel> OnDamageDealt;
+
+    public Vector3 Position { get; }
+
     /// <summary>
     /// 死亡時に発火するイベント
     /// </summary>
@@ -21,4 +29,11 @@ public interface IEnemy : ICharacter
     /// Playerの参照をもらう
     /// </summary>
     public void Init(IPlayer player);
+
+    /// <summary>
+    /// ConditionによりActionを阻害する
+    /// </summary>
+    public void OnConditionInterrupt();
+
+    public void SetPosition(Vector3 position); 
 }

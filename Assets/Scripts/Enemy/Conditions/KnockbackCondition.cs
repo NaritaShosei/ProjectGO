@@ -2,43 +2,64 @@ using Unity.Behavior;
 using UnityEngine;
 
 /// <summary>
-/// 作ってみたけど、やり方としてはDoTweenで飛ばすか、
-/// 飛ばすだけにして終了はEnemyが地面に着地したら、とかのほうがいいのか・・
-/// まだAttackContextに対応できていないのでお待ちを・・
+/// 斜め移動の挙動を手計算で実装
+/// 設計思想
+/// ・EnemyにRigidBodyがないこと
+/// ・NavMeshをつかわないこと
+/// ・自分の高さの確認のためLayCastを使用しないこと
 /// </summary>
 public sealed class KnockbackCondition : IEnemyCondition
 {
     public ConditionType Type => ConditionType.Knockback;
     public bool BlocksAction => true;
-    public bool IsFinished => _time <= 0f;
+    public bool IsFinished => _isFinished;
 
     // Condition作成時にKnockbackの方向を計算
-    public KnockbackCondition(Vector3 dir, float power)
+    public KnockbackCondition(KnockbackContext context)
     {
-        _velocity = dir.normalized * power;
+        var horizontal = context.Direction.normalized * context.Power;
+        var vertical = Vector3.up * context.Upward;
 
-        // ノックバック時間固定　
-        // あとからいじれるようにするかはプランナーと相談
-        _time = 0.2f;
+        _velocity = horizontal + vertical;
     }
 
     public void OnEnter(IEnemy enemy)
     {
-        // TODO: IEnemyにVelocityを追加してノックバックを実行する
-        // enemy.Velocity = _velocity;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log("ノックバック開始");
+#endif
+        _groundY = enemy.Position.y; 
+        _isFinished = false;
     }
 
-    public void Tick(IEnemy enemy, float dt)
+    public void Tick(IEnemy enemy, float deltaTime)
     {
-        _time -= dt;
-        // enemy.transform.position += enemy.Velocity * dt;
+        // 重力
+        _velocity.y += _gravity * deltaTime;
+
+        Vector3 delta = _velocity * deltaTime;
+        enemy.AddKnockBackForce(delta);
+
+        // 着地判定
+        if (enemy.Position.y <= _groundY)
+        {
+            var pos = enemy.Position;
+            pos.y = _groundY;
+            enemy.SetPosition(pos);
+
+            _isFinished = true;
+        }
     }
 
     public void OnExit(IEnemy enemy)
     {
-        // enemy.Velocity = Vector3.zero;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log("ノックバック終了");
+#endif
     }
 
-    private float _time;
-    private readonly Vector3 _velocity;
+    private Vector3 _velocity;
+    private float _groundY;
+    private bool _isFinished;
+    private const float _gravity = -30f; // あえて大きめに
 }

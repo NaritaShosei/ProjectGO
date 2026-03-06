@@ -1,9 +1,19 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class BossCore : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+    public EnemyConditionController ConditionController { get; }
+    public Vector3 Position { get => transform.position; }
+
+    public event Action<float, float> OnHealthChanged 
+    {
+        add => _boss.OnHealthChanged += value;
+        remove => _boss.OnHealthChanged -= value;
+    }
+
+    // public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public void AddKnockBackForce(Vector3 direction)
     {
@@ -25,9 +35,17 @@ public class BossCore : MonoBehaviour, IEnemy
         _boss.TakeDamage(new DamageContext
         {
             AttackPower = context.AttackPower * _damageMultiplier,
-            PlayerMode = context.PlayerMode
+            PlayerMode = context.PlayerMode,
+            OnHitResult = context.OnHitResult 
         });
+
     }
+
+    public void SetPosition(Vector3 position)
+    {
+        transform.position = position;
+    }
+    public  void OnConditionInterrupt() { }
 
     public void Init(IPlayer player)
     {
