@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb81bcb28e8942d459a479d94ec2889e, type: 3}
+  m_Name: AttackUpSkill
+  m_EditorClassIdentifier: Assembly-CSharp::AttackUpSkill
+  _id: 6563
+  _priority: 0
+  _name: "\u57FA\u790E\u653B\u6483\u529B\u4E0A\u6607"
+  _explanation: "\u57FA\u790E\u653B\u6483\u529B+100/150/250/400/500"
+  _icon: {fileID: 0}
+  _timing: 1
+  _attackUps:
+  - 100
+  - 150
+  - 250
+  - 400
+  - 500
