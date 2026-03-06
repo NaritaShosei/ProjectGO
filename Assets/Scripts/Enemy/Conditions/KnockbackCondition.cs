@@ -61,5 +61,5 @@ public sealed class KnockbackCondition : IEnemyCondition
     private Vector3 _velocity;
     private float _groundY;
     private bool _isFinished;
-    private const float _gravity = -30f;　// あえて大きめに
+    private const float _gravity = -30f; // あえて大きめに
 }

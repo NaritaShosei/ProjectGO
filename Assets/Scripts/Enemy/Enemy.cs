@@ -6,15 +6,29 @@ using UnityEngine;
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
 
-    public virtual EnemyConditionController ConditionController { get ; }
+    public event Action<float,float> OnHealthChanged 
+    {
+        add => _stats.OnHealthChanged += value;
+        remove => _stats.OnHealthChanged -= value;
+    }
+
+    // public event Action<DamagePopupViewModel> OnDamageDealt;
+
+    public virtual EnemyConditionController ConditionController { get; }
 
     public Vector3 Position { get => transform.position; }
 
+    public float TimeScale { get; set; } = 1f;
+
+    public void OnSpeedChange(float scale)
+    {
+        TimeScale = scale;
+    }
 
     public virtual void Init(IPlayer player)
     {
@@ -39,8 +53,18 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         _stats.TakeDamage(damage);
 
-        // TODO: ここからどう鎧に流すか・・
-        // TODO: ひとまずあきらめてMobEnemyにだけ実装した。
+        bool isKill = _stats.CurrentHealth <= 0;
+        bool isWeakPoint = _defenceContext.EnemyType == EnemyType.Flesh;
+
+        context.OnHitResult?.Invoke(
+            new HitResult
+            {
+                IsKill = isKill,
+                IsArmorBreak = false,
+                IsWeakPoint = isWeakPoint
+            });
+
+        // InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
     }
 
     public async UniTask ActivateShockDebuff(int durationSeconds = 10)
@@ -51,28 +75,43 @@ public abstract class Enemy : MonoBehaviour, IEnemy
 
         _defenceContext.HasShockDebuff = true;
 
+        float t = 0f;
+        float duration = durationSeconds;
+
         try
         {
-            // 10秒後にHasShockDebuffを切り替える
-            await UniTask.Delay(
-                delayTimeSpan: TimeSpan.FromSeconds(durationSeconds),
-                delayType: DelayType.DeltaTime,
-                delayTiming: PlayerLoopTiming.Update, // Enemy自体がUpdateを持っているのでUpdateでいいと判断
-                cancellationToken: _shockCts.Token
-                );
+            while (t < duration)
+            {
+                t += Time.deltaTime * TimeScale;
+                await UniTask.Yield(_shockCts.Token);
+            }
         }
         catch (OperationCanceledException)
         {
-            // 死亡時 OR 感電キャンセル
         }
 
         _defenceContext.HasShockDebuff = false;
     }
+
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
     }
 
+    /*
+    // MobEnemyからInvokeできないのでラップ？している
+    public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
+    {
+        OnDamageDealt?.Invoke(
+            new DamagePopupViewModel(
+                damage: damage,
+                isWeakPoint: isWeakPoint,
+                isCritical: isCritical,
+                worldPosition: GetTargetCenter().position
+                )
+            );
+    }
+    */
 
     public abstract void OnConditionInterrupt();
 
@@ -82,6 +121,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
+    private HitStopManager _hitStopManager;
 
     protected bool _isDead; // 軽い実装のため bool のフラグを使用
 
@@ -109,10 +149,25 @@ public abstract class Enemy : MonoBehaviour, IEnemy
         // 鎧生成関連はすべてMobEnemyのほうで実装
     }
     protected virtual void Update()
-
     {
-        if (_isDead) { return; }
-        UpdateEnemy(Time.deltaTime);
+        if (_isDead) return;
+
+        float dt = Time.deltaTime * TimeScale;
+        UpdateEnemy(dt);
+    }
+
+    private void OnEnable()
+    {
+        if (ServiceLocator.TryGet<HitStopManager>(out var manager))
+        {
+            _hitStopManager = manager;
+            _hitStopManager.Register(this, HitStopTargetGroup.AllEnemies);
+        }
+    }
+
+    private void OnDisable()
+    {
+        _hitStopManager?.UnregisterFromAll(this);
     }
 
     private void OnDestroy()

@@ -46,12 +46,11 @@ public class MobEnemy : Enemy
 
     public override void TakeDamage(DamageContext context)
     {
-        // 本当はよくないが、鎧をMobEnemyだけに持たせる都合で
-        // TakeDamageを完全にここに持ってくる
-        // 要相談
         if (_isDead) { return; }
 
         int damage = DamageSystem.Calculate(context, _defenceContext);
+
+        bool armorWasAlive = _defenceContext.EnemyType == EnemyType.Armor;
 
         // 鎧がダメージを肩代わり
         if (_defenceContext.EnemyType == EnemyType.Armor)
@@ -62,9 +61,24 @@ public class MobEnemy : Enemy
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
+        bool isKill = _stats.CurrentHealth <= 0; 
+        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
+        bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
+        // -------- HitResult通知 --------
+        context.OnHitResult?.Invoke(
+            new HitResult
+            {
+                IsKill = isKill,
+                IsArmorBreak = isArmorBreak,
+                IsWeakPoint = isWeakPoint
+            });
 
-        if(context.Knockback != null)
+        // InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+
+        // -------- 追加効果 --------
+
+        if (context.Knockback != null)
         {
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
