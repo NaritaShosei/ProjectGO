@@ -19,7 +19,8 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         gameObject.SetActive(true);
 
         //前回のアニメーションを停止
-        _currentTween?.Kill();
+        _currentTween?.Kill(false);
+        _currentTween = null;
 
         //透明度の初期化
         _canvasGroup.alpha = 1f;
@@ -72,6 +73,12 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         _rectTransform = GetComponent<RectTransform>();
 
         _canvasGroup.alpha = 0f;
+    }
+
+    private void OnDisable()
+    {
+        _currentTween?.Kill();
+        _currentTween = null;
     }
 
     /// <summary>
