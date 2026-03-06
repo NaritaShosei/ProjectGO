@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Damageイベントの受け取り
+/// 使用しない
 /// </summary>
 public class DamageUIPresenter : MonoBehaviour
 {

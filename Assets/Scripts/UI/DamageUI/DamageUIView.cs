@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// ダメージUIのView
+/// これも使用しない
 /// </summary>
 public class DamageUIView : MonoBehaviour
 {
