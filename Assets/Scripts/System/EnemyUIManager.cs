@@ -47,9 +47,10 @@ public class EnemyUIManager : MonoBehaviour
     {
         _enemyManager.OnEnemySpawned -= HandleEnemySpawned;
 
-        foreach (var presenter in _presenters.Values)
+        foreach (var pair in _presenters)
         {
-            presenter.Dispose();
+            pair.Key.OnDead -= HandleEnemyDead;
+            pair.Value.Dispose();
         }
 
         _presenters.Clear();
