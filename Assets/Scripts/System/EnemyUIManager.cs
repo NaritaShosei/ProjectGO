@@ -14,10 +14,6 @@ public class EnemyUIManager : MonoBehaviour
     private void Awake()
     {
         _pool = new EnemyGaugePool(_gaugePrefab, _gaugeParent);
-    }
-
-    private void Start()
-    {
         _enemyManager.OnEnemySpawned += HandleEnemySpawned;
     }
 
