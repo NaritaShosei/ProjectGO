@@ -33,6 +33,10 @@ public class PlayerMovement : MonoBehaviour
         {
             _cameraManager = cameraManager;
         }
+        else
+        {
+            Debug.LogError($"[{this}]:CameraManagerが見つかりませんでした。");
+        }
     }
 
     public void SetTimeScale(float scale)
