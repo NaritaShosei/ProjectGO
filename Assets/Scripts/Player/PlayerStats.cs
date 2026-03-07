@@ -83,7 +83,6 @@ public class PlayerStats
         {
             OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
         }
-
     }
 
     public void AddAttackPower(float value)
@@ -130,7 +129,6 @@ public class PlayerStats
         OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
         OnStatsChanged?.Invoke();
     }
-
 
     private float _maxHealth;
     private float _currentHealth;
