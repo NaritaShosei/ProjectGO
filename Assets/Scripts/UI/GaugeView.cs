@@ -1,64 +1,141 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GaugeView : MonoBehaviour
 {
-    public void UpdateGauge(float current, float max)
+    /// <summary>
+    /// HPゲージを更新する
+    /// current : 現在HP
+    /// max : 現在の最大HP
+    /// initialMax : 初期最大HP（ゲージ拡張の基準）
+    /// </summary>
+    public void UpdateGauge(float current, float max, float initialMax)
     {
-        if (max <= 0f)
+        if (initialMax <= 0f)
         {
-            Debug.LogWarning("最大値が0のため0除算が起きてしまいます。");
+            Debug.LogWarning("initialMax が 0 以下のため計算できません。");
             return;
         }
 
-        if (_gauge == null || _backgroundGauge == null)
-        {
-            Debug.LogError("Imageコンポーネントがアタッチされていません。");
-            return;
-        }
+        // HP割合（現在HP / 最大HP）
+        float hpAmount = current / max;
 
-        float mainAmount = _gauge.fillAmount;
-        float amount = current / max;
+        // 最大HP増加によるバー幅更新
+        UpdateBarWidth(max, initialMax);
 
-        GaugeAnimation(mainAmount, amount);
+        // HPゲージアニメーション
+        AnimateHPGauge(hpAmount);
     }
 
+    [SerializeField] private RectTransform _barContainer;
+
     [SerializeField] private Image _gauge;
-    [SerializeField] private Image _backgroundGauge;
-    [SerializeField] private float _duration = 0.5f;
-    [SerializeField] private float _delay = 0.5f;
-    [SerializeField] private Ease _animEase = Ease.Linear;
-    private Sequence _backgroundGaugeSeq;
-    private Sequence _mainGaugeSeq;
 
-    private void GaugeAnimation(float mainAmount, float targetAmount)
+    [SerializeField] private Image _delayGauge;
+
+    [SerializeField] private float _baseWidth;
+
+    [SerializeField] private float _duration = 0.4f;
+
+    [SerializeField] private float _delay = 0.4f;
+
+    [SerializeField] private Ease _ease = Ease.Linear;
+
+    // 各ゲージとコントローラーの幅の差
+    private float _gaugeWidthDiff;
+    private float _delayGaugeWidthDiff;
+
+    /// <summary>
+    /// HPゲージTween
+    /// </summary>
+    private Sequence _mainSeq;
+
+    /// <summary>
+    /// 遅延ゲージTween
+    /// </summary>
+    private Sequence _delaySeq;
+
+    /// <summary>
+    /// 最大HP増加時にバーの横幅を拡張する
+    /// </summary>
+    private void UpdateBarWidth(float max, float initialMax)
     {
-        _mainGaugeSeq?.Kill();
-        _backgroundGaugeSeq?.Kill();
+        float ratio = max / initialMax;
 
-        // 回復（増える）
-        if (mainAmount < targetAmount)
+        Vector2 size = _barContainer.sizeDelta;
+        size.x = _baseWidth * ratio;
+
+        _barContainer.sizeDelta = size;
+
+        // ゲージの幅も更新
+        if (_gauge != null)
         {
-            // 背景ゲージを先に瞬時に追いつかせる
-            _backgroundGauge.fillAmount = targetAmount;
+            Vector2 gaugeSize = _gauge.rectTransform.sizeDelta;
+            gaugeSize.x = size.x - _gaugeWidthDiff;
+            _gauge.rectTransform.sizeDelta = gaugeSize;
+        }
 
-            // メインゲージをアニメーションで増やす
-            _mainGaugeSeq = DOTween.Sequence()
+        if (_delayGauge != null)
+        {
+            Vector2 delayGaugeSize = _delayGauge.rectTransform.sizeDelta;
+            delayGaugeSize.x = size.x - _delayGaugeWidthDiff;
+            _delayGauge.rectTransform.sizeDelta = delayGaugeSize;
+        }
+    }
+
+    /// <summary>
+    /// HPゲージのアニメーション処理
+    /// </summary>
+    private void AnimateHPGauge(float targetAmount)
+    {
+        float currentAmount = _gauge.fillAmount;
+
+        // 既存Tween停止
+        _mainSeq?.Kill();
+        _delaySeq?.Kill();
+
+        // 回復処理
+        if (currentAmount < targetAmount)
+        {
+            // 遅延ゲージを先に更新
+            _delayGauge.fillAmount = targetAmount;
+
+            _mainSeq = DOTween.Sequence()
                 .Append(_gauge.DOFillAmount(targetAmount, _duration))
-                .SetEase(_animEase)
+                .SetEase(_ease)
                 .SetLink(gameObject);
 
             return;
         }
 
+        // ダメージ処理
         _gauge.fillAmount = targetAmount;
 
-        // HPゲージを更新した後少し遅らせて背景のゲージを更新
-        _backgroundGaugeSeq = DOTween.Sequence().
-            Append(_backgroundGauge.DOFillAmount(targetAmount, _duration)).
-            SetDelay(_delay).
-            SetEase(_animEase).
-            SetLink(gameObject);
+        _delaySeq = DOTween.Sequence()
+            .Append(_delayGauge.DOFillAmount(targetAmount, _duration))
+            .SetDelay(_delay)
+            .SetEase(_ease)
+            .SetLink(gameObject);
+    }
+
+    private void OnValidate()
+    {
+        if (_barContainer != null)
+        {
+            _baseWidth = _barContainer.sizeDelta.x;
+
+            if (_gauge != null)
+            {
+                var gaugeWidth = _gauge.rectTransform.sizeDelta.x;
+                _gaugeWidthDiff = _baseWidth - gaugeWidth;
+            }
+
+            if (_delayGauge != null)
+            {
+                var delayGaugeWidth = _delayGauge.rectTransform.sizeDelta.x;
+                _delayGaugeWidthDiff = _baseWidth - delayGaugeWidth;
+            }
+        }
     }
 }
