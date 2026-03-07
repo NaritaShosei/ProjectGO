@@ -7,6 +7,8 @@ public class EnemyManager : MonoBehaviour
     public event Action OnEnemyDefeated;
     public event Action OnBossDefeated;
 
+    public event Action<IEnemy> OnEnemySpawned;
+
     public void Init(IPlayer player)
     {
         _player = player;
@@ -37,7 +39,7 @@ public class EnemyManager : MonoBehaviour
             enemy.Init(_player);
             _enemies.Add(enemy);
 
-            // TODO: さらに階層を深くして鎧持ちであれば鎧オブジェクトの生成を実行させる
+            OnEnemySpawned?.Invoke(enemy);
         }
 
         else { Destroy(obj); Debug.LogWarning("IEnemyを継承していないオブジェクトを生成したため、破壊しました"); }

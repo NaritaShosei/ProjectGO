@@ -3,41 +3,24 @@ using System;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// ダメージポップアップUIの表示を管理するView。
+/// </summary>
 public class DamagePopupView : MonoBehaviour,IDamagePopupView
 {
-    [SerializeField] private TextMeshProUGUI _damageText;
-    [SerializeField] private GameObject _weakPointObj;
-    [SerializeField] private GameObject _criticalObj;
-    [SerializeField] private CanvasGroup _canvasGroup;
-
-    [Header("表示設定")]
-    [SerializeField] private float _lifeTime = 1.5f;//消滅までの時間
-    [SerializeField] private float _fadeDuration = 0.2f;//フェードの時間
-    [SerializeField] private float _popupDistance = 10f;
-
-    [Header("色設定")]
-    [SerializeField] private Color _normalColor = Color.white;
-    [SerializeField] private Color _weakColor = new Color(1f, 0.45f, 0f);
-
     public event Action<IDamagePopupView> OnRelease;
 
-    private Tween _currentTween;
-    private RectTransform _rectTransform;
-    private Camera _mainCamera;
-    private void Awake()
-    {
-        _mainCamera = Camera.main;
-        _rectTransform = GetComponent<RectTransform>();
-
-        _canvasGroup.alpha = 0f;
-    }
-
+    /// <summary>
+    /// ダメージポップアップを表示する。
+    /// </summary>
+    /// <param name="viewModel"></param>
     public void ShowDamage(DamagePopupViewModel viewModel)
     {
         gameObject.SetActive(true);
 
         //前回のアニメーションを停止
-        _currentTween?.Kill();
+        _currentTween?.Kill(false);
+        _currentTween = null;
 
         //透明度の初期化
         _canvasGroup.alpha = 1f;
@@ -46,7 +29,7 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         _damageText.text = viewModel.Damage.ToString();
 
         //色設定
-        if(viewModel.IsWeakPoint)
+        if (viewModel.IsWeakPoint)
         {
             _damageText.color = _weakColor;
         }
@@ -54,10 +37,16 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         {
             _damageText.color = _normalColor;
         }
-        
+
         //表示切替
         _weakPointObj.SetActive(viewModel.IsWeakPoint);
         _criticalObj.SetActive(viewModel.IsCritical);
+
+        if (_mainCamera == null)
+        {
+            _mainCamera = Camera.main;
+            if (_mainCamera == null) return;
+        }
 
         // ワールド座標をスクリーン座標へ変換
         var screenPos = _mainCamera.WorldToScreenPoint(viewModel.WorldPosition);
@@ -66,12 +55,42 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         PlayAnimation();
     }
 
+    [SerializeField] private TextMeshProUGUI _damageText;
+    [SerializeField] private GameObject _weakPointObj;
+    [SerializeField] private GameObject _criticalObj;
+    [SerializeField] private CanvasGroup _canvasGroup;
+
+    [Header("表示設定")]
+    [SerializeField] private float _lifeTime = 1.5f;        //消滅までの時間
+    [SerializeField] private float _fadeDuration = 0.2f;    //フェードの時間
+    [SerializeField] private float _popupDistance = 10f;
+
+    [Header("色設定")]
+    [SerializeField] private Color _normalColor = Color.white;
+    [SerializeField] private Color _weakColor = new Color(1f, 0.45f, 0f);
+
+    private Tween _currentTween;
+    private RectTransform _rectTransform;
+    private Camera _mainCamera;
+
+    private void Awake()
+    {
+        _rectTransform = GetComponent<RectTransform>();
+
+        _canvasGroup.alpha = 0f;
+    }
+
+    private void OnDisable()
+    {
+        _currentTween?.Kill(false);
+        _currentTween = null;
+    }
+
     /// <summary>
     /// ダメージ表記のアニメーション
     /// </summary>
     private void PlayAnimation()
     {
-        Debug.Log("ShowDamage開始");
         Sequence seq = DOTween.Sequence();
 
         //一定時間停止
@@ -83,9 +102,9 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
 
         seq.OnComplete(() =>
         {
-            Debug.Log("アニメーション完了");
             OnRelease?.Invoke(this);
         });
         _currentTween = seq;
     }
 }
+

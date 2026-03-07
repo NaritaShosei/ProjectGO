@@ -1,11 +1,15 @@
-﻿using System;
+using System;
 using UnityEngine;
 
-public class EnemyStats
+public class EnemyStats : IHealthStats, IHealth
 {
     public event Action OnDead;
     public event Action OnHealthZero;
     public event Action<float, float> OnHealthChanged;
+
+    public float MaxHealth {get => _maxHealth; }
+    public float CurrentHealth { get => _currentHealth; } 
+
 
     public EnemyStats(EnemyData data)
     {
@@ -23,6 +27,12 @@ public class EnemyStats
             OnHealthZero?.Invoke();
         }
     }
+
+    public void Healing(float amount)
+    {
+        // Enemyには必要ないので実装しない
+    }
+
 
     public void Kill()
     {
