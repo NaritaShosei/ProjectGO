@@ -6,7 +6,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Player _player;
     [SerializeField] private EnemyManager _enemyManager;
     [SerializeField] private SkillManager _skillManager;
-    [SerializeField] private CameraManager _cameraManager;
 
     [SerializeField] private PlayerGaugeView _playerGaugeView;
     private PlayerGaugePresenter _playerGaugePresenter;
@@ -51,7 +50,7 @@ public class GameManager : MonoBehaviour
     {
         var input = ServiceLocator.Get<InputHandler>();
 
-        _player.Init(_skillManager, _cameraManager, input);
+        _player.Init(_skillManager, input);
 
         _player.OnDead += HandleGameComplete;
 
@@ -60,7 +59,10 @@ public class GameManager : MonoBehaviour
 
     private void InitCameraManager()
     {
-        _cameraManager.Init(_player);
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            cameraManager.Init(_player);
+        }
     }
 
     private void InitEnemyManager()

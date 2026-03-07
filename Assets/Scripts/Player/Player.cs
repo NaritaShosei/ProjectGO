@@ -30,7 +30,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
         add => _playerStats.OnStaminaChanged += value;
         remove => _playerStats.OnStaminaChanged -= value;
     }
-    public void Init(SkillManager skillManager, CameraManager cameraManager, InputHandler input)
+
+    public void Init(SkillManager skillManager, InputHandler input)
     {
         CreateInternalObjects();
         BindEvents();
@@ -42,7 +43,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
         _move?.Init(
            _playerStateManager,
            input,
-           cameraManager,
            _moveData,
            this,
            _modeController,

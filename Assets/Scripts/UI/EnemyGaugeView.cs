@@ -7,7 +7,10 @@ public class EnemyGaugeView : MonoBehaviour
     public void Initialize(Transform enemyTransform)
     {
         _linkEnemy = enemyTransform;
-        _mainCamera = ServiceLocator.Get<CameraManager>().MainCamera;
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _mainCamera = cameraManager.MainCamera;
+        }
     }
 
     public void UpdateGauge(float current, float max)
