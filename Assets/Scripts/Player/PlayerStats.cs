@@ -3,9 +3,11 @@ using UnityEngine;
 
 public class PlayerStats
 {
+    public float InitialMaxHealth { get; private set; }
     public float MaxHealth => _maxHealth;
     public float MaxStamina => _maxStamina;
 
+    public float InitialMaxStamina { get; private set; }
     public float CurrentHealth => _currentHealth;
     public float CurrentStamina => _currentStamina;
 
@@ -14,8 +16,8 @@ public class PlayerStats
     public float DefensePower => _defensePower;
 
     public event Action OnDead;
-    public event Action<float, float> OnHealthChanged;
-    public event Action<float, float> OnStaminaChanged;
+    public event Action<float, float, float> OnHealthChanged;
+    public event Action<float, float, float> OnStaminaChanged;
     public event Action OnStatsChanged;
 
     public PlayerStats(PlayerData data)
@@ -23,6 +25,9 @@ public class PlayerStats
         // HP / スタミナ
         _maxHealth = data.Stats.MaxHealth;
         _maxStamina = data.Stats.MaxStamina;
+
+        InitialMaxHealth = _maxHealth;
+        InitialMaxStamina = _maxStamina;
 
         _currentHealth = _maxHealth;
         _currentStamina = _maxStamina;
@@ -38,7 +43,7 @@ public class PlayerStats
     {
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
 
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
 
         if (_currentHealth <= 0)
         {
@@ -50,7 +55,7 @@ public class PlayerStats
     {
         _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
 
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
     }
 
     public bool UseStamina(float amount)
@@ -62,7 +67,7 @@ public class PlayerStats
 
         _currentStamina = Mathf.Max(0, _currentStamina - amount);
 
-        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
+        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
         return true;
     }
 
@@ -76,7 +81,7 @@ public class PlayerStats
         // 差が大きければ回復したとみなし、イベント発火
         if (!Mathf.Approximately(previousStamina, _currentStamina))
         {
-            OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
+            OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
         }
 
     }
@@ -106,11 +111,10 @@ public class PlayerStats
         if (value <= 0f) { return; }
 
         _maxHealth += value;
-        _currentHealth += value;
 
         _currentHealth = Mathf.Min(_currentHealth, _maxHealth);
 
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+        OnHealthChanged?.Invoke(InitialMaxHealth, _maxHealth, InitialMaxHealth);
         OnStatsChanged?.Invoke();
     }
 
@@ -123,7 +127,7 @@ public class PlayerStats
 
         _currentStamina = Mathf.Min(_currentStamina, _maxStamina);
 
-        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina);
+        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
         OnStatsChanged?.Invoke();
     }
 

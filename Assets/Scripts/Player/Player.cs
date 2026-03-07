@@ -19,13 +19,13 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
     public float TimeScale { get; set; } = 1f;
 
     public event Action OnDead;
-    public event Action<float, float> OnHealthChanged
+    public event Action<float, float, float> OnHealthChanged
     {
         add => _playerStats.OnHealthChanged += value;
         remove => _playerStats.OnHealthChanged -= value;
     }
 
-    public event Action<float, float> OnStaminaChanged
+    public event Action<float, float, float> OnStaminaChanged
     {
         add => _playerStats.OnStaminaChanged += value;
         remove => _playerStats.OnStaminaChanged -= value;
