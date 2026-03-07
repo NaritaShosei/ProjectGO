@@ -33,7 +33,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
     public void Init(SkillManager skillManager, InputHandler input)
     {
-        CreateInternalObjects();
         BindEvents();
 
         _attackExecutor?.Init(this, skillManager);
@@ -131,6 +130,11 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
+
+    private void Awake()
+    {
+        CreateInternalObjects();
+    }
 
     private void Update()
     {
