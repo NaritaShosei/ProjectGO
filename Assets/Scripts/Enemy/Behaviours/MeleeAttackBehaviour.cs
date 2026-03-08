@@ -70,8 +70,13 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             ? _data.AttackPattern.SlotCost
             : 1;
 
-        // スロットが確保できなければリターン
-        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false)) return;
+        // スロットが確保できなければクールダウンを更新してリターン
+        // 更新しないと毎フレームOnEnterが呼ばれ続けてしまう
+        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false))
+        {
+            _lastAttackTime = Time.time;
+            return;
+        }
 
         _isAttacking = true;
         _timer = 0f;

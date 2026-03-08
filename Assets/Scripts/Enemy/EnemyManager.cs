@@ -41,9 +41,9 @@ public class EnemyManager : MonoBehaviour
         if (obj.TryGetComponent(out IEnemy enemy))
         {
             enemy.OnDead += HandleEnemyDead;
-            enemy.Init(_player);
 
-            // Enemyがサービス注入口を持っていれば注入する
+            // InjectServicesをInitより前に呼ぶ
+            // Init内でBehaviourを生成する際にサービスを参照するため
             if (obj.TryGetComponent(out Enemy enemyBase))
             {
                 enemyBase.InjectServices(
@@ -53,6 +53,11 @@ public class EnemyManager : MonoBehaviour
                     _attackerSlot
                 );
             }
+
+            enemy.Init(_player);
+
+            // SpatialHashGridに初期位置を登録する
+            _spatialHashGrid.Register(enemy, pos);
 
             _enemies.Add(enemy);
             OnEnemySpawned?.Invoke(enemy);
