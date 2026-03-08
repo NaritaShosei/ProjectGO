@@ -59,11 +59,6 @@ public class EnemyUIManager : MonoBehaviour
 
 public class EnemyGaugePool
 {
-    private EnemyGaugeView _prefab;
-    private Transform _parent;
-
-    private Stack<EnemyGaugeView> _pool = new();
-
     public EnemyGaugePool(EnemyGaugeView prefab, Transform parent)
     {
         _prefab = prefab;
@@ -92,4 +87,9 @@ public class EnemyGaugePool
         view.gameObject.SetActive(false);
         _pool.Push(view);
     }
+
+    private EnemyGaugeView _prefab;
+    private Transform _parent;
+
+    private Stack<EnemyGaugeView> _pool = new();
 }
