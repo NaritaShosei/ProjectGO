@@ -16,6 +16,18 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     /// <param name="viewModel"></param>
     public void ShowDamage(DamagePopupViewModel viewModel)
     {
+        if (_mainCamera == null)
+        {
+            _mainCamera = Camera.main;　//カメラ再取得
+        }
+
+        if (_mainCamera == null)
+        {
+            gameObject.SetActive(false);
+            OnRelease?.Invoke(this);　//取得できなかったら返却
+            return;
+        }
+
         gameObject.SetActive(true);
 
         //前回のアニメーションを停止
@@ -41,13 +53,7 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         //表示切替
         _weakPointObj.SetActive(viewModel.IsWeakPoint);
         _criticalObj.SetActive(viewModel.IsCritical);
-
-        if (_mainCamera == null)
-        {
-            _mainCamera = Camera.main;
-            if (_mainCamera == null) return;
-        }
-
+       
         // ワールド座標をスクリーン座標へ変換
         var screenPos = _mainCamera.WorldToScreenPoint(viewModel.WorldPosition);
         _rectTransform.position = screenPos;
@@ -76,7 +82,7 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
-
+        _mainCamera = Camera.main;
         _canvasGroup.alpha = 0f;
     }
 
@@ -102,6 +108,7 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
 
         seq.OnComplete(() =>
         {
+            gameObject.SetActive(false);
             OnRelease?.Invoke(this);
         });
         _currentTween = seq;
