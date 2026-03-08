@@ -28,6 +28,7 @@ public class EnemyBehaviourRunner
     public void RegisterTurn(IEnemyBehaviour turnBehaviour)
     {
         _turnBehaviour = turnBehaviour;
+        _turnBehaviour?.OnEnter();
     }
 
     /// <summary>

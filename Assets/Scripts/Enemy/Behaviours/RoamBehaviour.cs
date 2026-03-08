@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -18,6 +19,8 @@ public class RoamBehaviour : IEnemyBehaviour
         ISpatialHashGrid spatialHashGrid
     )
     {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
         _profile = profile;
         _separationService = separationService;
         _wallAvoidanceService = wallAvoidanceService;
@@ -151,7 +154,7 @@ public class RoamBehaviour : IEnemyBehaviour
     /// </summary>
     private void PickTarget()
     {
-        Vector2 randomCircle = Random.insideUnitCircle * _profile.RoamRadius;
+        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * _profile.RoamRadius;
         _target = _self.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
     }
 }

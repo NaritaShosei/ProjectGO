@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -16,6 +17,9 @@ public class TurnBehaviour : IEnemyBehaviour
     /// </summary>
     public TurnBehaviour(TurnProfile profile)
     {
+        if (profile == null)
+            throw new ArgumentNullException(nameof(profile));
+
         _profile = profile;
     }
 

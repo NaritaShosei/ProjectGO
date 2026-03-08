@@ -56,11 +56,12 @@ public class MoveBehaviour : IEnemyBehaviour
     {
         if (_player == null) return false;
 
-        // 攻撃距離内に入ったら終了
+        // 索敵距離外に出た場合、または攻撃距離内に入った場合は終了
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
         float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
 
-        return sqrDist > sqrAttack;
+        return sqrDist <= sqrDetect && sqrDist > sqrAttack;
     }
 
     public void OnEnter()

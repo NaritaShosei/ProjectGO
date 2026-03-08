@@ -14,6 +14,8 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
     public bool TryAcquire(int enemyId, int slotCost, bool isBoss)
     {
+        slotCost = Math.Max(1, slotCost);
+
         // すでに確保済みならtrueを返す
         if (_holders.Contains(enemyId)) return true;
 
@@ -27,6 +29,8 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
     public void Release(int enemyId, int slotCost)
     {
+        slotCost = Math.Max(1, slotCost);
+
         // 保持していなければ何もしない
         if (!_holders.Remove(enemyId)) return;
 
@@ -38,6 +42,8 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
     public bool IsFull(int slotCost)
     {
+        slotCost = Math.Max(1, slotCost);
+
         // 指定コスト分のスロットが残っていない場合は満杯とみなす
         return _usedSlots + slotCost > _maxSlots;
     }

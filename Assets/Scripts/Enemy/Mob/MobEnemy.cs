@@ -174,6 +174,17 @@ public class MobEnemy : Enemy
     }
 
     /// <summary>
+    /// 死亡時のクリーンアップ
+    /// _isDead = true後はUpdateが止まりRunnerのTickが呼ばれなくなるため
+    /// ここで明示的にBehaviourを終了させてスロットを解放する
+    /// </summary>
+    protected override void OnDeathInternal()
+    {
+        _runner?.ForceExitAction();
+        base.OnDeathInternal();
+    }
+
+    /// <summary>
     /// 鎧破壊時の処理
     /// </summary>
     private void BreakArmor()
