@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3469a6af574f7fe4c9c312273239f685, type: 3}
+  m_Name: MobEnemyAttackPattern
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackPattern
+  PatternName: TestPattern
+  SlotCost: 1
+  WindUp: 0
+  Duration: 1
+  Cooldown: 0
+  MaxHitCount: 1
+  HitInterval: 0.2
+  KnockbackPower: 0
+  BaseDamage: 0
