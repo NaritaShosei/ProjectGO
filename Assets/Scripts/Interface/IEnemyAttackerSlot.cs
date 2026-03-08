@@ -1,26 +1,25 @@
-using UnityEngine;
-
+/// <summary>
+/// 同時攻撃可能数を管理するスロットのインターフェース
+/// </summary>
 public interface IEnemyAttackerSlot
 {
+    /// <summary>
+    /// スロットの確保を試みる
+    /// </summary>
+    /// <param name="enemyId">EnemyのInstanceID</param>
+    /// <param name="slotCost">消費スロット数</param>
+    /// <param name="isBoss">Boss優先確保フラグ</param>
+    bool TryAcquire(int enemyId, int slotCost, bool isBoss);
 
     /// <summary>
-    /// 自分をAttackerに登録できるか
+    /// スロットを解放する
     /// </summary>
-    /// <param name="enemy"></param>
-    /// <returns></returns>
-    public bool TryAcquire(IEnemy enemy);
+    /// <param name="enemyId">EnemyのInstanceID</param>
+    /// <param name="slotCost">解放するスロット数</param>
+    void Release(int enemyId, int slotCost);
 
     /// <summary>
-    /// Attacker登録解除
+    /// 全スロットをリセットする
     /// </summary>
-    /// <param name="enemy"></param>
-    public void Release(IEnemy enemy);
-
-    /// <summary>
-    /// 自分がAttackerか
-    /// </summary>
-    /// <param name="enemy"></param>
-    /// <returns></returns>
-    public bool IsAttacker(IEnemy enemy);
-
+    void Reset();
 }

@@ -1,45 +1,48 @@
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
+/// <summary>
+/// 同時攻撃可能数を管理するスロット
+/// Bossは優先してスロットを確保できる
+/// </summary>
 public class EnemyAttackerSlot : IEnemyAttackerSlot
 {
-    /// <summary>
-    /// コンストラクタ
-    /// </summary>
-    /// <param name="maxAttackers"></param>
-    public EnemyAttackerSlot(int maxAttackers)
+    public EnemyAttackerSlot(int maxSlots)
     {
-        this._maxAttackers = Math.Max(1,maxAttackers);
+        _maxSlots = Math.Max(1, maxSlots);
     }
 
-    
-    public bool TryAcquire(IEnemy enemy)
+    public bool TryAcquire(int enemyId, int slotCost, bool isBoss)
     {
-        if (_attackers.Contains(enemy)) return true;
-        if (_attackers.Count >= _maxAttackers) return false;
+        // すでに確保済みならtrueを返す
+        if (_holders.Contains(enemyId)) return true;
 
-        _attackers.Add(enemy);
-        enemy.OnDead += OnEnemyDead;
+        // Boss以外はスロット上限チェック
+        if (_usedSlots + slotCost > _maxSlots && !isBoss) return false;
+
+        _holders.Add(enemyId);
+        _usedSlots += slotCost;
         return true;
     }
 
-    public void Release(IEnemy enemy)
+    public void Release(int enemyId, int slotCost)
     {
-        enemy.OnDead -= OnEnemyDead;
-        _attackers.Remove(enemy);
+        // 保持していなければ何もしない
+        if (!_holders.Remove(enemyId)) return;
+
+        _usedSlots -= slotCost;
+
+        // 安全のため0未満にならないようにする
+        if (_usedSlots < 0) _usedSlots = 0;
     }
 
-    public bool IsAttacker(IEnemy enemy)
+    public void Reset()
     {
-        return _attackers.Contains(enemy);
+        _holders.Clear();
+        _usedSlots = 0;
     }
 
-    private readonly int _maxAttackers;
-    private readonly HashSet<IEnemy> _attackers = new();
-
-    private void OnEnemyDead(IEnemy enemy)
-    {
-        Release(enemy);
-    }
-
+    private readonly int _maxSlots;
+    private int _usedSlots;
+    private readonly HashSet<int> _holders = new();
 }
