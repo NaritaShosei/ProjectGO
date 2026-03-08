@@ -7,8 +7,8 @@ public class EnemyStats : IHealthStats
     public event Action OnHealthZero;
     public event Action<float, float> OnHealthChanged;
 
-    public float MaxHealth {get => _maxHealth; }
-    public float CurrentHealth { get => _currentHealth; } 
+    public float MaxHealth { get => _maxHealth; }
+    public float CurrentHealth { get => _currentHealth; }
 
 
     public EnemyStats(EnemyData data)
