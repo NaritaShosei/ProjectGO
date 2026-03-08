@@ -11,7 +11,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnArmorBroken;
 
-    public event Action<float,float> OnHealthChanged 
+    public event Action<float, float> OnHealthChanged
     {
         add => _stats.OnHealthChanged += value;
         remove => _stats.OnHealthChanged -= value;
@@ -115,17 +115,43 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     public abstract void OnConditionInterrupt();
 
+    /// <summary>
+    /// 各サービスをBehaviourに注入する
+    /// EnemyManagerのSpawnから呼ぶ想定
+    /// </summary>
+    public void InjectServices(
+        ISpatialHashGrid spatialHashGrid,
+        ISeparationService separationService,
+        IWallAvoidanceService wallAvoidanceService,
+        IEnemyAttackerSlot attackerSlot
+    )
+    {
+        _spatialHashGrid = spatialHashGrid;
+        _separationService = separationService;
+        _wallAvoidanceService = wallAvoidanceService;
+        _attackerSlot = attackerSlot;
+    }
+
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
+
+    // Turn用プロファイル（派生クラスのInspectorから設定する）
+    [SerializeField] protected TurnProfile _turnProfile;
 
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
     private HitStopManager _hitStopManager;
 
-    protected bool _isDead; // 軽い実装のため bool のフラグを使用
+    protected bool _isDead;
 
     protected CancellationTokenSource _shockCts;
+
+    // サービス参照（InjectServicesで注入される）
+    protected ISpatialHashGrid _spatialHashGrid;
+    protected ISeparationService _separationService;
+    protected IWallAvoidanceService _wallAvoidanceService;
+    protected IEnemyAttackerSlot _attackerSlot;
 
     protected virtual void Awake()
     {
@@ -136,7 +162,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _defenceContext = new EnemyDefenseContext()
         {
             EnemyType = EnemyType.Flesh,
-
             HasShockDebuff = false
         };
 
@@ -148,6 +173,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
         // 鎧生成関連はすべてMobEnemyのほうで実装
     }
+
     protected virtual void Update()
     {
         if (_isDead) return;
@@ -204,15 +230,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
-
-
 }
 
 // TODO: 鎧が壊れたことを検知してEnemyTypeを切り替える
 public struct EnemyDefenseContext
 {
-    public EnemyType EnemyType; // 鎧 / 生身
-    public bool HasShockDebuff; // 感電弱体化状態か
+    // 鎧 / 生身
+    public EnemyType EnemyType;
+    // 感電弱体化状態か
+    public bool HasShockDebuff;
 }
 
 public enum EnemyType
