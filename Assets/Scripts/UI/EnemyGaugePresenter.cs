@@ -17,10 +17,11 @@ public class EnemyGaugePresenter : IDisposable
         _detectionRange = detectionRange;
         _enemyTransform = enemy.GetTargetCenter();
 
+        _visibility = new EnemyGaugeVisibilityState(damagedDisplayDuration);
+
         View = view;
         View.Initialize(_enemyTransform, isBehind => _visibility.SetBehindCamera(isBehind));
 
-        _visibility = new EnemyGaugeVisibilityState(damagedDisplayDuration);
         _visibility.OnVisibilityChanged += View.SetVisible;
 
         _enemy.OnHealthChanged += HandleHealthChanged;
