@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using System;
 
 // NOTE:
 // モブ敵のの基底クラスとして作成
@@ -11,6 +12,10 @@ using UnityEngine;
 public class MobEnemy : Enemy
 {
     public override EnemyConditionController ConditionController { get => _conditionController; }
+
+    // Armor登録を外部（UI等）に通知するイベント
+    // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
+    public event Action<IArmorHealth> OnArmorRegistered;
 
     public override void Init(IPlayer player)
     {
@@ -82,6 +87,8 @@ public class MobEnemy : Enemy
             _defenceContext.EnemyType = EnemyType.Armor;
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
+            // Init()後に発火することで購読者がOnHealthChangedを安全に受け取れる
+            OnArmorRegistered?.Invoke(_armor);
         }
         else
         {
@@ -169,7 +176,7 @@ public class MobEnemy : Enemy
     /// <summary>
     /// 鎧破壊時の処理
     /// </summary>
-    private void BreakArmor(IEnemy enemy)
+    private void BreakArmor()
     {
         _defenceContext.EnemyType = EnemyType.Flesh;
         _armor.OnBroken -= BreakArmor;
@@ -179,7 +186,7 @@ public class MobEnemy : Enemy
     // TODO: いろいろなところで使うと思うので、Utilityにできたほうがいいのでは
     private bool CheckProbability(float probability)
     {
-        return Random.value < probability;
+        return UnityEngine.Random.value < probability;
     }
 
 #if UNITY_EDITOR

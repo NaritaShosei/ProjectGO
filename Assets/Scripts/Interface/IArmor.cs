@@ -3,31 +3,19 @@ using System;
 
 /// <summary>
 /// エネミーからアーマーへの窓口
+/// IArmorHealthを継承することでUI等の購読者はIArmorHealthだけを知ればよい
 /// </summary>
-public interface IArmor
+public interface IArmor : IArmorHealth
 {
     /// <summary>
-    /// 鎧破壊時に発火するイベント保持用
+    /// 初期化
+    /// 誰の鎧かを登録する
     /// </summary>
-    public event Action<IEnemy> OnBroken;
-
-    /// <summary>
-    /// 鎧が壊れているか
-    /// </summary>
-    // public bool IsBroken();
-
-    /// <summary>
-    /// 初期化できる
-    /// ・誰の鎧かを登録
-    /// </summary>
-    /// <param name="enemy"></param>
     public void Init(IEnemy enemy);
 
     /// <summary>
-    /// ダメージを引き受け、超過ダメージを通知する
+    /// ダメージを引き受け、超過ダメージを返す
     /// </summary>
-    /// <param name="damage"></param>
-    /// <returns>残りダメージ量</returns>
     public float AbsorbDamageAndReturnExcess(float damage);
 
     /// <summary>
