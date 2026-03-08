@@ -11,7 +11,6 @@ public class PlayerMovement : MonoBehaviour
 
     public void Init(PlayerStateManager playerStateManager,
         InputHandler input,
-        CameraManager cameraManager,
         MoveData data,
         IStamina stamina,
         IModeController modeController,
@@ -20,7 +19,6 @@ public class PlayerMovement : MonoBehaviour
     {
         _playerStateManager = playerStateManager;
         _input = input;
-        _cameraManager = cameraManager;
         _moveData = data;
         _stamina = stamina;
         _modeController = modeController;
@@ -30,6 +28,15 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
 
         _attack.OnAttackMoveRequested += HandleAttackMove;
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _cameraManager = cameraManager;
+        }
+        else
+        {
+            Debug.LogError($"[{this}]:CameraManagerが見つかりませんでした。");
+        }
     }
 
     public void SetTimeScale(float scale)
