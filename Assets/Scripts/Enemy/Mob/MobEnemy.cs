@@ -46,28 +46,35 @@ public class MobEnemy : Enemy
             _runner.Register(attack);
         }
 
-        var move = new MoveBehaviour(
-            _distanceProfile,
-            _separationService,
-            _wallAvoidanceService,
-            _spatialHashGrid
-        );
-        move.Init(this, _data, _playerTransform, _context, _state);
-        _runner.Register(move);
+        // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
+        if (_distanceProfile == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Move・Bark・Roamは無効になります。");
+        }
+        else
+        {
+            var move = new MoveBehaviour(
+                _distanceProfile,
+                _separationService,
+                _wallAvoidanceService,
+                _spatialHashGrid
+            );
+            move.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(move);
 
+            var bark = new BarkBehaviour(_distanceProfile);
+            bark.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(bark);
 
-        var bark = new BarkBehaviour(_distanceProfile);
-        bark.Init(this, _data, _playerTransform, _context, _state);
-        _runner.Register(bark);
-
-        var roam = new RoamBehaviour(
-            _distanceProfile,
-            _separationService,
-            _wallAvoidanceService,
-            _spatialHashGrid
-        );
-        roam.Init(this, _data, _playerTransform, _context, _state);
-        _runner.Register(roam);
+            var roam = new RoamBehaviour(
+                _distanceProfile,
+                _separationService,
+                _wallAvoidanceService,
+                _spatialHashGrid
+            );
+            roam.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(roam);
+        }
 
         // 鎧登録　データがなければ裸
         if (_armor != null)
