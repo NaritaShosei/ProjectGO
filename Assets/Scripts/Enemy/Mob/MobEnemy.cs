@@ -55,6 +55,20 @@ public class MobEnemy : Enemy
         move.Init(this, _data, _playerTransform, _context, _state);
         _runner.Register(move);
 
+
+        var bark = new BarkBehaviour(_distanceProfile);
+        bark.Init(this, _data, _playerTransform, _context, _state);
+        _runner.Register(bark);
+
+        var roam = new RoamBehaviour(
+            _distanceProfile,
+            _separationService,
+            _wallAvoidanceService,
+            _spatialHashGrid
+        );
+        roam.Init(this, _data, _playerTransform, _context, _state);
+        _runner.Register(roam);
+
         // 鎧登録　データがなければ裸
         if (_armor != null)
         {
@@ -85,7 +99,7 @@ public class MobEnemy : Enemy
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        bool isKill = _stats.CurrentHealth <= 0; 
+        bool isKill = _stats.CurrentHealth <= 0;
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
         bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
@@ -109,11 +123,11 @@ public class MobEnemy : Enemy
             _conditionController.ApplyCondition(new KnockbackCondition(temp));
         }
 
-        if(CheckProbability(context.ElectricShock.GrantEffectProbability))
+        if (CheckProbability(context.ElectricShock.GrantEffectProbability))
         {
             // もちろんボスじゃないのでfalse
             _conditionController.ApplyCondition(
-                new ElectrifiedCondition(context.ElectricShock.DurationEffect,　enemyIsBoss: false));
+                new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
 
             this.ActivateShockDebuff().Forget();
         }
@@ -134,7 +148,7 @@ public class MobEnemy : Enemy
 
     private void OnDestroy()
     {
-         if(_armor!=null)_armor.OnBroken -= BreakArmor;
+        if (_armor != null) _armor.OnBroken -= BreakArmor;
     }
 
     protected override void UpdateEnemy(float deltaTime)

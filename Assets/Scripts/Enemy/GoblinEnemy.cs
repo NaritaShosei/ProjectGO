@@ -50,6 +50,20 @@ public class GoblinEnemy : Enemy
         );
         move.Init(this, _data, _playerTransform, _context, _state);
         _runner.Register(move);
+
+        var roam = new RoamBehaviour(
+            _distanceProfile,
+            _separationService,
+            _wallAvoidanceService,
+            _spatialHashGrid
+        );
+        roam.Init(this, _data, _playerTransform, _context, _state);
+        _runner.Register(roam);
+
+        var bark = new BarkBehaviour(_distanceProfile);
+        bark.Init(this, _data, _playerTransform, _context, _state);
+        _runner.Register(bark);
+
     }
 
     private EnemyBehaviourRunner _runner;
