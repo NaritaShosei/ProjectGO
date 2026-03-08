@@ -19,11 +19,20 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
     public float TimeScale { get; set; } = 1f;
 
     public event Action OnDead;
-    public event Action<float, float> OnHealthChanged;
-    public event Action<float, float> OnStaminaChanged;
-    public void Init(SkillManager skillManager, CameraManager cameraManager, InputHandler input)
+    public event Action<float, float, float> OnHealthChanged
     {
-        CreateInternalObjects();
+        add => _playerStats.OnHealthChanged += value;
+        remove => _playerStats.OnHealthChanged -= value;
+    }
+
+    public event Action<float, float, float> OnStaminaChanged
+    {
+        add => _playerStats.OnStaminaChanged += value;
+        remove => _playerStats.OnStaminaChanged -= value;
+    }
+
+    public void Init(SkillManager skillManager, InputHandler input)
+    {
         BindEvents();
 
         _attackExecutor?.Init(this, skillManager);
@@ -33,7 +42,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
         _move?.Init(
            _playerStateManager,
            input,
-           cameraManager,
            _moveData,
            this,
            _modeController,
@@ -123,6 +131,11 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
 
+    private void Awake()
+    {
+        CreateInternalObjects();
+    }
+
     private void Update()
     {
         RegenerateStamina();
@@ -139,8 +152,6 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
         if (_playerStats != null)
         {
             _playerStats.OnDead -= OnPlayerDead;
-            _playerStats.OnHealthChanged -= HealthChange;
-            _playerStats.OnStaminaChanged -= StaminaChange;
         }
 
         if (_move != null)
@@ -163,23 +174,11 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
     private void BindEvents()
     {
         _playerStats.OnDead += OnPlayerDead;
-        _playerStats.OnHealthChanged += HealthChange;
-        _playerStats.OnStaminaChanged += StaminaChange;
 
         if (_move != null && _attack != null)
         {
             _move.OnEndDodge += _attack.FinishDodge;
         }
-    }
-
-    private void HealthChange(float current, float max)
-    {
-        OnHealthChanged?.Invoke(current, max);
-    }
-
-    private void StaminaChange(float current, float max)
-    {
-        OnStaminaChanged?.Invoke(current, max);
     }
 
     private void RegenerateStamina()

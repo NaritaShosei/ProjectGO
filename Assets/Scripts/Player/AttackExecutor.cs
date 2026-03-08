@@ -23,10 +23,9 @@ public class AttackExecutor : MonoBehaviour
 
         Debug.Log($"{data.Mode}：{data.AttackName}で攻撃");
 
-        var context = new AttackContext
+        var context = new AttackContext(data.Mode, attackPos, transform)
         {
             AttackPower = _playerStats.AttackPower * data.DamageMultiplier * modeData.AttackMultiplier,
-            PlayerMode = data.Mode
         };
 
         if (data.EnableKnockback)
@@ -58,7 +57,7 @@ public class AttackExecutor : MonoBehaviour
             {
                 var perHitContext = context;
                 RollCritical(ref perHitContext, modeData);
-                perHitContext.OnHit?.Invoke();
+                perHitContext.OnHit?.Invoke(enemy);
 
                 var damageContext = BuildDamageContext(perHitContext);
 
@@ -174,7 +173,11 @@ public class AttackExecutor : MonoBehaviour
 public struct AttackContext
 {
     public float AttackPower;
-    public PlayerMode PlayerMode;
+    public readonly PlayerMode PlayerMode;
+
+    // 攻撃の座標
+    public readonly Vector3 AttackPosition;
+    public readonly Transform PlayerTransform;
 
     public bool IsCritical;
     public float CriticalMultiplier;
@@ -188,10 +191,26 @@ public struct AttackContext
     public Action OnAfterAttack;
 
     /// <summary>敵にヒットした瞬間</summary>
-    public Action OnHit;
+    public Action<IEnemy> OnHit;
 
     /// <summary>感電</summary>
     public ElectricShock ElectricShock;
+
+    public AttackContext(PlayerMode mode, Vector3 attackPos, Transform playerTransform)
+    {
+        PlayerMode = mode;
+        AttackPosition = attackPos;
+        PlayerTransform = playerTransform;
+
+        AttackPower = 0;
+        IsCritical = false;
+        CriticalMultiplier = 1f;
+        Knockback = null;
+        OnBeforeAttack = null;
+        OnAfterAttack = null;
+        OnHit = null;
+        ElectricShock = new();
+    }
 }
 
 /// <summary>
