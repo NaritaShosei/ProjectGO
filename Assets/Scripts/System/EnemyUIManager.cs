@@ -10,35 +10,51 @@ public class EnemyUIManager : MonoBehaviour
         _playerTransform = playerTransform;
     }
 
+    [Header("Reference")]
     [SerializeField] private EnemyManager _enemyManager;
+
+    [Header("Gauge")]
     [SerializeField] private EnemyGaugeView _gaugePrefab;
     [SerializeField] private Transform _gaugeParent;
+
+    [Header("Damage Popup")]
+    [SerializeField] private DamagePopupView _popupPrefab;
+    [SerializeField] private Transform _popupParent;
+
+    [Header("Settings")]
     [SerializeField] private float _detectionRange = 10f;
     [SerializeField] private float _damagedDisplayDuration = 3f;
-    [SerializeField] private float _rangeCheckInterval = 0.1f; // 距離チェック間隔(秒)
+    [SerializeField] private float _rangeCheckInterval = 0.1f;
+    [SerializeField] private int _popupPreloadCount = 20;
 
     private Transform _playerTransform;
 
     private Dictionary<IEnemy, EnemyGaugePresenter> _presenters = new();
-    private EnemyGaugePool _pool;
+
+    private EnemyGaugePool _gaugePool;
+    private DamagePopupPool _popupPool;
+    private DamagePopupPresenter _popupPresenter;
+
     private CancellationTokenSource _cts;
 
     private void Awake()
     {
-        // Debug用のフォールバック。通常はEnemyManager.Initでセットされる想定
-        _playerTransform = FindAnyObjectByType<Player>().transform;
+        _gaugePool = new EnemyGaugePool(_gaugePrefab, _gaugeParent);
 
-        _pool = new EnemyGaugePool(_gaugePrefab, _gaugeParent);
+        _popupPool = new DamagePopupPool(
+            _popupPrefab,
+            _popupParent,
+            _popupPreloadCount
+        );
+
+        _popupPresenter = new DamagePopupPresenter(_popupPool);
+
         _enemyManager.OnEnemySpawned += HandleEnemySpawned;
 
         _cts = new CancellationTokenSource();
         RangeCheckLoopAsync(_cts.Token).Forget();
     }
 
-    /// <summary>
-    /// 一定間隔で全Presenterの距離チェックを行うループ
-    /// Updateより頻度を落とすことでGC・CPU負荷を軽減
-    /// </summary>
     private async UniTaskVoid RangeCheckLoopAsync(CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
@@ -47,6 +63,7 @@ public class EnemyUIManager : MonoBehaviour
             {
                 presenter.UpdateRangeCheck();
             }
+
             await UniTask.Delay(
                 System.TimeSpan.FromSeconds(_rangeCheckInterval),
                 cancellationToken: ct
@@ -56,7 +73,9 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleEnemySpawned(IEnemy enemy)
     {
-        var view = _pool.Get();
+        // Gauge
+        var view = _gaugePool.Get();
+
         var presenter = new EnemyGaugePresenter(
             enemy,
             view,
@@ -64,8 +83,17 @@ public class EnemyUIManager : MonoBehaviour
             _detectionRange,
             _damagedDisplayDuration
         );
+
         _presenters.Add(enemy, presenter);
+
+        // Damage Popup
+        enemy.OnDamageDealt += HandleDamageDealt;
         enemy.OnDead += HandleEnemyDead;
+    }
+
+    private void HandleDamageDealt(DamagePopupViewModel viewModel)
+    {
+        _popupPresenter.Show(viewModel);
     }
 
     private void HandleEnemyDead(IEnemy enemy)
@@ -74,9 +102,13 @@ public class EnemyUIManager : MonoBehaviour
         {
             presenter.ResetView();
             presenter.Dispose();
-            _pool.Release(presenter.View);
+
+            _gaugePool.Release(presenter.View);
+
             _presenters.Remove(enemy);
         }
+
+        enemy.OnDamageDealt -= HandleDamageDealt;
         enemy.OnDead -= HandleEnemyDead;
     }
 
@@ -86,48 +118,17 @@ public class EnemyUIManager : MonoBehaviour
         _cts.Dispose();
 
         _enemyManager.OnEnemySpawned -= HandleEnemySpawned;
+
         foreach (var pair in _presenters)
         {
             pair.Key.OnDead -= HandleEnemyDead;
+            pair.Key.OnDamageDealt -= HandleDamageDealt;
+
             pair.Value.Dispose();
         }
+
         _presenters.Clear();
+
+        _popupPresenter.Dispose();
     }
-}
-public class EnemyGaugePool
-{
-    public EnemyGaugePool(EnemyGaugeView prefab, Transform parent)
-    {
-        _prefab = prefab;
-        _parent = parent;
-    }
-
-    public EnemyGaugeView Get()
-    {
-        EnemyGaugeView view;
-
-        if (_pool.Count > 0)
-        {
-            view = _pool.Pop();
-            view.gameObject.SetActive(true);
-        }
-        else
-        {
-            view = Object.Instantiate(_prefab, _parent);
-        }
-
-        return view;
-    }
-
-    public void Release(EnemyGaugeView view)
-    {
-        view.Cleanup();
-        view.gameObject.SetActive(false);
-        _pool.Push(view);
-    }
-
-    private EnemyGaugeView _prefab;
-    private Transform _parent;
-
-    private Stack<EnemyGaugeView> _pool = new();
 }
