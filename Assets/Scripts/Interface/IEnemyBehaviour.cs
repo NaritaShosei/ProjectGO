@@ -2,6 +2,7 @@ using UnityEngine;
 
 public interface IEnemyBehaviour
 {
+    /*
     public void Init(
          Enemy owner,
          EnemyData data,
@@ -9,6 +10,8 @@ public interface IEnemyBehaviour
          EnemyContext context,
          EnemyStateContext state
      );
+    */
+
     int Priority { get; }
 
     bool CanEnter();

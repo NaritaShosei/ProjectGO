@@ -138,6 +138,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     // Turn用プロファイル（派生クラスのInspectorから設定する）
     [SerializeField] protected TurnProfile _turnProfile;
 
+    // DistanceProfile（派生クラスのInspectorから設定する）
+    [SerializeField] protected DistanceProfile _distanceProfile;
+
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;

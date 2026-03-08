@@ -1,19 +1,28 @@
 using UnityEngine;
 
-
 /// <summary>
-/// 中身は後で実装
+/// プレイヤーに向かって移動するBehaviour
+/// SeparationServiceとWallAvoidanceServiceで移動方向を補正する
 /// </summary>
 public class MoveBehaviour : IEnemyBehaviour
 {
-
     public int Priority { get => (int)EnemyBehaviourPriority.Move; }
 
-    public bool CanEnter() { return true; }
-    public bool CanContinue() { return !IsWithinDistance(_self.position, _player.position, _maxApproachLimit); }
-
-    public void OnEnter() { }
-    public void OnExit() { }
+    /// <summary>
+    /// DistanceProfile・各サービスはMove固有の依存のためコンストラクタで受け取る
+    /// </summary>
+    public MoveBehaviour(
+        DistanceProfile profile,
+        ISeparationService separationService,
+        IWallAvoidanceService wallAvoidanceService,
+        ISpatialHashGrid spatialHashGrid
+    )
+    {
+        _profile = profile;
+        _separationService = separationService;
+        _wallAvoidanceService = wallAvoidanceService;
+        _spatialHashGrid = spatialHashGrid;
+    }
 
     public void Init(
         Enemy owner,
@@ -24,47 +33,110 @@ public class MoveBehaviour : IEnemyBehaviour
     )
     {
         _self = owner.transform;
+        _enemy = owner;
         _player = player;
         _data = data;
         _context = context;
         _state = state;
+    }
 
-        // 本来は敵ごとにEnemyDataに定義するもの
-        _maxApproachLimit = 2f;
+    public bool CanEnter()
+    {
+        if (_player == null) return false;
+
+        // 索敵距離内かつ攻撃距離外のときに発動
+        float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
+        float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
+
+        return sqrDist <= sqrDetect && sqrDist > sqrAttack;
+    }
+
+    public bool CanContinue()
+    {
+        if (_player == null) return false;
+
+        // 攻撃距離内に入ったら終了
+        float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
+
+        return sqrDist > sqrAttack;
+    }
+
+    public void OnEnter()
+    {
+        _state.ChangeState(EnemyState.Move);
+    }
+
+    public void OnExit()
+    {
+        _state.ChangeState(EnemyState.Idle);
     }
 
     public void Tick(float deltaTime)
     {
-        // 攻撃の条件に満たしていなかったら早期リターン
-        if (!_state.CanMove()) { return; }
-        if (_player == null) { return; }
+        if (_player == null) return;
+        if (!_state.CanMove()) return;
 
+        Vector3 oldPos = _self.position;
 
-        // プレイヤーに十分に近ければ動かない
-        if (IsWithinDistance(_self.position, _player.position, _maxApproachLimit)) { return; }
-
-        _state.ChangeState(EnemyState.Move);
-
-        // TODO:雑に移動しているため場合によっては修正が必要
-        Vector3 dir = (_player.position - _self.position);
-        dir.y = 0;
+        // プレイヤーへの方向を基本ベクトルとする
+        Vector3 dir = _player.position - _self.position;
+        dir.y = 0f;
         dir = dir.normalized;
 
-        _self.position += dir * _data.MoveSpeed * deltaTime;
+        // 分離力を加算する
+        if (_separationService != null)
+        {
+            dir += _separationService.Calculate(
+                _enemy,
+                _self.position,
+                _profile.SeparationRadius,
+                _profile.SeparationStrength
+            );
+        }
+
+        // 壁回避力を加算する
+        if (_wallAvoidanceService != null)
+        {
+            dir += _wallAvoidanceService.CalculateAvoidance(
+                _self.position,
+                dir.normalized,
+                _profile.WallDetectDistance,
+                _profile.WallAvoidanceStrength
+            );
+        }
+
+        dir.y = 0f;
+
+        // 方向ベクトルが極端に小さい場合はスキップ
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        Vector3 newPos = _self.position + dir.normalized * _data.MoveSpeed * deltaTime;
+        _self.position = newPos;
+
+        // SpatialHashGridの位置を更新する
+        if (_spatialHashGrid != null)
+        {
+            _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
+        }
+
+        // EnemyContextの距離を更新する
+        _context.DistanceToPlayer = Vector3.Distance(
+            _self.position,
+            _player.position
+        );
     }
 
     private Transform _self;
+    private IEnemy _enemy;
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
     private EnemyStateContext _state;
 
-    private float _maxApproachLimit;
-
-    bool IsWithinDistance(Vector3 self, Vector3 player, float threshold)
-    {
-        float sqrDist = (self - player).sqrMagnitude;
-        float sqrThreshold = threshold * threshold;
-        return sqrDist <= sqrThreshold;
-    }
+    private readonly DistanceProfile _profile;
+    private readonly ISeparationService _separationService;
+    private readonly IWallAvoidanceService _wallAvoidanceService;
+    private readonly ISpatialHashGrid _spatialHashGrid;
 }

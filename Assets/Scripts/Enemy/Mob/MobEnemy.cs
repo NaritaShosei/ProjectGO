@@ -46,7 +46,12 @@ public class MobEnemy : Enemy
             _runner.Register(attack);
         }
 
-        var move = new MoveBehaviour();
+        var move = new MoveBehaviour(
+            _distanceProfile,
+            _separationService,
+            _wallAvoidanceService,
+            _spatialHashGrid
+        );
         move.Init(this, _data, _playerTransform, _context, _state);
         _runner.Register(move);
 
