@@ -18,14 +18,10 @@ public class GaugeView : MonoBehaviour
             return;
         }
 
-        // HP割合（現在HP / 最大HP）
-        float hpAmount = current / max;
-
-        // 最大HP増加によるバー幅更新
+        // barContainerだけ伸ばす
         UpdateBarWidth(max, initialMax);
-
-        // HPゲージアニメーション
-        AnimateHPGauge(hpAmount);
+        // HPの長さはwidthで直接制御
+        AnimateHPGauge(current, max, initialMax);
     }
 
     [SerializeField] private RectTransform _barContainer;
@@ -36,15 +32,14 @@ public class GaugeView : MonoBehaviour
 
     [SerializeField] private float _baseWidth;
 
+    [SerializeField] private float _gaugeWidth;
+
     [SerializeField] private float _duration = 0.4f;
 
     [SerializeField] private float _delay = 0.4f;
 
     [SerializeField] private Ease _ease = Ease.Linear;
 
-    // 各ゲージとコントローラーの幅の差
-    private float _gaugeWidthDiff;
-    private float _delayGaugeWidthDiff;
 
     /// <summary>
     /// HPゲージTween
@@ -62,59 +57,48 @@ public class GaugeView : MonoBehaviour
     private void UpdateBarWidth(float max, float initialMax)
     {
         float ratio = max / initialMax;
-
         Vector2 size = _barContainer.sizeDelta;
         size.x = _baseWidth * ratio;
-
         _barContainer.sizeDelta = size;
-
-        // ゲージの幅も更新
-        if (_gauge != null)
-        {
-            Vector2 gaugeSize = _gauge.rectTransform.sizeDelta;
-            gaugeSize.x = size.x - _gaugeWidthDiff;
-            _gauge.rectTransform.sizeDelta = gaugeSize;
-        }
-
-        if (_delayGauge != null)
-        {
-            Vector2 delayGaugeSize = _delayGauge.rectTransform.sizeDelta;
-            delayGaugeSize.x = size.x - _delayGaugeWidthDiff;
-            _delayGauge.rectTransform.sizeDelta = delayGaugeSize;
-        }
     }
 
     /// <summary>
     /// HPゲージのアニメーション処理
     /// </summary>
-    private void AnimateHPGauge(float targetAmount)
+    private void AnimateHPGauge(float current, float max, float initialMax)
     {
-        float currentAmount = _gauge.fillAmount;
+        // HPの絶対的な長さ = gaugeWidth × (current / initialMax)
+        float targetWidth = _gaugeWidth * (current / initialMax);
+        float currentWidth = _gauge.rectTransform.sizeDelta.x;
 
-        // 既存Tween停止
         _mainSeq?.Kill();
         _delaySeq?.Kill();
 
-        // 回復処理
-        if (currentAmount < targetAmount)
+        if (currentWidth < targetWidth)
         {
-            // 遅延ゲージを先に更新
-            _delayGauge.fillAmount = targetAmount;
-
+            // 回復
+            _delayGauge.rectTransform.sizeDelta = new Vector2(targetWidth, _delayGauge.rectTransform.sizeDelta.y);
             _mainSeq = DOTween.Sequence()
-                .Append(_gauge.DOFillAmount(targetAmount, _duration))
+                .Append(DOTween.To(
+                    getter: () => _gauge.rectTransform.sizeDelta.x,
+                    setter: x => _gauge.rectTransform.sizeDelta = new Vector2(x, _gauge.rectTransform.sizeDelta.y),
+                    endValue: targetWidth,
+                    duration: _duration))
                 .SetEase(_ease)
                 .SetLink(gameObject);
-
             return;
         }
 
-        // ダメージ処理
-        _gauge.fillAmount = targetAmount;
+        // ダメージ
+        _gauge.rectTransform.sizeDelta = new Vector2(targetWidth, _gauge.rectTransform.sizeDelta.y);
 
         _delaySeq = DOTween.Sequence()
-            .Append(_delayGauge.DOFillAmount(targetAmount, _duration))
-            .SetDelay(_delay)
+            .AppendInterval(_delay)
+            .Append(DOTween.To(
+                getter: () => _delayGauge.rectTransform.sizeDelta.x,
+                setter: x => _delayGauge.rectTransform.sizeDelta = new Vector2(x, _delayGauge.rectTransform.sizeDelta.y),
+                endValue: targetWidth,
+                duration: _duration))
             .SetEase(_ease)
             .SetLink(gameObject);
     }
@@ -124,18 +108,11 @@ public class GaugeView : MonoBehaviour
         if (_barContainer != null)
         {
             _baseWidth = _barContainer.sizeDelta.x;
+        }
 
-            if (_gauge != null)
-            {
-                var gaugeWidth = _gauge.rectTransform.sizeDelta.x;
-                _gaugeWidthDiff = _baseWidth - gaugeWidth;
-            }
-
-            if (_delayGauge != null)
-            {
-                var delayGaugeWidth = _delayGauge.rectTransform.sizeDelta.x;
-                _delayGaugeWidthDiff = _baseWidth - delayGaugeWidth;
-            }
+        if (_gauge != null)
+        {
+            _gaugeWidth = _gauge.rectTransform.sizeDelta.x;
         }
     }
 }

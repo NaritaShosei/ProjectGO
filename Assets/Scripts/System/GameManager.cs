@@ -5,10 +5,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private SequenceManager _sequenceManager;
     [SerializeField] private Player _player;
     [SerializeField] private EnemyManager _enemyManager;
+    [SerializeField] private EnemyUIManager _enemyUIManager;
     [SerializeField] private SkillManager _skillManager;
-
     [SerializeField] private PlayerGaugeView _playerGaugeView;
-    private PlayerGaugePresenter _playerGaugePresenter;
+    [SerializeField] private InGameUIInitializer _inGameUIInitializer;
 
     private SceneTransitionManager _sceneTransitionManager;
 
@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
         InitPlayer();
         InitCameraManager();
         InitEnemyManager();
+        InitUI();
         StartGame();
     }
 
@@ -38,11 +39,6 @@ public class GameManager : MonoBehaviour
             _player.OnDead -= HandleGameComplete;
         }
 
-        if (_playerGaugePresenter != null)
-        {
-            _playerGaugePresenter.Dispose();
-        }
-
         _hitStopManager?.Dispose();
     }
 
@@ -53,8 +49,6 @@ public class GameManager : MonoBehaviour
         _player.Init(_skillManager, input);
 
         _player.OnDead += HandleGameComplete;
-
-        _playerGaugePresenter = new PlayerGaugePresenter(health: _player, stamina: _player, _playerGaugeView);
     }
 
     private void InitCameraManager()
@@ -80,6 +74,12 @@ public class GameManager : MonoBehaviour
 
         // SequenceManagerのイベントを購読
         _sequenceManager.OnAllSequencesComplete += HandleGameComplete;
+    }
+
+    private void InitUI()
+    {
+        _inGameUIInitializer.Init(_player);
+        _enemyUIManager.Init(_player.transform);
     }
 
     private void StartGame()
