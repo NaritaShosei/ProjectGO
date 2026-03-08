@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class EnemyStats : IHealthStats, IHealth
+public class EnemyStats : IHealthStats
 {
     public event Action OnDead;
     public event Action OnHealthZero;
