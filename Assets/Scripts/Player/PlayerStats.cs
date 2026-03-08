@@ -111,9 +111,7 @@ public class PlayerStats
 
         _maxHealth += value;
 
-        _currentHealth = Mathf.Min(_currentHealth, _maxHealth);
-
-        OnHealthChanged?.Invoke(InitialMaxHealth, _maxHealth, InitialMaxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
         OnStatsChanged?.Invoke();
     }
 
