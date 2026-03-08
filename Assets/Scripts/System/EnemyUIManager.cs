@@ -87,7 +87,7 @@ public class EnemyUIManager : MonoBehaviour
         _presenters.Add(enemy, presenter);
 
         // Damage Popup
-        enemy.OnDamageDealt += HandleDamageDealt;
+        // enemy.OnDamageDealt += HandleDamageDealt;
         enemy.OnDead += HandleEnemyDead;
     }
 
@@ -108,7 +108,7 @@ public class EnemyUIManager : MonoBehaviour
             _presenters.Remove(enemy);
         }
 
-        enemy.OnDamageDealt -= HandleDamageDealt;
+        // enemy.OnDamageDealt -= HandleDamageDealt;
         enemy.OnDead -= HandleEnemyDead;
     }
 
@@ -122,7 +122,7 @@ public class EnemyUIManager : MonoBehaviour
         foreach (var pair in _presenters)
         {
             pair.Key.OnDead -= HandleEnemyDead;
-            pair.Key.OnDamageDealt -= HandleDamageDealt;
+            // pair.Key.OnDamageDealt -= HandleDamageDealt;
 
             pair.Value.Dispose();
         }
