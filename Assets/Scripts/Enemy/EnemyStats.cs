@@ -28,12 +28,6 @@ public class EnemyStats : IHealthStats
         }
     }
 
-    public void Healing(float amount)
-    {
-        // Enemyには必要ないので実装しない
-    }
-
-
     public void Kill()
     {
         OnDead?.Invoke();
