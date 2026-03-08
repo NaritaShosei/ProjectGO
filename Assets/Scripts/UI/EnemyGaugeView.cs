@@ -1,35 +1,58 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using System;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class EnemyGaugeView : MonoBehaviour
 {
-    public void Initialize(Transform enemyTransform)
+    public void Initialize(Transform enemyTransform, Action<bool> onBehindCameraChanged)
     {
+        _onBehindCameraChanged = onBehindCameraChanged;
+
         _linkEnemy = enemyTransform;
+
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
             _mainCamera = cameraManager.MainCamera;
         }
+
+        // 初期状態は非表示
+        SetVisible(false);
+
+        _cts = new CancellationTokenSource();
+        PositionUpdateLoopAsync(_cts.Token).Forget();
     }
 
     public void UpdateGauge(float current, float max)
     {
-        // HP割合（現在HP / 最大HP）
         float hpAmount = current / max;
-        // HPゲージアニメーション
         AnimateHPGauge(hpAmount);
+    }
+
+    public void SetVisible(bool visible)
+    {
+        _isVisible = visible;
+        ApplyVisibility();
     }
 
     public void ResetView()
     {
         if (_delaySequence != null && _delaySequence.IsActive())
-        {
             _delaySequence.Kill();
-        }
 
         _mainGauge.fillAmount = 1f;
         _delayGauge.fillAmount = 1f;
+        SetVisible(false);
+    }
+
+    public void Cleanup()
+    {
+        ResetView();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
     }
 
     [SerializeField] private RectTransform _barContainer;
@@ -40,33 +63,56 @@ public class EnemyGaugeView : MonoBehaviour
     [SerializeField] private Ease _animationEase = Ease.Linear;
     [SerializeField] private float _verticalOffset = 50f;
 
-    private Transform _linkEnemy;
-
     private Sequence _delaySequence;
+    private Transform _linkEnemy;
     private Camera _mainCamera;
+    private bool _isVisible;
+    private bool _isBehindCamera;
+    private CancellationTokenSource _cts;
+
+    private event Action<bool> _onBehindCameraChanged;
 
     private void AnimateHPGauge(float hpAmount)
     {
         _mainGauge.fillAmount = hpAmount;
 
-        // 遅延ゲージのアニメーション
         if (_delaySequence != null && _delaySequence.IsActive())
-        {
             _delaySequence.Kill();
-        }
 
         _delaySequence = DOTween.Sequence();
         _delaySequence.AppendInterval(_animationDelay);
-        _delaySequence.Append(_delayGauge.DOFillAmount(hpAmount, _animationDuration).SetEase(_animationEase));
+        _delaySequence.Append(
+            _delayGauge.DOFillAmount(hpAmount, _animationDuration).SetEase(_animationEase)
+        );
     }
 
-    private void Update()
+    private void ApplyVisibility()
     {
-        if (_linkEnemy == null || _mainCamera == null) return;
-        var screenPos = _mainCamera.WorldToScreenPoint(_linkEnemy.position);
+        _barContainer.gameObject.SetActive(_isVisible && !_isBehindCamera);
+    }
 
-        screenPos.y += _verticalOffset;
+    private async UniTaskVoid PositionUpdateLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            await UniTask.Yield(PlayerLoopTiming.PostLateUpdate, ct);
+            if (_linkEnemy == null || _mainCamera == null) continue;
 
-        _barContainer.position = screenPos;
+            var worldPos = _linkEnemy.position + Vector3.up * _verticalOffset;
+
+            var screenPos = _mainCamera.WorldToScreenPoint(worldPos);
+            bool isBehind = screenPos.z < 0;
+
+            if (_isBehindCamera != isBehind)
+            {
+                _isBehindCamera = isBehind;
+                _onBehindCameraChanged?.Invoke(isBehind); // ← 追加
+                ApplyVisibility();
+            }
+
+            if (_isBehindCamera) continue;
+
+            _barContainer.position = screenPos;
+        }
     }
 }
