@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 // NOTE:
@@ -11,7 +10,8 @@ using UnityEngine;
 
 public class MobEnemy : Enemy
 {
-    public override EnemyConditionController ConditionController { get => _conditionController; }    
+    public override EnemyConditionController ConditionController { get => _conditionController; }
+
     public override void Init(IPlayer player)
     {
         base.Init(player);
@@ -22,14 +22,33 @@ public class MobEnemy : Enemy
 
         _conditionController = new EnemyConditionController(this);
 
+        // TurnProfileが未設定の場合は警告を出してTurnを登録しない
+        if (_turnProfile == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: TurnProfileが未設定です。Turnは無効になります。");
+        }
+        else
+        {
+            var turn = new TurnBehaviour(_turnProfile);
+            turn.Init(this, _data, _playerTransform, _context, _state);
+            _runner.RegisterTurn(turn);
+        }
+
+        // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
+        if (_attackerSlot == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
+        }
+        else
+        {
+            var attack = new MeleeAttackBehaviour(_attackerSlot);
+            attack.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(attack);
+        }
+
         var move = new MoveBehaviour();
-        var attack = new MeleeAttackBehaviour();
-
         move.Init(this, _data, _playerTransform, _context, _state);
-        attack.Init(this, _data, _playerTransform, _context, _state);
-
         _runner.Register(move);
-        _runner.Register(attack);
 
         // 鎧登録　データがなければ裸
         if (_armor != null)
