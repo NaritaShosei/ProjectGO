@@ -36,6 +36,12 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
         if (_usedSlots < 0) _usedSlots = 0;
     }
 
+    public bool IsFull(int slotCost)
+    {
+        // 指定コスト分のスロットが残っていない場合は満杯とみなす
+        return _usedSlots + slotCost > _maxSlots;
+    }
+
     public void Reset()
     {
         _holders.Clear();

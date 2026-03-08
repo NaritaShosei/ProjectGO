@@ -58,7 +58,7 @@ public class GoblinEnemy : Enemy
             move.Init(this, _data, _playerTransform, _context, _state);
             _runner.Register(move);
 
-            var bark = new BarkBehaviour(_distanceProfile);
+            var bark = new BarkBehaviour(_distanceProfile, _attackerSlot);
             bark.Init(this, _data, _playerTransform, _context, _state);
             _runner.Register(bark);
 

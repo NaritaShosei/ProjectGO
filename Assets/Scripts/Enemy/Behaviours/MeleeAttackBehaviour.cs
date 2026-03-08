@@ -9,16 +9,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
 
-    public bool CanEnter()
-    {
-        return CanAttack();
-    }
-
-    public bool CanContinue()
-    {
-        return _isAttacking;
-    }
-
     /// <summary>
     /// AttackerSlotはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
@@ -43,8 +33,46 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _state = state;
     }
 
+    public bool CanEnter()
+    {
+        // Playerが不正ならリターン
+        if (_player == null) return false;
+
+        // 距離計算
+        _context.DistanceToPlayer = Vector3.Distance(
+            _self.position,
+            _player.position
+        );
+
+        // Playerとの距離が遠いならリターン
+        if (_context.DistanceToPlayer > _data.AttackRange) return false;
+
+        // クールダウンが明けていなければリターン
+        if (Time.time - _lastAttackTime < _data.AttackCooldown) return false;
+
+        // 攻撃中ならリターン
+        if (_isAttacking) return false;
+
+        return true;
+    }
+
+    public bool CanContinue()
+    {
+        return _isAttacking;
+    }
+
     public void OnEnter()
     {
+        // スロットが未設定ならリターン
+        if (_attackerSlot == null) return;
+
+        int slotCost = _data.AttackPattern != null
+            ? _data.AttackPattern.SlotCost
+            : 1;
+
+        // スロットが確保できなければリターン
+        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false)) return;
+
         _isAttacking = true;
         _timer = 0f;
         _state.ChangeState(EnemyState.Attack);
@@ -86,39 +114,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private float _lastAttackTime;
     private float _timer;
     private bool _isAttacking;
-
-    private bool CanAttack()
-    {
-        // Playerが不正ならリターン
-        if (_player == null) return false;
-
-        // 距離計算
-        _context.DistanceToPlayer = Vector3.Distance(
-            _self.position,
-            _player.position
-        );
-
-        // Playerとの距離が遠いならリターン
-        if (_context.DistanceToPlayer > _data.AttackRange) return false;
-
-        // クールダウンが明けていなければリターン
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) return false;
-
-        // 攻撃中ならリターン
-        if (_isAttacking) return false;
-
-        // スロットが未設定ならリターン
-        if (_attackerSlot == null) return false;
-
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        // スロットが確保できなければリターン
-        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false)) return false;
-
-        return true;
-    }
 
     private void PerformAttack()
     {

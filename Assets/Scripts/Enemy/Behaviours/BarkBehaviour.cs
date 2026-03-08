@@ -9,11 +9,12 @@ public class BarkBehaviour : IEnemyBehaviour
     public int Priority { get => (int)EnemyBehaviourPriority.Bark; }
 
     /// <summary>
-    /// DistanceProfile はBarkBehaviour固有の依存のためコンストラクタで受け取る
+    /// DistanceProfile・AttackerSlot はBarkBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public BarkBehaviour(DistanceProfile profile)
+    public BarkBehaviour(DistanceProfile profile, IEnemyAttackerSlot attackerSlot)
     {
         _profile = profile;
+        _attackerSlot = attackerSlot;
     }
 
     public void Init(
@@ -38,8 +39,17 @@ public class BarkBehaviour : IEnemyBehaviour
         // 攻撃距離内のときのみ発動
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
         float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
+        if (sqrDist > sqrAttack) return false;
 
-        return sqrDist <= sqrAttack;
+        // AttackerSlotが未設定の場合は発動しない
+        if (_attackerSlot == null) return false;
+
+        int slotCost = _data.AttackPattern != null
+            ? _data.AttackPattern.SlotCost
+            : 1;
+
+        // スロットが満杯のときのみ発動
+        return _attackerSlot.IsFull(slotCost);
     }
 
     public bool CanContinue()
@@ -71,6 +81,7 @@ public class BarkBehaviour : IEnemyBehaviour
     private EnemyStateContext _state;
 
     private readonly DistanceProfile _profile;
+    private readonly IEnemyAttackerSlot _attackerSlot;
 
     private float _timer;
 }

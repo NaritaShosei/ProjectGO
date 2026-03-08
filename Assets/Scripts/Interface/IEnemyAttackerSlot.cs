@@ -4,22 +4,25 @@
 public interface IEnemyAttackerSlot
 {
     /// <summary>
-    /// スロットの確保を試みる
+    /// スロットを確保する
+    /// すでに確保済みの場合はtrueを返す
+    /// Boss以外はスロット上限を超えた場合はfalseを返す
     /// </summary>
-    /// <param name="enemyId">EnemyのInstanceID</param>
-    /// <param name="slotCost">消費スロット数</param>
-    /// <param name="isBoss">Boss優先確保フラグ</param>
     bool TryAcquire(int enemyId, int slotCost, bool isBoss);
 
     /// <summary>
     /// スロットを解放する
     /// </summary>
-    /// <param name="enemyId">EnemyのInstanceID</param>
-    /// <param name="slotCost">解放するスロット数</param>
     void Release(int enemyId, int slotCost);
 
     /// <summary>
-    /// 全スロットをリセットする
+    /// スロットが満杯かどうかを返す
+    /// BarkBehaviourのCanEnterなど、確保せずに満杯確認したい場合に使う
+    /// </summary>
+    bool IsFull(int slotCost);
+
+    /// <summary>
+    /// スロットをリセットする
     /// </summary>
     void Reset();
 }
