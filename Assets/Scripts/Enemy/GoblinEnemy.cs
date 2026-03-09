@@ -93,6 +93,12 @@ public class GoblinEnemy : Enemy
         _runner.Tick(deltaTime);
     }
 
+    protected override void OnDeathInternal()
+    {
+        _runner?.ForceExitAction();
+        base.OnDeathInternal();
+    }
+
 #if UNITY_EDITOR
     // デバッグ用にシーンビューで球体を描く
     private void OnDrawGizmosSelected()

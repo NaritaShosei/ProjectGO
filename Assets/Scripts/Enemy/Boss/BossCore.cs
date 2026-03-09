@@ -13,7 +13,7 @@ public class BossCore : MonoBehaviour, IEnemy
         remove => _boss.OnHealthChanged -= value;
     }
 
-    // public event Action<DamagePopupViewModel> OnDamageDealt;
+    public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public void AddKnockBackForce(Vector3 direction)
     {

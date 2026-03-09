@@ -73,6 +73,14 @@ public class SpatialHashGrid : ISpatialHashGrid
                 {
                     var enemy = list[i];
 
+
+                    if (enemy is Object enemyObject && enemyObject == null)
+                    {
+                        list.RemoveAt(i);
+                        _enemyGridMap.Remove(enemy);
+                        continue;
+                    }
+
                     // GetTargetCenter()がnullまたは破棄済みの場合はGridから除去してスキップ
                     var center2 = enemy.GetTargetCenter();
                     if (center2 == null)
@@ -89,13 +97,13 @@ public class SpatialHashGrid : ISpatialHashGrid
     }
 
     private readonly float _cellSize;
-    
+
     // GridにどのEnemyがいるか
     private readonly Dictionary<Vector3Int, List<IEnemy>> _enemiesInGrid = new();
-    
+
     // EnemyがどのGridにいるか
     private readonly Dictionary<IEnemy, Vector3Int> _enemyGridMap = new();
-    
+
     /// <summary>
     /// 座標変換
     /// 高さを意識しない
