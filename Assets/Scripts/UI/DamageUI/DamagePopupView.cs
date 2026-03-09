@@ -1,0 +1,117 @@
+using DG.Tweening;
+using System;
+using TMPro;
+using UnityEngine;
+
+/// <summary>
+/// ダメージポップアップUIの表示を管理するView。
+/// </summary>
+public class DamagePopupView : MonoBehaviour,IDamagePopupView
+{
+    public event Action<IDamagePopupView> OnRelease;
+
+    /// <summary>
+    /// ダメージポップアップを表示する。
+    /// </summary>
+    /// <param name="viewModel"></param>
+    public void ShowDamage(DamagePopupViewModel viewModel)
+    {
+        if (_mainCamera == null)
+        {
+            _mainCamera = Camera.main;　//カメラ再取得
+        }
+
+        if (_mainCamera == null)
+        {
+            gameObject.SetActive(false);
+            OnRelease?.Invoke(this);　//取得できなかったら返却
+            return;
+        }
+
+        gameObject.SetActive(true);
+
+        //前回のアニメーションを停止
+        _currentTween?.Kill(false);
+        _currentTween = null;
+
+        //透明度の初期化
+        _canvasGroup.alpha = 1f;
+
+        //テキスト設定
+        _damageText.text = viewModel.Damage.ToString();
+
+        //色設定
+        if (viewModel.IsWeakPoint)
+        {
+            _damageText.color = _weakColor;
+        }
+        else
+        {
+            _damageText.color = _normalColor;
+        }
+
+        //表示切替
+        _weakPointObj.SetActive(viewModel.IsWeakPoint);
+        _criticalObj.SetActive(viewModel.IsCritical);
+       
+        // ワールド座標をスクリーン座標へ変換
+        var screenPos = _mainCamera.WorldToScreenPoint(viewModel.WorldPosition);
+        _rectTransform.position = screenPos;
+
+        PlayAnimation();
+    }
+
+    [SerializeField] private TextMeshProUGUI _damageText;
+    [SerializeField] private GameObject _weakPointObj;
+    [SerializeField] private GameObject _criticalObj;
+    [SerializeField] private CanvasGroup _canvasGroup;
+
+    [Header("表示設定")]
+    [SerializeField] private float _lifeTime = 1.5f;        //消滅までの時間
+    [SerializeField] private float _fadeDuration = 0.2f;    //フェードの時間
+    [SerializeField] private float _popupDistance = 10f;
+
+    [Header("色設定")]
+    [SerializeField] private Color _normalColor = Color.white;
+    [SerializeField] private Color _weakColor = new Color(1f, 0.45f, 0f);
+
+    private Tween _currentTween;
+    private RectTransform _rectTransform;
+    private Camera _mainCamera;
+
+    private void Awake()
+    {
+        _rectTransform = GetComponent<RectTransform>();
+        _mainCamera = Camera.main;
+        _canvasGroup.alpha = 0f;
+    }
+
+    private void OnDisable()
+    {
+        _currentTween?.Kill(false);
+        _currentTween = null;
+    }
+
+    /// <summary>
+    /// ダメージ表記のアニメーション
+    /// </summary>
+    private void PlayAnimation()
+    {
+        Sequence seq = DOTween.Sequence();
+
+        //一定時間停止
+        float wait = Mathf.Max(0f,_lifeTime - _fadeDuration);
+        seq.AppendInterval(wait);
+
+        seq.Append(_rectTransform.DOMoveY(_rectTransform.position.y + _popupDistance,_fadeDuration));
+        seq.Join(_canvasGroup.DOFade(0f, _fadeDuration));
+
+        seq.OnComplete(() =>
+        {
+            gameObject.SetActive(false);
+            OnRelease?.Invoke(this);
+        });
+        _currentTween = seq;
+    }
+}
+

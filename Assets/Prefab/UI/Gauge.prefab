@@ -32,11 +32,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 7338700968044244562}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 362.65002, y: -20.549988}
-  m_SizeDelta: {x: 716.8, y: 34.7}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 4.2500305, y: 0.4500122}
+  m_SizeDelta: {x: 292.8, y: 34.7}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &7005086384450639338
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -166,11 +166,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c7b18a0c327a324aad7405a9dbc16ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GaugeView
+  _barContainer: {fileID: 7338700968044244562}
   _gauge: {fileID: 5888138155191040375}
-  _backgroundGauge: {fileID: 1697814442800229027}
+  _delayGauge: {fileID: 1697814442800229027}
+  _baseWidth: 725.3
   _duration: 0.5
   _delay: 0.5
-  _animEase: 1
+  _ease: 1
 --- !u!225 &1788762849820150035
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -215,11 +217,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 7338700968044244562}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 362.65002, y: -20.549988}
-  m_SizeDelta: {x: 716.8, y: 34.7}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 0, y: 0.5}
+  m_AnchoredPosition: {x: 4.2500305, y: 0.4500122}
+  m_SizeDelta: {x: 292.8, y: 34.7}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &4866673236880068229
 CanvasRenderer:
   m_ObjectHideFlags: 0
