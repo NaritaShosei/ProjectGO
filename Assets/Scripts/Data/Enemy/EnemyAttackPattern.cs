@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Enemy/EnemyAttackPattern")]
+[CreateAssetMenu(menuName = "Data/Enemy/EnemyAttackPattern")]
 public sealed class EnemyAttackPattern : ScriptableObject
 {
     public string PatternName;
