@@ -6,28 +6,33 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "TurnProfile", menuName = "GameData/Enemy/TurnProfile")]
 public class TurnProfile : ScriptableObject
 {
-    // 最小回転速度（deg/sec）：角度差が maxAngle に近いほどこの値に近づく
     [Min(0f)]
-    public float minTurnSpeed = 90f;
+    [SerializeField] private float _minTurnSpeed = 90f;
+
+    [Min(0f)]
+    [SerializeField] private float _maxTurnSpeed = 360f;
+
+    [Min(1f)]
+    [SerializeField] private float _maxAngle = 180f;
+
+    // 最小回転速度（deg/sec）：角度差が maxAngle に近いほどこの値に近づく
+    public float MinTurnSpeed => _minTurnSpeed;
 
     // 最大回転速度（deg/sec）：角度差が小さいほどこの値に近づく
-    [Min(0f)]
-    public float maxTurnSpeed = 360f;
+    public float MaxTurnSpeed => _maxTurnSpeed;
 
     // 回転速度補間の正規化基準角度（deg）
-    // この角度差のときに minTurnSpeed を使用する
-    [Min(1f)]
-    public float maxAngle = 180f;
+    public float MaxAngle => _maxAngle;
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
         // minTurnSpeed が maxTurnSpeed を超えると Lerp の結果が逆転する
-        if (minTurnSpeed > maxTurnSpeed)
+        if (_minTurnSpeed > _maxTurnSpeed)
         {
-            minTurnSpeed = maxTurnSpeed;
+            _minTurnSpeed = _maxTurnSpeed;
             Debug.LogWarning(
-                $"[TurnProfile] minTurnSpeed が maxTurnSpeed ({maxTurnSpeed}) を超えています。maxTurnSpeed に補正しました。",
+                $"[TurnProfile] minTurnSpeed が maxTurnSpeed ({_maxTurnSpeed}) を超えています。maxTurnSpeed に補正しました。",
                 this
             );
         }

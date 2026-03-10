@@ -82,10 +82,10 @@ public class TurnBehaviour : IEnemyBehaviour
         }
 
         // 角度に応じて回転速度を変化させる
-        float t = Mathf.Clamp01(angle / _profile.maxAngle);
+        float t = Mathf.Clamp01(angle / _profile.MaxAngle);
         float turnSpeed = Mathf.Lerp(
-            _profile.minTurnSpeed,
-            _profile.maxTurnSpeed,
+            _profile.MinTurnSpeed,
+            _profile.MaxTurnSpeed,
             t
         );
 

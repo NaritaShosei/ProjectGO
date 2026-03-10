@@ -6,53 +6,71 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyAttackPattern", menuName = "GameData/Enemy/EnemyAttackPattern")]
 public sealed class EnemyAttackPattern : ScriptableObject
 {
-    public string PatternName;
+    [SerializeField] private string _patternName;
 
     [Header("Slot")]
-    // 攻撃時に占有するスロット数（1以上）
     [Min(1)]
-    public int SlotCost = 1;
+    [SerializeField] private int _slotCost = 1;
 
     [Header("Timing")]
-    // 攻撃前の溜め時間
     [Min(0f)]
-    public float WindUp = 0f;
+    [SerializeField] private float _windUp;
 
-    // 攻撃の持続時間
     [Min(0f)]
-    public float Duration = 0.5f;
+    [SerializeField] private float _duration;
 
-    // 攻撃後のクールダウン(もっと長いほうがいいかも）
     [Min(0f)]
-    public float Cooldown = 1f;
+    [SerializeField] private float _cooldown;
 
     [Header("Hit")]
-    // 攻撃中の最大ヒット数（Bossは複数Hit可）
     [Min(1)]
-    public int MaxHitCount = 1;
+    [SerializeField] private int _maxHitCount = 1;
 
-    // 複数ヒット時のヒット間隔
     [Min(0f)]
-    public float HitInterval = 0.2f;
+    [SerializeField] private float _hitInterval = 0.2f;
 
     [Header("Knockback")]
-    // ノックバックの強さ
     [Min(0f)]
-    public float KnockbackPower;
+    [SerializeField] private float _knockbackPower;
 
     [Header("Damage")]
-    // 基礎ダメージ量
     [Min(0)]
-    public int BaseDamage;
+    [SerializeField] private int _baseDamage;
+
+    public string PatternName => _patternName;
+
+    // 攻撃時に占有するスロット数（1以上）
+    public int SlotCost => _slotCost;
+
+    // 攻撃前の溜め時間
+    public float WindUp => _windUp;
+
+    // 攻撃の持続時間
+    public float Duration => _duration;
+
+    // 攻撃後のクールダウン
+    public float Cooldown => _cooldown;
+
+    // 攻撃中の最大ヒット数
+    public int MaxHitCount => _maxHitCount;
+
+    // 複数ヒット時のヒット間隔
+    public float HitInterval => _hitInterval;
+
+    // ノックバックの強さ
+    public float KnockbackPower => _knockbackPower;
+
+    // 基礎ダメージ量
+    public int BaseDamage => _baseDamage;
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
         // MaxHitCount > 1 のとき HitInterval が 0 だと
         // ヒット処理が瞬時に連続して意図しない挙動になる
-        if (MaxHitCount > 1 && HitInterval <= 0f)
+        if (_maxHitCount > 1 && _hitInterval <= 0f)
         {
-            HitInterval = 0.1f;
+            _hitInterval = 0.1f;
             Debug.LogWarning(
                 $"[EnemyAttackPattern] MaxHitCount > 1 のとき HitInterval は 0 より大きい必要があります。0.1 に補正しました。",
                 this
@@ -60,11 +78,11 @@ public sealed class EnemyAttackPattern : ScriptableObject
         }
 
         // HitInterval が Duration を超えると1回もヒットしない
-        if (MaxHitCount > 1 && HitInterval > Duration)
+        if (_maxHitCount > 1 && _hitInterval > _duration)
         {
-            HitInterval = Duration;
+            _hitInterval = _duration;
             Debug.LogWarning(
-                $"[EnemyAttackPattern] HitInterval が Duration ({Duration}) を超えています。Duration に補正しました。",
+                $"[EnemyAttackPattern] HitInterval が Duration ({_duration}) を超えています。Duration に補正しました。",
                 this
             );
         }

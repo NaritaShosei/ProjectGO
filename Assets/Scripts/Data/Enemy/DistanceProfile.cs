@@ -6,71 +6,91 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DistanceProfile", menuName = "GameData/Enemy/DistanceProfile")]
 public class DistanceProfile : ScriptableObject
 {
-    // プレイヤーを発見する距離
     [Min(0f)]
-    public float DetectDistance = 10.0f;
+    [SerializeField] private float _detectDistance = 10.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _minAttackDistance = 1.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _maxAttackDistance = 2.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _desiredDistance = 2.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _desiredTolerance = 0.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _roamRadius = 3.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _separationRadius = 1.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _separationStrength = 0.8f;
+
+    [Min(0f)]
+    [SerializeField] private float _wallDetectDistance = 1.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _wallAvoidanceStrength = 0.8f;
+
+    // プレイヤーを発見する距離
+    public float DetectDistance => _detectDistance;
 
     // 攻撃を開始する最短距離
-    [Min(0f)]
-    public float MinAttackDistance = 1.5f;
+    public float MinAttackDistance => _minAttackDistance;
 
     // 攻撃を継続できる最長距離
-    [Min(0f)]
-    public float MaxAttackDistance = 2.5f;
+    public float MaxAttackDistance => _maxAttackDistance;
 
     // 移動目標とするプレイヤーとの理想距離
-    [Min(0f)]
-    public float DesiredDistance = 2.0f;
+    public float DesiredDistance => _desiredDistance;
 
     // 理想距離の許容誤差（この範囲内なら停止とみなす）
-    [Min(0f)]
-    public float DesiredTolerance = 0.5f;
+    public float DesiredTolerance => _desiredTolerance;
 
     // 徘徊時の移動半径
-    [Min(0f)]
-    public float RoamRadius = 3.0f;
+    public float RoamRadius => _roamRadius;
 
     // 他の敵との分離を開始する距離
-    [Min(0f)]
-    public float SeparationRadius = 1.5f;
+    public float SeparationRadius => _separationRadius;
 
     // 分離力の強さ
-    [Min(0f)]
-    public float SeparationStrength = 0.8f;
+    public float SeparationStrength => _separationStrength;
 
     // 壁を検知する距離
-    [Min(0f)]
-    public float WallDetectDistance = 1.0f;
+    public float WallDetectDistance => _wallDetectDistance;
 
     // 壁回避力の強さ
-    [Min(0f)]
-    public float WallAvoidanceStrength = 0.8f;
+    public float WallAvoidanceStrength => _wallAvoidanceStrength;
 
 #if UNITY_EDITOR
     private void OnValidate()
     {
         // DetectDistance は MinAttackDistance 以上でなければ索敵後に即攻撃になる
-        if (DetectDistance < MinAttackDistance)
+        if (_detectDistance < _minAttackDistance)
         {
-            DetectDistance = MinAttackDistance;
+            _detectDistance = _minAttackDistance;
             Debug.LogWarning(
-                $"[DistanceProfile] DetectDistance を MinAttackDistance ({MinAttackDistance}) に補正しました。",
+                $"[DistanceProfile] DetectDistance を MinAttackDistance ({_minAttackDistance}) に補正しました。",
                 this
             );
         }
 
         // MaxAttackDistance は MinAttackDistance 以上でなければ攻撃距離が逆転する
-        if (MaxAttackDistance < MinAttackDistance)
+        if (_maxAttackDistance < _minAttackDistance)
         {
-            MaxAttackDistance = MinAttackDistance;
+            _maxAttackDistance = _minAttackDistance;
             Debug.LogWarning(
-                $"[DistanceProfile] MaxAttackDistance を MinAttackDistance ({MinAttackDistance}) に補正しました。",
+                $"[DistanceProfile] MaxAttackDistance を MinAttackDistance ({_minAttackDistance}) に補正しました。",
                 this
             );
         }
 
         // DesiredDistance は MinAttackDistance 以上かつ MaxAttackDistance 以下が自然
-        DesiredDistance = Mathf.Clamp(DesiredDistance, MinAttackDistance, MaxAttackDistance);
+        _desiredDistance = Mathf.Clamp(_desiredDistance, _minAttackDistance, _maxAttackDistance);
     }
 #endif
 }
