@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 // NOTE:
 // モブ敵のの基底クラスとして作成
@@ -11,7 +11,12 @@ using UnityEngine;
 
 public class MobEnemy : Enemy
 {
-    public override EnemyConditionController ConditionController { get => _conditionController; }    
+    public override EnemyConditionController ConditionController { get => _conditionController; }
+
+    // Armor登録を外部（UI等）に通知するイベント
+    // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
+    public event Action<IArmorHealth> OnArmorRegistered;
+
     public override void Init(IPlayer player)
     {
         base.Init(player);
@@ -22,14 +27,59 @@ public class MobEnemy : Enemy
 
         _conditionController = new EnemyConditionController(this);
 
-        var move = new MoveBehaviour();
-        var attack = new MeleeAttackBehaviour();
+        // TurnProfileが未設定の場合は警告を出してTurnを登録しない
+        if (_turnProfile == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: TurnProfileが未設定です。Turnは無効になります。");
+        }
+        else
+        {
+            var turn = new TurnBehaviour(_turnProfile);
+            turn.Init(this, _data, _playerTransform, _context, _state);
+            _runner.RegisterTurn(turn);
+        }
 
-        move.Init(this, _data, _playerTransform, _context, _state);
-        attack.Init(this, _data, _playerTransform, _context, _state);
+        // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
+        if (_attackerSlot == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
+        }
+        else
+        {
+            var attack = new MeleeAttackBehaviour(_attackerSlot);
+            attack.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(attack);
+        }
 
-        _runner.Register(move);
-        _runner.Register(attack);
+        // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
+        if (_distanceProfile == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Move・Bark・Roamは無効になります。");
+        }
+        else
+        {
+            var move = new MoveBehaviour(
+                _distanceProfile,
+                _separationService,
+                _wallAvoidanceService,
+                _spatialHashGrid
+            );
+            move.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(move);
+
+            var bark = new BarkBehaviour(_distanceProfile, _attackerSlot);
+            bark.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(bark);
+
+            var roam = new RoamBehaviour(
+                _distanceProfile,
+                _separationService,
+                _wallAvoidanceService,
+                _spatialHashGrid
+            );
+            roam.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(roam);
+        }
 
         // 鎧登録　データがなければ裸
         if (_armor != null)
@@ -37,6 +87,8 @@ public class MobEnemy : Enemy
             _defenceContext.EnemyType = EnemyType.Armor;
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
+            // Init()後に発火することで購読者がOnHealthChangedを安全に受け取れる
+            OnArmorRegistered?.Invoke(_armor);
         }
         else
         {
@@ -61,7 +113,7 @@ public class MobEnemy : Enemy
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        bool isKill = _stats.CurrentHealth <= 0; 
+        bool isKill = _stats.CurrentHealth <= 0;
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
         bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
@@ -74,7 +126,7 @@ public class MobEnemy : Enemy
                 IsWeakPoint = isWeakPoint
             });
 
-        // InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
 
         // -------- 追加効果 --------
 
@@ -85,11 +137,11 @@ public class MobEnemy : Enemy
             _conditionController.ApplyCondition(new KnockbackCondition(temp));
         }
 
-        if(CheckProbability(context.ElectricShock.GrantEffectProbability))
+        if (CheckProbability(context.ElectricShock.GrantEffectProbability))
         {
             // もちろんボスじゃないのでfalse
             _conditionController.ApplyCondition(
-                new ElectrifiedCondition(context.ElectricShock.DurationEffect,　enemyIsBoss: false));
+                new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
 
             this.ActivateShockDebuff().Forget();
         }
@@ -110,7 +162,7 @@ public class MobEnemy : Enemy
 
     private void OnDestroy()
     {
-         if(_armor!=null)_armor.OnBroken -= BreakArmor;
+        if (_armor != null) _armor.OnBroken -= BreakArmor;
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -122,9 +174,20 @@ public class MobEnemy : Enemy
     }
 
     /// <summary>
+    /// 死亡時のクリーンアップ
+    /// _isDead = true後はUpdateが止まりRunnerのTickが呼ばれなくなるため
+    /// ここで明示的にBehaviourを終了させてスロットを解放する
+    /// </summary>
+    protected override void OnDeathInternal()
+    {
+        _runner?.ForceExitAction();
+        base.OnDeathInternal();
+    }
+
+    /// <summary>
     /// 鎧破壊時の処理
     /// </summary>
-    private void BreakArmor(IEnemy enemy)
+    private void BreakArmor()
     {
         _defenceContext.EnemyType = EnemyType.Flesh;
         _armor.OnBroken -= BreakArmor;
@@ -134,7 +197,7 @@ public class MobEnemy : Enemy
     // TODO: いろいろなところで使うと思うので、Utilityにできたほうがいいのでは
     private bool CheckProbability(float probability)
     {
-        return Random.value < probability;
+        return UnityEngine.Random.value < probability;
     }
 
 #if UNITY_EDITOR

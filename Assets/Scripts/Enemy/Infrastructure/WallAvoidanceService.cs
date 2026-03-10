@@ -19,6 +19,12 @@ public class WallAvoidanceService : IWallAvoidanceService
         float strength
     )
     {
+        // WallMaskがまだないので、初期値でVector3.zeroとする
+        if(_wallMask == 0)
+        {
+            return Vector3.zero;
+        }
+
         if (Physics.Raycast(self, forward, out var hit, detectDistance, _wallMask))
         {
             // 反射ベクトル計算

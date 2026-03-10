@@ -18,14 +18,63 @@ public class GoblinEnemy : Enemy
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
 
-        var move = new MoveBehaviour();
-        var attack = new MeleeAttackBehaviour();
+        // TurnProfileが未設定の場合は警告を出してTurnを登録しない
+        if (_turnProfile == null)
+        {
+            Debug.LogWarning($"{nameof(GoblinEnemy)}: TurnProfileが未設定です。Turnは無効になります。");
+        }
+        else
+        {
+            var turn = new TurnBehaviour(_turnProfile);
+            turn.Init(this, _data, _playerTransform, _context, _state);
+            _runner.RegisterTurn(turn);
+        }
 
-        move.Init(this, _data, _playerTransform, _context, _state);
-        attack.Init(this, _data, _playerTransform, _context, _state);
+        // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
+        if (_attackerSlot == null)
+        {
+            Debug.LogWarning($"{nameof(GoblinEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
+        }
+        else
+        {
+            var attack = new MeleeAttackBehaviour(_attackerSlot);
+            attack.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(attack);
+        }
 
-        _runner.Register(move);
-        _runner.Register(attack);
+        // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
+        if (_distanceProfile == null)
+        {
+            Debug.LogWarning($"{nameof(GoblinEnemy)}: DistanceProfileが未設定です。Move・Bark・Roamは無効になります。");
+        }
+        else
+        {
+            var move = new MoveBehaviour(
+                _distanceProfile,
+                _separationService,
+                _wallAvoidanceService,
+                _spatialHashGrid
+            );
+            move.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(move);
+
+            // BarkBehaviourはAttackerSlotが必要
+            if (_attackerSlot != null)
+            {
+                var bark = new BarkBehaviour(_distanceProfile, _attackerSlot);
+                bark.Init(this, _data, _playerTransform, _context, _state);
+                _runner.Register(bark);
+            }
+
+            var roam = new RoamBehaviour(
+                _distanceProfile,
+                _separationService,
+                _wallAvoidanceService,
+                _spatialHashGrid
+            );
+            roam.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(roam);
+        }
     }
 
     private EnemyBehaviourRunner _runner;
@@ -36,10 +85,18 @@ public class GoblinEnemy : Enemy
     {
         _runner.ForceExitAction();
     }
+
     protected override void UpdateEnemy(float deltaTime)
     {
-        if (_runner == null) { return; }
+        if (_runner == null) return;
+
         _runner.Tick(deltaTime);
+    }
+
+    protected override void OnDeathInternal()
+    {
+        _runner?.ForceExitAction();
+        base.OnDeathInternal();
     }
 
 #if UNITY_EDITOR
@@ -49,7 +106,10 @@ public class GoblinEnemy : Enemy
         if (_data == null) return;
 
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + transform.forward * _data.AttackRange, _data.AttackRadius);
+        Gizmos.DrawWireSphere(
+            transform.position + transform.forward * _data.AttackRange,
+            _data.AttackRadius
+        );
     }
 #endif
 }

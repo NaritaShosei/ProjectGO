@@ -59,35 +59,51 @@ public class SpatialHashGrid : ISpatialHashGrid
 
     public void Query(Vector3 position, float radius, List<IEnemy> result)
     {
-        // どれくらい近いGridまで取得するか
         int range = Mathf.CeilToInt(radius / _cellSize);
-
         var center = WorldToCell(position);
 
-        // 対象Gridひとつずつ調査
         for (int x = -range; x <= range; x++)
-        for (int z = -range; z <= range; z++)
-        {
-            var cell = new Vector3Int(center.x + x, 0, center.z + z);
-            if (!_enemiesInGrid.TryGetValue(cell, out var list)) continue;
-
-            foreach (var enemy in list)
+            for (int z = -range; z <= range; z++)
             {
-                // 対象Enemyが確かにradius内にいるか
-                if ((enemy.GetTargetCenter().position - position).sqrMagnitude <= radius * radius)
-                    result.Add(enemy);
+                var cell = new Vector3Int(center.x + x, 0, center.z + z);
+                if (!_enemiesInGrid.TryGetValue(cell, out var list)) continue;
+
+                // 逆順ループで安全にRemoveする
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    var enemy = list[i];
+
+
+                    if (enemy is Object enemyObject && enemyObject == null)
+                    {
+                        list.RemoveAt(i);
+                        _enemyGridMap.Remove(enemy);
+                        continue;
+                    }
+
+                    // GetTargetCenter()がnullまたは破棄済みの場合はGridから除去してスキップ
+                    var center2 = enemy.GetTargetCenter();
+                    if (center2 == null)
+                    {
+                        list.RemoveAt(i);
+                        _enemyGridMap.Remove(enemy);
+                        continue;
+                    }
+
+                    if ((center2.position - position).sqrMagnitude <= radius * radius)
+                        result.Add(enemy);
+                }
             }
-        }
     }
 
     private readonly float _cellSize;
-    
+
     // GridにどのEnemyがいるか
     private readonly Dictionary<Vector3Int, List<IEnemy>> _enemiesInGrid = new();
-    
+
     // EnemyがどのGridにいるか
     private readonly Dictionary<IEnemy, Vector3Int> _enemyGridMap = new();
-    
+
     /// <summary>
     /// 座標変換
     /// 高さを意識しない
