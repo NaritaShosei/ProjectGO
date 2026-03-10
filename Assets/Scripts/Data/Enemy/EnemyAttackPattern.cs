@@ -6,6 +6,32 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "EnemyAttackPattern", menuName = "GameData/Enemy/EnemyAttackPattern")]
 public sealed class EnemyAttackPattern : ScriptableObject
 {
+    public string PatternName => _patternName;
+
+    // 攻撃時に占有するスロット数（1以上）
+    public int SlotCost => _slotCost;
+
+    // 攻撃前の溜め時間
+    public float WindUp => _windUp;
+
+    // 攻撃の持続時間
+    public float Duration => _duration;
+
+    // 攻撃後のクールダウン
+    public float Cooldown => _cooldown;
+
+    // 攻撃中の最大ヒット数
+    public int MaxHitCount => _maxHitCount;
+
+    // 複数ヒット時のヒット間隔
+    public float HitInterval => _hitInterval;
+
+    // ノックバックの強さ
+    public float KnockbackPower => _knockbackPower;
+
+    // 基礎ダメージ量
+    public int BaseDamage => _baseDamage;
+
     [SerializeField] private string _patternName;
 
     [Header("Slot")]
@@ -36,32 +62,6 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [Header("Damage")]
     [Min(0)]
     [SerializeField] private int _baseDamage;
-
-    public string PatternName => _patternName;
-
-    // 攻撃時に占有するスロット数（1以上）
-    public int SlotCost => _slotCost;
-
-    // 攻撃前の溜め時間
-    public float WindUp => _windUp;
-
-    // 攻撃の持続時間
-    public float Duration => _duration;
-
-    // 攻撃後のクールダウン
-    public float Cooldown => _cooldown;
-
-    // 攻撃中の最大ヒット数
-    public int MaxHitCount => _maxHitCount;
-
-    // 複数ヒット時のヒット間隔
-    public float HitInterval => _hitInterval;
-
-    // ノックバックの強さ
-    public float KnockbackPower => _knockbackPower;
-
-    // 基礎ダメージ量
-    public int BaseDamage => _baseDamage;
 
 #if UNITY_EDITOR
     private void OnValidate()

@@ -6,6 +6,15 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "TurnProfile", menuName = "GameData/Enemy/TurnProfile")]
 public class TurnProfile : ScriptableObject
 {
+    // 最小回転速度（deg/sec）：角度差が maxAngle に近いほどこの値に近づく
+    public float MinTurnSpeed => _minTurnSpeed;
+
+    // 最大回転速度（deg/sec）：角度差が小さいほどこの値に近づく
+    public float MaxTurnSpeed => _maxTurnSpeed;
+
+    // 回転速度補間の正規化基準角度（deg）
+    public float MaxAngle => _maxAngle;
+
     [Min(0f)]
     [SerializeField] private float _minTurnSpeed = 90f;
 
@@ -15,14 +24,6 @@ public class TurnProfile : ScriptableObject
     [Min(1f)]
     [SerializeField] private float _maxAngle = 180f;
 
-    // 最小回転速度（deg/sec）：角度差が maxAngle に近いほどこの値に近づく
-    public float MinTurnSpeed => _minTurnSpeed;
-
-    // 最大回転速度（deg/sec）：角度差が小さいほどこの値に近づく
-    public float MaxTurnSpeed => _maxTurnSpeed;
-
-    // 回転速度補間の正規化基準角度（deg）
-    public float MaxAngle => _maxAngle;
 
 #if UNITY_EDITOR
     private void OnValidate()

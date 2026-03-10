@@ -6,36 +6,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DistanceProfile", menuName = "GameData/Enemy/DistanceProfile")]
 public class DistanceProfile : ScriptableObject
 {
-    [Min(0f)]
-    [SerializeField] private float _detectDistance = 10.0f;
-
-    [Min(0f)]
-    [SerializeField] private float _minAttackDistance = 1.5f;
-
-    [Min(0f)]
-    [SerializeField] private float _maxAttackDistance = 2.5f;
-
-    [Min(0f)]
-    [SerializeField] private float _desiredDistance = 2.0f;
-
-    [Min(0f)]
-    [SerializeField] private float _desiredTolerance = 0.5f;
-
-    [Min(0f)]
-    [SerializeField] private float _roamRadius = 3.0f;
-
-    [Min(0f)]
-    [SerializeField] private float _separationRadius = 1.5f;
-
-    [Min(0f)]
-    [SerializeField] private float _separationStrength = 0.8f;
-
-    [Min(0f)]
-    [SerializeField] private float _wallDetectDistance = 1.0f;
-
-    [Min(0f)]
-    [SerializeField] private float _wallAvoidanceStrength = 0.8f;
-
     // プレイヤーを発見する距離
     public float DetectDistance => _detectDistance;
 
@@ -65,6 +35,37 @@ public class DistanceProfile : ScriptableObject
 
     // 壁回避力の強さ
     public float WallAvoidanceStrength => _wallAvoidanceStrength;
+
+
+    [Min(0f)]
+    [SerializeField] private float _detectDistance = 10.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _minAttackDistance = 1.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _maxAttackDistance = 2.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _desiredDistance = 2.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _desiredTolerance = 0.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _roamRadius = 3.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _separationRadius = 1.5f;
+
+    [Min(0f)]
+    [SerializeField] private float _separationStrength = 0.8f;
+
+    [Min(0f)]
+    [SerializeField] private float _wallDetectDistance = 1.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _wallAvoidanceStrength = 0.8f;
 
 #if UNITY_EDITOR
     private void OnValidate()
