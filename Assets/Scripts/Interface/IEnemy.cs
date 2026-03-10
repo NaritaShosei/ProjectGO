@@ -7,7 +7,7 @@ public interface IEnemy : ICharacter
 
     public event Action<float, float> OnHealthChanged;
 
-    // event Action<DamagePopupViewModel> OnDamageDealt;
+    public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public Vector3 Position { get; }
 

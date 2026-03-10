@@ -3,7 +3,7 @@ using UnityEngine;
 /// <summary>
 /// Enemyの移動時の基準や制限を定めたもの
 /// </summary>
-[CreateAssetMenu(menuName = "Data/Enemy/DistanceProfile")]
+[CreateAssetMenu(fileName = "DistanceProfile", menuName = "GameData/Enemy/DistanceProfile")]
 public class DistanceProfile : ScriptableObject
 {
     // プレイヤーを発見する距離
