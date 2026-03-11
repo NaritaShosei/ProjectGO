@@ -71,3 +71,66 @@ public class EnemyGaugePresenter : IDisposable
         _visibility.SetLockedOn(isLockedOn);
     }
 }
+
+public class ArmorGaugePresenter : IDisposable
+{
+    public EnemyGaugeView View { get; }
+
+    public event Action<ArmorGaugePresenter> OnBroken;
+
+    public ArmorGaugePresenter(
+        IArmorHealth armor,
+        EnemyGaugeView view,
+        Transform playerTransform,
+        float detectionRange,
+        float damagedDisplayDuration)
+    {
+        _armor = armor;
+        _playerTransform = playerTransform;
+        _detectionRange = detectionRange;
+        _armorTransform = armor.GetTargetCenter();
+
+        _visibility = new EnemyGaugeVisibilityState(damagedDisplayDuration);
+
+        View = view;
+        View.Initialize(_armorTransform, isBehind => _visibility.SetBehindCamera(isBehind));
+
+        _visibility.OnVisibilityChanged += View.SetVisible;
+        _armor.OnHealthChanged += HandleHealthChanged;
+        _armor.OnBroken += HandleBroken;
+    }
+
+    public void UpdateRangeCheck()
+    {
+        if (_playerTransform == null || _armorTransform == null) return;
+        float sqrDist = (_playerTransform.position - _armorTransform.position).sqrMagnitude;
+        _visibility.SetInRange(sqrDist <= _detectionRange * _detectionRange);
+    }
+
+    public void ResetView() => View.ResetView();
+
+    public void Dispose()
+    {
+        _visibility.OnVisibilityChanged -= View.SetVisible;
+        _visibility.Dispose();
+        _armor.OnHealthChanged -= HandleHealthChanged;
+        _armor.OnBroken -= HandleBroken;
+    }
+
+    private readonly IArmorHealth _armor;
+    private readonly Transform _playerTransform;
+    private readonly Transform _armorTransform;
+    private readonly float _detectionRange;
+    private readonly EnemyGaugeVisibilityState _visibility;
+
+    private void HandleHealthChanged(float current, float max)
+    {
+        View.UpdateGauge(current, max);
+        _visibility.OnDamaged();
+    }
+    private void HandleBroken()
+    {
+        OnBroken?.Invoke(this);
+    }
+
+}

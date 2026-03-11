@@ -53,6 +53,7 @@ public class EnemyManager : MonoBehaviour
                     _attackerSlot
                 );
             }
+            OnEnemySpawned?.Invoke(enemy);
 
             enemy.Init(_player);
 
@@ -60,7 +61,6 @@ public class EnemyManager : MonoBehaviour
             _spatialHashGrid.Register(enemy, pos);
 
             _enemies.Add(enemy);
-            OnEnemySpawned?.Invoke(enemy);
         }
         else
         {

@@ -119,6 +119,41 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &5110712
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5110713}
+  m_Layer: 5
+  m_Name: EnemyArmerGaugePool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &5110713
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5110712}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1617911759}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &235821261 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4773163649764372864, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
@@ -1285,6 +1320,7 @@ RectTransform:
   - {fileID: 1337496022}
   - {fileID: 1631777442}
   - {fileID: 2098665450}
+  - {fileID: 5110713}
   - {fileID: 1591746413}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3276,6 +3312,14 @@ PrefabInstance:
       propertyPath: _detectionRange
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _armerGaugeParent
+      value: 
+      objectReference: {fileID: 5110713}
+    - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _armerGaugePrefab
+      value: 
+      objectReference: {fileID: 4650935944076157986, guid: f33880f00c74542479bed90efb2528cc, type: 3}
     - target: {fileID: 8440135078367233537, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _cinemachineCamera
       value: 
