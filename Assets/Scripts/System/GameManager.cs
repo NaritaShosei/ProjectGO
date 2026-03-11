@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour
     private void InitUI()
     {
         _inGameUIInitializer.Init(_player);
-        _enemyUIManager.Init(_player.transform);
+        _enemyUIManager.Init(_enemyManager, _player.transform);
     }
 
     private void StartGame()

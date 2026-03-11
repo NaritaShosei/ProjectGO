@@ -5,41 +5,14 @@ using UnityEngine;
 
 public class EnemyUIManager : MonoBehaviour
 {
-    public void Init(Transform playerTransform)
+    public void Init(EnemyManager enemyManager, Transform playerTransform)
     {
+        _enemyManager = enemyManager;
         _playerTransform = playerTransform;
-    }
 
-    [Header("Reference")]
-    [SerializeField] private EnemyManager _enemyManager;
-
-    [Header("Gauge")]
-    [SerializeField] private EnemyGaugeView _gaugePrefab;
-    [SerializeField] private Transform _gaugeParent;
-
-    [Header("Damage Popup")]
-    [SerializeField] private DamagePopupView _popupPrefab;
-    [SerializeField] private Transform _popupParent;
-
-    [Header("Settings")]
-    [SerializeField] private float _detectionRange = 10f;
-    [SerializeField] private float _damagedDisplayDuration = 3f;
-    [SerializeField] private float _rangeCheckInterval = 0.1f;
-    [SerializeField] private int _popupPreloadCount = 20;
-
-    private Transform _playerTransform;
-
-    private Dictionary<IEnemy, EnemyGaugePresenter> _presenters = new();
-
-    private EnemyGaugePool _gaugePool;
-    private DamagePopupPool _popupPool;
-    private DamagePopupPresenter _popupPresenter;
-
-    private CancellationTokenSource _cts;
-
-    private void Awake()
-    {
         _gaugePool = new EnemyGaugePool(_gaugePrefab, _gaugeParent);
+
+        _armerGaugePool = new EnemyGaugePool(_armerGaugePrefab, _armerGaugeParent);
 
         _popupPool = new DamagePopupPool(
             _popupPrefab,
@@ -55,11 +28,46 @@ public class EnemyUIManager : MonoBehaviour
         RangeCheckLoopAsync(_cts.Token).Forget();
     }
 
+
+    [Header("Gauge")]
+    [SerializeField] private EnemyGaugeView _gaugePrefab;
+    [SerializeField] private EnemyGaugeView _armerGaugePrefab;
+    [SerializeField] private Transform _gaugeParent;
+    [SerializeField] private Transform _armerGaugeParent;
+
+    [Header("Damage Popup")]
+    [SerializeField] private DamagePopupView _popupPrefab;
+    [SerializeField] private Transform _popupParent;
+
+    [Header("Settings")]
+    [SerializeField] private float _detectionRange = 10f;
+    [SerializeField] private float _damagedDisplayDuration = 3f;
+    [SerializeField] private float _rangeCheckInterval = 0.1f;
+    [SerializeField] private int _popupPreloadCount = 20;
+
+    private EnemyManager _enemyManager;
+    private Transform _playerTransform;
+
+    private Dictionary<IEnemy, EnemyGaugePresenter> _gaugePresenters = new();
+    private Dictionary<IArmorHealth, ArmorGaugePresenter> _armorPresenters = new();
+
+    private EnemyGaugePool _gaugePool;
+    private EnemyGaugePool _armerGaugePool;
+    private DamagePopupPool _popupPool;
+    private DamagePopupPresenter _popupPresenter;
+
+    private CancellationTokenSource _cts;
+
     private async UniTaskVoid RangeCheckLoopAsync(CancellationToken ct)
     {
         while (!ct.IsCancellationRequested)
         {
-            foreach (var presenter in _presenters.Values)
+            foreach (var presenter in _gaugePresenters.Values)
+            {
+                presenter.UpdateRangeCheck();
+            }
+
+            foreach (var presenter in _armorPresenters.Values)
             {
                 presenter.UpdateRangeCheck();
             }
@@ -84,10 +92,16 @@ public class EnemyUIManager : MonoBehaviour
             _damagedDisplayDuration
         );
 
-        _presenters.Add(enemy, presenter);
+        _gaugePresenters.Add(enemy, presenter);
 
         // Damage Popup
         enemy.OnDamageDealt += HandleDamageDealt;
+
+        if (enemy is MobEnemy mob)
+        {
+            mob.OnArmorRegistered += HandleArmorRegistered;
+        }
+
         enemy.OnDead += HandleEnemyDead;
     }
 
@@ -98,18 +112,53 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleEnemyDead(IEnemy enemy)
     {
-        if (_presenters.TryGetValue(enemy, out var presenter))
+        if (_gaugePresenters.TryGetValue(enemy, out var presenter))
         {
             presenter.ResetView();
             presenter.Dispose();
 
             _gaugePool.Release(presenter.View);
 
-            _presenters.Remove(enemy);
+            _gaugePresenters.Remove(enemy);
         }
 
         enemy.OnDamageDealt -= HandleDamageDealt;
         enemy.OnDead -= HandleEnemyDead;
+
+        if (enemy is MobEnemy mob)
+        {
+            mob.OnArmorRegistered -= HandleArmorRegistered;
+        }
+    }
+
+    private void HandleArmorRegistered(IArmorHealth armor)
+    {
+        var view = _armerGaugePool.Get();
+        var presenter = new ArmorGaugePresenter(
+            armor, view, _playerTransform, _detectionRange, _damagedDisplayDuration
+        );
+        _armorPresenters.Add(armor, presenter);
+
+        presenter.OnBroken += HandleArmorBroken;
+    }
+
+    private void HandleArmorBroken(ArmorGaugePresenter presenter)
+    {
+        presenter.OnBroken -= HandleArmorBroken;
+        presenter.ResetView();
+        _armerGaugePool.Release(presenter.View);
+
+        // Dictionaryから削除
+        foreach (var pair in _armorPresenters)
+        {
+            if (pair.Value == presenter)
+            {
+                _armorPresenters.Remove(pair.Key);
+                break;
+            }
+        }
+
+        presenter.Dispose();
     }
 
     private void OnDestroy()
@@ -119,15 +168,19 @@ public class EnemyUIManager : MonoBehaviour
 
         _enemyManager.OnEnemySpawned -= HandleEnemySpawned;
 
-        foreach (var pair in _presenters)
+        foreach (var pair in _gaugePresenters)
         {
             pair.Key.OnDead -= HandleEnemyDead;
             pair.Key.OnDamageDealt -= HandleDamageDealt;
-
             pair.Value.Dispose();
         }
+        _gaugePresenters.Clear();
 
-        _presenters.Clear();
+        foreach (var pair in _armorPresenters)
+        {
+            pair.Value.Dispose();
+        }
+        _armorPresenters.Clear();
 
         _popupPresenter.Dispose();
     }
