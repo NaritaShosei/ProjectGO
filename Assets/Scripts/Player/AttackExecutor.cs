@@ -196,6 +196,9 @@ public struct AttackContext
     /// <summary>感電</summary>
     public ElectricShock ElectricShock;
 
+    /// <summary>大地粉砕Ⅱ</summary>
+    public EvolutionGroundCrush EvolutionGroundCrush;
+
     public AttackContext(PlayerMode mode, Vector3 attackPos, Transform playerTransform)
     {
         PlayerMode = mode;
@@ -210,6 +213,7 @@ public struct AttackContext
         OnAfterAttack = null;
         OnHit = null;
         ElectricShock = new();
+        EvolutionGroundCrush = new();
     }
 }
 
