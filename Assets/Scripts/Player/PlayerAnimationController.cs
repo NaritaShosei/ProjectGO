@@ -113,6 +113,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
         public static readonly int Damaged = Animator.StringToHash("Damaged");
         public static readonly int Dead = Animator.StringToHash("Dead");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+        public static readonly int ModeChange = Animator.StringToHash("ModeChange");
     }
 
     private void Awake()
@@ -145,6 +146,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        _animator.SetTrigger(AnimParams.ModeChange);
         _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
     }
 }
