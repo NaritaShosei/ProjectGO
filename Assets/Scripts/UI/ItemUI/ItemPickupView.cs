@@ -29,7 +29,6 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     {
         _nearUI.SetActive(false);
         _interactUI.SetActive(false);
-        gameObject.SetActive(false);
     }
 
     public void ShowNear()
@@ -53,23 +52,36 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     {
         _mainCamera = Camera.main;
         _rectTransform = GetComponent<RectTransform>();
+
         Hide();
+        gameObject.SetActive(false);
     }
 
     private void LateUpdate()
     {
         if (_target == null) return;
-        if (_mainCamera == null) return;
+        if (!TryGetCamera()) return;
 
         Vector3 worldPos = _target.position + _displayHeight;
         Vector3 screenPos = _mainCamera.WorldToScreenPoint(worldPos);
 
         if (screenPos.z < 0f)
         {
-            Hide();
+            _nearUI.SetActive(false);
+            _interactUI.SetActive(false);
             return;
         }
 
         _rectTransform.position = screenPos;
+    }
+
+    private bool TryGetCamera()
+    {
+        if (_mainCamera == null || !_mainCamera.isActiveAndEnabled)
+        {
+            _mainCamera = Camera.main;
+        }
+
+        return _mainCamera != null;
     }
 }
