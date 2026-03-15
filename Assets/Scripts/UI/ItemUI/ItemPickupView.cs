@@ -5,6 +5,40 @@ using UnityEngine;
 /// </summary>
 public class ItemPickupView : MonoBehaviour, IItemPickupView
 {
+    public void SetState(ItemPickupViewState state)
+    {
+        if (_state == state) return;
+        _state = state;
+
+        switch (state)
+        {
+            case ItemPickupViewState.Hidden:
+                gameObject.SetActive(false);
+                break;
+
+            case ItemPickupViewState.Near:
+                gameObject.SetActive(true);
+                _nearUI.SetActive(true);
+                _interactUI.SetActive(false);
+                break;
+
+            case ItemPickupViewState.Interact:
+                gameObject.SetActive(true);
+                _nearUI.SetActive(false);
+                _interactUI.SetActive(true);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// アイテム位置をpresenterから受け取る
+    /// </summary>
+    /// <param name="target"></param>
+    public void Initialize(Transform target)
+    {
+        _target = target;
+    }
+
     [Header("UI")]
     [SerializeField] private GameObject _nearUI;     // 白い丸ポチ
     [SerializeField] private GameObject _interactUI; // 取得キーUI
@@ -16,44 +50,13 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     private Transform _target; //アイテムの位置
     private RectTransform _rectTransform;
 
-    /// <summary>
-    /// アイテム位置をpresenterから受け取る
-    /// </summary>
-    /// <param name="target"></param>
-    public void Initialize(Transform target)
-    {
-        _target = target;   
-    }
-
-    public void Hide()
-    {
-        _nearUI.SetActive(false);
-        _interactUI.SetActive(false);
-    }
-
-    public void ShowNear()
-    {
-        gameObject.SetActive(true);
-
-        _nearUI.SetActive(true);
-        _interactUI.SetActive(false);
-    }
-
-
-    public void ShowInteract()
-    {
-        gameObject.SetActive(true);
-
-        _nearUI.SetActive(false);
-        _interactUI.SetActive(true);
-    }
+    private ItemPickupViewState _state;
 
     private void Awake()
     {
         _mainCamera = Camera.main;
         _rectTransform = GetComponent<RectTransform>();
-
-        Hide();
+        SetState(ItemPickupViewState.Hidden);
         gameObject.SetActive(false);
     }
 

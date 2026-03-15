@@ -1,17 +1,16 @@
+using UnityEngine;
+
 public interface IItemPickupView
 {
     /// <summary>
-    /// 表示可能状態
+    /// 初期化
     /// </summary>
-    void ShowNear();
+    /// <param name="target"></param>
+    void Initialize(Transform target);
 
     /// <summary>
-    /// 取得可能状態
+    /// UIの状態変化
     /// </summary>
-    void ShowInteract();
-
-    /// <summary>
-    /// UI非表示
-    /// </summary>
-    void Hide();
+    /// <param name="state"></param>
+    void SetState(ItemPickupViewState state);
 }
