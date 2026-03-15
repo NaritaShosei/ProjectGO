@@ -504,6 +504,8 @@ public class PlayerAttack : MonoBehaviour
             ? PlayerMode.Thunder
             : PlayerMode.Warrior;
 
+        _stateManager.ChangeState(PlayerState.ModeChanging);
+
         _modeController.SwitchMode(newMode);
     }
 

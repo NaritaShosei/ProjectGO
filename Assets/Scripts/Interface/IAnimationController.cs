@@ -7,3 +7,8 @@ public interface IAnimationController
     public void AnimEvent_ComboWindowStart();
     public void AnimEvent_ComboWindowEnd();
 }
+
+public interface IModeChangeAnimationController
+{
+    public void AnimEvent_ModeChangeComplete();
+}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 public class PlayerStateManager
 {
@@ -20,6 +20,7 @@ public class PlayerStateManager
     public bool CanMove() => CurrentState != PlayerState.Attacking
                           && CurrentState != PlayerState.Dodge
                           && CurrentState != PlayerState.Damaged
+                          && CurrentState != PlayerState.ModeChanging
                           && CurrentState != PlayerState.Dead;
     public bool CanDodge() => CurrentState is PlayerState.Idle;
     public bool IsDodging() => CurrentState is PlayerState.Dodge;
@@ -38,4 +39,5 @@ public enum PlayerState
     Dodge,
     Damaged,
     Dead,
+    ModeChanging    
 }
