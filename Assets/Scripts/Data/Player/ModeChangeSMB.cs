@@ -1,9 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// モードチェンジアニメーション中にスロー演出を行うSMB
-/// normalizedTimeでスロー開始・終了タイミングを指定する
-/// </summary>
 public class ModeChangeSMB : StateMachineBehaviour
 {
     public override void OnStateEnter(
