@@ -16,6 +16,9 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     /// <param name="viewModel"></param>
     public void ShowDamage(DamagePopupViewModel viewModel)
     {
+        //弱点時に表紙しているobject自体がいらない
+        ResetView();
+
         if (_mainCamera == null)
         {
             _mainCamera = Camera.main;　//カメラ再取得
@@ -51,18 +54,21 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
         }
 
         //表示切替
-        _weakPointObj.SetActive(viewModel.IsWeakPoint);
         _criticalObj.SetActive(viewModel.IsCritical);
        
         // ワールド座標をスクリーン座標へ変換
         var screenPos = _mainCamera.WorldToScreenPoint(viewModel.WorldPosition);
+
+        //ランダムオフセット
+        screenPos.x += UnityEngine.Random.Range(-_randomOffsetX, _randomOffsetX);
+        screenPos.y += UnityEngine.Random.Range(-_randomOffsetY, _randomOffsetY);
+
         _rectTransform.position = screenPos;
 
         PlayAnimation();
     }
 
     [SerializeField] private TextMeshProUGUI _damageText;
-    [SerializeField] private GameObject _weakPointObj;
     [SerializeField] private GameObject _criticalObj;
     [SerializeField] private CanvasGroup _canvasGroup;
 
@@ -70,6 +76,9 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     [SerializeField] private float _lifeTime = 1.5f;        //消滅までの時間
     [SerializeField] private float _fadeDuration = 0.2f;    //フェードの時間
     [SerializeField] private float _popupDistance = 10f;
+
+    [SerializeField] private float _randomOffsetX = 15f;
+    [SerializeField] private float _randomOffsetY = 10f;
 
     [Header("色設定")]
     [SerializeField] private Color _normalColor = Color.white;
@@ -112,6 +121,11 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
             OnRelease?.Invoke(this);
         });
         _currentTween = seq;
+    }
+
+    private void ResetView()
+    {
+        _criticalObj.SetActive(false);
     }
 }
 
