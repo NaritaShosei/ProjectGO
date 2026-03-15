@@ -161,6 +161,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
         if (_playerAnimationController != null)
         {
+            _playerAnimationController.OnModeChangeComplete -= OnModeChangeComplete;
             _playerAnimationController.OnDestroy();
         }
     }
@@ -178,6 +179,19 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
         if (_move != null && _attack != null)
         {
             _move.OnEndDodge += _attack.FinishDodge;
+        }
+
+        if (_playerAnimationController != null && _playerStateManager != null)
+        {
+            _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
+        }
+    }
+
+    private void OnModeChangeComplete()
+    {
+        if (_playerStateManager.CurrentState == PlayerState.ModeChanging)
+        {
+            _playerStateManager.ChangeState(PlayerState.Idle);
         }
     }
 
