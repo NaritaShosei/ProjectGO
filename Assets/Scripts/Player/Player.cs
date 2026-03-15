@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
@@ -39,6 +40,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
 
         _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController);
 
+        _interactor?.Init(_playerStateManager, input);
+
         _move?.Init(
            _playerStateManager,
            input,
@@ -54,6 +57,8 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
         {
             hitStopManager.Register(this, HitStopTargetGroup.Player);
         }
+
+        _interactor?.SearchLoop(destroyCancellationToken).Forget();
     }
 
     public Transform GetTargetCenter()
@@ -123,6 +128,7 @@ public class Player : MonoBehaviour, IPlayer, IStamina, ISpeedChange
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
+    [SerializeField] private PlayerInteractor _interactor;
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private PlayerModeController _modeController;
     [SerializeField] private PlayerAnimationController _playerAnimationController;
