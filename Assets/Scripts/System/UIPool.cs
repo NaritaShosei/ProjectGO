@@ -79,3 +79,68 @@ public class EnemyGaugePool
 
     private Stack<EnemyGaugeView> _pool = new();
 }
+
+public class ItemPickupPool
+{
+    public ItemPickupPool(ItemPickupView prefab, Transform parent)
+    {
+        _prefab = prefab;
+        _parent = parent;
+    }
+
+    public ItemPickupView Get()
+    {
+        if (_pool.Count > 0)
+        {
+            var view = _pool.Pop();
+            return view;
+        }
+        return Object.Instantiate(_prefab, _parent);
+    }
+
+    public void Release(ItemPickupView view)
+    {
+        view.SetState(ItemPickupViewState.Hidden);
+        _pool.Push(view);
+    }
+
+    private readonly ItemPickupView _prefab;
+    private readonly Transform _parent;
+    private readonly Stack<ItemPickupView> _pool = new();
+}
+
+public class HealItemPool
+{
+    public HealItemPool(HealItem prefab, Transform parent)
+    {
+        _prefab = prefab;
+        _parent = parent;
+    }
+
+    public HealItem Get(Vector3 position)
+    {
+        HealItem item;
+        if (_pool.Count > 0)
+        {
+            item = _pool.Pop();
+        }
+        else
+        {
+            item = Object.Instantiate(_prefab, _parent);
+        }
+
+        item.transform.position = position;
+        item.gameObject.SetActive(true);
+        return item;
+    }
+
+    public void Release(HealItem item)
+    {
+        item.gameObject.SetActive(false);
+        _pool.Push(item);
+    }
+
+    private readonly HealItem _prefab;
+    private readonly Transform _parent;
+    private readonly Stack<HealItem> _pool = new();
+}
