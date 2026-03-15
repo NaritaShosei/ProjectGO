@@ -59,20 +59,14 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
         _mainCamera = Camera.main;
         _rectTransform = GetComponent<RectTransform>();
 
-        if (_nearUI == null)
-            Debug.LogError($"{nameof(ItemPickupView)} : _nearUI が設定されていません", this);
-
-        if (_interactUI == null)
-            Debug.LogError($"{nameof(ItemPickupView)} : _interactUI が設定されていません", this);
-
-        if (_rectTransform == null)
-            Debug.LogError($"{nameof(ItemPickupView)} : RectTransform が見つかりません", this);
-
-        if (_canvasGroup == null)
-            Debug.LogError($"{nameof(ItemPickupView)} : CanvasGroup が設定されていません", this);
+        if (_nearUI == null || _interactUI == null || _rectTransform == null || _canvasGroup == null)
+        {
+            Debug.LogError($"{nameof(ItemPickupView)} : 必須参照が設定されていません", this);
+            enabled = false;
+            return;
+        }
 
         SetState(ItemPickupViewState.Hidden);
-        gameObject.SetActive(false);
     }
 
     private void LateUpdate()
@@ -85,7 +79,7 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
 
         if (screenPos.z < 0f)
         {
-            if(!_isBehind)
+            if (!_isBehind)
             {
                 _canvasGroup.alpha = 0f;
                 _isBehind = true;
@@ -93,7 +87,7 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
             return;
         }
 
-        if(_isBehind)
+        if (_isBehind)
         {
             _canvasGroup.alpha = 1f;
             _isBehind = false;
