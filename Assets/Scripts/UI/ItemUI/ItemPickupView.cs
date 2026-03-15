@@ -42,6 +42,7 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     [Header("UI")]
     [SerializeField] private GameObject _nearUI;     // 白い丸ポチ
     [SerializeField] private GameObject _interactUI; // 取得キーUI
+    [SerializeField] private CanvasGroup _canvasGroup;
 
     [Header("表示高さ")]
     [SerializeField] private Vector3 _displayHeight = new Vector3(0, 1.5f, 0);
@@ -49,6 +50,7 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     private Camera _mainCamera;
     private Transform _target; //アイテムの位置
     private RectTransform _rectTransform;
+    private bool _isBehind;
 
     private ItemPickupViewState _state;
 
@@ -56,6 +58,19 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     {
         _mainCamera = Camera.main;
         _rectTransform = GetComponent<RectTransform>();
+
+        if (_nearUI == null)
+            Debug.LogError($"{nameof(ItemPickupView)} : _nearUI が設定されていません", this);
+
+        if (_interactUI == null)
+            Debug.LogError($"{nameof(ItemPickupView)} : _interactUI が設定されていません", this);
+
+        if (_rectTransform == null)
+            Debug.LogError($"{nameof(ItemPickupView)} : RectTransform が見つかりません", this);
+
+        if (_canvasGroup == null)
+            Debug.LogError($"{nameof(ItemPickupView)} : CanvasGroup が設定されていません", this);
+
         SetState(ItemPickupViewState.Hidden);
         gameObject.SetActive(false);
     }
@@ -70,7 +85,18 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
 
         if (screenPos.z < 0f)
         {
+            if(!_isBehind)
+            {
+                _canvasGroup.alpha = 0f;
+                _isBehind = true;
+            }
             return;
+        }
+
+        if(_isBehind)
+        {
+            _canvasGroup.alpha = 1f;
+            _isBehind = false;
         }
 
         _rectTransform.position = screenPos;
