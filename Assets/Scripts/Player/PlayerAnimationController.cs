@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour, IAnimationController
+public class PlayerAnimationController : MonoBehaviour, IAnimationController, IModeChangeAnimationController
 {
     public void Init(PlayerStateManager stateManager, IModeController modeController)
     {
@@ -16,6 +16,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
     public event Action OnAttackExecute;
+    public event Action OnModeChangeComplete;
 
     // アニメーションから呼ばれる関数
     public void AnimEvent_AttackExecute()
@@ -36,6 +37,11 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
     public void AnimEvent_ComboWindowEnd()
     {
         OnComboWindowEnd?.Invoke();
+    }
+
+    public void AnimEvent_ModeChangeComplete()
+    {
+        OnModeChangeComplete?.Invoke();
     }
 
     public void UpdateMoveAnimation(float speed)
@@ -113,6 +119,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
         public static readonly int Damaged = Animator.StringToHash("Damaged");
         public static readonly int Dead = Animator.StringToHash("Dead");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+        public static readonly int ModeChange = Animator.StringToHash("ModeChange");
     }
 
     private void Awake()
@@ -145,6 +152,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        _animator.SetTrigger(AnimParams.ModeChange);
         _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
     }
 }
