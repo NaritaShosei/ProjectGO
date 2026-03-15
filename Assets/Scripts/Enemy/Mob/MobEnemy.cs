@@ -35,7 +35,7 @@ public class MobEnemy : Enemy
         else
         {
             var turn = new TurnBehaviour(_turnProfile);
-            turn.Init(this, _data, _playerTransform, _context, _state);
+            turn.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
             _runner.RegisterTurn(turn);
         }
 
@@ -47,7 +47,7 @@ public class MobEnemy : Enemy
         else
         {
             _attack = new MeleeAttackBehaviour(_attackerSlot);
-            _attack.Init(this, _data, _playerTransform, _context, _state);
+            _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
             _runner.Register(_attack);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
@@ -55,7 +55,7 @@ public class MobEnemy : Enemy
             if (_distanceProfile != null)
             {
                 var bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
-                bark.Init(this, _data, _playerTransform, _context, _state);
+                bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
                 _runner.Register(bark);
             }
         }
@@ -74,7 +74,7 @@ public class MobEnemy : Enemy
                 _wallAvoidanceService,
                 _spatialHashGrid
             );
-            move.Init(this, _data, _playerTransform, _context, _state);
+            move.Init(this, _data, _playerTransform, _context, _enemyAnimator,_state);
             _runner.Register(move);
 
             // BarkはattackerSlotブロックへ移動したためここから削除
@@ -86,7 +86,7 @@ public class MobEnemy : Enemy
                 _wallAvoidanceService,
                 _spatialHashGrid
             );
-            roam.Init(this, _data, _playerTransform, _context, _state);
+            roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
             _runner.Register(roam);
         }
 
@@ -194,6 +194,8 @@ public class MobEnemy : Enemy
 
         // 死亡時にスロットを解放する
         _attack?.ReleaseSlot();
+
+        _enemyAnimator?.SetDead();
 
         base.OnDeathInternal();
     }

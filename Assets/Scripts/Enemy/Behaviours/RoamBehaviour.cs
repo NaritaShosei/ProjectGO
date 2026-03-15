@@ -34,15 +34,14 @@ public class RoamBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
+        EnemyAnimator enemyAnimator,
         EnemyStateContext state
     )
     {
         _self = owner.transform;
         _enemy = owner;
-
-        // 追加
+        _enemyAnimator = enemyAnimator;
         _enemyId = owner.GetInstanceID();
-
         _player = player;
         _data = data;
         _context = context;
@@ -72,11 +71,13 @@ public class RoamBehaviour : IEnemyBehaviour
     {
         _state.ChangeState(EnemyState.Move);
         PickTarget();
+        _enemyAnimator?.SetSpeed(1f);
     }
 
     public void OnExit()
     {
         _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetSpeed(0f);
     }
 
     public void Tick(float deltaTime)
@@ -134,6 +135,7 @@ public class RoamBehaviour : IEnemyBehaviour
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
+    private EnemyAnimator _enemyAnimator;
     private EnemyStateContext _state;
 
     private readonly DistanceProfile _profile;

@@ -20,6 +20,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     public event Action<DamagePopupViewModel> OnDamageDealt;
 
     public virtual EnemyConditionController ConditionController { get; }
+    public EnemyAnimator EnemyAnimator => _enemyAnimator;
 
     public Vector3 Position { get => transform.position; }
 
@@ -134,6 +135,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
+    [SerializeField] protected Animator _animator;
 
     // Turn用プロファイル（派生クラスのInspectorから設定する）
     [SerializeField] protected TurnProfile _turnProfile;
@@ -145,6 +147,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected EnemyStats _stats;
     protected Transform _playerTransform;
     private HitStopManager _hitStopManager;
+    protected EnemyAnimator _enemyAnimator;
 
     protected bool _isDead;
 
@@ -175,6 +178,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _stats.OnDead += OnDeath;
 
         // 鎧生成関連はすべてMobEnemyのほうで実装
+
+        // EnemyAnimatorを生成する
+        _enemyAnimator = new EnemyAnimator(_animator);
     }
 
     protected virtual void Update()
@@ -230,6 +236,21 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected virtual void OnDeathInternal()
     {
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// RootMotionをスクリプト側で受け取って位置・回転に反映する
+    /// ApplyRootMotionはONのままにすること
+    /// </summary>
+    private void OnAnimatorMove()
+    {
+        if (_animator == null) return;
+
+        // 位置をRootMotionで更新する
+        transform.position += _animator.deltaPosition;
+
+        // 回転をRootMotionで更新する
+        transform.rotation *= _animator.deltaRotation;
     }
 
     protected abstract void UpdateEnemy(float deltaTime);

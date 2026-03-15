@@ -7,6 +7,9 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     public event Action<IEnemy> OnDead;
     public EnemyConditionController ConditionController { get; }
 
+    // EnemyArmerはAnimatorを持たないためnullを返す
+    public EnemyAnimator EnemyAnimator => null;
+
     public event Action<float, float> OnHealthChanged; 
 
     public event Action<DamagePopupViewModel> OnDamageDealt;

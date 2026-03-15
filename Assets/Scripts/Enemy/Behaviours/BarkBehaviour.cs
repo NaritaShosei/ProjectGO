@@ -22,15 +22,16 @@ public class BarkBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
+        EnemyAnimator enemyAnimator,
+        Animator animator,
         EnemyStateContext state
     )
     {
         _self = owner.transform;
-
-        // 追加
+        _enemyAnimator = enemyAnimator;
         _enemyId = owner.GetInstanceID();
-
         _player = player;
+        _animator = animator;
         _data = data;
         _context = context;
         _state = state;
@@ -57,18 +58,24 @@ public class BarkBehaviour : IEnemyBehaviour
         if (_attackerSlot != null && _attackerSlot.IsAcquired(_enemyId)) return false;
 
         // タイマーが終わるまで継続
-        return _timer < _data.BarkDuration;
+        float duration = _data.BarkDuration > 0f
+            ? _data.BarkDuration
+            : GetAnimationLength();
+
+        return _timer < duration;
     }
 
     public void OnEnter()
     {
         _timer = 0f;
         _state.ChangeState(EnemyState.Bark);
+        _enemyAnimator?.SetBarking(true);
     }
 
     public void OnExit()
     {
         _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetBarking(false);
     }
 
     public void Tick(float deltaTime)
@@ -80,14 +87,37 @@ public class BarkBehaviour : IEnemyBehaviour
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
+    private Animator _animator;
     private EnemyStateContext _state;
+    private EnemyAnimator _enemyAnimator;
+
+    // BarkステートのAnimatorハッシュ
+    private static readonly int _barkStateHash = Animator.StringToHash("Bark");
 
     private int _enemyId;
-
 
     // 追加
     private readonly float _barkChance;
 
     private readonly IEnemyAttackerSlot _attackerSlot;
     private float _timer;
+
+    /// <summary>
+    /// BarkステートのAnimationClip長を取得する
+    /// BarkDurationが未設定の場合のフォールバック
+    /// </summary>
+    private float GetAnimationLength()
+    {
+        if (_animator == null) return 0f;
+
+        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+        if (stateInfo.IsName("Bark"))
+        {
+            return stateInfo.length;
+        }
+
+        // Barkステートに遷移前の場合は次フレームまで待つ
+        return float.MaxValue;
+    }
 }

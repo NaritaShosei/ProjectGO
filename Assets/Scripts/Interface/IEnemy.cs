@@ -4,6 +4,7 @@ using UnityEngine;
 public interface IEnemy : ICharacter
 {
     public EnemyConditionController ConditionController { get; }
+    public EnemyAnimator EnemyAnimator { get; }
 
     public event Action<float, float> OnHealthChanged;
 

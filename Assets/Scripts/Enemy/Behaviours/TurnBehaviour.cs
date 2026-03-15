@@ -28,6 +28,7 @@ public class TurnBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
+        EnemyAnimator enemyAnimator,
         EnemyStateContext state
     )
     {

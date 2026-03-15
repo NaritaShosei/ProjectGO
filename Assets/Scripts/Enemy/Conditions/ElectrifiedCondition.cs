@@ -28,6 +28,7 @@ public sealed class ElectrifiedCondition : IEnemyCondition
     {
         _time = _duration;
         _baseLocalPos = enemy.GetTargetCenter().localPosition;
+        enemy.EnemyAnimator?.SetElectrified(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("感電開始");
@@ -58,6 +59,7 @@ public sealed class ElectrifiedCondition : IEnemyCondition
     public void OnExit(IEnemy enemy)
     {
         enemy.GetTargetCenter().localPosition = _baseLocalPos;
+        enemy.EnemyAnimator?.SetElectrified(false);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("感電終了");

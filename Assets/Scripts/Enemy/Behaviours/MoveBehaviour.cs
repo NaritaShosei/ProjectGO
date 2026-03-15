@@ -31,15 +31,14 @@ public class MoveBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
+        EnemyAnimator enemyAnimator,
         EnemyStateContext state
     )
     {
         _self = owner.transform;
         _enemy = owner;
-
-        // 追加
+        _enemyAnimator = enemyAnimator;
         _enemyId = owner.GetInstanceID();
-
         _player = player;
         _data = data;
         _context = context;
@@ -81,11 +80,13 @@ public class MoveBehaviour : IEnemyBehaviour
     public void OnEnter()
     {
         _state.ChangeState(EnemyState.Move);
+        _enemyAnimator?.SetSpeed(1f);
     }
 
     public void OnExit()
     {
         _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetSpeed(0f);
     }
 
     public void Tick(float deltaTime)
@@ -150,6 +151,7 @@ public class MoveBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private EnemyStateContext _state;
     private int _enemyId;
+    private EnemyAnimator _enemyAnimator;
 
     private readonly DistanceProfile _profile;
     private readonly ISeparationService _separationService;

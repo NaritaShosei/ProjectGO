@@ -30,6 +30,7 @@ public sealed class KnockbackCondition : IEnemyCondition
 #endif
         _groundY = enemy.Position.y; 
         _isFinished = false;
+        enemy.EnemyAnimator?.SetKnockback(true);
     }
 
     public void Tick(IEnemy enemy, float deltaTime)
@@ -56,6 +57,7 @@ public sealed class KnockbackCondition : IEnemyCondition
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("ノックバック終了");
 #endif
+        enemy.EnemyAnimator?.SetKnockback(false);
     }
 
     private Vector3 _velocity;

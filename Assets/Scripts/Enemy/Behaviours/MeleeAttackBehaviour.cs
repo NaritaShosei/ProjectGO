@@ -22,6 +22,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
+        EnemyAnimator enemyAnimator,
+        Animator animator,
         EnemyStateContext state
     )
     {
@@ -30,7 +32,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _player = player;
         _data = data;
         _context = context;
+        _enemyAnimator = enemyAnimator;
         _state = state;
+        _animator = animator;
     }
 
     public bool CanEnter()
@@ -69,6 +73,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _timer = 0f;
         _state.ChangeState(EnemyState.Attack);
 
+        _enemyAnimator?.SetAttacking(true);
+
         PerformAttack();
     }
 
@@ -80,9 +86,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         // AttackPatternが設定されている場合はDurationで終了判定
         // 設定されていない場合は即終了
-        float duration = _data.AttackPattern != null
+        float duration = (_data.AttackPattern != null && _data.AttackPattern.Duration > 0f)
             ? _data.AttackPattern.Duration
-            : 0f;
+            : GetAnimationLength();
 
         if (_timer >= duration)
         {
@@ -92,6 +98,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnExit()
     {
+        _enemyAnimator?.SetAttacking(false);
         Exit();
     }
 
@@ -101,11 +108,16 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private EnemyStateContext _state;
     private readonly IEnemyAttackerSlot _attackerSlot;
+    private EnemyAnimator _enemyAnimator;
 
     private int _enemyId;
     private float _lastAttackTime;
     private float _timer;
     private bool _isAttacking;
+    private Animator _animator;
+
+    // AttackステートのAnimatorハッシュ
+    private static readonly int _attackStateHash = Animator.StringToHash("Attack");
 
     private void PerformAttack()
     {
@@ -147,5 +159,25 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _state.ChangeState(EnemyState.Idle);
 
         // スロットは死亡時にのみ解放するため、ここでは解放しない
+    }
+
+    /// <summary>
+    /// AttackステートのAnimationClip長を取得する
+    /// AttackPattern.Durationが未設定の場合のフォールバック
+    /// </summary>
+    private float GetAnimationLength()
+    {
+        if (_animator == null) return 0f;
+
+        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+        if (stateInfo.IsName("Attack"))
+        {
+            // normalizedTimeが1に達したらClip1周分
+            return stateInfo.length;
+        }
+
+        // Attackステートに遷移前の場合は次フレームまで待つ
+        return float.MaxValue;
     }
 }
