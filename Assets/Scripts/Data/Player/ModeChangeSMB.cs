@@ -12,6 +12,11 @@ public class ModeChangeSMB : StateMachineBehaviour
         _slowApplied = false;
 
         _hitStopManager = ServiceLocator.Get<HitStopManager>();
+
+        if (animator.TryGetComponent(out IModeChangeAnimationController modeChangeAnimController))
+        {
+            _modeChangeAnimController = modeChangeAnimController;
+        }
     }
 
     public override void OnStateUpdate(
@@ -24,6 +29,12 @@ public class ModeChangeSMB : StateMachineBehaviour
             _slowApplied = true;
             _hitStopManager?.TriggerDirect(_slowDuration, _targetGroup, _slowTimeScale);
         }
+
+        if (!_modeChangeEnded && currentTime >= _modeChangeEndTime)
+        {
+            _modeChangeEnded = true;
+            _modeChangeAnimController?.AnimEvent_ModeChangeComplete();
+        }
     }
 
     [Header("スロー区間")]
@@ -34,6 +45,11 @@ public class ModeChangeSMB : StateMachineBehaviour
     [SerializeField] private HitStopTargetGroup _targetGroup = HitStopTargetGroup.Player | HitStopTargetGroup.AllEnemies | HitStopTargetGroup.Effects;
     [SerializeField] private float _slowTimeScale = 0.1f;
 
+    [Header("モードチェンジ終了")]
+    [SerializeField] private float _modeChangeEndTime = 0.8f;
+
     private HitStopManager _hitStopManager;
+    private IModeChangeAnimationController _modeChangeAnimController;
     private bool _slowApplied;
+    private bool _modeChangeEnded;
 }
