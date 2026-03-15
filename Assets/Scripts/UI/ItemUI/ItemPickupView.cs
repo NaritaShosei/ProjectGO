@@ -67,8 +67,6 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
 
         if (screenPos.z < 0f)
         {
-            _nearUI.SetActive(false);
-            _interactUI.SetActive(false);
             return;
         }
 
