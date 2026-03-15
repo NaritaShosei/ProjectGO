@@ -10,8 +10,10 @@ public class ModeChangeSMB : StateMachineBehaviour
         Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _slowApplied = false;
+        _modeChangeEnded = false;
+        _modeChangeAnimController = null;
 
-        _hitStopManager = ServiceLocator.Get<HitStopManager>();
+        ServiceLocator.TryGet(out _hitStopManager);
 
         if (animator.TryGetComponent(out IModeChangeAnimationController modeChangeAnimController))
         {
