@@ -6,7 +6,15 @@ public class GroundCrush : SkillBase
 {
     public override void Apply(ref AttackContext context)
     {
-        context.EvolutionGroundCrush.Determine = _determine;
+        _damage = context.EvolutionGroundCrush.Damage;
+
+        Collider[] enemies = Physics.OverlapSphere(_attackCenter, _attackRadius, _enemyLayer);
+
+        if (enemies.Length > 0)
+        {
+            Debug.Log($"{enemies.Length}体の敵に{_damage}ダメージ");
+        }
+        else return;
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -19,12 +27,15 @@ public class GroundCrush : SkillBase
             && isComboCount;
     }
 
-    [SerializeField] private int _getComboCount = 1;
-    [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;
-    [SerializeField] private GameObject _determine;
+    [SerializeField] private int _enemyLayer;                                 //敵のレイヤー
+    [SerializeField] private int _getComboCount = 1;                          //コンボの何段目に実行するか
+    [SerializeField] private float _attackRadius = 1;                         //攻撃範囲
+    [SerializeField] private float _damage;                                   //与えるダメージ
+    [SerializeField] private Vector3 _attackCenter = new Vector3(1, 1, 1);    //攻撃位置
+    [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;   //プレイヤーが闘神モードかどうか
 }
 
 public struct EvolutionGroundCrush
 {
-    public GameObject Determine;
+    public float Damage;
 }
