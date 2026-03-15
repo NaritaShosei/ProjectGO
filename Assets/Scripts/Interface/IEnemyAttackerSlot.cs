@@ -4,6 +4,12 @@
 public interface IEnemyAttackerSlot
 {
     /// <summary>
+    /// 指定したEnemyがスロットを確保済みかどうかを返す
+    /// MoveBehaviourのCanEnterで使用する
+    /// </summary>
+    bool IsAcquired(int enemyId);
+
+    /// <summary>
     /// スロットを確保する
     /// すでに確保済みの場合はtrueを返す
     /// Boss以外はスロット上限を超えた場合はfalseを返す

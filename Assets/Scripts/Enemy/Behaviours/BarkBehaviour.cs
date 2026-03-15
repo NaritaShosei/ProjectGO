@@ -11,10 +11,10 @@ public class BarkBehaviour : IEnemyBehaviour
     /// <summary>
     /// DistanceProfile・AttackerSlot はBarkBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public BarkBehaviour(DistanceProfile profile, IEnemyAttackerSlot attackerSlot)
+    public BarkBehaviour(IEnemyAttackerSlot attackerSlot, float barkChance)
     {
-        _profile = profile;
         _attackerSlot = attackerSlot;
+        _barkChance = barkChance;
     }
 
     public void Init(
@@ -26,6 +26,10 @@ public class BarkBehaviour : IEnemyBehaviour
     )
     {
         _self = owner.transform;
+
+        // 追加
+        _enemyId = owner.GetInstanceID();
+
         _player = player;
         _data = data;
         _context = context;
@@ -34,26 +38,24 @@ public class BarkBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        if (_player == null) return false;
-
-        // 攻撃距離内のときのみ発動
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
-        if (sqrDist > sqrAttack) return false;
-
-        // AttackerSlotが未設定の場合は発動しない
         if (_attackerSlot == null) return false;
 
         int slotCost = _data.AttackPattern != null
             ? _data.AttackPattern.SlotCost
             : 1;
 
-        // スロットが満杯のときのみ発動
-        return _attackerSlot.IsFull(slotCost);
+        // スロットが満杯でなければ発動しない
+        if (!_attackerSlot.IsFull(slotCost)) return false;
+
+        // 確率判定：falseのときはRoamが選ばれる
+        return UnityEngine.Random.value < _barkChance;
     }
 
     public bool CanContinue()
     {
+        // スロットが確保されたら即座に終了してMoveへ切り替わる
+        if (_attackerSlot != null && _attackerSlot.IsAcquired(_enemyId)) return false;
+
         // タイマーが終わるまで継続
         return _timer < _data.BarkDuration;
     }
@@ -80,8 +82,12 @@ public class BarkBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private EnemyStateContext _state;
 
-    private readonly DistanceProfile _profile;
-    private readonly IEnemyAttackerSlot _attackerSlot;
+    private int _enemyId;
 
+
+    // 追加
+    private readonly float _barkChance;
+
+    private readonly IEnemyAttackerSlot _attackerSlot;
     private float _timer;
 }

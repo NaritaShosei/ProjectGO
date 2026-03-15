@@ -35,25 +35,26 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        // Playerが不正ならリターン
         if (_player == null) return false;
+        if (_attackerSlot == null) return false;
 
-        // 距離計算
-        _context.DistanceToPlayer = Vector3.Distance(
-            _self.position,
-            _player.position
-        );
-
-        // Playerとの距離が遠いならリターン
-        if (_context.DistanceToPlayer > _data.AttackRange) return false;
-
-        // クールダウンが明けていなければリターン
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) return false;
-
-        // 攻撃中ならリターン
         if (_isAttacking) return false;
 
-        return true;
+        if (Time.time - _lastAttackTime < _data.AttackCooldown) return false;
+
+        int slotCost = _data.AttackPattern != null
+            ? _data.AttackPattern.SlotCost
+            : 1;
+
+        // スロット確保を先に試みる（射程外でも確保することでMoveが動く）
+        // 確保済みの場合は即trueが返る
+        // 満杯の場合はfalseが返り、Bark/Roamへフォールバックする
+        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false)) return false;
+
+        // スロット確保後に射程チェック
+        // 射程外の場合はfalseを返すが、スロットは確保済みのままなのでMoveが動く
+        _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
+        return _context.DistanceToPlayer <= _data.AttackRange;
     }
 
     public bool CanContinue()
@@ -63,21 +64,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnEnter()
     {
-        // スロットが未設定ならリターン
-        if (_attackerSlot == null) return;
-
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        // スロットが確保できなければクールダウンを更新してリターン
-        // 更新しないと毎フレームOnEnterが呼ばれ続けてしまう
-        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false))
-        {
-            _lastAttackTime = Time.time;
-            return;
-        }
-
+        // スロットはCanEnterで確保済みのためここでは確保しない
         _isAttacking = true;
         _timer = 0f;
         _state.ChangeState(EnemyState.Attack);
@@ -124,6 +111,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     {
         _lastAttackTime = Time.time;
 
+        Debug.Log($"Enemyが攻撃した");
+
         // 球体をつくり、その範囲内にいるPlayerに攻撃
         Collider[] hits = Physics.OverlapSphere(
             _self.position + _self.forward * _data.AttackRange,
@@ -138,16 +127,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             }
         }
     }
-
-    private void Exit()
+    // 死亡時にEnemyから明示的に呼ぶ
+    public void ReleaseSlot()
     {
-        // 二重呼び出し防止
-        if (!_isAttacking) return;
-
-        _isAttacking = false;
-        _state.ChangeState(EnemyState.Idle);
-
-        // スロットを解放する
         if (_attackerSlot == null) return;
 
         int slotCost = _data.AttackPattern != null
@@ -155,5 +137,15 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             : 1;
 
         _attackerSlot.Release(_enemyId, slotCost);
+    }
+
+    private void Exit()
+    {
+        if (!_isAttacking) return;
+
+        _isAttacking = false;
+        _state.ChangeState(EnemyState.Idle);
+
+        // スロットは死亡時にのみ解放するため、ここでは解放しない
     }
 }

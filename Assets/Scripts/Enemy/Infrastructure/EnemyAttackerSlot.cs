@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// 同時攻撃可能数を管理するスロット
@@ -10,6 +11,12 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
     public EnemyAttackerSlot(int maxSlots)
     {
         _maxSlots = Math.Max(1, maxSlots);
+    }
+
+    public bool IsAcquired(int enemyId)
+    {
+        // Holdersに含まれていればスロット確保済み
+        return _holders.Contains(enemyId);
     }
 
     public bool TryAcquire(int enemyId, int slotCost, bool isBoss)
@@ -24,6 +31,7 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
         _holders.Add(enemyId);
         _usedSlots += slotCost;
+        Debug.Log($"{enemyId}が攻撃枠を取得した");
         return true;
     }
 

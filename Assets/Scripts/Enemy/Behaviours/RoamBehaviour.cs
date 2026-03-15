@@ -14,6 +14,7 @@ public class RoamBehaviour : IEnemyBehaviour
     /// </summary>
     public RoamBehaviour(
         DistanceProfile profile,
+        IEnemyAttackerSlot attackerSlot,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
         ISpatialHashGrid spatialHashGrid
@@ -23,6 +24,7 @@ public class RoamBehaviour : IEnemyBehaviour
             throw new ArgumentNullException(nameof(profile));
         _profile = profile;
         _separationService = separationService;
+        _attackerSlot = attackerSlot;
         _wallAvoidanceService = wallAvoidanceService;
         _spatialHashGrid = spatialHashGrid;
     }
@@ -37,6 +39,10 @@ public class RoamBehaviour : IEnemyBehaviour
     {
         _self = owner.transform;
         _enemy = owner;
+
+        // 追加
+        _enemyId = owner.GetInstanceID();
+
         _player = player;
         _data = data;
         _context = context;
@@ -45,24 +51,21 @@ public class RoamBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        if (_player == null) return true;
-
-        // 索敵距離外のときに発動
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
-
-        return sqrDist > sqrDetect;
+        // 常にtrue：BarkがfalseになったときのフォールバックとしてRoamが選ばれる
+        return true;
     }
 
+    // 目標地点に到達するまで継続（到達時はTick内でPickTargetが呼ばれるため
+    // CanContinueで終了させず、Runner側の再選択に委ねる）
     public bool CanContinue()
     {
-        if (_player == null) return true;
+        // スロットが確保されたら即座に終了してMoveへ切り替わる
+        if (_attackerSlot != null && _attackerSlot.IsAcquired(_enemyId)) return false;
 
-        // 索敵距離内に入ったら終了
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
-
-        return sqrDist > sqrDetect;
+        // 目標地点に到達していない間は継続
+        Vector3 toTarget = _target - _self.position;
+        toTarget.y = 0f;
+        return toTarget.sqrMagnitude > _arrivalThreshold * _arrivalThreshold;
     }
 
     public void OnEnter()
@@ -83,12 +86,6 @@ public class RoamBehaviour : IEnemyBehaviour
         // 目標地点に十分近づいたら新しい目標を設定する
         Vector3 toTarget = _target - _self.position;
         toTarget.y = 0f;
-
-        if (toTarget.sqrMagnitude <= _arrivalThreshold * _arrivalThreshold)
-        {
-            PickTarget();
-            return;
-        }
 
         Vector3 oldPos = _self.position;
 
@@ -143,6 +140,9 @@ public class RoamBehaviour : IEnemyBehaviour
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
     private readonly ISpatialHashGrid _spatialHashGrid;
+
+    private int _enemyId;
+    private readonly IEnemyAttackerSlot _attackerSlot;
 
     private Vector3 _target;
 

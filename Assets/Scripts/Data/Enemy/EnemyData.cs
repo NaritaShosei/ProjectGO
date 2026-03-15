@@ -13,6 +13,8 @@ public class EnemyData : ScriptableObject
 
     // Bark継続時間
     public float BarkDuration => _barkDuration;
+    public float BarkChance => _barkChance;
+
 
     // 攻撃パターン
     public EnemyAttackPattern AttackPattern => _attackPattern;
@@ -32,4 +34,8 @@ public class EnemyData : ScriptableObject
 
     [Header("Bark")]
     [SerializeField] private float _barkDuration = 2.0f;
+
+    // 追加：スロット待ち時にBarkを選ぶ確率（0〜1）
+    [Range(0f, 1f)]
+    [SerializeField] private float _barkChance = 0.5f;
 }

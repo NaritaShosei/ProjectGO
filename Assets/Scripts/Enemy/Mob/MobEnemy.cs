@@ -46,9 +46,18 @@ public class MobEnemy : Enemy
         }
         else
         {
-            var attack = new MeleeAttackBehaviour(_attackerSlot);
-            attack.Init(this, _data, _playerTransform, _context, _state);
-            _runner.Register(attack);
+            _attack = new MeleeAttackBehaviour(_attackerSlot);
+            _attack.Init(this, _data, _playerTransform, _context, _state);
+            _runner.Register(_attack);
+
+            // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
+            // distanceProfileがない場合はBarkも登録しない
+            if (_distanceProfile != null)
+            {
+                var bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
+                bark.Init(this, _data, _playerTransform, _context, _state);
+                _runner.Register(bark);
+            }
         }
 
         // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
@@ -60,6 +69,7 @@ public class MobEnemy : Enemy
         {
             var move = new MoveBehaviour(
                 _distanceProfile,
+                _attackerSlot,       // 追加
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid
@@ -67,12 +77,11 @@ public class MobEnemy : Enemy
             move.Init(this, _data, _playerTransform, _context, _state);
             _runner.Register(move);
 
-            var bark = new BarkBehaviour(_distanceProfile, _attackerSlot);
-            bark.Init(this, _data, _playerTransform, _context, _state);
-            _runner.Register(bark);
+            // BarkはattackerSlotブロックへ移動したためここから削除
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
+                _attackerSlot,
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid
@@ -159,6 +168,7 @@ public class MobEnemy : Enemy
     private EnemyContext _context;
     private EnemyStateContext _state;
     private EnemyConditionController _conditionController;
+    private MeleeAttackBehaviour _attack;
 
     private void OnDestroy()
     {
@@ -181,6 +191,10 @@ public class MobEnemy : Enemy
     protected override void OnDeathInternal()
     {
         _runner?.ForceExitAction();
+
+        // 死亡時にスロットを解放する
+        _attack?.ReleaseSlot();
+
         base.OnDeathInternal();
     }
 
