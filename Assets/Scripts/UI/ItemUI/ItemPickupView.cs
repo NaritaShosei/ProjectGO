@@ -5,6 +5,8 @@ using UnityEngine;
 /// </summary>
 public class ItemPickupView : MonoBehaviour, IItemPickupView
 {
+    public ItemPickupViewState CurrentState => _state;
+
     public void SetState(ItemPickupViewState state)
     {
         if (_state == state) return;
