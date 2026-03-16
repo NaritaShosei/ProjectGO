@@ -63,7 +63,8 @@ public class BarkBehaviour : IEnemyBehaviour
         // BarkDurationが設定されている場合はタイマーで終了判定する
         if (_data.BarkDuration > 0f)
         {
-            return _timer < _data.BarkDuration;
+            // BarkDuration経過またはAnimationEventで終了のどちらかで終了する
+            return _timer < _data.BarkDuration && !_barkEnded;
         }
 
         // BarkDuration未設定の場合はAnimationEventで終了を検知する

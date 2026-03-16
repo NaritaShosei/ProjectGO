@@ -55,7 +55,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _stats.TakeDamage(damage);
 
         bool isKill = _stats.CurrentHealth <= 0;
-        bool isWeakPoint = _defenceContext.EnemyType == EnemyType.Flesh;
+
+        // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
+        bool isWeakPoint = _defenceContext.EnemyType == EnemyType.Flesh
+            && context.PlayerMode == PlayerMode.Thunder;
 
         context.OnHitResult?.Invoke(
             new HitResult
@@ -157,9 +160,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected EnemyStats _stats;
     protected Transform _playerTransform;
     private HitStopManager _hitStopManager;
+
     protected EnemyAnimator _enemyAnimator;
 
     protected bool _isDead;
+    // 死亡アニメーション終了フラグ
+    private bool _deadAnimationEnded;
+
 
     protected CancellationTokenSource _shockCts;
 
@@ -191,6 +198,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
         // EnemyAnimatorを生成する（Receiverを渡してイベント中継を設定する）
         _enemyAnimator = new EnemyAnimator(_animator, _animationEventReceiver);
+        // 死亡アニメーション終了イベントを購読する
+        _enemyAnimator.OnDeadEnd += HandleDeadEnd;
     }
 
     protected virtual void Update()
@@ -226,6 +235,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             _attackerSlot.OnSlotReleased -= HandleSlotReleased;
         }
 
+        // 死亡アニメーション終了イベントの購読を解除する
+        _enemyAnimator.OnDeadEnd -= HandleDeadEnd;
         // EnemyAnimatorのイベント購読を解除する
         _enemyAnimator?.Dispose();
     }
@@ -251,7 +262,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     protected virtual void OnDeathInternal()
     {
-        Destroy(gameObject);
+        // 死亡アニメーション完了を待ってからDestroyする
+        WaitForDeadAnimationAndDestroy().Forget();
     }
 
     /// <summary>
@@ -260,6 +272,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// </summary>
     private void HandleSlotReleased()
     {
+        // 死亡済みの場合はスロット再取得を試みない
+        if (_isDead) return;
         if (_attackerSlot == null) return;
         if (_data == null) return;
 
@@ -272,6 +286,37 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         {
             _attackerSlot.TryAcquire(GetInstanceID(), slotCost, isBoss: false);
         }
+    }
+
+    /// <summary>
+    /// 死亡アニメーション終了イベントのハンドラ
+    /// </summary>
+    private void HandleDeadEnd()
+    {
+        _deadAnimationEnded = true;
+    }
+
+    /// <summary>
+    /// 死亡アニメーション完了を待ってからGameObjectを破棄する。
+    /// destroyCancellationToken により外部からの強制破棄にも対応する。
+    /// </summary>
+    private async UniTaskVoid WaitForDeadAnimationAndDestroy()
+    {
+        try
+        {
+            // 死亡アニメーション終了まで待機する
+            await UniTask.WaitUntil(
+                () => _deadAnimationEnded,
+                cancellationToken: destroyCancellationToken
+            );
+        }
+        catch (OperationCanceledException)
+        {
+            // 外部からの強制破棄（ObjectPool返却など）の場合は何もしない
+            return;
+        }
+
+        Destroy(gameObject);
     }
 
     protected abstract void UpdateEnemy(float deltaTime);

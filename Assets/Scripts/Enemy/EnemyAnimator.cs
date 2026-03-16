@@ -12,6 +12,8 @@ public class EnemyAnimator
     public event Action OnAttackEnd;
     public event Action OnBarkEnd;
     public event Action OnGetUpEnd;
+    public event Action OnDeadEnd;
+
 
     /// <summary>
     /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
@@ -27,6 +29,8 @@ public class EnemyAnimator
         _receiver.OnAttackEnd += HandleAttackEnd;
         _receiver.OnBarkEnd += HandleBarkEnd;
         _receiver.OnGetUpEnd += HandleGetUpEnd;
+        _receiver.OnDeadEnd += HandleDeadEnd;
+
     }
 
     /// <summary>
@@ -102,6 +106,7 @@ public class EnemyAnimator
         _receiver.OnAttackEnd -= HandleAttackEnd;
         _receiver.OnBarkEnd -= HandleBarkEnd;
         _receiver.OnGetUpEnd -= HandleGetUpEnd;
+        _receiver.OnDeadEnd -= HandleDeadEnd;
     }
 
 
@@ -125,4 +130,6 @@ public class EnemyAnimator
     private void HandleAttackEnd() => OnAttackEnd?.Invoke();
     private void HandleBarkEnd() => OnBarkEnd?.Invoke();
     private void HandleGetUpEnd() => OnGetUpEnd?.Invoke();
+    private void HandleDeadEnd() => OnDeadEnd?.Invoke();
+
 }

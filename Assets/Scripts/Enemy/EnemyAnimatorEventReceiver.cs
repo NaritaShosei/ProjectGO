@@ -20,6 +20,9 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     /// <summary>GetUpアニメーション終了のイベント</summary>
     public event Action OnGetUpEnd;
 
+    /// <summary>死亡アニメーション終了のイベント</summary>
+    public event Action OnDeadEnd;
+
     /// <summary>
     /// AnimationClipから直接呼ばれるメソッド
     /// </summary>
@@ -50,5 +53,13 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     public void AnimEvent_GetUpEnd()
     {
         OnGetUpEnd?.Invoke();
+    }
+
+    /// <summary>
+    /// AnimationClipから直接呼ばれるメソッド
+    /// </summary>
+    public void AnimEvent_DeadEnd()
+    {
+        OnDeadEnd?.Invoke();
     }
 }

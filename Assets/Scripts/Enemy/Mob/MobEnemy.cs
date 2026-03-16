@@ -131,7 +131,11 @@ public class MobEnemy : Enemy
 
         bool isKill = _stats.CurrentHealth <= 0;
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
-        bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
+
+        // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
+        bool isWeakPoint = !armorWasAlive
+            && _defenceContext.EnemyType == EnemyType.Flesh
+            && context.PlayerMode == PlayerMode.Thunder;
 
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
