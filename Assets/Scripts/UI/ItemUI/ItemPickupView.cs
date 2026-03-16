@@ -7,10 +7,22 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
 {
     public ItemPickupViewState CurrentState => _state;
 
+    /// <summary>
+    /// アイテム位置をpresenterから受け取る
+    /// </summary>
+    public void Initialize(Transform target)
+    {
+        _target = target;
+        ResetState();
+    }
+
     public void SetState(ItemPickupViewState state)
     {
         if (_state == state) return;
         _state = state;
+
+        Debug.Log($"[ItemPickupView] SetState: {state}\n{System.Environment.StackTrace}", this);
+
 
         switch (state)
         {
@@ -30,15 +42,6 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
                 _interactUI.SetActive(true);
                 break;
         }
-    }
-
-    /// <summary>
-    /// アイテム位置をpresenterから受け取る
-    /// </summary>
-    /// <param name="target"></param>
-    public void Initialize(Transform target)
-    {
-        _target = target;
     }
 
     [Header("UI")]
@@ -113,5 +116,10 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
         }
 
         return _mainCamera != null;
+    }
+    private void ResetState()
+    {
+        _state = ItemPickupViewState.Interact;
+        SetState(ItemPickupViewState.Hidden);
     }
 }

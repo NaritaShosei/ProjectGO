@@ -93,6 +93,7 @@ public class ItemPickupPool
         if (_pool.Count > 0)
         {
             var view = _pool.Pop();
+            view.gameObject.SetActive(true); 
             return view;
         }
         return Object.Instantiate(_prefab, _parent);
