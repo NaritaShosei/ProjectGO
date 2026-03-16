@@ -11,7 +11,11 @@ public class PlayerInteractor : MonoBehaviour
 
         _input.OnInteract += HandleInteract;
 
-        _interactHandler = ServiceLocator.Get<ItemPickupManager>();
+        if (!ServiceLocator.TryGet(out ItemPickupManager manager))
+        {
+            Debug.LogError("ItemPickupManagerが見つかりませんでした。PlayerInteractorは正常に機能しません。");
+        }
+        _interactHandler = manager;
     }
 
     public async UniTaskVoid SearchLoop(CancellationToken token)

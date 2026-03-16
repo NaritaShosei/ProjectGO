@@ -16,7 +16,7 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     /// <param name="viewModel"></param>
     public void ShowDamage(DamagePopupViewModel viewModel)
     {
-        //弱点時に表紙しているobject自体がいらない
+        //弱点時に表示しているobject自体がいらない
         ResetView();
 
         if (_mainCamera == null)
@@ -91,8 +91,15 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
-        _mainCamera = Camera.main;
         _canvasGroup.alpha = 0f;
+    }
+
+    private void Start()
+    {
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _mainCamera = cameraManager.MainCamera;
+        }
     }
 
     private void OnDisable()

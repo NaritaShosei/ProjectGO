@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
+using System.Linq;
 
 public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
 {
@@ -44,7 +45,8 @@ public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
     public void OnPlayerInteract(GameObject interactor)
     {
         // Interact状態のPresenterを探して実行する
-        foreach (var presenter in _presenters.Values)
+        // プレイヤーとアイテムの距離で近い順に処理
+        foreach (var presenter in _presenters.Values.OrderBy(p => Vector3.Distance(p.Item.transform.position, _playerTransform.position)))
         {
             if (presenter.View.CurrentState != ItemPickupViewState.Interact) continue;
             presenter.Item.Interact(interactor);
@@ -82,7 +84,7 @@ public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
     {
         while (!ct.IsCancellationRequested)
         {
-            foreach (var p in _presenters.Values)
+            foreach (var p in new List<ItemPickupPresenter>(_presenters.Values))
                 p.UpdateRangeCheck();
 
             await UniTask.Delay(

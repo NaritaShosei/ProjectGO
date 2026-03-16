@@ -58,7 +58,6 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
 
     private void Awake()
     {
-        _mainCamera = Camera.main;
         _rectTransform = GetComponent<RectTransform>();
 
         if (_nearUI == null || _interactUI == null || _rectTransform == null || _canvasGroup == null)
@@ -69,6 +68,14 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
         }
 
         SetState(ItemPickupViewState.Hidden);
+    }
+
+    private void Start()
+    {
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _mainCamera = cameraManager.MainCamera;
+        }
     }
 
     private void LateUpdate()
