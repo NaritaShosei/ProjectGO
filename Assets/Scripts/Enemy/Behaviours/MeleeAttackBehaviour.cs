@@ -41,22 +41,15 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     {
         if (_player == null) return false;
         if (_attackerSlot == null) return false;
-
         if (_isAttacking) return false;
 
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) return false;
+        // スポーン時に確保済みのスロットを持っているかチェック
+        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
 
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
+        // クールダウン判定をEnemyContext.LastAttackTimeで行う
+        if (Time.time - _context.LastAttackTime < _data.AttackCooldown) return false;
 
-        // スロット確保を先に試みる（射程外でも確保することでMoveが動く）
-        // 確保済みの場合は即trueが返る
-        // 満杯の場合はfalseが返り、Bark/Roamへフォールバックする
-        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false)) return false;
-
-        // スロット確保後に射程チェック
-        // 射程外の場合はfalseを返すが、スロットは確保済みのままなのでMoveが動く
+        // 射程チェック
         _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
         return _context.DistanceToPlayer <= _data.AttackRange;
     }
@@ -111,21 +104,15 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private EnemyAnimator _enemyAnimator;
 
     private int _enemyId;
-    private float _lastAttackTime;
     private float _timer;
     private bool _isAttacking;
     private Animator _animator;
 
-    // AttackステートのAnimatorハッシュ
-    private static readonly int _attackStateHash = Animator.StringToHash("Attack");
-
     private void PerformAttack()
     {
-        _lastAttackTime = Time.time;
+        // [変更] クールダウン管理のためEnemyContextに記録する
+        _context.LastAttackTime = Time.time;
 
-        Debug.Log($"Enemyが攻撃した");
-
-        // 球体をつくり、その範囲内にいるPlayerに攻撃
         Collider[] hits = Physics.OverlapSphere(
             _self.position + _self.forward * _data.AttackRange,
             _data.AttackRadius
@@ -139,6 +126,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             }
         }
     }
+
     // 死亡時にEnemyから明示的に呼ぶ
     public void ReleaseSlot()
     {

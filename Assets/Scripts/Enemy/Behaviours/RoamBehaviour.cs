@@ -57,13 +57,8 @@ public class RoamBehaviour : IEnemyBehaviour
         return _state.CanMove();
     }
 
-    // 目標地点に到達するまで継続（到達時はTick内でPickTargetが呼ばれるため
-    // CanContinueで終了させず、Runner側の再選択に委ねる）
     public bool CanContinue()
     {
-        // スロットが確保されたら即座に終了してMoveへ切り替わる
-        if (_attackerSlot != null && _attackerSlot.IsAcquired(_enemyId)) return false;
-
         // 目標地点に到達していない間は継続
         Vector3 toTarget = _target - _self.position;
         toTarget.y = 0f;

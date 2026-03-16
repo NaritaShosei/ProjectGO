@@ -173,8 +173,9 @@ public class MobEnemy : Enemy
     private MeleeAttackBehaviour _attack;
     private TurnBehaviour _turn;
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (_armor != null) _armor.OnBroken -= BreakArmor;
     }
 

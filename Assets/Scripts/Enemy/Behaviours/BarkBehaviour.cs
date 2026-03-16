@@ -40,16 +40,17 @@ public class BarkBehaviour : IEnemyBehaviour
     public bool CanEnter()
     {
         if (_attackerSlot == null) return false;
+        if (_player == null) return false;
 
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
+        // 攻撃距離外の場合はBarkしない
+        float distanceToPlayer = Vector3.Distance(_self.position, _player.position);
+        if (distanceToPlayer > _data.AttackRange) return false;
 
-        // 自分がすでにスロットを確保済みの場合はBarkしない
-        if (_attackerSlot.IsAcquired(_enemyId)) return false;
-
-        // 自分以外でスロットが満杯でなければBarkしない
-        if (!_attackerSlot.IsFull(slotCost)) return false;
+        // クールダウン中またはスロット未確保のときにBarkする
+        // 攻撃権を持ちクールダウンも終わっている場合はAttackが優先されるためBarkしない
+        bool isOnCooldown = Time.time - _context.LastAttackTime < _data.AttackCooldown;
+        bool hasNoSlot = !_attackerSlot.IsAcquired(_enemyId);
+        if (!isOnCooldown && !hasNoSlot) return false;
 
         // 確率判定：falseのときはRoamが選ばれる
         return UnityEngine.Random.value < _barkChance;

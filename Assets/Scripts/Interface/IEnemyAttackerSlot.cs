@@ -1,3 +1,5 @@
+using System;
+
 /// <summary>
 /// 同時攻撃可能数を管理するスロットのインターフェース
 /// </summary>
@@ -31,4 +33,8 @@ public interface IEnemyAttackerSlot
     /// スロットをリセットする
     /// </summary>
     void Reset();
+
+    // スロットが解放されたときに発火するイベント
+    // 未取得の敵がこのイベントを受けてTryAcquireを再試行する
+    event Action OnSlotReleased;
 }

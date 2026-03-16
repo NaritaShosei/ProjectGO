@@ -131,6 +131,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _separationService = separationService;
         _wallAvoidanceService = wallAvoidanceService;
         _attackerSlot = attackerSlot;
+
+        // スロット解放イベントを購読する
+        // 未取得の場合に限り再取得を試みる
+        if (_attackerSlot != null)
+        {
+            _attackerSlot.OnSlotReleased += HandleSlotReleased;
+        }
     }
 
     [SerializeField] protected EnemyData _data;
@@ -205,13 +212,17 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _hitStopManager?.UnregisterFromAll(this);
     }
 
-    private void OnDestroy()
+    protected virtual void OnDestroy()
     {
         _stats.OnHealthZero -= _stats.Kill;
-
         _stats.OnDead -= OnDeath;
-
         OnDead -= HandleDead;
+
+        // [追加] スロット解放イベントの購読を解除する
+        if (_attackerSlot != null)
+        {
+            _attackerSlot.OnSlotReleased -= HandleSlotReleased;
+        }
     }
 
     /// <summary>
@@ -236,6 +247,26 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected virtual void OnDeathInternal()
     {
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// スロット解放通知を受けてスロットの再取得を試みる
+    /// すでに取得済みの場合は何もしない
+    /// </summary>
+    private void HandleSlotReleased()
+    {
+        if (_attackerSlot == null) return;
+        if (_data == null) return;
+
+        int slotCost = _data.AttackPattern != null
+            ? _data.AttackPattern.SlotCost
+            : 1;
+
+        // 未取得の場合のみ再取得を試みる
+        if (!_attackerSlot.IsAcquired(GetInstanceID()))
+        {
+            _attackerSlot.TryAcquire(GetInstanceID(), slotCost, isBoss: false);
+        }
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
