@@ -1583,7 +1583,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: 637d865cf0dff744bb2084032f741c7d, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: b0dc88b688e30e84f861e801b29fa90d, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1852,11 +1852,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a9d5d74c2a6762478db342478950985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ModeChangeSMB
-  _slowStartTime: 0.62
-  _slowDuration: 1
+  _slowStartTime: 0.82
+  _slowDuration: 0.01
   _targetGroup: 13
-  _slowTimeScale: 0.04
-  _modeChangeEndTime: 1.34
+  _slowTimeScale: 0.1
+  _modeChangeEndTime: 1.7
 --- !u!1109 &5432271360907984846
 AnimatorTransition:
   m_ObjectHideFlags: 1
@@ -1928,7 +1928,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: ad9db988ac33a234c825a4e42064c7f6, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: 333e3ddba9a573c4e919f2232fac3797, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
