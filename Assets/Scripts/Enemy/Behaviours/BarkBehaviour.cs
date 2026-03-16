@@ -48,10 +48,6 @@ public class BarkBehaviour : IEnemyBehaviour
         if (_attackerSlot == null) return false;
         if (_player == null) return false;
 
-        // 攻撃距離外の場合はBarkしない
-        float distanceToPlayer = Vector3.Distance(_self.position, _player.position);
-        if (distanceToPlayer > _data.AttackRange) return false;
-
         // クールダウン中またはスロット未確保のときにBarkする
         // 攻撃権を持ちクールダウンも終わっている場合はAttackが優先されるためBarkしない
         bool isOnCooldown = Time.time - _context.LastAttackTime < _data.AttackCooldown;

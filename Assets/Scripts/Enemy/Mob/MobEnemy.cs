@@ -50,6 +50,11 @@ public class MobEnemy : Enemy
             _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
             _runner.Register(_attack);
 
+            // スポーン時にスロット取得を試みる
+            // 満杯の場合は OnSlotReleased イベントで再試行される
+            int mobSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+            _attackerSlot.TryAcquire(GetInstanceID(), mobSlotCost, isBoss: false);
+
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
@@ -145,7 +150,8 @@ public class MobEnemy : Enemy
         {
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
-            _conditionController.ApplyCondition(new KnockbackCondition(temp));
+            int knockbackLevel = DetermineKnockbackLevel(temp.Power);
+            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel));
         }
 
         if (CheckProbability(context.ElectricShock.GrantEffectProbability))
@@ -222,6 +228,17 @@ public class MobEnemy : Enemy
     private bool CheckProbability(float probability)
     {
         return UnityEngine.Random.value < probability;
+    }
+
+    /// <summary>
+    /// KnockbackContext.Power からノックバックレベルを決定する
+    /// </summary>
+    /// <returns>0=Hit / 1=Small / 2=Large</returns>
+    private int DetermineKnockbackLevel(float power)
+    {
+        if (power <= _data.KnockbackHitThreshold) return 0;
+        if (power >= _data.KnockbackLargeThreshold) return 2;
+        return 1;
     }
 
 #if UNITY_EDITOR

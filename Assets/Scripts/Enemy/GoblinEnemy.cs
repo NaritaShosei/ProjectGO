@@ -41,6 +41,11 @@ public class GoblinEnemy : Enemy
             _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
             _runner.Register(_attack);
 
+            // スポーン時にスロット取得を試みる
+            // 満杯の場合は OnSlotReleased イベントで再試行される
+            int goblinSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+            _attackerSlot.TryAcquire(GetInstanceID(), goblinSlotCost, isBoss: false);
+
             // BarkをattackerSlotブロック内に移動
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
