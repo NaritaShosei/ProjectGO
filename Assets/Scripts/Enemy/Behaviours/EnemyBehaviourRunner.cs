@@ -111,24 +111,25 @@ public class EnemyBehaviourRunner
 
     private void SelectBehaviour()
     {
-        // 実行可能なBehaviourのうち優先度が最も高いものを選択する
+        // 現在のBehaviourを先に終了させてからCanEnterを評価する
+        // これにより同じBehaviourが即再選択されることを防ぐ
+        IEnemyBehaviour previous = _current;
+        previous?.OnExit();
+        _current = null;
+
         for (int i = 0; i < _behaviours.Count; i++)
         {
             var next = _behaviours[i];
             if (!next.CanEnter()) continue;
-
             SwitchTo(next);
             return;
         }
-
-        _current?.OnExit();
-        _current = null;
     }
 
     private void SwitchTo(IEnemyBehaviour next)
     {
+        // SelectBehaviour()側でOnExit済みのため二重呼び出しを防ぐ
         if (_current == next) return;
-
         _current?.OnExit();
         _current = next;
         _current.OnEnter();

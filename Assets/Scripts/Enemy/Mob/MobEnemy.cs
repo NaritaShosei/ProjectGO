@@ -54,9 +54,9 @@ public class MobEnemy : Enemy
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                var bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
-                bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
-                _runner.Register(bark);
+                _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
+                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+                _runner.Register(_bark);
             }
         }
 
@@ -172,11 +172,15 @@ public class MobEnemy : Enemy
     private EnemyConditionController _conditionController;
     private MeleeAttackBehaviour _attack;
     private TurnBehaviour _turn;
+    private BarkBehaviour _bark;
 
     protected override void OnDestroy()
     {
         base.OnDestroy();
         if (_armor != null) _armor.OnBroken -= BreakArmor;
+
+        // BarkBehaviourのイベント購読を解除する
+        _bark?.Dispose();
     }
 
     protected override void UpdateEnemy(float deltaTime)

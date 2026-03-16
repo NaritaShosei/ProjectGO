@@ -132,6 +132,7 @@ MonoBehaviour:
   _animator: {fileID: 2344073549118351057}
   _turnProfile: {fileID: 11400000, guid: 362aa867931ba5444ae43e73f8223e3e, type: 2}
   _distanceProfile: {fileID: 11400000, guid: 28f4a609b4f245e4e8ec74a84e56b62b, type: 2}
+  _animationEventReceiver: {fileID: 1938003792529569398}
   _armor: {fileID: 186864388146565}
 --- !u!1001 &3207627424300379340
 PrefabInstance:
@@ -285,7 +286,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9e92dd1475945324b90c2a0705e95f60, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1938003792529569398}
   m_SourcePrefab: {fileID: 100100000, guid: 9e92dd1475945324b90c2a0705e95f60, type: 3}
 --- !u!95 &2344073549118351057 stripped
 Animator:
@@ -297,3 +301,20 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 9e92dd1475945324b90c2a0705e95f60, type: 3}
   m_PrefabInstance: {fileID: 8209296657890024256}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &9019634736239945233 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 9e92dd1475945324b90c2a0705e95f60, type: 3}
+  m_PrefabInstance: {fileID: 8209296657890024256}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1938003792529569398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9019634736239945233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a351cb892db9d0e478b82a503e589386, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimationEventReceiver

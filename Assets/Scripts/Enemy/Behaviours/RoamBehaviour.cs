@@ -69,12 +69,7 @@ public class RoamBehaviour : IEnemyBehaviour
     {
         _state.ChangeState(EnemyState.Move);
 
-        // スポーン同期をずらすためランダムな初期待機時間を設定する
-        if (!_delayFinished)
-        {
-            _initialDelay = UnityEngine.Random.Range(0f, 2f);
-        }
-
+        // 再入時も新しい目標地点を設定する
         PickTarget();
     }
 

@@ -35,6 +35,12 @@ public class BarkBehaviour : IEnemyBehaviour
         _data = data;
         _context = context;
         _state = state;
+
+        // OnBarkEndイベントを購読してBark終了を検知する
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnBarkEnd += HandleBarkEnd;
+        }
     }
 
     public bool CanEnter()
@@ -58,30 +64,20 @@ public class BarkBehaviour : IEnemyBehaviour
 
     public bool CanContinue()
     {
-        // タイマーが終わるまで継続
+        // BarkDurationが設定されている場合はタイマーで終了判定する
         if (_data.BarkDuration > 0f)
         {
             return _timer < _data.BarkDuration;
         }
 
-        // BarkDuration未設定の場合はAnimationの再生終了を検知する
-        if (_animator == null) return false;
-
-        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-
-        // Barkステートの再生が終了したら終了する
-        if (stateInfo.IsName("Bark"))
-        {
-            return stateInfo.normalizedTime < 1f;
-        }
-
-        // まだBarkステートに遷移していない場合は継続する
-        return true;
+        // BarkDuration未設定の場合はAnimationEventで終了を検知する
+        return !_barkEnded;
     }
 
     public void OnEnter()
     {
         _timer = 0f;
+        _barkEnded = false;
         _state.ChangeState(EnemyState.Bark);
         _enemyAnimator?.SetBarking(true);
     }
@@ -97,6 +93,17 @@ public class BarkBehaviour : IEnemyBehaviour
         _timer += deltaTime;
     }
 
+    /// <summary>
+    /// イベント購読を解除する
+    /// </summary>
+    public void Dispose()
+    {
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnBarkEnd -= HandleBarkEnd;
+        }
+    }
+
     private Transform _self;
     private Transform _player;
     private EnemyData _data;
@@ -106,6 +113,7 @@ public class BarkBehaviour : IEnemyBehaviour
     private EnemyAnimator _enemyAnimator;
 
     private int _enemyId;
+    private bool _barkEnded;
 
     // 追加
     private readonly float _barkChance;
@@ -114,7 +122,10 @@ public class BarkBehaviour : IEnemyBehaviour
     private float _timer;
 
     /// <summary>
-    /// BarkステートのAnimationClip長を取得する
-    /// BarkDurationが未設定の場合のフォールバック
+    /// BarkアニメーションのAnimationEventから中継されるハンドラ
     /// </summary>
+    private void HandleBarkEnd()
+    {
+        _barkEnded = true;
+    }
 }

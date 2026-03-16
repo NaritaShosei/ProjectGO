@@ -43,11 +43,16 @@ public class TurnBehaviour : IEnemyBehaviour
     {
         _self = owner.transform;
         _player = player;
+        _state = state;
     }
 
     public bool CanEnter()
     {
-        return _player != null;
+        if (_player == null) return false;
+
+        // Attack中・Bark中はTurnを行わない（仕様: TurnBehaviour Constraints）
+        if (_state == null) return false;
+        return _state.CanMove();
     }
 
     public bool CanContinue()
@@ -112,4 +117,5 @@ public class TurnBehaviour : IEnemyBehaviour
     private readonly TurnProfile _profile;
     // プレイヤー以外の方向を向かせる場合の上書きベクトル
     private Vector3? _overrideDirection;
+    private EnemyStateContext _state;
 }

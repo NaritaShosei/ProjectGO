@@ -150,6 +150,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     // DistanceProfile（派生クラスのInspectorから設定する）
     [SerializeField] protected DistanceProfile _distanceProfile;
 
+    // EnemyAnimatorと同じGameObjectにアタッチされたReceiverへの参照
+    [SerializeField] private EnemyAnimationEventReceiver _animationEventReceiver;
+
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
@@ -186,8 +189,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
         // 鎧生成関連はすべてMobEnemyのほうで実装
 
-        // EnemyAnimatorを生成する
-        _enemyAnimator = new EnemyAnimator(_animator);
+        // EnemyAnimatorを生成する（Receiverを渡してイベント中継を設定する）
+        _enemyAnimator = new EnemyAnimator(_animator, _animationEventReceiver);
     }
 
     protected virtual void Update()
@@ -218,11 +221,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _stats.OnDead -= OnDeath;
         OnDead -= HandleDead;
 
-        // [追加] スロット解放イベントの購読を解除する
         if (_attackerSlot != null)
         {
             _attackerSlot.OnSlotReleased -= HandleSlotReleased;
         }
+
+        // EnemyAnimatorのイベント購読を解除する
+        _enemyAnimator?.Dispose();
     }
 
     /// <summary>
