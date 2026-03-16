@@ -238,21 +238,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         Destroy(gameObject);
     }
 
-    /// <summary>
-    /// RootMotionをスクリプト側で受け取って位置・回転に反映する
-    /// ApplyRootMotionはONのままにすること
-    /// </summary>
-    private void OnAnimatorMove()
-    {
-        if (_animator == null) return;
-
-        // 位置をRootMotionで更新する
-        transform.position += _animator.deltaPosition;
-
-        // 回転をRootMotionで更新する
-        transform.rotation *= _animator.deltaRotation;
-    }
-
     protected abstract void UpdateEnemy(float deltaTime);
 }
 

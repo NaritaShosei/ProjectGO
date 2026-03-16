@@ -25,9 +25,9 @@ public class GoblinEnemy : Enemy
         }
         else
         {
-            var turn = new TurnBehaviour(_turnProfile);
-            turn.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
-            _runner.RegisterTurn(turn);
+            _turn = new TurnBehaviour(_turnProfile);
+            _turn.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+            _runner.RegisterTurn(_turn);
         }
 
         // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
@@ -75,7 +75,9 @@ public class GoblinEnemy : Enemy
                 _attackerSlot,
                 _separationService,
                 _wallAvoidanceService,
-                _spatialHashGrid
+                _spatialHashGrid,
+                // Roam中の移動方向をTurnBehaviourに通知する
+                dir => _turn?.SetOverrideDirection(dir)
             );
             roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
             _runner.Register(roam);
@@ -86,7 +88,7 @@ public class GoblinEnemy : Enemy
     private EnemyContext _context;
     private EnemyStateContext _state;
     private MeleeAttackBehaviour _attack;
-
+    private TurnBehaviour _turn;
 
     public override void OnConditionInterrupt()
     {

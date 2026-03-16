@@ -47,8 +47,6 @@ public class MoveBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        Debug.Log($"[Move.CanEnter] player={_player != null}, slot={_attackerSlot != null}, acquired={(_attackerSlot != null ? _attackerSlot.IsAcquired(_enemyId).ToString() : "N/A")}, enemyId={_enemyId}");
-
         if (_player == null) return false;
         if (_attackerSlot == null) return false;
 

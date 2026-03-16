@@ -45,7 +45,10 @@ public class BarkBehaviour : IEnemyBehaviour
             ? _data.AttackPattern.SlotCost
             : 1;
 
-        // スロットが満杯でなければ発動しない
+        // 自分がすでにスロットを確保済みの場合はBarkしない
+        if (_attackerSlot.IsAcquired(_enemyId)) return false;
+
+        // 自分以外でスロットが満杯でなければBarkしない
         if (!_attackerSlot.IsFull(slotCost)) return false;
 
         // 確率判定：falseのときはRoamが選ばれる
@@ -54,15 +57,25 @@ public class BarkBehaviour : IEnemyBehaviour
 
     public bool CanContinue()
     {
-        // スロットが確保されたら即座に終了してMoveへ切り替わる
-        if (_attackerSlot != null && _attackerSlot.IsAcquired(_enemyId)) return false;
-
         // タイマーが終わるまで継続
-        float duration = _data.BarkDuration > 0f
-            ? _data.BarkDuration
-            : GetAnimationLength();
+        if (_data.BarkDuration > 0f)
+        {
+            return _timer < _data.BarkDuration;
+        }
 
-        return _timer < duration;
+        // BarkDuration未設定の場合はAnimationの再生終了を検知する
+        if (_animator == null) return false;
+
+        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+        // Barkステートの再生が終了したら終了する
+        if (stateInfo.IsName("Bark"))
+        {
+            return stateInfo.normalizedTime < 1f;
+        }
+
+        // まだBarkステートに遷移していない場合は継続する
+        return true;
     }
 
     public void OnEnter()
@@ -91,9 +104,6 @@ public class BarkBehaviour : IEnemyBehaviour
     private EnemyStateContext _state;
     private EnemyAnimator _enemyAnimator;
 
-    // BarkステートのAnimatorハッシュ
-    private static readonly int _barkStateHash = Animator.StringToHash("Bark");
-
     private int _enemyId;
 
     // 追加
@@ -106,18 +116,4 @@ public class BarkBehaviour : IEnemyBehaviour
     /// BarkステートのAnimationClip長を取得する
     /// BarkDurationが未設定の場合のフォールバック
     /// </summary>
-    private float GetAnimationLength()
-    {
-        if (_animator == null) return 0f;
-
-        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-
-        if (stateInfo.IsName("Bark"))
-        {
-            return stateInfo.length;
-        }
-
-        // Barkステートに遷移前の場合は次フレームまで待つ
-        return float.MaxValue;
-    }
 }

@@ -17,7 +17,8 @@ public class RoamBehaviour : IEnemyBehaviour
         IEnemyAttackerSlot attackerSlot,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
-        ISpatialHashGrid spatialHashGrid
+        ISpatialHashGrid spatialHashGrid,
+        Action<Vector3?> onRoamDirection
     )
     {
         if (profile == null)
@@ -27,6 +28,7 @@ public class RoamBehaviour : IEnemyBehaviour
         _attackerSlot = attackerSlot;
         _wallAvoidanceService = wallAvoidanceService;
         _spatialHashGrid = spatialHashGrid;
+        _onRoamDirection = onRoamDirection;
     }
 
     public void Init(
@@ -50,8 +52,9 @@ public class RoamBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        // 常にtrue：BarkがfalseになったときのフォールバックとしてRoamが選ばれる
-        return true;
+        // Bark・Attack中はRoamに入らない
+        if (_state == null) return false;
+        return _state.CanMove();
     }
 
     // 目標地点に到達するまで継続（到達時はTick内でPickTargetが呼ばれるため
@@ -70,30 +73,47 @@ public class RoamBehaviour : IEnemyBehaviour
     public void OnEnter()
     {
         _state.ChangeState(EnemyState.Move);
+
+        // スポーン同期をずらすためランダムな初期待機時間を設定する
+        if (!_delayFinished)
+        {
+            _initialDelay = UnityEngine.Random.Range(0f, 2f);
+        }
+
         PickTarget();
-        _enemyAnimator?.SetSpeed(1f);
     }
 
     public void OnExit()
     {
+        _onRoamDirection?.Invoke(null);
         _state.ChangeState(EnemyState.Idle);
         _enemyAnimator?.SetSpeed(0f);
     }
 
     public void Tick(float deltaTime)
     {
+        // 初期待機中はアニメーションなしで待機する
+        if (!_delayFinished)
+        {
+            _initialDelay -= deltaTime;
+            _enemyAnimator?.SetSpeed(0f);
+
+            if (_initialDelay > 0f) return;
+
+            _delayFinished = true;
+        }
+
         if (!_state.CanMove()) return;
 
-        // 目標地点に十分近づいたら新しい目標を設定する
+        // Speedを毎フレーム更新する
+        _enemyAnimator?.SetSpeed(1f);
+
         Vector3 toTarget = _target - _self.position;
         toTarget.y = 0f;
 
         Vector3 oldPos = _self.position;
-
-        // 目標地点への方向を基本ベクトルとする
         Vector3 dir = toTarget.normalized;
 
-        // 分離力を加算する
         if (_separationService != null)
         {
             dir += _separationService.Calculate(
@@ -104,7 +124,6 @@ public class RoamBehaviour : IEnemyBehaviour
             );
         }
 
-        // 壁回避力を加算する
         if (_wallAvoidanceService != null)
         {
             dir += _wallAvoidanceService.CalculateAvoidance(
@@ -117,13 +136,14 @@ public class RoamBehaviour : IEnemyBehaviour
 
         dir.y = 0f;
 
-        // 方向ベクトルが極端に小さい場合はスキップ
         if (dir.sqrMagnitude < 0.001f) return;
+
+        // 移動方向をTurnBehaviourに通知する
+        _onRoamDirection?.Invoke(dir.normalized);
 
         Vector3 newPos = _self.position + dir.normalized * _data.MoveSpeed * deltaTime;
         _self.position = newPos;
 
-        // SpatialHashGridの位置を更新する
         if (_spatialHashGrid != null)
         {
             _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
@@ -150,6 +170,11 @@ public class RoamBehaviour : IEnemyBehaviour
 
     // 目標地点への到達判定しきい値
     private const float _arrivalThreshold = 0.3f;
+
+    // 初期待機タイマー（スポーン同期ずらし用）
+    private float _initialDelay;
+    private bool _delayFinished;
+    private readonly Action<Vector3?> _onRoamDirection;
 
     /// <summary>
     /// RoamRadius内のランダムな目標地点を設定する
