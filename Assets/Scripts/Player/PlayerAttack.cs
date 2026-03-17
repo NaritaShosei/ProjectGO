@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -36,6 +35,7 @@ public class PlayerAttack : MonoBehaviour
         _animationController.OnAttackComplete += FinishAttack;
         _animationController.OnComboWindowStart += OnComboWindowStart;
         _animationController.OnComboWindowEnd += OnComboWindowEnd;
+        _animationController.OnComboTransition += TryComboTransition;
 
         // 設定に応じて登録するイベントを変更
         switch (_dodgeAttackConfig.DodgeAttackType)
@@ -98,6 +98,7 @@ public class PlayerAttack : MonoBehaviour
     private float _chargeStartTime = -999f;
     private bool _hasBufferedDodgeAttack = false;
     private bool _isInComboWindow = false;
+    private bool _isComboTransitioned = false;
 
     private bool _isHomingActive;
     private float _homingStrength;
@@ -148,6 +149,7 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnAttackComplete -= FinishAttack;
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
+            _animationController.OnComboTransition -= TryComboTransition;
         }
     }
 
@@ -328,7 +330,7 @@ public class PlayerAttack : MonoBehaviour
         }
 
         // アニメーション再生のみ
-        _animationController.PlayAttack(_currentAttackId);
+        _animationController.PlayAttackBlend(_currentAttackId, attackData.AnimationStateName);
     }
 
     /// <summary>
@@ -351,28 +353,101 @@ public class PlayerAttack : MonoBehaviour
     }
 
     /// <summary>
+    /// コンボウィンドウ開始時点でバッファがあれば、
+    /// ステートが生きているうちにCrossFadeで遷移
+    /// </summary>
+    private void TryComboTransition()
+    {
+        if (!_bufferedComboInput.HasValue) { return; }
+
+        var bufferedInput = _bufferedComboInput.Value;
+        _bufferedComboInput = null;
+
+        AttackData nextAttack = GetNextAttack(bufferedInput, allowCombo: true);
+        if (nextAttack == null) { return; }
+
+        _isComboTransitioned = true; // 追加
+
+        _currentAttackId = nextAttack.AttackId;
+        _pendingAttackData = nextAttack;
+        _pendingAttackInput = bufferedInput;
+        _lastAttackTime = Time.time;
+
+        // PrepareAttack と同等の副作用を適用
+        if (nextAttack.EnableHoming)
+        {
+            _isHomingActive = true;
+            _homingRadius = nextAttack.HomingRadius;
+            _homingAngle = nextAttack.HomingAngle;
+            _homingStrength = nextAttack.HomingStrength;
+            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
+        }
+        else
+        {
+            _homingTarget = null;
+        }
+
+        if (nextAttack.MoveType != AttackMoveType.None)
+        {
+            var moveRequest = new AttackMoveRequest
+            {
+                MoveType = nextAttack.MoveType,
+                Distance = nextAttack.MoveDistance,
+                Speed = nextAttack.MoveSpeed,
+                Duration = nextAttack.MoveDuration,
+                Target = _homingTarget,
+                StopDistance = nextAttack.StopOnHit ? nextAttack.AttackRange : 0,
+                IsPhantom = nextAttack.IsPhantom
+            };
+
+            OnAttackMoveRequested?.Invoke(moveRequest);
+        }
+
+        _stateManager.ChangeState(PlayerState.Attacking);
+
+        if (nextAttack.TransitionDuration < 0)
+        {
+            // 遷移時間が負の場合はデフォルトの遷移時間を使用
+            _animationController.PlayAttackBlend(
+                _currentAttackId,
+                nextAttack.AnimationStateName
+            );
+            return;
+        }
+
+        _animationController.PlayAttackBlend(
+            _currentAttackId,
+            nextAttack.AnimationStateName,
+            nextAttack.TransitionDuration
+        );
+    }
+
+    /// <summary>
     /// アニメーションイベントから呼ばれる攻撃終了関数
     /// </summary>
     private void FinishAttack()
     {
         _isHomingActive = false;
 
-        _stateManager.ChangeState(PlayerState.Idle);
+        // コンボ遷移済みの場合はpendingをクリアしない
+        if (_isComboTransitioned)
+        {
+            _isComboTransitioned = false;
+            return; // 次のステートに引き継ぐ
+        }
+
         _pendingAttackData = null;
         _pendingAttackInput = null;
 
-        // バッファされたコンボ入力があれば実行
         if (_bufferedComboInput.HasValue)
         {
             var bufferedInput = _bufferedComboInput.Value;
             _bufferedComboInput = null;
-
-            Debug.Log($"バッファされたコンボを実行: {bufferedInput.AttackType}");
-            PrepareAttack(bufferedInput, true);
+            PrepareAttack(bufferedInput, allowCombo: true);
         }
         else
         {
-            // コンボが途切れた
+            _stateManager.ChangeState(PlayerState.Idle);
             ResetCombo();
         }
     }

@@ -6,6 +6,7 @@ public interface IAnimationController
     public void AnimEvent_AttackComplete();
     public void AnimEvent_ComboWindowStart();
     public void AnimEvent_ComboWindowEnd();
+    public void AnimEvent_ComboTransition();
 }
 
 public interface IModeChangeAnimationController

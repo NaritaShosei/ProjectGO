@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private SkillManager _skillManager;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
     [SerializeField] private InGameUIInitializer _inGameUIInitializer;
+    [SerializeField] private ItemPickupManager _itemPickupManager;
 
     private SceneTransitionManager _sceneTransitionManager;
 
@@ -80,6 +81,7 @@ public class GameManager : MonoBehaviour
     {
         _inGameUIInitializer.Init(_player);
         _enemyUIManager.Init(_enemyManager, _player.transform);
+        _itemPickupManager.Init(_player.transform);
     }
 
     private void StartGame()

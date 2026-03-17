@@ -30,6 +30,8 @@ public class PlayerStateManager
     public bool IsDead() => CurrentState is PlayerState.Dead;
 
     public bool CanModeChange() => CurrentState is PlayerState.Idle;
+
+    public bool CanInteract() => CurrentState is PlayerState.Idle;
 }
 public enum PlayerState
 {
