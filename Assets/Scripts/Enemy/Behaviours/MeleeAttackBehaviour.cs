@@ -189,7 +189,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     /// </summary>
     private float GetAnimationLength()
     {
-        if (_animator == null) return 0f;
+        // Animatorがnullのときはフォールバックタイムアウトを返して攻撃が即終了しないようにする
+        if (_animator == null) return _attackFallbackTimeout;
 
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
 

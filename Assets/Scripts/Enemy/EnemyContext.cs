@@ -4,5 +4,6 @@ public class EnemyContext
 
     // MeleeAttackBehaviourが攻撃するたびに更新する
     // BarkBehaviourがクールダウン判定に使用する
-    public float LastAttackTime;
+    // 初回攻撃前はクールダウンなし扱いにするためsentinel値で初期化する
+    public float LastAttackTime = float.NegativeInfinity;
 }
