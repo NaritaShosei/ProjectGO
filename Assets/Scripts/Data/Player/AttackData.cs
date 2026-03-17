@@ -34,6 +34,9 @@ public class AttackData : ScriptableObject
 
     public HitStopData HitStopData => _hitStopData;
 
+    public string AnimationStateName => _animationStateName;
+    public float TransitionDuration => _transitionDuration;
+
     [Header("Basic Info")]
     [SerializeField] private int _attackId;
     [SerializeField] private string _attackName;
@@ -73,6 +76,10 @@ public class AttackData : ScriptableObject
 
     [Header("Hit Stop")]
     [SerializeField] private HitStopData _hitStopData;
+
+    [Header("Animation")]
+    [SerializeField] private string _animationStateName; // Animatorのステート名
+    [SerializeField] private float _transitionDuration = -1f; // 遷移時間（秒）。-1の場合はデフォルト値(0.1f)を使用
 }
 
 // 攻撃の段階（チャージレベル）

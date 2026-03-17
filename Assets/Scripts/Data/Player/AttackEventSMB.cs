@@ -16,8 +16,7 @@ public class AttackEventSMB : StateMachineBehaviour
     public override void OnStateUpdate(
     Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (animator.speed == 0f) { return; } // アニメーションが停止している場合は処理しない
-
+        if (animator.speed == 0f) { return; }
         if (_controller == null) { return; }
 
         float currentTime = stateInfo.normalizedTime * stateInfo.length;
@@ -38,6 +37,9 @@ public class AttackEventSMB : StateMachineBehaviour
         {
             _comboEnded = true;
             _controller.AnimEvent_ComboWindowEnd();
+
+            // バッファがあれば即コンボ遷移
+            _controller.AnimEvent_ComboTransition();
         }
     }
 
