@@ -22,7 +22,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
-        EnemyAnimator enemyAnimator,
+        IEnemyAnimator enemyAnimator,
         Animator animator,
         EnemyStateContext state
     )
@@ -112,6 +112,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnExit()
     {
+        // すでにHandleAttackEnd経由でExitしている場合は二重処理をスキップする
+        if (!_isAttacking) return;
         _enemyAnimator?.SetAttacking(false);
         Exit();
     }
@@ -122,7 +124,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private EnemyStateContext _state;
     private readonly IEnemyAttackerSlot _attackerSlot;
-    private EnemyAnimator _enemyAnimator;
+    private IEnemyAnimator _enemyAnimator;
 
     private int _enemyId;
     private float _timer;

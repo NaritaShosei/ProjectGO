@@ -5,10 +5,10 @@ using UnityEngine;
 public class EnemyArmer : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
-    public EnemyConditionController ConditionController { get; }
+    public IEnemyConditionController ConditionController { get; }
 
     // EnemyArmerはAnimatorを持たないためnullを返す
-    public EnemyAnimator EnemyAnimator => null;
+    public IEnemyAnimator EnemyAnimator => null;
 
     public event Action<float, float> OnHealthChanged; 
 

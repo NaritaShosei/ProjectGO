@@ -4,10 +4,10 @@ using UnityEngine;
 public class BossCore : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
-    public EnemyConditionController ConditionController { get; }
+    public IEnemyConditionController ConditionController { get; }
 
     // ボスはAnimatorを持たないためnullを返す
-    public EnemyAnimator EnemyAnimator => null;
+    public IEnemyAnimator EnemyAnimator => null;
 
     public Vector3 Position { get => transform.position; }
 

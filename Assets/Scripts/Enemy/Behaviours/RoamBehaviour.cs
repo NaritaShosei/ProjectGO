@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// プレイヤーを索敵距離外のときにランダム方向へ徘徊するBehaviour
+/// 他のBehaviourが選択できないときのフォールバックとしてランダム方向へ徘徊するBehaviour
 /// ランダムな目標地点に向かって移動し、到達したら新しい目標を設定する
 /// </summary>
 public class RoamBehaviour : IEnemyBehaviour
@@ -14,7 +14,6 @@ public class RoamBehaviour : IEnemyBehaviour
     /// </summary>
     public RoamBehaviour(
         DistanceProfile profile,
-        IEnemyAttackerSlot attackerSlot,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
         ISpatialHashGrid spatialHashGrid,
@@ -25,7 +24,6 @@ public class RoamBehaviour : IEnemyBehaviour
             throw new ArgumentNullException(nameof(profile));
         _profile = profile;
         _separationService = separationService;
-        _attackerSlot = attackerSlot;
         _wallAvoidanceService = wallAvoidanceService;
         _spatialHashGrid = spatialHashGrid;
         _onRoamDirection = onRoamDirection;
@@ -36,7 +34,7 @@ public class RoamBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
-        EnemyAnimator enemyAnimator,
+        IEnemyAnimator enemyAnimator,
         EnemyStateContext state
     )
     {
@@ -52,7 +50,8 @@ public class RoamBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        // Bark・Attack中はRoamに入らない
+        // フォールバックBehaviourのため常時enterable
+        // Attack・Bark中はCanMove()でブロックされる
         if (_state == null) return false;
         return _state.CanMove();
     }
@@ -148,7 +147,7 @@ public class RoamBehaviour : IEnemyBehaviour
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
-    private EnemyAnimator _enemyAnimator;
+    private IEnemyAnimator _enemyAnimator;
     private EnemyStateContext _state;
 
     private readonly DistanceProfile _profile;
@@ -157,7 +156,6 @@ public class RoamBehaviour : IEnemyBehaviour
     private readonly ISpatialHashGrid _spatialHashGrid;
 
     private int _enemyId;
-    private readonly IEnemyAttackerSlot _attackerSlot;
 
     private Vector3 _target;
 

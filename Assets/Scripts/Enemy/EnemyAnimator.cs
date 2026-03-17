@@ -5,7 +5,7 @@ using System;
 /// EnemyのAnimatorパラメータを一元管理するクラス
 /// 文字列ハッシュで管理することでパフォーマンスを最適化する
 /// </summary>
-public class EnemyAnimator
+public class EnemyAnimator : IEnemyAnimator
 {
     // Receiverから中継するイベント（外部への単一エントリポイント）
     public event Action OnAttackHit;
@@ -65,14 +65,14 @@ public class EnemyAnimator
     /// value = true のとき KnockbackLevel も同時に書き込む。
     /// value = false のとき KnockbackLevel はリセットしない（仕様通り）。
     /// </summary>
-    public void SetKnockback(bool value, int level = 0)
+    public void SetKnockback(bool value, KnockbackLevel level = KnockbackLevel.Hit)
     {
         if (_animator == null) return;
         _animator.SetBool(_hashIsKnockback, value);
 
         if (value)
         {
-            _animator.SetInteger(_hashKnockbackLevel, level);
+            _animator.SetInteger(_hashKnockbackLevel, (int)level);
         }
     }
 

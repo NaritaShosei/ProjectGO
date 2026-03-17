@@ -50,9 +50,9 @@ public class GoblinEnemy : Enemy
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                var bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
-                bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
-                _runner.Register(bark);
+                _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
+                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+                _runner.Register(_bark);
             }
         }
 
@@ -77,11 +77,9 @@ public class GoblinEnemy : Enemy
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
-                _attackerSlot,
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid,
-                // Roam中の移動方向をTurnBehaviourに通知する
                 dir => _turn?.SetOverrideDirection(dir)
             );
             roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
@@ -93,6 +91,7 @@ public class GoblinEnemy : Enemy
     private EnemyContext _context;
     private EnemyStateContext _state;
     private MeleeAttackBehaviour _attack;
+    private BarkBehaviour _bark;
     private TurnBehaviour _turn;
 
     public override void OnConditionInterrupt()
@@ -103,7 +102,7 @@ public class GoblinEnemy : Enemy
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        // MeleeAttackBehaviourのイベント購読を解除する
+        _bark?.Dispose();
         _attack?.Dispose();
     }
 

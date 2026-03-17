@@ -14,11 +14,10 @@ public sealed class KnockbackCondition : IEnemyCondition
     public bool IsFinished => _isFinished;
 
     /// <param name="level">ノックバックレベル（0=Hit / 1=Small / 2=Large）</param>
-    public KnockbackCondition(KnockbackContext context, int level)
+    public KnockbackCondition(KnockbackContext context, KnockbackLevel level)
     {
         var horizontal = context.Direction.normalized * context.Power;
         var vertical = Vector3.up * context.Upward;
-
         _velocity = horizontal + vertical;
         _level = level;
     }
@@ -32,9 +31,12 @@ public sealed class KnockbackCondition : IEnemyCondition
         _isFinished = false;
         _landingDone = false;
 
-        // level 2（Large）はGetUp完了まで待機するためAnimatorを保持する
-        if (_level == 2)
+        if (_level == KnockbackLevel.Large)
         {
+            // 死亡後のAnimationEvent発火に備えてOnDeadを購読する
+            _enemy = enemy;
+            _enemy.OnDead += HandleEnemyDead;
+
             _enemyAnimator = enemy.EnemyAnimator;
             if (_enemyAnimator != null)
             {
@@ -63,10 +65,8 @@ public sealed class KnockbackCondition : IEnemyCondition
             pos.y = _groundY;
             enemy.SetPosition(pos);
 
-            // level 2（Large）はGetUpEnd イベントを待ってから終了する
-            if (_level == 2)
+            if (_level == KnockbackLevel.Large)
             {
-                // AnimatorがなければGetUpEndを待たずに終了
                 if (_enemyAnimator == null)
                 {
                     _isFinished = true;
@@ -76,19 +76,18 @@ public sealed class KnockbackCondition : IEnemyCondition
                     _landingDone = true;
                 }
             }
-            else
-            {
-                _isFinished = true;
-            }
         }
     }
 
     public void OnExit(IEnemy enemy)
     {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log("ノックバック終了");
-#endif
-        // level 2（Large）の購読解除
+        // Level Large の購読をまとめて解除する
+        if (_enemy != null)
+        {
+            _enemy.OnDead -= HandleEnemyDead;
+            _enemy = null;
+        }
+
         if (_enemyAnimator != null)
         {
             _enemyAnimator.OnGetUpEnd -= HandleGetUpEnd;
@@ -104,17 +103,45 @@ public sealed class KnockbackCondition : IEnemyCondition
     private bool _landingDone;
 
     // level 2（Large）のGetUpEnd購読解除用
-    private EnemyAnimator _enemyAnimator;
-    private readonly int _level;
+    private IEnemyAnimator _enemyAnimator;
+    private readonly KnockbackLevel _level;
+
+    // Level Large の死亡後発火ガード用
+    private IEnemy _enemy;
+    private bool _enemyDead;
 
     private const float _gravity = -30f; // あえて大きめに
 
     /// <summary>
+    /// 敵死亡通知のハンドラ
+    /// GetUpEnd が死亡後に発火した場合のガードに使用する
+    /// </summary>
+    private void HandleEnemyDead(IEnemy _)
+    {
+        _enemyDead = true;
+    }
+
+    /// <summary>
     /// GetUpアニメーション完了時に呼ばれるハンドラ
-    /// level 2（Large）のCondition終了をここで確定させる
+    /// 敵がすでに死亡している場合はCondition終了処理をスキップする
     /// </summary>
     private void HandleGetUpEnd()
     {
+        if (_enemyDead) return;
         _isFinished = true;
     }
+}
+
+/// <summary>
+/// ノックバックのレベルを表すenum
+/// KnockbackContext.Power をもとに MobEnemy.DetermineKnockbackLevel() で決定される
+/// </summary>
+public enum KnockbackLevel
+{
+    /// <summary>ヒットリアクション（移動なし）</summary>
+    Hit = 0,
+    /// <summary>小ノックバック（小移動）</summary>
+    Small = 1,
+    /// <summary>大ノックバック（大移動 → GetUp）</summary>
+    Large = 2,
 }

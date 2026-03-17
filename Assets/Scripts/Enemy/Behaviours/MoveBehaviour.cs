@@ -31,7 +31,7 @@ public class MoveBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
-        EnemyAnimator enemyAnimator,
+        IEnemyAnimator enemyAnimator,
         EnemyStateContext state
     )
     {
@@ -149,7 +149,7 @@ public class MoveBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private EnemyStateContext _state;
     private int _enemyId;
-    private EnemyAnimator _enemyAnimator;
+    private IEnemyAnimator _enemyAnimator;
 
     private readonly DistanceProfile _profile;
     private readonly ISeparationService _separationService;

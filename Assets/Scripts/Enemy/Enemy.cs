@@ -19,8 +19,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     public event Action<DamagePopupViewModel> OnDamageDealt;
 
-    public virtual EnemyConditionController ConditionController { get; }
-    public EnemyAnimator EnemyAnimator => _enemyAnimator;
+    public virtual IEnemyConditionController ConditionController { get; }
+    public IEnemyAnimator EnemyAnimator => _enemyAnimator;
 
     public Vector3 Position { get => transform.position; }
 
@@ -161,7 +161,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected Transform _playerTransform;
     private HitStopManager _hitStopManager;
 
-    protected EnemyAnimator _enemyAnimator;
+    protected IEnemyAnimator _enemyAnimator;
 
     // 死亡アニメーション終了待機のタイムアウト上限（秒）
     private const float _deadAnimationTimeout = 5f;
@@ -238,10 +238,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             _attackerSlot.OnSlotReleased -= HandleSlotReleased;
         }
 
-        // 死亡アニメーション終了イベントの購読を解除する
-        _enemyAnimator.OnDeadEnd -= HandleDeadEnd;
-        // EnemyAnimatorのイベント購読を解除する
-        _enemyAnimator?.Dispose();
+        // 死亡アニメーション終了イベントの購読解除とDisposeをまとめて行う
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnDeadEnd -= HandleDeadEnd;
+            _enemyAnimator.Dispose();
+        }
     }
 
     /// <summary>

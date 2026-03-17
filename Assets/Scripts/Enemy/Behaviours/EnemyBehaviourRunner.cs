@@ -121,6 +121,8 @@ public class EnemyBehaviourRunner
             var next = _behaviours[i];
             if (ReferenceEquals(next, previous)) continue;
             if (!next.CanEnter()) continue;
+            // 切り替え前に前のBehaviourを明示的に終了させる
+            previous?.OnExit();
             SwitchTo(next);
             return;
         }
@@ -132,7 +134,7 @@ public class EnemyBehaviourRunner
     {
         // 同一Behaviourへの切り替えは無視する
         if (_current == next) return;
-        // OnExitはSelectBehaviour()またはForce系メソッドで呼び済みの前提
+        // OnExitは呼び出し元（SelectBehaviour / Force系メソッド）で呼び済みの前提
         // SwitchToは切り替えとOnEnterのみを担う
         _current = next;
         _current.OnEnter();

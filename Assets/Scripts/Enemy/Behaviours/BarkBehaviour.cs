@@ -22,7 +22,7 @@ public class BarkBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
-        EnemyAnimator enemyAnimator,
+        IEnemyAnimator enemyAnimator,
         Animator animator,
         EnemyStateContext state
     )
@@ -108,7 +108,7 @@ public class BarkBehaviour : IEnemyBehaviour
     private EnemyContext _context;
     private Animator _animator;
     private EnemyStateContext _state;
-    private EnemyAnimator _enemyAnimator;
+    private IEnemyAnimator _enemyAnimator;
 
     private int _enemyId;
     private bool _barkEnded;

@@ -11,7 +11,7 @@ using System;
 
 public class MobEnemy : Enemy
 {
-    public override EnemyConditionController ConditionController { get => _conditionController; }
+    public override IEnemyConditionController ConditionController { get => _conditionController; }
 
     // Armor登録を外部（UI等）に通知するイベント
     // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
@@ -86,11 +86,9 @@ public class MobEnemy : Enemy
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
-                _attackerSlot,
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid,
-                // Roam中の移動方向をTurnBehaviourに通知する
                 dir => _turn?.SetOverrideDirection(dir)
             );
             roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
@@ -154,7 +152,7 @@ public class MobEnemy : Enemy
         {
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
-            int knockbackLevel = DetermineKnockbackLevel(temp.Power);
+            KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
             _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel));
         }
 
@@ -239,12 +237,12 @@ public class MobEnemy : Enemy
     /// <summary>
     /// KnockbackContext.Power からノックバックレベルを決定する
     /// </summary>
-    /// <returns>0=Hit / 1=Small / 2=Large</returns>
-    private int DetermineKnockbackLevel(float power)
+    /// <returns>Hit / Small / Large</returns>
+    private KnockbackLevel DetermineKnockbackLevel(float power)
     {
-        if (power <= _data.KnockbackHitThreshold) return 0;
-        if (power >= _data.KnockbackLargeThreshold) return 2;
-        return 1;
+        if (power <= _data.KnockbackHitThreshold) return KnockbackLevel.Hit;
+        if (power >= _data.KnockbackLargeThreshold) return KnockbackLevel.Large;
+        return KnockbackLevel.Small;
     }
 
 #if UNITY_EDITOR

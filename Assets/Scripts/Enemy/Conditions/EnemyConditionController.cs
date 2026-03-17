@@ -1,5 +1,5 @@
 
-public sealed class EnemyConditionController
+public sealed class EnemyConditionController : IEnemyConditionController
 {
     public bool BlocksAction => _active.BlocksAction;
 
