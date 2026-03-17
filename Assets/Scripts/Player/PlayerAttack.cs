@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -373,6 +372,36 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = nextAttack;
         _pendingAttackInput = bufferedInput;
         _lastAttackTime = Time.time;
+
+        // PrepareAttack と同等の副作用を適用
+        if (nextAttack.EnableHoming)
+        {
+            _isHomingActive = true;
+            _homingRadius = nextAttack.HomingRadius;
+            _homingAngle = nextAttack.HomingAngle;
+            _homingStrength = nextAttack.HomingStrength;
+            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
+        }
+        else
+        {
+            _homingTarget = null;
+        }
+
+        if (nextAttack.MoveType != AttackMoveType.None)
+        {
+            var moveRequest = new AttackMoveRequest
+            {
+                MoveType = nextAttack.MoveType,
+                Distance = nextAttack.MoveDistance,
+                Speed = nextAttack.MoveSpeed,
+                Duration = nextAttack.MoveDuration,
+                Target = _homingTarget,
+                StopDistance = nextAttack.StopOnHit ? nextAttack.AttackRange : 0,
+                IsPhantom = nextAttack.IsPhantom
+            }
+                 ;
+            OnAttackMoveRequested?.Invoke(moveRequest);
+        }
 
         _stateManager.ChangeState(PlayerState.Attacking);
 
