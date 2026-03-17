@@ -398,8 +398,8 @@ public class PlayerAttack : MonoBehaviour
                 Target = _homingTarget,
                 StopDistance = nextAttack.StopOnHit ? nextAttack.AttackRange : 0,
                 IsPhantom = nextAttack.IsPhantom
-            }
-                 ;
+            };
+
             OnAttackMoveRequested?.Invoke(moveRequest);
         }
 
