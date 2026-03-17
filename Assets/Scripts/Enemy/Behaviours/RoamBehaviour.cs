@@ -69,7 +69,10 @@ public class RoamBehaviour : IEnemyBehaviour
     {
         _state.ChangeState(EnemyState.Move);
 
-        // 再入時も新しい目標地点を設定する
+        // スポーン同期ずらし用の初期待機時間をランダムで設定する
+        _initialDelay = UnityEngine.Random.Range(0f, _initialDelayMax);
+        _delayFinished = _initialDelay <= 0f;
+        
         PickTarget();
     }
 
@@ -160,6 +163,8 @@ public class RoamBehaviour : IEnemyBehaviour
 
     // 目標地点への到達判定しきい値
     private const float _arrivalThreshold = 0.3f;
+    // 初期待機のランダム上限（スポーン同期ずらし用）
+    private const float _initialDelayMax = 0.5f;
 
     // 初期待機タイマー（スポーン同期ずらし用）
     private float _initialDelay;

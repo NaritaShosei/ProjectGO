@@ -66,7 +66,15 @@ public sealed class KnockbackCondition : IEnemyCondition
             // level 2（Large）はGetUpEnd イベントを待ってから終了する
             if (_level == 2)
             {
-                _landingDone = true;
+                // AnimatorがなければGetUpEndを待たずに終了
+                if (_enemyAnimator == null)
+                {
+                    _isFinished = true;
+                }
+                else
+                {
+                    _landingDone = true;
+                }
             }
             else
             {

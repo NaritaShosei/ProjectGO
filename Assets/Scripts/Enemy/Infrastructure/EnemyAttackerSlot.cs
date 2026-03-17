@@ -35,7 +35,6 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
         _holders.Add(enemyId);
         _usedSlots += slotCost;
-        Debug.Log($"{enemyId}が攻撃枠を取得した");
         return true;
     }
 

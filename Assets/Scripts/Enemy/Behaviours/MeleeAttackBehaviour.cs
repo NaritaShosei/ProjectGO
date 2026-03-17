@@ -35,6 +35,26 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _enemyAnimator = enemyAnimator;
         _state = state;
         _animator = animator;
+
+        // AttackHit / AttackEndイベントを購読してアニメーションと同期する
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnAttackHit += HandleAttackHit;
+            _enemyAnimator.OnAttackEnd += HandleAttackEnd;
+        }
+    }
+
+    // After（ReleaseSlot()の後に追加）
+    /// <summary>
+    /// イベント購読を解除する
+    /// </summary>
+    public void Dispose()
+    {
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnAttackHit -= HandleAttackHit;
+            _enemyAnimator.OnAttackEnd -= HandleAttackEnd;
+        }
     }
 
     public bool CanEnter()
@@ -61,14 +81,12 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnEnter()
     {
-        // スロットはCanEnterで確保済みのためここでは確保しない
         _isAttacking = true;
         _timer = 0f;
+        _attackHitFired = false;
+        _attackEndFired = false;
         _state.ChangeState(EnemyState.Attack);
-
         _enemyAnimator?.SetAttacking(true);
-
-        PerformAttack();
     }
 
     public void Tick(float deltaTime)
@@ -77,15 +95,18 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         _timer += deltaTime;
 
-        // AttackPatternが設定されている場合はDurationで終了判定
-        // 設定されていない場合は即終了
-        float duration = (_data.AttackPattern != null && _data.AttackPattern.Duration > 0f)
-            ? _data.AttackPattern.Duration
-            : GetAnimationLength();
-
-        if (_timer >= duration)
+        // AnimationEventで終了を検知できなかった場合のフォールバック
+        // Duration / clip長を超えた場合は強制終了する
+        if (!_attackEndFired)
         {
-            Exit();
+            float duration = (_data.AttackPattern != null && _data.AttackPattern.Duration > 0f)
+                ? _data.AttackPattern.Duration
+                : GetAnimationLength();
+
+            if (_timer >= duration)
+            {
+                Exit();
+            }
         }
     }
 
@@ -106,6 +127,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private int _enemyId;
     private float _timer;
     private bool _isAttacking;
+    private bool _attackHitFired;
+    private bool _attackEndFired;
+
     private Animator _animator;
 
     private void PerformAttack()
@@ -167,5 +191,25 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         // Attackステートに遷移前の場合は次フレームまで待つ
         return float.MaxValue;
+    }
+
+    /// <summary>
+    /// 攻撃ヒットタイミングのAnimationEventから中継されるハンドラ
+    /// </summary>
+    private void HandleAttackHit()
+    {
+        if (!_isAttacking) return;
+        _attackHitFired = true;
+        PerformAttack();
+    }
+
+    /// <summary>
+    /// 攻撃終了タイミングのAnimationEventから中継されるハンドラ
+    /// </summary>
+    private void HandleAttackEnd()
+    {
+        if (!_isAttacking) return;
+        _attackEndFired = true;
+        Exit();
     }
 }

@@ -163,6 +163,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     protected EnemyAnimator _enemyAnimator;
 
+    // 死亡アニメーション終了待機のタイムアウト上限（秒）
+    private const float _deadAnimationTimeout = 5f;
+
     protected bool _isDead;
     // 死亡アニメーション終了フラグ
     private bool _deadAnimationEnded;
@@ -302,13 +305,21 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// </summary>
     private async UniTaskVoid WaitForDeadAnimationAndDestroy()
     {
+        // Receiver未設定のPrefabは即時破棄する
+        if (_animationEventReceiver == null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         try
         {
-            // 死亡アニメーション終了まで待機する
+            // タイムアウト付きで死亡アニメーション終了を待機する
+            // AnimationEvent付け忘れがある場合でも上限時間で強制破棄する
             await UniTask.WaitUntil(
                 () => _deadAnimationEnded,
                 cancellationToken: destroyCancellationToken
-            );
+            ).TimeoutWithoutException(TimeSpan.FromSeconds(_deadAnimationTimeout));
         }
         catch (OperationCanceledException)
         {

@@ -114,23 +114,26 @@ public class EnemyBehaviourRunner
         // 現在のBehaviourを先に終了させてからCanEnterを評価する
         // これにより同じBehaviourが即再選択されることを防ぐ
         IEnemyBehaviour previous = _current;
-        previous?.OnExit();
         _current = null;
 
         for (int i = 0; i < _behaviours.Count; i++)
         {
             var next = _behaviours[i];
+            if (ReferenceEquals(next, previous)) continue;
             if (!next.CanEnter()) continue;
             SwitchTo(next);
             return;
         }
+        // 選択できるBehaviourがない場合はpreviousのOnExitだけ呼んで終了する
+        previous?.OnExit();
     }
 
     private void SwitchTo(IEnemyBehaviour next)
     {
-        // SelectBehaviour()側でOnExit済みのため二重呼び出しを防ぐ
+        // 同一Behaviourへの切り替えは無視する
         if (_current == next) return;
-        _current?.OnExit();
+        // OnExitはSelectBehaviour()またはForce系メソッドで呼び済みの前提
+        // SwitchToは切り替えとOnEnterのみを担う
         _current = next;
         _current.OnEnter();
     }

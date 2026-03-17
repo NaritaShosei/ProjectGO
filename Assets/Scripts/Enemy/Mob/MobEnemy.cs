@@ -191,6 +191,8 @@ public class MobEnemy : Enemy
 
         // BarkBehaviourのイベント購読を解除する
         _bark?.Dispose();
+        // MeleeAttackBehaviourのイベント購読を解除する
+        _attack?.Dispose();
     }
 
     protected override void UpdateEnemy(float deltaTime)

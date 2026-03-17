@@ -100,6 +100,13 @@ public class GoblinEnemy : Enemy
         _runner.ForceExitAction();
     }
 
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        // MeleeAttackBehaviourのイベント購読を解除する
+        _attack?.Dispose();
+    }
+
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_runner == null) return;
