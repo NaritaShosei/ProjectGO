@@ -376,10 +376,20 @@ public class PlayerAttack : MonoBehaviour
 
         _stateManager.ChangeState(PlayerState.Attacking);
 
+        if (nextAttack.TransitionDuration < 0)
+        {
+            // 遷移時間が負の場合はデフォルトの遷移時間を使用
+            _animationController.PlayAttackBlend(
+                _currentAttackId,
+                nextAttack.AnimationStateName
+            );
+            return;
+        }
+
         _animationController.PlayAttackBlend(
             _currentAttackId,
             nextAttack.AnimationStateName,
-            nextAttack.AnimationStartTime
+            nextAttack.TransitionDuration
         );
     }
 
