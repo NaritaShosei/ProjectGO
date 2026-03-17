@@ -133,10 +133,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _spatialHashGrid = spatialHashGrid;
         _separationService = separationService;
         _wallAvoidanceService = wallAvoidanceService;
+
+        // 再注入時に旧スロットの購読が残らないよう先に解除する
+        if (_attackerSlot != null)
+        {
+            _attackerSlot.OnSlotReleased -= HandleSlotReleased;
+        }
+
         _attackerSlot = attackerSlot;
 
-        // スロット解放イベントを購読する
-        // 未取得の場合に限り再取得を試みる
         if (_attackerSlot != null)
         {
             _attackerSlot.OnSlotReleased += HandleSlotReleased;
@@ -307,12 +312,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// </summary>
     private async UniTaskVoid WaitForDeadAnimationAndDestroy()
     {
-        // Receiver未設定のPrefabは即時破棄する
         if (_animationEventReceiver == null)
         {
             Destroy(gameObject);
             return;
         }
+
+        // 前回の状態が残っている場合に備えてフラグをリセットする
+        _deadAnimationEnded = false;
 
         try
         {

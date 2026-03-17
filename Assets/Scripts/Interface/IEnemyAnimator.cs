@@ -31,3 +31,24 @@ public interface IEnemyAnimator
     /// <summary>イベント購読を解除する</summary>
     public void Dispose();
 }
+
+/// <summary>
+/// AnimatorをもたないEnemy実装（BossCore / EnemyArmer）向けのNull Objectパターン実装。
+/// 全操作は無操作となり、呼び出し側のnullチェックを不要にする。
+/// </summary>
+public sealed class NullEnemyAnimator : IEnemyAnimator
+{
+    public event Action OnAttackHit;
+    public event Action OnAttackEnd;
+    public event Action OnBarkEnd;
+    public event Action OnGetUpEnd;
+    public event Action OnDeadEnd;
+
+    public void SetSpeed(float speed) { }
+    public void SetAttacking(bool value) { }
+    public void SetBarking(bool value) { }
+    public void SetKnockback(bool value, KnockbackLevel level = KnockbackLevel.Hit) { }
+    public void SetElectrified(bool value) { }
+    public void SetDead() { }
+    public void Dispose() { }
+}

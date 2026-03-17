@@ -131,6 +131,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     private Animator _animator;
 
+    // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
+    private const float _attackFallbackTimeout = 5f;
+
     private void PerformAttack()
     {
 # if UNITY_EDITOR
@@ -196,8 +199,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             return stateInfo.length;
         }
 
-        // Attackステートに遷移前の場合は次フレームまで待つ
-        return float.MaxValue;
+        // Attackステートに遷移前、またはClip長取得不能の場合はフォールバックタイムアウトを返す
+        return _attackFallbackTimeout;
     }
 
     /// <summary>
@@ -206,6 +209,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private void HandleAttackHit()
     {
         if (!_isAttacking) return;
+        // 1攻撃につき1回のみヒット処理を行う
+        if (_attackHitFired) return;
         _attackHitFired = true;
         PerformAttack();
     }

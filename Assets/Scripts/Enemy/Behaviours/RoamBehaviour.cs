@@ -41,7 +41,6 @@ public class RoamBehaviour : IEnemyBehaviour
         _self = owner.transform;
         _enemy = owner;
         _enemyAnimator = enemyAnimator;
-        _enemyId = owner.GetInstanceID();
         _player = player;
         _data = data;
         _context = context;
@@ -154,8 +153,6 @@ public class RoamBehaviour : IEnemyBehaviour
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
     private readonly ISpatialHashGrid _spatialHashGrid;
-
-    private int _enemyId;
 
     private Vector3 _target;
 

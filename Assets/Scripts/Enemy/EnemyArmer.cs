@@ -5,10 +5,10 @@ using UnityEngine;
 public class EnemyArmer : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
-    public IEnemyConditionController ConditionController { get; }
-
-    // EnemyArmerはAnimatorを持たないためnullを返す
-    public IEnemyAnimator EnemyAnimator => null;
+    public IEnemyConditionController ConditionController => _nullConditionController;
+   
+    // EnemyArmerはAnimatorを持たないためNull Objectを返す
+    public IEnemyAnimator EnemyAnimator => _nullAnimator;
 
     public event Action<float, float> OnHealthChanged; 
 
@@ -83,6 +83,9 @@ public class EnemyArmer : MonoBehaviour, IEnemy
     [SerializeField] private float _hp = 50;
     [SerializeField] private GameObject _core;
     [SerializeField] private Transform _targetCenter;
+
+    private readonly IEnemyAnimator _nullAnimator = new NullEnemyAnimator();
+    private readonly IEnemyConditionController _nullConditionController = new NullEnemyConditionController();
 
     private void Break()
     {

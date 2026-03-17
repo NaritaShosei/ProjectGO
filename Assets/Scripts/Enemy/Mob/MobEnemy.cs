@@ -35,7 +35,7 @@ public class MobEnemy : Enemy
         else
         {
             _turn = new TurnBehaviour(_turnProfile);
-            _turn.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+            _turn.Init(this, _data, _playerTransform, _context, _state);
             _runner.RegisterTurn(_turn);
         }
 
@@ -60,7 +60,7 @@ public class MobEnemy : Enemy
             if (_distanceProfile != null)
             {
                 _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
-                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
                 _runner.Register(_bark);
             }
         }

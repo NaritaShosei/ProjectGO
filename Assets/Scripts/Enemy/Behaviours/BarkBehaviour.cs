@@ -23,7 +23,6 @@ public class BarkBehaviour : IEnemyBehaviour
         Transform player,
         EnemyContext context,
         IEnemyAnimator enemyAnimator,
-        Animator animator,
         EnemyStateContext state
     )
     {
@@ -31,7 +30,6 @@ public class BarkBehaviour : IEnemyBehaviour
         _enemyAnimator = enemyAnimator;
         _enemyId = owner.GetInstanceID();
         _player = player;
-        _animator = animator;
         _data = data;
         _context = context;
         _state = state;
@@ -106,7 +104,6 @@ public class BarkBehaviour : IEnemyBehaviour
     private Transform _player;
     private EnemyData _data;
     private EnemyContext _context;
-    private Animator _animator;
     private EnemyStateContext _state;
     private IEnemyAnimator _enemyAnimator;
 
