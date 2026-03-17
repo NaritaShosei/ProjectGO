@@ -76,6 +76,10 @@ public sealed class KnockbackCondition : IEnemyCondition
                     _landingDone = true;
                 }
             }
+            else
+            {
+                _isFinished = true;
+            }
         }
     }
 

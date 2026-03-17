@@ -329,6 +329,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             return;
         }
 
+        // TimeoutWithoutExceptionがキャンセルを吸収した場合に備えてnullチェックする
+        if (this == null) return;
         Destroy(gameObject);
     }
 

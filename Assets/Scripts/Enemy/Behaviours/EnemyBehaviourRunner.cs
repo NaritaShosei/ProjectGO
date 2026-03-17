@@ -121,7 +121,6 @@ public class EnemyBehaviourRunner
             var next = _behaviours[i];
             if (ReferenceEquals(next, previous)) continue;
             if (!next.CanEnter()) continue;
-            // 切り替え前に前のBehaviourを明示的に終了させる
             previous?.OnExit();
             SwitchTo(next);
             return;

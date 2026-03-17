@@ -44,7 +44,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         }
     }
 
-    // After（ReleaseSlot()の後に追加）
     /// <summary>
     /// イベント購読を解除する
     /// </summary>
@@ -112,9 +111,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnExit()
     {
-        // すでにHandleAttackEnd経由でExitしている場合は二重処理をスキップする
         if (!_isAttacking) return;
-        _enemyAnimator?.SetAttacking(false);
         Exit();
     }
 
@@ -136,7 +133,17 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     private void PerformAttack()
     {
-        // [変更] クールダウン管理のためEnemyContextに記録する
+# if UNITY_EDITOR
+        Vector3 center = _self.position + _self.forward * _data.AttackRange;
+        Debug.Log($"[Attack] center={center}, radius={_data.AttackRadius}, forward={_self.forward}");
+        Collider[] debugHits = Physics.OverlapSphere(center, _data.AttackRadius);
+        foreach (var h in debugHits)
+        {
+            Debug.Log($"[Attack] hit={h.gameObject.name}, hasIPlayer={h.TryGetComponent<IPlayer>(out _)}");
+        }
+# endif
+
+        // クールダウン管理のためEnemyContextに記録する
         _context.LastAttackTime = Time.time;
 
         Collider[] hits = Physics.OverlapSphere(
@@ -168,11 +175,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private void Exit()
     {
         if (!_isAttacking) return;
-
         _isAttacking = false;
+        _enemyAnimator?.SetAttacking(false);
         _state.ChangeState(EnemyState.Idle);
-
-        // スロットは死亡時にのみ解放するため、ここでは解放しない
     }
 
     /// <summary>
