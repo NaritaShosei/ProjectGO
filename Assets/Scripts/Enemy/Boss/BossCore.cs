@@ -4,7 +4,10 @@ using UnityEngine;
 public class BossCore : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
-    public EnemyConditionController ConditionController { get; }
+    public IEnemyConditionController ConditionController => _nullConditionController;
+    // ボスはAnimatorを持たないためNull Objectを返す
+    public IEnemyAnimator EnemyAnimator => _nullAnimator;
+
     public Vector3 Position { get => transform.position; }
 
     public event Action<float, float> OnHealthChanged 
@@ -55,4 +58,8 @@ public class BossCore : MonoBehaviour, IEnemy
     [SerializeField] private TestBoss _boss;
     [SerializeField] private float _damageMultiplier = 1f;
     [SerializeField] private Transform _targetCenter;
+
+    private readonly IEnemyAnimator _nullAnimator = new NullEnemyAnimator();
+    private readonly IEnemyConditionController _nullConditionController = new NullEnemyConditionController();
+
 }

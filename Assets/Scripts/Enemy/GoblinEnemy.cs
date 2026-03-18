@@ -25,9 +25,9 @@ public class GoblinEnemy : Enemy
         }
         else
         {
-            var turn = new TurnBehaviour(_turnProfile);
-            turn.Init(this, _data, _playerTransform, _context, _state);
-            _runner.RegisterTurn(turn);
+            _turn = new TurnBehaviour(_turnProfile);
+            _turn.Init(this, _data, _playerTransform, _context, _state);
+            _runner.RegisterTurn(_turn);
         }
 
         // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
@@ -37,9 +37,23 @@ public class GoblinEnemy : Enemy
         }
         else
         {
-            var attack = new MeleeAttackBehaviour(_attackerSlot);
-            attack.Init(this, _data, _playerTransform, _context, _state);
-            _runner.Register(attack);
+            _attack = new MeleeAttackBehaviour(_attackerSlot);
+            _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+            _runner.Register(_attack);
+
+            // スポーン時にスロット取得を試みる
+            // 満杯の場合は OnSlotReleased イベントで再試行される
+            int goblinSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+            _attackerSlot.TryAcquire(GetInstanceID(), goblinSlotCost, isBoss: false);
+
+            // BarkをattackerSlotブロック内に移動
+            // distanceProfileがない場合はBarkも登録しない
+            if (_distanceProfile != null)
+            {
+                _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
+                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+                _runner.Register(_bark);
+            }
         }
 
         // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
@@ -51,28 +65,24 @@ public class GoblinEnemy : Enemy
         {
             var move = new MoveBehaviour(
                 _distanceProfile,
+                _attackerSlot,
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid
             );
-            move.Init(this, _data, _playerTransform, _context, _state);
+            move.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
             _runner.Register(move);
 
-            // BarkBehaviourはAttackerSlotが必要
-            if (_attackerSlot != null)
-            {
-                var bark = new BarkBehaviour(_distanceProfile, _attackerSlot);
-                bark.Init(this, _data, _playerTransform, _context, _state);
-                _runner.Register(bark);
-            }
+            // BarkはattackerSlotブロックへ移動したためここから削除
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
                 _separationService,
                 _wallAvoidanceService,
-                _spatialHashGrid
+                _spatialHashGrid,
+                dir => _turn?.SetOverrideDirection(dir)
             );
-            roam.Init(this, _data, _playerTransform, _context, _state);
+            roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
             _runner.Register(roam);
         }
     }
@@ -80,10 +90,20 @@ public class GoblinEnemy : Enemy
     private EnemyBehaviourRunner _runner;
     private EnemyContext _context;
     private EnemyStateContext _state;
+    private MeleeAttackBehaviour _attack;
+    private BarkBehaviour _bark;
+    private TurnBehaviour _turn;
 
     public override void OnConditionInterrupt()
     {
         _runner.ForceExitAction();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        _bark?.Dispose();
+        _attack?.Dispose();
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -96,6 +116,13 @@ public class GoblinEnemy : Enemy
     protected override void OnDeathInternal()
     {
         _runner?.ForceExitAction();
+
+        // 死亡時にスロットを解放する
+        _attack?.ReleaseSlot();
+
+        // 死亡アニメーションを再生する
+        _enemyAnimator?.SetDead();
+
         base.OnDeathInternal();
     }
 

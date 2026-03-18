@@ -7,9 +7,19 @@ using System.Collections.Generic;
 /// </summary>
 public class EnemyAttackerSlot : IEnemyAttackerSlot
 {
+    // [追加] スロットが解放されたときに発火するイベント
+    // 待機中の敵がこのイベントを受けてTryAcquireを再試行する
+    public event Action OnSlotReleased;
+
     public EnemyAttackerSlot(int maxSlots)
     {
         _maxSlots = Math.Max(1, maxSlots);
+    }
+
+    public bool IsAcquired(int enemyId)
+    {
+        // Holdersに含まれていればスロット確保済み
+        return _holders.Contains(enemyId);
     }
 
     public bool TryAcquire(int enemyId, int slotCost, bool isBoss)
@@ -38,6 +48,9 @@ public class EnemyAttackerSlot : IEnemyAttackerSlot
 
         // 安全のため0未満にならないようにする
         if (_usedSlots < 0) _usedSlots = 0;
+
+        // 待機中の敵にスロット解放を通知する
+        OnSlotReleased?.Invoke();
     }
 
     public bool IsFull(int slotCost)

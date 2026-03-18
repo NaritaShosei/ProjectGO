@@ -11,7 +11,7 @@ using System;
 
 public class MobEnemy : Enemy
 {
-    public override EnemyConditionController ConditionController { get => _conditionController; }
+    public override IEnemyConditionController ConditionController { get => _conditionController; }
 
     // Armor登録を外部（UI等）に通知するイベント
     // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
@@ -34,9 +34,9 @@ public class MobEnemy : Enemy
         }
         else
         {
-            var turn = new TurnBehaviour(_turnProfile);
-            turn.Init(this, _data, _playerTransform, _context, _state);
-            _runner.RegisterTurn(turn);
+            _turn = new TurnBehaviour(_turnProfile);
+            _turn.Init(this, _data, _playerTransform, _context, _state);
+            _runner.RegisterTurn(_turn);
         }
 
         // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
@@ -46,9 +46,23 @@ public class MobEnemy : Enemy
         }
         else
         {
-            var attack = new MeleeAttackBehaviour(_attackerSlot);
-            attack.Init(this, _data, _playerTransform, _context, _state);
-            _runner.Register(attack);
+            _attack = new MeleeAttackBehaviour(_attackerSlot);
+            _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+            _runner.Register(_attack);
+
+            // スポーン時にスロット取得を試みる
+            // 満杯の場合は OnSlotReleased イベントで再試行される
+            int mobSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+            _attackerSlot.TryAcquire(GetInstanceID(), mobSlotCost, isBoss: false);
+
+            // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
+            // distanceProfileがない場合はBarkも登録しない
+            if (_distanceProfile != null)
+            {
+                _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
+                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+                _runner.Register(_bark);
+            }
         }
 
         // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
@@ -60,24 +74,24 @@ public class MobEnemy : Enemy
         {
             var move = new MoveBehaviour(
                 _distanceProfile,
+                _attackerSlot,       // 追加
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid
             );
-            move.Init(this, _data, _playerTransform, _context, _state);
+            move.Init(this, _data, _playerTransform, _context, _enemyAnimator,_state);
             _runner.Register(move);
 
-            var bark = new BarkBehaviour(_distanceProfile, _attackerSlot);
-            bark.Init(this, _data, _playerTransform, _context, _state);
-            _runner.Register(bark);
+            // BarkはattackerSlotブロックへ移動したためここから削除
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
                 _separationService,
                 _wallAvoidanceService,
-                _spatialHashGrid
+                _spatialHashGrid,
+                dir => _turn?.SetOverrideDirection(dir)
             );
-            roam.Init(this, _data, _playerTransform, _context, _state);
+            roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
             _runner.Register(roam);
         }
 
@@ -115,7 +129,11 @@ public class MobEnemy : Enemy
 
         bool isKill = _stats.CurrentHealth <= 0;
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
-        bool isWeakPoint = !armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
+
+        // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
+        bool isWeakPoint = !armorWasAlive
+            && _defenceContext.EnemyType == EnemyType.Flesh
+            && context.PlayerMode == PlayerMode.Thunder;
 
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
@@ -134,7 +152,8 @@ public class MobEnemy : Enemy
         {
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
-            _conditionController.ApplyCondition(new KnockbackCondition(temp));
+            KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
+            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel));
         }
 
         if (CheckProbability(context.ElectricShock.GrantEffectProbability))
@@ -159,10 +178,19 @@ public class MobEnemy : Enemy
     private EnemyContext _context;
     private EnemyStateContext _state;
     private EnemyConditionController _conditionController;
+    private MeleeAttackBehaviour _attack;
+    private TurnBehaviour _turn;
+    private BarkBehaviour _bark;
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (_armor != null) _armor.OnBroken -= BreakArmor;
+
+        // BarkBehaviourのイベント購読を解除する
+        _bark?.Dispose();
+        // MeleeAttackBehaviourのイベント購読を解除する
+        _attack?.Dispose();
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -181,6 +209,12 @@ public class MobEnemy : Enemy
     protected override void OnDeathInternal()
     {
         _runner?.ForceExitAction();
+
+        // 死亡時にスロットを解放する
+        _attack?.ReleaseSlot();
+
+        _enemyAnimator?.SetDead();
+
         base.OnDeathInternal();
     }
 
@@ -198,6 +232,17 @@ public class MobEnemy : Enemy
     private bool CheckProbability(float probability)
     {
         return UnityEngine.Random.value < probability;
+    }
+
+    /// <summary>
+    /// KnockbackContext.Power からノックバックレベルを決定する
+    /// </summary>
+    /// <returns>Hit / Small / Large</returns>
+    private KnockbackLevel DetermineKnockbackLevel(float power)
+    {
+        if (power <= _data.KnockbackHitThreshold) return KnockbackLevel.Hit;
+        if (power >= _data.KnockbackLargeThreshold) return KnockbackLevel.Large;
+        return KnockbackLevel.Small;
     }
 
 #if UNITY_EDITOR
