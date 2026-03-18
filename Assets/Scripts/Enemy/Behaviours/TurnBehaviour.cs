@@ -23,6 +23,15 @@ public class TurnBehaviour : IEnemyBehaviour
         _profile = profile;
     }
 
+    /// <summary>
+    /// Roam中など、プレイヤー以外の方向を向かせる場合に使用する
+    /// nullを渡すとプレイヤー方向に戻る
+    /// </summary>
+    public void SetOverrideDirection(Vector3? direction)
+    {
+        _overrideDirection = direction;
+    }
+
     public void Init(
         Enemy owner,
         EnemyData data,
@@ -33,11 +42,16 @@ public class TurnBehaviour : IEnemyBehaviour
     {
         _self = owner.transform;
         _player = player;
+        _state = state;
     }
 
     public bool CanEnter()
     {
-        return _player != null;
+        if (_player == null) return false;
+
+        // Attack中・Bark中はTurnを行わない（仕様: TurnBehaviour Constraints）
+        if (_state == null) return false;
+        return _state.CanMove();
     }
 
     public bool CanContinue()
@@ -54,16 +68,19 @@ public class TurnBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        if (_player == null)
+        // 上書き方向が設定されている場合はそちらを優先する
+        Vector3 toTarget = _overrideDirection.HasValue
+            ? _overrideDirection.Value
+            : (_player != null ? _player.position - _self.position : Vector3.zero);
+
+        toTarget.y = 0f;
+
+        if (_player == null && !_overrideDirection.HasValue)
         {
             IsFinished = true;
             return;
         }
 
-        Vector3 toTarget = _player.position - _self.position;
-        toTarget.y = 0f;
-
-        // プレイヤーとの距離が近すぎる場合はスキップ
         if (toTarget.sqrMagnitude < 0.0001f)
         {
             IsFinished = true;
@@ -73,7 +90,6 @@ public class TurnBehaviour : IEnemyBehaviour
         Quaternion targetRot = Quaternion.LookRotation(toTarget);
         float angle = Quaternion.Angle(_self.rotation, targetRot);
 
-        // 誤差範囲内であれば即座に向きを合わせて終了
         if (angle < 0.5f)
         {
             _self.rotation = targetRot;
@@ -81,7 +97,6 @@ public class TurnBehaviour : IEnemyBehaviour
             return;
         }
 
-        // 角度に応じて回転速度を変化させる
         float t = Mathf.Clamp01(angle / _profile.MaxAngle);
         float turnSpeed = Mathf.Lerp(
             _profile.MinTurnSpeed,
@@ -99,4 +114,7 @@ public class TurnBehaviour : IEnemyBehaviour
     private Transform _self;
     private Transform _player;
     private readonly TurnProfile _profile;
+    // プレイヤー以外の方向を向かせる場合の上書きベクトル
+    private Vector3? _overrideDirection;
+    private EnemyStateContext _state;
 }

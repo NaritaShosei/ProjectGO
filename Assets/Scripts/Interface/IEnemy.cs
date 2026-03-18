@@ -3,7 +3,8 @@ using UnityEngine;
 
 public interface IEnemy : ICharacter
 {
-    public EnemyConditionController ConditionController { get; }
+    public IEnemyConditionController ConditionController { get; }
+    public IEnemyAnimator EnemyAnimator { get; }
 
     public event Action<float, float> OnHealthChanged;
 

@@ -13,6 +13,7 @@ public class MoveBehaviour : IEnemyBehaviour
     /// </summary>
     public MoveBehaviour(
         DistanceProfile profile,
+        IEnemyAttackerSlot attackerSlot,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
         ISpatialHashGrid spatialHashGrid
@@ -22,6 +23,7 @@ public class MoveBehaviour : IEnemyBehaviour
         _separationService = separationService;
         _wallAvoidanceService = wallAvoidanceService;
         _spatialHashGrid = spatialHashGrid;
+        _attackerSlot = attackerSlot;
     }
 
     public void Init(
@@ -29,11 +31,14 @@ public class MoveBehaviour : IEnemyBehaviour
         EnemyData data,
         Transform player,
         EnemyContext context,
+        IEnemyAnimator enemyAnimator,
         EnemyStateContext state
     )
     {
         _self = owner.transform;
         _enemy = owner;
+        _enemyAnimator = enemyAnimator;
+        _enemyId = owner.GetInstanceID();
         _player = player;
         _data = data;
         _context = context;
@@ -43,35 +48,43 @@ public class MoveBehaviour : IEnemyBehaviour
     public bool CanEnter()
     {
         if (_player == null) return false;
+        if (_attackerSlot == null) return false;
 
-        // 索敵距離内かつ攻撃距離外のときに発動
+        // スロットを確保済みのときのみ発動
+        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
+
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
         float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
 
-        return sqrDist <= sqrDetect && sqrDist > sqrAttack;
+        // 攻撃距離外のときに発動
+        return sqrDist > sqrAttack;
     }
 
     public bool CanContinue()
     {
         if (_player == null) return false;
+        if (_attackerSlot == null) return false;
 
-        // 索敵距離外に出た場合、または攻撃距離内に入った場合は終了
+        // スロットを解放されたら終了
+        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
+
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
         float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
 
-        return sqrDist <= sqrDetect && sqrDist > sqrAttack;
+        // 攻撃距離内に入ったら終了
+        return sqrDist > sqrAttack;
     }
 
     public void OnEnter()
     {
         _state.ChangeState(EnemyState.Move);
+        _enemyAnimator?.SetSpeed(1f);
     }
 
     public void OnExit()
     {
         _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetSpeed(0f);
     }
 
     public void Tick(float deltaTime)
@@ -135,9 +148,12 @@ public class MoveBehaviour : IEnemyBehaviour
     private EnemyData _data;
     private EnemyContext _context;
     private EnemyStateContext _state;
+    private int _enemyId;
+    private IEnemyAnimator _enemyAnimator;
 
     private readonly DistanceProfile _profile;
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
     private readonly ISpatialHashGrid _spatialHashGrid;
+    private readonly IEnemyAttackerSlot _attackerSlot;
 }
