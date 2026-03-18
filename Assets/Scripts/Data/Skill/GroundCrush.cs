@@ -11,8 +11,8 @@ public class GroundCrush : SkillBase
         if (enemies.Length <= 0) return;
         else
         {
-            Debug.Log($"{enemies.Length}体の敵に{context.AttackPower}ダメージ");
             context.AttackPower += _damage;
+            Debug.Log($"{enemies.Length}体の敵に{context.AttackPower}ダメージ");
         }
     }
 
