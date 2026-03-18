@@ -6,7 +6,7 @@ public class GroundCrush : SkillBase
 {
     public override void Apply(ref AttackContext context)
     {
-        Collider[] enemies = Physics.OverlapSphere(_attackCenter, _attackRadius);
+        Collider[] enemies = Physics.OverlapSphere(context.AttackPosition, _attackRadius);
 
         if (enemies.Length <= 0) return;
         else
@@ -35,7 +35,6 @@ public class GroundCrush : SkillBase
     [SerializeField] private int _getComboCount = 1;                          //コンボの何段目に実行するか
     [SerializeField] private float _attackRadius = 1;                         //攻撃範囲
     [SerializeField] private float _damage;                                   //与えるダメージ
-    [SerializeField] private Vector3 _attackCenter = new Vector3(1, 1, 1);    //攻撃位置
     [SerializeField] private AttackType _attackType;                          //攻撃タイプ
     [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;   //プレイヤーが闘神モードかどうか
 }
