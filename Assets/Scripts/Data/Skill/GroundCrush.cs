@@ -6,15 +6,14 @@ public class GroundCrush : SkillBase
 {
     public override void Apply(ref AttackContext context)
     {
-        _damage = context.EvolutionGroundCrush.Damage;
-
         Collider[] enemies = Physics.OverlapSphere(_attackCenter, _attackRadius);
 
-        if (enemies.Length > 0)
+        if (enemies.Length <= 0) return;
+        else
         {
-            Debug.Log($"{enemies.Length}体の敵に{_damage}ダメージ");
+            Debug.Log($"{enemies.Length}体の敵に{context.AttackPower}ダメージ");
+            context.AttackPower += _damage;
         }
-        else return;
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
