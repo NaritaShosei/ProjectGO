@@ -3,87 +3,128 @@ using UnityEngine;
 
 public class PlayerStats
 {
+    // ---- HP ----
     public float InitialMaxHealth { get; private set; }
     public float MaxHealth => _maxHealth;
-    public float MaxStamina => _maxStamina;
-
-    public float InitialMaxStamina { get; private set; }
     public float CurrentHealth => _currentHealth;
-    public float CurrentStamina => _currentStamina;
 
+    // ---- 雷ゲージ ----
+    public float InitialMaxThunderGauge { get; private set; }
+    public float MaxThunderGauge => _maxThunderGauge;
+    public float CurrentThunderGauge => _currentThunderGauge;
+    public float DrainPerSecond => _drainPerSecond;
+    public float RecoverPerSecond => _recoverPerSecond;
+
+    /// <summary> 1以上あれば雷神モードを使用可能 </summary>
+    public bool CanUseThunder => _currentThunderGauge > 0f;
+
+    // ---- 戦闘ステータス ----
     public float AttackPower => _attackPower;
     public float CriticalRate => _criticalRate;
     public float DefensePower => _defensePower;
 
+    // ---- イベント ----
     public event Action OnDead;
     public event Action<float, float, float> OnHealthChanged;
-    public event Action<float, float, float> OnStaminaChanged;
+    /// <summary> (current, max, initialMax) — スタミナと同じ形式 </summary>
+    public event Action<float, float, float> OnThunderGaugeChanged;
+    public event Action OnThunderGaugeDepleted;
     public event Action OnStatsChanged;
 
     public PlayerStats(PlayerData data)
     {
-        // HP / スタミナ
+        // HP
         _maxHealth = data.Stats.MaxHealth;
-        _maxStamina = data.Stats.MaxStamina;
-
         InitialMaxHealth = _maxHealth;
-        InitialMaxStamina = _maxStamina;
-
         _currentHealth = _maxHealth;
-        _currentStamina = _maxStamina;
 
-        // 戦闘ステータス
+        // 雷ゲージ
+        _maxThunderGauge = data.Stats.MaxThunderGauge;
+        InitialMaxThunderGauge = _maxThunderGauge;
+        _currentThunderGauge = _maxThunderGauge;
+        _drainPerSecond = data.ThunderDrainPerSecond;
+        _recoverPerSecond = data.ThunderRecoverPerSecond;
+
+        // 戦闘
         _attackPower = data.AttackPower;
         _criticalRate = data.CriticalRate;
-
         _defensePower = data.DefensePower;
     }
+
+    // ---- HP操作 ----
 
     public void TakeDamage(float damage)
     {
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
-
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
-
-        if (_currentHealth <= 0)
-        {
-            OnDead?.Invoke();
-        }
+        if (_currentHealth <= 0) OnDead?.Invoke();
     }
 
     public void Heal(float amount)
     {
         _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
-
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
     }
 
-    public bool UseStamina(float amount)
+    // ---- 雷ゲージ操作 ----
+
+    /// <summary>
+    /// Player.Update から毎フレーム呼ぶ。
+    /// isThunderMode = true のとき消費、false のとき回復。
+    /// </summary>
+    public void TickThunderGauge(float deltaTime, bool isThunderMode)
     {
-        if (_currentStamina < amount)
+        float before = _currentThunderGauge;
+
+        if (isThunderMode)
         {
-            return false;
+            _currentThunderGauge = Mathf.Max(0f, _currentThunderGauge - _drainPerSecond * deltaTime);
+
+            // 枯渇した瞬間だけ OnDepleted を発火
+            if (before > 0f && _currentThunderGauge <= 0f)
+            {
+                OnThunderGaugeChanged?.Invoke(_currentThunderGauge, _maxThunderGauge, InitialMaxThunderGauge);
+                OnThunderGaugeDepleted?.Invoke();
+                return;
+            }
+        }
+        else
+        {
+            _currentThunderGauge = Mathf.Min(_maxThunderGauge, _currentThunderGauge + _recoverPerSecond * deltaTime);
         }
 
-        _currentStamina = Mathf.Max(0, _currentStamina - amount);
-
-        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
-        return true;
-    }
-
-    public void RegenerateStamina(float regenPerSecond)
-    {
-        float regenAmountThisFrame = regenPerSecond * Time.deltaTime;
-        float previousStamina = _currentStamina;
-        _currentStamina = Mathf.Min(_maxStamina, _currentStamina + regenAmountThisFrame);
-
-        // float 同士をほぼ同じか比較
-        // 差が大きければ回復したとみなし、イベント発火
-        if (!Mathf.Approximately(previousStamina, _currentStamina))
+        // 変化があったときのみ通知（毎フレーム発火によるUI負荷を抑える）
+        if (!Mathf.Approximately(before, _currentThunderGauge))
         {
-            OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
+            OnThunderGaugeChanged?.Invoke(_currentThunderGauge, _maxThunderGauge, InitialMaxThunderGauge);
         }
     }
+
+    // ---- スキルから呼ぶ口 ----
+
+    public void AddMaxThunderGauge(float value)
+    {
+        if (value <= 0f) return;
+        _maxThunderGauge += value;
+        OnThunderGaugeChanged?.Invoke(_currentThunderGauge, _maxThunderGauge, InitialMaxThunderGauge);
+        OnStatsChanged?.Invoke();
+    }
+
+    /// <summary> 消費速度を変更する。負の値で軽減。0未満にはならない。 </summary>
+    public void AddDrainPerSecond(float delta)
+    {
+        _drainPerSecond = Mathf.Max(0f, _drainPerSecond + delta);
+        OnStatsChanged?.Invoke();
+    }
+
+    /// <summary> 回復速度を変更する。正の値で強化。0未満にはならない。 </summary>
+    public void AddRecoverPerSecond(float delta)
+    {
+        _recoverPerSecond = Mathf.Max(0f, _recoverPerSecond + delta);
+        OnStatsChanged?.Invoke();
+    }
+
+    // ---- 戦闘ステータス操作 ----
 
     public void AddAttackPower(float value)
     {
@@ -97,46 +138,31 @@ public class PlayerStats
         OnStatsChanged?.Invoke();
     }
 
-
-    public void AddDefensePower(float defensePowerBonus)
+    public void AddDefensePower(float value)
     {
-        _defensePower = Mathf.Max(0f, _defensePower + defensePowerBonus);
-
+        _defensePower = Mathf.Max(0f, _defensePower + value);
         OnStatsChanged?.Invoke();
     }
 
     public void AddMaxHealth(float value)
     {
-        if (value <= 0f) { return; }
-
+        if (value <= 0f) return;
         _maxHealth += value;
-
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
         OnStatsChanged?.Invoke();
     }
 
-    public void AddMaxStamina(float value)
-    {
-        if (value <= 0f) { return; }
-
-        _maxStamina += value;
-        _currentStamina += value;
-
-        _currentStamina = Mathf.Min(_currentStamina, _maxStamina);
-
-        OnStaminaChanged?.Invoke(_currentStamina, _maxStamina, InitialMaxStamina);
-        OnStatsChanged?.Invoke();
-    }
+    // ---- フィールド ----
 
     private float _maxHealth;
     private float _currentHealth;
 
-    private float _maxStamina;
-    private float _currentStamina;
+    private float _maxThunderGauge;
+    private float _currentThunderGauge;
+    private float _drainPerSecond;
+    private float _recoverPerSecond;
 
     private float _attackPower;
     private float _criticalRate;
-
     private float _defensePower;
 }
-
