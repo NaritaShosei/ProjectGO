@@ -150,7 +150,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         bool isThunderMode = _modeController != null
             && _modeController.CurrentMode == PlayerMode.Thunder
             && _playerStateManager.CurrentState != PlayerState.ModeChanging;
-        _playerStats.TickThunderGauge(Time.deltaTime, isThunderMode);
+        _playerStats.TickThunderGauge(Time.deltaTime * TimeScale, isThunderMode);
     }
 
     private void HandleThunderGaugeDepleted()
