@@ -7,11 +7,19 @@ public class PlayerGaugeView : MonoBehaviour
         _healthView.UpdateGauge(current, max, initialMax);
     }
 
-    public void StaminaChange(float current, float max, float initialMax)
+    /// <summary>
+    /// 旧 StaminaChange の代わりに雷ゲージを表示する。
+    /// GaugeView はそのまま流用できる。
+    /// </summary>
+    public void ThunderGaugeChange(float current, float max, float initialMax)
     {
-        _staminaView.UpdateGauge(current, max, initialMax);
+        _thunderGaugeView.UpdateGauge(current, max, initialMax);
     }
 
     [SerializeField] private GaugeView _healthView;
-    [SerializeField] private GaugeView _staminaView;
+
+    /// <summary>
+    /// Inspector で旧スタミナゲージと同じ GaugeView を割り当てる。
+    /// </summary>
+    [SerializeField] private GaugeView _thunderGaugeView;
 }
