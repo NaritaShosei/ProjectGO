@@ -13,6 +13,8 @@ public interface IEnemyAnimator
     public event Action OnBarkEnd;
     /// <summary>GetUpアニメーション終了のイベント</summary>
     public event Action OnGetUpEnd;
+    /// <summary>ノックバック（Hit/Small）アニメーション終了のイベント</summary>
+    public event Action OnKnockbackEnd;
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
 
@@ -44,6 +46,7 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public event Action OnAttackEnd;
     public event Action OnBarkEnd;
     public event Action OnGetUpEnd;
+    public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
 
     public void SetSpeed(float speed) { }

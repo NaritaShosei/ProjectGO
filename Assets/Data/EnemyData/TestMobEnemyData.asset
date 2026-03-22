@@ -12,11 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba454a2f6d480e649bf6078092511ffe, type: 3}
   m_Name: TestMobEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  _maxHP: 200
+  _maxHP: 2000
   _moveSpeed: 1
   _attackRange: 2
   _attackRadius: 1
   _attackCooldown: 7
   _attackDamage: 5
   _attackPattern: {fileID: 11400000, guid: 47ea3464128699641bc0940e28688e35, type: 2}
+  _knockbackHitThreshold: 5
+  _knockbackLargeThreshold: 10
+  _knockbackStunDuration: 0.05
+  _knockbackDeceleration: 10
   _barkDuration: 2
+  _barkChance: 0.5

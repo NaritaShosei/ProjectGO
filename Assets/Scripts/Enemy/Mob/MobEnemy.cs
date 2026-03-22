@@ -153,7 +153,7 @@ public class MobEnemy : Enemy
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
             KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
-            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel));
+            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel, _data.KnockbackStunDuration, _data.KnockbackDeceleration));
         }
 
         if (CheckProbability(context.ElectricShock.GrantEffectProbability))

@@ -17,6 +17,9 @@ public interface IEnemyAnimationController
     /// <summary>GetUpアニメーション終了の通知</summary>
     public void AnimEvent_GetUpEnd();
 
+    /// <summary>ノックバック（Hit/Small）アニメーション終了の通知</summary>
+    public void AnimEvent_KnockbackEnd();
+
     /// <summary>死亡アニメーション終了の通知</summary>
     public void AnimEvent_DeadEnd();
 }

@@ -18,6 +18,8 @@ public class EnemyData : ScriptableObject
     // ノックバックレベル閾値
     public float KnockbackHitThreshold => _knockbackHitThreshold;
     public float KnockbackLargeThreshold => _knockbackLargeThreshold;
+    public float KnockbackStunDuration => _knockbackStunDuration;
+    public float KnockbackDeceleration => _knockbackDeceleration;
 
     // 攻撃パターン
     public EnemyAttackPattern AttackPattern => _attackPattern;
@@ -41,6 +43,10 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float _knockbackHitThreshold = 5f;
     // Power がこの値以上なら Large（level 2）
     [SerializeField] private float _knockbackLargeThreshold = 100f;
+    // 停止後の硬直時間（秒）Hit / Small のみ使用
+    [SerializeField] private float _knockbackStunDuration = 0.1f;
+    // 水平方向の減速度（単位/秒²）。飛距離の目安 ≈ Power² / (2 × 減速度)
+    [SerializeField] private float _knockbackDeceleration = 50f;
 
     [Header("Bark")]
     [SerializeField] private float _barkDuration = 2.0f;

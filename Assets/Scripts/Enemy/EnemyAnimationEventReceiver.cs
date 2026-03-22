@@ -21,6 +21,9 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     /// <summary>GetUpアニメーション終了のイベント</summary>
     public event Action OnGetUpEnd;
 
+    /// <summary>ノックバック（Hit/Small）アニメーション終了のイベント</summary>
+    public event Action OnKnockbackEnd;
+
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
 
@@ -54,6 +57,14 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public void AnimEvent_GetUpEnd()
     {
         OnGetUpEnd?.Invoke();
+    }
+
+    /// <summary>
+    /// SMBから呼ばれるメソッド
+    /// </summary>
+    public void AnimEvent_KnockbackEnd()
+    {
+        OnKnockbackEnd?.Invoke();
     }
 
     /// <summary>

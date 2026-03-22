@@ -12,6 +12,7 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnAttackEnd;
     public event Action OnBarkEnd;
     public event Action OnGetUpEnd;
+    public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
 
 
@@ -29,6 +30,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnAttackEnd += HandleAttackEnd;
         _receiver.OnBarkEnd += HandleBarkEnd;
         _receiver.OnGetUpEnd += HandleGetUpEnd;
+        _receiver.OnKnockbackEnd += HandleKnockbackEnd;
         _receiver.OnDeadEnd += HandleDeadEnd;
 
     }
@@ -116,6 +118,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnAttackEnd -= HandleAttackEnd;
         _receiver.OnBarkEnd -= HandleBarkEnd;
         _receiver.OnGetUpEnd -= HandleGetUpEnd;
+        _receiver.OnKnockbackEnd -= HandleKnockbackEnd;
         _receiver.OnDeadEnd -= HandleDeadEnd;
     }
 
@@ -140,6 +143,7 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleAttackEnd() => OnAttackEnd?.Invoke();
     private void HandleBarkEnd() => OnBarkEnd?.Invoke();
     private void HandleGetUpEnd() => OnGetUpEnd?.Invoke();
+    private void HandleKnockbackEnd() => OnKnockbackEnd?.Invoke();
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
 
 }
