@@ -987,7 +987,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5722453716084609631, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_Name
-      value: StaminaGauge
+      value: ThunderGauge
       objectReference: {fileID: 0}
     - target: {fileID: 7238458640552067971, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_Pivot.x
@@ -1283,7 +1283,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerGaugeView
   _healthView: {fileID: 1997347486}
-  _staminaView: {fileID: 1337496021}
+  _thunderGaugeView: {fileID: 1337496021}
 --- !u!4 &1631777442 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7667369573914981762, guid: 83116e09ba2fb934d9d99d78f4fe4e82, type: 3}
