@@ -2,11 +2,12 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// AnimationClipのAnimationEventを受け取り、外部へ中継する薄いクラス。
+/// アニメーションのイベントを受け取り、外部へ中継する薄いクラス。
 /// EnemyのAnimatorと同じGameObjectにアタッチする。
 /// ロジックは持たず、イベントの中継のみを担当する。
+/// IEnemyAnimationControllerを実装し、SMBからanimator.TryGetComponent()で取得される。
 /// </summary>
-public class EnemyAnimationEventReceiver : MonoBehaviour
+public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationController
 {
     /// <summary>攻撃ヒットタイミングのイベント</summary>
     public event Action OnAttackHit;
@@ -24,7 +25,7 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     public event Action OnDeadEnd;
 
     /// <summary>
-    /// AnimationClipから直接呼ばれるメソッド
+    /// SMBから呼ばれるメソッド
     /// </summary>
     public void AnimEvent_AttackHit()
     {
@@ -32,7 +33,7 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// AnimationClipから直接呼ばれるメソッド
+    /// SMBから呼ばれるメソッド
     /// </summary>
     public void AnimEvent_AttackEnd()
     {
@@ -40,7 +41,7 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// AnimationClipから直接呼ばれるメソッド
+    /// SMBから呼ばれるメソッド
     /// </summary>
     public void AnimEvent_BarkEnd()
     {
@@ -48,7 +49,7 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// AnimationClipから直接呼ばれるメソッド
+    /// SMBから呼ばれるメソッド
     /// </summary>
     public void AnimEvent_GetUpEnd()
     {
@@ -56,7 +57,7 @@ public class EnemyAnimationEventReceiver : MonoBehaviour
     }
 
     /// <summary>
-    /// AnimationClipから直接呼ばれるメソッド
+    /// SMBから呼ばれるメソッド
     /// </summary>
     public void AnimEvent_DeadEnd()
     {
