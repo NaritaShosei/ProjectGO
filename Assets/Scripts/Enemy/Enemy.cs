@@ -29,6 +29,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     public void OnSpeedChange(float scale)
     {
         TimeScale = scale;
+        // HitStop中はアニメーション再生も停止させる
+        _enemyAnimator?.SetAnimSpeed(scale);
     }
 
     public virtual void Init(IPlayer player)
@@ -223,7 +225,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         if (ServiceLocator.TryGet<HitStopManager>(out var manager))
         {
             _hitStopManager = manager;
+            // AllEnemies: 全敵を対象とするHitStop（クリティカル等）用
             _hitStopManager.Register(this, HitStopTargetGroup.AllEnemies);
+            // HitEnemy: ヒットした1体のみを対象とするHitStop用
+            // 全敵を登録しておき、HitStopManager側で対象の1体だけにフィルタリングする
+            _hitStopManager.Register(this, HitStopTargetGroup.HitEnemy);
         }
     }
 

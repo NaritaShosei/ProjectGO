@@ -95,6 +95,16 @@ public class EnemyAnimator : IEnemyAnimator
     }
 
     /// <summary>
+    /// アニメーション再生速度を設定する。
+    /// HitStopManager から OnSpeedChange 経由で呼ばれる。
+    /// </summary>
+    public void SetAnimSpeed(float speed)
+    {
+        if (_animator == null) return;
+        _animator.speed = speed;
+    }
+
+    /// <summary>
     /// Receiverのイベント購読を解除する。
     /// EnemyのOnDestroyから呼ぶこと。
     /// </summary>

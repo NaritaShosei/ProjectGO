@@ -28,6 +28,8 @@ public interface IEnemyAnimator
     public void SetElectrified(bool value);
     /// <summary>死亡フラグを設定する（一度設定したら戻さない）</summary>
     public void SetDead();
+    /// <summary>アニメーション再生速度を設定する（HitStop制御に使用）</summary>
+    public void SetAnimSpeed(float speed);
     /// <summary>イベント購読を解除する</summary>
     public void Dispose();
 }
@@ -50,5 +52,6 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public void SetKnockback(bool value, KnockbackLevel level = KnockbackLevel.Hit) { }
     public void SetElectrified(bool value) { }
     public void SetDead() { }
+    public void SetAnimSpeed(float speed) { }
     public void Dispose() { }
 }
