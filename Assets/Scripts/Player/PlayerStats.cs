@@ -16,7 +16,7 @@ public class PlayerStats
     public float RecoverPerSecond => _recoverPerSecond;
 
     /// <summary> 1以上あれば雷神モードを使用可能 </summary>
-    public bool CanUseThunder => _currentThunderGauge > 0f;
+    public bool CanUseThunder => _currentThunderGauge > 1f;
 
     // ---- 戦闘ステータス ----
     public float AttackPower => _attackPower;
