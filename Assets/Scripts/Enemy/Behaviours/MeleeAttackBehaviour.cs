@@ -65,8 +65,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         // スポーン時に確保済みのスロットを持っているかチェック
         if (!_attackerSlot.IsAcquired(_enemyId)) return false;
 
-        // クールダウン判定をEnemyContext.LastAttackTimeで行う
-        if (Time.time - _context.LastAttackTime < _data.AttackCooldown) return false;
+        // クールダウン判定（0以下で攻撃可能）
+        if (_context.AttackCooldownRemaining > 0f) return false;
 
         // 射程チェック
         _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
@@ -146,8 +146,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         }
 # endif
 
-        // クールダウン管理のためEnemyContextに記録する
-        _context.LastAttackTime = Time.time;
+        // クールダウンをセットする（MobEnemy.UpdateEnemy()でdeltaTime減算される）
+        _context.AttackCooldownRemaining = _data.AttackCooldown;
 
         Collider[] hits = Physics.OverlapSphere(
             _self.position + _self.forward * _data.AttackRange,

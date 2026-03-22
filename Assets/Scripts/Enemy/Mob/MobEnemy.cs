@@ -196,6 +196,15 @@ public class MobEnemy : Enemy
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_runner == null || _conditionController == null) { return; }
+
+        // 攻撃クールダウンをTimeScale反映済みdeltaTimeで進める
+        // Behaviourの実行状態に関わらず毎フレーム減算する
+        if (_context.AttackCooldownRemaining > 0f)
+        {
+            _context.AttackCooldownRemaining -= deltaTime;
+            if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
+        }
+
         _conditionController.Tick(deltaTime);
         if (_conditionController.BlocksAction) { return; }
         _runner.Tick(deltaTime);
