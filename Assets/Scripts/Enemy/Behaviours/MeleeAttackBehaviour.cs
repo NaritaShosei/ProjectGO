@@ -29,7 +29,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _self = ctx.Owner.GetTargetCenter();
         _enemyId = ctx.Owner.Id;
         _player = ctx.Player;
-        _data = ctx.Data;
         _context = ctx.RuntimeContext;
         _enemyAnimator = ctx.EnemyAnimator;
         _state = ctx.StateContext;
@@ -145,7 +144,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     private Transform _self;
     private Transform _player;
-    private EnemyData _data;
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private IEnemyAnimator _enemyAnimator;
@@ -164,6 +162,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
     private const float _attackFallbackTimeout = 5f;
+
+    // Attackアニメーターステートの名前
+    private const string _attackStateName = "Attack";
 
     /// <summary>
     /// 実際の攻撃判定とダメージ適用を行う
@@ -242,7 +243,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
 
-        if (stateInfo.IsName("Attack"))
+        if (stateInfo.IsName(_attackStateName))
         {
             return stateInfo.length;
         }

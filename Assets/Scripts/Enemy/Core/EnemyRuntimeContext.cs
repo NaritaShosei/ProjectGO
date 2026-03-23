@@ -6,10 +6,12 @@ public class EnemyRuntimeContext
     /// <summary>プレイヤーとの距離キャッシュ（各Behaviourが更新する）</summary>
     public float DistanceToPlayer;
 
-    // 攻撃クールダウン残り時間（秒）
-    // MeleeAttackBehaviourが攻撃するたびにCooldown値にセットする
-    // MobEnemy.UpdateEnemy()でdeltaTime（TimeScale反映済み）ずつ減算する
-    // 0以下で攻撃可能。初回はすぐ攻撃できるよう0で初期化する
+    /// <summary>
+    /// 攻撃クールダウン残り時間（秒）
+    /// MeleeAttackBehaviourが攻撃するたびにCooldown値にセットする
+    /// MobEnemy / GoblinEnemy の UpdateEnemy() でdeltaTime（TimeScale反映済み）ずつ減算する
+    /// 0以下で攻撃可能。初回はすぐ攻撃できるよう0で初期化する
+    /// </summary>
     public float AttackCooldownRemaining;
 
     /// <summary>

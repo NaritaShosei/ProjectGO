@@ -104,6 +104,13 @@ public class GoblinEnemy : Enemy
     {
         if (_runner == null) return;
 
+        // 攻撃クールダウンをTimeScale反映済みdeltaTimeで進める
+        if (_context.AttackCooldownRemaining > 0f)
+        {
+            _context.AttackCooldownRemaining -= deltaTime;
+            if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
+        }
+
         // スロット保持中にパターン未選択なら再選択する
         if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
         {

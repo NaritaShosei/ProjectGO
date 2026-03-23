@@ -44,7 +44,7 @@ public class MoveBehaviour : IEnemyBehaviour
         if (_context.SelectedPattern == null) return false;
 
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        // AttackRangeの_approachRatio倍まで近づいていないときに発動
+        // AttackRangeのMoveApproachRatio倍まで近づいていないときに発動
         float stop = _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
 
         // 攻撃可能距離まで近づいていないときに発動

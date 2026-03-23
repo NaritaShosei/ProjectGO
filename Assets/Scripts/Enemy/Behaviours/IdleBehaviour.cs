@@ -34,7 +34,10 @@ public class IdleBehaviour : IEnemyBehaviour
         _enemyAnimator?.SetSpeed(0f);
     }
 
-    public void OnExit() { }
+    public void OnExit()
+    {
+        // 次のBehaviourのOnEnter()でStateが上書きされるため、ここでは何もしない
+    }
 
     private EnemyData _data;
     private IEnemyAnimator _enemyAnimator;

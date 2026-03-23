@@ -74,7 +74,7 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     /// <summary>
     /// ダメージポップアップ表示用のイベントを発火する
     /// </summary>
-    public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
+    private void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
     {
         OnDamageDealt?.Invoke(new DamagePopupViewModel(
             damage: damage,
