@@ -1,12 +1,12 @@
 using UnityEngine;
 
 /// <summary>
-/// Enemyの移動時の基準や制限を定めたもの
+/// Enemyの移動・攻撃・分離・壁回避に関する距離パラメータをまとめたデータ
 /// </summary>
 [CreateAssetMenu(fileName = "DistanceProfile", menuName = "GameData/Enemy/DistanceProfile")]
 public class DistanceProfile : ScriptableObject
 {
-    // 攻撃を開始する最短距離
+    // 攻撃を開始できる最短距離
     public float MinAttackDistance => _minAttackDistance;
 
     // 攻撃を継続できる最長距離
@@ -40,18 +40,21 @@ public class DistanceProfile : ScriptableObject
     public float WallAvoidanceStrength => _wallAvoidanceStrength;
 
 
+    [Header("Attack")]
     [Min(0f)]
     [SerializeField] private float _minAttackDistance = 1.5f;
 
     [Min(0f)]
     [SerializeField] private float _maxAttackDistance = 2.5f;
 
+    [Header("Movement")]
     [Min(0f)]
     [SerializeField] private float _desiredDistance = 2.0f;
 
     [Min(0f)]
     [SerializeField] private float _desiredTolerance = 0.5f;
 
+    [Header("Roam")]
     [Min(0f)]
     [SerializeField] private float _roamRadius = 3.0f;
 
@@ -61,17 +64,20 @@ public class DistanceProfile : ScriptableObject
     [Min(0f)]
     [SerializeField] private float _minNonAttackerDistance = 3.0f;
 
+    [Header("Separation")]
     [Min(0f)]
     [SerializeField] private float _separationRadius = 1.5f;
 
     [Min(0f)]
     [SerializeField] private float _separationStrength = 0.8f;
 
+    [Header("Wall Avoidance")]
     [Min(0f)]
     [SerializeField] private float _wallDetectDistance = 1.0f;
 
     [Min(0f)]
     [SerializeField] private float _wallAvoidanceStrength = 0.8f;
+
 
 #if UNITY_EDITOR
     private void OnValidate()

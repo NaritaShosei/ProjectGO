@@ -42,12 +42,14 @@ public interface IEnemyAnimator
 /// </summary>
 public sealed class NullEnemyAnimator : IEnemyAnimator
 {
+#pragma warning disable CS0067
     public event Action OnAttackHit;
     public event Action OnAttackEnd;
     public event Action OnBarkEnd;
     public event Action OnGetUpEnd;
     public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
+#pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }
     public void SetAttacking(bool value) { }

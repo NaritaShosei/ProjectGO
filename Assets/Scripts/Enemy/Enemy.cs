@@ -24,8 +24,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     public Vector3 Position { get => transform.position; }
 
+    public int Id => GetInstanceID();
+
+    public virtual bool IsBoss => false;
+
     public float TimeScale { get; set; } = 1f;
 
+    /// <summary>
+    /// HitStop等でTimeScaleが変化したときに呼ばれる
+    /// </summary>
     public void OnSpeedChange(float scale)
     {
         TimeScale = scale;
@@ -33,16 +40,25 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _enemyAnimator?.SetAnimSpeed(scale);
     }
 
+    /// <summary>
+    /// プレイヤー参照を受け取って初期化する
+    /// </summary>
     public virtual void Init(IPlayer player)
     {
         _playerTransform = player.GetTargetCenter();
     }
 
-    public void AddKnockBackForce(Vector3 direction)
+    /// <summary>
+    /// ノックバックの力を方向ベクトルとして直接座標に加算する
+    /// </summary>
+    public void AddKnockbackForce(Vector3 direction)
     {
         transform.position += direction;
     }
 
+    /// <summary>
+    /// UI等が攻撃・ヘルスバーのアンカーとして使用するTransformを返す
+    /// </summary>
     public Transform GetTargetCenter()
     {
         return _targetCenter;
@@ -99,14 +115,23 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _defenceContext.HasShockDebuff = false;
     }
 
+    /// <summary>
+    /// 座標を直接セットする（スポーン・テレポート等）
+    /// </summary>
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
     }
 
-    
-    // MobEnemyからInvokeできないのでラップ？している
-    public void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
+    /// <summary>
+    /// OnArmorBroken を派生クラスから発火するためのラッパー
+    /// </summary>
+    protected void InvokeOnArmorBroken() => OnArmorBroken?.Invoke(this);
+
+    /// <summary>
+    /// ダメージポップアップ表示用イベントを発火する
+    /// </summary>
+    protected void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
     {
         OnDamageDealt?.Invoke(
             new DamagePopupViewModel(
@@ -125,29 +150,16 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// 各サービスをBehaviourに注入する
     /// EnemyManagerのSpawnから呼ぶ想定
     /// </summary>
-    public void InjectServices(
-        ISpatialHashGrid spatialHashGrid,
-        ISeparationService separationService,
-        IWallAvoidanceService wallAvoidanceService,
-        IEnemyAttackerSlot attackerSlot
-    )
+    public void InjectServices(EnemyServices services)
     {
-        _spatialHashGrid = spatialHashGrid;
-        _separationService = separationService;
-        _wallAvoidanceService = wallAvoidanceService;
-
         // 再注入時に旧スロットの購読が残らないよう先に解除する
-        if (_attackerSlot != null)
-        {
-            _attackerSlot.OnSlotReleased -= HandleSlotReleased;
-        }
+        var oldSlot = _services.AttackerSlot;
+        if (oldSlot != null) oldSlot.OnSlotReleased -= HandleSlotReleased;
 
-        _attackerSlot = attackerSlot;
+        _services = services;
 
-        if (_attackerSlot != null)
-        {
-            _attackerSlot.OnSlotReleased += HandleSlotReleased;
-        }
+        var newSlot = _services.AttackerSlot;
+        if (newSlot != null) newSlot.OnSlotReleased += HandleSlotReleased;
     }
 
     [SerializeField] protected EnemyData _data;
@@ -181,10 +193,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected CancellationTokenSource _shockCts;
 
     // サービス参照（InjectServicesで注入される）
-    protected ISpatialHashGrid _spatialHashGrid;
-    protected ISeparationService _separationService;
-    protected IWallAvoidanceService _wallAvoidanceService;
-    protected IEnemyAttackerSlot _attackerSlot;
+    protected EnemyServices _services;
 
     protected virtual void Awake()
     {
@@ -244,10 +253,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _stats.OnDead -= OnDeath;
         OnDead -= HandleDead;
 
-        if (_attackerSlot != null)
-        {
-            _attackerSlot.OnSlotReleased -= HandleSlotReleased;
-        }
+        var slot = _services.AttackerSlot;
+        if (slot != null) slot.OnSlotReleased -= HandleSlotReleased;
 
         // 死亡アニメーション終了イベントの購読解除とDisposeをまとめて行う
         if (_enemyAnimator != null)
@@ -269,7 +276,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         OnDeathInternal();
     }
 
-    protected void HandleDead(IEnemy _)
+    private void HandleDead(IEnemy _)
     {
         // _shockCtsの解除
         _shockCts?.Cancel();
@@ -290,7 +297,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     {
         // 死亡済みの場合はスロット再取得を試みない
         if (_isDead) return;
-        if (_attackerSlot == null) return;
+        if (_services.AttackerSlot == null) return;
         if (_data == null) return;
 
         int slotCost = _data.AttackPattern != null
@@ -298,9 +305,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             : 1;
 
         // 未取得の場合のみ再取得を試みる
-        if (!_attackerSlot.IsAcquired(GetInstanceID()))
+        if (!_services.AttackerSlot.IsAcquired(Id))
         {
-            _attackerSlot.TryAcquire(GetInstanceID(), slotCost, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, slotCost, IsBoss);
         }
     }
 
@@ -350,19 +357,3 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected abstract void UpdateEnemy(float deltaTime);
 }
 
-// TODO: 鎧が壊れたことを検知してEnemyTypeを切り替える
-public struct EnemyDefenseContext
-{
-    // 鎧 / 生身
-    public EnemyType EnemyType;
-    // 感電弱体化状態か
-    public bool HasShockDebuff;
-}
-
-public enum EnemyType
-{
-    [InspectorName("生身")]
-    Flesh,
-    [InspectorName("鎧")]
-    Armor,
-}

@@ -14,6 +14,9 @@ public sealed class KnockbackCondition : IEnemyCondition
     public bool BlocksAction => true;
     public bool IsFinished => _isFinished;
 
+    /// <summary>
+    /// ノックバック条件を初期化する
+    /// </summary>
     /// <param name="level">ノックバックレベル（0=Hit / 1=Small / 2=Large）</param>
     /// <param name="stunDuration">停止後の硬直時間（秒）Hit/Small のみ使用</param>
     /// <param name="deceleration">水平方向の減速度（単位/秒²）飛距離 ≈ Power² / (2 × deceleration)</param>
@@ -104,7 +107,7 @@ public sealed class KnockbackCondition : IEnemyCondition
 
         // 移動適用
         Vector3 delta = _velocityH * deltaTime + Vector3.up * (_velocityV * deltaTime);
-        enemy.AddKnockBackForce(delta);
+        enemy.AddKnockbackForce(delta);
 
         // 地面クランプ（めり込み防止）
         if (enemy.Position.y < _groundY)

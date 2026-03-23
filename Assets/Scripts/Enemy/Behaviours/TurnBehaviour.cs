@@ -32,17 +32,11 @@ public class TurnBehaviour : IEnemyBehaviour
         _overrideDirection = direction;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _player = player;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _player = ctx.Player;
+        _state = ctx.StateContext;
     }
 
     public bool CanEnter()

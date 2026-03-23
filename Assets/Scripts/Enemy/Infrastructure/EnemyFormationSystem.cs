@@ -13,13 +13,16 @@ using UnityEngine;
 /// 背後スロット譲渡ルール（Tick内で判定）:
 ///   前衛がプレイヤー背後に移動かつCoolDown中 → CP以下の正面非前衛へスロットを譲渡する
 /// </summary>
-public class EnemyFormationSystem : IEnemyFormationSystem
+public sealed class EnemyFormationSystem : IEnemyFormationSystem
 {
     /// <summary>
     /// 内部スロットが解放されたときに発火するイベント
     /// </summary>
     public event Action OnSlotReleased;
 
+    /// <summary>
+    /// フォーメーションシステムを初期化する
+    /// </summary>
     /// <param name="maxSlots">同時攻撃スロット上限数</param>
     /// <param name="playerTransform">プレイヤーの向き・位置参照（背後判定に使用）</param>
     /// <param name="backAttackAngle">背後エリアとみなす角度（プレイヤー正面からの閾値、デフォルト90°）</param>
@@ -122,8 +125,10 @@ public class EnemyFormationSystem : IEnemyFormationSystem
         _innerSlot.Release(enemyId, slotCost);
     }
 
-    public bool IsFull(int slotCost) => _innerSlot.IsFull(slotCost);
-
+    /// <summary>
+    /// 全エントリとスロット状態をクリアする
+    /// シーン再ロードやゲームリセット時の使用を想定
+    /// </summary>
     public void Reset()
     {
         _innerSlot.Reset();

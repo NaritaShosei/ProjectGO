@@ -44,15 +44,12 @@ public class EnemyManager : MonoBehaviour
 
             // InjectServicesをInitより前に呼ぶ
             // Init内でBehaviourを生成する際にサービスを参照するため
-            if (obj.TryGetComponent(out Enemy enemyBase))
-            {
-                enemyBase.InjectServices(
-                    _spatialHashGrid,
-                    _separationService,
-                    _wallAvoidanceService,
-                    _formationSystem
-                );
-            }
+            enemy.InjectServices(new EnemyServices(
+                _spatialHashGrid,
+                _separationService,
+                _wallAvoidanceService,
+                _formationSystem
+            ));
 
             // FormationSystemへの登録はInit前に行う
             // Init内のTryAcquireが呼ばれる時点でIsVanguardが確定している必要があるため
@@ -77,6 +74,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
     /// <summary>
@@ -131,6 +129,10 @@ public class EnemyManager : MonoBehaviour
         _formationSystem?.Tick(Time.deltaTime);
     }
 
+    /// <summary>
+    /// EnemyのOnDeadイベントハンドラ
+    /// リストから除外してEnemyDefeated / BossDefeatedを発火する
+    /// </summary>
     private void HandleEnemyDead(IEnemy enemy)
     {
         if (enemy != null)
@@ -143,7 +145,7 @@ public class EnemyManager : MonoBehaviour
             _enemies.Remove(enemy);
 
             // ボスかどうか判定
-            if (enemy is BossEnemy)
+            if (enemy.IsBoss)
             {
                 OnBossDefeated?.Invoke();
             }
@@ -154,9 +156,11 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
     // デバッグ用
     private void OnGUI()
     {
         GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
     }
+#endif
 }

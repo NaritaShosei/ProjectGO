@@ -1,22 +1,21 @@
 using UnityEngine;
 
-// NOTE:
-// この GoblinEnemy は「基盤用の最小実装」です。
-// ・複雑なAI
-// ・スキル
-// ・状態遷移
-// は意図的に入れていません。
-// 拡張する場合はこのクラスを参考に派生 or 分離してください。
-
+/// <summary>
+/// Enemyの基盤用最小実装クラス
+/// 複雑なAI・スキル・状態遷移は意図的に含めていない
+/// 拡張する場合はこのクラスを参考に派生 or 分離してください
+/// </summary>
 public class GoblinEnemy : Enemy
 {
     public override void Init(IPlayer player)
     {
         base.Init(player);
 
-        _context = new EnemyContext();
+        _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
+
+        var initCtx = new BehaviourInitContext(this, _data, _playerTransform, _context, _enemyAnimator, _state);
 
         // TurnProfileが未設定の場合は警告を出してTurnを登録しない
         if (_turnProfile == null)
@@ -26,32 +25,32 @@ public class GoblinEnemy : Enemy
         else
         {
             _turn = new TurnBehaviour(_turnProfile);
-            _turn.Init(this, _data, _playerTransform, _context, _state);
+            _turn.Init(initCtx);
             _runner.RegisterTurn(_turn);
         }
 
         // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
-        if (_attackerSlot == null)
+        if (_services.AttackerSlot == null)
         {
             Debug.LogWarning($"{nameof(GoblinEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
         }
         else
         {
-            _attack = new MeleeAttackBehaviour(_attackerSlot);
-            _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+            _attack = new MeleeAttackBehaviour(_distanceProfile, _services, _animator);
+            _attack.Init(initCtx);
             _runner.Register(_attack);
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
             int goblinSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
-            _attackerSlot.TryAcquire(GetInstanceID(), goblinSlotCost, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, goblinSlotCost, isBoss: false);
 
             // BarkをattackerSlotブロック内に移動
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                _bark = new BarkBehaviour(_distanceProfile, _attackerSlot, _data.BarkChance);
-                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+                _bark = new BarkBehaviour(_distanceProfile, _services, _data.BarkChance);
+                _bark.Init(initCtx);
                 _runner.Register(_bark);
             }
         }
@@ -63,33 +62,22 @@ public class GoblinEnemy : Enemy
         }
         else
         {
-            var move = new MoveBehaviour(
-                _distanceProfile,
-                _attackerSlot,
-                _separationService,
-                _wallAvoidanceService,
-                _spatialHashGrid
-            );
-            move.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+            var move = new MoveBehaviour(_distanceProfile, _services);
+            move.Init(initCtx);
             _runner.Register(move);
-
-            // BarkはattackerSlotブロックへ移動したためここから削除
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
-                _attackerSlot,
-                _separationService,
-                _wallAvoidanceService,
-                _spatialHashGrid,
+                _services,
                 dir => _turn?.SetOverrideDirection(dir)
             );
-            roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+            roam.Init(initCtx);
             _runner.Register(roam);
         }
     }
 
     private EnemyBehaviourRunner _runner;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private MeleeAttackBehaviour _attack;
     private BarkBehaviour _bark;

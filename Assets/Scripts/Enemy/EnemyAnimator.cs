@@ -32,7 +32,6 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnGetUpEnd += HandleGetUpEnd;
         _receiver.OnKnockbackEnd += HandleKnockbackEnd;
         _receiver.OnDeadEnd += HandleDeadEnd;
-
     }
 
     /// <summary>
@@ -122,7 +121,6 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnDeadEnd -= HandleDeadEnd;
     }
 
-
     // Animatorパラメータのハッシュ
     private static readonly int _hashSpeed = Animator.StringToHash("Speed");
     private static readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
@@ -131,7 +129,6 @@ public class EnemyAnimator : IEnemyAnimator
     private static readonly int _hashIsDead = Animator.StringToHash("IsDead");
 
     private static readonly int _hashIsKnockback = Animator.StringToHash("IsKnockback");
-    // 追加: KnockbackLevelパラメータのハッシュ
     private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
 
     private readonly Animator _animator;
@@ -145,5 +142,4 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleGetUpEnd() => OnGetUpEnd?.Invoke();
     private void HandleKnockbackEnd() => OnKnockbackEnd?.Invoke();
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
-
 }

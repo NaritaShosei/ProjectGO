@@ -27,49 +27,37 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
 
-    /// <summary>
-    /// SMBから呼ばれるメソッド
-    /// </summary>
+    /// <summary>EnemyAttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
     {
         OnAttackHit?.Invoke();
     }
 
-    /// <summary>
-    /// SMBから呼ばれるメソッド
-    /// </summary>
+    /// <summary>EnemyAttackSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_AttackEnd()
     {
         OnAttackEnd?.Invoke();
     }
 
-    /// <summary>
-    /// SMBから呼ばれるメソッド
-    /// </summary>
+    /// <summary>EnemyBarkSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_BarkEnd()
     {
         OnBarkEnd?.Invoke();
     }
 
-    /// <summary>
-    /// SMBから呼ばれるメソッド
-    /// </summary>
+    /// <summary>EnemyGetUpSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_GetUpEnd()
     {
         OnGetUpEnd?.Invoke();
     }
 
-    /// <summary>
-    /// SMBから呼ばれるメソッド
-    /// </summary>
+    /// <summary>EnemyKnockbackSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_KnockbackEnd()
     {
         OnKnockbackEnd?.Invoke();
     }
 
-    /// <summary>
-    /// SMBから呼ばれるメソッド
-    /// </summary>
+    /// <summary>EnemyDeadSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_DeadEnd()
     {
         OnDeadEnd?.Invoke();

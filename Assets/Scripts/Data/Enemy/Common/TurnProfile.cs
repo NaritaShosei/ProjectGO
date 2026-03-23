@@ -4,7 +4,7 @@ using UnityEngine;
 /// Enemyの回転速度を制限するためのデータ
 /// </summary>
 [CreateAssetMenu(fileName = "TurnProfile", menuName = "GameData/Enemy/TurnProfile")]
-public class TurnProfile : ScriptableObject
+public sealed class TurnProfile : ScriptableObject
 {
     // 最小回転速度（deg/sec）：角度差が maxAngle に近いほどこの値に近づく
     public float MinTurnSpeed => _minTurnSpeed;

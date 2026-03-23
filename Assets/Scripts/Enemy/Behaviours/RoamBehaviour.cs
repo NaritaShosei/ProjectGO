@@ -14,40 +14,29 @@ public class RoamBehaviour : IEnemyBehaviour
     /// </summary>
     public RoamBehaviour(
         DistanceProfile profile,
-        IEnemyAttackerSlot attackerSlot,
-        ISeparationService separationService,
-        IWallAvoidanceService wallAvoidanceService,
-        ISpatialHashGrid spatialHashGrid,
+        EnemyServices services,
         Action<Vector3?> onRoamDirection
     )
     {
         if (profile == null)
             throw new ArgumentNullException(nameof(profile));
         _profile = profile;
-        _attackerSlot = attackerSlot;
-        _separationService = separationService;
-        _wallAvoidanceService = wallAvoidanceService;
-        _spatialHashGrid = spatialHashGrid;
+        _attackerSlot = services.AttackerSlot;
+        _separationService = services.SeparationService;
+        _wallAvoidanceService = services.WallAvoidanceService;
+        _spatialHashGrid = services.SpatialHashGrid;
         _onRoamDirection = onRoamDirection;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        IEnemyAnimator enemyAnimator,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _enemy = owner;
-        _enemyId = owner.GetInstanceID();
-        _enemyAnimator = enemyAnimator;
-        _player = player;
-        _data = data;
-        _context = context;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemy = ctx.Owner;
+        _enemyId = ctx.Owner.Id;
+        _enemyAnimator = ctx.EnemyAnimator;
+        _player = ctx.Player;
+        _data = ctx.Data;
+        _state = ctx.StateContext;
     }
 
     public bool CanEnter()
@@ -148,7 +137,6 @@ public class RoamBehaviour : IEnemyBehaviour
     private IEnemy _enemy;
     private Transform _player;
     private EnemyData _data;
-    private EnemyContext _context;
     private IEnemyAnimator _enemyAnimator;
     private EnemyStateContext _state;
 

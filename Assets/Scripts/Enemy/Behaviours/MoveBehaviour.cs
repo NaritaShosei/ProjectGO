@@ -11,38 +11,25 @@ public class MoveBehaviour : IEnemyBehaviour
     /// <summary>
     /// DistanceProfile・各サービスはMove固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MoveBehaviour(
-        DistanceProfile profile,
-        IEnemyAttackerSlot attackerSlot,
-        ISeparationService separationService,
-        IWallAvoidanceService wallAvoidanceService,
-        ISpatialHashGrid spatialHashGrid
-    )
+    public MoveBehaviour(DistanceProfile profile, EnemyServices services)
     {
         _profile = profile;
-        _separationService = separationService;
-        _wallAvoidanceService = wallAvoidanceService;
-        _spatialHashGrid = spatialHashGrid;
-        _attackerSlot = attackerSlot;
+        _separationService = services.SeparationService;
+        _wallAvoidanceService = services.WallAvoidanceService;
+        _spatialHashGrid = services.SpatialHashGrid;
+        _attackerSlot = services.AttackerSlot;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        IEnemyAnimator enemyAnimator,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _enemy = owner;
-        _enemyAnimator = enemyAnimator;
-        _enemyId = owner.GetInstanceID();
-        _player = player;
-        _data = data;
-        _context = context;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemy = ctx.Owner;
+        _enemyAnimator = ctx.EnemyAnimator;
+        _enemyId = ctx.Owner.Id;
+        _player = ctx.Player;
+        _data = ctx.Data;
+        _context = ctx.RuntimeContext;
+        _state = ctx.StateContext;
     }
 
     public bool CanEnter()
@@ -54,10 +41,10 @@ public class MoveBehaviour : IEnemyBehaviour
         if (!_attackerSlot.IsAcquired(_enemyId)) return false;
 
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
+        float threshold = _profile.DesiredDistance + _profile.DesiredTolerance;
 
-        // 攻撃距離外のときに発動
-        return sqrDist > sqrAttack;
+        // 理想距離まで近づいていないときに発動
+        return sqrDist > threshold * threshold;
     }
 
     public bool CanContinue()
@@ -69,10 +56,10 @@ public class MoveBehaviour : IEnemyBehaviour
         if (!_attackerSlot.IsAcquired(_enemyId)) return false;
 
         float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
+        float threshold = _profile.DesiredDistance + _profile.DesiredTolerance;
 
-        // 攻撃距離内に入ったら終了
-        return sqrDist > sqrAttack;
+        // 理想距離内に入ったら終了
+        return sqrDist > threshold * threshold;
     }
 
     public void OnEnter()
@@ -135,7 +122,7 @@ public class MoveBehaviour : IEnemyBehaviour
             _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
         }
 
-        // EnemyContextの距離を更新する
+        // EnemyRuntimeContextの距離を更新する
         _context.DistanceToPlayer = Vector3.Distance(
             _self.position,
             _player.position
@@ -146,7 +133,7 @@ public class MoveBehaviour : IEnemyBehaviour
     private IEnemy _enemy;
     private Transform _player;
     private EnemyData _data;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private int _enemyId;
     private IEnemyAnimator _enemyAnimator;

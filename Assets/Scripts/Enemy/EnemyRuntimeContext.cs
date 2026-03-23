@@ -1,5 +1,9 @@
-public class EnemyContext
+/// <summary>
+/// Behaviour間で共有するランタイム状態コンテキスト
+/// </summary>
+public class EnemyRuntimeContext
 {
+    /// <summary>プレイヤーとの距離キャッシュ（各Behaviourが更新する）</summary>
     public float DistanceToPlayer;
 
     // 攻撃クールダウン残り時間（秒）

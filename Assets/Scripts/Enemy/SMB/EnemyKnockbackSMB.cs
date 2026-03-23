@@ -12,8 +12,8 @@ public class EnemyKnockbackSMB : StateMachineBehaviour
 {
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.SetBool("IsKnockback", false);
-        animator.SetInteger("KnockbackLevel", 0);
+        animator.SetBool(_hashIsKnockback, false);
+        animator.SetInteger(_hashKnockbackLevel, 0);
         animator.TryGetComponent(out _controller);
     }
 
@@ -22,6 +22,9 @@ public class EnemyKnockbackSMB : StateMachineBehaviour
         if (_controller == null) return;
         _controller.AnimEvent_KnockbackEnd();
     }
+
+    private static readonly int _hashIsKnockback = Animator.StringToHash("IsKnockback");
+    private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
 
     private IEnemyAnimationController _controller;
 }
