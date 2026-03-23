@@ -14,6 +14,9 @@ public interface IEnemy : ICharacter
     /// <summary>ダメージを受けた際にポップアップ情報を通知するイベント</summary>
     event Action<DamagePopupViewModel> OnDamageDealt;
 
+    /// <summary>ダメージを受けて生存したときに発火するイベント（被弾入れ替え判定に使用）</summary>
+    event Action<IEnemy> OnDamaged;
+
     /// <summary>死亡時に発火するイベント</summary>
     event Action<IEnemy> OnDead;
 

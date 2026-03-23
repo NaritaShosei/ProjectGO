@@ -20,7 +20,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     // ─── IFormationParticipant ───────────────────────────────────────────
     public int EnemyId => GetInstanceID();
     public float CombatPower => _data != null ? _data.CombatPower : 0f;
-    public int FormationSlotCost => _data?.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+    public int FormationSlotCost => _data?.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0].SlotCost : 1;
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
@@ -55,13 +55,14 @@ public class MobEnemy : Enemy, IFormationParticipant
         }
         else
         {
-            _attack = new MeleeAttackBehaviour(_distanceProfile, _services, _animator);
+            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
             _attack.Init(initCtx);
             _runner.Register(_attack);
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            int mobSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+            int mobSlotCost = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0].SlotCost : 1;
+            _context.AcquiredSlotCost = mobSlotCost;
             _services.AttackerSlot.TryAcquire(Id, mobSlotCost, isBoss: false);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
@@ -92,6 +93,10 @@ public class MobEnemy : Enemy, IFormationParticipant
             );
             roam.Init(initCtx);
             _runner.Register(roam);
+
+            var idle = new IdleBehaviour();
+            idle.Init(initCtx);
+            _runner.Register(idle);
         }
 
         // 鎧登録　データがなければ裸
@@ -144,6 +149,8 @@ public class MobEnemy : Enemy, IFormationParticipant
             });
 
         InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+
+        if (!isKill) InvokeOnDamaged();
 
         // -------- 追加効果 --------
 
@@ -204,6 +211,13 @@ public class MobEnemy : Enemy, IFormationParticipant
             if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
         }
 
+        // スロット保持中にパターン未選択なら再選択する
+        // スポーン時取得失敗後の再取得・攻撃終了後の再選択をここで一括処理する
+        if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
+        {
+            _context.SelectedPattern = SelectPattern();
+        }
+
         _conditionController.Tick(deltaTime);
         if (_conditionController.BlocksAction) { return; }
         _runner.Tick(deltaTime);
@@ -244,6 +258,15 @@ public class MobEnemy : Enemy, IFormationParticipant
     }
 
     /// <summary>
+    /// AttackPatternsリストからランダムに1つ選択する
+    /// </summary>
+    private EnemyAttackPattern SelectPattern()
+    {
+        if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0) return null;
+        return _data.AttackPatterns[UnityEngine.Random.Range(0, _data.AttackPatterns.Count)];
+    }
+
+    /// <summary>
     /// 0〜1の確率値に対してランダム判定を行う
     /// </summary>
     private bool CheckProbability(float probability)
@@ -263,16 +286,29 @@ public class MobEnemy : Enemy, IFormationParticipant
     }
 
 #if UNITY_EDITOR
+    // Attacker取得中の敵の頭上にマーカーを常時表示する
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+        if (_services.AttackerSlot == null) return;
+        if (!_services.AttackerSlot.IsAcquired(Id)) return;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(transform.position + Vector3.up * 2.5f, 0.2f);
+    }
+
     // デバッグ用にシーンビューで球体を描く
     private void OnDrawGizmosSelected()
     {
         if (_data == null) return;
+        var pattern = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0] : null;
+        if (pattern == null) return;
 
         Gizmos.color = Color.red;
         // TODO: Debug用機能なので、優先度低い
         // TODO: 当たり判定の中心がtransform.forwardのためずれてしまう。
         // TODO: 自分が向いている方向を取得して反映しなければいけない
-        Gizmos.DrawWireSphere(transform.position + transform.forward * _data.AttackRange, _data.AttackRadius);
+        Gizmos.DrawWireSphere(transform.position + transform.forward * pattern.AttackRange, pattern.AttackRadius);
     }
 #endif
 }

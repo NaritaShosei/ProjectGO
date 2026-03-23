@@ -1,23 +1,11 @@
 using UnityEngine;
 
 /// <summary>
-/// Enemyの移動・攻撃・分離・壁回避に関する距離パラメータをまとめたデータ
+/// Enemyの移動・徘徊・分離・壁回避に関する距離パラメータをまとめたデータ
 /// </summary>
 [CreateAssetMenu(fileName = "DistanceProfile", menuName = "GameData/Enemy/DistanceProfile")]
 public class DistanceProfile : ScriptableObject
 {
-    // 攻撃を開始できる最短距離
-    public float MinAttackDistance => _minAttackDistance;
-
-    // 攻撃を継続できる最長距離
-    public float MaxAttackDistance => _maxAttackDistance;
-
-    // 移動目標とするプレイヤーとの理想距離
-    public float DesiredDistance => _desiredDistance;
-
-    // 理想距離の許容誤差（この範囲内なら停止とみなす）
-    public float DesiredTolerance => _desiredTolerance;
-
     // 徘徊時の移動半径
     public float RoamRadius => _roamRadius;
 
@@ -26,6 +14,9 @@ public class DistanceProfile : ScriptableObject
 
     // Attacker でない敵がプレイヤーに近づける最小距離
     public float MinNonAttackerDistance => _minNonAttackerDistance;
+
+    // Attacker がプレイヤーに近づける最小距離（Roam時の目標選定に使用）
+    public float MinAttackerRoamDistance => _minAttackerRoamDistance;
 
     // 他の敵との分離を開始する距離
     public float SeparationRadius => _separationRadius;
@@ -40,19 +31,28 @@ public class DistanceProfile : ScriptableObject
     public float WallAvoidanceStrength => _wallAvoidanceStrength;
 
 
-    [Header("Attack")]
-    [Min(0f)]
-    [SerializeField] private float _minAttackDistance = 1.5f;
+    // Moveを終了してAttackに譲る距離（AttackRangeに対する割合）
+    public float MoveApproachRatio => _moveApproachRatio;
 
-    [Min(0f)]
-    [SerializeField] private float _maxAttackDistance = 2.5f;
+    // 背後攻撃を抑制するプレイヤー正面からの角度閾値（度）
+    public float BackAttackAngle => _backAttackAngle;
+
+    // 背後にいるときに攻撃をキャンセルする確率（0〜1）
+    public float BackAttackSuppressChance => _backAttackSuppressChance;
 
     [Header("Movement")]
-    [Min(0f)]
-    [SerializeField] private float _desiredDistance = 2.0f;
+    [Tooltip("MoveをやめてAttackに譲る距離（AttackRangeに対する割合。0.8 = 80%地点で停止）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float _moveApproachRatio = 0.8f;
 
-    [Min(0f)]
-    [SerializeField] private float _desiredTolerance = 0.5f;
+    [Header("Back Attack")]
+    [Tooltip("背後と判定するプレイヤー正面からの角度（90° = 正面±90°以外は背後）")]
+    [Range(0f, 180f)]
+    [SerializeField] private float _backAttackAngle = 90f;
+
+    [Tooltip("背後にいるときに攻撃をキャンセルする確率（0.8 = 80%キャンセル）")]
+    [Range(0f, 1f)]
+    [SerializeField] private float _backAttackSuppressChance = 0.8f;
 
     [Header("Roam")]
     [Min(0f)]
@@ -63,6 +63,10 @@ public class DistanceProfile : ScriptableObject
 
     [Min(0f)]
     [SerializeField] private float _minNonAttackerDistance = 3.0f;
+
+    [Tooltip("Attackerがプレイヤーに近づける最小距離。Roam目標選定時に適用する")]
+    [Min(0f)]
+    [SerializeField] private float _minAttackerRoamDistance = 2.5f;
 
     [Header("Separation")]
     [Min(0f)]
@@ -77,23 +81,4 @@ public class DistanceProfile : ScriptableObject
 
     [Min(0f)]
     [SerializeField] private float _wallAvoidanceStrength = 0.8f;
-
-
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        // MaxAttackDistance は MinAttackDistance 以上でなければ攻撃距離が逆転する
-        if (_maxAttackDistance < _minAttackDistance)
-        {
-            _maxAttackDistance = _minAttackDistance;
-            Debug.LogWarning(
-                $"[DistanceProfile] MaxAttackDistance を MinAttackDistance ({_minAttackDistance}) に補正しました。",
-                this
-            );
-        }
-
-        // DesiredDistance は MinAttackDistance 以上かつ MaxAttackDistance 以下が自然
-        _desiredDistance = Mathf.Clamp(_desiredDistance, _minAttackDistance, _maxAttackDistance);
-    }
-#endif
 }

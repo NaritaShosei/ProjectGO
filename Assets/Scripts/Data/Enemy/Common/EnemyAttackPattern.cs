@@ -32,6 +32,15 @@ public sealed class EnemyAttackPattern : ScriptableObject
     // 基礎ダメージ量
     public int BaseDamage => _baseDamage;
 
+    // 攻撃射程（当たり判定・Move停止距離の基準）
+    public float AttackRange => _attackRange;
+
+    // 攻撃の当たり判定半径
+    public float AttackRadius => _attackRadius;
+
+    // 攻撃を開始するトリガー距離（AttackRange * AttackTriggerRatio）
+    public float AttackTriggerRatio => _attackTriggerRatio;
+
     [SerializeField] private string _patternName;
 
     [Header("Slot")]
@@ -39,14 +48,16 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [SerializeField] private int _slotCost = 1;
 
     [Header("Timing")]
+    [Tooltip("溜め時間。EnemyAttackSMBの_attackHitTimeと合わせて設定する（コードでは直接参照しない）")]
     [Min(0f)]
     [SerializeField] private float _windUp;
 
+    [Tooltip("攻撃持続時間（秒）。SMBのOnStateExitが正常に発火しない場合のフォールバックとして使用する")]
     [Min(0f)]
-    [SerializeField] private float _duration;
+    [SerializeField] private float _duration = 3.0f;
 
     [Min(0f)]
-    [SerializeField] private float _cooldown;
+    [SerializeField] private float _cooldown = 1.5f;
 
     [Header("Hit")]
     [Min(1)]
@@ -56,12 +67,24 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [SerializeField] private float _hitInterval = 0.2f;
 
     [Header("Knockback")]
+    [Tooltip("プレイヤーへのノックバック強度。現在PerformHit()で未使用（将来の実装用）")]
     [Min(0f)]
     [SerializeField] private float _knockbackPower;
 
     [Header("Damage")]
     [Min(0)]
-    [SerializeField] private int _baseDamage;
+    [SerializeField] private int _baseDamage = 10;
+
+    [Header("Range")]
+    [Min(0f)]
+    [SerializeField] private float _attackRange = 3.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _attackRadius = 1.0f;
+
+    [Tooltip("攻撃を開始するトリガー距離の割合（1.0 = AttackRange, 1.5 = 遠めに攻撃開始）")]
+    [Min(0f)]
+    [SerializeField] private float _attackTriggerRatio = 1.0f;
 
 #if UNITY_EDITOR
     private void OnValidate()

@@ -36,13 +36,14 @@ public class GoblinEnemy : Enemy
         }
         else
         {
-            _attack = new MeleeAttackBehaviour(_distanceProfile, _services, _animator);
+            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
             _attack.Init(initCtx);
             _runner.Register(_attack);
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            int goblinSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+            int goblinSlotCost = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0].SlotCost : 1;
+            _context.AcquiredSlotCost = goblinSlotCost;
             _services.AttackerSlot.TryAcquire(Id, goblinSlotCost, isBoss: false);
 
             // BarkをattackerSlotブロック内に移動
@@ -73,6 +74,10 @@ public class GoblinEnemy : Enemy
             );
             roam.Init(initCtx);
             _runner.Register(roam);
+
+            var idle = new IdleBehaviour();
+            idle.Init(initCtx);
+            _runner.Register(idle);
         }
     }
 
@@ -99,7 +104,19 @@ public class GoblinEnemy : Enemy
     {
         if (_runner == null) return;
 
+        // スロット保持中にパターン未選択なら再選択する
+        if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
+        {
+            _context.SelectedPattern = SelectPattern();
+        }
+
         _runner.Tick(deltaTime);
+    }
+
+    private EnemyAttackPattern SelectPattern()
+    {
+        if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0) return null;
+        return _data.AttackPatterns[UnityEngine.Random.Range(0, _data.AttackPatterns.Count)];
     }
 
     protected override void OnDeathInternal()
@@ -116,15 +133,29 @@ public class GoblinEnemy : Enemy
     }
 
 #if UNITY_EDITOR
+    // Attacker取得中の敵の頭上にマーカーを常時表示する
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+        if (_services.AttackerSlot == null) return;
+        if (!_services.AttackerSlot.IsAcquired(Id)) return;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(transform.position + Vector3.up * 2.5f, 0.2f);
+    }
+
     // デバッグ用にシーンビューで球体を描く
     private void OnDrawGizmosSelected()
     {
         if (_data == null) return;
 
+        var pattern = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0] : null;
+        if (pattern == null) return;
+
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(
-            transform.position + transform.forward * _data.AttackRange,
-            _data.AttackRadius
+            transform.position + transform.forward * pattern.AttackRange,
+            pattern.AttackRadius
         );
     }
 #endif

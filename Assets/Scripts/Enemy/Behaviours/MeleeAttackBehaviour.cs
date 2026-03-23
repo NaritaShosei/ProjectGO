@@ -11,13 +11,17 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
 
     /// <summary>
-    /// DistanceProfile・AttackerSlot・AnimatorはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
+    /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MeleeAttackBehaviour(DistanceProfile profile, EnemyServices services, Animator animator)
+    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null)
     {
-        _profile = profile;
         _attackerSlot = services.AttackerSlot;
         _animator = animator;
+        _profile = profile;
+        // profileがnullの場合は背後判定を無効化する（dot < -1 は常にfalse）
+        _backDotThreshold = profile != null
+            ? Mathf.Cos(profile.BackAttackAngle * Mathf.Deg2Rad)
+            : -1f;
     }
 
     public void Init(BehaviourInitContext ctx)
@@ -47,26 +51,30 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         // スポーン時に確保済みのスロットを持っているかチェック
         if (!_attackerSlot.IsAcquired(_enemyId)) return false;
 
+        // パターン未選択なら攻撃不可
+        if (_context.SelectedPattern == null) return false;
+
         // クールダウン判定（0以下で攻撃可能）
         if (_context.AttackCooldownRemaining > 0f) return false;
 
-        // 射程チェック
+        // 射程チェック（AttackTriggerRatioでトリガー距離を調整）
         _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
-        return _context.DistanceToPlayer <= _data.AttackRange;
+        float triggerRange = _context.SelectedPattern.AttackRange * _context.SelectedPattern.AttackTriggerRatio;
+        if (_context.DistanceToPlayer > triggerRange) return false;
+
+        // 背後攻撃抑制（プレイヤー背後にいる場合は確率的にキャンセル）
+        if (_profile != null && IsInPlayerBack())
+        {
+            if (UnityEngine.Random.value < _profile.BackAttackSuppressChance) return false;
+        }
+
+        return true;
     }
 
     public bool CanContinue()
     {
-        if (!_isAttacking) return false;
-
-        // プレイヤーが最大射程外に逃げた場合は攻撃を中断する
-        if (_profile != null && _player != null)
-        {
-            float dist = Vector3.Distance(_self.position, _player.position);
-            if (dist > _profile.MaxAttackDistance) return false;
-        }
-
-        return true;
+        // 攻撃開始後はアニメーション終了まで継続する
+        return _isAttacking;
     }
 
     public void OnEnter()
@@ -87,7 +95,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _timer += deltaTime;
 
         // 多段ヒット：前回ヒットからHitInterval経過後に追加ヒットを処理する
-        int maxHitCount = _data.AttackPattern != null ? _data.AttackPattern.MaxHitCount : 1;
+        int maxHitCount = _context.SelectedPattern?.MaxHitCount ?? 1;
         if (_hitCount > 0 && _hitCount < maxHitCount && _timer >= _nextHitTime)
         {
             PerformHit();
@@ -97,8 +105,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         // Duration / clip長を超えた場合は強制終了する
         if (!_attackEndFired)
         {
-            float duration = (_data.AttackPattern != null && _data.AttackPattern.Duration > 0f)
-                ? _data.AttackPattern.Duration
+            float duration = (_context.SelectedPattern != null && _context.SelectedPattern.Duration > 0f)
+                ? _context.SelectedPattern.Duration
                 : GetAnimationLength();
 
             if (_timer >= duration)
@@ -132,12 +140,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public void ReleaseSlot()
     {
         if (_attackerSlot == null) return;
-
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        _attackerSlot.Release(_enemyId, slotCost);
+        _attackerSlot.Release(_enemyId, _context?.AcquiredSlotCost ?? 1);
     }
 
     private Transform _self;
@@ -148,8 +151,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private IEnemyAnimator _enemyAnimator;
     private Animator _animator;
 
-    private readonly DistanceProfile _profile;
     private readonly IEnemyAttackerSlot _attackerSlot;
+    private readonly DistanceProfile _profile;
+    private readonly float _backDotThreshold;
 
     private int _enemyId;
     private float _timer;
@@ -163,45 +167,37 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     /// <summary>
     /// 実際の攻撃判定とダメージ適用を行う
-    /// BaseDamageはAttackPatternから取得し、未設定の場合はEnemyDataにフォールバックする
     /// </summary>
     private void PerformHit()
     {
-        var pattern = _data.AttackPattern;
-        float damage = (pattern != null && pattern.BaseDamage > 0)
-            ? pattern.BaseDamage
-            : _data.AttackDamage;
-
-        string patternName = pattern != null ? pattern.PatternName : "default";
+        var pattern = _context.SelectedPattern;
+        if (pattern == null) return;
 
 #if UNITY_EDITOR
-        Vector3 center = _self.position + _self.forward * _data.AttackRange;
-        Debug.Log($"[Attack:{patternName}] hit={_hitCount + 1}, center={center}, radius={_data.AttackRadius}");
-        Collider[] debugHits = Physics.OverlapSphere(center, _data.AttackRadius);
+        Vector3 debugCenter = _self.position + _self.forward * pattern.AttackRange;
+        Debug.Log($"[Attack:{pattern.PatternName}] hit={_hitCount + 1}, center={debugCenter}, radius={pattern.AttackRadius}");
+        Collider[] debugHits = Physics.OverlapSphere(debugCenter, pattern.AttackRadius);
         foreach (var h in debugHits)
         {
-            Debug.Log($"[Attack:{patternName}] target={h.gameObject.name}, hasIPlayer={h.TryGetComponent<IPlayer>(out _)}");
+            Debug.Log($"[Attack:{pattern.PatternName}] target={h.gameObject.name}, hasIPlayer={h.TryGetComponent<IPlayer>(out _)}");
         }
 #endif
 
         Collider[] hits = Physics.OverlapSphere(
-            _self.position + _self.forward * _data.AttackRange,
-            _data.AttackRadius
+            _self.position + _self.forward * pattern.AttackRange,
+            pattern.AttackRadius
         );
 
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent(out IPlayer player))
             {
-                player.TakeDamage(damage);
+                player.TakeDamage(pattern.BaseDamage);
             }
         }
 
         _hitCount++;
-
-        // 次のヒット時刻を設定する
-        float hitInterval = pattern != null ? pattern.HitInterval : 0f;
-        _nextHitTime = _timer + hitInterval;
+        _nextHitTime = _timer + pattern.HitInterval;
     }
 
     private void Exit()
@@ -209,15 +205,30 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         if (!_isAttacking) return;
         _isAttacking = false;
 
-        // 攻撃後クールダウンをセット（AttackPatternが設定されていれば優先する）
-        var pattern = _data.AttackPattern;
-        float cooldown = (pattern != null && pattern.Cooldown > 0f)
-            ? pattern.Cooldown
-            : _data.AttackCooldown;
-        _context.AttackCooldownRemaining = cooldown;
+        // 攻撃後クールダウンをセット
+        _context.AttackCooldownRemaining = _context.SelectedPattern?.Cooldown ?? 1.5f;
+
+        // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
+        _context.SelectedPattern = null;
 
         _enemyAnimator?.SetAttacking(false);
         _state.ChangeState(EnemyState.Idle);
+    }
+
+    /// <summary>
+    /// 自分がプレイヤーの背後エリアに位置するかを判定する
+    /// </summary>
+    private bool IsInPlayerBack()
+    {
+        Vector3 toSelf = _self.position - _player.position;
+        toSelf.y = 0f;
+        if (toSelf.sqrMagnitude < 0.001f) return false;
+
+        Vector3 playerFwd = _player.forward;
+        playerFwd.y = 0f;
+
+        float dot = Vector3.Dot(playerFwd.normalized, toSelf.normalized);
+        return dot < _backDotThreshold;
     }
 
     /// <summary>

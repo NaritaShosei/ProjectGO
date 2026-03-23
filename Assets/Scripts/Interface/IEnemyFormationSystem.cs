@@ -13,8 +13,8 @@ public interface IEnemyFormationSystem : IEnemyAttackerSlot
     void Register(IEnemy enemy, IFormationParticipant participant);
 
     /// <summary>
-    /// 毎フレーム呼び出す
-    /// 背後に移動かつCoolDown中の前衛からスロットを正面の低CPエントリへ譲渡する
+    /// 後衛Enemyが被弾したことを通知する
+    /// CP同等以下の前衛と入れ替えてスロットを再配分する
     /// </summary>
-    void Tick(float deltaTime);
+    void NotifyHit(int enemyId);
 }

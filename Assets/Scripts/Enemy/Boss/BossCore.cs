@@ -29,6 +29,13 @@ public sealed class BossCore : MonoBehaviour, IEnemy
         remove => _boss.OnDamageDealt -= value;
     }
 
+    /// <summary>_bossのOnDamagedをそのまま中継する</summary>
+    public event Action<IEnemy> OnDamaged
+    {
+        add => _boss.OnDamaged += value;
+        remove => _boss.OnDamaged -= value;
+    }
+
     public IEnemyConditionController ConditionController => _nullConditionController;
 
     /// <summary>BossCoreはAnimatorを持たないためNull Objectを返す</summary>

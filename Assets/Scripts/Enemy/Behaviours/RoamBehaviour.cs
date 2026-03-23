@@ -187,9 +187,24 @@ public class RoamBehaviour : IEnemyBehaviour
             float angle = UnityEngine.Random.Range(-90f, 90f);
             baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
         }
+        else if (isAttacker && distToPlayer < _profile.MinAttackerRoamDistance)
+        {
+            // 攻撃者が最小距離より近い場合はプレイヤーから離れる方向へ徘徊する
+            Vector3 awayFromPlayer = distToPlayer > 0f ? -toPlayer.normalized : Vector3.back;
+            float angle = UnityEngine.Random.Range(-90f, 90f);
+            baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
+        }
+        else if (isAttacker)
+        {
+            // 攻撃者はプレイヤーを中心とした円周上を移動する（横方向のみ）
+            Vector3 dirToPlayer = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
+            Vector3 lateral = Vector3.Cross(Vector3.up, dirToPlayer).normalized;
+            float sign = UnityEngine.Random.value < 0.5f ? 1f : -1f;
+            baseDir = lateral * sign;
+        }
         else
         {
-            // プレイヤー方向を基準に ±90° 以内のランダムな方向へ徘徊する
+            // 非攻撃者はプレイヤー方向を基準に ±90° 以内のランダムな方向へ徘徊する
             Vector3 dirToPlayer = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
             float angle = UnityEngine.Random.Range(-90f, 90f);
             baseDir = Quaternion.Euler(0f, angle, 0f) * dirToPlayer;

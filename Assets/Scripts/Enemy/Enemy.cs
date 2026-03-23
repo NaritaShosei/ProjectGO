@@ -9,6 +9,7 @@ using UnityEngine;
 public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 {
     public event Action<IEnemy> OnDead;
+    public event Action<IEnemy> OnDamaged;
     public event Action<IEnemy> OnArmorBroken;
 
     public event Action<float, float> OnHealthChanged
@@ -87,6 +88,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             });
 
         InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+
+        if (!isKill) InvokeOnDamaged();
     }
 
     public async UniTask ActivateShockDebuff(int durationSeconds = 10)
@@ -127,6 +130,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// OnArmorBroken を派生クラスから発火するためのラッパー
     /// </summary>
     protected void InvokeOnArmorBroken() => OnArmorBroken?.Invoke(this);
+
+    /// <summary>
+    /// OnDamaged を派生クラスから発火するためのラッパー
+    /// </summary>
+    protected void InvokeOnDamaged() => OnDamaged?.Invoke(this);
 
     /// <summary>
     /// ダメージポップアップ表示用イベントを発火する
@@ -300,8 +308,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         if (_services.AttackerSlot == null) return;
         if (_data == null) return;
 
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
+        int slotCost = _data.AttackPatterns != null && _data.AttackPatterns.Count > 0
+            ? _data.AttackPatterns[0].SlotCost
             : 1;
 
         // 未取得の場合のみ再取得を試みる

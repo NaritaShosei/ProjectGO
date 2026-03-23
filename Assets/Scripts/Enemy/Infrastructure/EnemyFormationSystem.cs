@@ -8,10 +8,15 @@ using UnityEngine;
 ///
 /// 前衛選出ルール:
 ///   前衛数 = max(2, ceil(総敵数 × 0.3))
-///   正面エリア（プレイヤー前方±backAttackAngle以内）のエントリをCombatPower降順で上位N体を前衛とする
+///   全エントリをCombatPower降順でソートし上位N体を前衛とする（位置は考慮しない）
 ///
-/// 背後スロット譲渡ルール（Tick内で判定）:
-///   前衛がプレイヤー背後に移動かつCoolDown中 → CP以下の正面非前衛へスロットを譲渡する
+/// アタッカー入れ替えトリガー:
+///   ① 死亡: OnDeadハンドラ → ReevaluateFormation()
+///   ② 強敵スポーン: Register() → ReevaluateFormation()
+///   ③ 被弾: NotifyHit() → CP同等以下の前衛と入れ替え
+///
+/// 背後攻撃抑制:
+///   MeleeAttackBehaviour.CanEnter()内でDistanceProfileのパラメータに基づき確率的に抑制する
 /// </summary>
 public sealed class EnemyFormationSystem : IEnemyFormationSystem
 {
@@ -22,20 +27,15 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
 
     /// <summary>
     /// フォーメーションシステムを初期化する
+    /// スロット上限は敵登録・死亡のたびに ReevaluateFormation() が自動で更新する
     /// </summary>
-    /// <param name="maxSlots">同時攻撃スロット上限数</param>
-    /// <param name="playerTransform">プレイヤーの向き・位置参照（背後判定に使用）</param>
-    /// <param name="backAttackAngle">背後エリアとみなす角度（プレイヤー正面からの閾値、デフォルト90°）</param>
-    public EnemyFormationSystem(int maxSlots, Transform playerTransform, float backAttackAngle = 90f)
+    public EnemyFormationSystem()
     {
-        _innerSlot = new EnemyAttackerSlot(maxSlots);
+        _innerSlot = new EnemyAttackerSlot();
         _innerSlot.OnSlotReleased += HandleInnerSlotReleased;
-        _playerTransform = playerTransform;
-        // dot積閾値: cos(backAttackAngle) より小さければ背後エリアとみなす
-        _backDotThreshold = Mathf.Cos(backAttackAngle * Mathf.Deg2Rad);
     }
 
-    // ─── IEnemyFormationSystem ───────────────────────────────────────────
+    // ─── IEnemyFormationSystem / IEnemyAttackerSlot ──────────────────────
 
     /// <summary>
     /// EnemyをFormationSystemに登録してフォーメーションを再評価する
@@ -73,32 +73,35 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     }
 
     /// <summary>
-    /// 毎フレーム呼び出す
-    /// 背後に移動かつCoolDown中の前衛からスロットを正面の低CPエントリへ譲渡する
+    /// 後衛Enemyが被弾したことを通知する
+    /// CP同等以下の前衛の中で最もCPが低い敵と入れ替える
+    /// IsVanguardを先に更新してからスロット解放することで、
+    /// OnSlotReleased発火時に昇格候補が正しくTryAcquireできるようにする
     /// </summary>
-    public void Tick(float deltaTime)
+    public void NotifyHit(int enemyId)
     {
-        if (_playerTransform == null) return;
+        if (!_entries.TryGetValue(enemyId, out var hitEntry)) return;
+        // すでに前衛なら何もしない
+        if (hitEntry.IsVanguard) return;
 
-        // イテレーション中の辞書変更を避けるため対象IDを事前に収集する
-        List<int> transferTargets = null;
+        // CP同等以下の前衛の中で最もCPが低い敵を降格候補とする
+        FormationEntry worst = null;
         foreach (var kvp in _entries)
         {
             var entry = kvp.Value;
             if (!entry.IsVanguard) continue;
-            if (!IsInPlayerBack(entry.Enemy)) continue;
-            if (!entry.Participant.IsInAttackCooldown) continue;
-
-            transferTargets ??= new List<int>();
-            transferTargets.Add(kvp.Key);
+            if (entry.CombatPower > hitEntry.CombatPower) continue;
+            if (worst == null || entry.CombatPower < worst.CombatPower)
+                worst = entry;
         }
 
-        if (transferTargets == null) return;
+        if (worst == null) return;
 
-        foreach (int id in transferTargets)
-        {
-            TransferSlotToFront(id);
-        }
+        // IsVanguardを先に更新してからスロット解放する
+        worst.IsVanguard = false;
+        hitEntry.IsVanguard = true;
+        // 解放によりOnSlotReleasedが発火し、hitEntryがTryAcquireを試みる
+        DemoteIfAcquired(worst);
     }
 
     // ─── IEnemyAttackerSlot ──────────────────────────────────────────────
@@ -144,10 +147,6 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     // ─── Private ─────────────────────────────────────────────────────────
 
     private readonly EnemyAttackerSlot _innerSlot;
-    private readonly Transform _playerTransform;
-
-    // 背後判定のdot積閾値（cos(backAttackAngle)）
-    private readonly float _backDotThreshold;
 
     // EnemyId → FormationEntry
     private readonly Dictionary<int, FormationEntry> _entries = new();
@@ -170,8 +169,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
 
     /// <summary>
     /// 全エントリを対象に前衛を再選出する
-    /// 正面エリアのエントリからCombatPower降順で上位N体を前衛とし、
-    /// 降格した前衛のスロットを強制解放する
+    /// 全エントリをCombatPower降順でソートし上位N体を前衛とする（位置は考慮しない）
     /// IsVanguardフラグを先に更新してからスロット解放することで、
     /// OnSlotReleased発火時に新前衛が正しくTryAcquireできるようにする
     /// </summary>
@@ -183,40 +181,24 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         // 前衛数: max(2, ceil(total × 0.3))
         int vanguardCount = Mathf.Max(2, Mathf.CeilToInt(total * 0.3f));
 
-        // 正面・背後エントリを分類する
-        var frontCandidates = new List<FormationEntry>(_entries.Count);
-        var backEntries = new List<FormationEntry>();
+        // スロット上限を前衛数に合わせて更新する
+        _innerSlot.UpdateMaxSlots(vanguardCount);
 
-        foreach (var kvp in _entries)
-        {
-            if (IsInPlayerBack(kvp.Value.Enemy))
-                backEntries.Add(kvp.Value);
-            else
-                frontCandidates.Add(kvp.Value);
-        }
-
-        // 正面エントリをCombatPower降順にソート
-        frontCandidates.Sort((a, b) => b.CombatPower.CompareTo(a.CombatPower));
+        // 全エントリをCombatPower降順にソート
+        var allEntries = new List<FormationEntry>(_entries.Values);
+        allEntries.Sort((a, b) => b.CombatPower.CompareTo(a.CombatPower));
 
         // IsVanguardフラグを先に全エントリに適用する
-        for (int i = 0; i < frontCandidates.Count; i++)
+        for (int i = 0; i < allEntries.Count; i++)
         {
-            frontCandidates[i].IsVanguard = i < vanguardCount;
-        }
-        foreach (var entry in backEntries)
-        {
-            entry.IsVanguard = false;
+            allEntries[i].IsVanguard = i < vanguardCount;
         }
 
         // 降格したエントリのスロットを解放する（OnSlotReleased発火は解放後）
-        foreach (var entry in frontCandidates)
+        foreach (var entry in allEntries)
         {
             if (!entry.IsVanguard)
                 DemoteIfAcquired(entry);
-        }
-        foreach (var entry in backEntries)
-        {
-            DemoteIfAcquired(entry);
         }
     }
 
@@ -232,54 +214,4 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         }
     }
 
-    /// <summary>
-    /// 背後に移動した前衛のスロットを正面の低CPエントリへ譲渡する
-    /// IsVanguardを先に更新してからスロット解放することで、
-    /// OnSlotReleased発火時に昇格候補が正しくTryAcquireできるようにする
-    /// </summary>
-    private void TransferSlotToFront(int fromId)
-    {
-        if (!_entries.TryGetValue(fromId, out var fromEntry)) return;
-
-        // 正面かつ非前衛の中でCPが最大かつfromEntry以下の候補を選ぶ
-        FormationEntry best = null;
-        foreach (var kvp in _entries)
-        {
-            var other = kvp.Value;
-            if (other.IsVanguard) continue;
-            if (IsInPlayerBack(other.Enemy)) continue;
-            if (other.CombatPower > fromEntry.CombatPower) continue;
-            if (best == null || other.CombatPower > best.CombatPower)
-                best = other;
-        }
-
-        if (best == null) return;
-
-        // IsVanguardを先に更新してからスロット解放する
-        fromEntry.IsVanguard = false;
-        best.IsVanguard = true;
-        // 解放によりOnSlotReleasedが発火し、bestがTryAcquireを試みる
-        DemoteIfAcquired(fromEntry);
-    }
-
-    /// <summary>
-    /// EnemyがプレイヤーのXZ平面上で背後エリアに位置するかを判定する
-    /// dot積がthresholdを下回る（角度がbackAttackAngleを超える）場合に背後とみなす
-    /// </summary>
-    private bool IsInPlayerBack(IEnemy enemy)
-    {
-        if (_playerTransform == null) return false;
-
-        Vector3 toEnemy = enemy.Position - _playerTransform.position;
-        toEnemy.y = 0f;
-
-        // 極めて近い場合は背後と判定しない
-        if (toEnemy.sqrMagnitude < 0.001f) return false;
-
-        Vector3 playerForward = _playerTransform.forward;
-        playerForward.y = 0f;
-
-        float dot = Vector3.Dot(playerForward.normalized, toEnemy.normalized);
-        return dot < _backDotThreshold;
-    }
 }

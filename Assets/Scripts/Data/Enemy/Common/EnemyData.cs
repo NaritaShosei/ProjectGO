@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -12,14 +13,8 @@ public class EnemyData : ScriptableObject
     // 移動速度
     public float MoveSpeed => _moveSpeed;
 
-    // 攻撃射程・判定・クールダウン・ダメージ
-    public float AttackRange => _attackRange;
-    public float AttackRadius => _attackRadius;
-    public float AttackCooldown => _attackCooldown;
-    public float AttackDamage => _attackDamage;
-
-    // 攻撃パターン
-    public EnemyAttackPattern AttackPattern => _attackPattern;
+    // 攻撃パターンリスト（射程・判定・ダメージ・クールダウンはパターン側に定義）
+    public List<EnemyAttackPattern> AttackPatterns => _attackPatterns;
 
     // ノックバックレベル閾値
     public float KnockbackHitThreshold => _knockbackHitThreshold;
@@ -43,6 +38,9 @@ public class EnemyData : ScriptableObject
     // 死亡時にヒールアイテムをドロップする確率（0〜1）
     public float HealDropChance => _healDropChance;
 
+    // Idle継続時間（秒）
+    public float IdleDuration => _idleDuration;
+
 
     [Header("Status")]
     [SerializeField] private float _maxHP = 100f;
@@ -51,11 +49,7 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float _moveSpeed = 3f;
 
     [Header("Attack")]
-    [SerializeField] private float _attackRange = 1.5f;
-    [SerializeField] private float _attackRadius = 1.0f;
-    [SerializeField] private float _attackCooldown = 1.2f;
-    [SerializeField] private float _attackDamage = 10f;
-    [SerializeField] private EnemyAttackPattern _attackPattern;
+    [SerializeField] private List<EnemyAttackPattern> _attackPatterns = new();
 
     [Header("Knockback")]
     // Power がこの値以下なら Hit（level 0）
@@ -73,6 +67,10 @@ public class EnemyData : ScriptableObject
 
     [Range(0f, 1f)]
     [SerializeField] private float _barkChance = 0.5f;
+
+    [Header("Idle")]
+    [Min(0f)]
+    [SerializeField] private float _idleDuration = 1.0f;
 
     [Header("Drop")]
     [Range(0f, 1f)]

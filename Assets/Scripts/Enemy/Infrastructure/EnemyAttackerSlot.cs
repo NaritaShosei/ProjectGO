@@ -13,9 +13,18 @@ public sealed class EnemyAttackerSlot : IEnemyAttackerSlot
     /// </summary>
     public event Action OnSlotReleased;
 
-    public EnemyAttackerSlot(int maxSlots)
+    public EnemyAttackerSlot(int maxSlots = 0)
     {
-        _maxSlots = Math.Max(1, maxSlots);
+        _maxSlots = Math.Max(0, maxSlots);
+    }
+
+    /// <summary>
+    /// スロット上限を更新する
+    /// 敵の総数変化（スポーン・死亡）のたびに前衛数に合わせて呼ぶ
+    /// </summary>
+    public void UpdateMaxSlots(int newMax)
+    {
+        _maxSlots = Math.Max(0, newMax);
     }
 
     /// <summary>
@@ -68,7 +77,7 @@ public sealed class EnemyAttackerSlot : IEnemyAttackerSlot
         _usedSlots = 0;
     }
 
-    private readonly int _maxSlots;
+    private int _maxSlots;
     private int _usedSlots;
     private readonly HashSet<int> _holders = new();
 }

@@ -147,8 +147,9 @@ public class EnemyBehaviourRunner
 public enum EnemyBehaviourPriority : int
 {
     None = 0,
-    Roam = 1,
-    Bark = 2,
-    Move = 3,
-    Attack = 4
+    Idle = 1,
+    Roam = 2,
+    Bark = 3,
+    Move = 4,
+    Attack = 5
 }

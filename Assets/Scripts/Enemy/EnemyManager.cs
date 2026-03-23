@@ -25,7 +25,7 @@ public class EnemyManager : MonoBehaviour
         _spatialHashGrid = new SpatialHashGrid(_spatialHashGridCellSize);
         _separationService = new SeparationService(_spatialHashGrid);
         _wallAvoidanceService = new WallAvoidanceService(_wallLayerMask);
-        _formationSystem = new EnemyFormationSystem(_maxAttackerSlots, player.GetTargetCenter(), _backAttackAngle);
+        _formationSystem = new EnemyFormationSystem();
     }
 
     public void Spawn(GameObject original, Vector3 pos)
@@ -41,6 +41,7 @@ public class EnemyManager : MonoBehaviour
         if (obj.TryGetComponent(out IEnemy enemy))
         {
             enemy.OnDead += HandleEnemyDead;
+            enemy.OnDamaged += HandleEnemyDamaged;
 
             // InjectServicesをInitより前に呼ぶ
             // Init内でBehaviourを生成する際にサービスを参照するため
@@ -107,14 +108,6 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
-    [Header("Attacker Slot")]
-    // 同時攻撃可能な最大数
-    [SerializeField] private int _maxAttackerSlots = 3;
-
-    [Header("Formation")]
-    // 背後エリアとみなす角度（プレイヤー正面からの閾値）
-    [SerializeField] private float _backAttackAngle = 60f;
-
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
 
@@ -123,21 +116,22 @@ public class EnemyManager : MonoBehaviour
     private IWallAvoidanceService _wallAvoidanceService;
     private IEnemyFormationSystem _formationSystem;
 
-    private void Update()
-    {
-        // 背後移動×CoolDown によるスロット譲渡チェックを毎フレーム実行する
-        _formationSystem?.Tick(Time.deltaTime);
-    }
 
     /// <summary>
     /// EnemyのOnDeadイベントハンドラ
     /// リストから除外してEnemyDefeated / BossDefeatedを発火する
     /// </summary>
+    private void HandleEnemyDamaged(IEnemy enemy)
+    {
+        _formationSystem?.NotifyHit(enemy.Id);
+    }
+
     private void HandleEnemyDead(IEnemy enemy)
     {
         if (enemy != null)
         {
             enemy.OnDead -= HandleEnemyDead;
+            enemy.OnDamaged -= HandleEnemyDamaged;
 
             // SpatialHashGridから登録解除
             _spatialHashGrid?.Remove(enemy);

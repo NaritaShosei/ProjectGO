@@ -9,6 +9,9 @@ using UnityEngine;
 public sealed class EnemyArmer : MonoBehaviour, IEnemy
 {
     public event Action<IEnemy> OnDead;
+#pragma warning disable CS0067 // IEnemy実装のためのスタブ。EnemyArmerは被弾時の前衛入れ替え対象外
+    public event Action<IEnemy> OnDamaged;
+#pragma warning restore CS0067
     public event Action<float, float> OnHealthChanged;
     public event Action<DamagePopupViewModel> OnDamageDealt;
 
