@@ -14,6 +14,7 @@ public class RoamBehaviour : IEnemyBehaviour
     /// </summary>
     public RoamBehaviour(
         DistanceProfile profile,
+        IEnemyAttackerSlot attackerSlot,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
         ISpatialHashGrid spatialHashGrid,
@@ -23,6 +24,7 @@ public class RoamBehaviour : IEnemyBehaviour
         if (profile == null)
             throw new ArgumentNullException(nameof(profile));
         _profile = profile;
+        _attackerSlot = attackerSlot;
         _separationService = separationService;
         _wallAvoidanceService = wallAvoidanceService;
         _spatialHashGrid = spatialHashGrid;
@@ -40,6 +42,7 @@ public class RoamBehaviour : IEnemyBehaviour
     {
         _self = owner.transform;
         _enemy = owner;
+        _enemyId = owner.GetInstanceID();
         _enemyAnimator = enemyAnimator;
         _player = player;
         _data = data;
@@ -150,9 +153,12 @@ public class RoamBehaviour : IEnemyBehaviour
     private EnemyStateContext _state;
 
     private readonly DistanceProfile _profile;
+    private readonly IEnemyAttackerSlot _attackerSlot;
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
     private readonly ISpatialHashGrid _spatialHashGrid;
+
+    private int _enemyId;
 
     private Vector3 _target;
 
@@ -167,11 +173,40 @@ public class RoamBehaviour : IEnemyBehaviour
     private readonly Action<Vector3?> _onRoamDirection;
 
     /// <summary>
-    /// RoamRadius内のランダムな目標地点を設定する
+    /// プレイヤーとの距離・攻撃参加状態に応じて移動目標を設定する
+    /// 遠すぎる場合はプレイヤーへ、非攻撃者が近すぎる場合はプレイヤーから離れる方向、
+    /// それ以外はプレイヤー方向から ±90° 以内のランダム方向へ RoamRadius 分移動する
     /// </summary>
     private void PickTarget()
     {
-        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * _profile.RoamRadius;
-        _target = _self.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
+        Vector3 toPlayer = _player.position - _self.position;
+        toPlayer.y = 0f;
+        float distToPlayer = toPlayer.magnitude;
+
+        bool isAttacker = _attackerSlot != null && _attackerSlot.IsAcquired(_enemyId);
+
+        Vector3 baseDir;
+
+        if (distToPlayer > _profile.MaxRoamDistance)
+        {
+            // プレイヤーから離れすぎているため、プレイヤー方向へ向かう
+            baseDir = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
+        }
+        else if (!isAttacker && distToPlayer < _profile.MinNonAttackerDistance)
+        {
+            // 非攻撃者が近づきすぎているため、プレイヤーと逆方向から ±90° 以内のランダム方向へ向かう
+            Vector3 awayFromPlayer = distToPlayer > 0f ? -toPlayer.normalized : Vector3.back;
+            float angle = UnityEngine.Random.Range(-90f, 90f);
+            baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
+        }
+        else
+        {
+            // プレイヤー方向を基準に ±90° 以内のランダムな方向へ徘徊する
+            Vector3 dirToPlayer = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
+            float angle = UnityEngine.Random.Range(-90f, 90f);
+            baseDir = Quaternion.Euler(0f, angle, 0f) * dirToPlayer;
+        }
+
+        _target = _self.position + baseDir * _profile.RoamRadius;
     }
 }

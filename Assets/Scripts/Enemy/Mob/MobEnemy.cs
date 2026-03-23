@@ -66,7 +66,7 @@ public class MobEnemy : Enemy, IFormationParticipant
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
+                _bark = new BarkBehaviour(_distanceProfile, _attackerSlot, _data.BarkChance);
                 _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
                 _runner.Register(_bark);
             }
@@ -93,6 +93,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
+                _attackerSlot,
                 _separationService,
                 _wallAvoidanceService,
                 _spatialHashGrid,

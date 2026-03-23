@@ -6,9 +6,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DistanceProfile", menuName = "GameData/Enemy/DistanceProfile")]
 public class DistanceProfile : ScriptableObject
 {
-    // プレイヤーを発見する距離
-    public float DetectDistance => _detectDistance;
-
     // 攻撃を開始する最短距離
     public float MinAttackDistance => _minAttackDistance;
 
@@ -24,6 +21,12 @@ public class DistanceProfile : ScriptableObject
     // 徘徊時の移動半径
     public float RoamRadius => _roamRadius;
 
+    // プレイヤーから離れられる最大距離（これ以上遠い場合はプレイヤーへ向かう）
+    public float MaxRoamDistance => _maxRoamDistance;
+
+    // Attacker でない敵がプレイヤーに近づける最小距離
+    public float MinNonAttackerDistance => _minNonAttackerDistance;
+
     // 他の敵との分離を開始する距離
     public float SeparationRadius => _separationRadius;
 
@@ -36,9 +39,6 @@ public class DistanceProfile : ScriptableObject
     // 壁回避力の強さ
     public float WallAvoidanceStrength => _wallAvoidanceStrength;
 
-
-    [Min(0f)]
-    [SerializeField] private float _detectDistance = 10.0f;
 
     [Min(0f)]
     [SerializeField] private float _minAttackDistance = 1.5f;
@@ -56,6 +56,12 @@ public class DistanceProfile : ScriptableObject
     [SerializeField] private float _roamRadius = 3.0f;
 
     [Min(0f)]
+    [SerializeField] private float _maxRoamDistance = 6.0f;
+
+    [Min(0f)]
+    [SerializeField] private float _minNonAttackerDistance = 3.0f;
+
+    [Min(0f)]
     [SerializeField] private float _separationRadius = 1.5f;
 
     [Min(0f)]
@@ -70,16 +76,6 @@ public class DistanceProfile : ScriptableObject
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        // DetectDistance は MinAttackDistance 以上でなければ索敵後に即攻撃になる
-        if (_detectDistance < _minAttackDistance)
-        {
-            _detectDistance = _minAttackDistance;
-            Debug.LogWarning(
-                $"[DistanceProfile] DetectDistance を MinAttackDistance ({_minAttackDistance}) に補正しました。",
-                this
-            );
-        }
-
         // MaxAttackDistance は MinAttackDistance 以上でなければ攻撃距離が逆転する
         if (_maxAttackDistance < _minAttackDistance)
         {
