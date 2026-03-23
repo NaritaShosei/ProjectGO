@@ -25,7 +25,7 @@ public class EnemyManager : MonoBehaviour
         _spatialHashGrid = new SpatialHashGrid(_spatialHashGridCellSize);
         _separationService = new SeparationService(_spatialHashGrid);
         _wallAvoidanceService = new WallAvoidanceService(_wallLayerMask);
-        _attackerSlot = new EnemyAttackerSlot(_maxAttackerSlots);
+        _formationSystem = new EnemyFormationSystem(_maxAttackerSlots, player.GetTargetCenter(), _backAttackAngle);
     }
 
     public void Spawn(GameObject original, Vector3 pos)
@@ -50,9 +50,17 @@ public class EnemyManager : MonoBehaviour
                     _spatialHashGrid,
                     _separationService,
                     _wallAvoidanceService,
-                    _attackerSlot
+                    _formationSystem
                 );
             }
+
+            // FormationSystemへの登録はInit前に行う
+            // Init内のTryAcquireが呼ばれる時点でIsVanguardが確定している必要があるため
+            if (_formationSystem != null && obj.TryGetComponent(out IFormationParticipant participant))
+            {
+                _formationSystem.Register(enemy, participant);
+            }
+
             OnEnemySpawned?.Invoke(enemy);
 
             enemy.Init(_player);
@@ -105,13 +113,23 @@ public class EnemyManager : MonoBehaviour
     // 同時攻撃可能な最大数
     [SerializeField] private int _maxAttackerSlots = 3;
 
+    [Header("Formation")]
+    // 背後エリアとみなす角度（プレイヤー正面からの閾値）
+    [SerializeField] private float _backAttackAngle = 60f;
+
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
 
     private ISpatialHashGrid _spatialHashGrid;
     private ISeparationService _separationService;
     private IWallAvoidanceService _wallAvoidanceService;
-    private IEnemyAttackerSlot _attackerSlot;
+    private IEnemyFormationSystem _formationSystem;
+
+    private void Update()
+    {
+        // 背後移動×CoolDown によるスロット譲渡チェックを毎フレーム実行する
+        _formationSystem?.Tick(Time.deltaTime);
+    }
 
     private void HandleEnemyDead(IEnemy enemy)
     {

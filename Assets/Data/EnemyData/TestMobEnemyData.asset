@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba454a2f6d480e649bf6078092511ffe, type: 3}
   m_Name: TestMobEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  _maxHP: 2000
+  _maxHP: 500
   _moveSpeed: 1
   _attackRange: 2
   _attackRadius: 1
@@ -23,5 +23,6 @@ MonoBehaviour:
   _knockbackLargeThreshold: 10
   _knockbackStunDuration: 0.05
   _knockbackDeceleration: 10
+  _combatPower: 1
   _barkDuration: 2
   _barkChance: 0.5

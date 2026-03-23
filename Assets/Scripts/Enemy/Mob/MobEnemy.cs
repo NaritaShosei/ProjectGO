@@ -9,13 +9,20 @@ using System;
 // ※鎧が残っているかはEnemyTypeで判定
 // ※鎧持ちでも感電する
 
-public class MobEnemy : Enemy
+public class MobEnemy : Enemy, IFormationParticipant
 {
     public override IEnemyConditionController ConditionController { get => _conditionController; }
 
     // Armor登録を外部（UI等）に通知するイベント
     // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
     public event Action<IArmorHealth> OnArmorRegistered;
+
+    // ─── IFormationParticipant ───────────────────────────────────────────
+    public int EnemyId => GetInstanceID();
+    public float CombatPower => _data != null ? _data.CombatPower : 0f;
+    public int FormationSlotCost => _data?.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
+    // _contextはInit後に生成されるためnullチェックが必要
+    public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
     public override void Init(IPlayer player)
     {

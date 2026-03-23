@@ -24,6 +24,9 @@ public class EnemyData : ScriptableObject
     // 攻撃パターン
     public EnemyAttackPattern AttackPattern => _attackPattern;
 
+    // フォーメーション優先度
+    public float CombatPower => _combatPower;
+
     [Header("Status")]
     [SerializeField] private float _maxHP = 100f;
 
@@ -42,11 +45,15 @@ public class EnemyData : ScriptableObject
     // Power がこの値以下なら Hit（level 0）
     [SerializeField] private float _knockbackHitThreshold = 5f;
     // Power がこの値以上なら Large（level 2）
-    [SerializeField] private float _knockbackLargeThreshold = 100f;
+    [SerializeField] private float _knockbackLargeThreshold = 20f;
     // 停止後の硬直時間（秒）Hit / Small のみ使用
     [SerializeField] private float _knockbackStunDuration = 0.1f;
     // 水平方向の減速度（単位/秒²）。飛距離の目安 ≈ Power² / (2 × 減速度)
-    [SerializeField] private float _knockbackDeceleration = 50f;
+    [SerializeField] private float _knockbackDeceleration = 20f;
+
+    [Header("Formation")]
+    // 前衛選出の優先度。値が高いほど前衛に選ばれやすい
+    [SerializeField] private float _combatPower = 1f;
 
     [Header("Bark")]
     [SerializeField] private float _barkDuration = 2.0f;
