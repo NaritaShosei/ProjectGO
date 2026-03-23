@@ -15,6 +15,9 @@ public class EnemyData : ScriptableObject
     public float BarkDuration => _barkDuration;
     public float BarkChance => _barkChance;
 
+    // ヒールアイテムドロップ確率
+    public float HealDropChance => _healDropChance;
+
     // ノックバックレベル閾値
     public float KnockbackHitThreshold => _knockbackHitThreshold;
     public float KnockbackLargeThreshold => _knockbackLargeThreshold;
@@ -58,7 +61,12 @@ public class EnemyData : ScriptableObject
     [Header("Bark")]
     [SerializeField] private float _barkDuration = 2.0f;
 
-    // 追加：スロット待ち時にBarkを選ぶ確率（0〜1）
+    // スロット待ち時にBarkを選ぶ確率（0〜1）
     [Range(0f, 1f)]
     [SerializeField] private float _barkChance = 0.5f;
+
+    [Header("Drop")]
+    // 死亡時にヒールアイテムをドロップする確率（0〜1）
+    [Range(0f, 1f)]
+    [SerializeField] private float _healDropChance = 0.3f;
 }

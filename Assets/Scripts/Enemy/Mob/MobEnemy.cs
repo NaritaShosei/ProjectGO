@@ -231,6 +231,13 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         _enemyAnimator?.SetDead();
 
+        // ヒールアイテムのドロップ抽選を行う
+        if (CheckProbability(_data.HealDropChance)
+            && ServiceLocator.TryGet<ItemPickupManager>(out var itemSpawner))
+        {
+            itemSpawner.Spawn(transform.position);
+        }
+
         base.OnDeathInternal();
     }
 
