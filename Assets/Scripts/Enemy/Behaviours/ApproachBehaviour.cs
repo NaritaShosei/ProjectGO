@@ -43,8 +43,8 @@ public class ApproachBehaviour : IEnemyBehaviour
         // パターン未選択なら発動しない（MobEnemy.UpdateEnemy()が次フレームで選択する）
         if (_context.SelectedPattern == null) return false;
 
-        // 攻撃可能距離まで近づいていないときに発動
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        // 攻撃可能距離まで近づいていないときに発動（Y差分を除いたXZ平面で判定）
+        float sqrDist = CalcXZSqrDist();
         float stop = CalcStopDistance();
         return sqrDist > stop * stop;
     }
@@ -60,8 +60,8 @@ public class ApproachBehaviour : IEnemyBehaviour
         // パターンがクリアされたら終了
         if (_context.SelectedPattern == null) return false;
 
-        // 攻撃可能距離内に入ったら終了
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        // 攻撃可能距離内に入ったら終了（Y差分を除いたXZ平面で判定）
+        float sqrDist = CalcXZSqrDist();
         float stop = CalcStopDistance();
         return sqrDist > stop * stop;
     }
@@ -147,6 +147,17 @@ public class ApproachBehaviour : IEnemyBehaviour
     /// </summary>
     private float CalcStopDistance()
         => _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
+
+    /// <summary>
+    /// XZ平面のみの距離の二乗を返す。
+    /// 坂・段差でY差分が生じても停止判定がずれないようにするため3D距離は使わない。
+    /// </summary>
+    private float CalcXZSqrDist()
+    {
+        float dx = _self.position.x - _player.position.x;
+        float dz = _self.position.z - _player.position.z;
+        return dx * dx + dz * dz;
+    }
 
     private readonly DistanceProfile _profile;
     private readonly ISeparationService _separationService;

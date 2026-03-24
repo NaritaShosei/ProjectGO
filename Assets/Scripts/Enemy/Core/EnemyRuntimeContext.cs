@@ -20,4 +20,13 @@ public class EnemyRuntimeContext
     /// </summary>
     public EnemyAttackPattern SelectedPattern;
 
+    /// <summary>
+    /// ObjectPoolから再利用する際に状態を初期値に戻す
+    /// </summary>
+    public void Reset()
+    {
+        DistanceToPlayer = 0f;
+        AttackCooldownRemaining = 0f;
+        SelectedPattern = null;
+    }
 }

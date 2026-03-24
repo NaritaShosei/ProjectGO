@@ -296,7 +296,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     protected virtual void OnDeathInternal()
     {
-        // 死亡アニメーション完了を待ってからDestroyする
+        // 死亡アニメーション完了を待ってから破棄する
+        // TODO: ObjectPool導入時は WaitForDeadAnimationAndDeactivate() に切り替える
         WaitForDeadAnimationAndDestroy().Forget();
     }
 
@@ -326,9 +327,32 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     }
 
     /// <summary>
+    /// スポーン位置を指定して敵をプールから再利用するための初期化を行う。
+    /// ObjectPoolからSetActive(true)した直後に呼ぶこと。
+    /// </summary>
+    public virtual void ReInitialize(Vector3 spawnPosition)
+    {
+        transform.position = spawnPosition;
+        _isDead = false;
+        _deadAnimationEnded = false;
+        TimeScale = 1f;
+
+        // Animatorを初期状態（Idle）に戻す
+        // Dead→Exit遷移が再活性化時に誤発火しないよう即時反映する
+        _animator.Play("Idle", 0, 0f);
+        _animator.Update(0f);
+
+        // TODO: _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+    }
+
+    /// <summary>
     /// 死亡アニメーション完了を待ってからGameObjectを破棄する。
     /// destroyCancellationToken により外部からの強制破棄にも対応する。
     /// </summary>
+    /// <remarks>
+    /// ObjectPool導入時は gameObject.SetActive(false) に置き換え、
+    /// WaitForDeadAnimationAndDeactivate() にリネームして切り替えること。
+    /// </remarks>
     private async UniTaskVoid WaitForDeadAnimationAndDestroy()
     {
         if (_animationEventReceiver == null)
@@ -343,7 +367,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         try
         {
             // タイムアウト付きで死亡アニメーション終了を待機する
-            // AnimationEvent付け忘れがある場合でも上限時間で強制破棄する
+            // Dead→Exit遷移が正常に発火しない場合でも上限時間で強制破棄する
             await UniTask.WaitUntil(
                 () => _deadAnimationEnded,
                 cancellationToken: destroyCancellationToken
@@ -351,11 +375,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         }
         catch (OperationCanceledException)
         {
-            // 外部からの強制破棄（ObjectPool返却など）の場合は何もしない
+            // destroyCancellationToken キャンセル時（シーン破棄など）は何もしない
             return;
         }
 
-        // TimeoutWithoutExceptionがキャンセルを吸収した場合に備えてnullチェックする
         if (this == null) return;
         Destroy(gameObject);
     }

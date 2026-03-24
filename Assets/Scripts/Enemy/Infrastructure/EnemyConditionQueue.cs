@@ -4,6 +4,7 @@ using System.Collections.Generic;
 /// Enemyが保持する状態異常のキュー
 /// 同種のConditionは同時に1つまでで、新しいものが来た場合は上書きする
 /// 異種のConditionは_pendingに積まれ、毎フレームの先頭で_activeに移行する
+/// 同一フレームに同種のConditionが複数Enqueueされた場合は後から来たものが上書きする
 /// </summary>
 public sealed class EnemyConditionQueue
 {
@@ -30,6 +31,7 @@ public sealed class EnemyConditionQueue
     /// <summary>
     /// Conditionをキューに追加する
     /// 同種がすでにアクティブな場合は上書きし、即座にOnEnterを呼ぶ
+    /// 同種がpending中の場合も上書きし、後から来たものを優先する
     /// </summary>
     public void Enqueue(IEnemy enemy, IEnemyCondition condition)
     {
@@ -41,23 +43,26 @@ public sealed class EnemyConditionQueue
             return;
         }
 
-        _pending.Enqueue(condition);
+        // Dictionaryによる上書きで同一フレーム内の同種重複を防ぐ
+        _pending[condition.Type] = condition;
     }
 
     /// <summary>
     /// アクティブなConditionを毎フレーム進め、終了したものを解除する
-    /// その後_pendingのConditionを_activeに移行する
+    /// 先頭でpendingを処理し、OnEnterと初回Tickを同一フレームで実行する
     /// </summary>
     public void Tick(IEnemy enemy, float dt)
     {
         // 先頭でpendingを処理し、OnEnterと初回Tickを同一フレームで実行する
-        while (_pending.Count > 0)
+        if (_pending.Count > 0)
         {
-            var next = _pending.Dequeue();
-            if (_active.ContainsKey(next.Type)) continue;
-
-            _active.Add(next.Type, next);
-            next.OnEnter(enemy);
+            foreach (var condition in _pending.Values)
+            {
+                if (_active.ContainsKey(condition.Type)) continue;
+                _active.Add(condition.Type, condition);
+                condition.OnEnter(enemy);
+            }
+            _pending.Clear();
         }
 
         var finished = ListPool<IEnemyCondition>.Get();
@@ -79,6 +84,18 @@ public sealed class EnemyConditionQueue
         ListPool<IEnemyCondition>.Release(finished);
     }
 
+    /// <summary>
+    /// ObjectPoolから再利用する際にすべてのConditionを強制終了してクリアする
+    /// </summary>
+    public void Clear(IEnemy enemy)
+    {
+        foreach (var condition in _active.Values)
+            condition.OnExit(enemy);
+        _active.Clear();
+        _pending.Clear();
+    }
+
     private readonly Dictionary<ConditionType, IEnemyCondition> _active = new();
-    private readonly Queue<IEnemyCondition> _pending = new();
+    // Dictionaryで管理することで同一フレーム内の同種Conditionを自動的に上書きする
+    private readonly Dictionary<ConditionType, IEnemyCondition> _pending = new();
 }

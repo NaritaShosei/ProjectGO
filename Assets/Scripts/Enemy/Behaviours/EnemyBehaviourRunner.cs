@@ -95,6 +95,18 @@ public class EnemyBehaviourRunner
         _current = null;
     }
 
+    /// <summary>
+    /// ObjectPoolから再利用する際に実行状態をリセットする。
+    /// 登録済みのBehaviourリストは保持したまま、実行中の状態だけをクリアする。
+    /// </summary>
+    public void Reset()
+    {
+        _forced?.OnExit();
+        _forced = null;
+        _current?.OnExit();
+        _current = null;
+    }
+
     private readonly IEnemy _owner;
 
     private readonly List<IEnemyBehaviour> _behaviours

@@ -69,6 +69,8 @@ public class EnemyData : ScriptableObject
     // Power がこの値以上なら Large（level 2）
     [SerializeField] private float _knockbackLargeThreshold = 20f;
     [SerializeField] private float _knockbackStunDuration = 0.1f;
+    [Tooltip("0以下を設定すると水平速度が収束せず死亡ノックバックが終了しなくなるため 0.01 以上を強制する")]
+    [Min(0.01f)]
     [SerializeField] private float _knockbackDeceleration = 20f;
 
     [Header("Formation")]

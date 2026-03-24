@@ -83,8 +83,8 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [Min(0f)]
     [SerializeField] private float _attackRadius = 1.0f;
 
-    [Tooltip("攻撃を開始するトリガー距離の割合（1.0 = AttackRange, 1.5 = 遠めに攻撃開始）")]
-    [Min(0f)]
+    [Tooltip("攻撃を開始するトリガー距離の割合（1.0 = AttackRange, 1.5 = 遠めに攻撃開始）\n0は AttackRange × 0 = 0 になり攻撃に入れなくなるため 0.01 以上を強制する")]
+    [Min(0.01f)]
     [SerializeField] private float _attackTriggerRatio = 1.0f;
 
 #if UNITY_EDITOR
@@ -107,6 +107,16 @@ public sealed class EnemyAttackPattern : ScriptableObject
             _hitInterval = _duration;
             Debug.LogWarning(
                 $"[EnemyAttackPattern] HitInterval が Duration ({_duration}) を超えています。Duration に補正しました。",
+                this
+            );
+        }
+
+        // AttackTriggerRatio が 0 だと AttackRange × 0 = 0 になり Attack に入れなくなる
+        if (_attackTriggerRatio < 0.01f)
+        {
+            _attackTriggerRatio = 0.01f;
+            Debug.LogWarning(
+                "[EnemyAttackPattern] AttackTriggerRatio は 0.01 以上が必要です。0.01 に補正しました。",
                 this
             );
         }

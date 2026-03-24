@@ -116,6 +116,27 @@ public class MobEnemy : Enemy, IFormationParticipant
         }
     }
 
+    /// <summary>
+    /// ObjectPoolから再利用する際の初期化。SetActive(true)直後に呼ぶこと。
+    /// </summary>
+    public override void ReInitialize(Vector3 spawnPosition)
+    {
+        base.ReInitialize(spawnPosition);
+
+        // RuntimeContextをリセットする
+        _context?.Reset();
+
+        // Conditionをすべてクリアする
+        _conditionController?.Clear();
+
+        // BehaviourRunnerを初期状態に戻す
+        _runner?.Reset();
+
+        // TODO: _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+        // TODO: 鎧のリセット（ArmorStats）
+        // TODO: アタッカースロットの再取得
+    }
+
     public override void TakeDamage(DamageContext context)
     {
         if (_isDead) { return; }

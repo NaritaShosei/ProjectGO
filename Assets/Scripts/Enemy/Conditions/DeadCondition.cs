@@ -27,7 +27,8 @@ public sealed class DeadCondition : IEnemyCondition
             : Vector3.zero;
         _velocityV = data.DeathKnockbackUpward;
         _deceleration = data.KnockbackDeceleration;
-        _hasPhysics = data.DeathKnockbackPower > 0f;
+        // 水平のみ・上方向のみどちらの設定でも物理ループを起動する
+        _hasPhysics = data.DeathKnockbackPower > 0f || data.DeathKnockbackUpward > 0f;
         _ct = ct;
     }
 

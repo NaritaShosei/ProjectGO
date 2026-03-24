@@ -34,6 +34,14 @@ public sealed class EnemyConditionController : IEnemyConditionController
     public bool HasCondition(ConditionType type)
         => _active.Has(type);
 
+    /// <summary>
+    /// ObjectPoolから再利用する際にすべてのConditionを強制終了してクリアする
+    /// </summary>
+    public void Clear()
+    {
+        _active.Clear(_enemy);
+    }
+
     private readonly IEnemy _enemy;
     private readonly EnemyConditionQueue _active = new();
 }
