@@ -29,6 +29,15 @@ public sealed class EnemyConditionController : IEnemyConditionController
     }
 
     /// <summary>
+    /// Conditionを pending を経由せず即座に登録し OnEnter() を呼ぶ。
+    /// _isDead = true 後など Tick() が止まった状態での適用に使用する。
+    /// </summary>
+    public void ApplyImmediate(IEnemyCondition condition)
+    {
+        _active.Apply(_enemy, condition);
+    }
+
+    /// <summary>
     /// 指定したConditionが発動中かを返す
     /// </summary>
     public bool HasCondition(ConditionType type)

@@ -48,6 +48,20 @@ public sealed class EnemyConditionQueue
     }
 
     /// <summary>
+    /// Conditionを pending を経由せず即座に _active に登録し OnEnter() を呼ぶ。
+    /// 死亡など Tick() が止まった後に適用が必要な場合に使用する。
+    /// </summary>
+    public void Apply(IEnemy enemy, IEnemyCondition condition)
+    {
+        if (_active.ContainsKey(condition.Type))
+        {
+            _active[condition.Type].OnExit(enemy);
+        }
+        _active[condition.Type] = condition;
+        condition.OnEnter(enemy);
+    }
+
+    /// <summary>
     /// アクティブなConditionを毎フレーム進め、終了したものを解除する
     /// 先頭でpendingを処理し、OnEnterと初回Tickを同一フレームで実行する
     /// </summary>

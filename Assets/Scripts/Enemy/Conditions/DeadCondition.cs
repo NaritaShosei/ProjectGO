@@ -8,6 +8,7 @@ using UnityEngine;
 /// 設計上の注意:
 /// ・_isDead = true 後は ConditionController.Tick() が呼ばれないため Tick() は no-op
 /// ・物理ループは OnEnter() 内で UniTask として起動し自律動作する
+/// ・OnExit() で物理ループをキャンセルする（ObjectPool返却時の再利用に対応）
 /// ・KnockbackCondition と同じく AddKnockbackForce / SetPosition で位置を操作する
 /// </summary>
 public sealed class DeadCondition : IEnemyCondition
@@ -29,12 +30,12 @@ public sealed class DeadCondition : IEnemyCondition
         _deceleration = data.KnockbackDeceleration;
         // 水平のみ・上方向のみどちらの設定でも物理ループを起動する
         _hasPhysics = data.DeathKnockbackPower > 0f || data.DeathKnockbackUpward > 0f;
-        _ct = ct;
+        // destroyCancellationToken とリンクし、OnExit() または Destroy() どちらでもキャンセルできるようにする
+        _physicsCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
     }
 
     /// <summary>
     /// SetDead() を即座に発火し、物理ノックバックが必要な場合は UniTask を起動する。
-    /// ApplyCondition を経由せず直接呼び出す想定。
     /// </summary>
     public void OnEnter(IEnemy enemy)
     {
@@ -49,13 +50,21 @@ public sealed class DeadCondition : IEnemyCondition
     /// </summary>
     public void Tick(IEnemy enemy, float dt) { }
 
-    public void OnExit(IEnemy enemy) { }
+    /// <summary>
+    /// 物理ループをキャンセルする。ObjectPool返却時（ReInitialize経由）に呼ばれる。
+    /// </summary>
+    public void OnExit(IEnemy enemy)
+    {
+        _physicsCts?.Cancel();
+        _physicsCts?.Dispose();
+        _physicsCts = null;
+    }
 
     private readonly Vector3 _velocityH;
     private readonly float _velocityV;
     private readonly float _deceleration;
     private readonly bool _hasPhysics;
-    private readonly CancellationToken _ct;
+    private CancellationTokenSource _physicsCts;
 
     private const float _gravity = -30f;
 
@@ -71,7 +80,7 @@ public sealed class DeadCondition : IEnemyCondition
 
         while (true)
         {
-            await UniTask.Yield(PlayerLoopTiming.Update, _ct);
+            await UniTask.Yield(PlayerLoopTiming.Update, _physicsCts.Token);
 
             float dt = Time.deltaTime * enemy.TimeScale;
 

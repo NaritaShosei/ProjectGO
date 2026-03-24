@@ -262,7 +262,8 @@ public class MobEnemy : Enemy, IFormationParticipant
         OnDespawn();
 
         // SetDead() と物理ノックバックを DeadCondition に委譲する
-        new DeadCondition(_lastHitDirection, _data, destroyCancellationToken).OnEnter(this);
+        // ApplyImmediate を使い ConditionController 管理下に置く（Clear() でキャンセル可能にするため）
+        _conditionController.ApplyImmediate(new DeadCondition(_lastHitDirection, _data, destroyCancellationToken));
 
         // ヒールアイテムのドロップ抽選を行う
         if (CheckProbability(_data.HealDropChance)
