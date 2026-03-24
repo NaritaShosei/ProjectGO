@@ -985,9 +985,45 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1617911759}
     m_Modifications:
+    - target: {fileID: 1595329044071810930, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_Color.b
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 1595329044071810930, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_Color.g
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 1595329044071810930, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_Color.r
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 2897360599550716527, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: _baseWidth
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5722453716084609631, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_Name
       value: ThunderGauge
+      objectReference: {fileID: 0}
+    - target: {fileID: 5772128290864420006, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5772128290864420006, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_Color.g
+      value: 0.7647059
+      objectReference: {fileID: 0}
+    - target: {fileID: 5772128290864420006, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5952191321030552243, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 147.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 6891228846053391328, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 147.18
       objectReference: {fileID: 0}
     - target: {fileID: 7238458640552067971, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_Pivot.x
@@ -1015,11 +1051,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7238458640552067971, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 300
+      value: 154.3677
       objectReference: {fileID: 0}
     - target: {fileID: 7238458640552067971, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 41.100006
+      value: 41.1
       objectReference: {fileID: 0}
     - target: {fileID: 7238458640552067971, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_LocalPosition.x
