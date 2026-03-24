@@ -197,6 +197,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     // 死亡アニメーション終了フラグ
     private bool _deadAnimationEnded;
 
+    // 最後に受けたダメージの方向（死亡ノックバック用）
+    protected Vector3 _lastHitDirection;
+
 
     protected CancellationTokenSource _shockCts;
 
@@ -208,7 +211,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         // OnDead時の登録
         OnDead += HandleDead;
 
-        // 雑に生身限定
+        // 鎧の有無はMobEnemy.Init()で上書きされる。ここではデフォルト値として生身を設定する
         _defenceContext = new EnemyDefenseContext()
         {
             EnemyType = EnemyType.Flesh,
@@ -303,19 +306,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// </summary>
     private void HandleSlotReleased()
     {
-        // 死亡済みの場合はスロット再取得を試みない
         if (_isDead) return;
         if (_services.AttackerSlot == null) return;
         if (_data == null) return;
+        if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0) return;
 
-        int slotCost = _data.AttackPatterns != null && _data.AttackPatterns.Count > 0
-            ? _data.AttackPatterns[0].SlotCost
-            : 1;
-
-        // 未取得の場合のみ再取得を試みる
         if (!_services.AttackerSlot.IsAcquired(Id))
         {
-            _services.AttackerSlot.TryAcquire(Id, slotCost, IsBoss);
+            _services.AttackerSlot.TryAcquire(Id, 1, IsBoss);
         }
     }
 
@@ -363,5 +361,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
+
 }
 

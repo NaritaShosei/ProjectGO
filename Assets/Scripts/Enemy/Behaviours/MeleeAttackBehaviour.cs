@@ -93,9 +93,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         _timer += deltaTime;
 
-        // 多段ヒット：前回ヒットからHitInterval経過後に追加ヒットを処理する
+        // 多段ヒット：deltaTimeが大きい場合も期限超過分をすべて消化する
         int maxHitCount = _context.SelectedPattern?.MaxHitCount ?? 1;
-        if (_hitCount > 0 && _hitCount < maxHitCount && _timer >= _nextHitTime)
+        while (_hitCount > 0 && _hitCount < maxHitCount && _timer >= _nextHitTime)
         {
             PerformHit();
         }
@@ -139,7 +139,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public void ReleaseSlot()
     {
         if (_attackerSlot == null) return;
-        _attackerSlot.Release(_enemyId, _context?.AcquiredSlotCost ?? 1);
+        _attackerSlot.Release(_enemyId, 1);
     }
 
     private Transform _self;
@@ -198,7 +198,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         }
 
         _hitCount++;
-        _nextHitTime = _timer + pattern.HitInterval;
+        _nextHitTime += pattern.HitInterval;
     }
 
     private void Exit()

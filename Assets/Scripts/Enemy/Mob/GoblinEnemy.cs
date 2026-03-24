@@ -1,9 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Enemyの基盤用最小実装クラス
-/// 複雑なAI・スキル・状態遷移は意図的に含めていない
-/// 拡張する場合はこのクラスを参考に派生 or 分離してください
+/// ゴブリン敵の実装クラス
+/// MobEnemyと同等のBehaviour構成を持つが、鎧・感電などの追加要素を含まないシンプルな実装
 /// </summary>
 public class GoblinEnemy : Enemy
 {
@@ -34,6 +33,10 @@ public class GoblinEnemy : Enemy
         {
             Debug.LogWarning($"{nameof(GoblinEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
         }
+        else if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0)
+        {
+            Debug.LogWarning($"{nameof(GoblinEnemy)}: AttackPatternsが空です。Attack・スロット取得をスキップします。");
+        }
         else
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
@@ -42,9 +45,7 @@ public class GoblinEnemy : Enemy
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            int goblinSlotCost = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0].SlotCost : 1;
-            _context.AcquiredSlotCost = goblinSlotCost;
-            _services.AttackerSlot.TryAcquire(Id, goblinSlotCost, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, 1, isBoss: false);
 
             // BarkをattackerSlotブロック内に移動
             // distanceProfileがない場合はBarkも登録しない
@@ -59,11 +60,11 @@ public class GoblinEnemy : Enemy
         // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
         if (_distanceProfile == null)
         {
-            Debug.LogWarning($"{nameof(GoblinEnemy)}: DistanceProfileが未設定です。Move・Bark・Roamは無効になります。");
+            Debug.LogWarning($"{nameof(GoblinEnemy)}: DistanceProfileが未設定です。Approach・Bark・Roamは無効になります。");
         }
         else
         {
-            var move = new MoveBehaviour(_distanceProfile, _services);
+            var move = new ApproachBehaviour(_distanceProfile, _services);
             move.Init(initCtx);
             _runner.Register(move);
 
@@ -126,15 +127,30 @@ public class GoblinEnemy : Enemy
         return _data.AttackPatterns[UnityEngine.Random.Range(0, _data.AttackPatterns.Count)];
     }
 
-    protected override void OnDeathInternal()
+    public override void TakeDamage(DamageContext context)
+    {
+        if (context.Knockback != null)
+            _lastHitDirection = ((KnockbackContext)context.Knockback).Direction;
+
+        base.TakeDamage(context);
+    }
+
+    /// <summary>
+    /// スロット解放・Behaviourの停止を行う。
+    /// 死亡時と将来のプール返却時（OnDespawn）の両方から呼ぶ想定。
+    /// </summary>
+    protected virtual void OnDespawn()
     {
         _runner?.ForceExitAction();
-
-        // 死亡時にスロットを解放する
         _attack?.ReleaseSlot();
+    }
 
-        // 死亡アニメーションを再生する
-        _enemyAnimator?.SetDead();
+    protected override void OnDeathInternal()
+    {
+        OnDespawn();
+
+        // SetDead() と物理ノックバックを DeadCondition に委譲する
+        new DeadCondition(_lastHitDirection, _data, destroyCancellationToken).OnEnter(this);
 
         base.OnDeathInternal();
     }

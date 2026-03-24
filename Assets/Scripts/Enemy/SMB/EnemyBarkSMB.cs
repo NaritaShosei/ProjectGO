@@ -6,17 +6,9 @@ using UnityEngine;
 /// </summary>
 public class EnemyBarkSMB : StateMachineBehaviour
 {
-    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        animator.TryGetComponent(out _controller);
-    }
-
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_controller == null) return;
-
-        _controller.AnimEvent_BarkEnd();
+        if (animator.TryGetComponent(out IEnemyAnimationController controller))
+            controller.AnimEvent_BarkEnd();
     }
-
-    private IEnemyAnimationController _controller;
 }

@@ -150,6 +150,6 @@ public enum EnemyBehaviourPriority : int
     Idle = 1,
     Roam = 2,
     Bark = 3,
-    Move = 4,
+    Approach = 4,
     Attack = 5
 }

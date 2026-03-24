@@ -23,6 +23,7 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     public int Id => GetInstanceID();
     public bool IsBoss => false;
     public Vector3 Position => transform.position;
+    public float TimeScale => 1f;
 
     /// <summary>HPがゼロ以下になったかどうかを返す</summary>
     public bool IsBroken => _hp <= 0;
@@ -51,9 +52,8 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     {
         if (context.PlayerMode != PlayerMode.Warrior) return;
 
-        float beforeHp = _hp;
         _hp -= context.AttackPower;
-        OnHealthChanged?.Invoke(beforeHp, _hp);
+        OnHealthChanged?.Invoke(_hp, _maxHp);
 
         InvokeOnDamageDealt((int)context.AttackPower, isWeakPoint: false, context.IsCritical);
 
@@ -87,6 +87,13 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     [SerializeField] private float _hp = 50;
     [SerializeField] private GameObject _core;
     [SerializeField] private Transform _targetCenter;
+
+    private float _maxHp;
+
+    private void Awake()
+    {
+        _maxHp = _hp;
+    }
 
     private readonly IEnemyAnimator _nullAnimator = new NullEnemyAnimator();
     private readonly IEnemyConditionController _nullConditionController = new NullEnemyConditionController();

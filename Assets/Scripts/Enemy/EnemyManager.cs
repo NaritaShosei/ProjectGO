@@ -118,8 +118,8 @@ public class EnemyManager : MonoBehaviour
 
 
     /// <summary>
-    /// EnemyのOnDeadイベントハンドラ
-    /// リストから除外してEnemyDefeated / BossDefeatedを発火する
+    /// EnemyのOnDamagedイベントハンドラ
+    /// FormationSystemに被弾を通知する
     /// </summary>
     private void HandleEnemyDamaged(IEnemy enemy)
     {

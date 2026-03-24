@@ -50,6 +50,16 @@ public sealed class EnemyConditionQueue
     /// </summary>
     public void Tick(IEnemy enemy, float dt)
     {
+        // 先頭でpendingを処理し、OnEnterと初回Tickを同一フレームで実行する
+        while (_pending.Count > 0)
+        {
+            var next = _pending.Dequeue();
+            if (_active.ContainsKey(next.Type)) continue;
+
+            _active.Add(next.Type, next);
+            next.OnEnter(enemy);
+        }
+
         var finished = ListPool<IEnemyCondition>.Get();
 
         foreach (var condition in _active.Values)
@@ -67,15 +77,6 @@ public sealed class EnemyConditionQueue
         }
 
         ListPool<IEnemyCondition>.Release(finished);
-
-        while (_pending.Count > 0)
-        {
-            var next = _pending.Dequeue();
-            if (_active.ContainsKey(next.Type)) continue;
-
-            _active.Add(next.Type, next);
-            next.OnEnter(enemy);
-        }
     }
 
     private readonly Dictionary<ConditionType, IEnemyCondition> _active = new();

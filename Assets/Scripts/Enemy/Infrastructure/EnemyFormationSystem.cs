@@ -100,8 +100,13 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         // IsVanguardを先に更新してからスロット解放する
         worst.IsVanguard = false;
         hitEntry.IsVanguard = true;
-        // 解放によりOnSlotReleasedが発火し、hitEntryがTryAcquireを試みる
+
+        bool worstHadSlot = _innerSlot.IsAcquired(worst.Participant.EnemyId);
         DemoteIfAcquired(worst);
+
+        // worstがスロット未保持だった場合は解放イベントが発火しないため明示的に通知する
+        if (!worstHadSlot)
+            OnSlotReleased?.Invoke();
     }
 
     // ─── IEnemyAttackerSlot ──────────────────────────────────────────────

@@ -26,8 +26,9 @@ public sealed class ArmorStats
     /// </summary>
     public void TakeDamage(float damage)
     {
-        _currentHealth = Mathf.Max(0, _currentHealth - damage);
+        if (_isBroken) return;
 
+        _currentHealth = Mathf.Max(0, _currentHealth - damage);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
         if (_currentHealth <= 0) Break();
@@ -35,9 +36,11 @@ public sealed class ArmorStats
 
     private void Break()
     {
+        _isBroken = true;
         OnBroken?.Invoke();
     }
 
     private readonly float _maxHealth;
     private float _currentHealth;
+    private bool _isBroken;
 }

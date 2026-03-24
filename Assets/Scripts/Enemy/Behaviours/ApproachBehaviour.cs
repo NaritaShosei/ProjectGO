@@ -1,17 +1,17 @@
 using UnityEngine;
 
 /// <summary>
-/// プレイヤーに向かって移動するBehaviour
+/// 攻撃のためプレイヤーへ接近するBehaviour
 /// SeparationServiceとWallAvoidanceServiceで移動方向を補正する
 /// </summary>
-public class MoveBehaviour : IEnemyBehaviour
+public class ApproachBehaviour : IEnemyBehaviour
 {
-    public int Priority { get => (int)EnemyBehaviourPriority.Move; }
+    public int Priority { get => (int)EnemyBehaviourPriority.Approach; }
 
     /// <summary>
-    /// DistanceProfile・各サービスはMove固有の依存のためコンストラクタで受け取る
+    /// DistanceProfile・各サービスはApproach固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MoveBehaviour(DistanceProfile profile, EnemyServices services)
+    public ApproachBehaviour(DistanceProfile profile, EnemyServices services)
     {
         _profile = profile;
         _separationService = services.SeparationService;
@@ -43,11 +43,9 @@ public class MoveBehaviour : IEnemyBehaviour
         // パターン未選択なら発動しない（MobEnemy.UpdateEnemy()が次フレームで選択する）
         if (_context.SelectedPattern == null) return false;
 
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        // AttackRangeのMoveApproachRatio倍まで近づいていないときに発動
-        float stop = _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
-
         // 攻撃可能距離まで近づいていないときに発動
+        float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        float stop = CalcStopDistance();
         return sqrDist > stop * stop;
     }
 
@@ -62,10 +60,9 @@ public class MoveBehaviour : IEnemyBehaviour
         // パターンがクリアされたら終了
         if (_context.SelectedPattern == null) return false;
 
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float stop = _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
-
         // 攻撃可能距離内に入ったら終了
+        float sqrDist = (_self.position - _player.position).sqrMagnitude;
+        float stop = CalcStopDistance();
         return sqrDist > stop * stop;
     }
 
@@ -120,7 +117,7 @@ public class MoveBehaviour : IEnemyBehaviour
         // 方向ベクトルが極端に小さい場合はスキップ
         if (dir.sqrMagnitude < 0.001f) return;
 
-        Vector3 newPos = _self.position + dir.normalized * _data.MoveSpeed * deltaTime;
+        Vector3 newPos = _self.position + dir.normalized * _data.ApproachSpeed * deltaTime;
         _self.position = newPos;
 
         // SpatialHashGridの位置を更新する
@@ -144,6 +141,12 @@ public class MoveBehaviour : IEnemyBehaviour
     private EnemyStateContext _state;
     private int _enemyId;
     private IEnemyAnimator _enemyAnimator;
+
+    /// <summary>
+    /// 接近を停止する距離を返す（AttackRange × MoveApproachRatio）
+    /// </summary>
+    private float CalcStopDistance()
+        => _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
 
     private readonly DistanceProfile _profile;
     private readonly ISeparationService _separationService;

@@ -88,8 +88,8 @@ public class RoamBehaviour : IEnemyBehaviour
 
         if (!_state.CanMove()) return;
 
-        // Speedを毎フレーム更新する
-        _enemyAnimator?.SetSpeed(1f);
+        // Speedを毎フレーム更新する（Walk = 0.5f）
+        _enemyAnimator?.SetSpeed(0.5f);
 
         Vector3 toTarget = _target - _self.position;
         toTarget.y = 0f;
@@ -124,7 +124,7 @@ public class RoamBehaviour : IEnemyBehaviour
         // 移動方向をTurnBehaviourに通知する
         _onRoamDirection?.Invoke(dir.normalized);
 
-        Vector3 newPos = _self.position + dir.normalized * _data.MoveSpeed * deltaTime;
+        Vector3 newPos = _self.position + dir.normalized * _data.RoamSpeed * deltaTime;
         _self.position = newPos;
 
         if (_spatialHashGrid != null)

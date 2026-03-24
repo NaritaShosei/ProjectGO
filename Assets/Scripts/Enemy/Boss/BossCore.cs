@@ -44,6 +44,7 @@ public sealed class BossCore : MonoBehaviour, IEnemy
     public int Id => GetInstanceID();
     public bool IsBoss => true;
     public Vector3 Position => transform.position;
+    public float TimeScale => 1f;
 
     public void InjectServices(EnemyServices services) { }
     public void Init(IPlayer player) { }
@@ -72,7 +73,10 @@ public sealed class BossCore : MonoBehaviour, IEnemy
         {
             AttackPower = context.AttackPower * _damageMultiplier,
             PlayerMode = context.PlayerMode,
-            OnHitResult = context.OnHitResult
+            OnHitResult = context.OnHitResult,
+            IsCritical = context.IsCritical,
+            Knockback = context.Knockback,
+            ElectricShock = context.ElectricShock
         });
     }
 

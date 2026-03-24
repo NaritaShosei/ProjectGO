@@ -13,10 +13,17 @@ MonoBehaviour:
   m_Name: EnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   _maxHP: 100
-  _moveSpeed: 3
-  _attackRange: 3.36
-  _attackRadius: 13.15
-  _attackCooldown: 7
-  _attackDamage: 5
-  _attackPattern: {fileID: 0}
+  _roamSpeed: 2
+  _approachSpeed: 4
+  _attackPatterns: []
+  _knockbackHitThreshold: 5
+  _knockbackLargeThreshold: 20
+  _knockbackStunDuration: 0.1
+  _knockbackDeceleration: 20
+  _combatPower: 1
   _barkDuration: 2
+  _barkChance: 0.5
+  _idleDuration: 1
+  _deathKnockbackPower: 8
+  _deathKnockbackUpward: 2
+  _healDropChance: 0.3

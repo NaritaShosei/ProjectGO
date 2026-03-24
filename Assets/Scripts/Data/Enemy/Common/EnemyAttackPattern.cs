@@ -44,6 +44,7 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [SerializeField] private string _patternName;
 
     [Header("Slot")]
+    [Tooltip("将来使用予定。現在スロット制御では使用しない（アタッカースロットは人数ベースで管理）")]
     [Min(1)]
     [SerializeField] private int _slotCost = 1;
 

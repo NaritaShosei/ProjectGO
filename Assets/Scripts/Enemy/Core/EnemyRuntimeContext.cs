@@ -20,8 +20,4 @@ public class EnemyRuntimeContext
     /// </summary>
     public EnemyAttackPattern SelectedPattern;
 
-    /// <summary>
-    /// スロット取得時のコスト。解放時に一致させる必要があるため保持する
-    /// </summary>
-    public int AcquiredSlotCost = 1;
 }

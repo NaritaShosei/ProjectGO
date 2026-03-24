@@ -8,6 +8,8 @@ public class IdleBehaviour : IEnemyBehaviour
 
     public void Init(BehaviourInitContext ctx)
     {
+        if (ctx.Data == null)
+            UnityEngine.Debug.LogWarning("[IdleBehaviour] ctx.Data が null です。IdleDuration は 1 秒にフォールバックします。");
         _data = ctx.Data;
         _enemyAnimator = ctx.EnemyAnimator;
         _state = ctx.StateContext;
@@ -25,7 +27,7 @@ public class IdleBehaviour : IEnemyBehaviour
     {
         _state.ChangeState(EnemyState.Idle);
         _enemyAnimator?.SetSpeed(0f);
-        _timer = _data.IdleDuration;
+        _timer = _data != null ? _data.IdleDuration : 1f;
     }
 
     public void Tick(float deltaTime)

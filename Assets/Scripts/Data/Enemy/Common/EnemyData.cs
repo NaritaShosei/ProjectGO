@@ -10,8 +10,11 @@ public class EnemyData : ScriptableObject
     // ステータス
     public float MaxHP => _maxHP;
 
-    // 移動速度
-    public float MoveSpeed => _moveSpeed;
+    // 徘徊速度（RoamBehaviour）
+    public float RoamSpeed => _roamSpeed;
+
+    // 接近速度（ApproachBehaviour）
+    public float ApproachSpeed => _approachSpeed;
 
     // 攻撃パターンリスト（射程・判定・ダメージ・クールダウンはパターン側に定義）
     public List<EnemyAttackPattern> AttackPatterns => _attackPatterns;
@@ -41,12 +44,21 @@ public class EnemyData : ScriptableObject
     // Idle継続時間（秒）
     public float IdleDuration => _idleDuration;
 
+    // 死亡ノックバックの水平速度
+    public float DeathKnockbackPower => _deathKnockbackPower;
+
+    // 死亡ノックバックの初期垂直速度
+    public float DeathKnockbackUpward => _deathKnockbackUpward;
+
 
     [Header("Status")]
     [SerializeField] private float _maxHP = 100f;
 
     [Header("Movement")]
-    [SerializeField] private float _moveSpeed = 3f;
+    [Min(0f)]
+    [SerializeField] private float _roamSpeed = 1f;
+    [Min(0f)]
+    [SerializeField] private float _approachSpeed = 3f;
 
     [Header("Attack")]
     [SerializeField] private List<EnemyAttackPattern> _attackPatterns = new();
@@ -71,6 +83,12 @@ public class EnemyData : ScriptableObject
     [Header("Idle")]
     [Min(0f)]
     [SerializeField] private float _idleDuration = 1.0f;
+
+    [Header("Death")]
+    [Min(0f)]
+    [SerializeField] private float _deathKnockbackPower = 8f;
+    [Min(0f)]
+    [SerializeField] private float _deathKnockbackUpward = 2f;
 
     [Header("Drop")]
     [Range(0f, 1f)]

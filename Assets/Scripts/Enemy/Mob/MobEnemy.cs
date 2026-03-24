@@ -20,7 +20,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     // ─── IFormationParticipant ───────────────────────────────────────────
     public int EnemyId => GetInstanceID();
     public float CombatPower => _data != null ? _data.CombatPower : 0f;
-    public int FormationSlotCost => _data?.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0].SlotCost : 1;
+    public int FormationSlotCost => 1;
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
@@ -53,6 +53,10 @@ public class MobEnemy : Enemy, IFormationParticipant
         {
             Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
         }
+        else if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: AttackPatternsが空です。Attack・スロット取得をスキップします。");
+        }
         else
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
@@ -61,9 +65,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            int mobSlotCost = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0].SlotCost : 1;
-            _context.AcquiredSlotCost = mobSlotCost;
-            _services.AttackerSlot.TryAcquire(Id, mobSlotCost, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, 1, isBoss: false);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
             // distanceProfileがない場合はBarkも登録しない
@@ -78,11 +80,11 @@ public class MobEnemy : Enemy, IFormationParticipant
         // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
         if (_distanceProfile == null)
         {
-            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Move・Bark・Roamは無効になります。");
+            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Approach・Bark・Roamは無効になります。");
         }
         else
         {
-            var move = new MoveBehaviour(_distanceProfile, _services);
+            var move = new ApproachBehaviour(_distanceProfile, _services);
             move.Init(initCtx);
             _runner.Register(move);
 
@@ -158,6 +160,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         {
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
+            _lastHitDirection = temp.Direction;
             KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
             _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel, _data.KnockbackStunDuration, _data.KnockbackDeceleration));
         }
@@ -224,18 +227,21 @@ public class MobEnemy : Enemy, IFormationParticipant
     }
 
     /// <summary>
-    /// 死亡時のクリーンアップ
-    /// _isDead = true後はUpdateが止まりRunnerのTickが呼ばれなくなるため
-    /// ここで明示的にBehaviourを終了させてスロットを解放する
+    /// スロット解放・Behaviourの停止を行う。
+    /// 死亡時と将来のプール返却時の両方から呼ぶ想定。
     /// </summary>
-    protected override void OnDeathInternal()
+    protected virtual void OnDespawn()
     {
         _runner?.ForceExitAction();
-
-        // 死亡時にスロットを解放する
         _attack?.ReleaseSlot();
+    }
 
-        _enemyAnimator?.SetDead();
+    protected override void OnDeathInternal()
+    {
+        OnDespawn();
+
+        // SetDead() と物理ノックバックを DeadCondition に委譲する
+        new DeadCondition(_lastHitDirection, _data, destroyCancellationToken).OnEnter(this);
 
         // ヒールアイテムのドロップ抽選を行う
         if (CheckProbability(_data.HealDropChance)

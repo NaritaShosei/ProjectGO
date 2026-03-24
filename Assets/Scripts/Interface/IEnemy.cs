@@ -37,6 +37,9 @@ public interface IEnemy : ICharacter
     /// <summary>ボス判定</summary>
     bool IsBoss { get; }
 
+    /// <summary>HitStop等で使用するタイムスケール（DeadCondition の物理スケーリングに使用）</summary>
+    float TimeScale { get; }
+
     // --- Methods ---
 
     /// <summary>Playerの参照を渡して初期化する</summary>

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: TestMobEnemyData
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   _maxHP: 500
-  _moveSpeed: 1
+  _roamSpeed: 1
+  _approachSpeed: 2
   _attackPatterns:
   - {fileID: 11400000, guid: 47ea3464128699641bc0940e28688e35, type: 2}
   _knockbackHitThreshold: 5
@@ -24,4 +25,6 @@ MonoBehaviour:
   _barkDuration: 2
   _barkChance: 0.5
   _idleDuration: 1
+  _deathKnockbackPower: 8
+  _deathKnockbackUpward: 2
   _healDropChance: 0.3
