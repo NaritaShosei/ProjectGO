@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 1.17
-  _comboWindowStartTime: 1.17
-  _comboWindowEndTime: 2.1
+  _attackExecuteTime: 1.133333
+  _comboWindowStartTime: 1.2
+  _comboWindowEndTime: 1.5
 --- !u!1102 &-9185387951244037547
 AnimatorState:
   serializedVersion: 6
@@ -83,9 +83,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.791
-  _comboWindowStartTime: 0.5
-  _comboWindowEndTime: 0.863
+  _attackExecuteTime: 0.8
+  _comboWindowStartTime: 0.8
+  _comboWindowEndTime: 1
 --- !u!114 &-8572658575067035617
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -98,9 +98,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.24
-  _comboWindowStartTime: 0.24
-  _comboWindowEndTime: 0.533
+  _attackExecuteTime: 0.22
+  _comboWindowStartTime: 0.5
+  _comboWindowEndTime: 0.8
 --- !u!1101 &-8335513729436235242
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -433,9 +433,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 1.02
-  _comboWindowStartTime: 0
-  _comboWindowEndTime: 0
+  _attackExecuteTime: 0.9666666
+  _comboWindowStartTime: 1.1
+  _comboWindowEndTime: 1.866667
 --- !u!1101 &-7066746509532670744
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -903,8 +903,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.128
-  _comboWindowStartTime: 0.128
+  _attackExecuteTime: 0.1166667
+  _comboWindowStartTime: 0.3166667
   _comboWindowEndTime: 0.8
 --- !u!1102 &-3168858749003931569
 AnimatorState:
@@ -1339,7 +1339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.24
+  _attackExecuteTime: 0.23
   _comboWindowStartTime: 0.24
   _comboWindowEndTime: 0.533
 --- !u!1107 &1627237608642912886
@@ -1558,8 +1558,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 1.04
-  _comboWindowStartTime: 1.04
+  _attackExecuteTime: 0.9666666
+  _comboWindowStartTime: 1.266667
   _comboWindowEndTime: 2.916667
 --- !u!1102 &3885943936177353613
 AnimatorState:
