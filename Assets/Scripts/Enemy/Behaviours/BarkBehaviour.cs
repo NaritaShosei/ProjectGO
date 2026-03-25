@@ -11,62 +11,76 @@ public class BarkBehaviour : IEnemyBehaviour
     /// <summary>
     /// DistanceProfile・AttackerSlot はBarkBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public BarkBehaviour(DistanceProfile profile, IEnemyAttackerSlot attackerSlot)
+    public BarkBehaviour(DistanceProfile profile, EnemyServices services, float barkChance)
     {
         _profile = profile;
-        _attackerSlot = attackerSlot;
+        _attackerSlot = services.AttackerSlot;
+        _barkChance = barkChance;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _player = player;
-        _data = data;
-        _context = context;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemyAnimator = ctx.EnemyAnimator;
+        _enemyId = ctx.Owner.Id;
+        _player = ctx.Player;
+        _data = ctx.Data;
+        _context = ctx.RuntimeContext;
+        _state = ctx.StateContext;
+
+        // OnBarkEndイベントを購読してBark終了を検知する
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnBarkEnd += HandleBarkEnd;
+        }
     }
 
     public bool CanEnter()
     {
+        if (_attackerSlot == null) return false;
         if (_player == null) return false;
 
-        // 攻撃距離内のときのみ発動
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrAttack = _profile.MinAttackDistance * _profile.MinAttackDistance;
-        if (sqrDist > sqrAttack) return false;
+        // リポジション必要時はBarkしない（Roamに委ねる）
+        float dist = Vector3.Distance(_self.position, _player.position);
+        if (dist > _profile.MaxRoamDistance) return false;
+        if (!_attackerSlot.IsAcquired(_enemyId) && dist < _profile.MinNonAttackerDistance) return false;
 
-        // AttackerSlotが未設定の場合は発動しない
-        if (_attackerSlot == null) return false;
+        // クールダウン中またはスロット未確保のときにBarkする
+        // 攻撃権を持ちクールダウンも終わっている場合はAttackが優先されるためBarkしない
+        bool isOnCooldown = _context.AttackCooldownRemaining > 0f;
+        bool hasNoSlot = !_attackerSlot.IsAcquired(_enemyId);
+        if (!isOnCooldown && !hasNoSlot) return false;
 
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        // スロットが満杯のときのみ発動
-        return _attackerSlot.IsFull(slotCost);
+        // 確率判定：falseのときはRoamが選ばれる
+        return UnityEngine.Random.value < _barkChance;
     }
 
     public bool CanContinue()
     {
-        // タイマーが終わるまで継続
-        return _timer < _data.BarkDuration;
+        // BarkDurationが設定されている場合はタイマーで終了判定する
+        if (_data.BarkDuration > 0f)
+        {
+            // BarkDuration設定時はtimerのみで終了判定する
+            // AnimationEventのタイミングに依存しないため安定した終了が保証される
+            return _timer < _data.BarkDuration;
+        }
+
+        // BarkDuration未設定時はAnimationEventで終了を検知する
+        return !_barkEnded;
     }
 
     public void OnEnter()
     {
         _timer = 0f;
+        _barkEnded = false;
         _state.ChangeState(EnemyState.Bark);
+        _enemyAnimator?.SetBarking(true);
     }
 
     public void OnExit()
     {
         _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetBarking(false);
     }
 
     public void Tick(float deltaTime)
@@ -74,14 +88,38 @@ public class BarkBehaviour : IEnemyBehaviour
         _timer += deltaTime;
     }
 
+    /// <summary>
+    /// イベント購読を解除する
+    /// </summary>
+    public void Dispose()
+    {
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnBarkEnd -= HandleBarkEnd;
+        }
+    }
+
     private Transform _self;
     private Transform _player;
     private EnemyData _data;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
+    private IEnemyAnimator _enemyAnimator;
+
+    private int _enemyId;
+    private bool _barkEnded;
 
     private readonly DistanceProfile _profile;
-    private readonly IEnemyAttackerSlot _attackerSlot;
+    private readonly float _barkChance;
 
+    private readonly IEnemyAttackerSlot _attackerSlot;
     private float _timer;
+
+    /// <summary>
+    /// BarkアニメーションのAnimationEventから中継されるハンドラ
+    /// </summary>
+    private void HandleBarkEnd()
+    {
+        _barkEnded = true;
+    }
 }

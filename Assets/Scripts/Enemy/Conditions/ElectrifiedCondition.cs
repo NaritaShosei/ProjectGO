@@ -1,9 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// 色を変える方針からぶるぶるさせるように変更した
-/// 最後もこのまま使用でききるかも？
-/// 色をやめたのはIEnemyにもう何も追加したくないから。。
+/// 感電状態のCondition
+/// 持続時間中、PerlinNoiseによる振動でEnemyの見た目を揺らす
+/// ボスでなければBlocksActionがtrueになり行動を停止する
 /// </summary>
 public sealed class ElectrifiedCondition : IEnemyCondition
 {
@@ -28,6 +28,7 @@ public sealed class ElectrifiedCondition : IEnemyCondition
     {
         _time = _duration;
         _baseLocalPos = enemy.GetTargetCenter().localPosition;
+        enemy.EnemyAnimator?.SetElectrified(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("感電開始");
@@ -58,23 +59,22 @@ public sealed class ElectrifiedCondition : IEnemyCondition
     public void OnExit(IEnemy enemy)
     {
         enemy.GetTargetCenter().localPosition = _baseLocalPos;
+        enemy.EnemyAnimator?.SetElectrified(false);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("感電終了");
 #endif
     }
 
-    // 持続時間
-    private float _time;
     private readonly float _duration;
     private readonly bool _enemyIsBoss;
 
-
-    private Vector3 _baseLocalPos;
-
-    private float _noiseTime;
-
     // 調整値
-    private const float _maxShake = 0.08f;  // 揺れ幅
-    private const float _frequency = 40f;   // 速さ
+    private const float _maxShake = 0.08f;
+    private const float _frequency = 40f;
+
+    // 残り時間・揺れ計算用（OnEnterで初期化）
+    private float _time;
+    private Vector3 _baseLocalPos;
+    private float _noiseTime;
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Presenter を生成・初期化する 
+/// Presenter を生成・初期化する
 /// </summary>
 public class InGameUIInitializer : MonoBehaviour
 {
@@ -17,29 +17,24 @@ public class InGameUIInitializer : MonoBehaviour
             Debug.LogError("PlayerにIModeControllerが見つかりませんでした。");
         }
 
-        _playerGaugePresenter = new PlayerGaugePresenter(health: player, stamina: player, _playerGaugeView);
+        // HP と雷ゲージをまとめて渡す
+        _playerGaugePresenter = new PlayerGaugePresenter(
+            health: player,
+            playerStats: player,
+            view: _playerGaugeView
+        );
     }
 
-    //UI表示
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
 
     private IModeController _playerModeController;
-
-    //Presenter
     private PlayerModePresenter _playerModePresenter;
     private PlayerGaugePresenter _playerGaugePresenter;
 
     private void OnDestroy()
     {
-        if (_playerModeController != null)
-        {
-            _playerModePresenter?.Dispose();
-        }
-
-        if (_playerGaugePresenter != null)
-        {
-            _playerGaugePresenter?.Dispose();
-        }
+        _playerModePresenter?.Dispose();
+        _playerGaugePresenter?.Dispose();
     }
 }

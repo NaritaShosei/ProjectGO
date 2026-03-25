@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// プレイヤーを索敵距離外のときにランダム方向へ徘徊するBehaviour
+/// 他のBehaviourが選択できないときのフォールバックとしてランダム方向へ徘徊するBehaviour
 /// ランダムな目標地点に向かって移動し、到達したら新しい目標を設定する
 /// </summary>
 public class RoamBehaviour : IEnemyBehaviour
@@ -14,88 +14,89 @@ public class RoamBehaviour : IEnemyBehaviour
     /// </summary>
     public RoamBehaviour(
         DistanceProfile profile,
-        ISeparationService separationService,
-        IWallAvoidanceService wallAvoidanceService,
-        ISpatialHashGrid spatialHashGrid
+        EnemyServices services,
+        Action<Vector3?> onRoamDirection
     )
     {
         if (profile == null)
             throw new ArgumentNullException(nameof(profile));
         _profile = profile;
-        _separationService = separationService;
-        _wallAvoidanceService = wallAvoidanceService;
-        _spatialHashGrid = spatialHashGrid;
+        _attackerSlot = services.AttackerSlot;
+        _separationService = services.SeparationService;
+        _wallAvoidanceService = services.WallAvoidanceService;
+        _spatialHashGrid = services.SpatialHashGrid;
+        _onRoamDirection = onRoamDirection;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _enemy = owner;
-        _player = player;
-        _data = data;
-        _context = context;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemy = ctx.Owner;
+        _enemyId = ctx.Owner.Id;
+        _enemyAnimator = ctx.EnemyAnimator;
+        _player = ctx.Player;
+        _data = ctx.Data;
+        _state = ctx.StateContext;
     }
 
     public bool CanEnter()
     {
-        if (_player == null) return true;
-
-        // 索敵距離外のときに発動
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
-
-        return sqrDist > sqrDetect;
+        // フォールバックBehaviourのため常時enterable
+        // Attack・Bark中はCanMove()でブロックされる
+        if (_state == null) return false;
+        return _state.CanMove();
     }
 
     public bool CanContinue()
     {
-        if (_player == null) return true;
-
-        // 索敵距離内に入ったら終了
-        float sqrDist = (_self.position - _player.position).sqrMagnitude;
-        float sqrDetect = _profile.DetectDistance * _profile.DetectDistance;
-
-        return sqrDist > sqrDetect;
+        // 目標地点に到達していない間は継続
+        Vector3 toTarget = _target - _self.position;
+        toTarget.y = 0f;
+        return toTarget.sqrMagnitude > _arrivalThreshold * _arrivalThreshold;
     }
 
     public void OnEnter()
     {
         _state.ChangeState(EnemyState.Move);
+
+        // スポーン同期ずらし用の初期待機時間をランダムで設定する
+        _initialDelay = UnityEngine.Random.Range(0f, _initialDelayMax);
+        _delayFinished = _initialDelay <= 0f;
+        
         PickTarget();
     }
 
     public void OnExit()
     {
+        _onRoamDirection?.Invoke(null);
         _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetSpeed(0f);
     }
 
     public void Tick(float deltaTime)
     {
+        // 初期待機中はアニメーションなしで待機する
+        if (!_delayFinished)
+        {
+            _initialDelay -= deltaTime;
+            _enemyAnimator?.SetSpeed(0f);
+
+            if (_initialDelay > 0f) return;
+
+            _delayFinished = true;
+        }
+
         if (!_state.CanMove()) return;
 
-        // 目標地点に十分近づいたら新しい目標を設定する
+        // Speedを毎フレーム更新する（Walk = 0.5f）
+        _enemyAnimator?.SetSpeed(0.5f);
+
         Vector3 toTarget = _target - _self.position;
         toTarget.y = 0f;
 
-        if (toTarget.sqrMagnitude <= _arrivalThreshold * _arrivalThreshold)
-        {
-            PickTarget();
-            return;
-        }
-
         Vector3 oldPos = _self.position;
-
-        // 目標地点への方向を基本ベクトルとする
         Vector3 dir = toTarget.normalized;
 
-        // 分離力を加算する
         if (_separationService != null)
         {
             dir += _separationService.Calculate(
@@ -106,7 +107,6 @@ public class RoamBehaviour : IEnemyBehaviour
             );
         }
 
-        // 壁回避力を加算する
         if (_wallAvoidanceService != null)
         {
             dir += _wallAvoidanceService.CalculateAvoidance(
@@ -119,13 +119,14 @@ public class RoamBehaviour : IEnemyBehaviour
 
         dir.y = 0f;
 
-        // 方向ベクトルが極端に小さい場合はスキップ
         if (dir.sqrMagnitude < 0.001f) return;
 
-        Vector3 newPos = _self.position + dir.normalized * _data.MoveSpeed * deltaTime;
+        // 移動方向をTurnBehaviourに通知する
+        _onRoamDirection?.Invoke(dir.normalized);
+
+        Vector3 newPos = _self.position + dir.normalized * _data.RoamSpeed * deltaTime;
         _self.position = newPos;
 
-        // SpatialHashGridの位置を更新する
         if (_spatialHashGrid != null)
         {
             _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
@@ -136,25 +137,79 @@ public class RoamBehaviour : IEnemyBehaviour
     private IEnemy _enemy;
     private Transform _player;
     private EnemyData _data;
-    private EnemyContext _context;
+    private IEnemyAnimator _enemyAnimator;
     private EnemyStateContext _state;
 
     private readonly DistanceProfile _profile;
+    private readonly IEnemyAttackerSlot _attackerSlot;
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
     private readonly ISpatialHashGrid _spatialHashGrid;
+
+    private int _enemyId;
 
     private Vector3 _target;
 
     // 目標地点への到達判定しきい値
     private const float _arrivalThreshold = 0.3f;
+    // 初期待機のランダム上限（スポーン同期ずらし用）
+    private const float _initialDelayMax = 0.5f;
+
+    // 初期待機タイマー（スポーン同期ずらし用）
+    private float _initialDelay;
+    private bool _delayFinished;
+    private readonly Action<Vector3?> _onRoamDirection;
 
     /// <summary>
-    /// RoamRadius内のランダムな目標地点を設定する
+    /// プレイヤーとの距離・攻撃参加状態に応じて移動目標を設定する
+    /// 遠すぎる場合はプレイヤーへ、非攻撃者が近すぎる場合はプレイヤーから離れる方向、
+    /// それ以外はプレイヤー方向から ±90° 以内のランダム方向へ RoamRadius 分移動する
     /// </summary>
     private void PickTarget()
     {
-        Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * _profile.RoamRadius;
-        _target = _self.position + new Vector3(randomCircle.x, 0f, randomCircle.y);
+        Vector3 toPlayer = _player.position - _self.position;
+        toPlayer.y = 0f;
+        float distToPlayer = toPlayer.magnitude;
+
+        bool isAttacker = _attackerSlot != null && _attackerSlot.IsAcquired(_enemyId);
+
+        Vector3 baseDir;
+
+        if (distToPlayer > _profile.MaxRoamDistance)
+        {
+            // プレイヤーから離れすぎているため、プレイヤー方向へ向かう
+            baseDir = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
+        }
+        else if (!isAttacker && distToPlayer < _profile.MinNonAttackerDistance)
+        {
+            // 非攻撃者が近づきすぎているため、プレイヤーと逆方向から ±90° 以内のランダム方向へ向かう
+            Vector3 awayFromPlayer = distToPlayer > 0f ? -toPlayer.normalized : Vector3.back;
+            float angle = UnityEngine.Random.Range(-90f, 90f);
+            baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
+        }
+        else if (isAttacker && distToPlayer < _profile.MinAttackerRoamDistance)
+        {
+            // 攻撃者が最小距離より近い場合はプレイヤーから離れる方向へ徘徊する
+            Vector3 awayFromPlayer = distToPlayer > 0f ? -toPlayer.normalized : Vector3.back;
+            float angle = UnityEngine.Random.Range(-90f, 90f);
+            baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
+        }
+        else if (isAttacker)
+        {
+            // 攻撃者はプレイヤーを中心とした円周上を移動する（横方向のみ）
+            Vector3 dirToPlayer = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
+            Vector3 lateral = Vector3.Cross(Vector3.up, dirToPlayer).normalized;
+            float sign = UnityEngine.Random.value < 0.5f ? 1f : -1f;
+            baseDir = lateral * sign;
+        }
+        else
+        {
+            // 非攻撃者はプレイヤー方向を基準に ±90° 以内のランダムな方向へ徘徊する
+            Vector3 dirToPlayer = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
+            float angle = UnityEngine.Random.Range(-90f, 90f);
+            baseDir = Quaternion.Euler(0f, angle, 0f) * dirToPlayer;
+        }
+
+        _target = _self.position + baseDir * _profile.RoamRadius;
     }
 }

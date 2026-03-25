@@ -1,8 +1,16 @@
+using System;
+
 /// <summary>
 /// 同時攻撃可能数を管理するスロットのインターフェース
 /// </summary>
 public interface IEnemyAttackerSlot
 {
+    /// <summary>
+    /// 指定したEnemyがスロットを確保済みかどうかを返す
+    /// MoveBehaviourのCanEnterで使用する
+    /// </summary>
+    bool IsAcquired(int enemyId);
+
     /// <summary>
     /// スロットを確保する
     /// すでに確保済みの場合はtrueを返す
@@ -16,13 +24,14 @@ public interface IEnemyAttackerSlot
     void Release(int enemyId, int slotCost);
 
     /// <summary>
-    /// スロットが満杯かどうかを返す
-    /// BarkBehaviourのCanEnterなど、確保せずに満杯確認したい場合に使う
-    /// </summary>
-    bool IsFull(int slotCost);
-
-    /// <summary>
     /// スロットをリセットする
+    /// シーン再ロードやゲームリセット時に全スロット状態をクリアする想定
     /// </summary>
     void Reset();
+
+    /// <summary>
+    /// スロットが解放されたときに発火するイベント
+    /// 未取得の敵がこのイベントを受けてTryAcquireを再試行する
+    /// </summary>
+    event Action OnSlotReleased;
 }

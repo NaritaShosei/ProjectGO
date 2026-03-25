@@ -95,6 +95,18 @@ public class EnemyBehaviourRunner
         _current = null;
     }
 
+    /// <summary>
+    /// ObjectPoolから再利用する際に実行状態をリセットする。
+    /// 登録済みのBehaviourリストは保持したまま、実行中の状態だけをクリアする。
+    /// </summary>
+    public void Reset()
+    {
+        _forced?.OnExit();
+        _forced = null;
+        _current?.OnExit();
+        _current = null;
+    }
+
     private readonly IEnemy _owner;
 
     private readonly List<IEnemyBehaviour> _behaviours
@@ -111,25 +123,30 @@ public class EnemyBehaviourRunner
 
     private void SelectBehaviour()
     {
-        // 実行可能なBehaviourのうち優先度が最も高いものを選択する
+        // 現在のBehaviourを先に終了させてからCanEnterを評価する
+        // これにより同じBehaviourが即再選択されることを防ぐ
+        IEnemyBehaviour previous = _current;
+        _current = null;
+
         for (int i = 0; i < _behaviours.Count; i++)
         {
             var next = _behaviours[i];
+            if (ReferenceEquals(next, previous)) continue;
             if (!next.CanEnter()) continue;
-
+            previous?.OnExit();
             SwitchTo(next);
             return;
         }
-
-        _current?.OnExit();
-        _current = null;
+        // 選択できるBehaviourがない場合はpreviousのOnExitだけ呼んで終了する
+        previous?.OnExit();
     }
 
     private void SwitchTo(IEnemyBehaviour next)
     {
+        // 同一Behaviourへの切り替えは無視する
         if (_current == next) return;
-
-        _current?.OnExit();
+        // OnExitは呼び出し元（SelectBehaviour / Force系メソッド）で呼び済みの前提
+        // SwitchToは切り替えとOnEnterのみを担う
         _current = next;
         _current.OnEnter();
     }
@@ -142,8 +159,9 @@ public class EnemyBehaviourRunner
 public enum EnemyBehaviourPriority : int
 {
     None = 0,
-    Roam = 1,
-    Bark = 2,
-    Move = 3,
-    Attack = 4
+    Idle = 1,
+    Roam = 2,
+    Bark = 3,
+    Approach = 4,
+    Attack = 5
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,6 +13,7 @@ public class InputHandler : MonoBehaviour
     public event Action OnChargeEnd;
     public event Action OnInteract;
     public event Action OnModeChange;
+    public event Action OnLockOn;
 
     /// <summary>
     /// PlayerのActionMapの有効か非有効化の切り替え。
@@ -60,6 +61,9 @@ public class InputHandler : MonoBehaviour
 
         // モードチェンジ
         _input.Player.ModeChange.started += _ => OnModeChange?.Invoke();
+
+        // ロックオン
+        _input.Player.LockOn.started += _ => OnLockOn?.Invoke();
 
         EnableInput(true);
     }

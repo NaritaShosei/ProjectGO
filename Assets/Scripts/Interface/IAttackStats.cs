@@ -1,8 +1,8 @@
 public interface IAttackStats
 {
-    public float AttackPower { get; }
+    float AttackPower { get; }
     /// <summary> クリティカル率(0～1) 1を超えると確定クリティカル </summary>
-    public float CriticalRate { get; }
+    float CriticalRate { get; }
 }
 
 public interface IDefenseStats
@@ -16,8 +16,13 @@ public interface IHealthStats
     float CurrentHealth { get; }
 }
 
-public interface IStaminaStats
+/// <summary>
+/// 旧 IStaminaStats に相当する雷ゲージの読み取り専用インターフェース。
+/// UIや外部から現在値・最大値を参照する際に使用する。
+/// </summary>
+public interface IThunderGaugeStats
 {
-    float MaxStamina { get; }
-    float CurrentStamina { get; }
+    float MaxThunderGauge { get; }
+    float CurrentThunderGauge { get; }
+    float InitialMaxThunderGauge { get; }
 }

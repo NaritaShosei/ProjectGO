@@ -47,9 +47,11 @@ MonoBehaviour:
   _sequenceManager: {fileID: 9128100736884302578}
   _player: {fileID: 0}
   _enemyManager: {fileID: 5320311474982235821}
-  _skillManager: {fileID: 2881409127565757846}
   _enemyUIManager: {fileID: 7908005230863849075}
+  _skillManager: {fileID: 2881409127565757846}
   _playerGaugeView: {fileID: 0}
+  _inGameUIInitializer: {fileID: 4773163649764372864}
+  _itemPickupManager: {fileID: 9221605787384030750}
 --- !u!1 &2077946794018349390
 GameObject:
   m_ObjectHideFlags: 0
@@ -94,12 +96,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2c5dec192d3f704782983793a57d430, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyUIManager
-  _enemyManager: {fileID: 5320311474982235821}
   _gaugePrefab: {fileID: 4650935944076157986, guid: 1c25fa8f3e1eb334890636a78985dc3d, type: 3}
+  _armerGaugePrefab: {fileID: 4650935944076157986, guid: f33880f00c74542479bed90efb2528cc, type: 3}
   _gaugeParent: {fileID: 0}
-  _detectionRange: 10
+  _armerGaugeParent: {fileID: 0}
+  _popupPrefab: {fileID: 4699854269337061299, guid: f5cd68eac20996844a6309012b86abcd, type: 3}
+  _popupParent: {fileID: 0}
+  _detectionRange: 2
   _damagedDisplayDuration: 3
   _rangeCheckInterval: 0.1
+  _popupPreloadCount: 20
 --- !u!1 &2138172531251908086
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,8 +150,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e46f65807e7b6404f8152920dbaa5002, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPresenterInitializer
-  _playerModeController: {fileID: 0}
   _playerModeView: {fileID: 0}
+  _playerGaugeView: {fileID: 0}
 --- !u!1 &2902406552746354774
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,6 +196,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5057605c4c88c8946b84461c0746413f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyManager
+  _spatialHashGridCellSize: 2
+  _wallLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _maxAttackerSlots: 3
 --- !u!1 &3913965231841061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -226,6 +237,7 @@ Transform:
   - {fileID: 4259693024337359455}
   - {fileID: 8100726554472640711}
   - {fileID: 4509286154457740210}
+  - {fileID: 378753349322358893}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4996710551187502800
@@ -322,6 +334,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillManager
   _skillDataBase: {fileID: 11400000, guid: 4d79037967742ff419d5ff316893928e, type: 2}
+--- !u!1 &7616060526857187252
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 378753349322358893}
+  - component: {fileID: 9221605787384030750}
+  m_Layer: 0
+  m_Name: ItemPickUpManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &378753349322358893
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7616060526857187252}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7036861525032570302}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9221605787384030750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7616060526857187252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 839d2586d06caab44a3e6fe3d413482c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemPickupManager
+  _itemPrefab: {fileID: 8723580063973863131, guid: 6a4f7f7f9566e234aa9643de07180aea, type: 3}
+  _itemParent: {fileID: 378753349322358893}
+  _viewPrefab: {fileID: 8392898125462638931, guid: 796e3a673d0526440b221af48b1dd721, type: 3}
+  _viewParent: {fileID: 0}
+  _nearRange: 5
+  _interactRange: 2
+  _rangeCheckInterval: 0.1
 --- !u!1 &7749162525453086863
 GameObject:
   m_ObjectHideFlags: 0

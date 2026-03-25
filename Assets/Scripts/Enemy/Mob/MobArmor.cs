@@ -1,10 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// モブのアーマーの具象クラス
+/// モブ用アーマーの具象クラス
+/// 現時点ではArmorの基本実装をそのまま使用する
 /// </summary>
 public class MobArmor : Armor
 {
-    // TODO: 具体的な内容は未定
-    // かたっぱしっからoverride つまり何も必要ない
 }

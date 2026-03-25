@@ -3,86 +3,88 @@ using UnityEngine;
 /// <summary>
 /// 近接攻撃Behaviour
 /// AttackerSlotでスロットを確保できた場合のみ攻撃する
-/// AttackPatternのDurationでモーション時間を管理する
+/// AttackPatternのDuration・BaseDamage・Cooldown・MaxHitCount・HitIntervalを参照する
+/// WindUpはAnimationEventのOnAttackHit発火タイミングでアニメーション側が制御する
 /// </summary>
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
 
     /// <summary>
-    /// AttackerSlotはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
+    /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MeleeAttackBehaviour(IEnemyAttackerSlot attackerSlot)
+    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null)
     {
-        _attackerSlot = attackerSlot;
+        _attackerSlot = services.AttackerSlot;
+        _animator = animator;
+        _profile = profile;
+        // profileがnullの場合は背後判定を無効化する（dot < -1 は常にfalse）
+        _backDotThreshold = profile != null
+            ? Mathf.Cos(profile.BackAttackAngle * Mathf.Deg2Rad)
+            : -1f;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _enemyId = owner.GetInstanceID();
-        _player = player;
-        _data = data;
-        _context = context;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemyId = ctx.Owner.Id;
+        _player = ctx.Player;
+        _context = ctx.RuntimeContext;
+        _enemyAnimator = ctx.EnemyAnimator;
+        _state = ctx.StateContext;
+
+        // AttackHit / AttackEndイベントを購読してアニメーションと同期する
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnAttackHit += HandleAttackHit;
+            _enemyAnimator.OnAttackEnd += HandleAttackEnd;
+        }
     }
 
     public bool CanEnter()
     {
-        // Playerが不正ならリターン
         if (_player == null) return false;
-
-        // 距離計算
-        _context.DistanceToPlayer = Vector3.Distance(
-            _self.position,
-            _player.position
-        );
-
-        // Playerとの距離が遠いならリターン
-        if (_context.DistanceToPlayer > _data.AttackRange) return false;
-
-        // クールダウンが明けていなければリターン
-        if (Time.time - _lastAttackTime < _data.AttackCooldown) return false;
-
-        // 攻撃中ならリターン
+        if (_attackerSlot == null) return false;
         if (_isAttacking) return false;
+
+        // スポーン時に確保済みのスロットを持っているかチェック
+        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
+
+        // パターン未選択なら攻撃不可
+        if (_context.SelectedPattern == null) return false;
+
+        // クールダウン判定（0以下で攻撃可能）
+        if (_context.AttackCooldownRemaining > 0f) return false;
+
+        // 射程チェック（AttackTriggerRatioでトリガー距離を調整）
+        _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
+        float triggerRange = _context.SelectedPattern.AttackRange * _context.SelectedPattern.AttackTriggerRatio;
+        if (_context.DistanceToPlayer > triggerRange) return false;
+
+        // 背後攻撃抑制（プレイヤー背後にいる場合は確率的にキャンセル）
+        if (_profile != null && IsInPlayerBack())
+        {
+            if (UnityEngine.Random.value < _profile.BackAttackSuppressChance) return false;
+        }
 
         return true;
     }
 
     public bool CanContinue()
     {
+        // 攻撃開始後はアニメーション終了まで継続する
         return _isAttacking;
     }
 
     public void OnEnter()
     {
-        // スロットが未設定ならリターン
-        if (_attackerSlot == null) return;
-
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        // スロットが確保できなければクールダウンを更新してリターン
-        // 更新しないと毎フレームOnEnterが呼ばれ続けてしまう
-        if (!_attackerSlot.TryAcquire(_enemyId, slotCost, isBoss: false))
-        {
-            _lastAttackTime = Time.time;
-            return;
-        }
-
         _isAttacking = true;
         _timer = 0f;
+        _hitCount = 0;
+        _nextHitTime = float.MaxValue;
+        _attackEndFired = false;
         _state.ChangeState(EnemyState.Attack);
-
-        PerformAttack();
+        _enemyAnimator?.SetAttacking(true);
     }
 
     public void Tick(float deltaTime)
@@ -91,69 +93,186 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         _timer += deltaTime;
 
-        // AttackPatternが設定されている場合はDurationで終了判定
-        // 設定されていない場合は即終了
-        float duration = _data.AttackPattern != null
-            ? _data.AttackPattern.Duration
-            : 0f;
-
-        if (_timer >= duration)
+        // 多段ヒット：deltaTimeが大きい場合も期限超過分をすべて消化する
+        int maxHitCount = _context.SelectedPattern?.MaxHitCount ?? 1;
+        while (_hitCount > 0 && _hitCount < maxHitCount && _timer >= _nextHitTime)
         {
-            Exit();
+            PerformHit();
+        }
+
+        // AnimationEventで終了を検知できなかった場合のフォールバック
+        // Duration / clip長を超えた場合は強制終了する
+        if (!_attackEndFired)
+        {
+            float duration = (_context.SelectedPattern != null && _context.SelectedPattern.Duration > 0f)
+                ? _context.SelectedPattern.Duration
+                : GetAnimationLength();
+
+            if (_timer >= duration)
+            {
+                Exit();
+            }
         }
     }
 
     public void OnExit()
     {
+        if (!_isAttacking) return;
         Exit();
+    }
+
+    /// <summary>
+    /// イベント購読を解除する
+    /// </summary>
+    public void Dispose()
+    {
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnAttackHit -= HandleAttackHit;
+            _enemyAnimator.OnAttackEnd -= HandleAttackEnd;
+        }
+    }
+
+    /// <summary>
+    /// 死亡時にEnemyから明示的に呼び出し、AttackerSlotを解放する
+    /// </summary>
+    public void ReleaseSlot()
+    {
+        if (_attackerSlot == null) return;
+        _attackerSlot.Release(_enemyId, 1);
     }
 
     private Transform _self;
     private Transform _player;
-    private EnemyData _data;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
+    private IEnemyAnimator _enemyAnimator;
+    private Animator _animator;
+
     private readonly IEnemyAttackerSlot _attackerSlot;
+    private readonly DistanceProfile _profile;
+    private readonly float _backDotThreshold;
 
     private int _enemyId;
-    private float _lastAttackTime;
     private float _timer;
+    private float _nextHitTime;
     private bool _isAttacking;
+    private int _hitCount;
+    private bool _attackEndFired;
 
-    private void PerformAttack()
+    // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
+    private const float _attackFallbackTimeout = 5f;
+
+    // Attackアニメーターステートの名前
+    private const string _attackStateName = "Attack";
+
+    /// <summary>
+    /// 実際の攻撃判定とダメージ適用を行う
+    /// </summary>
+    private void PerformHit()
     {
-        _lastAttackTime = Time.time;
+        var pattern = _context.SelectedPattern;
+        if (pattern == null) return;
 
-        // 球体をつくり、その範囲内にいるPlayerに攻撃
+#if UNITY_EDITOR
+        Vector3 debugCenter = _self.position + _self.forward * pattern.AttackRange;
+        Debug.Log($"[Attack:{pattern.PatternName}] hit={_hitCount + 1}, center={debugCenter}, radius={pattern.AttackRadius}");
+        Collider[] debugHits = Physics.OverlapSphere(debugCenter, pattern.AttackRadius);
+        foreach (var h in debugHits)
+        {
+            Debug.Log($"[Attack:{pattern.PatternName}] target={h.gameObject.name}, hasIPlayer={h.TryGetComponent<IPlayer>(out _)}");
+        }
+#endif
+
         Collider[] hits = Physics.OverlapSphere(
-            _self.position + _self.forward * _data.AttackRange,
-            _data.AttackRadius
+            _self.position + _self.forward * pattern.AttackRange,
+            pattern.AttackRadius
         );
 
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent(out IPlayer player))
             {
-                player.TakeDamage(_data.AttackDamage);
+                player.TakeDamage(pattern.BaseDamage);
             }
         }
+
+        _hitCount++;
+        _nextHitTime += pattern.HitInterval;
     }
 
     private void Exit()
     {
-        // 二重呼び出し防止
+        if (!_isAttacking) return;
+        _isAttacking = false;
+
+        // 攻撃後クールダウンをセット
+        _context.AttackCooldownRemaining = _context.SelectedPattern?.Cooldown ?? 1.5f;
+
+        // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
+        _context.SelectedPattern = null;
+
+        _enemyAnimator?.SetAttacking(false);
+        _state.ChangeState(EnemyState.Idle);
+    }
+
+    /// <summary>
+    /// 自分がプレイヤーの背後エリアに位置するかを判定する
+    /// </summary>
+    private bool IsInPlayerBack()
+    {
+        Vector3 toSelf = _self.position - _player.position;
+        toSelf.y = 0f;
+        if (toSelf.sqrMagnitude < 0.001f) return false;
+
+        Vector3 playerFwd = _player.forward;
+        playerFwd.y = 0f;
+
+        float dot = Vector3.Dot(playerFwd.normalized, toSelf.normalized);
+        return dot < _backDotThreshold;
+    }
+
+    /// <summary>
+    /// AttackステートのAnimationClip長を取得する
+    /// AttackPattern.Durationが未設定の場合のフォールバック
+    /// </summary>
+    private float GetAnimationLength()
+    {
+        // Animatorがnullのときはフォールバックタイムアウトを返して攻撃が即終了しないようにする
+        if (_animator == null) return _attackFallbackTimeout;
+
+        AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+        if (stateInfo.IsName(_attackStateName))
+        {
+            return stateInfo.length;
+        }
+
+        // Attackステートに遷移前、またはClip長取得不能の場合はフォールバックタイムアウトを返す
+        return _attackFallbackTimeout;
+    }
+
+    /// <summary>
+    /// 攻撃ヒットタイミングのAnimationEventから中継されるハンドラ
+    /// WindUpはアニメーション側でOnAttackHitの発火タイミングとして制御される
+    /// </summary>
+    private void HandleAttackHit()
+    {
         if (!_isAttacking) return;
 
-        _isAttacking = false;
-        _state.ChangeState(EnemyState.Idle);
+        // 初回ヒットのみAnimationEventで処理し、以降はTick内でHitIntervalに従って処理する
+        if (_hitCount > 0) return;
 
-        // スロットを解放する
-        if (_attackerSlot == null) return;
+        PerformHit();
+    }
 
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        _attackerSlot.Release(_enemyId, slotCost);
+    /// <summary>
+    /// 攻撃終了タイミングのAnimationEventから中継されるハンドラ
+    /// </summary>
+    private void HandleAttackEnd()
+    {
+        if (!_isAttacking) return;
+        _attackEndFired = true;
+        Exit();
     }
 }

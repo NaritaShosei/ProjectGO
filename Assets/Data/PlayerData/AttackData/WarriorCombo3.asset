@@ -29,16 +29,18 @@ MonoBehaviour:
   _homingRadius: 5
   _homingAngle: 360
   _homingStrength: 10
-  _moveType: 0
-  _moveDistance: 0
+  _moveType: 2
+  _moveDistance: 2
   _moveSpeed: 0
   _moveDuration: 0
   _stopOnHit: 1
   _isPhantom: 0
   _hitStopData:
-    _baseDuration: 0.08
+    _baseDuration: 0.15
     _timeScale: 0
     _targetGroup: 11
-    _weakPointMultiplier: 1.2
-    _breakOrKillMultiplier: 1.2
-    _weakAndBreakOrKillMultiplier: 1.4
+    _weakPointMultiplier: 2
+    _breakOrKillMultiplier: 2
+    _weakAndBreakOrKillMultiplier: 2.5
+  _animationStateName: Warrior_Combo_3
+  _animationStartTime: 0.1

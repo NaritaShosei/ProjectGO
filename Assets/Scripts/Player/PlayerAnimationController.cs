@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour, IAnimationController
+public class PlayerAnimationController : MonoBehaviour, IAnimationController, IModeChangeAnimationController
 {
     public void Init(PlayerStateManager stateManager, IModeController modeController)
     {
@@ -16,6 +16,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
     public event Action OnAttackExecute;
+    public event Action OnModeChangeComplete;
+    public event Action OnComboTransition;
 
     // アニメーションから呼ばれる関数
     public void AnimEvent_AttackExecute()
@@ -36,6 +38,16 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
     public void AnimEvent_ComboWindowEnd()
     {
         OnComboWindowEnd?.Invoke();
+    }
+
+    public void AnimEvent_ModeChangeComplete()
+    {
+        OnModeChangeComplete?.Invoke();
+    }
+
+    public void AnimEvent_ComboTransition()
+    {
+        OnComboTransition?.Invoke();
     }
 
     public void UpdateMoveAnimation(float speed)
@@ -82,6 +94,23 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
         _animator.speed = _beforeAnimSpeed * speed;
     }
 
+    public void PlayAttackBlend(int attackId, string stateName, float transitionDuration = 0.1f)
+    {
+        _animator.SetInteger(AnimParams.AttackId, attackId);
+
+        if (!string.IsNullOrEmpty(stateName))
+        {
+            // 現在のステートからブレンドしながら直接遷移
+            // 第3引数 = レイヤーインデックス（0 = Base Layer）
+            _animator.CrossFadeInFixedTime(stateName, transitionDuration, 0);
+        }
+        else
+        {
+            // フォールバック：従来通り
+            _animator.SetTrigger(AnimParams.Attack);
+        }
+    }
+
     public void OnDestroy()
     {
         if (_stateManager != null)
@@ -113,6 +142,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
         public static readonly int Damaged = Animator.StringToHash("Damaged");
         public static readonly int Dead = Animator.StringToHash("Dead");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+        public static readonly int ModeChange = Animator.StringToHash("ModeChange");
     }
 
     private void Awake()
@@ -145,6 +175,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        _animator.SetTrigger(AnimParams.ModeChange);
         _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
     }
 }
