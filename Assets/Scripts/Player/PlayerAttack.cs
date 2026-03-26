@@ -556,7 +556,7 @@ public class PlayerAttack : MonoBehaviour
         if (_isHomingLocked && _lockedHomingTarget != null)
         {
             // 死亡チェック：IEnemy経由でチェック
-            if (_lockedHomingTarget != null && _lockedHomingTarget.gameObject.activeInHierarchy)
+            if (_lockedHomingTarget != null && _lockedHomingTarget.TryGetComponent(out IEnemy enemy) && !enemy.IsDead)
             {
                 return _lockedHomingTarget; // 固定ターゲットを返す
             }
