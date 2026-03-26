@@ -40,6 +40,9 @@ public interface IEnemy : ICharacter
     /// <summary>HitStop等で使用するタイムスケール（DeadCondition の物理スケーリングに使用）</summary>
     float TimeScale { get; }
 
+    /// <summary> 死亡判定 </summary>
+    bool IsDead { get; }
+
     // --- Methods ---
 
     /// <summary>Playerの参照を渡して初期化する</summary>

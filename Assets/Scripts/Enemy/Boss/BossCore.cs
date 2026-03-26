@@ -46,6 +46,8 @@ public sealed class BossCore : MonoBehaviour, IEnemy
     public Vector3 Position => transform.position;
     public float TimeScale => 1f;
 
+    public bool IsDead => _boss.IsDead;
+
     public void InjectServices(EnemyServices services) { }
     public void Init(IPlayer player) { }
     public void OnConditionInterrupt() { }

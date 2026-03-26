@@ -31,6 +31,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     public float TimeScale { get; set; } = 1f;
 
+    public bool IsDead => _isDead;
+
     /// <summary>
     /// HitStop等でTimeScaleが変化したときに呼ばれる
     /// </summary>
@@ -150,7 +152,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
                 )
             );
     }
-    
+
 
     public abstract void OnConditionInterrupt();
 

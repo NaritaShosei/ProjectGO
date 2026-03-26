@@ -25,6 +25,8 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     public Vector3 Position => transform.position;
     public float TimeScale => 1f;
 
+    public bool IsDead => IsBroken;
+
     /// <summary>HPがゼロ以下になったかどうかを返す</summary>
     public bool IsBroken => _hp <= 0;
 
