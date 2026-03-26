@@ -40,5 +40,6 @@ public enum ConditionType : int
     Knockback = 1,
     Electrified = 2,
     Down = 3,
+    Dead = 4,
     // 拡張できるようにEnum
 }

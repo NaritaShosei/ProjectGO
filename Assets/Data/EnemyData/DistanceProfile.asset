@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14a06eac8ec24e44fabc8ab2dbabe34e, type: 3}
   m_Name: DistanceProfile
   m_EditorClassIdentifier: Assembly-CSharp::DistanceProfile
-  DetectDistance: 10
-  MinAttackDistance: 2
-  MaxAttackDistance: 3
-  DesiredDistance: 3
-  DesiredTolerance: 0.5
-  RoamRadius: 5
-  SeparationRadius: 2.5
-  SeparationStrength: 0.8
-  WallDetectDistance: 2.5
-  WallAvoidanceStrength: 0.8
+  _moveApproachRatio: 0.8
+  _backAttackAngle: 90
+  _backAttackSuppressChance: 0.8
+  _roamRadius: 2
+  _maxRoamDistance: 6
+  _minNonAttackerDistance: 4.5
+  _minAttackerRoamDistance: 2.5
+  _separationRadius: 1.5
+  _separationStrength: 0.8
+  _wallDetectDistance: 1
+  _wallAvoidanceStrength: 0.8

@@ -13,6 +13,8 @@ public interface IEnemyAnimator
     public event Action OnBarkEnd;
     /// <summary>GetUpアニメーション終了のイベント</summary>
     public event Action OnGetUpEnd;
+    /// <summary>ノックバック（Hit/Small）アニメーション終了のイベント</summary>
+    public event Action OnKnockbackEnd;
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
 
@@ -28,6 +30,8 @@ public interface IEnemyAnimator
     public void SetElectrified(bool value);
     /// <summary>死亡フラグを設定する（一度設定したら戻さない）</summary>
     public void SetDead();
+    /// <summary>アニメーション再生速度を設定する（HitStop制御に使用）</summary>
+    public void SetAnimSpeed(float speed);
     /// <summary>イベント購読を解除する</summary>
     public void Dispose();
 }
@@ -38,11 +42,14 @@ public interface IEnemyAnimator
 /// </summary>
 public sealed class NullEnemyAnimator : IEnemyAnimator
 {
+#pragma warning disable CS0067
     public event Action OnAttackHit;
     public event Action OnAttackEnd;
     public event Action OnBarkEnd;
     public event Action OnGetUpEnd;
+    public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
+#pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }
     public void SetAttacking(bool value) { }
@@ -50,5 +57,6 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public void SetKnockback(bool value, KnockbackLevel level = KnockbackLevel.Hit) { }
     public void SetElectrified(bool value) { }
     public void SetDead() { }
+    public void SetAnimSpeed(float speed) { }
     public void Dispose() { }
 }
