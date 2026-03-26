@@ -3,56 +3,41 @@ using UnityEngine;
 /// <summary>
 /// 近接攻撃Behaviour
 /// AttackerSlotでスロットを確保できた場合のみ攻撃する
-/// AttackPatternのDurationでモーション時間を管理する
+/// AttackPatternのDuration・BaseDamage・Cooldown・MaxHitCount・HitIntervalを参照する
+/// WindUpはAnimationEventのOnAttackHit発火タイミングでアニメーション側が制御する
 /// </summary>
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
 
     /// <summary>
-    /// AttackerSlotはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
+    /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MeleeAttackBehaviour(IEnemyAttackerSlot attackerSlot)
+    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null)
     {
-        _attackerSlot = attackerSlot;
+        _attackerSlot = services.AttackerSlot;
+        _animator = animator;
+        _profile = profile;
+        // profileがnullの場合は背後判定を無効化する（dot < -1 は常にfalse）
+        _backDotThreshold = profile != null
+            ? Mathf.Cos(profile.BackAttackAngle * Mathf.Deg2Rad)
+            : -1f;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        IEnemyAnimator enemyAnimator,
-        Animator animator,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _enemyId = owner.GetInstanceID();
-        _player = player;
-        _data = data;
-        _context = context;
-        _enemyAnimator = enemyAnimator;
-        _state = state;
-        _animator = animator;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemyId = ctx.Owner.Id;
+        _player = ctx.Player;
+        _context = ctx.RuntimeContext;
+        _enemyAnimator = ctx.EnemyAnimator;
+        _state = ctx.StateContext;
 
         // AttackHit / AttackEndイベントを購読してアニメーションと同期する
         if (_enemyAnimator != null)
         {
             _enemyAnimator.OnAttackHit += HandleAttackHit;
             _enemyAnimator.OnAttackEnd += HandleAttackEnd;
-        }
-    }
-
-    /// <summary>
-    /// イベント購読を解除する
-    /// </summary>
-    public void Dispose()
-    {
-        if (_enemyAnimator != null)
-        {
-            _enemyAnimator.OnAttackHit -= HandleAttackHit;
-            _enemyAnimator.OnAttackEnd -= HandleAttackEnd;
         }
     }
 
@@ -65,16 +50,29 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         // スポーン時に確保済みのスロットを持っているかチェック
         if (!_attackerSlot.IsAcquired(_enemyId)) return false;
 
-        // クールダウン判定をEnemyContext.LastAttackTimeで行う
-        if (Time.time - _context.LastAttackTime < _data.AttackCooldown) return false;
+        // パターン未選択なら攻撃不可
+        if (_context.SelectedPattern == null) return false;
 
-        // 射程チェック
+        // クールダウン判定（0以下で攻撃可能）
+        if (_context.AttackCooldownRemaining > 0f) return false;
+
+        // 射程チェック（AttackTriggerRatioでトリガー距離を調整）
         _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
-        return _context.DistanceToPlayer <= _data.AttackRange;
+        float triggerRange = _context.SelectedPattern.AttackRange * _context.SelectedPattern.AttackTriggerRatio;
+        if (_context.DistanceToPlayer > triggerRange) return false;
+
+        // 背後攻撃抑制（プレイヤー背後にいる場合は確率的にキャンセル）
+        if (_profile != null && IsInPlayerBack())
+        {
+            if (UnityEngine.Random.value < _profile.BackAttackSuppressChance) return false;
+        }
+
+        return true;
     }
 
     public bool CanContinue()
     {
+        // 攻撃開始後はアニメーション終了まで継続する
         return _isAttacking;
     }
 
@@ -82,7 +80,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     {
         _isAttacking = true;
         _timer = 0f;
-        _attackHitFired = false;
+        _hitCount = 0;
+        _nextHitTime = float.MaxValue;
         _attackEndFired = false;
         _state.ChangeState(EnemyState.Attack);
         _enemyAnimator?.SetAttacking(true);
@@ -94,12 +93,19 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         _timer += deltaTime;
 
+        // 多段ヒット：deltaTimeが大きい場合も期限超過分をすべて消化する
+        int maxHitCount = _context.SelectedPattern?.MaxHitCount ?? 1;
+        while (_hitCount > 0 && _hitCount < maxHitCount && _timer >= _nextHitTime)
+        {
+            PerformHit();
+        }
+
         // AnimationEventで終了を検知できなかった場合のフォールバック
         // Duration / clip長を超えた場合は強制終了する
         if (!_attackEndFired)
         {
-            float duration = (_data.AttackPattern != null && _data.AttackPattern.Duration > 0f)
-                ? _data.AttackPattern.Duration
+            float duration = (_context.SelectedPattern != null && _context.SelectedPattern.Duration > 0f)
+                ? _context.SelectedPattern.Duration
                 : GetAnimationLength();
 
             if (_timer >= duration)
@@ -115,72 +121,115 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         Exit();
     }
 
+    /// <summary>
+    /// イベント購読を解除する
+    /// </summary>
+    public void Dispose()
+    {
+        if (_enemyAnimator != null)
+        {
+            _enemyAnimator.OnAttackHit -= HandleAttackHit;
+            _enemyAnimator.OnAttackEnd -= HandleAttackEnd;
+        }
+    }
+
+    /// <summary>
+    /// 死亡時にEnemyから明示的に呼び出し、AttackerSlotを解放する
+    /// </summary>
+    public void ReleaseSlot()
+    {
+        if (_attackerSlot == null) return;
+        _attackerSlot.Release(_enemyId, 1);
+    }
+
     private Transform _self;
     private Transform _player;
-    private EnemyData _data;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
-    private readonly IEnemyAttackerSlot _attackerSlot;
     private IEnemyAnimator _enemyAnimator;
+    private Animator _animator;
+
+    private readonly IEnemyAttackerSlot _attackerSlot;
+    private readonly DistanceProfile _profile;
+    private readonly float _backDotThreshold;
 
     private int _enemyId;
     private float _timer;
+    private float _nextHitTime;
     private bool _isAttacking;
-    private bool _attackHitFired;
+    private int _hitCount;
     private bool _attackEndFired;
-
-    private Animator _animator;
 
     // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
     private const float _attackFallbackTimeout = 5f;
 
-    private void PerformAttack()
+    // Attackアニメーターステートの名前
+    private const string _attackStateName = "Attack";
+
+    /// <summary>
+    /// 実際の攻撃判定とダメージ適用を行う
+    /// </summary>
+    private void PerformHit()
     {
-# if UNITY_EDITOR
-        Vector3 center = _self.position + _self.forward * _data.AttackRange;
-        Debug.Log($"[Attack] center={center}, radius={_data.AttackRadius}, forward={_self.forward}");
-        Collider[] debugHits = Physics.OverlapSphere(center, _data.AttackRadius);
+        var pattern = _context.SelectedPattern;
+        if (pattern == null) return;
+
+#if UNITY_EDITOR
+        Vector3 debugCenter = _self.position + _self.forward * pattern.AttackRange;
+        Debug.Log($"[Attack:{pattern.PatternName}] hit={_hitCount + 1}, center={debugCenter}, radius={pattern.AttackRadius}");
+        Collider[] debugHits = Physics.OverlapSphere(debugCenter, pattern.AttackRadius);
         foreach (var h in debugHits)
         {
-            Debug.Log($"[Attack] hit={h.gameObject.name}, hasIPlayer={h.TryGetComponent<IPlayer>(out _)}");
+            Debug.Log($"[Attack:{pattern.PatternName}] target={h.gameObject.name}, hasIPlayer={h.TryGetComponent<IPlayer>(out _)}");
         }
-# endif
-
-        // クールダウン管理のためEnemyContextに記録する
-        _context.LastAttackTime = Time.time;
+#endif
 
         Collider[] hits = Physics.OverlapSphere(
-            _self.position + _self.forward * _data.AttackRange,
-            _data.AttackRadius
+            _self.position + _self.forward * pattern.AttackRange,
+            pattern.AttackRadius
         );
 
         foreach (var hit in hits)
         {
             if (hit.TryGetComponent(out IPlayer player))
             {
-                player.TakeDamage(_data.AttackDamage);
+                player.TakeDamage(pattern.BaseDamage);
             }
         }
-    }
 
-    // 死亡時にEnemyから明示的に呼ぶ
-    public void ReleaseSlot()
-    {
-        if (_attackerSlot == null) return;
-
-        int slotCost = _data.AttackPattern != null
-            ? _data.AttackPattern.SlotCost
-            : 1;
-
-        _attackerSlot.Release(_enemyId, slotCost);
+        _hitCount++;
+        _nextHitTime += pattern.HitInterval;
     }
 
     private void Exit()
     {
         if (!_isAttacking) return;
         _isAttacking = false;
+
+        // 攻撃後クールダウンをセット
+        _context.AttackCooldownRemaining = _context.SelectedPattern?.Cooldown ?? 1.5f;
+
+        // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
+        _context.SelectedPattern = null;
+
         _enemyAnimator?.SetAttacking(false);
         _state.ChangeState(EnemyState.Idle);
+    }
+
+    /// <summary>
+    /// 自分がプレイヤーの背後エリアに位置するかを判定する
+    /// </summary>
+    private bool IsInPlayerBack()
+    {
+        Vector3 toSelf = _self.position - _player.position;
+        toSelf.y = 0f;
+        if (toSelf.sqrMagnitude < 0.001f) return false;
+
+        Vector3 playerFwd = _player.forward;
+        playerFwd.y = 0f;
+
+        float dot = Vector3.Dot(playerFwd.normalized, toSelf.normalized);
+        return dot < _backDotThreshold;
     }
 
     /// <summary>
@@ -194,9 +243,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
 
-        if (stateInfo.IsName("Attack"))
+        if (stateInfo.IsName(_attackStateName))
         {
-            // normalizedTimeが1に達したらClip1周分
             return stateInfo.length;
         }
 
@@ -206,14 +254,16 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     /// <summary>
     /// 攻撃ヒットタイミングのAnimationEventから中継されるハンドラ
+    /// WindUpはアニメーション側でOnAttackHitの発火タイミングとして制御される
     /// </summary>
     private void HandleAttackHit()
     {
         if (!_isAttacking) return;
-        // 1攻撃につき1回のみヒット処理を行う
-        if (_attackHitFired) return;
-        _attackHitFired = true;
-        PerformAttack();
+
+        // 初回ヒットのみAnimationEventで処理し、以降はTick内でHitIntervalに従って処理する
+        if (_hitCount > 0) return;
+
+        PerformHit();
     }
 
     /// <summary>

@@ -11,28 +11,22 @@ public class BarkBehaviour : IEnemyBehaviour
     /// <summary>
     /// DistanceProfile・AttackerSlot はBarkBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public BarkBehaviour(IEnemyAttackerSlot attackerSlot, float barkChance)
+    public BarkBehaviour(DistanceProfile profile, EnemyServices services, float barkChance)
     {
-        _attackerSlot = attackerSlot;
+        _profile = profile;
+        _attackerSlot = services.AttackerSlot;
         _barkChance = barkChance;
     }
 
-    public void Init(
-        Enemy owner,
-        EnemyData data,
-        Transform player,
-        EnemyContext context,
-        IEnemyAnimator enemyAnimator,
-        EnemyStateContext state
-    )
+    public void Init(BehaviourInitContext ctx)
     {
-        _self = owner.transform;
-        _enemyAnimator = enemyAnimator;
-        _enemyId = owner.GetInstanceID();
-        _player = player;
-        _data = data;
-        _context = context;
-        _state = state;
+        _self = ctx.Owner.GetTargetCenter();
+        _enemyAnimator = ctx.EnemyAnimator;
+        _enemyId = ctx.Owner.Id;
+        _player = ctx.Player;
+        _data = ctx.Data;
+        _context = ctx.RuntimeContext;
+        _state = ctx.StateContext;
 
         // OnBarkEndイベントを購読してBark終了を検知する
         if (_enemyAnimator != null)
@@ -46,9 +40,14 @@ public class BarkBehaviour : IEnemyBehaviour
         if (_attackerSlot == null) return false;
         if (_player == null) return false;
 
+        // リポジション必要時はBarkしない（Roamに委ねる）
+        float dist = Vector3.Distance(_self.position, _player.position);
+        if (dist > _profile.MaxRoamDistance) return false;
+        if (!_attackerSlot.IsAcquired(_enemyId) && dist < _profile.MinNonAttackerDistance) return false;
+
         // クールダウン中またはスロット未確保のときにBarkする
         // 攻撃権を持ちクールダウンも終わっている場合はAttackが優先されるためBarkしない
-        bool isOnCooldown = Time.time - _context.LastAttackTime < _data.AttackCooldown;
+        bool isOnCooldown = _context.AttackCooldownRemaining > 0f;
         bool hasNoSlot = !_attackerSlot.IsAcquired(_enemyId);
         if (!isOnCooldown && !hasNoSlot) return false;
 
@@ -103,14 +102,14 @@ public class BarkBehaviour : IEnemyBehaviour
     private Transform _self;
     private Transform _player;
     private EnemyData _data;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private IEnemyAnimator _enemyAnimator;
 
     private int _enemyId;
     private bool _barkEnded;
 
-    // 追加
+    private readonly DistanceProfile _profile;
     private readonly float _barkChance;
 
     private readonly IEnemyAttackerSlot _attackerSlot;

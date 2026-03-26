@@ -25,7 +25,7 @@ public class EnemyManager : MonoBehaviour
         _spatialHashGrid = new SpatialHashGrid(_spatialHashGridCellSize);
         _separationService = new SeparationService(_spatialHashGrid);
         _wallAvoidanceService = new WallAvoidanceService(_wallLayerMask);
-        _attackerSlot = new EnemyAttackerSlot(_maxAttackerSlots);
+        _formationSystem = new EnemyFormationSystem();
     }
 
     public void Spawn(GameObject original, Vector3 pos)
@@ -41,18 +41,24 @@ public class EnemyManager : MonoBehaviour
         if (obj.TryGetComponent(out IEnemy enemy))
         {
             enemy.OnDead += HandleEnemyDead;
+            enemy.OnDamaged += HandleEnemyDamaged;
 
             // InjectServicesをInitより前に呼ぶ
             // Init内でBehaviourを生成する際にサービスを参照するため
-            if (obj.TryGetComponent(out Enemy enemyBase))
+            enemy.InjectServices(new EnemyServices(
+                _spatialHashGrid,
+                _separationService,
+                _wallAvoidanceService,
+                _formationSystem
+            ));
+
+            // FormationSystemへの登録はInit前に行う
+            // Init内のTryAcquireが呼ばれる時点でIsVanguardが確定している必要があるため
+            if (_formationSystem != null && obj.TryGetComponent(out IFormationParticipant participant))
             {
-                enemyBase.InjectServices(
-                    _spatialHashGrid,
-                    _separationService,
-                    _wallAvoidanceService,
-                    _attackerSlot
-                );
+                _formationSystem.Register(enemy, participant);
             }
+
             OnEnemySpawned?.Invoke(enemy);
 
             enemy.Init(_player);
@@ -69,6 +75,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
     /// <summary>
@@ -101,23 +108,30 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
-    [Header("Attacker Slot")]
-    // 同時攻撃可能な最大数
-    [SerializeField] private int _maxAttackerSlots = 3;
-
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
 
     private ISpatialHashGrid _spatialHashGrid;
     private ISeparationService _separationService;
     private IWallAvoidanceService _wallAvoidanceService;
-    private IEnemyAttackerSlot _attackerSlot;
+    private IEnemyFormationSystem _formationSystem;
+
+
+    /// <summary>
+    /// EnemyのOnDamagedイベントハンドラ
+    /// FormationSystemに被弾を通知する
+    /// </summary>
+    private void HandleEnemyDamaged(IEnemy enemy)
+    {
+        _formationSystem?.NotifyHit(enemy.Id);
+    }
 
     private void HandleEnemyDead(IEnemy enemy)
     {
         if (enemy != null)
         {
             enemy.OnDead -= HandleEnemyDead;
+            enemy.OnDamaged -= HandleEnemyDamaged;
 
             // SpatialHashGridから登録解除
             _spatialHashGrid?.Remove(enemy);
@@ -125,7 +139,7 @@ public class EnemyManager : MonoBehaviour
             _enemies.Remove(enemy);
 
             // ボスかどうか判定
-            if (enemy is BossEnemy)
+            if (enemy.IsBoss)
             {
                 OnBossDefeated?.Invoke();
             }
@@ -136,9 +150,11 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
     // デバッグ用
     private void OnGUI()
     {
         GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
     }
+#endif
 }

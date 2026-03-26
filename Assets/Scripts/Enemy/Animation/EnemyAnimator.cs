@@ -12,6 +12,7 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnAttackEnd;
     public event Action OnBarkEnd;
     public event Action OnGetUpEnd;
+    public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
 
 
@@ -29,8 +30,8 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnAttackEnd += HandleAttackEnd;
         _receiver.OnBarkEnd += HandleBarkEnd;
         _receiver.OnGetUpEnd += HandleGetUpEnd;
+        _receiver.OnKnockbackEnd += HandleKnockbackEnd;
         _receiver.OnDeadEnd += HandleDeadEnd;
-
     }
 
     /// <summary>
@@ -95,6 +96,16 @@ public class EnemyAnimator : IEnemyAnimator
     }
 
     /// <summary>
+    /// アニメーション再生速度を設定する。
+    /// HitStopManager から OnSpeedChange 経由で呼ばれる。
+    /// </summary>
+    public void SetAnimSpeed(float speed)
+    {
+        if (_animator == null) return;
+        _animator.speed = speed;
+    }
+
+    /// <summary>
     /// Receiverのイベント購読を解除する。
     /// EnemyのOnDestroyから呼ぶこと。
     /// </summary>
@@ -106,9 +117,9 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnAttackEnd -= HandleAttackEnd;
         _receiver.OnBarkEnd -= HandleBarkEnd;
         _receiver.OnGetUpEnd -= HandleGetUpEnd;
+        _receiver.OnKnockbackEnd -= HandleKnockbackEnd;
         _receiver.OnDeadEnd -= HandleDeadEnd;
     }
-
 
     // Animatorパラメータのハッシュ
     private static readonly int _hashSpeed = Animator.StringToHash("Speed");
@@ -118,7 +129,6 @@ public class EnemyAnimator : IEnemyAnimator
     private static readonly int _hashIsDead = Animator.StringToHash("IsDead");
 
     private static readonly int _hashIsKnockback = Animator.StringToHash("IsKnockback");
-    // 追加: KnockbackLevelパラメータのハッシュ
     private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
 
     private readonly Animator _animator;
@@ -130,6 +140,6 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleAttackEnd() => OnAttackEnd?.Invoke();
     private void HandleBarkEnd() => OnBarkEnd?.Invoke();
     private void HandleGetUpEnd() => OnGetUpEnd?.Invoke();
+    private void HandleKnockbackEnd() => OnKnockbackEnd?.Invoke();
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
-
 }

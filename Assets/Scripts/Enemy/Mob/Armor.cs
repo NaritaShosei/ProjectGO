@@ -3,26 +3,31 @@ using UnityEngine;
 
 /// <summary>
 /// モブとボスのアーマーの抽象クラス
+/// ダメージの肩代わり・超過ダメージの返却・破壊通知を担う
 /// </summary>
 public abstract class Armor : MonoBehaviour, IArmor
 {
-    // IArmorHealth: 破壊イベント（UI等・MobEnemy共通）
+    /// <summary>
+    /// アーマーが破壊されたときに発火するイベント
+    /// MobEnemy・UI等が購読する
+    /// </summary>
     public event Action OnBroken;
 
-    // IArmorHealth: HP変化イベント
-    // _statsはInit()後に生成されるためイベントの中継もInit()内で設定する
+    /// <summary>
+    /// HP変化イベント（IArmorHealth越しにUI等が購読する）
+    /// _statsはInit()後に生成されるためイベントの中継もInit()内で設定する
+    /// </summary>
     event Action<float, float> IArmorHealth.OnHealthChanged
     {
         add => _onHealthChangedHealth += value;
         remove => _onHealthChangedHealth -= value;
     }
 
-    // IArmorHealth.OnHealthChangedの購読者向けイベントの実体
-    private Action<float, float> _onHealthChangedHealth;
-
+    /// <summary>
+    /// アーマーを初期化し、ArmorStatsを生成してイベント中継を設定する
+    /// </summary>
     public void Init(IEnemy enemy)
     {
-        _enemy = enemy;
         _stats = new ArmorStats(_data);
         _stats.OnBroken += Broken;
 
@@ -30,6 +35,9 @@ public abstract class Armor : MonoBehaviour, IArmor
         _stats.OnHealthChanged += (current, max) => _onHealthChangedHealth?.Invoke(current, max);
     }
 
+    /// <summary>
+    /// ダメージをアーマーが引き受け、HPを超えた超過分を返す
+    /// </summary>
     public float AbsorbDamageAndReturnExcess(float damage)
     {
         float excessDamage = Mathf.Max(0, damage - _stats.CurrentHealth);
@@ -37,19 +45,20 @@ public abstract class Armor : MonoBehaviour, IArmor
         return excessDamage;
     }
 
+    /// <summary>
+    /// アーマーを破壊し、OnBrokenを発火してGameObjectを非表示にする
+    /// OnBroken購読者（MobEnemy.BreakArmor）が解除処理を行うため購読解除は不要
+    /// </summary>
     public void Broken()
     {
         _stats.OnBroken -= Broken;
-
-        // 購読者（UI等・MobEnemy）へ通知する
         OnBroken?.Invoke();
-
-        // 鎧破壊時に非表示
-        // TODO: 参照など残っていないかチェックする
         gameObject.SetActive(false);
     }
 
-    // IArmorHealth.GetTargetCenter() の実装
+    /// <summary>
+    /// IArmorHealth.GetTargetCenter() の実装
+    /// </summary>
     public Transform GetTargetCenter()
     {
         return transform;
@@ -57,6 +66,8 @@ public abstract class Armor : MonoBehaviour, IArmor
 
     [SerializeField] protected ArmorData _data;
 
-    protected IEnemy _enemy;
     protected ArmorStats _stats;
+
+    // IArmorHealth.OnHealthChangedの購読者向けイベントの実体
+    private Action<float, float> _onHealthChangedHealth;
 }
