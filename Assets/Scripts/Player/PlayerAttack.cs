@@ -530,7 +530,7 @@ public class PlayerAttack : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (!hit.TryGetComponent(out IEnemy _)) { continue; }
+            if (!hit.TryGetComponent(out IEnemy enemy) || enemy.IsDead) { continue; }
 
             var dir = (hit.transform.position - transform.position).normalized;
             float angleTo = Vector3.Angle(transform.forward, dir);
@@ -556,13 +556,13 @@ public class PlayerAttack : MonoBehaviour
         if (_isHomingLocked && _lockedHomingTarget != null)
         {
             // 死亡チェック：IEnemy経由でチェック
-            if (_lockedHomingTarget != null && _lockedHomingTarget.TryGetComponent(out IEnemy enemy) && !enemy.IsDead)
+            if (_lockedHomingTarget.TryGetComponent(out IEnemy enemy) && !enemy.IsDead)
             {
                 return _lockedHomingTarget; // 固定ターゲットを返す
             }
 
             // 死亡していたら次のターゲットへ
-            _lockedHomingTarget = null;
+            ClearHomingLock();
         }
 
         // 新規検索
