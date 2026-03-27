@@ -1,18 +1,27 @@
 using System;
 using UnityEngine;
 
-// NOTE:
-// BossEnemy は「ボス用の基盤クラス」
-// ・フェーズという概念
-// ・即死しない死亡処理
-// ・ダメージ可否の制御
-// だけを定義する
-// 実際の行動・攻撃・演出は派生クラスで実装する
-
+/// <summary>
+/// ボス用の基盤クラス
+/// ・フェーズという概念
+/// ・即死しない死亡処理
+/// ・ダメージ可否の制御
+/// だけを定義する
+/// 実際の行動・攻撃・演出は派生クラスで実装する
+/// </summary>
 public abstract class BossEnemy : Enemy
 {
+    public override bool IsBoss => true;
+
+    /// <summary>
+    /// フェーズ移行時に発火するイベント
+    /// UI・カメラ演出などがフェーズ変化を受け取るために使用する想定
+    /// </summary>
     public event Action OnPhaseChange;
 
+    /// <summary>
+    /// CanTakeDamageがtrueの場合のみダメージを適用する
+    /// </summary>
     public override void TakeDamage(DamageContext context)
     {
         // 派生側で「今ダメージが通るか？」を判断させる
@@ -33,7 +42,7 @@ public abstract class BossEnemy : Enemy
             });
     }
 
-    [SerializeField] protected private BossActionPhaseController _bossPhaseController;
+    [SerializeField] private protected BossActionPhaseController _bossPhaseController;
 
     protected override void Awake()
     {
@@ -44,24 +53,31 @@ public abstract class BossEnemy : Enemy
         _stats.OnDead += OnDeath;
     }
 
+    /// <summary>
+    /// 派生クラスでダメージの通過条件を定義する
+    /// デフォルトは常に通る
+    /// </summary>
     protected virtual bool CanTakeDamage(DamageContext context)
     {
-        // デフォルトは通る
         return true;
     }
 
+    /// <summary>
+    /// HPがゼロになったときに呼ばれる
+    /// 派生クラスでフェーズ遷移・ダウン・形態変化などを実装する
+    /// </summary>
     protected virtual void OnBossHPZero()
     {
-        // 例：フェーズ遷移、ダウン、形態変化
-        // Destroy はしない
         PhaseChange();
     }
 
+    /// <summary>
+    /// 最終フェーズ専用の死亡演出用オーバーライドポイント
+    /// オブジェクトの非有効化などは派生クラスで行う想定
+    /// </summary>
     protected override void OnDeathInternal()
     {
         base.OnDeathInternal();
-        // 最終フェーズ専用の死亡演出用
-        // オブジェクトの非有効化などはここで行う想定
     }
 
     /// <summary>
@@ -82,7 +98,9 @@ public abstract class BossEnemy : Enemy
         _data = _bossPhaseController.CurrentPhase.Data;
         _stats.ResetHP(_data.MaxHP);
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("フェーズ変更");
+#endif
     }
 
 }

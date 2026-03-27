@@ -1,0 +1,167 @@
+using UnityEngine;
+
+/// <summary>
+/// 攻撃のためプレイヤーへ接近するBehaviour
+/// SeparationServiceとWallAvoidanceServiceで移動方向を補正する
+/// </summary>
+public class ApproachBehaviour : IEnemyBehaviour
+{
+    public int Priority { get => (int)EnemyBehaviourPriority.Approach; }
+
+    /// <summary>
+    /// DistanceProfile・各サービスはApproach固有の依存のためコンストラクタで受け取る
+    /// </summary>
+    public ApproachBehaviour(DistanceProfile profile, EnemyServices services)
+    {
+        _profile = profile;
+        _separationService = services.SeparationService;
+        _wallAvoidanceService = services.WallAvoidanceService;
+        _spatialHashGrid = services.SpatialHashGrid;
+        _attackerSlot = services.AttackerSlot;
+    }
+
+    public void Init(BehaviourInitContext ctx)
+    {
+        _self = ctx.Owner.GetTargetCenter();
+        _enemy = ctx.Owner;
+        _enemyAnimator = ctx.EnemyAnimator;
+        _enemyId = ctx.Owner.Id;
+        _player = ctx.Player;
+        _data = ctx.Data;
+        _context = ctx.RuntimeContext;
+        _state = ctx.StateContext;
+    }
+
+    public bool CanEnter()
+    {
+        if (_player == null) return false;
+        if (_attackerSlot == null) return false;
+
+        // スロットを確保済みのときのみ発動
+        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
+
+        // パターン未選択なら発動しない（MobEnemy.UpdateEnemy()が次フレームで選択する）
+        if (_context.SelectedPattern == null) return false;
+
+        // 攻撃可能距離まで近づいていないときに発動（Y差分を除いたXZ平面で判定）
+        float sqrDist = CalcXZSqrDist();
+        float stop = CalcStopDistance();
+        return sqrDist > stop * stop;
+    }
+
+    public bool CanContinue()
+    {
+        if (_player == null) return false;
+        if (_attackerSlot == null) return false;
+
+        // スロットを解放されたら終了
+        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
+
+        // パターンがクリアされたら終了
+        if (_context.SelectedPattern == null) return false;
+
+        // 攻撃可能距離内に入ったら終了（Y差分を除いたXZ平面で判定）
+        float sqrDist = CalcXZSqrDist();
+        float stop = CalcStopDistance();
+        return sqrDist > stop * stop;
+    }
+
+    public void OnEnter()
+    {
+        _state.ChangeState(EnemyState.Move);
+        _enemyAnimator?.SetSpeed(1f);
+    }
+
+    public void OnExit()
+    {
+        _state.ChangeState(EnemyState.Idle);
+        _enemyAnimator?.SetSpeed(0f);
+    }
+
+    public void Tick(float deltaTime)
+    {
+        if (_player == null) return;
+        if (!_state.CanMove()) return;
+
+        Vector3 oldPos = _self.position;
+
+        // プレイヤーへの方向を基本ベクトルとする
+        Vector3 dir = _player.position - _self.position;
+        dir.y = 0f;
+        dir = dir.normalized;
+
+        // 分離力を加算する
+        if (_separationService != null)
+        {
+            dir += _separationService.Calculate(
+                _enemy,
+                _self.position,
+                _profile.SeparationRadius,
+                _profile.SeparationStrength
+            );
+        }
+
+        // 壁回避力を加算する
+        if (_wallAvoidanceService != null)
+        {
+            dir += _wallAvoidanceService.CalculateAvoidance(
+                _self.position,
+                dir.normalized,
+                _profile.WallDetectDistance,
+                _profile.WallAvoidanceStrength
+            );
+        }
+
+        dir.y = 0f;
+
+        // 方向ベクトルが極端に小さい場合はスキップ
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        Vector3 newPos = _self.position + dir.normalized * _data.ApproachSpeed * deltaTime;
+        _self.position = newPos;
+
+        // SpatialHashGridの位置を更新する
+        if (_spatialHashGrid != null)
+        {
+            _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
+        }
+
+        // EnemyRuntimeContextの距離を更新する
+        _context.DistanceToPlayer = Vector3.Distance(
+            _self.position,
+            _player.position
+        );
+    }
+
+    private Transform _self;
+    private IEnemy _enemy;
+    private Transform _player;
+    private EnemyData _data;
+    private EnemyRuntimeContext _context;
+    private EnemyStateContext _state;
+    private int _enemyId;
+    private IEnemyAnimator _enemyAnimator;
+
+    /// <summary>
+    /// 接近を停止する距離を返す（AttackRange × MoveApproachRatio）
+    /// </summary>
+    private float CalcStopDistance()
+        => _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
+
+    /// <summary>
+    /// XZ平面のみの距離の二乗を返す。
+    /// 坂・段差でY差分が生じても停止判定がずれないようにするため3D距離は使わない。
+    /// </summary>
+    private float CalcXZSqrDist()
+    {
+        float dx = _self.position.x - _player.position.x;
+        float dz = _self.position.z - _player.position.z;
+        return dx * dx + dz * dz;
+    }
+
+    private readonly DistanceProfile _profile;
+    private readonly ISeparationService _separationService;
+    private readonly IWallAvoidanceService _wallAvoidanceService;
+    private readonly ISpatialHashGrid _spatialHashGrid;
+    private readonly IEnemyAttackerSlot _attackerSlot;
+}

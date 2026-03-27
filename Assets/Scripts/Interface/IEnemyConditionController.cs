@@ -9,7 +9,14 @@ public interface IEnemyConditionController
     public void Tick(float deltaTime);
     /// <summary>Conditionを適用する</summary>
     public void ApplyCondition(IEnemyCondition condition);
-    /// <summary>指定したConditionが存在するか</summary>
+    /// <summary>
+    /// 指定したConditionが発動中かを返す
+    /// </summary>
+    /// <remarks>
+    /// 感電（Electrified）・ダウン（Down）などの状態でダメージ倍率が変わる仕様のために使用する想定。
+    /// ダメージ計算時に呼び出し元（MobEnemy.TakeDamage など）がConditionを確認し、
+    /// DamageContextまたはDamageSystemへ状態を伝える形での活用を予定している。
+    /// </remarks>
     public bool HasCondition(ConditionType type);
 }
 
