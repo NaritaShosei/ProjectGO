@@ -70,6 +70,7 @@ public class PlayerAttack : MonoBehaviour
     {
         _currentAttackId = -1;
         _bufferedComboInput = null;
+        ClearHomingLock();
     }
 
     // 依存関係
@@ -105,6 +106,11 @@ public class PlayerAttack : MonoBehaviour
     private float _homingRadius;
     private float _homingAngle;
     private Transform _homingTarget;
+
+    // コンボ中に固定されるターゲット
+    private Transform _lockedHomingTarget;
+    // ロック中フラグ
+    private bool _isHomingLocked;
 
     // 保留中の攻撃データ
     private AttackData _pendingAttackData;
@@ -306,7 +312,7 @@ public class PlayerAttack : MonoBehaviour
             _homingRadius = _pendingAttackData.HomingRadius;
             _homingAngle = _pendingAttackData.HomingAngle;
             _homingStrength = _pendingAttackData.HomingStrength;
-            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
+            _homingTarget = ResolveHomingTarget(_homingRadius, _homingAngle);
         }
         else
         {
@@ -380,7 +386,7 @@ public class PlayerAttack : MonoBehaviour
             _homingRadius = nextAttack.HomingRadius;
             _homingAngle = nextAttack.HomingAngle;
             _homingStrength = nextAttack.HomingStrength;
-            _homingTarget = FindHomingTarget(_homingRadius, _homingAngle);
+            _homingTarget = ResolveHomingTarget(_homingRadius, _homingAngle);
         }
         else
         {
@@ -524,7 +530,7 @@ public class PlayerAttack : MonoBehaviour
 
         foreach (var hit in hits)
         {
-            if (!hit.TryGetComponent(out IEnemy _)) { continue; }
+            if (!hit.TryGetComponent(out IEnemy enemy) || enemy.IsDead) { continue; }
 
             var dir = (hit.transform.position - transform.position).normalized;
             float angleTo = Vector3.Angle(transform.forward, dir);
@@ -539,6 +545,46 @@ public class PlayerAttack : MonoBehaviour
         }
 
         return best;
+    }
+
+    /// <summary>
+    /// ホーミングターゲットを決定する。
+    /// コンボ中かつロック済みの場合は固定ターゲットを返す。
+    /// </summary>
+    private Transform ResolveHomingTarget(float radius, float angle)
+    {
+        if (_isHomingLocked && _lockedHomingTarget != null)
+        {
+            // 死亡チェック：IEnemy経由でチェック
+            if (_lockedHomingTarget.TryGetComponent(out IEnemy enemy) && !enemy.IsDead)
+            {
+                return _lockedHomingTarget; // 固定ターゲットを返す
+            }
+
+            // 死亡していたら次のターゲットへ
+            ClearHomingLock();
+        }
+
+        // 新規検索
+        var newTarget = FindHomingTarget(radius, angle);
+
+        // コンボ中なら固定
+        if (newTarget != null && _currentAttackId != -1)
+        {
+            _lockedHomingTarget = newTarget;
+            _isHomingLocked = true;
+        }
+
+        return newTarget;
+    }
+
+    /// <summary>
+    /// コンボ終了時にホーミングロックを解除
+    /// </summary>
+    private void ClearHomingLock()
+    {
+        _lockedHomingTarget = null;
+        _isHomingLocked = false;
     }
 
     private void PerformHoming()
