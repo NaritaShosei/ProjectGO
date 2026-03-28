@@ -28,8 +28,11 @@ public class EnemyStateContext
         OnStateChanged?.Invoke(oldState, newState);
     }
 
+    /// <summary>攻撃Behaviourが入場できる状態かどうか</summary>
     public bool CanAttack() => CurrentState is EnemyState.Idle
                             || CurrentState is EnemyState.Move;
+
+    /// <summary>移動系BehaviourおよびTurnが入場できる状態かどうか</summary>
     public bool CanMove() => CurrentState != EnemyState.Attack
                           && CurrentState != EnemyState.Bark
                           && CurrentState != EnemyState.Electrified

@@ -9,10 +9,10 @@ public class PlayerMovement : MonoBehaviour
 
     public event Action OnEndDodge;
 
-    public void Init(PlayerStateManager playerStateManager,
+    public void Init(
+        PlayerStateManager playerStateManager,
         InputHandler input,
         MoveData data,
-        IStamina stamina,
         IModeController modeController,
         PlayerAnimationController animationController,
         PlayerAttack attack)
@@ -20,13 +20,11 @@ public class PlayerMovement : MonoBehaviour
         _playerStateManager = playerStateManager;
         _input = input;
         _moveData = data;
-        _stamina = stamina;
         _modeController = modeController;
         _animationController = animationController;
         _attack = attack;
 
         _input.OnDodge += Dodge;
-
         _attack.OnAttackMoveRequested += HandleAttackMove;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -50,7 +48,6 @@ public class PlayerMovement : MonoBehaviour
     private InputHandler _input;
     private CameraManager _cameraManager;
     private MoveData _moveData;
-    private IStamina _stamina;
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
     private PlayerAttack _attack;
@@ -60,7 +57,6 @@ public class PlayerMovement : MonoBehaviour
     private bool _canChainRoll;
     private float _chainTimer;
 
-    // 攻撃時移動用
     private CancellationTokenSource _attackMoveCts;
     private bool _isAttackMoving;
     private bool _currentIsPhantom;
@@ -69,7 +65,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        // 攻撃時移動中は通常移動をスキップ
         if (!_isAttackMoving)
         {
             Rotate();
@@ -105,17 +100,12 @@ public class PlayerMovement : MonoBehaviour
 
     #endregion
 
-    /// <summary>
-    /// 攻撃時の移動要求を処理
-    /// </summary>
     private void HandleAttackMove(AttackMoveRequest request)
     {
-        // 既存の攻撃移動をキャンセル
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = new CancellationTokenSource();
 
-        // 前回のファントム状態をリセット
         if (_currentIsPhantom)
         {
             Physics.IgnoreLayerCollision(
@@ -129,9 +119,6 @@ public class PlayerMovement : MonoBehaviour
         PerformAttackMove(request).Forget();
     }
 
-    /// <summary>
-    /// 攻撃時移動の実行
-    /// </summary>
     private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
     {
         _isAttackMoving = true;
@@ -139,12 +126,11 @@ public class PlayerMovement : MonoBehaviour
         if (request.IsPhantom)
         {
             _currentIsPhantom = true;
-
             Physics.IgnoreLayerCollision(
-            LayerMask.NameToLayer("Player"),
-            LayerMask.NameToLayer("Enemy"),
-            true
-        );
+                LayerMask.NameToLayer("Player"),
+                LayerMask.NameToLayer("Enemy"),
+                true
+            );
         }
 
         try
@@ -162,10 +148,7 @@ public class PlayerMovement : MonoBehaviour
                     break;
             }
         }
-        catch (OperationCanceledException)
-        {
-            // キャンセルされた場合
-        }
+        catch (OperationCanceledException) { }
         finally
         {
             _isAttackMoving = false;
@@ -187,9 +170,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 突進移動
-    /// </summary>
     private async UniTask DashMove(AttackMoveRequest request)
     {
         float elapsed = 0f;
@@ -197,18 +177,14 @@ public class PlayerMovement : MonoBehaviour
         Vector3 targetPos = startPos + transform.forward * request.Distance;
         targetPos.y = startPos.y;
 
-
         while (true)
         {
             if (request.Duration <= 0f) { return; }
-
             if (elapsed >= request.Duration) { break; }
-
             if (request.Target &&
                 Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
 
             float t = elapsed / request.Duration * _timeScale;
-            // イージング（加速→減速）
             float smoothT = Mathf.SmoothStep(0, 1, t);
 
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, smoothT);
@@ -219,9 +195,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ステップ移動（小移動）
-    /// </summary>
     private async UniTask StepMove(AttackMoveRequest request)
     {
         float elapsed = 0f;
@@ -233,9 +206,7 @@ public class PlayerMovement : MonoBehaviour
         while (true)
         {
             if (request.Duration <= 0f) { return; }
-
             if (elapsed >= request.Duration) { break; }
-
             if (request.Target &&
                 Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) { break; }
 
@@ -246,12 +217,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 曲線移動（将来的にホーミングなど）
-    /// </summary>
     private async UniTask CurveMove(AttackMoveRequest request)
     {
-        // 現時点では Dash と同じ実装
         await DashMove(request);
     }
 
@@ -261,7 +228,6 @@ public class PlayerMovement : MonoBehaviour
 
         var vec = _input.MoveInput;
         var camera = _cameraManager.MainCamera;
-
         var inputMag = vec.magnitude;
 
         if (inputMag < INPUT_THRESHOLD)
@@ -272,12 +238,10 @@ public class PlayerMovement : MonoBehaviour
 
         var right = camera.transform.right * vec.x;
         var forward = camera.transform.forward * vec.y;
-
         var moveDir = (right + forward).normalized;
         moveDir.y = 0;
 
         var speed = _modeController.ModeData.MoveSpeed * inputMag;
-
         _rb.linearVelocity = moveDir * speed * _timeScale;
     }
 
@@ -289,39 +253,29 @@ public class PlayerMovement : MonoBehaviour
         if (vec.magnitude < INPUT_THRESHOLD) { return; }
 
         var camera = _cameraManager.MainCamera;
-
         var right = camera.transform.right * vec.x;
         var forward = camera.transform.forward * vec.y;
-
         var lookDir = right + forward;
         lookDir.y = 0f;
 
         if (lookDir.sqrMagnitude <= 0f) { return; }
 
         var targetRotation = Quaternion.LookRotation(lookDir);
-
-        float rotateSpeed = _moveData.RotateSpeed;
-
         transform.rotation = Quaternion.Slerp(
             transform.rotation,
             targetRotation,
-            rotateSpeed * Time.deltaTime * _timeScale
+            _moveData.RotateSpeed * Time.deltaTime * _timeScale
         );
     }
 
+    /// <summary>
+    /// スタミナチェックなしで回避を実行する。
+    /// </summary>
     private async UniTaskVoid DodgeInternal(DodgeType type)
     {
         if (!_playerStateManager.CanDodge()) { return; }
 
-        float staminaCost =
-            type == DodgeType.Step
-            ? _stamina.GetDodgeStaminaCost()
-            : _stamina.GetDodgeStaminaCost(); // 将来分けてもいい
-
-        if (!_stamina.TryUseStamina(staminaCost)) { return; }
-
-        var dodgeData =
-            type == DodgeType.Step
+        var dodgeData = type == DodgeType.Step
             ? _moveData.StepDodge
             : _moveData.RollDodge;
 
@@ -329,7 +283,6 @@ public class PlayerMovement : MonoBehaviour
         PlayDodgeAnimation(type);
 
         Vector3 dodgeDir = GetDodgeDirection();
-
         float t = 0f;
 
         try
@@ -347,7 +300,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         _rb.linearVelocity = Vector3.zero;
-
         OnDodgeEnd(type);
     }
 
@@ -380,10 +332,8 @@ public class PlayerMovement : MonoBehaviour
             dir.y = 0f;
             return dir.normalized;
         }
-        else
-        {
-            return transform.forward;
-        }
+
+        return transform.forward;
     }
 
     private void PlayMoveAnimation()
@@ -393,7 +343,6 @@ public class PlayerMovement : MonoBehaviour
         if (_animationController != null)
         {
             var speed = _rb.linearVelocity.magnitude;
-
             _animationController.UpdateMoveAnimation(speed);
         }
     }
@@ -401,13 +350,9 @@ public class PlayerMovement : MonoBehaviour
     private void PlayDodgeAnimation(DodgeType type)
     {
         if (type == DodgeType.Step)
-        {
             _animationController.PlayStepDodge();
-        }
         else
-        {
             _animationController.PlayRollDodge();
-        }
     }
 
     private void UpdateDodgeChain()
@@ -421,17 +366,11 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // 匿名関数回避のためのメソッド
     private void Dodge()
     {
         if (_canChainRoll)
-        {
             DodgeInternal(DodgeType.Roll).Forget();
-        }
         else
-        {
             DodgeInternal(DodgeType.Step).Forget();
-        }
     }
-
 }

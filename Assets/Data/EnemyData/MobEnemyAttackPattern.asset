@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3469a6af574f7fe4c9c312273239f685, type: 3}
   m_Name: MobEnemyAttackPattern
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackPattern
-  PatternName: TestPattern
-  SlotCost: 1
-  WindUp: 0
-  Duration: 1
-  Cooldown: 0
-  MaxHitCount: 1
-  HitInterval: 0.2
-  KnockbackPower: 0
-  BaseDamage: 0
+  _patternName: 
+  _slotCost: 1
+  _windUp: 0
+  _duration: 3
+  _cooldown: 1.5
+  _maxHitCount: 1
+  _hitInterval: 0.2
+  _knockbackPower: 0
+  _baseDamage: 10
+  _attackRange: 1.5
+  _attackRadius: 1
+  _attackTriggerRatio: 1

@@ -1,3 +1,8 @@
+/// <summary>
+/// ダウン状態のCondition
+/// BlocksActionがtrueのため、発動中はEnemyの行動をすべて停止する
+/// OnEnter/OnExit は未実装（アニメーション・鎧回復などは今後対応予定）
+/// </summary>
 public sealed class DownCondition : IEnemyCondition
 {
     public ConditionType Type => ConditionType.Down;

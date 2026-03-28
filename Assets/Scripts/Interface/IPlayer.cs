@@ -1,4 +1,5 @@
-using UnityEngine;
+using System;
+
 public interface IPlayer :
     ICharacter, IPlayerStats
 {
@@ -9,8 +10,9 @@ public interface IPlayerStats :
     IAttackStats,
     IDefenseStats,
     IHealthStats,
-    IStaminaStats,
+    IThunderGaugeStats,
     IStatUpgradable
 {
-
+    /// <summary> 雷ゲージ変化通知 (current, max, initialMax) </summary>
+    event Action<float, float, float> OnThunderGaugeChanged;
 }

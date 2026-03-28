@@ -9,7 +9,7 @@ using System;
 // ※鎧が残っているかはEnemyTypeで判定
 // ※鎧持ちでも感電する
 
-public class MobEnemy : Enemy
+public class MobEnemy : Enemy, IFormationParticipant
 {
     public override IEnemyConditionController ConditionController { get => _conditionController; }
 
@@ -17,15 +17,24 @@ public class MobEnemy : Enemy
     // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
     public event Action<IArmorHealth> OnArmorRegistered;
 
+    // ─── IFormationParticipant ───────────────────────────────────────────
+    public int EnemyId => GetInstanceID();
+    public float CombatPower => _data != null ? _data.CombatPower : 0f;
+    public int FormationSlotCost => 1;
+    // _contextはInit後に生成されるためnullチェックが必要
+    public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
+
     public override void Init(IPlayer player)
     {
         base.Init(player);
 
-        _context = new EnemyContext();
+        _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
 
         _conditionController = new EnemyConditionController(this);
+
+        var initCtx = new BehaviourInitContext(this, _data, _playerTransform, _context, _enemyAnimator, _state);
 
         // TurnProfileが未設定の場合は警告を出してTurnを登録しない
         if (_turnProfile == null)
@@ -35,32 +44,35 @@ public class MobEnemy : Enemy
         else
         {
             _turn = new TurnBehaviour(_turnProfile);
-            _turn.Init(this, _data, _playerTransform, _context, _state);
+            _turn.Init(initCtx);
             _runner.RegisterTurn(_turn);
         }
 
         // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
-        if (_attackerSlot == null)
+        if (_services.AttackerSlot == null)
         {
             Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
         }
+        else if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: AttackPatternsが空です。Attack・スロット取得をスキップします。");
+        }
         else
         {
-            _attack = new MeleeAttackBehaviour(_attackerSlot);
-            _attack.Init(this, _data, _playerTransform, _context, _enemyAnimator, _animator, _state);
+            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
+            _attack.Init(initCtx);
             _runner.Register(_attack);
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            int mobSlotCost = _data.AttackPattern != null ? _data.AttackPattern.SlotCost : 1;
-            _attackerSlot.TryAcquire(GetInstanceID(), mobSlotCost, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, 1, isBoss: false);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                _bark = new BarkBehaviour(_attackerSlot, _data.BarkChance);
-                _bark.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+                _bark = new BarkBehaviour(_distanceProfile, _services, _data.BarkChance);
+                _bark.Init(initCtx);
                 _runner.Register(_bark);
             }
         }
@@ -68,31 +80,25 @@ public class MobEnemy : Enemy
         // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
         if (_distanceProfile == null)
         {
-            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Move・Bark・Roamは無効になります。");
+            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Approach・Bark・Roamは無効になります。");
         }
         else
         {
-            var move = new MoveBehaviour(
-                _distanceProfile,
-                _attackerSlot,       // 追加
-                _separationService,
-                _wallAvoidanceService,
-                _spatialHashGrid
-            );
-            move.Init(this, _data, _playerTransform, _context, _enemyAnimator,_state);
+            var move = new ApproachBehaviour(_distanceProfile, _services);
+            move.Init(initCtx);
             _runner.Register(move);
-
-            // BarkはattackerSlotブロックへ移動したためここから削除
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
-                _separationService,
-                _wallAvoidanceService,
-                _spatialHashGrid,
+                _services,
                 dir => _turn?.SetOverrideDirection(dir)
             );
-            roam.Init(this, _data, _playerTransform, _context, _enemyAnimator, _state);
+            roam.Init(initCtx);
             _runner.Register(roam);
+
+            var idle = new IdleBehaviour();
+            idle.Init(initCtx);
+            _runner.Register(idle);
         }
 
         // 鎧登録　データがなければ裸
@@ -108,6 +114,27 @@ public class MobEnemy : Enemy
         {
             _defenceContext.EnemyType = EnemyType.Flesh;
         }
+    }
+
+    /// <summary>
+    /// ObjectPoolから再利用する際の初期化。SetActive(true)直後に呼ぶこと。
+    /// </summary>
+    public override void ReInitialize(Vector3 spawnPosition)
+    {
+        base.ReInitialize(spawnPosition);
+
+        // RuntimeContextをリセットする
+        _context?.Reset();
+
+        // Conditionをすべてクリアする
+        _conditionController?.Clear();
+
+        // BehaviourRunnerを初期状態に戻す
+        _runner?.Reset();
+
+        // TODO: _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+        // TODO: 鎧のリセット（ArmorStats）
+        // TODO: アタッカースロットの再取得
     }
 
     public override void TakeDamage(DamageContext context)
@@ -146,14 +173,17 @@ public class MobEnemy : Enemy
 
         InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
 
+        if (!isKill) InvokeOnDamaged();
+
         // -------- 追加効果 --------
 
         if (context.Knockback != null)
         {
             // Knockback?はそのまま渡せないので。。
             KnockbackContext temp = (KnockbackContext)context.Knockback;
+            _lastHitDirection = temp.Direction;
             KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
-            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel));
+            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel, _data.KnockbackStunDuration, _data.KnockbackDeceleration));
         }
 
         if (CheckProbability(context.ElectricShock.GrantEffectProbability))
@@ -175,7 +205,7 @@ public class MobEnemy : Enemy
     [SerializeField] private MobArmor _armor;
 
     private EnemyBehaviourRunner _runner;
-    private EnemyContext _context;
+    private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private EnemyConditionController _conditionController;
     private MeleeAttackBehaviour _attack;
@@ -196,24 +226,51 @@ public class MobEnemy : Enemy
     protected override void UpdateEnemy(float deltaTime)
     {
         if (_runner == null || _conditionController == null) { return; }
+
+        // 攻撃クールダウンをTimeScale反映済みdeltaTimeで進める
+        // Behaviourの実行状態に関わらず毎フレーム減算する
+        if (_context.AttackCooldownRemaining > 0f)
+        {
+            _context.AttackCooldownRemaining -= deltaTime;
+            if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
+        }
+
+        // スロット保持中にパターン未選択なら再選択する
+        // スポーン時取得失敗後の再取得・攻撃終了後の再選択をここで一括処理する
+        if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
+        {
+            _context.SelectedPattern = SelectPattern();
+        }
+
         _conditionController.Tick(deltaTime);
         if (_conditionController.BlocksAction) { return; }
         _runner.Tick(deltaTime);
     }
 
     /// <summary>
-    /// 死亡時のクリーンアップ
-    /// _isDead = true後はUpdateが止まりRunnerのTickが呼ばれなくなるため
-    /// ここで明示的にBehaviourを終了させてスロットを解放する
+    /// スロット解放・Behaviourの停止を行う。
+    /// 死亡時と将来のプール返却時の両方から呼ぶ想定。
     /// </summary>
-    protected override void OnDeathInternal()
+    protected virtual void OnDespawn()
     {
         _runner?.ForceExitAction();
-
-        // 死亡時にスロットを解放する
         _attack?.ReleaseSlot();
+    }
 
-        _enemyAnimator?.SetDead();
+    protected override void OnDeathInternal()
+    {
+        OnDespawn();
+
+        // SetDead() と物理ノックバックを DeadCondition に委譲する
+        // ApplyImmediate を使い ConditionController 管理下に置く（Clear() でキャンセル可能にするため）
+        _conditionController.ApplyImmediate(new DeadCondition(_lastHitDirection, _data, destroyCancellationToken));
+
+        // ヒールアイテムのドロップ抽選を行う
+        if (CheckProbability(_data.HealDropChance)
+            && ServiceLocator.TryGet<ItemPickupManager>(out var itemSpawner))
+        {
+            itemSpawner.Spawn(transform.position);
+        }
 
         base.OnDeathInternal();
     }
@@ -225,10 +282,21 @@ public class MobEnemy : Enemy
     {
         _defenceContext.EnemyType = EnemyType.Flesh;
         _armor.OnBroken -= BreakArmor;
+        InvokeOnArmorBroken();
     }
 
-    // 確率計算メソッド
-    // TODO: いろいろなところで使うと思うので、Utilityにできたほうがいいのでは
+    /// <summary>
+    /// AttackPatternsリストからランダムに1つ選択する
+    /// </summary>
+    private EnemyAttackPattern SelectPattern()
+    {
+        if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0) return null;
+        return _data.AttackPatterns[UnityEngine.Random.Range(0, _data.AttackPatterns.Count)];
+    }
+
+    /// <summary>
+    /// 0〜1の確率値に対してランダム判定を行う
+    /// </summary>
     private bool CheckProbability(float probability)
     {
         return UnityEngine.Random.value < probability;
@@ -246,16 +314,29 @@ public class MobEnemy : Enemy
     }
 
 #if UNITY_EDITOR
+    // Attacker取得中の敵の頭上にマーカーを常時表示する
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+        if (_services.AttackerSlot == null) return;
+        if (!_services.AttackerSlot.IsAcquired(Id)) return;
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(transform.position + Vector3.up * 2.5f, 0.2f);
+    }
+
     // デバッグ用にシーンビューで球体を描く
     private void OnDrawGizmosSelected()
     {
         if (_data == null) return;
+        var pattern = _data.AttackPatterns?.Count > 0 ? _data.AttackPatterns[0] : null;
+        if (pattern == null) return;
 
         Gizmos.color = Color.red;
         // TODO: Debug用機能なので、優先度低い
         // TODO: 当たり判定の中心がtransform.forwardのためずれてしまう。
         // TODO: 自分が向いている方向を取得して反映しなければいけない
-        Gizmos.DrawWireSphere(transform.position + transform.forward * _data.AttackRange, _data.AttackRadius);
+        Gizmos.DrawWireSphere(transform.position + transform.forward * pattern.AttackRange, pattern.AttackRadius);
     }
 #endif
 }
