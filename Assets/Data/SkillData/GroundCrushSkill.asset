@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c07dde74d4e1f841b3c3a8efd9a3008, type: 3}
   m_Name: GroundCrushSkill
   m_EditorClassIdentifier: Assembly-CSharp::GroundCrush
-  _id: 15648
+  _id: 541
   _priority: 0
   _name: "\u5927\u5730\u7C89\u7815\u2161"
   _explanation: "\u30B3\u30F3\u30DC\u6700\u5F8C\u306E\u4E00\u6483\u306E\u5F8C\u3001\u524D\u65B9\u306B\u30C7\u30A3\u30EC\u30A4\u306E\u304B\u304B\u3063\u305F\u4E38\u5F62\u306E\u885D\u6CE2\u6CE2\u304C\u767A\u751F"
   _icon: {fileID: 0}
   _timing: 0
-  _getComboCount: 1
-  _attackRadius: 500
-  _damage: 20
-  _attackCenter: {x: 0, y: 0, z: 3}
+  _getComboCount: 2
+  _attackRadius: 2.5
+  _damageMagnification: 1.8
   _attackType: 0
   _isPlayerMode: 0
+  _delay: 1
