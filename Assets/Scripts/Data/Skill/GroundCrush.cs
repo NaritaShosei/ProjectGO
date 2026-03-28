@@ -37,9 +37,9 @@ public class GroundCrush : SkillBase
     [SerializeField] private AttackType _attackType = AttackType.LightAttack; //攻撃タイプ
     [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;   //プレイヤーが闘神モードかどうか
     [SerializeField] private float _delay = 1.0f;                             //ヒットから発動までの待機時間
-    //[SerializeField] private ScriptableObject _effectPrefab;                  //GroundSmashEffectを持つPrefab
+    [SerializeField] private GameObject _effectPrefab;                  //GroundSmashEffectを持つPrefab
 
-    async void ActivationGroundCrush(Transform playerTransform, float attackPower)
+    private async void ActivationGroundCrush(Transform playerTransform, float attackPower)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(_delay));
 
