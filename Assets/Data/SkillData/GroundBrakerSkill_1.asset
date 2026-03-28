@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f931a9915ce1dd64ab97602606bd16c3, type: 3}
+  m_Name: GroundBrakerSkill_1
+  m_EditorClassIdentifier: Assembly-CSharp::GroundBrakerSkill_1
+  _id: 0
+  _priority: 0
+  _name: "\u5927\u5730\u7C89\u7815\u2160"
+  _explanation: "\u95D8\u795E\u30E2\u30FC\u30C9\u306E\u30B3\u30F3\u30DC\u6700\u7D42\u6BB5\u306B\u8FFD\u52A0\u653B\u6483\u3092\u884C\u3046\u3002"
+  _icon: {fileID: 0}
+  _timing: 0
+  _effectPrefab: {fileID: 8199528857376779805, guid: 7b0b065706e852543bdbebf0e9401ff7, type: 3}
+  _damageRadius: 2
+  _damageMultiplier: 1.5
+  _enemyLayer:
+    serializedVersion: 2
+    m_Bits: 256
