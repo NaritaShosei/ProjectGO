@@ -17,7 +17,7 @@ public class GroundCrush : SkillBase
 
     public override bool CanApply(AttackContext context, AttackData data)
     {
-        bool isWorrior = context.PlayerMode == _isPlayerMode;
+        bool isWarrior = context.PlayerMode == _isPlayerMode;
 
         bool isTargetAttackType = data.AttackType == _attackType;
 
@@ -25,7 +25,7 @@ public class GroundCrush : SkillBase
 
         bool isLastCombo = data.NextComboAttackId == -1;
 
-        return isWorrior
+        return isWarrior
             && isTargetAttackType
             && isComboCount
             && isLastCombo;
