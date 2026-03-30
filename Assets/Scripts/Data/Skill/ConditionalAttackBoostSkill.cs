@@ -63,7 +63,8 @@ public class ConditionalAttackBoostSkill : SkillBase
         {
             if (col.TryGetComponent(out IEnemy enemy) && hitEnemies.Add(enemy))
             {
-                _knockbackContext.Direction = (enemy.Position - context.AttackPosition).normalized;
+                var knockback = _knockbackContext;
+                knockback.Direction = (enemy.Position - context.AttackPosition).normalized;
 
                 var damageContext = new DamageContext
                 {
@@ -71,7 +72,7 @@ public class ConditionalAttackBoostSkill : SkillBase
                     PlayerMode = context.PlayerMode,
                     IsCritical = false,
                     OnHitResult = null,
-                    Knockback = _knockbackContext
+                    Knockback = knockback
                 };
                 enemy.TakeDamage(damageContext);
             }
