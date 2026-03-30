@@ -57,10 +57,11 @@ public class ConditionalAttackBoostSkill : SkillBase
     {
         // コンテキストから情報をもらい一定範囲の敵にダメージを与える
         var cols = Physics.OverlapSphere(context.AttackPosition, _damageRadius, _enemyLayer);
+        var hitEnemies = new System.Collections.Generic.HashSet<IEnemy>();
 
         foreach (var col in cols)
         {
-            if (col.TryGetComponent(out IEnemy enemy))
+            if (col.TryGetComponent(out IEnemy enemy) && hitEnemies.Add(enemy))
             {
                 _knockbackContext.Direction = (enemy.Position - context.AttackPosition).normalized;
 
