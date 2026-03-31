@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 335098f6034bb9e45857c96f1c815c88, type: 3}
-  m_Name: StaminaUpSkill
+  m_Name: ThunderGaugeUpSkill
   m_EditorClassIdentifier: Assembly-CSharp::StaminaUpSkill
   _id: 5646
   _priority: 0
   _name: "\u795E\u529B\u5FAA\u74B0"
-  _explanation: "\u30B9\u30BF\u30DF\u30CA\u6700\u5927\u5024\u304C +25/30/45"
+  _explanation: "\u96F7\u30B2\u30FC\u30B8\u6700\u5927\u5024\u304C +25/30/45"
   _icon: {fileID: 0}
   _timing: 1
-  _staminaUps:
+  _thunderGaugeUps:
   - 25
   - 30
   - 45

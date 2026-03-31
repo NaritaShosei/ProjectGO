@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 /// <summary>
@@ -67,22 +68,15 @@ public sealed class HitStopManager : IDisposable
     /// ヒットした敵（HitEnemy グループの絞り込みに使用）
     /// </param>
     public void Trigger(
-        HitStopData data,
-        bool isWeakPoint = false,
-        bool isArmorBreak = false,
-        bool isKill = false,
-        ISpeedChange hitEnemyTarget = null)
+    HitStopData data,
+    bool isWeakPoint = false,
+    bool isArmorBreak = false,
+    bool isKill = false,
+    IReadOnlyList<ISpeedChange> hitEnemyTargets = null)
     {
         if (data == null) return;
-
         float duration = data.GetDuration(isWeakPoint, isArmorBreak, isKill);
-
-        ExecuteHitStopAsync(
-            duration,
-            data.TimeScale,
-            data.TargetGroup,
-            hitEnemyTarget
-        ).Forget();
+        ExecuteHitStopAsync(duration, data.TimeScale, data.TargetGroup, hitEnemyTargets).Forget();
     }
 
     /// <summary>
@@ -90,17 +84,12 @@ public sealed class HitStopManager : IDisposable
     /// （必殺技・死亡演出など特殊ケース用）
     /// </summary>
     public void TriggerDirect(
-        float duration,
-        HitStopTargetGroup targetGroup,
-        float timeScale = 0f,
-        ISpeedChange hitEnemyTarget = null)
+       float duration,
+       HitStopTargetGroup targetGroup,
+       float timeScale = 0f,
+       IReadOnlyList<ISpeedChange> hitEnemyTargets = null)
     {
-        ExecuteHitStopAsync(
-            duration,
-            timeScale,
-            targetGroup,
-            hitEnemyTarget
-        ).Forget();
+        ExecuteHitStopAsync(duration, timeScale, targetGroup, hitEnemyTargets).Forget();
     }
 
     /// <summary>
@@ -155,7 +144,7 @@ public sealed class HitStopManager : IDisposable
         float duration,
         float timeScale,
         HitStopTargetGroup targetGroups,
-        ISpeedChange hitEnemyTarget)
+        IReadOnlyList<ISpeedChange> hitEnemyTargets)
     {
         // 既存ヒットストップをキャンセル
         _hitStopCancellation?.Cancel();
@@ -164,7 +153,7 @@ public sealed class HitStopManager : IDisposable
         var cancellation = new CancellationTokenSource();
         _hitStopCancellation = cancellation;
 
-        ApplySpeedScale(timeScale, targetGroups, hitEnemyTarget);
+        ApplySpeedScale(timeScale, targetGroups, hitEnemyTargets);
 
         try
         {
@@ -182,7 +171,7 @@ public sealed class HitStopManager : IDisposable
         }
         finally
         {
-            ApplySpeedScale(1f, targetGroups, hitEnemyTarget);
+            ApplySpeedScale(1f, targetGroups, hitEnemyTargets);
 
             if (ReferenceEquals(_hitStopCancellation, cancellation))
             {
@@ -196,9 +185,9 @@ public sealed class HitStopManager : IDisposable
     /// 指定グループの ISpeedChange に速度変更を適用する
     /// </summary>
     private void ApplySpeedScale(
-        float scale,
-        HitStopTargetGroup targetGroups,
-        ISpeedChange hitEnemyTarget)
+     float scale,
+     HitStopTargetGroup targetGroups,
+     IReadOnlyList<ISpeedChange> hitEnemyTargets)
     {
         foreach (var (group, list) in _groupTargets)
         {
@@ -206,10 +195,9 @@ public sealed class HitStopManager : IDisposable
 
             foreach (var target in list.ToArray())
             {
-                // HitEnemy グループはヒットした敵 1 体のみに適用
                 if (group == HitStopTargetGroup.HitEnemy &&
-                    hitEnemyTarget != null &&
-                    !ReferenceEquals(target, hitEnemyTarget))
+                    hitEnemyTargets != null &&
+                    !hitEnemyTargets.Contains(target))
                 {
                     continue;
                 }
