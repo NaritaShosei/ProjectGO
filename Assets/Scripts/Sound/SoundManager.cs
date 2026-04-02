@@ -41,7 +41,7 @@ public class SoundManager : MonoBehaviour
 
     /// <summary> BGM再生 </summary>
     /// <param name="cueName">再生するBGMのキュー名</param>
-    /// <param name="cueName">再生するBGMのシートの種類</param>
+    /// <param name="sheetType">再生するBGMのシートの種類</param>
     public void PlayBGM(string cueName, CueSheetType sheetType = CueSheetType.None)
     {
         if(sheetType != CueSheetType.None)
@@ -58,7 +58,7 @@ public class SoundManager : MonoBehaviour
 
     /// <summary> SE再生 </summary>
     /// <param name="cueName">再生するSEのキュー名</param>
-    /// <param name="cueName">再生するSEのシートの種類</param>
+    /// <param name="sheetType">再生するSEのシートの種類</param>
     public void PlaySE(string cueName, CueSheetType sheetType = CueSheetType.None)
     {
         if (sheetType != CueSheetType.None)
