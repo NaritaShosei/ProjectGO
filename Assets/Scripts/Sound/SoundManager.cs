@@ -54,8 +54,6 @@ public class SoundManager : MonoBehaviour
         newSource.Play();
     }
 
-    private static SoundManager _instance;
-
     private string _currentBGMCueSheet = "InGame_BGM";
 
     private CueSheetPathHolder _cueSheetPathHolder = new CueSheetPathHolder();
@@ -65,15 +63,7 @@ public class SoundManager : MonoBehaviour
 
     private void Awake()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-            Initialize();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        Initialize();
     }
 
     /// <summary> 初期化 </summary>
