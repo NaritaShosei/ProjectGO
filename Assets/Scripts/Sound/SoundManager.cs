@@ -12,7 +12,7 @@ public class SoundManager : MonoBehaviour
     public void PlayBGM(string cueName, CueSheetType sheetType = CueSheetType.None)
     {
         if (sheetType != CueSheetType.None)
-            SetBGMCueSheet(_cueSheetPathRegistry.CueSheetPathDict[sheetType]);
+            SetBGMCueSheet(_cueSheetPathHolder.CueSheetPathDict[sheetType]);
 
         _bgmSource.Stop();
 
@@ -24,20 +24,22 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary> SE再生 </summary>
+    /// <param name="seObj">SEを鳴らすオブジェクト</param>
     /// <param name="cueName">再生するSEのキュー名</param>
     /// <param name="sheetType">再生するSEのシートの種類</param>
-    public void PlaySE(string cueName, CueSheetType sheetType = CueSheetType.None)
+    public void PlaySE(GameObject seObj, string cueName, CueSheetType sheetType)
     {
-        if (sheetType != CueSheetType.None)
-            SetSECueSheet(_cueSheetPathRegistry.CueSheetPathDict[sheetType]);
+        if (!_seSourcesDict.ContainsKey(seObj))
+            _seSourcesDict.Add(seObj, new List<CriAtomSource>());
+
 
         // 停止中のソースを探して再生
-        foreach (var source in _seSources)
+        foreach (var source in _seSourcesDict[seObj])
         {
             if (source.status != CriAtomSource.Status.Playing)
             {
-                if (source.cueSheet != _currentSECueSheet)
-                    source.cueSheet = _currentSECueSheet;
+                if (sheetType != CueSheetType.None)
+                    source.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
 
                 source.cueName = cueName;
                 source.Play();
@@ -46,25 +48,26 @@ public class SoundManager : MonoBehaviour
         }
 
         // 全てのソースが再生中の場合、新しいソースを作成して再生
-        CreateNewSESource().Play();
+        CriAtomSource newSource = CreateNewSESource(seObj);
+        newSource.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
+        newSource.cueName = cueName;
+        newSource.Play();
     }
 
     private static SoundManager _instance;
 
     private string _currentBGMCueSheet = "InGame_BGM";
-    private string _currentSECueSheet = "Common_SE";
 
-    private CueSheetPathRegistry _cueSheetPathRegistry = new CueSheetPathRegistry();
+    private CueSheetPathHolder _cueSheetPathHolder = new CueSheetPathHolder();
 
     private CriAtomSource _bgmSource;
-    private List<CriAtomSource> _seSources = new List<CriAtomSource>();
+    private Dictionary<GameObject, List<CriAtomSource>> _seSourcesDict = new Dictionary<GameObject, List<CriAtomSource>>();
 
     private void Awake()
     {
         if (_instance == null)
         {
             _instance = this;
-            DontDestroyOnLoad(gameObject);
             Initialize();
         }
         else
@@ -80,22 +83,20 @@ public class SoundManager : MonoBehaviour
         _bgmSource = gameObject.AddComponent<CriAtomSource>();
         _bgmSource.cueSheet = _currentBGMCueSheet;
 
-        CreateNewSESource();
     }
 
     /// <summary> 新たにse用のSourceを作る処理 </summary>
-    private CriAtomSource CreateNewSESource()
+    private CriAtomSource CreateNewSESource(GameObject seObj)
     {
-        var newSource = gameObject.AddComponent<CriAtomSource>();
+        var newSource = seObj.AddComponent<CriAtomSource>();
         newSource.cueSheet = _currentBGMCueSheet;
-        _seSources.Add(newSource);
+
+        _seSourcesDict[seObj].Add(newSource);
+
         return newSource;
     }
 
     /// <summary> 現在のBGMのCueSheetを変更 </summary>
     private void SetBGMCueSheet(string sheetName) => _currentBGMCueSheet = sheetName;
-
-    /// <summary> 現在のSEのCueSheetを変更 </summary>
-    private void SetSECueSheet(string sheetName) => _currentSECueSheet = sheetName;
 }
 

@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 
-public class CueSheetPathRegistry
+public class CueSheetPathHolder
 {
     public readonly Dictionary<CueSheetType, string> CueSheetPathDict = new Dictionary<CueSheetType, string>();
 
-    public CueSheetPathRegistry()
+    public CueSheetPathHolder()
     {
         CueSheetPathDict.Add(CueSheetType.CommonSE, "Common_SE");
         CueSheetPathDict.Add(CueSheetType.InGameBGM, "InGame_BGM");
         CueSheetPathDict.Add(CueSheetType.RaijinSE, "Raijin_SE");
-        CueSheetPathDict.Add(CueSheetType.TousinSE, "Toujin_SE");
+        CueSheetPathDict.Add(CueSheetType.TousinSE, "Tousin_SE");
     }
 }
 
