@@ -2,22 +2,26 @@ using UnityEngine;
 using CriWare;
 using System.Collections.Generic;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager 
 {
-    public static SoundManager Instance => _instance;
+    /// <summary> コンストラクタ </summary>
+    /// <param name="bgmPlayer"> BGM用のPlayerObject </param>
+    /// <param name="defaultBGM"> BGMの音源データが入ったCueSheetの名前(あとで再生時に変更可能) </param>
+    public SoundManager(GameObject bgmPlayer, string defaultBGM)
+    {
+        _defaultBGMCueSheet = defaultBGM;
+        Initialize(bgmPlayer);
+    }
 
     /// <summary> BGM再生 </summary>
     /// <param name="cueName">再生するBGMのキュー名</param>
     /// <param name="sheetType">再生するBGMのシートの種類</param>
     public void PlayBGM(string cueName, CueSheetType sheetType = CueSheetType.None)
     {
-        if (sheetType != CueSheetType.None)
-            SetBGMCueSheet(_cueSheetPathHolder.CueSheetPathDict[sheetType]);
-
         _bgmSource.Stop();
 
-        if (_bgmSource.cueSheet != _currentBGMCueSheet)
-            _bgmSource.cueSheet = _currentBGMCueSheet;
+        if(sheetType != CueSheetType.None)
+            _bgmSource.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
 
         _bgmSource.cueName = cueName;
         _bgmSource.Play();
@@ -57,7 +61,7 @@ public class SoundManager : MonoBehaviour
         }
 
         // 全てのソースが再生中の場合、新しいソースを作成して再生
-        CriAtomSource newSource = CreateNewSESource(seObj);
+        CriAtomSource newSource = CreateNewSESource(seObj, sheetType);
         newSource.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
         newSource.cueName = cueName;
         newSource.Play();
@@ -99,45 +103,37 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    private static SoundManager _instance;
+    // デフォルトのBGM CueSheet名
+    private readonly string _defaultBGMCueSheet;
 
-    private string _currentBGMCueSheet = "InGame_BGM";
-
+    // CueSheetのパスを管理するクラス
     private CueSheetPathHolder _cueSheetPathHolder = new CueSheetPathHolder();
 
+    // BGM用のソース
     private CriAtomSource _bgmSource;
+
+    // SE用のソースを管理するDictionary
     private Dictionary<GameObject, List<CriAtomSource>> _seSourcesDict = new Dictionary<GameObject, List<CriAtomSource>>();
 
-    private void Awake()
-    {
-        if(Instance != null)
-            Destroy(gameObject);
-        else
-            _instance = this;
-
-        Initialize();
-    }
-
     /// <summary> 初期化 </summary>
-    private void Initialize()
+    private void Initialize(GameObject bgmPlayer)
     {
         // BGM用ソースの設定
-        _bgmSource = gameObject.AddComponent<CriAtomSource>();
-        _bgmSource.cueSheet = _currentBGMCueSheet;
+        if(!bgmPlayer.TryGetComponent<CriAtomSource>(out _bgmSource))
+            _bgmSource = bgmPlayer.AddComponent<CriAtomSource>();
+
+        _bgmSource.cueSheet = _defaultBGMCueSheet;
     }
 
     /// <summary> 新たにse用のSourceを作る処理 </summary>
-    private CriAtomSource CreateNewSESource(GameObject seObj)
+    private CriAtomSource CreateNewSESource(GameObject seObj, CueSheetType sheetType)
     {
         var newSource = seObj.AddComponent<CriAtomSource>();
-        newSource.cueSheet = _currentBGMCueSheet;
+        newSource.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
 
         _seSourcesDict[seObj].Add(newSource);
 
         return newSource;
     }
-
-    /// <summary> 現在のBGMのCueSheetを変更 </summary>
-    private void SetBGMCueSheet(string sheetName) => _currentBGMCueSheet = sheetName;
 }
 
