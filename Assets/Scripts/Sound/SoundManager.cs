@@ -23,6 +23,15 @@ public class SoundManager : MonoBehaviour
         _bgmSource.Play();
     }
 
+    /// <summary> BGM停止 </summary>
+    public void StopBGM() => _bgmSource.Stop();
+
+    /// <summary> BGM一時停止 </summary>
+    public void PauseBGM() => _bgmSource.Pause(true);
+
+    /// <summary> BGM再開 </summary>
+    public void ResumeBGM() => _bgmSource.Pause(false);
+
     /// <summary> SE再生 </summary>
     /// <param name="seObj">SEを鳴らすオブジェクト</param>
     /// <param name="cueName">再生するSEのキュー名</param>
@@ -54,6 +63,44 @@ public class SoundManager : MonoBehaviour
         newSource.Play();
     }
 
+    /// <summary> SE停止 </summary>
+    public void StopSE(GameObject seObj)
+    {
+        if (_seSourcesDict.ContainsKey(seObj))
+        {
+            foreach (var source in _seSourcesDict[seObj])
+            {
+                source.Stop();
+            }
+        }
+    }
+
+    /// <summary> SE一時停止 </summary>
+    public void PauseSE(GameObject seObj)
+    {
+        if (_seSourcesDict.ContainsKey(seObj))
+        {
+            foreach (var source in _seSourcesDict[seObj])
+            {
+                source.Pause(true);
+            }
+        }
+    }
+
+    /// <summary> SE再開 </summary>
+    public void ResumeSE(GameObject seObj)
+    {
+        if (_seSourcesDict.ContainsKey(seObj))
+        {
+            foreach (var source in _seSourcesDict[seObj])
+            {
+                source.Pause(false);
+            }
+        }
+    }
+
+    private static SoundManager _instance;
+
     private string _currentBGMCueSheet = "InGame_BGM";
 
     private CueSheetPathHolder _cueSheetPathHolder = new CueSheetPathHolder();
@@ -63,6 +110,11 @@ public class SoundManager : MonoBehaviour
 
     private void Awake()
     {
+        if(Instance != null)
+            Destroy(gameObject);
+        else
+            _instance = this;
+
         Initialize();
     }
 
@@ -72,7 +124,6 @@ public class SoundManager : MonoBehaviour
         // BGM用ソースの設定
         _bgmSource = gameObject.AddComponent<CriAtomSource>();
         _bgmSource.cueSheet = _currentBGMCueSheet;
-
     }
 
     /// <summary> 新たにse用のSourceを作る処理 </summary>
