@@ -14,4 +14,10 @@ public class CRIAudioInitializer : MonoBehaviour
         // SoundManagerをServiceLocatorに登録
         ServiceLocator.Register(new SoundManager(_bgmPlayer, _deaultBGMCueSheet));
     }
+
+    private void OnDestroy()
+    {
+        // SoundManagerをServiceLocatorから削除
+        ServiceLocator.Unregister<SoundManager>();
+    }
 }

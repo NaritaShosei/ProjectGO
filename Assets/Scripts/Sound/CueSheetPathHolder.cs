@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+/// <summary> CueSheetの名前保管クラス </summary>
 public class CueSheetPathHolder
 {
     public readonly Dictionary<CueSheetType, string> CueSheetPathDict = new Dictionary<CueSheetType, string>();
