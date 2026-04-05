@@ -1,16 +1,40 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "MoveData", menuName = "GameData/MoveData")]
 public class MoveData : ScriptableObject
 {
     public float RotateSpeed => _rotateSpeed;
-    public DodgeData StepDodge => _stepData;
-    public DodgeData RollDodge => _rollData;
+
+    /// <summary>モードごとの回避パラメータ</summary>
+    public DodgeData GetDodge(PlayerMode mode)
+    {
+        if (_modeDodgeData != null)
+        {
+            foreach (var entry in _modeDodgeData)
+            {
+                if (entry.Mode == mode) return entry.Data;
+            }
+        }
+        // フォールバック
+        return _defaultDodge;
+    }
 
     [SerializeField] private float _rotateSpeed = 5;
-    [SerializeField] private DodgeData _stepData;
-    [SerializeField] private DodgeData _rollData;
+
+    [Tooltip("モードごとの回避設定")]
+    [SerializeField] private List<ModeDodgeEntry> _modeDodgeData;
+
+    [Tooltip("モード設定がない場合のフォールバック")]
+    [SerializeField] private DodgeData _defaultDodge;
+}
+
+[Serializable]
+public struct ModeDodgeEntry
+{
+    public PlayerMode Mode;
+    public DodgeData Data;
 }
 
 [Serializable]
@@ -18,10 +42,13 @@ public struct DodgeData
 {
     public float Speed;
     public float Duration;
-    public float ChainWindow; // 次の回避を受け付ける時間
+
+    [Tooltip("回避のアニメーションステート名（Animator.CrossFadeInFixedTimeで使用）")]
+    public string AnimationStateName;
 }
+
 public enum DodgeType
 {
-    Step,
-    Roll
+    Normal,     // ロックオンなし（前方向）
+    Directional // ロックオン中（8方向）
 }
