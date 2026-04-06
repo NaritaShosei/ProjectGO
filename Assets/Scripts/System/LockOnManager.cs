@@ -76,59 +76,61 @@ public class LockOnManager : MonoBehaviour
     /// 左右にロックオン対象を切り替える
     /// direction: -1=左 1=右
     /// </summary>
-private void SwitchLockOnTarget(int direction)
-{
-    if (!_cameraManager.IsLockedOn) return;
-    if (Time.time - _lastSwitchTime < _switchCooldown) return;
-
-    Debug.Log($"切り替え方向: {direction}");
-
-    ILockOnTarget current = _cameraManager.CurrentTarget;
-    Vector2 currentScreenPos = _mainCamera.WorldToViewportPoint(current.LockOnPoint.position);
-
-    Debug.Log($"現在の対象の画面座標: {currentScreenPos}");
-
-    ILockOnTarget best = null;
-    float bestDist = float.MaxValue;
-
-    foreach (var candidate in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+    private void SwitchLockOnTarget(int direction)
     {
-        if (candidate is not ILockOnTarget target) continue;
-        if (!target.IsLockable) continue;
-        if (target == current) continue;
+        if (!_cameraManager.IsLockedOn) return;
+        if (Time.time - _lastSwitchTime < _switchCooldown) return;
 
-        Vector3 screenPos = _mainCamera.WorldToViewportPoint(target.LockOnPoint.position);
+        Debug.Log($"切り替え方向: {direction}");
 
-        if (screenPos.x < 0f || screenPos.x > 1f ||
-            screenPos.y < 0f || screenPos.y > 1f ||
-            screenPos.z < 0f) continue;
+        ILockOnTarget current = _cameraManager.CurrentTarget;
+        if (current.LockOnPoint == null) return;
+        Vector2 currentScreenPos = _mainCamera.WorldToViewportPoint(current.LockOnPoint.position);
 
-        float diffX = screenPos.x - currentScreenPos.x;
+        Debug.Log($"現在の対象の画面座標: {currentScreenPos}");
 
-        Debug.Log($"候補: {candidate.name} screenPos={screenPos} diffX={diffX}");
+        ILockOnTarget best = null;
+        float bestDist = float.MaxValue;
 
-        if (direction == -1 && diffX >= 0f) continue;
-        if (direction == 1 && diffX <= 0f) continue;
-
-        float screenDist = Vector2.Distance(
-            new Vector2(screenPos.x, screenPos.y),
-            new Vector2(currentScreenPos.x, currentScreenPos.y)
-        );
-
-        if (screenDist < bestDist)
+        foreach (var candidate in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
         {
-            bestDist = screenDist;
-            best = target;
+            if (candidate is not ILockOnTarget target) continue;
+            if (!target.IsLockable) continue;
+            if (target == current) continue;
+            if (target.LockOnPoint == null) continue;
+
+            Vector3 screenPos = _mainCamera.WorldToViewportPoint(target.LockOnPoint.position);
+
+            if (screenPos.x < 0f || screenPos.x > 1f ||
+                screenPos.y < 0f || screenPos.y > 1f ||
+                screenPos.z < 0f) continue;
+
+            float diffX = screenPos.x - currentScreenPos.x;
+
+            Debug.Log($"候補: {candidate.name} screenPos={screenPos} diffX={diffX}");
+
+            if (direction == -1 && diffX >= 0f) continue;
+            if (direction == 1 && diffX <= 0f) continue;
+
+            float screenDist = Vector2.Distance(
+                new Vector2(screenPos.x, screenPos.y),
+                new Vector2(currentScreenPos.x, currentScreenPos.y)
+            );
+
+            if (screenDist < bestDist)
+            {
+                bestDist = screenDist;
+                best = target;
+            }
         }
+
+        Debug.Log($"選ばれた対象: {(best?.LockOnPoint != null ? best.LockOnPoint.gameObject.name : "なし")}");
+
+        if (best == null) return;
+
+        _cameraManager.LockOn(best);
+        _lastSwitchTime = Time.time;
     }
-
-    Debug.Log($"選ばれた対象: {(best != null ? best.LockOnPoint.gameObject.name : "なし")}");
-
-    if (best == null) return;
-
-    _cameraManager.LockOn(best);
-    _lastSwitchTime = Time.time;
-}
 
     /// <summary>
     /// 画面中心に最も近い敵を選ぶ（初回ロックオン用）
@@ -149,6 +151,7 @@ private void SwitchLockOnTarget(int direction)
         {
             if (!_overlapBuffer[i].TryGetComponent(out ILockOnTarget candidate)) continue;
             if (!candidate.IsLockable) continue;
+            if (candidate.LockOnPoint == null) continue;
 
             Vector3 screenPos = _mainCamera.WorldToViewportPoint(candidate.LockOnPoint.position);
 
