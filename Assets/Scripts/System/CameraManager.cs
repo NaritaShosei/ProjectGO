@@ -6,7 +6,7 @@ public class CameraManager : MonoBehaviour
 {
     public Camera MainCamera => _mainCamera;
     public ILockOnTarget CurrentTarget => _currentTarget;
-    public bool IsLockedOn => _currentTarget != null;
+    public bool IsLockedOn => _currentTargetComponent != null;
 
     public event Action<ILockOnTarget> OnLockOnTargetChanged;
 
@@ -24,7 +24,7 @@ public class CameraManager : MonoBehaviour
 
     public void LockOn(ILockOnTarget target)
     {
-        if (target == null || !target.IsLockable)
+        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.LockOnPoint == null)
         {
             Debug.LogWarning("ロックオン対象がnullまたはロック不可です。");
             return;
@@ -33,26 +33,28 @@ public class CameraManager : MonoBehaviour
         if (_currentTarget == target) return;
 
         _currentTarget = target;
+        _currentTargetComponent = targetComponent;
         _lockOnCamera.Priority = _lockOnPriority;
 
         OnLockOnTargetChanged?.Invoke(_currentTarget);
     }
 
-public void Unlock()
-{
-    if (_currentTarget == null) return;
+    public void Unlock()
+    {
+        if (_currentTarget == null && _currentTargetComponent == null) return;
 
-    _currentTarget = null;
+        _currentTarget = null;
+        _currentTargetComponent = null;
 
-    // ロックオンカメラの現在の角度を通常カメラに引き継ぐ
-    Vector3 currentEuler = _lockOnCamera.transform.rotation.eulerAngles;
-    _normalCamera.GetComponent<CinemachineOrbitalFollow>().HorizontalAxis.Value = currentEuler.y;
-    _normalCamera.GetComponent<CinemachineOrbitalFollow>().VerticalAxis.Value = currentEuler.x;
+        // ロックオンカメラの現在の角度を通常カメラに引き継ぐ
+        Vector3 currentEuler = _lockOnCamera.transform.rotation.eulerAngles;
+        _normalCamera.GetComponent<CinemachineOrbitalFollow>().HorizontalAxis.Value = currentEuler.y;
+        _normalCamera.GetComponent<CinemachineOrbitalFollow>().VerticalAxis.Value = currentEuler.x;
 
-    _lockOnCamera.Priority = _normalPriority - 1;
+        _lockOnCamera.Priority = _normalPriority - 1;
 
-    OnLockOnTargetChanged?.Invoke(null);
-}
+        OnLockOnTargetChanged?.Invoke(null);
+    }
 
     [Header("カメラ")]
     [SerializeField] private CinemachineCamera _normalCamera;
@@ -70,6 +72,7 @@ public void Unlock()
     private Camera _mainCamera;
     private Transform _playerTransform;
     private ILockOnTarget _currentTarget;
+    private Component _currentTargetComponent;
 
     private void Awake()
     {
@@ -82,7 +85,11 @@ public void Unlock()
 
     private void LateUpdate()
     {
-        if (!IsLockedOn) return;
+        if (_currentTargetComponent == null || !_currentTarget.IsLockable || _currentTarget.LockOnPoint == null)
+        {
+            Unlock();
+            return;
+        }
 
         UpdateLockOnCamera();
     }
