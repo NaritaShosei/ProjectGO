@@ -84,7 +84,7 @@ public class LockOnManager : MonoBehaviour
         Debug.Log($"切り替え方向: {direction}");
 
         ILockOnTarget current = _cameraManager.CurrentTarget;
-        if (current.LockOnPoint == null) return;
+        if (current == null || current.LockOnPoint == null) return;
         Vector2 currentScreenPos = _mainCamera.WorldToViewportPoint(current.LockOnPoint.position);
 
         Debug.Log($"現在の対象の画面座標: {currentScreenPos}");
