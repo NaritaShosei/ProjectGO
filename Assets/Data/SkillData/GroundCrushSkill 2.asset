@@ -20,7 +20,10 @@ MonoBehaviour:
   _timing: 0
   _getComboCount: 2
   _attackRadius: 2.5
-  _damageMagnification: 1.8
+  _damageMultiplier: 1.8
   _attackType: 0
   _isPlayerMode: 0
-  _delay: 1
+  _delay: 0.5
+  _knockBackPower: 0
+  _knockBackUpward: 0
+  _effectPrefab: {fileID: 0}
