@@ -42,9 +42,6 @@ public struct DodgeData
 {
     public float Speed;
     public float Duration;
-
-    [Tooltip("回避のアニメーションステート名（Animator.CrossFadeInFixedTimeで使用）")]
-    public string AnimationStateName;
 }
 
 public enum DodgeType
