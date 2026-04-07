@@ -40,7 +40,9 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     /// </summary>
     public void UpdateMoveAnimation(float speed)
     {
-        _animator.SetFloat(AnimParams.Speed, speed);
+        // 第3引数: 現在値から目標値に到達するまでの時間(秒)
+        // 第4引数: deltaTime
+        _animator.SetFloat(AnimParams.Speed, speed, 0.1f, Time.deltaTime);
     }
 
     /// <summary>
