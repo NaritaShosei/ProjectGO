@@ -106,7 +106,9 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            moveDir = (camera.transform.right * vec.x + camera.transform.forward * vec.y).normalized;
+            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+            Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+            moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
         }
         moveDir.y = 0f;
 
@@ -156,7 +158,13 @@ public class PlayerMovement : MonoBehaviour
         if (!_playerStateManager.CanDodge()) return;
 
         if (_playerStateManager.CurrentState == PlayerState.Attacking)
+        {
             _attack.InterruptByDodge();
+            _attackMoveCts?.Cancel();
+            _attackMoveCts?.Dispose();
+            _attackMoveCts = null;
+            _isAttackMoving = false;
+        }
 
         // 進行中の回避移動があればキャンセルして上書き
         _dodgeMoveCts?.Cancel();
@@ -301,7 +309,7 @@ public class PlayerMovement : MonoBehaviour
             if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
 
             _rb.MovePosition(Vector3.Lerp(startPos, targetPos,
-                Mathf.SmoothStep(0, 1, elapsed / request.Duration * _timeScale)));
+                 Mathf.SmoothStep(0, 1, elapsed / request.Duration)));
             elapsed += Time.fixedDeltaTime * _timeScale;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }

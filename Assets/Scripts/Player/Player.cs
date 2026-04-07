@@ -74,9 +74,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         int reductDamage = DamageSystem.ApplyDamageReduction(damage, _playerStats.DefensePower);
         _playerStats.TakeDamage(reductDamage);
 
-        // 生存中は被弾ステートへ遷移（アニメーションSMBが終了時にIdleへ戻す）
         if (!_playerStateManager.IsDead())
+        {
+            _attack?.InterruptByDamage(); // 攻撃内部状態を全てクリア
             _playerStateManager.ChangeState(PlayerState.Damaged);
+        }
     }
 
     // ---- IStatUpgradable ----

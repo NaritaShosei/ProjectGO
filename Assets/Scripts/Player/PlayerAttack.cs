@@ -82,6 +82,22 @@ public class PlayerAttack : MonoBehaviour
         ClearHomingLock();
     }
 
+    /// <summary>
+    /// 被弾による攻撃中断。Player.TakeDamageから呼ばれる。
+    /// 全ての攻撃内部状態をリセットしてIdle相当の状態にする。
+    /// </summary>
+    public void InterruptByDamage()
+    {
+        _pendingAttackData = null;
+        _pendingAttackInput = null;
+        _bufferedComboInput = null;
+        _isInComboWindow = false;
+        _isComboTransitioned = false;
+        _isHomingActive = false;
+        _currentAttackId = -1;   // コンボチェーンもリセット
+        ClearHomingLock();
+    }
+
     // ── Inspector ──────────────────────────────────────────
     [SerializeField] private AttackDataRepository _attackRepository;
     [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
@@ -311,6 +327,11 @@ public class PlayerAttack : MonoBehaviour
 
     private void FinishAttack()
     {
+        // 回避・ダメージリアクション中はAttackの終了処理をスキップ
+        if (_stateManager.CurrentState == PlayerState.Dodge ||
+            _stateManager.IsDamaged())
+            return;
+
         _isHomingActive = false;
 
         if (_isComboTransitioned)
