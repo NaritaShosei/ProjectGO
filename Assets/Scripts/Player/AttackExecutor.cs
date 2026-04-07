@@ -49,7 +49,7 @@ public class AttackExecutor : MonoBehaviour
         bool isWeakPoint = false;
         bool isArmorBreak = false;
         bool isKill = false;
-        ISpeedChange firstHitEnemy = null;
+        var hitEnemyTargets = new List<ISpeedChange>();
 
         foreach (var col in cols)
         {
@@ -68,7 +68,8 @@ public class AttackExecutor : MonoBehaviour
                     if (result.IsWeakPoint) isWeakPoint = true;
                     if (result.IsArmorBreak) isArmorBreak = true;
                     if (result.IsKill) isKill = true;
-                    firstHitEnemy ??= enemy as ISpeedChange;
+                    if (enemy is ISpeedChange speedChange)
+                        hitEnemyTargets.Add(speedChange);
                 };
 
                 enemy.TakeDamage(damageContext);
@@ -83,7 +84,7 @@ public class AttackExecutor : MonoBehaviour
                 isWeakPoint: isWeakPoint,
                 isArmorBreak: isArmorBreak,
                 isKill: isKill,
-                hitEnemyTarget: firstHitEnemy
+                hitEnemyTargets: hitEnemyTargets
             );
         }
 

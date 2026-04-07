@@ -175,6 +175,16 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        // 雷神→闘神（Warrior）へのモードチェンジはアニメーションをスキップ
+        if (newMode == PlayerMode.Warrior)
+        {
+            _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
+            // ModeChangeトリガーを発火しないのでアニメーションは再生されない
+            // ただしPlayerStateをModeChangingから戻す必要があるため直接通知する
+            OnModeChangeComplete?.Invoke();
+            return;
+        }
+
         _animator.SetTrigger(AnimParams.ModeChange);
         _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
     }
