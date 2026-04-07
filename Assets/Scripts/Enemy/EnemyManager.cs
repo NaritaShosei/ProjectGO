@@ -142,7 +142,6 @@ public class EnemyManager : MonoBehaviour
             // SpatialHashGridから登録解除
             _spatialHashGrid?.Remove(enemy);
 
-            _enemiesTransformList.Remove(enemy.);
             _enemies.Remove(enemy);
 
             // ボスかどうか判定
