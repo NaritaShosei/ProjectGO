@@ -7,7 +7,6 @@ public class PlayerMovement : MonoBehaviour
 {
     const float INPUT_THRESHOLD = 0.001f;
 
-    /// <summary>回避終了通知（PlayerAttackが購読してDodgeAttack判定に使う）</summary>
     public event Action OnEndDodge;
 
     public void Init(
@@ -27,9 +26,8 @@ public class PlayerMovement : MonoBehaviour
 
         _input.OnDodge += Dodge;
         _attack.OnAttackMoveRequested += HandleAttackMove;
-
-        // 被弾アニメーション終了をAnimationControllerから受け取る
         _animationController.OnDamagedEnd += HandleDamagedEnd;
+        _animationController.OnDodgeEnd += HandleDodgeEnd;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             _cameraManager = cameraManager;
@@ -38,12 +36,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     public void SetTimeScale(float scale) => _timeScale = scale;
-
-    /// <summary>ロックオン対象の設定（nullで解除）</summary>
-    public void SetLockOnTarget(Transform target)
-    {
-        _lockOnTarget = target;
-    }
+    public void SetLockOnTarget(Transform target) => _lockOnTarget = target;
 
     [SerializeField] private Rigidbody _rb;
 
@@ -58,12 +51,10 @@ public class PlayerMovement : MonoBehaviour
 
     private float _timeScale = 1f;
     private bool _isDodging;
-
+    private CancellationTokenSource _dodgeMoveCts;
     private CancellationTokenSource _attackMoveCts;
     private bool _isAttackMoving;
     private bool _currentIsPhantom;
-
-    // ── Unity イベント ───────────────────────────────────────
 
     private void Update()
     {
@@ -84,8 +75,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_input != null) _input.OnDodge -= Dodge;
         if (_attack != null) _attack.OnAttackMoveRequested -= HandleAttackMove;
-        if (_animationController != null) _animationController.OnDamagedEnd -= HandleDamagedEnd;
-
+        if (_animationController != null)
+        {
+            _animationController.OnDamagedEnd -= HandleDamagedEnd;
+            _animationController.OnDodgeEnd -= HandleDodgeEnd;
+        }
+        _dodgeMoveCts?.Cancel();
+        _dodgeMoveCts?.Dispose();
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
     }
@@ -94,33 +90,27 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move()
     {
+        if (_isDodging) return; // 回避中は移動入力を無視（回避移動はDodgeMoveAsyncで管理）
         if (!_playerStateManager.CanMove()) { _rb.linearVelocity = Vector3.zero; return; }
 
         var vec = _input.MoveInput;
-        var camera = _cameraManager.MainCamera;
         float inputMag = vec.magnitude;
-
         if (inputMag < INPUT_THRESHOLD) { _rb.linearVelocity = Vector3.zero; return; }
 
+        var camera = _cameraManager.MainCamera;
         Vector3 moveDir;
-
         if (_lockOnTarget != null)
         {
-            // ロックオン中: カメラ空間入力をそのままワールド方向に変換
-            var right = camera.transform.right * vec.x;
-            var forward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y;
-            moveDir = (right + forward).normalized;
+            moveDir = (camera.transform.right * vec.x
+                + Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y).normalized;
         }
         else
         {
-            var right = camera.transform.right * vec.x;
-            var forward = camera.transform.forward * vec.y;
-            moveDir = (right + forward).normalized;
+            moveDir = (camera.transform.right * vec.x + camera.transform.forward * vec.y).normalized;
         }
         moveDir.y = 0f;
 
-        float speed = _modeController.ModeData.MoveSpeed * inputMag;
-        _rb.linearVelocity = moveDir * speed * _timeScale;
+        _rb.linearVelocity = moveDir * _modeController.ModeData.MoveSpeed * inputMag * _timeScale;
     }
 
     private void Rotate()
@@ -129,55 +119,34 @@ public class PlayerMovement : MonoBehaviour
 
         if (_lockOnTarget != null)
         {
-            // ロックオン中: 常にターゲットの方向を向く
             Vector3 toTarget = _lockOnTarget.position - transform.position;
             toTarget.y = 0f;
             if (toTarget.sqrMagnitude > 0.001f)
-            {
-                Quaternion targetRot = Quaternion.LookRotation(toTarget);
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation, targetRot,
+                transform.rotation = Quaternion.Slerp(transform.rotation,
+                    Quaternion.LookRotation(toTarget),
                     _moveData.RotateSpeed * Time.deltaTime * _timeScale);
-            }
             return;
         }
 
-        // 通常: 移動方向を向く
         var vec = _input.MoveInput;
         if (vec.magnitude < INPUT_THRESHOLD) return;
-
-        var camera = _cameraManager.MainCamera;
-        var right = camera.transform.right * vec.x;
-        var forward = camera.transform.forward * vec.y;
-        var lookDir = right + forward;
+        var cam = _cameraManager.MainCamera;
+        var lookDir = cam.transform.right * vec.x + cam.transform.forward * vec.y;
         lookDir.y = 0f;
-
         if (lookDir.sqrMagnitude <= 0f) return;
-
-        var targetRotation = Quaternion.LookRotation(lookDir);
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation, targetRotation,
+        transform.rotation = Quaternion.Slerp(transform.rotation,
+            Quaternion.LookRotation(lookDir),
             _moveData.RotateSpeed * Time.deltaTime * _timeScale);
     }
 
     private void PlayMoveAnimation()
     {
         if (_playerStateManager.IsDodging()) return;
-
-        float speed = _rb.linearVelocity.magnitude;
-
         if (_lockOnTarget != null)
-        {
-            // 8方向ブレンド
             _animationController.UpdateLockedMoveAnimation(
-                _input.MoveInput,
-                transform.forward,
-                _cameraManager.MainCamera.transform.right);
-        }
+                _input.MoveInput, transform.forward, _cameraManager.MainCamera.transform.right);
         else
-        {
-            _animationController.UpdateMoveAnimation(speed);
-        }
+            _animationController.UpdateMoveAnimation(_rb.linearVelocity.magnitude);
     }
 
     // ── 回避 ─────────────────────────────────────────────────
@@ -186,54 +155,63 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanDodge()) return;
 
-        // 攻撃中なら中断してリセット
         if (_playerStateManager.CurrentState == PlayerState.Attacking)
-        {
             _attack.InterruptByDodge();
-        }
 
-        DodgeAsync().Forget();
-    }
-
-    private async UniTaskVoid DodgeAsync()
-    {
-        if (_isDodging) return;
+        // 進行中の回避移動があればキャンセルして上書き
+        _dodgeMoveCts?.Cancel();
+        _dodgeMoveCts?.Dispose();
+        _dodgeMoveCts = new CancellationTokenSource();
 
         _isDodging = true;
         _playerStateManager.ChangeState(PlayerState.Dodge);
 
-        // モード対応の回避データ取得
         DodgeData dodgeData = _moveData.GetDodge(_modeController.CurrentMode);
         Vector3 dodgeDir = GetDodgeDirection();
 
-        // アニメーション再生
+        // アニメーション再生（Dodgeトリガーを発火）
         if (_lockOnTarget != null)
         {
-            // ロックオン中: ローカル方向を計算してBlendTree用パラメータをセット
             Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
-            float lx = Vector3.Dot(dodgeDir, right);
-            float ly = Vector3.Dot(dodgeDir, fwd);
-            _animationController.PlayLockedDodge(lx, ly, dodgeData.AnimationStateName);
+            _animationController.PlayLockedDodge(
+                Vector3.Dot(dodgeDir, right),
+                Vector3.Dot(dodgeDir, fwd));
         }
         else
         {
-            _animationController.PlayDodge(dodgeData.AnimationStateName);
+            _animationController.PlayDodge();
         }
 
+        // 移動のみタイマー管理。終了処理は HandleDodgeEnd（SMB通知）が担当
+        DodgeMoveAsync(dodgeDir, dodgeData.Speed, dodgeData.Duration, _dodgeMoveCts.Token).Forget();
+    }
+
+    private async UniTaskVoid DodgeMoveAsync(Vector3 dir, float speed, float duration, CancellationToken ct)
+    {
         float elapsed = 0f;
         try
         {
-            while (elapsed < dodgeData.Duration)
+            while (elapsed < duration)
             {
-                _rb.linearVelocity = dodgeDir * dodgeData.Speed * _timeScale;
+                _rb.linearVelocity = dir * speed * _timeScale;
                 elapsed += Time.deltaTime * _timeScale;
-                await UniTask.Yield(destroyCancellationToken);
+                await UniTask.Yield(ct);
             }
         }
-        catch (OperationCanceledException) { return; }
+        catch (OperationCanceledException) { }
 
-        _rb.linearVelocity = Vector3.zero;
+        if (_rb) _rb.linearVelocity = Vector3.zero;
+        // ステート復帰は HandleDodgeEnd（DodgeSMBのOnStateExit通知）を待つ
+    }
+
+    /// <summary>
+    /// DodgeSMB の OnStateExit → PlayerAnimationController.AnimEvent_DodgeEnd → ここ。
+    /// アニメーションが実際に終わったタイミングでステートを復帰させる。
+    /// </summary>
+    private void HandleDodgeEnd()
+    {
+        if (!_isDodging) return;
         _isDodging = false;
         _playerStateManager.ChangeState(PlayerState.Idle);
         OnEndDodge?.Invoke();
@@ -244,10 +222,8 @@ public class PlayerMovement : MonoBehaviour
         var input = _input.MoveInput;
         if (input.magnitude > INPUT_THRESHOLD)
         {
-            var camera = _cameraManager.MainCamera;
-            var right = camera.transform.right * input.x;
-            var forward = camera.transform.forward * input.y;
-            var dir = right + forward;
+            var dir = _cameraManager.MainCamera.transform.right * input.x
+                    + _cameraManager.MainCamera.transform.forward * input.y;
             dir.y = 0f;
             return dir.normalized;
         }
@@ -258,7 +234,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleDamagedEnd()
     {
-        // 被弾アニメーション終了でIdle復帰
         if (_playerStateManager.IsDamaged())
             _playerStateManager.ChangeState(PlayerState.Idle);
     }
@@ -273,9 +248,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (_currentIsPhantom)
         {
-            Physics.IgnoreLayerCollision(
-                LayerMask.NameToLayer("Player"),
-                LayerMask.NameToLayer("Enemy"), false);
+            Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
             _currentIsPhantom = false;
         }
 
@@ -289,9 +262,7 @@ public class PlayerMovement : MonoBehaviour
         if (request.IsPhantom)
         {
             _currentIsPhantom = true;
-            Physics.IgnoreLayerCollision(
-                LayerMask.NameToLayer("Player"),
-                LayerMask.NameToLayer("Enemy"), true);
+            Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true);
         }
 
         try
@@ -308,12 +279,9 @@ public class PlayerMovement : MonoBehaviour
         {
             _isAttackMoving = false;
             if (_rb) _rb.linearVelocity = Vector3.zero;
-
             if (_currentIsPhantom)
             {
-                Physics.IgnoreLayerCollision(
-                    LayerMask.NameToLayer("Player"),
-                    LayerMask.NameToLayer("Enemy"), false);
+                Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
                 _currentIsPhantom = false;
             }
         }
@@ -330,13 +298,10 @@ public class PlayerMovement : MonoBehaviour
         {
             if (request.Duration <= 0f) return;
             if (elapsed >= request.Duration) break;
-            if (request.Target &&
-                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
+            if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
 
-            float t = elapsed / request.Duration * _timeScale;
-            float smoothT = Mathf.SmoothStep(0, 1, t);
-            _rb.MovePosition(Vector3.Lerp(startPos, targetPos, smoothT));
-
+            _rb.MovePosition(Vector3.Lerp(startPos, targetPos,
+                Mathf.SmoothStep(0, 1, elapsed / request.Duration * _timeScale)));
             elapsed += Time.fixedDeltaTime * _timeScale;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
@@ -352,8 +317,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (request.Duration <= 0f) return;
             if (elapsed >= request.Duration) break;
-            if (request.Target &&
-                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
+            if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
 
             _rb.linearVelocity = moveDir * speed * _timeScale;
             elapsed += Time.fixedDeltaTime * _timeScale;

@@ -18,6 +18,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnAttackExecute;
     public event Action OnModeChangeComplete;
     public event Action OnComboTransition;
+    public event Action OnDodgeEnd;
+
 
     /// <summary>被弾アニメーション終了イベント（PlayerMovementやPlayerが購読）</summary>
     public event Action OnDamagedEnd;
@@ -32,6 +34,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     /// <summary>被弾アニメーション終了をSMBから受け取る</summary>
     public void AnimEvent_DamagedEnd() => OnDamagedEnd?.Invoke();
+
+    public void AnimEvent_DodgeEnd() => OnDodgeEnd?.Invoke();
 
     // ── 移動アニメーション ───────────────────────────────────
 
@@ -101,23 +105,22 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     /// <summary>
     /// 通常回避（ロックオンなし）: ステート名を直接指定して再生。
     /// </summary>
-    public void PlayDodge(string stateName, float transitionDuration = 0.1f)
+    public void PlayDodge()
     {
-        if (!string.IsNullOrEmpty(stateName))
-            _animator.CrossFadeInFixedTime(stateName, transitionDuration, 0);
-        else
-            _animator.SetTrigger(AnimParams.Dodge);
+        _animator.SetFloat(AnimParams.DodgeX, 0);
+        _animator.SetFloat(AnimParams.DodgeY, 1);
+        _animator.SetTrigger(AnimParams.Dodge);
     }
 
     /// <summary>
     /// ロックオン中の8方向回避: DodgeX / DodgeY をセットしてトリガー発火。
     /// inputDir はカメラ空間の入力方向をプレイヤーローカルに変換した値。
     /// </summary>
-    public void PlayLockedDodge(float localX, float localY, string stateName, float transitionDuration = 0.1f)
+    public void PlayLockedDodge(float localX, float localY, float transitionDuration = 0.1f)
     {
         _animator.SetFloat(AnimParams.DodgeX, localX);
         _animator.SetFloat(AnimParams.DodgeY, localY);
-        PlayDodge(stateName, transitionDuration);
+        _animator.SetTrigger(AnimParams.Dodge);
     }
 
     // ── ヒットストップ ───────────────────────────────────────
