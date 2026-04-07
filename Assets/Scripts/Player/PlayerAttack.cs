@@ -625,8 +625,14 @@ public class PlayerAttack : MonoBehaviour
             ? PlayerMode.Thunder
             : PlayerMode.Warrior;
 
-        _stateManager.ChangeState(PlayerState.ModeChanging);
+        // 闘神への切り替えはアニメーションなしのため、ModeChangingステートを経由しない
+        if (newMode == PlayerMode.Warrior)
+        {
+            _modeController.SwitchMode(newMode);
+            return;
+        }
 
+        _stateManager.ChangeState(PlayerState.ModeChanging);
         _modeController.SwitchMode(newMode);
     }
 
