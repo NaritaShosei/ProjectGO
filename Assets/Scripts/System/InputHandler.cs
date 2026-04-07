@@ -14,6 +14,8 @@ public class InputHandler : MonoBehaviour
     public event Action OnInteract;
     public event Action OnModeChange;
     public event Action OnLockOn;
+    public event Action OnLockOnLeft;
+    public event Action OnLockOnRight;
 
     /// <summary>
     /// PlayerのActionMapの有効か非有効化の切り替え。
@@ -64,6 +66,14 @@ public class InputHandler : MonoBehaviour
 
         // ロックオン
         _input.Player.LockOn.started += _ => OnLockOn?.Invoke();
+
+        // ロックオン切り替え
+        _input.Player.LockOnChange.performed += ctx =>
+        {
+            Vector2 value = ctx.ReadValue<Vector2>();
+            if (value.x < 0f) OnLockOnLeft?.Invoke();
+            else if (value.x > 0f) OnLockOnRight?.Invoke();
+        };
 
         EnableInput(true);
     }
