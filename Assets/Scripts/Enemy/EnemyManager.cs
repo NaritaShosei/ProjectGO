@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.ObjectModel;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class EnemyManager : MonoBehaviour
     public event Action OnBossDefeated;
     public event Action<IEnemy> OnEnemySpawned;
 
-    public List<Transform> EnemiesTransformList => _enemiesTransformList;
+    public ReadOnlyCollection<Transform> EnemiesTransformList => _enemiesTransformList.AsReadOnly();
 
     /// <summary> プレイヤー参照と各サービスを初期化する </summary>
     public void Init(IPlayer player)
@@ -41,6 +42,8 @@ public class EnemyManager : MonoBehaviour
 
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
         _enemiesTransformList.Add(obj.transform);
+
+
 
         if (obj.TryGetComponent(out IEnemy enemy))
         {
@@ -131,12 +134,15 @@ public class EnemyManager : MonoBehaviour
     {
         if (enemy != null)
         {
+            RemoveDeadEnemyTransform(enemy);
+
             enemy.OnDead -= HandleEnemyDead;
             enemy.OnDamaged -= HandleEnemyDamaged;
 
             // SpatialHashGridから登録解除
             _spatialHashGrid?.Remove(enemy);
 
+            _enemiesTransformList.Remove(enemy.);
             _enemies.Remove(enemy);
 
             // ボスかどうか判定
@@ -148,6 +154,22 @@ public class EnemyManager : MonoBehaviour
             {
                 OnEnemyDefeated?.Invoke();
             }
+        }
+    }
+
+    /// <summary> 死んだ敵の登録されているTransformをリムーブする </summary>
+    /// <param name="enemy"> 死んだ敵 </param>
+    private void RemoveDeadEnemyTransform(IEnemy enemy)
+    {
+        var enemyComponent = enemy as Component;
+
+        if (enemyComponent != null)
+        {
+            GameObject targetEnemy = enemyComponent.gameObject;
+        }
+        else
+        {
+            Debug.LogError("このインターフェースの実体はUnityのComponentではありません。");
         }
     }
 
