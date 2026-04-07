@@ -8,9 +8,9 @@ public class EnemyManager : MonoBehaviour
     public event Action OnBossDefeated;
     public event Action<IEnemy> OnEnemySpawned;
 
-    /// <summary>
-    /// プレイヤー参照と各サービスを初期化する
-    /// </summary>
+    public List<Transform> EnemiesTransformList => _enemiesTransformList;
+
+    /// <summary> プレイヤー参照と各サービスを初期化する </summary>
     public void Init(IPlayer player)
     {
         if (player == null)
@@ -28,6 +28,9 @@ public class EnemyManager : MonoBehaviour
         _formationSystem = new EnemyFormationSystem();
     }
 
+    /// <summary> エネミーの生成 </summary>
+    /// <param name="original"> 出現させたいエネミー </param>
+    /// <param name="pos"> 出現させる場所 </param>
     public void Spawn(GameObject original, Vector3 pos)
     {
         if (_player == null)
@@ -37,6 +40,7 @@ public class EnemyManager : MonoBehaviour
         }
 
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
+        _enemiesTransformList.Add(obj.transform);
 
         if (obj.TryGetComponent(out IEnemy enemy))
         {
@@ -78,9 +82,7 @@ public class EnemyManager : MonoBehaviour
     /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
-    /// <summary>
-    /// SpawnDataRepositoryから一括生成
-    /// </summary>
+    /// <summary> SpawnDataRepositoryから一括生成 </summary>
     public void SpawnFromRepository(SpawnDataRepository repository)
     {
         if (repository == null || repository.SpawnDatas == null) return;
@@ -92,9 +94,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ボスを生成
-    /// </summary>
+    /// <summary> ボスを生成 </summary>
     public void SpawnBoss(GameObject bossPrefab, Vector3 position)
     {
         Spawn(bossPrefab, position);
@@ -108,6 +108,7 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
+    private List<Transform> _enemiesTransformList = new List<Transform>();
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
 
