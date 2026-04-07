@@ -101,8 +101,9 @@ public class PlayerMovement : MonoBehaviour
         Vector3 moveDir;
         if (_lockOnTarget != null)
         {
-            moveDir = (camera.transform.right * vec.x
-                + Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y).normalized;
+            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+            moveDir = (cameraRight * vec.x
+                            + Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y).normalized;
         }
         else
         {
