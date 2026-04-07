@@ -6,23 +6,20 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SystemScene.unity
-    guid: ca21a82b48fccaa408dcbadacaff4e7b
-  - enabled: 1
     path: Assets/Scenes/SceneTransitionDev/TitleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
+    path: Assets/Scenes/TestScenes/PlayerTestScene.unity
+    guid: 2cce74d756ae87c4991b9f0fb99921e1
+  - enabled: 1
     path: Assets/Scenes/SceneTransitionDev/OptionDev.unity
     guid: b803499d4da2092448fa3cafab55dd30
-  - enabled: 0
-    path: Assets/Scenes/SceneTransitionDev/InGameScene.unity
-    guid: 3400b34f6a1bd7746aa68b0d02bd6b03
-  - enabled: 1
-    path: Assets/Scenes/TestScenes/TestScene.unity
-    guid: bf46631f458a368409d17dad6cda10cb
   - enabled: 1
     path: Assets/Scenes/SceneTransitionDev/ResultScene.unity
     guid: 13cbcc83d40366847a516e7534d228d3
+  - enabled: 1
+    path: Assets/Scenes/SystemScene.unity
+    guid: ca21a82b48fccaa408dcbadacaff4e7b
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 957e69c2a6cc3a142bc73a80b29469db, type: 3}
