@@ -8,11 +8,11 @@ public class GroundCrush : SkillBase
 {
     public override void Apply(ref AttackContext context)
     {
-        float attackPower = context.AttackPower * _damageMagnification;
+        float attackPower = context.AttackPower * _damageMultiplier;
         Transform playerTransform = context.PlayerTransform;
 
         // OnAfterAttack に登録するだけでスキルになる
-        context.OnAfterAttack += () => ActivationGroundCrush(playerTransform, attackPower);
+        context.OnAfterAttack += async () => await ActivationGroundCrush(playerTransform, attackPower);
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -31,15 +31,17 @@ public class GroundCrush : SkillBase
             && isLastCombo;
     }
 
-    [SerializeField] private int _getComboCount = 2;                          //コンボの何段目に実行するか
-    [SerializeField] private float _attackRadius = 2.5f;                      //攻撃範囲
-    [SerializeField] private float _damageMagnification = 1.8f;               //与えるダメージ
-    [SerializeField] private AttackType _attackType = AttackType.LightAttack; //攻撃タイプ
-    [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;   //プレイヤーが闘神モードかどうか
-    [SerializeField] private float _delay = 1.0f;                             //ヒットから発動までの待機時間
-    [SerializeField] private GameObject _effectPrefab;                        //GroundSmashEffectを持つPrefab
+    [SerializeField] private int _getComboCount = 2;                                       //コンボの何段目に実行するか
+    [SerializeField] private float _attackRadius = 2.5f;                                   //攻撃範囲
+    [SerializeField] private float _damageMultiplier = 1.8f;                               //与えるダメージ
+    [SerializeField] private AttackType _attackType = AttackType.LightAttack;              //攻撃タイプ
+    [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;                //プレイヤーが闘神モードかどうか
+    [SerializeField] private float _delay = 1.0f;                                          //ヒットから発動までの待機時間
+    [SerializeField] private float _knockBackPower;                                        //ノックバックの強さ
+    [SerializeField] private float _knockBackUpward;                                       //ノックバックの角度
+    [SerializeField] private GameObject _effectPrefab;                                     //GroundSmashEffectを持つPrefab
 
-    private async UniTaskVoid ActivationGroundCrush(Transform playerTransform, float attackPower)
+    private async UniTask ActivationGroundCrush(Transform playerTransform, float attackPower)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(_delay));
 
@@ -57,8 +59,12 @@ public class GroundCrush : SkillBase
                 PlayerMode = _isPlayerMode,
                 IsCritical = false,
                 CriticalMultiplier = 1f,
-                ElectricShock = new ElectricShock(),
-                Knockback = null,
+                Knockback = new KnockbackContext
+                {
+                    Direction = playerTransform.forward,
+                    Power = _knockBackPower,
+                    Upward = _knockBackUpward,
+                }
             });
         }
 
