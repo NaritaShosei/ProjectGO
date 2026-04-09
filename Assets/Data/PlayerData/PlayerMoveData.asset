@@ -13,11 +13,18 @@ MonoBehaviour:
   m_Name: PlayerMoveData
   m_EditorClassIdentifier: Assembly-CSharp::MoveData
   _rotateSpeed: 8.63
-  _stepData:
-    Speed: 5
-    Duration: 0.44
-    ChainWindow: 0.2
-  _rollData:
+  _modeDodgeData:
+  - Mode: 0
+    Data:
+      Speed: 10
+      Duration: 0.5
+      AnimationStateName: Warrior_Dodge
+  - Mode: 1
+    Data:
+      Speed: 10
+      Duration: 0.5
+      AnimationStateName: Thunder_Dodge
+  _defaultDodge:
     Speed: 10
-    Duration: 1.2
-    ChainWindow: -1
+    Duration: 0.5
+    AnimationStateName: Warrior_Dodge

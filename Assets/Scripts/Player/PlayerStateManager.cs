@@ -4,7 +4,6 @@ public class PlayerStateManager
 {
     public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
 
-    // 状態変更イベント(必要に応じて)
     public event Action<PlayerState, PlayerState> OnStateChanged;
 
     public void ChangeState(PlayerState newState)
@@ -17,22 +16,34 @@ public class PlayerStateManager
     }
 
     public bool CanAttack() => CurrentState is PlayerState.Idle;
+
     public bool CanMove() => CurrentState != PlayerState.Attacking
                           && CurrentState != PlayerState.Dodge
                           && CurrentState != PlayerState.Damaged
                           && CurrentState != PlayerState.ModeChanging
                           && CurrentState != PlayerState.Dead;
-    public bool CanDodge() => CurrentState is PlayerState.Idle;
+
+    /// <summary>
+    /// 回避可能かどうか。
+    /// Idle・Attacking状態から回避できる（攻撃の中断が可能）。
+    /// Damaged・ModeChanging・Dodge・Deadは不可。
+    /// </summary>
+    public bool CanDodge() => CurrentState is PlayerState.Idle
+                           || CurrentState is PlayerState.Attacking;
+
     public bool IsDodging() => CurrentState is PlayerState.Dodge;
 
     public bool IsCharging() => CurrentState is PlayerState.Charging;
 
     public bool IsDead() => CurrentState is PlayerState.Dead;
 
+    public bool IsDamaged() => CurrentState is PlayerState.Damaged;
+
     public bool CanModeChange() => CurrentState is PlayerState.Idle;
 
     public bool CanInteract() => CurrentState is PlayerState.Idle;
 }
+
 public enum PlayerState
 {
     Idle,
@@ -41,5 +52,5 @@ public enum PlayerState
     Dodge,
     Damaged,
     Dead,
-    ModeChanging    
+    ModeChanging
 }
