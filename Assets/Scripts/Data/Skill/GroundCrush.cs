@@ -11,8 +11,11 @@ public class GroundCrush : SkillBase
         float attackPower = context.AttackPower * _damageMultiplier;
         Transform playerTransform = context.PlayerTransform;
 
+        AttackContext ct = context;
+
         // OnAfterAttack に登録するだけでスキルになる
         context.OnAfterAttack += async () => await ActivationGroundCrush(playerTransform, attackPower);
+        context.OnAfterAttack += async () => await SpawnEffect(ct.AttackPosition);
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -69,5 +72,15 @@ public class GroundCrush : SkillBase
         }
 
         Debug.Log($"{enemies.Length}体の敵に{attackPower}ダメージ!");
+    }
+
+    private async UniTask SpawnEffect(Vector3 position)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(_delay));
+
+        if (_effectPrefab != null)
+        {
+            GameObject.Instantiate(_effectPrefab, position, Quaternion.identity);
+        }
     }
 }
