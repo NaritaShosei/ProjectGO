@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "GroundCrushSkill", menuName = "GameData/Skill/GroundCrushSkill")]
@@ -44,18 +45,23 @@ public class GroundCrush : SkillBase
     [SerializeField] private float _knockBackUpward;                                       //ノックバックの角度
     [SerializeField] private GameObject _effectPrefab;                                     //GroundSmashEffectを持つPrefab
 
+    /// <summary>
+    /// スキルの処理
+    /// </summary>
+    /// <param name="playerTransform">攻撃発生位置</param>
+    /// <param name="attackPower">攻撃力</param>
+    /// <returns></returns>
     private async UniTask ActivationGroundCrush(Transform playerTransform, float attackPower)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(_delay));
 
         if (playerTransform == null) return;
 
-        Collider[] enemies = Physics.OverlapSphere(playerTransform.position, _attackRadius);
+        EnemyManager enemyManager = ServiceLocator.Get<EnemyManager>();
+        IReadOnlyList<IEnemy> enemies = enemyManager.GetEnemiesInRange(playerTransform.position, _attackRadius);
 
-        foreach (Collider col in enemies)
+        foreach (IEnemy enemy in enemies)
         {
-            if (!col.TryGetComponent(out IEnemy enemy)) continue;
-
             enemy.TakeDamage(new DamageContext
             {
                 AttackPower = attackPower,
@@ -71,9 +77,14 @@ public class GroundCrush : SkillBase
             });
         }
 
-        Debug.Log($"{enemies.Length}体の敵に{attackPower}ダメージ!");
+        Debug.Log($"{enemies.Count}体の敵に{attackPower}ダメージ!");
     }
 
+    /// <summary>
+    /// Effectの生成
+    /// </summary>
+    /// <param name="position">生成位置</param>
+    /// <returns></returns>
     private async UniTask SpawnEffect(Vector3 position)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(_delay));
