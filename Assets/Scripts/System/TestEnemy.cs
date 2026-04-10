@@ -7,4 +7,9 @@ public class TestEnemy : MonoBehaviour, ILockOnTarget
 
     public Transform LockOnPoint => _lockOnPoint != null ? _lockOnPoint : transform;
     public bool IsLockable => true; // テスト用なので常にtrue
+
+    public Transform GetTargetCenter()
+    {
+        return LockOnPoint;
+    }
 }

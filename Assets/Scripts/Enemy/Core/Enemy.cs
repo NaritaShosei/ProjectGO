@@ -33,6 +33,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     public bool IsDead => _isDead;
 
+    public bool IsLockable => true;
+
     /// <summary>
     /// HitStop等でTimeScaleが変化したときに呼ばれる
     /// </summary>
