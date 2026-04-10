@@ -9,6 +9,9 @@ public class PlayerMovement : MonoBehaviour
 
     public event Action OnEndDodge;
 
+    /// <summary>
+    /// PlayerStateManager, InputHandler, MoveData, IModeController, PlayerAnimationController, PlayerAttack を受け取って初期化する。
+    /// </summary>
     public void Init(
         PlayerStateManager playerStateManager,
         InputHandler input,
@@ -35,7 +38,9 @@ public class PlayerMovement : MonoBehaviour
             Debug.LogError($"[{this}]: CameraManagerが見つかりませんでした。");
     }
 
+    /// <summary> 時間のスケールを設定する。攻撃移動や回避移動の速度に影響する </summary>
     public void SetTimeScale(float scale) => _timeScale = scale;
+    /// <summary> ロックオン対象を設定する。nullを渡すとロックオン解除。 </summary>
     public void SetLockOnTarget(Transform target) => _lockOnTarget = target;
 
     [SerializeField] private Rigidbody _rb;
@@ -87,7 +92,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ── 移動 ─────────────────────────────────────────────────
-
+    /// <summary> 移動入力に基づいてプレイヤーを移動させる。</summary>
     private void Move()
     {
         if (_isDodging) return; // 回避中は移動入力を無視（回避移動はDodgeMoveAsyncで管理）
@@ -116,6 +121,7 @@ public class PlayerMovement : MonoBehaviour
         _rb.linearVelocity = moveDir * _modeController.ModeData.MoveSpeed * inputMag * _timeScale;
     }
 
+    /// <summary> 回転処理。ロックオン中は常に敵の方向を向く。ロックオンなしは移動入力の方向を向く。 </summary>
     private void Rotate()
     {
         if (!_playerStateManager.CanMove()) return;
@@ -142,6 +148,7 @@ public class PlayerMovement : MonoBehaviour
             _moveData.RotateSpeed * Time.deltaTime * _timeScale);
     }
 
+    /// <summary> 移動アニメーションの更新。ロックオン中は入力方向に応じた8方向アニメーション、ロックオンなしはSpeedパラメータで通常移動アニメーション。 </summary>
     private void PlayMoveAnimation()
     {
         if (_playerStateManager.IsDodging()) return;
@@ -154,11 +161,17 @@ public class PlayerMovement : MonoBehaviour
 
     // ── 回避 ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// 回避処理。回避可能な状態であれば、入力方向に応じて回避アニメーションを再生し、一定時間無敵で移動する。
+    /// </summary>
     private void Dodge()
     {
         if (!_playerStateManager.CanDodge()) return;
 
-        if (_playerStateManager.CurrentState == PlayerState.Attacking)
+        // 攻撃キャンセル回避かどうかを記録
+        bool isCancelDodge = _playerStateManager.CurrentState == PlayerState.Attacking;
+
+        if (isCancelDodge)
         {
             _attack.InterruptByDodge();
             _attackMoveCts?.Cancel();
@@ -167,7 +180,6 @@ public class PlayerMovement : MonoBehaviour
             _isAttackMoving = false;
         }
 
-        // 進行中の回避移動があればキャンセルして上書き
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
         _dodgeMoveCts = new CancellationTokenSource();
@@ -178,9 +190,11 @@ public class PlayerMovement : MonoBehaviour
         DodgeData dodgeData = _moveData.GetDodge(_modeController.CurrentMode);
         Vector3 dodgeDir = GetDodgeDirection();
 
-        // アニメーション再生（Dodgeトリガーを発火）
-        if (_lockOnTarget != null)
+        if (_lockOnTarget != null || isCancelDodge)
         {
+            // ロックオン中は常に8方向
+            // 攻撃キャンセル回避は8方向アニメーション
+            // プレイヤーの現在の向き（敵の方向）を基準にローカル方向を計算する
             Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
             _animationController.PlayLockedDodge(
@@ -189,13 +203,19 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            // 通常回避は前方向に向き直して前回避アニメーション
+            if (dodgeDir.sqrMagnitude > 0.001f)
+                transform.rotation = Quaternion.LookRotation(dodgeDir);
+
             _animationController.PlayDodge();
         }
 
-        // 移動のみタイマー管理。終了処理は HandleDodgeEnd（SMB通知）が担当
         DodgeMoveAsync(dodgeDir, dodgeData.Speed, dodgeData.Duration, _dodgeMoveCts.Token).Forget();
     }
 
+    /// <summary>
+    /// 回避移動を管理する非同期メソッド。一定時間、指定された方向に移動し続ける。
+    /// </summary>
     private async UniTaskVoid DodgeMoveAsync(Vector3 dir, float speed, float duration, CancellationToken ct)
     {
         float elapsed = 0f;
@@ -226,6 +246,9 @@ public class PlayerMovement : MonoBehaviour
         OnEndDodge?.Invoke();
     }
 
+    /// <summary>
+    /// 回避入力の方向をワールド空間で計算する。入力がない場合は前方に回避する。
+    /// </summary>
     private Vector3 GetDodgeDirection()
     {
         var input = _input.MoveInput;
@@ -241,6 +264,9 @@ public class PlayerMovement : MonoBehaviour
 
     // ── 被弾 ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// 被弾アニメーション終了イベントのハンドラー。PlayerStateManagerがDamaged状態ならIdleに遷移させる。
+    /// </summary>
     private void HandleDamagedEnd()
     {
         if (_playerStateManager.IsDamaged())
@@ -249,6 +275,9 @@ public class PlayerMovement : MonoBehaviour
 
     // ── 攻撃移動 ─────────────────────────────────────────────
 
+    /// <summary>
+    /// PlayerAttackから攻撃移動のリクエストを受け取るハンドラー。現在の攻撃移動をキャンセルして新しい攻撃移動を開始する。
+    /// </summary>
     private void HandleAttackMove(AttackMoveRequest request)
     {
         _attackMoveCts?.Cancel();
@@ -264,6 +293,9 @@ public class PlayerMovement : MonoBehaviour
         PerformAttackMove(request).Forget();
     }
 
+    /// <summary>
+    /// 攻撃移動の実行。リクエストの内容に応じて、ダッシュ移動・ステップ移動・カーブ移動などを行う。
+    /// </summary>
     private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
     {
         _isAttackMoving = true;
@@ -296,6 +328,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ダッシュ移動。プレイヤーの正面方向に向かって一定距離を滑らかに移動する。
+    /// </summary>
     private async UniTask DashMove(AttackMoveRequest request)
     {
         float elapsed = 0f;
@@ -316,6 +351,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ステップ移動。プレイヤーの正面方向に向かって一定速度で移動する。距離や時間ではなく、指定された時間が経過するか、ターゲットに近づくまで移動し続ける。
+    /// </summary>
     private async UniTask StepMove(AttackMoveRequest request)
     {
         float elapsed = 0f;
