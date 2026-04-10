@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
@@ -64,12 +63,22 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _playerStats.Heal(amount);
     }
 
+    /// <summary>
+    /// ダメージを受ける。回避中は無敵。被弾時はDamagedステートへ遷移。
+    /// </summary>
     public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) return;
         if (_playerStateManager.IsDodging()) return;
+
         int reductDamage = DamageSystem.ApplyDamageReduction(damage, _playerStats.DefensePower);
         _playerStats.TakeDamage(reductDamage);
+
+        if (!_playerStateManager.IsDead())
+        {
+            _attack?.InterruptByDamage(); // 攻撃内部状態を全てクリア
+            _playerStateManager.ChangeState(PlayerState.Damaged);
+        }
     }
 
     // ---- IStatUpgradable ----
@@ -86,6 +95,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         TimeScale = timeScale;
         _playerAnimationController.SetAnimSpeed(timeScale);
         _move.SetTimeScale(timeScale);
+    }
+
+    /// <summary>ロックオン対象を設定する（nullで解除）</summary>
+    public void SetLockOnTarget(Transform target)
+    {
+        _move?.SetLockOnTarget(target);
     }
 
     [SerializeField] private PlayerData _playerData;
@@ -171,7 +186,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         OnDead?.Invoke();
     }
 
-    // デバッグ用
     private void OnGUI()
     {
         GUI.Label(new Rect(10, 50, 500, 300), $"残りHP：{_playerStats.CurrentHealth}");
