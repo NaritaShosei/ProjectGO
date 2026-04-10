@@ -97,18 +97,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _move.SetTimeScale(timeScale);
     }
 
-    /// <summary>ロックオン対象を設定する（nullで解除）</summary>
-    public void SetLockOnTarget(ILockOnTarget target)
-    {
-        if (target == null || target.GetTargetCenter() == null)
-        {
-            _move?.SetLockOnTarget(null);
-            return;
-        }
-
-        _move?.SetLockOnTarget(target.GetTargetCenter());
-    }
-
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerMovement _move;
@@ -190,6 +178,18 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         if (_playerStateManager.CurrentState == PlayerState.ModeChanging)
             _playerStateManager.ChangeState(PlayerState.Idle);
+    }
+
+    /// <summary>ロックオン対象を設定する（nullで解除）</summary>
+    private void SetLockOnTarget(ILockOnTarget target)
+    {
+        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
+        {
+            _move?.SetLockOnTarget(null);
+            return;
+        }
+
+        _move?.SetLockOnTarget(target.GetTargetCenter());
     }
 
     private void OnPlayerDead()

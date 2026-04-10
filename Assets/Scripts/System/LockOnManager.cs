@@ -46,12 +46,12 @@ public class LockOnManager : MonoBehaviour
     {
         ServiceLocator.Unregister<LockOnManager>();
 
-        InputHandler inputHandler = ServiceLocator.Get<InputHandler>();
-        if (inputHandler == null) return;
-
-        inputHandler.OnLockOn -= ToggleLockOn;
-        inputHandler.OnLockOnLeft -= _onLockOnLeft;
-        inputHandler.OnLockOnRight -= _onLockOnRight;
+        if (ServiceLocator.TryGet(out InputHandler inputHandler))
+        {
+            inputHandler.OnLockOn -= ToggleLockOn;
+            inputHandler.OnLockOnLeft -= _onLockOnLeft;
+            inputHandler.OnLockOnRight -= _onLockOnRight;
+        }
     }
     private void ToggleLockOn()
     {
