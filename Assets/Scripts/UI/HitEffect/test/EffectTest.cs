@@ -34,6 +34,15 @@ public class EffectTest : MonoBehaviour
         {
             _presenter.ShowHit(_spawnPoint.position, HitEffectType.Thunder);
         }
+
+        // スペースキーでエフェクト再生
+        if (Keyboard.current.oKey.wasPressedThisFrame)
+        {
+            // 適当な位置に出す
+            Vector3 pos = new Vector3(0, 0, 0);
+
+            _manager.PlayEffect("TestHitEffect_Thunder", pos);
+        }
     }
     /// <summary>
     /// マウス位置をワールド座標に変換
@@ -50,4 +59,8 @@ public class EffectTest : MonoBehaviour
         // 当たらなかった場合は適当な前方位置
         return ray.origin + ray.direction * 5f;
     }
+
+
+    [SerializeField] private EffectManager _manager;
+
 }

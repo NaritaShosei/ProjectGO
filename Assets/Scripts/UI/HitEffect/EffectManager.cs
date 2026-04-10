@@ -19,7 +19,7 @@ public class EffectManager : MonoBehaviour
         var effect = _pool.Get(key);
         if (effect == null) return;
 
-        effect.transform.SetParent(trasfomr);
+        effect.transform.SetParent(trasfomr,false);
 
         effect.transform.position = Vector3.zero;
         effect.transform.rotation = Quaternion.identity;

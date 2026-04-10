@@ -71,6 +71,7 @@ public class EffectPool : MonoBehaviour
         if (prefab == null) return null;
 
         var effect = Instantiate(prefab,transform);
+        Initialization(effect);
         return effect;
     }
 
@@ -91,6 +92,11 @@ public class EffectPool : MonoBehaviour
    
         effect.transform.localPosition = Vector3.zero;
         effect.transform.localRotation = Quaternion.identity;
+
+        if (effect.TryGetComponent(out ParticleSystem ps))
+        {
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
 
         effect.gameObject.SetActive(false);
     }
