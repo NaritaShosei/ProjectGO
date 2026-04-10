@@ -98,9 +98,15 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
     /// <summary>ロックオン対象を設定する（nullで解除）</summary>
-    public void SetLockOnTarget(Transform target)
+    public void SetLockOnTarget(ILockOnTarget target)
     {
-        _move?.SetLockOnTarget(target);
+        if (target == null || target.GetTargetCenter() == null)
+        {
+            _move?.SetLockOnTarget(null);
+            return;
+        }
+
+        _move?.SetLockOnTarget(target.GetTargetCenter());
     }
 
     [SerializeField] private PlayerData _playerData;
@@ -158,6 +164,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         if (_playerAnimationController != null && _playerStateManager != null)
             _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged += SetLockOnTarget;
     }
 
     private void TickThunderGauge()
