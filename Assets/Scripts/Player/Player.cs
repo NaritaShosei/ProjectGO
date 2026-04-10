@@ -135,6 +135,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private void OnDestroy()
     {
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged -= SetLockOnTarget;
+
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
             hitStopManager.Unregister(this, HitStopTargetGroup.Player);
 
