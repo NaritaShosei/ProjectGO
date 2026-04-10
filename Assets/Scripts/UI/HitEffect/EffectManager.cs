@@ -2,15 +2,12 @@ using UnityEngine;
 
 public class EffectManager : MonoBehaviour
 {
-    [SerializeField] private EffectPool _pool;
-
-    public void PlayEffect(string key, Vector3 position)//string key をenum化したい（string卒業）
+    public void PlayEffect(string key, Vector3 position)//string key をenumにしたい
     {
         var effect = _pool.Get(key);
         if (effect == null) return;
 
         effect.transform.SetParent(null);
-
         effect.transform.position = position;
         effect.transform.rotation = Quaternion.identity;
 
@@ -55,4 +52,6 @@ public class EffectManager : MonoBehaviour
 
         effect.Play();
     }
+
+    [SerializeField] private EffectPool _pool;
 }

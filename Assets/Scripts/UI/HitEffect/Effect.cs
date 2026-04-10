@@ -3,15 +3,8 @@ using UnityEngine;
 
 public class Effect : MonoBehaviour
 {
-    private string _key;
-
-    [SerializeField] private ParticleSystem _particle;
-    public Action<Effect> OnFinishd;
-    public void Iint(EffectPool pool,string key)
-    {
-        _key = key;
-    }
-
+    public Action<Effect> OnFinished;
+    public string Key { get; set; }
     public void Play()
     {
         gameObject.SetActive(true);
@@ -20,10 +13,26 @@ public class Effect : MonoBehaviour
             _particle.Play();
         }
     }
-    public void Finish()
+
+    [SerializeField] private ParticleSystem _particle;
+
+    void Awake()
+    {
+        if(_particle != null)
+        {
+            var main = _particle.main;
+            main.stopAction = ParticleSystemStopAction.Callback;
+        }
+    }
+
+    private void OnParticleSystemStopped()
+    {
+        Finish();
+    }
+
+    private void Finish()
     {
         gameObject.SetActive(false);
-
-        OnFinishd?.Invoke(this);
+        OnFinished?.Invoke(this);
     }
 }
