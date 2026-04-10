@@ -83,7 +83,7 @@ public class CameraManager : MonoBehaviour
         _lockOnCamera.Priority = _normalPriority - 1;
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         if (_currentTargetComponent == null || !_currentTarget.IsLockable || _currentTarget.LockOnPoint == null)
         {
