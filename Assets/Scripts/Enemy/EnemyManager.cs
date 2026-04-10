@@ -41,14 +41,13 @@ public class EnemyManager : MonoBehaviour
         }
 
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
-        _enemiesTransformList.Add(obj.transform);
-
-
 
         if (obj.TryGetComponent(out IEnemy enemy))
         {
             enemy.OnDead += HandleEnemyDead;
             enemy.OnDamaged += HandleEnemyDamaged;
+
+            _enemiesTransformList.Add(obj.transform);
 
             // InjectServicesをInitより前に呼ぶ
             // Init内でBehaviourを生成する際にサービスを参照するため
@@ -165,6 +164,7 @@ public class EnemyManager : MonoBehaviour
         if (enemyComponent != null)
         {
             GameObject targetEnemy = enemyComponent.gameObject;
+            _enemiesTransformList.Remove(targetEnemy.transform);
         }
         else
         {
