@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EffectManager : MonoBehaviour
 {
-    public void PlayEffect(string key, Vector3 position)//string key をenumにしたい
+    public void PlayEffect(string key, Vector3 position)
     {
         var effect = _pool.Get(key);
         if (effect == null) return;
@@ -21,8 +21,8 @@ public class EffectManager : MonoBehaviour
 
         effect.transform.SetParent(trasfomr,false);
 
-        effect.transform.position = Vector3.zero;
-        effect.transform.rotation = Quaternion.identity;
+        effect.transform.localPosition = Vector3.zero;
+        effect.transform.localRotation = Quaternion.identity;
 
         effect.Play();
     }
@@ -54,4 +54,13 @@ public class EffectManager : MonoBehaviour
     }
 
     [SerializeField] private EffectPool _pool;
+
+    void Awake()
+    {
+        if(_pool == null )
+        {
+            Debug.LogError($"{nameof(EffectManager)}: _pool が未設定です。", this);
+            enabled = false;
+        }
+    }
 }

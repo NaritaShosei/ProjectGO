@@ -16,7 +16,12 @@ public class HitEffectPresenter
         {
             var obj = Object.Instantiate(prefab);
 
-            var view = obj.GetComponent<IHitEffectView>();
+            if (!obj.TryGetComponent<IHitEffectView>(out var view))
+            {
+                Debug.LogError($"IHitEffectView が見つかりません: {prefab.name}");
+                Object.Destroy(obj);
+                return;
+            }
             view.EffectPlay(position);
         }
     }

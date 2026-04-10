@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class EffectPool : MonoBehaviour
 {
+    /// <summary>
+    /// エフェクト取得
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     public Effect Get(string key)
     {
         Effect effect;
@@ -15,7 +20,7 @@ public class EffectPool : MonoBehaviour
         {
             effect = CreateEffect(key);
 
-            if(effect == null)return null;
+            if (effect == null) return null;
         }
 
         _active.Add(effect);
@@ -28,6 +33,10 @@ public class EffectPool : MonoBehaviour
         return effect;
     }
 
+    /// <summary>
+    /// エフェクトをプールに変換
+    /// </summary>
+    /// <param name="effect"></param>
     public void Return(Effect effect)
     {
 
@@ -52,29 +61,48 @@ public class EffectPool : MonoBehaviour
         _pool[key].Enqueue(effect);
     }
 
+    //prefabの一覧
     [SerializeField] private List<Effect> _prefabs;
+    //keyのprefab
     private Dictionary<string, Effect> _prefabDic = new();
+    //keyごとのPool
     private Dictionary<string, Queue<Effect>> _pool = new();
+    //現在使用中のエフェクトの一覧
     private HashSet<Effect> _active = new();
 
     void Awake()
     {
         foreach (var prefab in _prefabs)
         {
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{nameof(EffectPool)}: _prefabs に null 要素があります。", this);
+                continue;
+            }
             _prefabDic[prefab.name] = prefab;
         }
     }
 
+    /// <summary>
+    /// 新規エフェクトの作成
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     private Effect CreateEffect(string key)
     {
         var prefab = GetPrefab(key);
         if (prefab == null) return null;
 
-        var effect = Instantiate(prefab,transform);
+        var effect = Instantiate(prefab, transform);
         Initialization(effect);
         return effect;
     }
 
+    /// <summary>
+    /// prefab取得
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     private Effect GetPrefab(string key)
     {
         if (_prefabDic.TryGetValue(key, out var prefab))
@@ -86,10 +114,14 @@ public class EffectPool : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// エフェクトの状態初期化
+    /// </summary>
+    /// <param name="effect"></param>
     private void Initialization(Effect effect)
     {
-        effect.transform.SetParent(transform,false);
-   
+        effect.transform.SetParent(transform, false);
+
         effect.transform.localPosition = Vector3.zero;
         effect.transform.localRotation = Quaternion.identity;
 
@@ -101,6 +133,10 @@ public class EffectPool : MonoBehaviour
         effect.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Effect側からの終了通知を受け取る
+    /// </summary>
+    /// <param name="effect"></param>
     private void OnEffectFinished(Effect effect)
     {
         Return(effect);

@@ -4,29 +4,25 @@ using System.Collections;
 
 public class Effect : MonoBehaviour
 {
-
-
-    private Coroutine _coroutine;
+    //再生終了時に呼ばれるコールバック
     public Action<Effect> OnFinished;
 
     public string Key { get; set; }
 
+    // メインのParticle
     [SerializeField] private ParticleSystem _particle;
 
-    // 子Particleも含めてキャッシュ
+    //子objectも含めたParticleSystem
     private ParticleSystem[] _particles;
 
-    private void Awake()
-    {
-        // 子含めて全部取得しておく
-        _particles = GetComponentsInChildren<ParticleSystem>();
-    }
 
+    /// <summary>
+    /// エフェクトの再生
+    /// </summary>
     public void Play()
     {
         gameObject.SetActive(true);
 
-        // 念のため全部再生（子も確実に）
         foreach (var ps in _particles)
         {
             ps.Play();
@@ -36,19 +32,27 @@ public class Effect : MonoBehaviour
         {
             StopCoroutine(_coroutine);
         }
-
-        // 終了監視スタート
-        StartCoroutine(WaitForFinish());
+        //再生終了を監視
+        _coroutine = StartCoroutine(WaitForFinish());
     }
 
+    private Coroutine _coroutine;
+
+    private void Awake()
+    {
+        _particles = GetComponentsInChildren<ParticleSystem>();
+    }
+
+    /// <summary>
+    /// すべてのParticleSystemが終了するまで待機
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator WaitForFinish()
     {
-        // すべてのParticleが完全停止するまで待つ
         yield return new WaitUntil(() =>
         {
             foreach (var ps in _particles)
             {
-                // 1つでも生きてたらまだ終わらない
                 if (ps.IsAlive(true))
                     return false;
             }
@@ -58,9 +62,11 @@ public class Effect : MonoBehaviour
         Finish();
     }
 
+    /// <summary>
+    /// エフェクトの終了処理
+    /// </summary>
     private void Finish()
     {
-        // 念のため停止（再利用時の事故防止）
         foreach (var ps in _particles)
         {
             ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -68,7 +74,6 @@ public class Effect : MonoBehaviour
 
         gameObject.SetActive(false);
 
-        // Poolに返却通知
         OnFinished?.Invoke(this);
     }
 }

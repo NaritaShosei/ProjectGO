@@ -11,10 +11,13 @@ public class HitEffectView : MonoBehaviour,IHitEffectView
     {
         transform.position = position;
 
-        if(_particleSystem != null)
+        float destroyDelay = 0f;
+
+        if (_particleSystem != null)
         {
             _particleSystem.Play();
+            destroyDelay = _particleSystem.main.duration;
         }
-        Destroy(gameObject,_particleSystem.main.duration);
+        Destroy(gameObject,destroyDelay);
     }
 }

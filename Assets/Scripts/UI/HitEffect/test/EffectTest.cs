@@ -7,7 +7,7 @@ public class EffectTest : MonoBehaviour
     [SerializeField] private GameObject _thunderPrefab;
     [SerializeField] private GameObject _warriorPrefab;
 
-    [SerializeField] private Transform _spawnPoint; // 出す位置
+    [SerializeField] private Transform _spawnPoint; 
 
     private HitEffectPresenter _presenter;
 
@@ -29,16 +29,13 @@ public class EffectTest : MonoBehaviour
             _presenter.ShowHit(_spawnPoint.position, HitEffectType.Warrior);
         }
 
-        // IキーでIce
         if (Keyboard.current.iKey.wasPressedThisFrame)
         {
             _presenter.ShowHit(_spawnPoint.position, HitEffectType.Thunder);
         }
 
-        // スペースキーでエフェクト再生
         if (Keyboard.current.oKey.wasPressedThisFrame)
         {
-            // 適当な位置に出す
             Vector3 pos = new Vector3(0, 0, 0);
 
             _manager.PlayEffect("TestHitEffect_Thunder", pos);
@@ -56,7 +53,6 @@ public class EffectTest : MonoBehaviour
             return hit.point;
         }
 
-        // 当たらなかった場合は適当な前方位置
         return ray.origin + ray.direction * 5f;
     }
 
