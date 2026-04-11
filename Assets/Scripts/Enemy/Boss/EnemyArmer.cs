@@ -30,6 +30,8 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     /// <summary>HPがゼロ以下になったかどうかを返す</summary>
     public bool IsBroken => _hp <= 0;
 
+    public bool IsLockable => true;
+
     public void InjectServices(EnemyServices services) { }
     public void Init(IPlayer player) { }
     public void OnConditionInterrupt() { }

@@ -48,6 +48,8 @@ public sealed class BossCore : MonoBehaviour, IEnemy
 
     public bool IsDead => _boss.IsDead;
 
+    public bool IsLockable => true;
+
     public void InjectServices(EnemyServices services) { }
     public void Init(IPlayer player) { }
     public void OnConditionInterrupt() { }

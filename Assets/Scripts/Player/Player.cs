@@ -97,12 +97,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _move.SetTimeScale(timeScale);
     }
 
-    /// <summary>ロックオン対象を設定する（nullで解除）</summary>
-    public void SetLockOnTarget(Transform target)
-    {
-        _move?.SetLockOnTarget(target);
-    }
-
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
     [SerializeField] private PlayerMovement _move;
@@ -129,6 +123,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private void OnDestroy()
     {
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged -= SetLockOnTarget;
+
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
             hitStopManager.Unregister(this, HitStopTargetGroup.Player);
 
@@ -158,6 +155,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         if (_playerAnimationController != null && _playerStateManager != null)
             _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged += SetLockOnTarget;
     }
 
     private void TickThunderGauge()
@@ -178,6 +178,20 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         if (_playerStateManager.CurrentState == PlayerState.ModeChanging)
             _playerStateManager.ChangeState(PlayerState.Idle);
+    }
+
+    /// <summary>ロックオン対象を設定する（nullで解除）</summary>
+    private void SetLockOnTarget(ILockOnTarget target)
+    {
+        _playerAnimationController?.SetLockedOn(target != null);
+
+        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
+        {
+            _move?.SetLockOnTarget(null);
+            return;
+        }
+
+        _move?.SetLockOnTarget(target.GetTargetCenter());
     }
 
     private void OnPlayerDead()
