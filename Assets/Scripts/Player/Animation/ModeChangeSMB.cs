@@ -17,8 +17,7 @@ public class ModeChangeSMB : StateMachineBehaviour
         }
     }
 
-    public override void OnStateUpdate(
-        Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         float currentTime = stateInfo.normalizedTime * stateInfo.length;
 
@@ -31,6 +30,8 @@ public class ModeChangeSMB : StateMachineBehaviour
         if (!_modeChangeEnded && currentTime >= _modeChangeEndTime)
         {
             _modeChangeEnded = true;
+            // ここでPlayerModeを更新することでBlendTree切り替えをアニメーション完了後に行う
+            animator.SetInteger(Animator.StringToHash("PlayerMode"), 1); // Thunder
             _modeChangeAnimController?.AnimEvent_ModeChangeComplete();
         }
     }

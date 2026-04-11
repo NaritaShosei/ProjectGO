@@ -58,6 +58,11 @@ public class GameManager : MonoBehaviour
         {
             cameraManager.Init(_player);
         }
+
+        if (ServiceLocator.TryGet(out LockOnManager lockOnManager))
+        {
+            lockOnManager.Init(_player);
+        }
     }
 
     private void InitEnemyManager()

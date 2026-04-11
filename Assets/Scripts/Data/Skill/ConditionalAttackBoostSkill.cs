@@ -15,18 +15,66 @@ public class ConditionalAttackBoostSkill : SkillBase
         // コンボの最終段かどうか
         bool isLastCombo = data.NextComboAttackId == -1;
 
+        bool isWarriorMode = context.PlayerMode == PlayerMode.Warrior;
+
         return isTargetAttackType
             && hasRequiredComboCount
-            && isLastCombo;
+            && isLastCombo
+            && isWarriorMode;
     }
 
     public override void Apply(ref AttackContext context)
     {
         // 攻撃力を一定割合増加
         context.AttackPower *= (1f + _boostAmount);
+
+        var ct = context;
+        context.OnAfterAttack += () => SpawnEffect(ct.AttackPosition);
+        context.OnAfterAttack += () => Skill(ct);
     }
 
+    [Header("条件設定")]
     [SerializeField] private float _boostAmount = 0.5f;
-    [SerializeField] private int _requiredComboIndex = 1;
+    [SerializeField] private int _requiredComboIndex = 2;
     [SerializeField] private AttackType _targetAttackType = AttackType.LightAttack;
+
+    [Header("攻撃設定")]
+    [SerializeField] private GameObject _effectPrefab;
+    [SerializeField] private float _damageRadius = 2f;
+    [SerializeField] private float _damageMultiplier = 1.5f;
+    [SerializeField] private LayerMask _enemyLayer;
+    [SerializeField] private KnockbackContext _knockbackContext;
+
+    private void SpawnEffect(Vector3 position)
+    {
+        if (_effectPrefab != null)
+        {
+            GameObject.Instantiate(_effectPrefab, position, Quaternion.identity);
+        }
+    }
+
+    private void Skill(AttackContext context)
+    {
+        // コンテキストから情報をもらい一定範囲の敵にダメージを与える
+        ServiceLocator.TryGet(out EnemyManager enemyManager);
+        var enemies = enemyManager.GetEnemiesInRange(context.AttackPosition, _damageRadius);
+
+        float radiusSqr = _damageRadius * _damageRadius;
+
+        foreach (var enemy in enemies)
+        {
+            var knockback = _knockbackContext;
+            knockback.Direction = (enemy.Position - context.AttackPosition).normalized;
+
+            var damageContext = new DamageContext
+            {
+                AttackPower = context.AttackPower * _damageMultiplier,
+                PlayerMode = context.PlayerMode,
+                IsCritical = false,
+                OnHitResult = null,
+                Knockback = knockback
+            };
+            enemy.TakeDamage(damageContext);
+        }
+    }
 }

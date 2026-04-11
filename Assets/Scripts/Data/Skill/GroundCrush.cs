@@ -1,0 +1,97 @@
+using Cysharp.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "GroundCrushSkill", menuName = "GameData/Skill/GroundCrushSkill")]
+
+public class GroundCrush : SkillBase
+{
+    public override void Apply(ref AttackContext context)
+    {
+        float attackPower = context.AttackPower * _damageMultiplier;
+        Transform playerTransform = context.PlayerTransform;
+
+        AttackContext ct = context;
+
+        // OnAfterAttack に登録するだけでスキルになる
+        context.OnAfterAttack += async () => await ActivationGroundCrush(playerTransform, attackPower);
+        context.OnAfterAttack += async () => await SpawnEffect(ct.AttackPosition);
+    }
+
+    public override bool CanApply(AttackContext context, AttackData data)
+    {
+        bool isWarrior = context.PlayerMode == _isPlayerMode;
+
+        bool isTargetAttackType = data.AttackType == _attackType;
+
+        bool isComboCount = data.ComboIndex >= _getComboCount;
+
+        bool isLastCombo = data.NextComboAttackId == -1;
+
+        return isWarrior
+            && isTargetAttackType
+            && isComboCount
+            && isLastCombo;
+    }
+
+    [SerializeField] private int _getComboCount = 2;                                       //コンボの何段目に実行するか
+    [SerializeField] private float _attackRadius = 2.5f;                                   //攻撃範囲
+    [SerializeField] private float _damageMultiplier = 1.8f;                               //与えるダメージ
+    [SerializeField] private AttackType _attackType = AttackType.LightAttack;              //攻撃タイプ
+    [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;                //プレイヤーが闘神モードかどうか
+    [SerializeField] private float _delay = 1.0f;                                          //ヒットから発動までの待機時間
+    [SerializeField] private float _knockBackPower;                                        //ノックバックの強さ
+    [SerializeField] private float _knockBackUpward;                                       //ノックバックの角度
+    [SerializeField] private GameObject _effectPrefab;                                     //GroundSmashEffectを持つPrefab
+
+    /// <summary>
+    /// スキルの処理
+    /// </summary>
+    /// <param name="playerTransform">攻撃発生位置</param>
+    /// <param name="attackPower">攻撃力</param>
+    /// <returns></returns>
+    private async UniTask ActivationGroundCrush(Transform playerTransform, float attackPower)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(_delay));
+
+        if (playerTransform == null) return;
+
+        EnemyManager enemyManager = ServiceLocator.Get<EnemyManager>();
+        IReadOnlyList<IEnemy> enemies = enemyManager.GetEnemiesInRange(playerTransform.position, _attackRadius);
+
+        foreach (IEnemy enemy in enemies)
+        {
+            enemy.TakeDamage(new DamageContext
+            {
+                AttackPower = attackPower,
+                PlayerMode = _isPlayerMode,
+                IsCritical = false,
+                CriticalMultiplier = 1f,
+                Knockback = new KnockbackContext
+                {
+                    Direction = playerTransform.forward,
+                    Power = _knockBackPower,
+                    Upward = _knockBackUpward,
+                }
+            });
+        }
+
+        Debug.Log($"{enemies.Count}体の敵に{attackPower}ダメージ!");
+    }
+
+    /// <summary>
+    /// Effectの生成
+    /// </summary>
+    /// <param name="position">生成位置</param>
+    /// <returns></returns>
+    private async UniTask SpawnEffect(Vector3 position)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(_delay));
+
+        if (_effectPrefab != null)
+        {
+            GameObject.Instantiate(_effectPrefab, position, Quaternion.identity);
+        }
+    }
+}

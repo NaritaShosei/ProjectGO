@@ -1,8 +1,13 @@
 using System;
+using UnityEngine;
 
 public interface IPlayer :
-    ICharacter, IPlayerStats
+     IPlayerStats
 {
+    /// <summary>
+    /// ロックオンなどの中心のTransformを取得する
+    /// </summary>
+    public Transform GetTargetCenter();
 }
 
 public interface IPlayerStats :
