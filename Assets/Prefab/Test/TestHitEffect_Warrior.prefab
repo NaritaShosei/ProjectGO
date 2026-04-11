@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2662943577018011525
+--- !u!1 &4062814897601555906
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7704426920691470163}
-  - component: {fileID: 7807055707474259172}
+  - component: {fileID: 2701438060250085420}
+  - component: {fileID: 8323647386054025277}
   m_Layer: 0
   m_Name: TestHitEffect_Warrior
   m_TagString: Untagged
@@ -17,42 +17,42 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7704426920691470163
+--- !u!4 &2701438060250085420
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2662943577018011525}
+  m_GameObject: {fileID: 4062814897601555906}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -1.15993, y: -1, z: -0.83599}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2465805976049250335}
+  - {fileID: 99468202561691374}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7807055707474259172
+--- !u!114 &8323647386054025277
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2662943577018011525}
+  m_GameObject: {fileID: 4062814897601555906}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f94b1b6966e6130479ccae93fd0a3b56, type: 3}
+  m_Script: {fileID: 11500000, guid: 8225f2b8fb25d2946ba5c8fcd257afce, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitEffectView
-  _particleSystem: {fileID: 314226915647594933}
---- !u!1001 &6303461692473170242
+  m_EditorClassIdentifier: Assembly-CSharp::Effect
+  _particle: {fileID: 2811784393395998532}
+--- !u!1001 &8368613579631687603
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 7704426920691470163}
+    m_TransformParent: {fileID: 2701438060250085420}
     m_Modifications:
     - target: {fileID: 5991545297567742199, guid: 36a3ddd9e9258474aa29a08939eeda45, type: 3}
       propertyPath: InitialModule.startSize.scalar
@@ -111,13 +111,13 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36a3ddd9e9258474aa29a08939eeda45, type: 3}
---- !u!198 &314226915647594933 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 5991545297567742199, guid: 36a3ddd9e9258474aa29a08939eeda45, type: 3}
-  m_PrefabInstance: {fileID: 6303461692473170242}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &2465805976049250335 stripped
+--- !u!4 &99468202561691374 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8449360362269452637, guid: 36a3ddd9e9258474aa29a08939eeda45, type: 3}
-  m_PrefabInstance: {fileID: 6303461692473170242}
+  m_PrefabInstance: {fileID: 8368613579631687603}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2811784393395998532 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 5991545297567742199, guid: 36a3ddd9e9258474aa29a08939eeda45, type: 3}
+  m_PrefabInstance: {fileID: 8368613579631687603}
   m_PrefabAsset: {fileID: 0}

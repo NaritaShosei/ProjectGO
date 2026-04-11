@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3467487199878667285}
-  - component: {fileID: 7664974590066335539}
   - component: {fileID: 4091557258641419018}
   m_Layer: 0
   m_Name: TestHitEffect_Thunder
@@ -34,19 +33,6 @@ Transform:
   - {fileID: 6101723803543926723}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7664974590066335539
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1022316301948996564}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f94b1b6966e6130479ccae93fd0a3b56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HitEffectView
-  _particleSystem: {fileID: 3370087411113567708}
 --- !u!114 &4091557258641419018
 MonoBehaviour:
   m_ObjectHideFlags: 0

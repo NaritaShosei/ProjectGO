@@ -8,32 +8,8 @@ public class EffectTest : MonoBehaviour
     [SerializeField] private GameObject _warriorPrefab;
 
     [SerializeField] private Transform _spawnPoint; 
-
-    private HitEffectPresenter _presenter;
-
-    private void Start()
-    {
-        var dic = new Dictionary<HitEffectType, GameObject>()
-        {
-            { HitEffectType.Thunder, _thunderPrefab },
-            { HitEffectType.Warrior, _warriorPrefab },
-        };
-
-        _presenter = new HitEffectPresenter(dic);
-    }
-
     private void Update()
     {
-        if (Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            _presenter.ShowHit(_spawnPoint.position, HitEffectType.Warrior);
-        }
-
-        if (Keyboard.current.iKey.wasPressedThisFrame)
-        {
-            _presenter.ShowHit(_spawnPoint.position, HitEffectType.Thunder);
-        }
-
         if (Keyboard.current.oKey.wasPressedThisFrame)
         {
             Vector3 pos = new Vector3(0, 0, 0);
