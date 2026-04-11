@@ -397,9 +397,29 @@ public class PlayerAttack : MonoBehaviour
             return _currentLockOnTarget.GetTargetCenter();
         }
 
-        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
         Transform best = null;
         float bestScore = float.MaxValue;
+
+        // ロックオン対象がない場合は周囲の敵からホーミングターゲットを選定
+        if (ServiceLocator.TryGet(out EnemyManager enemyManager))
+        {
+            var enemies = enemyManager.GetEnemiesInRange(transform.position, radius);
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsDead) continue;
+                var dir = (enemy.GetTargetCenter().position - transform.position).normalized;
+                float angleTo = Vector3.Angle(transform.forward, dir);
+                if (angleTo > angle) continue;
+                float dist = Vector3.Distance(transform.position, enemy.GetTargetCenter().position);
+                if (dist < bestScore) { bestScore = dist; best = enemy.GetTargetCenter(); }
+            }
+
+            return best;
+        }
+
+        // EnemyManagerがない場合は物理判定で敵を探す（基本的にはEnemyManagerがある前提なので、こちらは保険的な実装）
+        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
 
         foreach (var hit in hits)
         {
