@@ -152,6 +152,55 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIPresenterInitializer
   _playerModeView: {fileID: 0}
   _playerGaugeView: {fileID: 0}
+--- !u!1 &2419423074138577103
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2114542451929730437}
+  - component: {fileID: 2363477718432143616}
+  m_Layer: 0
+  m_Name: LockOnManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2114542451929730437
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2419423074138577103}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7036861525032570302}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2363477718432143616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2419423074138577103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69b89436b7da58a44947a5af853abd36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LockOnManager
+  _lockOnRange: 20
+  _lockOnLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  _switchCooldown: 0.3
 --- !u!1 &2902406552746354774
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,7 +249,6 @@ MonoBehaviour:
   _wallLayerMask:
     serializedVersion: 2
     m_Bits: 0
-  _maxAttackerSlots: 3
 --- !u!1 &3913965231841061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,6 +286,7 @@ Transform:
   - {fileID: 8100726554472640711}
   - {fileID: 4509286154457740210}
   - {fileID: 378753349322358893}
+  - {fileID: 2114542451929730437}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4996710551187502800
@@ -383,7 +432,6 @@ MonoBehaviour:
   _viewPrefab: {fileID: 8392898125462638931, guid: 796e3a673d0526440b221af48b1dd721, type: 3}
   _viewParent: {fileID: 0}
   _nearRange: 5
-  _interactRange: 2
   _rangeCheckInterval: 0.1
 --- !u!1 &7749162525453086863
 GameObject:
@@ -429,4 +477,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b0e31ffd0f7a604eaac1cbe033e6c40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraManager
-  _cinemachineCamera: {fileID: 0}
+  _normalCamera: {fileID: 0}
+  _lockOnCamera: {fileID: 0}
+  _normalPriority: 10
+  _lockOnPriority: 20
+  _cameraDistance: 5
+  _cameraHeight: 2
+  _followSpeed: 10

@@ -2,6 +2,23 @@ using UnityEngine;
 
 public class LockOnManager : MonoBehaviour
 {
+    public void Init(Player player)
+    {
+        _player = player;
+
+        _cameraManager = ServiceLocator.Get<CameraManager>();
+        _mainCamera = _cameraManager.MainCamera;
+        _playerTransform = _player.transform;
+
+        _onLockOnLeft = () => SwitchLockOnTarget(-1);
+        _onLockOnRight = () => SwitchLockOnTarget(1);
+
+        InputHandler inputHandler = ServiceLocator.Get<InputHandler>();
+        inputHandler.OnLockOn += ToggleLockOn;
+        inputHandler.OnLockOnLeft += _onLockOnLeft;
+        inputHandler.OnLockOnRight += _onLockOnRight;
+    }
+
     [Header("ロックオン設定")]
     [SerializeField] private float _lockOnRange = 20f;
     [SerializeField] private LayerMask _lockOnLayer;
@@ -9,8 +26,7 @@ public class LockOnManager : MonoBehaviour
     [Header("ロックオン切り替え設定")]
     [SerializeField] private float _switchCooldown = 0.3f;
 
-    [Header("プレイヤー参照")]
-    [SerializeField] private Player _player; //　一時的に直接プレイヤー参照する。
+    private Player _player; //　一時的に直接プレイヤー参照する。
 
     private CameraManager _cameraManager;
     private Transform _playerTransform;
@@ -26,31 +42,16 @@ public class LockOnManager : MonoBehaviour
         ServiceLocator.Register(this);
     }
 
-    private void Start()
-    {
-        _cameraManager = ServiceLocator.Get<CameraManager>();
-        _mainCamera = _cameraManager.MainCamera;
-        _playerTransform = _player.transform;
-
-        _onLockOnLeft = () => SwitchLockOnTarget(-1);
-        _onLockOnRight = () => SwitchLockOnTarget(1);
-
-        InputHandler inputHandler = ServiceLocator.Get<InputHandler>();
-        inputHandler.OnLockOn += ToggleLockOn;
-        inputHandler.OnLockOnLeft += _onLockOnLeft;
-        inputHandler.OnLockOnRight += _onLockOnRight;
-    }
-
     private void OnDestroy()
     {
         ServiceLocator.Unregister<LockOnManager>();
 
-        InputHandler inputHandler = ServiceLocator.Get<InputHandler>();
-        if (inputHandler == null) return;
-
-        inputHandler.OnLockOn -= ToggleLockOn;
-        inputHandler.OnLockOnLeft -= _onLockOnLeft;
-        inputHandler.OnLockOnRight -= _onLockOnRight;
+        if (ServiceLocator.TryGet(out InputHandler inputHandler))
+        {
+            inputHandler.OnLockOn -= ToggleLockOn;
+            inputHandler.OnLockOnLeft -= _onLockOnLeft;
+            inputHandler.OnLockOnRight -= _onLockOnRight;
+        }
     }
     private void ToggleLockOn()
     {
@@ -84,8 +85,8 @@ public class LockOnManager : MonoBehaviour
         Debug.Log($"切り替え方向: {direction}");
 
         ILockOnTarget current = _cameraManager.CurrentTarget;
-        if (current == null || current.LockOnPoint == null) return;
-        Vector2 currentScreenPos = _mainCamera.WorldToViewportPoint(current.LockOnPoint.position);
+        if (current == null || current.GetTargetCenter() == null) return;
+        Vector2 currentScreenPos = _mainCamera.WorldToViewportPoint(current.GetTargetCenter().position);
 
         Debug.Log($"現在の対象の画面座標: {currentScreenPos}");
 
@@ -97,9 +98,9 @@ public class LockOnManager : MonoBehaviour
             if (candidate is not ILockOnTarget target) continue;
             if (!target.IsLockable) continue;
             if (target == current) continue;
-            if (target.LockOnPoint == null) continue;
+            if (target.GetTargetCenter() == null) continue;
 
-            Vector3 screenPos = _mainCamera.WorldToViewportPoint(target.LockOnPoint.position);
+            Vector3 screenPos = _mainCamera.WorldToViewportPoint(target.GetTargetCenter().position);
 
             if (screenPos.x < 0f || screenPos.x > 1f ||
                 screenPos.y < 0f || screenPos.y > 1f ||
@@ -124,7 +125,7 @@ public class LockOnManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"選ばれた対象: {(best?.LockOnPoint != null ? best.LockOnPoint.gameObject.name : "なし")}");
+        Debug.Log($"選ばれた対象: {(best?.GetTargetCenter() != null ? best.GetTargetCenter().gameObject.name : "なし")}");
 
         if (best == null) return;
 
@@ -151,9 +152,9 @@ public class LockOnManager : MonoBehaviour
         {
             if (!_overlapBuffer[i].TryGetComponent(out ILockOnTarget candidate)) continue;
             if (!candidate.IsLockable) continue;
-            if (candidate.LockOnPoint == null) continue;
+            if (candidate.GetTargetCenter() == null) continue;
 
-            Vector3 screenPos = _mainCamera.WorldToViewportPoint(candidate.LockOnPoint.position);
+            Vector3 screenPos = _mainCamera.WorldToViewportPoint(candidate.GetTargetCenter().position);
 
             // 画面外は除外
             if (screenPos.x < 0f || screenPos.x > 1f ||

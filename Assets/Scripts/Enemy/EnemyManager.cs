@@ -84,6 +84,21 @@ public class EnemyManager : MonoBehaviour
     /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
+    public IReadOnlyList<IEnemy> GetEnemiesInRange(Vector3 position, float radius)
+    {
+        List<IEnemy> enemiesInRange = new List<IEnemy>();
+        foreach (var enemy in _enemies)
+        {
+            if (enemy.IsDead) continue;
+            float distance = Vector3.Distance(enemy.Position, position);
+            if (distance <= radius)
+            {
+                enemiesInRange.Add(enemy);
+            }
+        }
+        return enemiesInRange;
+    }
+
     /// <summary> SpawnDataRepositoryから一括生成 </summary>
     public void SpawnFromRepository(SpawnDataRepository repository)
     {

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 
 public class PlayerAnimationController : MonoBehaviour, IAnimationController, IModeChangeAnimationController
 {
@@ -40,13 +41,13 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     // ── 移動アニメーション ───────────────────────────────────
 
     /// <summary>
-    /// 通常移動（ロックオンなし）: Speedパラメータのみ更新。
+    /// 通常移動: Speed パラメータを更新してBlendTreeでアニメーション切り替え。
     /// </summary>
     public void UpdateMoveAnimation(float speed)
     {
-        // 第3引数: 現在値から目標値に到達するまでの時間(秒)
-        // 第4引数: deltaTime
         _animator.SetFloat(AnimParams.Speed, speed, 0.1f, Time.deltaTime);
+        _animator.SetFloat(AnimParams.MoveX, 0f, 0.1f, Time.deltaTime);
+        _animator.SetFloat(AnimParams.MoveY, speed, 0.1f, Time.deltaTime);
     }
 
     /// <summary>
@@ -75,7 +76,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
         _animator.SetFloat(AnimParams.MoveX, localX, 0.1f, Time.deltaTime);
         _animator.SetFloat(AnimParams.MoveY, localY, 0.1f, Time.deltaTime);
-        _animator.SetFloat(AnimParams.Speed, magnitude);
+        _animator.SetFloat(AnimParams.Speed, magnitude, 0.1f, Time.deltaTime);
     }
 
     // ── 攻撃アニメーション ───────────────────────────────────
@@ -146,6 +147,15 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.speed = _beforeAnimSpeed * speed;
     }
 
+    /// ── その他 ─────────────────────────────────────────────
+    /// <summary>
+    /// ロックオンのON/OFFをアニメーションに伝える。
+    /// </summary>
+    public void SetLockedOn(bool isLockedOn)
+    {
+        _animator.SetBool(AnimParams.IsLockedOn, isLockedOn);
+    }
+
     public void OnDestroy()
     {
         if (_stateManager != null)
@@ -181,6 +191,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         public static readonly int Dead = Animator.StringToHash("Dead");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
         public static readonly int ModeChange = Animator.StringToHash("ModeChange");
+        public static readonly int IsLockedOn = Animator.StringToHash("IsLockedOn");
     }
 
     private void Awake()
@@ -212,16 +223,16 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
-        // PlayerModeパラメータを更新してBlendTreeで自動的にアニメーションが切り替わる
-        _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
-
-        // 雷神→闘神（Warrior）へのモードチェンジはアニメーションをスキップ
+        // Warrior→Thunderのモードチェンジはアニメーションをスキップ
         if (newMode == PlayerMode.Warrior)
         {
+            _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
             OnModeChangeComplete?.Invoke();
             return;
         }
 
+        // Thunderへの切替: トリガーを先に発火してからPlayerModeを更新しない
+        // PlayerModeの更新はModeChangeSMBのmodeChangeEndTime後に行う
         _animator.SetTrigger(AnimParams.ModeChange);
     }
 }
