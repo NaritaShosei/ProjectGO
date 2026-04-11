@@ -24,7 +24,7 @@ public class CameraManager : MonoBehaviour
 
     public void LockOn(ILockOnTarget target)
     {
-        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.LockOnPoint == null)
+        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
         {
             Debug.LogWarning("ロックオン対象がnullまたはロック不可です。");
             return;
@@ -83,9 +83,9 @@ public class CameraManager : MonoBehaviour
         _lockOnCamera.Priority = _normalPriority - 1;
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
-        if (_currentTargetComponent == null || !_currentTarget.IsLockable || _currentTarget.LockOnPoint == null)
+        if (_currentTargetComponent == null || !_currentTarget.IsLockable || _currentTarget.GetTargetCenter() == null)
         {
             Unlock();
             return;
@@ -102,7 +102,7 @@ public class CameraManager : MonoBehaviour
     private void UpdateLockOnCamera()
     {
         // 敵→プレイヤーの方向を計算（Y軸無視）
-        Vector3 dirToPlayer = _playerTransform.position - _currentTarget.LockOnPoint.position;
+        Vector3 dirToPlayer = _playerTransform.position - _currentTarget.GetTargetCenter().position;
         dirToPlayer.y = 0f;
 
         if (dirToPlayer.sqrMagnitude < 0.001f) return;
@@ -124,7 +124,7 @@ public class CameraManager : MonoBehaviour
         // プレイヤーと敵の中間点を向く
         Vector3 lookAtPoint = Vector3.Lerp(
             _playerTransform.position,
-            _currentTarget.LockOnPoint.position,
+            _currentTarget.GetTargetCenter().position,
             0.5f
         );
 

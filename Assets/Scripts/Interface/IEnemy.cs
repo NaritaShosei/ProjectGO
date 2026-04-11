@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Enemyの共通インターフェース
 /// </summary>
-public interface IEnemy : ICharacter
+public interface IEnemy : ILockOnTarget
 {
     // --- Events ---
 

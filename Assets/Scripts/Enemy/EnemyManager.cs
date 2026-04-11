@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.ObjectModel;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -8,9 +9,9 @@ public class EnemyManager : MonoBehaviour
     public event Action OnBossDefeated;
     public event Action<IEnemy> OnEnemySpawned;
 
-    /// <summary>
-    /// プレイヤー参照と各サービスを初期化する
-    /// </summary>
+    public ReadOnlyCollection<Transform> EnemiesTransformList => _enemiesTransformList.AsReadOnly();
+
+    /// <summary> プレイヤー参照と各サービスを初期化する </summary>
     public void Init(IPlayer player)
     {
         if (player == null)
@@ -28,6 +29,9 @@ public class EnemyManager : MonoBehaviour
         _formationSystem = new EnemyFormationSystem();
     }
 
+    /// <summary> エネミーの生成 </summary>
+    /// <param name="original"> 出現させたいエネミー </param>
+    /// <param name="pos"> 出現させる場所 </param>
     public void Spawn(GameObject original, Vector3 pos)
     {
         if (_player == null)
@@ -42,6 +46,8 @@ public class EnemyManager : MonoBehaviour
         {
             enemy.OnDead += HandleEnemyDead;
             enemy.OnDamaged += HandleEnemyDamaged;
+
+            _enemiesTransformList.Add(obj.transform);
 
             // InjectServicesをInitより前に呼ぶ
             // Init内でBehaviourを生成する際にサービスを参照するため
@@ -78,9 +84,22 @@ public class EnemyManager : MonoBehaviour
     /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
-    /// <summary>
-    /// SpawnDataRepositoryから一括生成
-    /// </summary>
+    public IReadOnlyList<IEnemy> GetEnemiesInRange(Vector3 position, float radius)
+    {
+        List<IEnemy> enemiesInRange = new List<IEnemy>();
+        foreach (var enemy in _enemies)
+        {
+            if (enemy.IsDead) continue;
+            float distance = Vector3.Distance(enemy.Position, position);
+            if (distance <= radius)
+            {
+                enemiesInRange.Add(enemy);
+            }
+        }
+        return enemiesInRange;
+    }
+
+    /// <summary> SpawnDataRepositoryから一括生成 </summary>
     public void SpawnFromRepository(SpawnDataRepository repository)
     {
         if (repository == null || repository.SpawnDatas == null) return;
@@ -92,9 +111,7 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ボスを生成
-    /// </summary>
+    /// <summary> ボスを生成 </summary>
     public void SpawnBoss(GameObject bossPrefab, Vector3 position)
     {
         Spawn(bossPrefab, position);
@@ -108,6 +125,7 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
+    private List<Transform> _enemiesTransformList = new List<Transform>();
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
 
@@ -130,6 +148,8 @@ public class EnemyManager : MonoBehaviour
     {
         if (enemy != null)
         {
+            RemoveDeadEnemyTransform(enemy);
+
             enemy.OnDead -= HandleEnemyDead;
             enemy.OnDamaged -= HandleEnemyDamaged;
 
@@ -147,6 +167,23 @@ public class EnemyManager : MonoBehaviour
             {
                 OnEnemyDefeated?.Invoke();
             }
+        }
+    }
+
+    /// <summary> 死んだ敵の登録されているTransformをリムーブする </summary>
+    /// <param name="enemy"> 死んだ敵 </param>
+    private void RemoveDeadEnemyTransform(IEnemy enemy)
+    {
+        var enemyComponent = enemy as Component;
+
+        if (enemyComponent != null)
+        {
+            GameObject targetEnemy = enemyComponent.gameObject;
+            _enemiesTransformList.Remove(targetEnemy.transform);
+        }
+        else
+        {
+            Debug.LogError("このインターフェースの実体はUnityのComponentではありません。");
         }
     }
 

@@ -6,9 +6,9 @@ using UnityEngine;
 public interface ILockOnTarget
 {
     /// <summary>
-    /// ロックオンポイント（ロックオンの中心点）。
+    /// ロックオンなどの中心のTransformを取得する
     /// </summary>
-    Transform LockOnPoint { get; }
+    public Transform GetTargetCenter();
 
     /// <summary>
     /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
