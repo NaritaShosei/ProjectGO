@@ -183,6 +183,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     /// <summary>ロックオン対象を設定する（nullで解除）</summary>
     private void SetLockOnTarget(ILockOnTarget target)
     {
+        _playerAnimationController?.SetLockedOn(target != null);
+
         if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
         {
             _move?.SetLockOnTarget(null);
