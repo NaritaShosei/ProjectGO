@@ -56,26 +56,25 @@ public class ConditionalAttackBoostSkill : SkillBase
     private void Skill(AttackContext context)
     {
         // コンテキストから情報をもらい一定範囲の敵にダメージを与える
-        var cols = Physics.OverlapSphere(context.AttackPosition, _damageRadius, _enemyLayer);
-        var hitEnemies = new System.Collections.Generic.HashSet<IEnemy>();
+        ServiceLocator.TryGet(out EnemyManager enemyManager);
+        var enemies = enemyManager.GetEnemiesInRange(context.AttackPosition, _damageRadius);
 
-        foreach (var col in cols)
+        float radiusSqr = _damageRadius * _damageRadius;
+
+        foreach (var enemy in enemies)
         {
-            if (col.TryGetComponent(out IEnemy enemy) && hitEnemies.Add(enemy))
-            {
-                var knockback = _knockbackContext;
-                knockback.Direction = (enemy.Position - context.AttackPosition).normalized;
+            var knockback = _knockbackContext;
+            knockback.Direction = (enemy.Position - context.AttackPosition).normalized;
 
-                var damageContext = new DamageContext
-                {
-                    AttackPower = context.AttackPower * _damageMultiplier,
-                    PlayerMode = context.PlayerMode,
-                    IsCritical = false,
-                    OnHitResult = null,
-                    Knockback = knockback
-                };
-                enemy.TakeDamage(damageContext);
-            }
+            var damageContext = new DamageContext
+            {
+                AttackPower = context.AttackPower * _damageMultiplier,
+                PlayerMode = context.PlayerMode,
+                IsCritical = false,
+                OnHitResult = null,
+                Knockback = knockback
+            };
+            enemy.TakeDamage(damageContext);
         }
     }
 }
