@@ -153,8 +153,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerStateManager.IsDodging()) return;
         if (_lockOnTarget != null)
+        {
+            var input = _input.MoveInput;
+            var snappedInput = SnapTo8Directions(input);
+
             _animationController.UpdateLockedMoveAnimation(
-                _input.MoveInput, transform.forward, _cameraManager.MainCamera.transform.right);
+               snappedInput, transform.forward, _cameraManager.MainCamera.transform.right);
+        }
         else
             _animationController.UpdateMoveAnimation(_rb.linearVelocity.magnitude);
     }
@@ -252,10 +257,12 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 GetDodgeDirection()
     {
         var input = _input.MoveInput;
-        if (input.magnitude > INPUT_THRESHOLD)
+        var snappedInput = SnapTo8Directions(input);
+
+        if (snappedInput.magnitude > INPUT_THRESHOLD)
         {
-            var dir = _cameraManager.MainCamera.transform.right * input.x
-                    + _cameraManager.MainCamera.transform.forward * input.y;
+            var dir = _cameraManager.MainCamera.transform.right * snappedInput.x
+                    + _cameraManager.MainCamera.transform.forward * snappedInput.y;
             dir.y = 0f;
             return dir.normalized;
         }
@@ -370,5 +377,26 @@ public class PlayerMovement : MonoBehaviour
             elapsed += Time.fixedDeltaTime * _timeScale;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
+    }
+
+    /// <summary>
+    /// 入力方向を8方向に丸める。ロックオン中の回避や攻撃移動で使用する。
+    /// </summary>
+    private Vector2 SnapTo8Directions(Vector2 input)
+    {
+        if (input.sqrMagnitude < 0.0001f)
+            return Vector2.zero;
+
+        // 角度取得（ラジアン → 度）
+        float angle = Mathf.Atan2(input.y, input.x) * Mathf.Rad2Deg;
+
+        // 45度刻みに丸める
+        float snappedAngle = Mathf.Round(angle / 45f) * 45f;
+
+        // ベクトルに戻す
+        float rad = snappedAngle * Mathf.Deg2Rad;
+        Vector2 result = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+
+        return result.normalized;
     }
 }
