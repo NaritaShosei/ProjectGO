@@ -42,6 +42,9 @@ public class PlayerAttack : MonoBehaviour
                 _input.OnChargeStart += BufferDodgeAttack;
                 break;
         }
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged += ChangeLockOnTarget;
     }
 
     /// <summary>
@@ -135,6 +138,8 @@ public class PlayerAttack : MonoBehaviour
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
     private AttackInput? _bufferedComboInput;
+
+    private ILockOnTarget _currentLockOnTarget;
 
     // ── Lifecycle ──────────────────────────────────────────
 
@@ -387,6 +392,11 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform FindHomingTarget(float radius, float angle)
     {
+        if(_currentLockOnTarget != null)
+        {
+            return _currentLockOnTarget.GetTargetCenter();
+        }
+
         var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
         Transform best = null;
         float bestScore = float.MaxValue;
@@ -449,8 +459,12 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnModeChanged(PlayerMode newMode)
     {
-        Debug.Log($"モード変更: {newMode}");
         ResetCombo();
+    }
+
+    private void ChangeLockOnTarget(ILockOnTarget target)
+    {
+        _currentLockOnTarget = target;
     }
 }
 
