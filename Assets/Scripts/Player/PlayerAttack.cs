@@ -169,6 +169,9 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
             _animationController.OnComboTransition -= TryComboTransition;
         }
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged -= ChangeLockOnTarget;
     }
 
     private void Update() => PerformHoming();
@@ -392,7 +395,7 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform FindHomingTarget(float radius, float angle)
     {
-        if(_currentLockOnTarget != null)
+        if (_currentLockOnTarget != null)
         {
             return _currentLockOnTarget.GetTargetCenter();
         }
@@ -484,6 +487,11 @@ public class PlayerAttack : MonoBehaviour
 
     private void ChangeLockOnTarget(ILockOnTarget target)
     {
+        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
+        {
+            _currentLockOnTarget = null;
+        }
+
         _currentLockOnTarget = target;
     }
 }

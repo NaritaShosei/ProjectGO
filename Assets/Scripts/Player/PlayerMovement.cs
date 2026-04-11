@@ -197,14 +197,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (_lockOnTarget != null || isCancelDodge)
         {
+            var snappedDir = SnapTo8Directions(new Vector2(dodgeDir.x, dodgeDir.z));
+
             // ロックオン中は常に8方向
             // 攻撃キャンセル回避は8方向アニメーション
             // プレイヤーの現在の向き（敵の方向）を基準にローカル方向を計算する
             Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
             _animationController.PlayLockedDodge(
-                Vector3.Dot(dodgeDir, right),
-                Vector3.Dot(dodgeDir, fwd));
+                Vector3.Dot(snappedDir, right),
+                Vector3.Dot(snappedDir, fwd));
         }
         else
         {
@@ -257,12 +259,11 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 GetDodgeDirection()
     {
         var input = _input.MoveInput;
-        var snappedInput = SnapTo8Directions(input);
 
-        if (snappedInput.magnitude > INPUT_THRESHOLD)
+        if (input.magnitude > INPUT_THRESHOLD)
         {
-            var dir = _cameraManager.MainCamera.transform.right * snappedInput.x
-                    + _cameraManager.MainCamera.transform.forward * snappedInput.y;
+            var dir = _cameraManager.MainCamera.transform.right * input.x
+                    + _cameraManager.MainCamera.transform.forward * input.y;
             dir.y = 0f;
             return dir.normalized;
         }

@@ -139,6 +139,11 @@ public class EnemyManager : MonoBehaviour
         ServiceLocator.Register(this);
     }
 
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister<EnemyManager>();
+    }
+
     /// <summary>
     /// EnemyのOnDamagedイベントハンドラ
     /// FormationSystemに被弾を通知する

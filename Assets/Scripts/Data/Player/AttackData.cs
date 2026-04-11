@@ -57,7 +57,7 @@ public class AttackData : ScriptableObject
 
     [Header("Knockback")]
     [SerializeField] private bool _enableKnockback = false; // ノックバックを有効にするかどうか
-    [SerializeField] private float _knockbackPower = 5f; // ノックバックの強さ（
+    [SerializeField] private float _knockbackPower = 5f; // ノックバックの強さ
     [SerializeField] private float _knockbackUpward = 0f; // ノックバックの垂直成分
 
     [Header("Homing")]
