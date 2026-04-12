@@ -25,4 +25,10 @@ public static class SoundCueNames
         public const string BodyHit = "enemyhit_tsuyoi";
         public const string ArmorHit = "enemyhit_yowai_yoroi";
     }
+
+    public static class BGM
+    {
+        public const string Ingame_Intro = "In Game_Intro";
+        public const string Ingame_Loop = "In Game_Loop";
+    }
 }
