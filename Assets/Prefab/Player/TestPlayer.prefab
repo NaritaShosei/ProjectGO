@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4412391866698522038}
   - component: {fileID: 2204079526448793672}
   - component: {fileID: 8069266211170886861}
+  - component: {fileID: 5786415077606400648}
   m_Layer: 3
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -60,6 +61,7 @@ MonoBehaviour:
   _attackExecutor: {fileID: 7971035984183082400}
   _modeController: {fileID: 4412391866698522038}
   _playerAnimationController: {fileID: 5576176091719650943}
+  _soundHandler: {fileID: 5786415077606400648}
   _targetCenter: {fileID: 3784771225125332287}
 --- !u!114 &6265858459617693970
 MonoBehaviour:
@@ -179,6 +181,18 @@ MonoBehaviour:
   _interactableLayer:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &5786415077606400648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5847551565396971007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d89db95844ecfd40bb3d38fd2524460, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSoundHandler
 --- !u!1 &6848730639649579340
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,7 +204,7 @@ GameObject:
   - component: {fileID: 3784771225125332287}
   - component: {fileID: 7971035984183082400}
   m_Layer: 3
-  m_Name: GameObject
+  m_Name: TargetCenter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
