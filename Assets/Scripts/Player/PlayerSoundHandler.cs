@@ -59,7 +59,7 @@ public class PlayerSoundHandler : MonoBehaviour
         if (ctx.PlayerMode == PlayerMode.Warrior)
         {
             // 弱点 = 鎧ヒット / 非弱点 = 生身ヒット（闘神は鎧が弱点）
-            var cue = ctx.IsWeakPoint
+            var cue = ctx.IsArmorHit
                 ? SoundCueNames.Tousin.ArmorHit
                 : SoundCueNames.Tousin.BodyHit;
             Sound.PlayTousnSE(gameObject, cue);

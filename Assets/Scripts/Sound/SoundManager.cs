@@ -127,6 +127,10 @@ public class SoundManager
             var existing = _loopSourcesDict[seObj][cueName];
             if (existing.status == CriAtomSource.Status.Playing)
                 return;
+
+            existing.Stop();
+            Object.Destroy(existing);
+            _loopSourcesDict[seObj].Remove(cueName);
         }
 
         // 新しいループ用ソースを作成して再生
