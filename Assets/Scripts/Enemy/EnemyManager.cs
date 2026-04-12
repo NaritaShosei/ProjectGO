@@ -134,6 +134,15 @@ public class EnemyManager : MonoBehaviour
     private IWallAvoidanceService _wallAvoidanceService;
     private IEnemyFormationSystem _formationSystem;
 
+    private void Awake()
+    {
+        ServiceLocator.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister<EnemyManager>();
+    }
 
     /// <summary>
     /// EnemyのOnDamagedイベントハンドラ
