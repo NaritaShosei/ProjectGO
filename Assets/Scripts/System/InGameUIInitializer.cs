@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Presenter を生成・初期化する
-/// </summary>
 public class InGameUIInitializer : MonoBehaviour
 {
     public void Init(Player player)
@@ -17,24 +14,42 @@ public class InGameUIInitializer : MonoBehaviour
             Debug.LogError("PlayerにIModeControllerが見つかりませんでした。");
         }
 
-        // HP と雷ゲージをまとめて渡す
         _playerGaugePresenter = new PlayerGaugePresenter(
             health: player,
             playerStats: player,
             view: _playerGaugeView
         );
+
+        // ロックオンマーカー初期化
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _lockOnMarkerPresenter = new LockOnMarkerPresenter(cameraManager, _lockOnMarkerView);
+        }
+        else
+        {
+            Debug.LogError("CameraManagerが見つかりませんでした。LockOnMarkerは無効です。");
+        }
     }
 
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
+    [SerializeField] private LockOnMarkerView _lockOnMarkerView; 
 
     private IModeController _playerModeController;
     private PlayerModePresenter _playerModePresenter;
     private PlayerGaugePresenter _playerGaugePresenter;
+    private LockOnMarkerPresenter _lockOnMarkerPresenter; 
+
+    private void Update()
+    {
+        // ロックオン中は毎フレーム位置追従
+        _lockOnMarkerPresenter?.Tick();
+    }
 
     private void OnDestroy()
     {
         _playerModePresenter?.Dispose();
         _playerGaugePresenter?.Dispose();
+        _lockOnMarkerPresenter?.Dispose(); 
     }
 }
