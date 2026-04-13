@@ -3,21 +3,31 @@ using UnityEngine;
 public class PlayerSoundHandler : MonoBehaviour
 {
     public void Init(
-        PlayerAnimationController animController,
-        PlayerStateManager stateManager,
-        IModeController modeController,
-        AttackExecutor attackExecutor)
+       PlayerAnimationController animController,
+       PlayerStateManager stateManager,
+       IModeController modeController,
+       AttackExecutor attackExecutor)
     {
         _modeController = modeController;
 
-        animController.OnModeChangeComplete += OnModeChanged;
-        stateManager.OnStateChanged += OnStateChanged;
-        attackExecutor.OnSwingReady += PlaySwingSE;
-        attackExecutor.OnHitResultReady += PlayHitSE;
+        if (animController != null)
+        {
+            animController.OnModeChangeComplete += OnModeChanged;
+            _animController = animController;
+        }
 
-        _animController = animController;
-        _stateManager = stateManager;
-        _attackExecutor = attackExecutor;
+        if (stateManager != null)
+        {
+            stateManager.OnStateChanged += OnStateChanged;
+            _stateManager = stateManager;
+        }
+
+        if (attackExecutor != null)
+        {
+            attackExecutor.OnSwingReady += PlaySwingSE;
+            attackExecutor.OnHitResultReady += PlayHitSE;
+            _attackExecutor = attackExecutor;
+        }
     }
 
     private void OnDestroy()

@@ -161,6 +161,8 @@ public class SoundManager
                 source.Stop();
                 Object.Destroy(source);
                 _loopSourcesDict[seObj].Remove(cueName);
+                if (_loopSourcesDict[seObj].Count == 0)
+                    _loopSourcesDict.Remove(seObj);
             }
         }
         else
@@ -171,7 +173,7 @@ public class SoundManager
                 source.Stop();
                 Object.Destroy(source);
             }
-            _loopSourcesDict[seObj].Clear();
+            _loopSourcesDict.Remove(seObj);
         }
     }
 
