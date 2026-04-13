@@ -5,17 +5,22 @@ using UnityEngine;
 
 public class AttackExecutor : MonoBehaviour
 {
+    /// <summary> ヒット結果をサウンドハンドラーなどに通知するイベント </summary>
+    public event Action<HitSoundContext> OnHitResultReady;
+
+    /// <summary> スイング音通知用。攻撃判定が出る瞬間に発火する </summary>
+    public event Action<PlayerMode> OnSwingReady;
+
     public void Init(IPlayerStats stats, SkillManager manager)
     {
         _playerStats = stats;
         _skillManager = manager;
     }
 
-    /// <summary>
-    /// 与えられたデータを基に攻撃
-    /// </summary>
     public void Execute(AttackData data, AttackInput input, ModeData modeData)
     {
+        OnSwingReady?.Invoke(data.Mode);
+
         _lastAttackData = data;
 
         var attackPos = transform.position + transform.forward * data.AttackRange;
@@ -38,101 +43,97 @@ public class AttackExecutor : MonoBehaviour
             };
         }
 
-        // 取得済みスキルの中から条件に合うものを取得して適用
         var applicableSkills = GetApplicableSkills(context, data);
         ApplySkills(ref context, applicableSkills);
-
-        // 攻撃直前スキルを発動
         context.OnBeforeAttack?.Invoke();
 
         bool hasHitResult = false;
         bool isWeakPoint = false;
         bool isArmorBreak = false;
         bool isKill = false;
+        bool isArmorHit = false; 
         var hitEnemyTargets = new List<ISpeedChange>();
 
         foreach (var col in cols)
         {
-            if (col.TryGetComponent(out IEnemy enemy))
+            if (!col.TryGetComponent(out IEnemy enemy)) continue;
+
+            var perHitContext = context;
+            RollCritical(ref perHitContext, modeData);
+            perHitContext.OnHit?.Invoke(enemy);
+
+            var damageContext = BuildDamageContext(perHitContext);
+
+            damageContext.OnHitResult = result =>
             {
-                var perHitContext = context;
-                RollCritical(ref perHitContext, modeData);
-                perHitContext.OnHit?.Invoke(enemy);
+                hasHitResult = true;
+                if (result.IsWeakPoint) isWeakPoint = true;
+                if (result.IsArmorBreak) isArmorBreak = true;
+                if (result.IsKill) isKill = true;
+                if (result.IsArmorHit) isArmorHit = true; 
+                if (enemy is ISpeedChange speedChange)
+                    hitEnemyTargets.Add(speedChange);
+            };
 
-                var damageContext = BuildDamageContext(perHitContext);
-
-                damageContext.OnHitResult = result =>
-                {
-                    hasHitResult = true;
-                    // より強い結果で上書き
-                    if (result.IsWeakPoint) isWeakPoint = true;
-                    if (result.IsArmorBreak) isArmorBreak = true;
-                    if (result.IsKill) isKill = true;
-                    if (enemy is ISpeedChange speedChange)
-                        hitEnemyTargets.Add(speedChange);
-                };
-
-                enemy.TakeDamage(damageContext);
-            }
+            enemy.TakeDamage(damageContext);
         }
 
-        // 全員分の結果をまとめて1回だけTrigger
-        if (hasHitResult && ServiceLocator.TryGet(out HitStopManager hitStop))
+        // 地面ヒット音（特定攻撃のみ）
+        if (data.PlayGroundHitSE)
+            Sound.PlayTousnSE(gameObject, SoundCueNames.Tousin.GroundHit);
+
+        if (hasHitResult)
         {
-            hitStop.Trigger(
-                data: data.HitStopData,
-                isWeakPoint: isWeakPoint,
-                isArmorBreak: isArmorBreak,
-                isKill: isKill,
-                hitEnemyTargets: hitEnemyTargets
-            );
+            // HitStop
+            if (ServiceLocator.TryGet(out HitStopManager hitStop))
+            {
+                hitStop.Trigger(
+                    data: data.HitStopData,
+                    isWeakPoint: isWeakPoint,
+                    isArmorBreak: isArmorBreak,
+                    isKill: isKill,
+                    hitEnemyTargets: hitEnemyTargets
+                );
+            }
+
+            // サウンド通知
+            OnHitResultReady?.Invoke(new HitSoundContext
+            {
+                IsKill = isKill,
+                IsArmorBreak = isArmorBreak,
+                IsWeakPoint = isWeakPoint,
+                IsArmorHit = isArmorHit,
+                PlayerMode = data.Mode,
+            });
         }
 
-        // 攻撃直後スキルの発動
         context.OnAfterAttack?.Invoke();
     }
-
 
     [SerializeField] private LayerMask _layer;
     private IPlayerStats _playerStats;
     private SkillManager _skillManager;
 
-    /// <summary>
-    /// 条件に合う取得済みスキルを優先度順に取得
-    /// </summary>
     private List<SkillBase> GetApplicableSkills(AttackContext context, AttackData data)
     {
-        if (_skillManager == null)
-        {
-            return new List<SkillBase>();
-        }
-
+        if (_skillManager == null) return new List<SkillBase>();
         return _skillManager.GetAttackSkills()
             .Where(skill => skill.CanApply(context, data))
             .OrderByDescending(skill => skill.Priority)
             .ToList();
     }
 
-    /// <summary>
-    /// 複数のスキルを順番に適用
-    /// </summary>
     private void ApplySkills(ref AttackContext context, List<SkillBase> skills)
     {
-        foreach (var skill in skills)
-        {
-            skill.Apply(ref context);
-        }
+        foreach (var skill in skills) skill.Apply(ref context);
     }
 
     private void RollCritical(ref AttackContext context, ModeData data)
     {
-        float chance = _playerStats.CriticalRate;
         context.IsCritical = false;
         context.CriticalMultiplier = 1f;
-
-        if (UnityEngine.Random.value < chance)
+        if (UnityEngine.Random.value < _playerStats.CriticalRate)
         {
-            // クリティカル耐性の可能性を考え、ここではクリティカルダメージを求めない
             context.IsCritical = true;
             context.CriticalMultiplier = data.CriticalDamageMultiplier;
         }
@@ -151,18 +152,14 @@ public class AttackExecutor : MonoBehaviour
         };
     }
 
-    // デバッグ用
     private AttackData _lastAttackData;
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
         if (_lastAttackData == null) return;
-
         Gizmos.color = Color.red;
         var pos = transform.position + transform.forward * _lastAttackData.AttackRange;
         Gizmos.DrawWireSphere(pos, _lastAttackData.AttackRadius);
-
-        // 向き確認用
         Gizmos.DrawLine(transform.position, pos);
     }
 #endif
@@ -256,4 +253,17 @@ public struct HitResult
     public bool IsKill;
     public bool IsArmorBreak;
     public bool IsWeakPoint;
+    public bool IsArmorHit; 
+}
+
+/// <summary>
+/// 攻撃のヒット結果をサウンドハンドラーなどに通知するための情報
+/// </summary>
+public struct HitSoundContext
+{
+    public bool IsKill;
+    public bool IsArmorBreak;
+    public bool IsWeakPoint;
+    public bool IsArmorHit;
+    public PlayerMode PlayerMode;
 }
