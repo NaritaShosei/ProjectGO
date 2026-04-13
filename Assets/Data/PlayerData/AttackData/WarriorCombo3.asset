@@ -27,7 +27,7 @@ MonoBehaviour:
   _knockbackUpward: 2.89
   _enableHoming: 1
   _homingRadius: 5
-  _homingAngle: 360
+  _homingAngle: 45
   _homingStrength: 10
   _moveType: 2
   _moveDistance: 2
@@ -43,4 +43,5 @@ MonoBehaviour:
     _breakOrKillMultiplier: 2
     _weakAndBreakOrKillMultiplier: 2.5
   _animationStateName: Warrior_Combo_3
-  _animationStartTime: 0.1
+  _transitionDuration: -1
+  _playGroundHitSE: 1

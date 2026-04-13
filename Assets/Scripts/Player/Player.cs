@@ -49,6 +49,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
 
+        _soundHandler?.Init(_playerAnimationController, _playerStateManager, _modeController, _attackExecutor);
+
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
             hitStopManager.Register(this, HitStopTargetGroup.Player);
 
@@ -105,6 +107,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     [SerializeField] private AttackExecutor _attackExecutor;
     [SerializeField] private PlayerModeController _modeController;
     [SerializeField] private PlayerAnimationController _playerAnimationController;
+    [SerializeField] private PlayerSoundHandler _soundHandler;
     [SerializeField] private Transform _targetCenter;
 
     private PlayerStateManager _playerStateManager;

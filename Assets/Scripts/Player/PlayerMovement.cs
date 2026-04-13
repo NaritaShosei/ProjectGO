@@ -153,8 +153,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_playerStateManager.IsDodging()) return;
         if (_lockOnTarget != null)
+        {
+            var input = _input.MoveInput;
+            var snappedInput = SnapTo8Directions(input);
+
             _animationController.UpdateLockedMoveAnimation(
-                _input.MoveInput, transform.forward, _cameraManager.MainCamera.transform.right);
+               snappedInput, transform.forward, _cameraManager.MainCamera.transform.right);
+        }
         else
             _animationController.UpdateMoveAnimation(_rb.linearVelocity.magnitude);
     }
@@ -192,14 +197,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (_lockOnTarget != null || isCancelDodge)
         {
+            var snappedDir = SnapTo8Directions(new Vector2(dodgeDir.x, dodgeDir.z));
+
             // ロックオン中は常に8方向
             // 攻撃キャンセル回避は8方向アニメーション
             // プレイヤーの現在の向き（敵の方向）を基準にローカル方向を計算する
             Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
             _animationController.PlayLockedDodge(
-                Vector3.Dot(dodgeDir, right),
-                Vector3.Dot(dodgeDir, fwd));
+                Vector3.Dot(snappedDir, right),
+                Vector3.Dot(snappedDir, fwd));
         }
         else
         {
@@ -252,6 +259,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 GetDodgeDirection()
     {
         var input = _input.MoveInput;
+
         if (input.magnitude > INPUT_THRESHOLD)
         {
             var dir = _cameraManager.MainCamera.transform.right * input.x
@@ -370,5 +378,26 @@ public class PlayerMovement : MonoBehaviour
             elapsed += Time.fixedDeltaTime * _timeScale;
             await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
         }
+    }
+
+    /// <summary>
+    /// 入力方向を8方向に丸める。ロックオン中の回避や攻撃移動で使用する。
+    /// </summary>
+    private Vector2 SnapTo8Directions(Vector2 input)
+    {
+        if (input.sqrMagnitude < 0.0001f)
+            return Vector2.zero;
+
+        // 角度取得（ラジアン → 度）
+        float angle = Mathf.Atan2(input.y, input.x) * Mathf.Rad2Deg;
+
+        // 45度刻みに丸める
+        float snappedAngle = Mathf.Round(angle / 45f) * 45f;
+
+        // ベクトルに戻す
+        float rad = snappedAngle * Mathf.Deg2Rad;
+        Vector2 result = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+
+        return result.normalized;
     }
 }

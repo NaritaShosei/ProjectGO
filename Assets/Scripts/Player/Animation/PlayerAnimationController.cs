@@ -206,6 +206,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         {
             case PlayerState.Charging:
                 _animator.SetBool(AnimParams.IsCharging, true);
+                _animator.SetLayerWeight(_animator.GetLayerIndex(AnimParams.Body), 1f);
                 break;
             case PlayerState.Dead:
                 _animator.SetTrigger(AnimParams.Dead);
@@ -218,6 +219,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         if (oldState == PlayerState.Charging)
         {
             _animator.SetBool(AnimParams.IsCharging, false);
+            _animator.SetLayerWeight(_animator.GetLayerIndex(AnimParams.Body), 0f);
         }
     }
 
