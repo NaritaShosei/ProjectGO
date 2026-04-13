@@ -2,18 +2,11 @@ using System;
 using UnityEngine;
 using System.Collections;
 
-public class Effect : MonoBehaviour,ISpeedChange
+public class Effect : MonoBehaviour, ISpeedChange
 {
     //再生終了時に呼ばれるコールバック
     public Action<Effect> OnFinished;
-
     public string Key { get; set; }
-
-    // メインのParticle
-    [SerializeField] private ParticleSystem _particle;
-
-    //子objectも含めたParticleSystem
-    private ParticleSystem[] _particles;
     public float TimeScale { get; set; } = 1f;
 
     /// <summary>
@@ -48,12 +41,21 @@ public class Effect : MonoBehaviour,ISpeedChange
         ApplyTimeScale();
     }
 
+    // メインのParticle
+    [SerializeField] private ParticleSystem _particle;
+    //子objectも含めたParticleSystem
+    private ParticleSystem[] _particles;
+
     private Coroutine _coroutine;
     private HitStopManager _hitStopManager;
 
     private void OnEnable()
     {
-        _hitStopManager.Register(this, HitStopTargetGroup.Effects);
+        if (ServiceLocator.TryGet<HitStopManager>(out var manager))
+        {
+            _hitStopManager = manager;
+            _hitStopManager.Register(this, HitStopTargetGroup.Effects);
+        }
     }
 
     private void OnDisable()
