@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections;
 
-public class Effect : MonoBehaviour
+public class Effect : MonoBehaviour,ISpeedChange
 {
     //再生終了時に呼ばれるコールバック
     public Action<Effect> OnFinished;
@@ -14,7 +14,7 @@ public class Effect : MonoBehaviour
 
     //子objectも含めたParticleSystem
     private ParticleSystem[] _particles;
-
+    public float TimeScale { get; set; } = 1f;
 
     /// <summary>
     /// エフェクトの再生
@@ -22,6 +22,8 @@ public class Effect : MonoBehaviour
     public void Play()
     {
         gameObject.SetActive(true);
+
+        ApplyTimeScale();
 
         foreach (var ps in _particles)
         {
@@ -36,11 +38,43 @@ public class Effect : MonoBehaviour
         _coroutine = StartCoroutine(WaitForFinish());
     }
 
-    private Coroutine _coroutine;
+    /// <summary>
+    /// HitStopから呼ばれる速度変更処理
+    /// </summary>
+    /// <param name="scale"></param>
+    public void OnSpeedChange(float scale)
+    {
+        TimeScale = scale;
+        ApplyTimeScale();
+    }
 
+    private Coroutine _coroutine;
+    private HitStopManager _hitStopManager;
+
+    private void OnEnable()
+    {
+        _hitStopManager.Register(this, HitStopTargetGroup.Effects);
+    }
+
+    private void OnDisable()
+    {
+        _hitStopManager.Unregister(this, HitStopTargetGroup.Effects);
+    }
     private void Awake()
     {
         _particles = GetComponentsInChildren<ParticleSystem>();
+    }
+
+    /// <summary>
+    /// ParticleSysytemにTimeScaleを反映
+    /// </summary>
+    private void ApplyTimeScale()
+    {
+        foreach (var ps in _particles)
+        {
+            var main = ps.main;
+            main.simulationSpeed = TimeScale;
+        }
     }
 
     /// <summary>
