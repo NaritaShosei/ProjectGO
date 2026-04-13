@@ -588,7 +588,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  CustomBlends: {fileID: 0}
+  CustomBlends: {fileID: 11400000, guid: f9ec0cc6e62e32441af4c6b10a5bc5ff, type: 2}
 --- !u!114 &660226419
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1717,10 +1717,6 @@ PrefabInstance:
     - target: {fileID: 5847551565396971007, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: m_Name
       value: TestPlayer
-      objectReference: {fileID: 0}
-    - target: {fileID: 6848730639649579340, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-      propertyPath: m_Name
-      value: TargetCenter
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -37,6 +37,8 @@ public class AttackData : ScriptableObject
     public string AnimationStateName => _animationStateName;
     public float TransitionDuration => _transitionDuration;
 
+    public bool PlayGroundHitSE => _playGroundHitSE;
+
     [Header("Basic Info")]
     [SerializeField] private int _attackId; // 攻撃ID
     [SerializeField] private string _attackName; // 攻撃名
@@ -80,6 +82,9 @@ public class AttackData : ScriptableObject
     [Header("Animation")]
     [SerializeField] private string _animationStateName; // Animatorのステート名
     [SerializeField] private float _transitionDuration = -1f; // 遷移時間（秒）。-1の場合はデフォルト値(0.1f)を使用
+
+    [Header("Sound")]
+    [SerializeField] private bool _playGroundHitSE = false; // 地面ヒットSEを鳴らすか
 }
 
 // 攻撃の段階（チャージレベル）

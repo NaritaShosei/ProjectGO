@@ -162,13 +162,17 @@ public class MobEnemy : Enemy, IFormationParticipant
             && _defenceContext.EnemyType == EnemyType.Flesh
             && context.PlayerMode == PlayerMode.Thunder;
 
+        // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
+        bool isArmorHit = armorWasAlive && !isArmorBreak;
+
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
             new HitResult
             {
                 IsKill = isKill,
                 IsArmorBreak = isArmorBreak,
-                IsWeakPoint = isWeakPoint
+                IsWeakPoint = isWeakPoint,
+                IsArmorHit = isArmorHit
             });
 
         InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
