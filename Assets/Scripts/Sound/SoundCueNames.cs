@@ -13,7 +13,7 @@ public static class SoundCueNames
         public const string HammerSwing = "tousin_hammerswing";
         public const string HammerHit = "tousin_hammer_hit";
         public const string GroundHit = "tousin_groundhit";
-        public const string ArmorHit = "enemyhit_tsuyoi_yoroi";
+        public const string ArmorHit = "enemyhit_tuyoi_yoroi";
         public const string BodyHit = "enemyhit_yowai";
     }
 
