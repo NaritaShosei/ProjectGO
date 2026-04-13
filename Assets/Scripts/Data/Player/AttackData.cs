@@ -40,36 +40,36 @@ public class AttackData : ScriptableObject
     public bool PlayGroundHitSE => _playGroundHitSE;
 
     [Header("Basic Info")]
-    [SerializeField] private int _attackId;
-    [SerializeField] private string _attackName;
-    [SerializeField] private PlayerMode _mode;
-    [SerializeField] private AttackType _attackType;
-    [SerializeField] private int _comboIndex;
-    [SerializeField] private ChargeLevel _requiredCharge;
+    [SerializeField] private int _attackId; // 攻撃ID
+    [SerializeField] private string _attackName; // 攻撃名
+    [SerializeField] private PlayerMode _mode; // 闘神 or 雷神
+    [SerializeField] private AttackType _attackType; // 攻撃タイプ（弱攻撃、強攻撃、回避攻撃）
+    [SerializeField] private int _comboIndex; // コンボの何段目か（1スタート）。単発攻撃の場合は1。コンボ未対応の場合は-1。
+    [SerializeField] private ChargeLevel _requiredCharge; // 必要な溜めレベル（None, Level1, Level2）
 
     [Header("Damage")]
-    [SerializeField] private float _damageMultiplier = 1;
+    [SerializeField] private float _damageMultiplier = 1; // 攻撃力倍率（例: 1.5 = 150%のダメージ）
 
     [Header("Range")]
-    [SerializeField] private float _attackRange = 1;
-    [SerializeField] private float _attackRadius = 1;
+    [SerializeField] private float _attackRange = 1; // 攻撃の届く距離（例: 1.5 = 1.5m先まで攻撃が届く）
+    [SerializeField] private float _attackRadius = 1; // 攻撃の当たり判定の半径（例: 0.5 = 攻撃の中心から0.5m以内がヒット範囲）
 
     [Header("Combo")]
-    [SerializeField] private int _nextComboAttackId = -1;
+    [SerializeField] private int _nextComboAttackId = -1; // 次のコンボ攻撃ID。-1の場合はコンボ終了。
 
     [Header("Knockback")]
-    [SerializeField] private bool _enableKnockback = false;
-    [SerializeField] private float _knockbackPower = 5f;
-    [SerializeField] private float _knockbackUpward = 0f;
+    [SerializeField] private bool _enableKnockback = false; // ノックバックを有効にするかどうか
+    [SerializeField] private float _knockbackPower = 5f; // ノックバックの強さ
+    [SerializeField] private float _knockbackUpward = 0f; // ノックバックの垂直成分
 
     [Header("Homing")]
-    [SerializeField] private bool _enableHoming = false;
-    [SerializeField] private float _homingRadius = 5f;
-    [SerializeField] private float _homingAngle = 45f;
-    [SerializeField] private float _homingStrength = 10f;
+    [SerializeField] private bool _enableHoming = false; // ホーミングを有効にするかどうか
+    [SerializeField] private float _homingRadius = 5f; // ホーミングの探索半径
+    [SerializeField] private float _homingAngle = 45f; // ホーミングの探索角度
+    [SerializeField] private float _homingStrength = 10f; // ホーミングの強さ（大きいほどターゲットに向かって急激に曲がる）
 
     [Header("Movement")]
-    [SerializeField] private AttackMoveType _moveType = AttackMoveType.None;
+    [SerializeField] private AttackMoveType _moveType = AttackMoveType.None; // 攻撃中の移動タイプ
     [SerializeField] private float _moveDistance = 0f;
     [SerializeField] private float _moveSpeed = 0f;
     [SerializeField] private float _moveDuration = 0f;
