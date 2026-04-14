@@ -3,12 +3,6 @@ using UnityEngine;
 
 public class SkillExecutor : MonoBehaviour
 {
-    private SkillManager _skillManager;
-    private IPlayerStats _playerStats;
-    private Func<PlayerMode> _getMode;
-    private Transform _playerTransform;
-    private EnemyManager _enemyManager;
-
     public void Iint(SkillManager skillManager,IPlayerStats stats,Func<PlayerMode> getmode,Transform playerTransform,EnemyManager enemyManager)
     {
         _skillManager = skillManager;
@@ -18,6 +12,11 @@ public class SkillExecutor : MonoBehaviour
         _playerTransform = playerTransform;
     }
 
+    private SkillManager _skillManager;
+    private IPlayerStats _playerStats;
+    private Func<PlayerMode> _getMode;
+    private Transform _playerTransform;
+    private EnemyManager _enemyManager;
 
     void Update()
     {

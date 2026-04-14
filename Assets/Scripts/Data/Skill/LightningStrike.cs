@@ -3,13 +3,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "LightningStrike", menuName = "GameData/Skill/LightningStrike")]
 public class LightningStrike : SkillBase, ISkillUpdater
 {
-    [SerializeField] private float _minInterval = 2f;
-    [SerializeField] private float _maxInterval = 4f;
-    [SerializeField] private float _damegeMultiplier = 1f;
-    [SerializeField] private float _searchRadius = 999f;
-
-    private float _timer;
-
     public void OnUpdate(float deltaTime, PlayerMode mode, IPlayerStats stats,Vector3 playerPosition,EnemyManager enemyManager)
     {
         if (mode != PlayerMode.Thunder) return;
@@ -22,6 +15,13 @@ public class LightningStrike : SkillBase, ISkillUpdater
 
         Trigger(stats,playerPosition,enemyManager);
     }
+
+    [SerializeField] private float _minInterval = 2f;
+    [SerializeField] private float _maxInterval = 4f;
+    [SerializeField] private float _damegeMultiplier = 1f;
+    [SerializeField] private float _searchRadius = 999f;
+
+    private float _timer;
 
     private void Trigger(IPlayerStats stats,Vector3 playerPosition, EnemyManager enemyManager)
     {
