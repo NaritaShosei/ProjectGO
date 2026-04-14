@@ -49,6 +49,10 @@ public class GameManager : MonoBehaviour
 
         _player.Init(_skillManager, input);
 
+        //SkillExecutorに
+        var modeController = _player.GetComponent<IModeController>();
+        _skillManager.Init(_player, () => modeController.CurrentMode);
+
         _player.OnDead += HandleGameComplete;
     }
 

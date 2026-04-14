@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SkillManager : MonoBehaviour
@@ -31,9 +32,22 @@ public class SkillManager : MonoBehaviour
             _ownedSkillIDs.Add(id);
         }
 
+        //常時発動スキルの登録
+        if (skill is ISkillUpdater updater)
+        {
+            if (!_updaters.Contains(updater))
+            {
+                _updaters.Add(updater);
+            }
+        }
+
         return true;
     }
 
+    public IReadOnlyList<ISkillUpdater> GetUpdaters()
+    {
+        return _updaters;
+    }
 
     /// <summary> 開放済みのIDを取得する </summary>
     public IReadOnlyList<int> GetOwnedSkillIDs() => _ownedSkillIDs.ToList();
@@ -82,8 +96,19 @@ public class SkillManager : MonoBehaviour
             .ToList();
     }
 
+    /// <summary>
+    /// 初期化　スキル一覧と能力値、現在のモードを取得
+    /// </summary>
+    /// <param name="stats"></param>
+    /// <param name="getmode"></param>
+    public void Init(IPlayerStats stats,Func<PlayerMode> getmode)
+    {
+        _skillExecutor.Iint(this,stats,getmode);
+    }
 
     [SerializeField] private SkillDataBase _skillDataBase;
+    [SerializeField] private SkillExecutor _skillExecutor;
+    private List<ISkillUpdater> _updaters = new();
 
     private HashSet<int> _ownedSkillIDs = new HashSet<int>();
     private Dictionary<int, int> _skillAcquireCounts = new();
