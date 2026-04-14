@@ -207,9 +207,7 @@ public class PlayerMovement : MonoBehaviour
             // プレイヤーの現在の向き（敵の方向）を基準にローカル方向を計算する
             Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
-            _animationController.PlayLockedDodge(
-                  Vector3.Dot(snappedDir, right),
-                  Vector3.Dot(snappedDir, fwd));
+            _animationController.PlayLockedDodge(snappedDir.x, snappedDir.z);
         }
         else
         {
