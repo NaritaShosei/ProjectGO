@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using UnityEngine;
 
 /// <summary>
 /// ヒットストップを管理するマネージャー。
@@ -24,12 +25,18 @@ public sealed class HitStopManager : IDisposable
     /// </summary>
     public void Register(ISpeedChange target, HitStopTargetGroup group)
     {
-        if (target == null) return;
+        if (target == null) { return; }
 
         if (_groupTargets.TryGetValue(group, out var list) &&
             !list.Contains(target))
         {
             list.Add(target);
+
+            // ヒットストップ中なら即適用
+            if (_currentScale.TryGetValue(group, out var scale) && Mathf.Abs(scale - 1f) > 0.0001f)
+            {
+                target.OnSpeedChange(scale);
+            }
         }
     }
 
@@ -132,6 +139,19 @@ public sealed class HitStopManager : IDisposable
         };
 
     /// <summary>
+    /// グループごとの現在の速度倍率
+    /// </summary>
+    private readonly Dictionary<HitStopTargetGroup, float> _currentScale =
+        new()
+        {
+        { HitStopTargetGroup.Player,     1f },
+        { HitStopTargetGroup.HitEnemy,   1f },
+        { HitStopTargetGroup.AllEnemies, 1f },
+        { HitStopTargetGroup.Effects,    1f },
+        { HitStopTargetGroup.Camera,     1f },
+        };
+
+    /// <summary>
     /// 現在発動中のヒットストップ用キャンセルトークン
     /// </summary>
     private CancellationTokenSource _hitStopCancellation;
@@ -185,13 +205,16 @@ public sealed class HitStopManager : IDisposable
     /// 指定グループの ISpeedChange に速度変更を適用する
     /// </summary>
     private void ApplySpeedScale(
-     float scale,
-     HitStopTargetGroup targetGroups,
-     IReadOnlyList<ISpeedChange> hitEnemyTargets)
+    float scale,
+    HitStopTargetGroup targetGroups,
+    IReadOnlyList<ISpeedChange> hitEnemyTargets)
     {
         foreach (var (group, list) in _groupTargets)
         {
             if ((targetGroups & group) == 0) continue;
+
+            // スケールを記録
+            _currentScale[group] = scale;
 
             foreach (var target in list.ToArray())
             {
