@@ -1,37 +1,20 @@
-using System.Runtime.InteropServices;
 using UnityEngine;
-using static CriWare.CriAtomExMic;
 
 [CreateAssetMenu(fileName = "LightningStrike", menuName = "GameData/Skill/LightningStrike")]
 public class LightningStrike : SkillBase, ISkillUpdater
 {
     public void OnUpdate(float deltaTime, PlayerMode mode, IPlayerStats stats, Vector3 playerPosition, EnemyManager enemyManager)
     {
-        Debug.Log($"Skill Update: mode={mode}");
-        //一旦コメントアウト
-        //if (mode != PlayerMode.Thunder) return;
+        if (mode != PlayerMode.Thunder) return;
 
-        //_timer -= deltaTime;
-
-        //if (_timer > 0f) return;
-
-        //_timer = Random.Range(_minInterval, _maxInterval);
-
-        //Trigger(stats,playerPosition,enemyManager);
-
-        //ここから
         _timer -= deltaTime;
-
-        Debug.Log($"timer: {_timer}");
 
         if (_timer > 0f) return;
 
-        _timer = 1f; // 強制1秒
-
-        Debug.Log("落雷発動");
+        _timer = Random.Range(_minInterval, _maxInterval);
 
         Trigger(stats, playerPosition, enemyManager);
-        //ここまでテスト用　要削除
+        Debug.Log("落雷発動");
     }
 
     [SerializeField] private float _minInterval = 2f;
