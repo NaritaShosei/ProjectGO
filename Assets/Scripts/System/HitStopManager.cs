@@ -35,7 +35,12 @@ public sealed class HitStopManager : IDisposable
             // ヒットストップ中なら即適用
             if (_currentScale.TryGetValue(group, out var scale) && Mathf.Abs(scale - 1f) > 0.0001f)
             {
-                target.OnSpeedChange(scale);
+                if (group != HitStopTargetGroup.HitEnemy ||
+                  _activeHitEnemyTargets == null ||
+                  _activeHitEnemyTargets.Contains(target))
+                {
+                    target.OnSpeedChange(scale);
+                }
             }
         }
     }
@@ -156,6 +161,7 @@ public sealed class HitStopManager : IDisposable
     /// </summary>
     private CancellationTokenSource _hitStopCancellation;
 
+    private HashSet<ISpeedChange> _activeHitEnemyTargets;
 
     /// <summary>
     /// ヒットストップの非同期処理本体
@@ -215,6 +221,14 @@ public sealed class HitStopManager : IDisposable
 
             // スケールを記録
             _currentScale[group] = scale;
+
+            if (group == HitStopTargetGroup.HitEnemy)
+            {
+                _activeHitEnemyTargets =
+                (Mathf.Abs(scale - 1f) > 0.0001f && hitEnemyTargets != null)
+                    ? new HashSet<ISpeedChange>(hitEnemyTargets)
+                    : null;
+            }
 
             foreach (var target in list.ToArray())
             {
