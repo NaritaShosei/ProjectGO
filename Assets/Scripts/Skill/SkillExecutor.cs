@@ -20,6 +20,7 @@ public class SkillExecutor : MonoBehaviour
 
     void Update()
     {
+        Debug.Log("SkillExecutor 回ってる");
         if (_skillManager == null) return;
 
         float deltatime = Time.deltaTime;
@@ -27,6 +28,7 @@ public class SkillExecutor : MonoBehaviour
 
         foreach (var updater in _skillManager.GetUpdaters())
         {
+            Debug.Log("Updater呼び出し");
             updater.OnUpdate(deltatime,mode,_playerStats,_playerTransform.position,_enemyManager);
         }
     }
