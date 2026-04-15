@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class InGameUIInitializer : MonoBehaviour
@@ -23,7 +24,7 @@ public class InGameUIInitializer : MonoBehaviour
         // ロックオンマーカー初期化
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
-            _lockOnMarkerPresenter = new LockOnMarkerPresenter(cameraManager, _lockOnMarkerView);
+            _lockOnMarkerPresenter = new LockOnMarkerPresenter(cameraManager, _lockOnMarkerView, destroyCancellationToken);
         }
         else
         {
@@ -33,23 +34,17 @@ public class InGameUIInitializer : MonoBehaviour
 
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
-    [SerializeField] private LockOnMarkerView _lockOnMarkerView; 
+    [SerializeField] private LockOnMarkerView _lockOnMarkerView;
 
     private IModeController _playerModeController;
     private PlayerModePresenter _playerModePresenter;
     private PlayerGaugePresenter _playerGaugePresenter;
-    private LockOnMarkerPresenter _lockOnMarkerPresenter; 
-
-    private void Update()
-    {
-        // ロックオン中は毎フレーム位置追従
-        _lockOnMarkerPresenter?.Tick();
-    }
+    private LockOnMarkerPresenter _lockOnMarkerPresenter;
 
     private void OnDestroy()
     {
         _playerModePresenter?.Dispose();
         _playerGaugePresenter?.Dispose();
-        _lockOnMarkerPresenter?.Dispose(); 
+        _lockOnMarkerPresenter?.Dispose();
     }
 }

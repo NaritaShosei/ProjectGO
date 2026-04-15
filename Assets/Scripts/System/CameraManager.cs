@@ -96,8 +96,10 @@ public class CameraManager : MonoBehaviour
     private Transform _playerTransform;
     private ILockOnTarget _currentTarget;
     private Component _currentTargetComponent;
+    private CinemachineOrbitalFollow _normalOrbitalFollow; // 通常カメラのOrbitalFollowコンポーネントへの参照
     private Transform _cameraFollowTarget; // 通常時の遅延追従用アンカー
-    private Vector3 _currentPosVelocity;   // SmoothDamp用
+    private Vector3 _normalFollowVelocity; // 通常追従用
+    private Vector3 _lockOnCameraVelocity; // ロックオン追従用
 
     private void Awake()
     {
@@ -109,6 +111,9 @@ public class CameraManager : MonoBehaviour
 
         _normalCamera.Priority = _normalPriority;
         _lockOnCamera.Priority = _normalPriority - 1;
+
+        // 通常カメラのOrbitalFollowコンポーネントを取得
+        _normalOrbitalFollow = _normalCamera.GetComponent<CinemachineOrbitalFollow>();
     }
 
     /// <summary>
@@ -143,7 +148,7 @@ public class CameraManager : MonoBehaviour
         _cameraFollowTarget.position = Vector3.SmoothDamp(
             _cameraFollowTarget.position,
             _playerTransform.position,
-            ref _currentPosVelocity,
+            ref _normalFollowVelocity,
             _posSmoothTime
         );
     }
@@ -174,7 +179,7 @@ public class CameraManager : MonoBehaviour
         _lockOnCamera.transform.position = Vector3.SmoothDamp(
             _lockOnCamera.transform.position,
             desiredPosition,
-            ref _currentPosVelocity,
+            ref _lockOnCameraVelocity,
             _posSmoothTime
         );
 
@@ -197,11 +202,10 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     private void ApplyRotationToNormalCamera()
     {
-        if (_normalCamera.GetComponent<CinemachineOrbitalFollow>() is var orbital)
-        {
-            Vector3 currentEuler = _lockOnCamera.transform.rotation.eulerAngles;
-            orbital.HorizontalAxis.Value = currentEuler.y;
-            orbital.VerticalAxis.Value = currentEuler.x;
-        }
+        if (_normalOrbitalFollow == null) return;
+
+        Vector3 currentEuler = _lockOnCamera.transform.rotation.eulerAngles;
+        _normalOrbitalFollow.HorizontalAxis.Value = currentEuler.y;
+        _normalOrbitalFollow.VerticalAxis.Value = currentEuler.x;
     }
 }

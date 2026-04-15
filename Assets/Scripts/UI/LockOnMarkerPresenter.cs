@@ -1,11 +1,14 @@
+using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 
 public class LockOnMarkerPresenter : IDisposable
 {
     public LockOnMarkerPresenter(
         CameraManager cameraManager,
-        LockOnMarkerView view)
+        LockOnMarkerView view,
+        CancellationToken token)
     {
         _cameraManager = cameraManager;
         _view = view;
@@ -13,17 +16,8 @@ public class LockOnMarkerPresenter : IDisposable
         _view.SetCamera(_cameraManager.MainCamera);
 
         _cameraManager.OnLockOnTargetChanged += HandleLockOnTargetChanged;
-    }
 
-    public void Tick()
-    {
-        // ロックオン中は毎フレーム位置を更新する
-        if (_currentTarget == null) return;
-
-        var center = _currentTarget.GetTargetCenter();
-        if (center == null) return;
-
-        _view.UpdatePosition(center.position);
+        TickAsync(token).Forget();
     }
 
     public void Dispose()
@@ -46,5 +40,36 @@ public class LockOnMarkerPresenter : IDisposable
         }
 
         _view.Show(target.GetTargetCenter().position);
+    }
+
+    private async UniTask TickAsync(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                Tick();
+                await UniTask.Yield(PlayerLoopTiming.LastUpdate, token);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // キャンセル時は正常終了
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
+    }
+
+    private void Tick()
+    {
+        // ロックオン中は毎フレーム位置を更新する
+        if (_currentTarget == null) return;
+
+        var center = _currentTarget.GetTargetCenter();
+        if (center == null) return;
+
+        _view.UpdatePosition(center.position);
     }
 }

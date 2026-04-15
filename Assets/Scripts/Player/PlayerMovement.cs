@@ -197,17 +197,20 @@ public class PlayerMovement : MonoBehaviour
 
         if (_lockOnTarget != null || isCancelDodge)
         {
-            // Dodgeメソッド内の修正イメージ
-            var snappedInputV2 = SnapTo8Directions(_input.MoveInput);
-            // Vector2(x, y) を Vector3(x, 0, y) に変換
-            Vector3 snappedDir = new Vector3(snappedInputV2.x, 0, snappedInputV2.y);
+            // ロックオン中の回避は入力方向に応じた8方向アニメーションで回避する。
+            var snappedInput = SnapTo8Directions(_input.MoveInput);
+            var cam = _cameraManager.MainCamera.transform;
 
-            // ロックオン中は常に8方向
-            // 攻撃キャンセル回避は8方向アニメーション
-            // プレイヤーの現在の向き（敵の方向）を基準にローカル方向を計算する
-            Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
-            Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
-            _animationController.PlayLockedDodge(snappedDir.x, snappedDir.z);
+            // 入力方向をワールド空間のベクトルに変換してプレイヤーローカルに変換
+            var snappedWorldDir =
+            Vector3.ProjectOnPlane(cam.right, Vector3.up).normalized * snappedInput.x +
+            Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized * snappedInput.y;
+
+            // ワールド空間の回避方向をプレイヤーローカル空間に変換してアニメーションに渡す
+            var localDir = transform.InverseTransformDirection(snappedWorldDir.normalized);
+
+            // ロックオン中の回避アニメーションは8方向に分かれているため、入力方向を丸めてアニメーションを切り替える
+            _animationController.PlayLockedDodge(localDir.x, localDir.z);
         }
         else
         {

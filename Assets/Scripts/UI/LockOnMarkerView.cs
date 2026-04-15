@@ -10,7 +10,9 @@ public class LockOnMarkerView : MonoBehaviour
         {
             _isVisible = true;
             _canvasGroup.alpha = 0f;
-            _canvasGroup.DOFade(1f, _fadeDuration).SetLink(gameObject);
+
+            _fadeTween?.Kill();
+            _fadeTween = _canvasGroup.DOFade(1f, _fadeDuration).SetLink(gameObject);
         }
         gameObject.SetActive(true);
     }
@@ -19,7 +21,9 @@ public class LockOnMarkerView : MonoBehaviour
     {
         if (!_isVisible) return;
         _isVisible = false;
-        _canvasGroup.DOFade(0f, _fadeDuration)
+
+        _fadeTween?.Kill();
+        _fadeTween = _canvasGroup.DOFade(0f, _fadeDuration)
             .OnComplete(() => gameObject.SetActive(false))
             .SetLink(gameObject);
     }
@@ -59,6 +63,7 @@ public class LockOnMarkerView : MonoBehaviour
     private Camera _mainCamera;
     private bool _isVisible;
     private Sequence _seq;
+    private Tween _fadeTween;
 
     private void Awake()
     {
