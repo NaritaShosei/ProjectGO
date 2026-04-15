@@ -15,7 +15,7 @@ public class CameraManager : MonoBehaviour
     public ILockOnTarget CurrentTarget => _currentTarget;
 
     /// <summary>現在ロックオン中かどうか</summary>
-    public bool IsLockedOn => _currentTargetComponent != null;
+    public bool IsLockedOn => _currentTarget != null;
 
     /// <summary>ロックオン対象が変更された際の通知</summary>
     public event Action<ILockOnTarget> OnLockOnTargetChanged;
