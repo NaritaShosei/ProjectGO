@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Main Camera Custom Blends
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineBlenderSettings
   CustomBlends:
-  - From: FreeLook Camera
+  - From: 'FreeLook Camera '
     To: LockOnCamera
     Blend:
       Style: 1
@@ -25,7 +25,7 @@ MonoBehaviour:
         m_PostInfinity: 0
         m_RotationOrder: 0
   - From: LockOnCamera
-    To: FreeLook Camera
+    To: 'FreeLook Camera '
     Blend:
       Style: 1
       Time: 0.1
