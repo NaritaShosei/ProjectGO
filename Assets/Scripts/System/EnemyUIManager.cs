@@ -10,15 +10,13 @@ public class EnemyUIManager : MonoBehaviour
         _enemyManager = enemyManager;
         _playerTransform = playerTransform;
 
-        _gaugePool = new EnemyGaugePool(_gaugePrefab, _gaugeParent);
+        _gaugePool = new GenericObjectPool<EnemyGaugeView>(_gaugePrefab, _gaugeParent, 0,
+            onRelease: view => view.Cleanup());
 
-        _armerGaugePool = new EnemyGaugePool(_armerGaugePrefab, _armerGaugeParent);
+        _armerGaugePool = new GenericObjectPool<EnemyGaugeView>(_armerGaugePrefab, _armerGaugeParent, 0,
+            onRelease: view => view.Cleanup());
 
-        _popupPool = new DamagePopupPool(
-            _popupPrefab,
-            _popupParent,
-            _popupPreloadCount
-        );
+        _popupPool = new GenericObjectPool<DamagePopupView>(_popupPrefab, _popupParent, _popupPreloadCount);
 
         _popupPresenter = new DamagePopupPresenter(_popupPool);
 
@@ -51,9 +49,9 @@ public class EnemyUIManager : MonoBehaviour
     private Dictionary<IEnemy, EnemyGaugePresenter> _gaugePresenters = new();
     private Dictionary<IArmorHealth, ArmorGaugePresenter> _armorPresenters = new();
 
-    private EnemyGaugePool _gaugePool;
-    private EnemyGaugePool _armerGaugePool;
-    private DamagePopupPool _popupPool;
+    private GenericObjectPool<EnemyGaugeView> _gaugePool;
+    private GenericObjectPool<EnemyGaugeView> _armerGaugePool;
+    private GenericObjectPool<DamagePopupView> _popupPool;
     private DamagePopupPresenter _popupPresenter;
 
     private CancellationTokenSource _cts;
