@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SkillExecutor : MonoBehaviour
 {
-    public void Iint(SkillManager skillManager,IPlayerStats stats,Func<PlayerMode> getmode,Transform playerTransform,EnemyManager enemyManager)
+    public void Init(SkillManager skillManager,IPlayerStats stats,Func<PlayerMode> getmode,Transform playerTransform,EnemyManager enemyManager)
     {
         _skillManager = skillManager;
         _playerStats = stats;
@@ -20,7 +20,6 @@ public class SkillExecutor : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("SkillExecutor 回ってる");
         if (_skillManager == null) return;
 
         float deltatime = Time.deltaTime;
@@ -28,7 +27,6 @@ public class SkillExecutor : MonoBehaviour
 
         foreach (var updater in _skillManager.GetUpdaters())
         {
-            Debug.Log("Updater呼び出し");
             updater.OnUpdate(deltatime,mode,_playerStats,_playerTransform.position,_enemyManager);
         }
     }

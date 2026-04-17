@@ -29,7 +29,7 @@ public class LightningStrike : SkillBase,ISkillUpdater
     //感電時間
     [SerializeField] private float _electricShockDuration;
 
-    private float _timer;
+    [System.NonSerialized] private float _timer;
 
     private void Trigger(IPlayerStats stats, Vector3 playerPosition, EnemyManager enemyManager)
     {
@@ -49,9 +49,9 @@ public class LightningStrike : SkillBase,ISkillUpdater
         {
             var target = shuffled[i];
 
-            var areaTragets = enemyManager.GetEnemiesInRange(target.Position, _areaRadius);
+            var areaTargets = enemyManager.GetEnemiesInRange(target.Position, _areaRadius);
 
-            foreach (var enemy in areaTragets)
+            foreach (var enemy in areaTargets)
             {
                 float damage = stats.AttackPower * _damageMultiplier;
 
@@ -76,8 +76,13 @@ public class LightningStrike : SkillBase,ISkillUpdater
             // 視覚確認
             Debug.DrawLine(playerPosition, target.Position, Color.blue, 1f);
         }
-        Debug.Log("落雷発動");
     }
+
+    private void OnEnable()
+    {
+        _timer = Random.Range(_minInterval, _maxInterval);
+    }
+
     /// <summary>
     /// エフェクトシャッフル
     /// </summary>

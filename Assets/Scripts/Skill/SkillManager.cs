@@ -102,7 +102,7 @@ public class SkillManager : MonoBehaviour
     /// <param name="getmode"></param>
     public void Init(IPlayerStats stats, Func<PlayerMode> getmode, Transform playerTransform, EnemyManager enemyManager)
     {
-        _skillExecutor.Iint(this, stats, getmode, playerTransform, enemyManager);
+        _skillExecutor.Init(this, stats, getmode, playerTransform, enemyManager);
     }
 
     [SerializeField] private SkillDataBase _skillDataBase;
