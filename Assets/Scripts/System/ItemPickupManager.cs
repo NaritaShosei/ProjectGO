@@ -8,15 +8,17 @@ public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
     public void Init(Transform playerTransform)
     {
         _playerTransform = playerTransform;
-        _itemPool = new HealItemPool(_itemPrefab, _itemParent);
-        _viewPool = new ItemPickupPool(_viewPrefab, _viewParent);
+        _itemPool = new GenericObjectPool<HealItem>(_itemPrefab, _itemParent);
+        _viewPool = new GenericObjectPool<ItemPickupView>(_viewPrefab, _viewParent);
         _cts = new CancellationTokenSource();
         RangeCheckLoopAsync(_cts.Token).Forget();
     }
 
     public void Spawn(Vector3 position)
     {
-        var item = _itemPool.Get(position);
+        var item = _itemPool.Get();
+        item.transform.position = position;
+
         var view = _viewPool.Get();
         var presenter = new ItemPickupPresenter(
             item, view, _playerTransform, _nearRange
@@ -69,8 +71,8 @@ public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
     [SerializeField] private float _rangeCheckInterval = 0.1f;
 
     private Transform _playerTransform;
-    private HealItemPool _itemPool;
-    private ItemPickupPool _viewPool;
+    private GenericObjectPool<HealItem> _itemPool;
+    private GenericObjectPool<ItemPickupView> _viewPool;
     private CancellationTokenSource _cts;
     private ItemPickupPresenter _interactPresenter;
     private readonly Dictionary<HealItem, ItemPickupPresenter> _presenters = new();
