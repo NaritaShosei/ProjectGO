@@ -49,9 +49,10 @@ public class GameManager : MonoBehaviour
 
         _player.Init(_skillManager, input);
 
-        //追加
-        var modeController = _player.GetComponent<IModeController>();
-        _skillManager.Init(_player, () => modeController.CurrentMode,_player.transform,_enemyManager);
+        if (_player.TryGetComponent(out IModeController modeController))
+        {
+            _skillManager.Init(_player, modeController, _player.transform, _enemyManager);
+        }
 
         _player.OnDead += HandleGameComplete;
     }

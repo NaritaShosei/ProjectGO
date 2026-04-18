@@ -1,33 +1,32 @@
 using System;
 using UnityEngine;
 
-public class SkillExecutor : MonoBehaviour
+public class SkillExecutor
 {
-    public void Init(SkillManager skillManager,IPlayerStats stats,Func<PlayerMode> getmode,Transform playerTransform,EnemyManager enemyManager)
+    public SkillExecutor(SkillManager skillManager, IPlayerStats stats, IModeController modeController, Transform playerTransform, EnemyManager enemyManager)
     {
         _skillManager = skillManager;
         _playerStats = stats;
-        _getMode = getmode;
+        this._modeController = modeController;
         _enemyManager = enemyManager;
         _playerTransform = playerTransform;
     }
 
-    private SkillManager _skillManager;
-    private IPlayerStats _playerStats;
-    private Func<PlayerMode> _getMode;
-    private Transform _playerTransform;
-    private EnemyManager _enemyManager;
-
-    private void Update()
+    public void Tick()
     {
         if (_skillManager == null) return;
 
         float deltatime = Time.deltaTime;
-        var mode = _getMode?.Invoke() ?? default;
 
         foreach (var updater in _skillManager.GetUpdaters())
         {
-            updater.OnUpdate(deltatime,mode,_playerStats,_playerTransform.position,_enemyManager);
+            updater.OnUpdate(deltatime, _modeController.CurrentMode, _playerStats, _playerTransform.position, _enemyManager);
         }
     }
+
+    private SkillManager _skillManager;
+    private IPlayerStats _playerStats;
+    private IModeController _modeController;
+    private Transform _playerTransform;
+    private EnemyManager _enemyManager;
 }
