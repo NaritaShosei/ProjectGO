@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class LightningStrikeUpdater : ISkillUpdater
 {
-    private readonly LightningStrike _data;
-    private float _timer;
 
     public LightningStrikeUpdater(LightningStrike data)
     {
@@ -24,6 +22,8 @@ public class LightningStrikeUpdater : ISkillUpdater
         Trigger(stats, playerPosition, enemyManager);
     }
 
+    private readonly LightningStrike _data;
+    private float _timer;
     private void Trigger(IPlayerStats stats, Vector3 playerPosition, EnemyManager enemyManager)
     {
         var enemies = enemyManager.GetEnemiesInRange(playerPosition, _data.SearchRadius);
