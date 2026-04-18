@@ -27,12 +27,13 @@ public class Effect : MonoBehaviour, ISpeedChange
         }
         return false;
     }
+
     public void Cleanup()
     {
         Stop();
+        TimeScale = 1f;
+        ApplyTimeScale();
     }
-
-
 
     /// <summary>
     /// HitStopから呼ばれる速度変更処理
@@ -48,6 +49,7 @@ public class Effect : MonoBehaviour, ISpeedChange
     [SerializeField] private ParticleSystem _particle;
     ////子objectも含めたParticleSystem
     private ParticleSystem[] _particles;
+
     private void Awake()
     {
         _particles = GetComponentsInChildren<ParticleSystem>();
@@ -58,6 +60,8 @@ public class Effect : MonoBehaviour, ISpeedChange
     /// </summary>
     private void ApplyTimeScale()
     {
+        if (_particles == null) return;
+
         foreach (var ps in _particles)
         {
             var main = ps.main;

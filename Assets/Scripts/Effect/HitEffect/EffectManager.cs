@@ -15,7 +15,7 @@ public class EffectManager : MonoBehaviour
 
         var view = pool.Get();
 
-        var presenter = new EffectPresenter(view, pool);
+        var presenter = new EffectPresenter(view, pool,_hitStop);
         presenter.PlayAsync(position, Quaternion.identity, _cts.Token).Forget();
     }
 
@@ -23,9 +23,12 @@ public class EffectManager : MonoBehaviour
     [SerializeField] private List<EffectData> _effectDatasLsit;
     private Dictionary<string, GenericObjectPool<Effect>> _pools = new();
     private CancellationTokenSource _cts;
+    private HitStopManager _hitStop;
+
 
     private void Awake()
     {
+        _hitStop = ServiceLocator.Get<HitStopManager>();
         _cts = new CancellationTokenSource();
 
         foreach (var data in _effectDatasLsit)

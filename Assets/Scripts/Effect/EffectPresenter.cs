@@ -6,26 +6,33 @@ public class EffectPresenter
 {
     private Effect _view;
     private GenericObjectPool<Effect> _pool;
+    private HitStopManager _hitStopManager;
 
-    public EffectPresenter(Effect view,GenericObjectPool<Effect> pool)
+    public EffectPresenter(Effect view,GenericObjectPool<Effect> pool,HitStopManager hitStopManager)
     {
         _pool = pool;
         _view = view;
+        _hitStopManager = hitStopManager;
     }
 
     public async UniTask PlayAsync(Vector3 position,Quaternion rotation, CancellationToken ct = default)
     {
-        _view.transform.SetParent(null, false);
-        _view.transform.position = position;
-        _view.transform.rotation = rotation;
+        try
+        {
+            _hitStopManager.Register(_view, HitStopTargetGroup.Effects);
+            _view.transform.SetParent(null, false);
+            _view.transform.position = position;
+            _view.transform.rotation = rotation;
 
-        _view.Play();
+            _view.Play();
 
-        // 再生終了待ち
-        await UniTask.WaitUntil(() => ct.IsCancellationRequested || !_view.IsAlive(),
-    cancellationToken: ct);
-
-        Dispose();
+            // 再生終了待ち
+            await UniTask.WaitUntil(() => ct.IsCancellationRequested || !_view.IsAlive(), cancellationToken: ct);
+        }
+        finally
+        {
+            Dispose();
+        }
     }
 
     public void Dispose()
@@ -34,5 +41,6 @@ public class EffectPresenter
         _view.Cleanup();
         _pool.Release(_view);
         _view = null;
+        _hitStopManager.Unregister(_view, HitStopTargetGroup.Effects);
     }
 }
