@@ -22,7 +22,8 @@ public class EffectPresenter
         _view.Play();
 
         // 再生終了待ち
-        await UniTask.WaitUntil(() => _view == null || !_view.IsAlive(), cancellationToken: ct);
+        await UniTask.WaitUntil(() => ct.IsCancellationRequested || !_view.IsAlive(),
+    cancellationToken: ct);
 
         Dispose();
     }
