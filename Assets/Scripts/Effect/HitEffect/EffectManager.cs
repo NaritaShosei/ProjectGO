@@ -14,12 +14,12 @@ public class EffectManager : MonoBehaviour
         effect.Play();
     }
 
-    public void PlayEffect(string key, Transform trasfomr)
+    public void PlayEffect(string key, Transform transform)
     {
         var effect = _pool.Get(key);
         if (effect == null) return;
 
-        effect.transform.SetParent(trasfomr,false);
+        effect.transform.SetParent(transform,false);
 
         effect.transform.localPosition = Vector3.zero;
         effect.transform.localRotation = Quaternion.identity;
