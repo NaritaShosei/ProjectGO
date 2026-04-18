@@ -1,84 +1,62 @@
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class EffectManager : MonoBehaviour
 {
     public void PlayEffect(string key, Vector3 position)
     {
-        var effect = GetEffect(key);
-        if (effect == null) return;
+        if (!_pools.TryGetValue(key, out var pool))
+        {
+            Debug.LogError($"Effect not found: {key}");
+            return;
+        }
 
-        effect.transform.SetParent(null,false);
-        effect.transform.position = position;
-        effect.transform.rotation = Quaternion.identity;
+        var view = pool.Get();
 
-        effect.Play();
-    }
-
-    public void PlayEffect(string key, Transform transform)
-    {
-        var effect = GetEffect(key);
-        if (effect == null) return;
-
-        effect.transform.SetParent(transform,false);
-        effect.transform.localPosition = Vector3.zero;
-        effect.transform.localRotation = Quaternion.identity;
-
-        effect.Play();
-    }
-
-    public void PlayEffect(string key, Vector3 position,Quaternion rotation)
-    {
-        var effect = GetEffect(key);
-        if (effect == null) return;
-
-        effect.transform.SetParent(null,false);
-        effect.transform.position = position;
-        effect.transform.rotation = rotation;
-
-        effect.Play();
-    }
-
-    public void PlayEffect(string key, Transform parent, Vector3 localPosition)
-    {
-        var effect = GetEffect(key);
-        if (effect == null) return;
-
-        effect.transform.SetParent(parent,false);
-        effect.transform.localPosition = localPosition;
-        effect.transform.localRotation = Quaternion.identity;
-
-        effect.Play();
+        var presenter = new EffectPresenter(view, pool);
+        presenter.PlayAsync(position, Quaternion.identity, _cts.Token).Forget();
     }
 
     [SerializeField] private Transform _poolParent;
     [SerializeField] private List<EffectData> _effectDatasLsit;
-    private Dictionary<string,EffectPool> _pools = new();
-
+    private Dictionary<string, GenericObjectPool<Effect>> _pools = new();
+    private CancellationTokenSource _cts;
 
     private void Awake()
     {
-        foreach(var data in _effectDatasLsit)
+        _cts = new CancellationTokenSource();
+
+        foreach (var data in _effectDatasLsit)
         {
-            if(string.IsNullOrEmpty(data.Key)||data.Prefab == null)
-            {
+            if (string.IsNullOrEmpty(data.Key) || data.Prefab == null)
                 continue;
-            }
-            if(_pools.ContainsKey(data.Key))
-            {
+            if (_pools.ContainsKey(data.Key))
                 continue;
+
+            var pool = new GenericObjectPool<Effect>(
+            data.Prefab,
+            _poolParent,
+            preloadCount: 5,
+            onRelease: e =>
+            {
+                e.Cleanup();
+                e.transform.SetParent(_poolParent);
+
+                e.transform.localPosition = Vector3.zero;
+                e.transform.localRotation = Quaternion.identity;
             }
-            _pools[data.Key] = new EffectPool(data.Prefab,_poolParent);
+        );
+            _pools[data.Key] = pool;
+
+            Debug.Log($"Registered Effect: {data.Key}");
         }
     }
 
-    private Effect GetEffect(string key)
+    private void OnDestroy()
     {
-        if (!_pools.TryGetValue(key, out var pool))
-        {
-            Debug.LogError($"Effect not found: {key}", this);
-            return null;
-        }
-        return pool.Get();
+        _cts.Cancel();
+        _cts.Dispose();
     }
 }
