@@ -6,7 +6,6 @@ public class Effect : MonoBehaviour, ISpeedChange
 {
     //再生終了時に呼ばれるコールバック
     public Action<Effect> OnFinished;
-    public string Key { get; set; }
     public float TimeScale { get; set; } = 1f;
 
     /// <summary>
@@ -54,7 +53,7 @@ public class Effect : MonoBehaviour, ISpeedChange
         if (ServiceLocator.TryGet<HitStopManager>(out var manager))
         {
             _hitStopManager = manager;
-            _hitStopManager.Register(this, HitStopTargetGroup.Effects);
+            _hitStopManager?.Register(this, HitStopTargetGroup.Effects);
         }
     }
 
