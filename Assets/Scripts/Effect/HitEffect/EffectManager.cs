@@ -44,9 +44,7 @@ public class EffectManager : MonoBehaviour
             preloadCount: 5,
             onRelease: e =>
             {
-                e.Cleanup();
                 e.transform.SetParent(_poolParent);
-
                 e.transform.localPosition = Vector3.zero;
                 e.transform.localRotation = Quaternion.identity;
             }

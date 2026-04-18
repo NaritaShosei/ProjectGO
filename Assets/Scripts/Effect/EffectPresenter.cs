@@ -38,9 +38,9 @@ public class EffectPresenter
     public void Dispose()
     {
         if (_view == null) return;
+        _hitStopManager.Unregister(_view, HitStopTargetGroup.Effects);
         _view.Cleanup();
         _pool.Release(_view);
         _view = null;
-        _hitStopManager.Unregister(_view, HitStopTargetGroup.Effects);
     }
 }
