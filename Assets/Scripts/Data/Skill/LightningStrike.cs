@@ -73,8 +73,6 @@ public class LightningStrike : SkillBase,ISkillUpdater
                 var effect = Instantiate(effectPrefab, target.Position, Quaternion.identity);
                 Destroy(effect, 2f);
             }
-            // 視覚確認
-            Debug.DrawLine(playerPosition, target.Position, Color.blue, 1f);
         }
     }
 

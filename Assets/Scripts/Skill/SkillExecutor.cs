@@ -18,7 +18,7 @@ public class SkillExecutor : MonoBehaviour
     private Transform _playerTransform;
     private EnemyManager _enemyManager;
 
-    void Update()
+    private void Update()
     {
         if (_skillManager == null) return;
 
