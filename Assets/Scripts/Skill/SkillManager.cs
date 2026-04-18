@@ -7,66 +7,56 @@ public class SkillManager : MonoBehaviour
 {
     public event Action<SkillBase> OnSkillAcquired;
 
-    /// <summary> スキルのIDを登録し、獲得時効果を適用する </summary>
+    public void Init(IPlayerStats stats, IModeController modeController,
+        Transform playerTransform, EnemyManager enemyManager)
+    {
+        _skillExecutor = new SkillExecutor(this, stats, modeController, playerTransform, enemyManager);
+    }
+
     public bool TryRegisterSkillId(int id, IPlayerStats stats)
     {
-        if (!_skillAcquireCounts.ContainsKey(id))
-        {
-            _skillAcquireCounts[id] = 0;
-        }
+        if (_skillDataBase == null) return false;
+        var skill = _skillDataBase.GetSkill(id);
+        if (skill == null) return false;
 
+        if (!_skillAcquireCounts.ContainsKey(id))
+            _skillAcquireCounts[id] = 0;
         _skillAcquireCounts[id]++;
 
-        // スキルを取得して獲得時効果を適用
-        var skill = _skillDataBase.GetSkill(id);
-        if (skill != null && skill.Timing == SkillTiming.OnAcquire)
-        {
+        if (skill.Timing == SkillTiming.OnAcquire)
             skill.OnAcquire(stats, _skillAcquireCounts[id]);
-            OnSkillAcquired?.Invoke(skill);
-        }
 
-        // 次のレベルに進めない場合はスキルが出てこないようにする
-        if (skill == null || !skill.CanAcquire(_skillAcquireCounts[id]))
+        OnSkillAcquired?.Invoke(skill);
+
+        _ownedSkillIDs.Add(id);
+        if (!skill.CanAcquire(_skillAcquireCounts[id] + 1))
+            _exhaustedSkillIDs.Add(id);
+
+        // Passive スキルは CreateUpdater() で Updater を生成して登録
+        // 同じスキルを複数回取得しても Updater は1つだけ登録する
+        if (skill.Timing == SkillTiming.Passive && _registeredSkillIDs.Add(id))
         {
-            _ownedSkillIDs.Add(id);
+            var updater = skill.CreateUpdater();
+            if (updater != null)
+                _updaters.Add(updater);
         }
 
         return true;
     }
 
+    public IReadOnlyList<ISkillUpdater> GetUpdaters() => _updaters;
+    public IEnumerable<int> GetOwnedSkillIDs() => _ownedSkillIDs;
+    public IEnumerable<SkillBase> GetAttackSkills() => GetSkillsByTiming(SkillTiming.OnAttack);
 
-    /// <summary> 開放済みのIDを取得する </summary>
-    public IReadOnlyList<int> GetOwnedSkillIDs() => _ownedSkillIDs.ToList();
-
-    /// <summary> 攻撃時に適用するスキルのみを取得 </summary>
-    public IEnumerable<SkillBase> GetAttackSkills()
-    {
-        foreach (var id in _ownedSkillIDs)
-        {
-            var skill = _skillDataBase.GetSkill(id);
-
-            if (skill != null && skill.Timing == SkillTiming.OnAttack)
-            {
-                yield return skill;
-            }
-        }
-    }
-
-    /// <summary> 取得済みスキルの列挙を返す </summary>
     public IEnumerable<SkillBase> GetOwnedSkills()
     {
         foreach (var id in _ownedSkillIDs)
         {
             var skill = _skillDataBase.GetSkill(id);
-
-            if (skill != null)
-            {
-                yield return skill;
-            }
+            if (skill != null) yield return skill;
         }
     }
 
-    /// <summary> 与えられた数分ランダムにスキルを取得 </summary>
     public List<SkillBase> GetSelectableSkills(int count)
     {
         if (_skillDataBase == null)
@@ -74,17 +64,24 @@ public class SkillManager : MonoBehaviour
             Debug.LogWarning("SkillDataBaseが未設定です");
             return new List<SkillBase>();
         }
-
         return _skillDataBase.GetAllSkills()
-            .Where(s => !_ownedSkillIDs.Contains(s.ID))
+            .Where(s => !_exhaustedSkillIDs.Contains(s.ID))
             .OrderBy(_ => UnityEngine.Random.value)
             .Take(count)
             .ToList();
     }
 
-
     [SerializeField] private SkillDataBase _skillDataBase;
 
-    private HashSet<int> _ownedSkillIDs = new HashSet<int>();
+    private SkillExecutor _skillExecutor;
+    private List<ISkillUpdater> _updaters = new();
+    private HashSet<int> _ownedSkillIDs = new();
+    private HashSet<int> _exhaustedSkillIDs = new();
+    private HashSet<int> _registeredSkillIDs = new();
     private Dictionary<int, int> _skillAcquireCounts = new();
+
+    private IEnumerable<SkillBase> GetSkillsByTiming(SkillTiming timing)
+        => GetOwnedSkills().Where(s => s.Timing == timing);
+
+    private void Update() => _skillExecutor?.Tick();
 }
