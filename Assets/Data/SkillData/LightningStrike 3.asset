@@ -12,16 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be655b64f5d7b3f44bc4e975e4b5b069, type: 3}
   m_Name: LightningStrike 3
   m_EditorClassIdentifier: Assembly-CSharp::LightningStrike
-  _id: 0
+  _id: 668
   _priority: 0
-  _name: 
+  _name: "\u96F7\u9CF4\u306E\u5BE9\u52243"
   _explanation: 
   _icon: {fileID: 0}
-  _timing: 0
+  _timing: 2
+  _targetCount: 2
   _minInterval: 2
   _maxInterval: 4
-  _damegeMultiplier: 1.6
+  _damageMultiplier: 1.6
   _searchRadius: 999
   _hitEffectPrefabs: []
-  _areaRadius: 0
-  _electricShockDuration: 0
+  _areaRadius: 2.5
+  _electricShockDuration: 1.5
