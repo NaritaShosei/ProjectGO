@@ -15,7 +15,6 @@ public class LightningStrikeUpdater : ISkillUpdater
     public void OnUpdate(float deltaTime, PlayerMode mode, IPlayerStats stats,
         Vector3 playerPosition, EnemyManager enemyManager)
     {
-        Debug.Log($"LightningStrikeUpdater Tick - Mode: {mode}, Timer: {_timer:F2}s");
         if (mode != PlayerMode.Thunder) return;
 
         _timer -= deltaTime;
@@ -27,7 +26,6 @@ public class LightningStrikeUpdater : ISkillUpdater
 
     private void Trigger(IPlayerStats stats, Vector3 playerPosition, EnemyManager enemyManager)
     {
-        Debug.Log("Lightning Strike 発動！");
         var enemies = enemyManager.GetEnemiesInRange(playerPosition, _data.SearchRadius);
         if (enemies.Count == 0) return;
 
@@ -69,11 +67,13 @@ public class LightningStrikeUpdater : ISkillUpdater
                 enemy.TakeDamage(damageContext);
             }
 
+
+            // エフェクトのプールができたらInstantiate→Destroyの流れをやめる
             if (effects.Count > 0)
             {
                 var prefab = effects[i % effects.Count];
                 var effect = Object.Instantiate(prefab, target.Position, Quaternion.identity);
-                Object.Destroy(effect, 2f);Debug.Log($"Lightning Strike Hit Effect instantiated at {target.Position}");
+                Object.Destroy(effect, 2f);
             }
         }
     }
