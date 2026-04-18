@@ -42,7 +42,7 @@ public class LightningStrike : SkillBase,ISkillUpdater
 
         int targetCount = Mathf.Min(_targetCount, shuffled.Count);
 
-        var effects = new List<GameObject>(_hitEffectPrefabs);
+        var effects = _hitEffectPrefabs != null ? new List<GameObject>(_hitEffectPrefabs) : new List<GameObject>();
         Shuffle(effects);
 
         for (int i = 0; i < targetCount; i++)
@@ -58,7 +58,7 @@ public class LightningStrike : SkillBase,ISkillUpdater
                 var damageContext = new DamageContext { AttackPower = damage, PlayerMode = PlayerMode.Thunder };
                 enemy.TakeDamage(damageContext);
 
-                enemy.ConditionController?.ApplyCondition(new ElectrifiedCondition(_electricShockDuration, enemyIsBoss: false));
+                enemy.ConditionController?.ApplyCondition(new ElectrifiedCondition(_electricShockDuration, enemyIsBoss: enemy.IsBoss));
             }
 
             GameObject effectPrefab = null;
