@@ -18,10 +18,14 @@ MonoBehaviour:
   _explanation: 
   _icon: {fileID: 0}
   _timing: 2
+  _targetCount: 1
   _minInterval: 2
   _maxInterval: 4
-  _damegeMultiplier: 1
+  _damageMultiplier: 1.6
   _searchRadius: 999
-  _hitEffectPrefabs: []
+  _hitEffectPrefabs:
+  - {fileID: 8762405910555896786, guid: fcb74f28d107e284e80af037bfec14ca, type: 3}
   _areaRadius: 0
-  _electricShockDuration: 0
+  _electricShockDuration: 0.3
+  _grantEffectProbability: 1
+  _upDamagePercentage: 0
