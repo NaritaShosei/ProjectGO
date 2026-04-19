@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EnemyUIManager _enemyUIManager;
     [SerializeField] private SkillManager _skillManager;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
-    [SerializeField] private InGameUIInitializer _inGameUIInitializer;
+    [SerializeField] private PlayerUIInitializer _inGameUIInitializer;
     [SerializeField] private ItemPickupManager _itemPickupManager;
 
     private SceneTransitionManager _sceneTransitionManager;
