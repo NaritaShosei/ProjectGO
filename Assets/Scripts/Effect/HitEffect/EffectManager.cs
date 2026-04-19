@@ -20,7 +20,7 @@ public class EffectManager : MonoBehaviour
     }
 
     [SerializeField] private Transform _poolParent;
-    [SerializeField] private List<EffectData> _effectDatasLsit;
+    [SerializeField] private List<EffectData> _effectDatasList;
     [SerializeField] private int _preloadCount = 5;
     private Dictionary<string, GenericObjectPool<Effect>> _pools = new();
     private CancellationTokenSource _cts;
@@ -32,7 +32,7 @@ public class EffectManager : MonoBehaviour
         _hitStop = ServiceLocator.Get<HitStopManager>();
         _cts = new CancellationTokenSource();
 
-        foreach (var data in _effectDatasLsit)
+        foreach (var data in _effectDatasList)
         {
             if (string.IsNullOrEmpty(data.Key) || data.Prefab == null)
                 continue;

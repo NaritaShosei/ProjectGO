@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class EffectPresenter
 {
-    public EffectPresenter(Effect view,GenericObjectPool<Effect> pool,HitStopManager hitStopManager)
+    public EffectPresenter(Effect view, GenericObjectPool<Effect> pool, HitStopManager hitStopManager)
     {
         _pool = pool;
         _view = view;
         _hitStopManager = hitStopManager;
     }
 
-    public async UniTask PlayAsync(Vector3 position,Quaternion rotation, CancellationToken ct = default)
+    public async UniTask PlayAsync(Vector3 position, Quaternion rotation, CancellationToken ct = default)
     {
         try
         {
@@ -40,7 +40,7 @@ public class EffectPresenter
         _view = null;
     }
 
-        private Effect _view;
+    private Effect _view;
     private GenericObjectPool<Effect> _pool;
     private HitStopManager _hitStopManager;
 }
