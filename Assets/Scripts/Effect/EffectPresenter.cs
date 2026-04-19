@@ -4,10 +4,6 @@ using UnityEngine;
 
 public class EffectPresenter
 {
-    private Effect _view;
-    private GenericObjectPool<Effect> _pool;
-    private HitStopManager _hitStopManager;
-
     public EffectPresenter(Effect view,GenericObjectPool<Effect> pool,HitStopManager hitStopManager)
     {
         _pool = pool;
@@ -19,10 +15,10 @@ public class EffectPresenter
     {
         try
         {
-            _hitStopManager.Register(_view, HitStopTargetGroup.Effects);
             _view.transform.SetParent(null, false);
             _view.transform.position = position;
             _view.transform.rotation = rotation;
+            _hitStopManager.Register(_view, HitStopTargetGroup.Effects);
 
             _view.Play();
 
@@ -43,4 +39,8 @@ public class EffectPresenter
         _pool.Release(_view);
         _view = null;
     }
+
+        private Effect _view;
+    private GenericObjectPool<Effect> _pool;
+    private HitStopManager _hitStopManager;
 }

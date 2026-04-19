@@ -21,6 +21,7 @@ public class EffectManager : MonoBehaviour
 
     [SerializeField] private Transform _poolParent;
     [SerializeField] private List<EffectData> _effectDatasLsit;
+    [SerializeField] private int _preloadCount = 5;
     private Dictionary<string, GenericObjectPool<Effect>> _pools = new();
     private CancellationTokenSource _cts;
     private HitStopManager _hitStop;
@@ -41,7 +42,7 @@ public class EffectManager : MonoBehaviour
             var pool = new GenericObjectPool<Effect>(
             data.Prefab,
             _poolParent,
-            preloadCount: 5,
+            preloadCount: _preloadCount,
             onRelease: e =>
             {
                 e.transform.SetParent(_poolParent);

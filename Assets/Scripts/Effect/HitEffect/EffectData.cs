@@ -1,6 +1,11 @@
+using UnityEngine;
+
 [System.Serializable]
 public struct EffectData
 {
-    public string Key;
-    public Effect Prefab;
+    [SerializeField] private string _key;
+    [SerializeField] private Effect _prefab;
+
+    public string Key => _key;
+    public Effect Prefab => _prefab;
 }
