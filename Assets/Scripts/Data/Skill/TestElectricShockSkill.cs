@@ -26,7 +26,16 @@ public class TestElectricShockSkill : SkillBase
 /// </summary>
 public struct ElectricShock
 {
+    /// <summary>
+    /// 状態異常を付与する確率。0.2なら20%の確率で付与される。
+    /// </summary>
     public float GrantEffectProbability;
+    /// <summary>
+    /// 状態異常の持続時間。単位は秒。
+    /// </summary>
     public float DurationEffect;
+    /// <summary>
+    /// 状態異常中のダメージ上昇率。0.5なら50%ダメージが上昇する。
+    /// </summary>
     public float UpDamagePercentage;
 }
