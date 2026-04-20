@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 8100726554472640711}
   - component: {fileID: 4773163649764372864}
   m_Layer: 0
-  m_Name: UIPresenterInitializer
+  m_Name: PlayerUIInitializer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -152,6 +152,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UIPresenterInitializer
   _playerModeView: {fileID: 0}
   _playerGaugeView: {fileID: 0}
+  _lockOnMarkerView: {fileID: 0}
+  _thunderEffect: {fileID: 0}
 --- !u!1 &2419423074138577103
 GameObject:
   m_ObjectHideFlags: 0
@@ -483,4 +485,5 @@ MonoBehaviour:
   _lockOnPriority: 20
   _cameraDistance: 5
   _cameraHeight: 2
-  _followSpeed: 10
+  _posSmoothTime: 0.2
+  _rotFollowSpeed: 10
