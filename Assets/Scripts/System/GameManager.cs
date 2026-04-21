@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EnemyUIManager _enemyUIManager;
     [SerializeField] private SkillManager _skillManager;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
-    [SerializeField] private InGameUIInitializer _inGameUIInitializer;
+    [SerializeField] private PlayerUIInitializer _inGameUIInitializer;
     [SerializeField] private ItemPickupManager _itemPickupManager;
 
     private SceneTransitionManager _sceneTransitionManager;
@@ -48,6 +48,11 @@ public class GameManager : MonoBehaviour
         var input = ServiceLocator.Get<InputHandler>();
 
         _player.Init(_skillManager, input);
+
+        if (_player.TryGetComponent(out IModeController modeController))
+        {
+            _skillManager.Init(_player, modeController, _player.transform, _enemyManager);
+        }
 
         _player.OnDead += HandleGameComplete;
     }

@@ -42,6 +42,9 @@ public class PlayerAttack : MonoBehaviour
                 _input.OnChargeStart += BufferDodgeAttack;
                 break;
         }
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged += ChangeLockOnTarget;
     }
 
     /// <summary>
@@ -136,6 +139,8 @@ public class PlayerAttack : MonoBehaviour
     private AttackInput? _pendingAttackInput;
     private AttackInput? _bufferedComboInput;
 
+    private ILockOnTarget _currentLockOnTarget;
+
     // ── Lifecycle ──────────────────────────────────────────
 
     private void OnDestroy()
@@ -164,6 +169,9 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
             _animationController.OnComboTransition -= TryComboTransition;
         }
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged -= ChangeLockOnTarget;
     }
 
     private void Update() => PerformHoming();
@@ -387,9 +395,34 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform FindHomingTarget(float radius, float angle)
     {
-        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
+        if (_currentLockOnTarget != null)
+        {
+            return _currentLockOnTarget.GetTargetCenter();
+        }
+
         Transform best = null;
         float bestScore = float.MaxValue;
+
+        // ロックオン対象がない場合は周囲の敵からホーミングターゲットを選定
+        if (ServiceLocator.TryGet(out EnemyManager enemyManager))
+        {
+            var enemies = enemyManager.GetEnemiesInRange(transform.position, radius);
+
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsDead) continue;
+                var dir = (enemy.GetTargetCenter().position - transform.position).normalized;
+                float angleTo = Vector3.Angle(transform.forward, dir);
+                if (angleTo > angle) continue;
+                float dist = Vector3.Distance(transform.position, enemy.GetTargetCenter().position);
+                if (dist < bestScore) { bestScore = dist; best = enemy.GetTargetCenter(); }
+            }
+
+            return best;
+        }
+
+        // EnemyManagerがない場合は物理判定で敵を探す（基本的にはEnemyManagerがある前提なので、こちらは保険的な実装）
+        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
 
         foreach (var hit in hits)
         {
@@ -449,8 +482,17 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnModeChanged(PlayerMode newMode)
     {
-        Debug.Log($"モード変更: {newMode}");
         ResetCombo();
+    }
+
+    private void ChangeLockOnTarget(ILockOnTarget target)
+    {
+        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
+        {
+            _currentLockOnTarget = null;
+        }
+
+        _currentLockOnTarget = target;
     }
 }
 
