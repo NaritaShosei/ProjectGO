@@ -18,7 +18,7 @@ public class EffectPresenter
             _view.transform.SetParent(null, false);
             _view.transform.position = position;
             _view.transform.rotation = rotation;
-            _hitStopManager.Register(_view, HitStopTargetGroup.Effects);
+            _hitStopManager?.Register(_view, HitStopTargetGroup.Effects);
 
             _view.Play();
 
@@ -34,7 +34,7 @@ public class EffectPresenter
     public void Dispose()
     {
         if (_view == null) return;
-        _hitStopManager.Unregister(_view, HitStopTargetGroup.Effects);
+        _hitStopManager?.Unregister(_view, HitStopTargetGroup.Effects);
         _view.Cleanup();
         _pool.Release(_view);
         _view = null;
