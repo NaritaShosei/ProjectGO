@@ -179,10 +179,6 @@ PrefabInstance:
       value: Manager
       objectReference: {fileID: 0}
     - target: {fileID: 4773163649764372864, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: _thunderEffect
-      value: 
-      objectReference: {fileID: 846275052}
-    - target: {fileID: 4773163649764372864, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _playerModeView
       value: 
       objectReference: {fileID: 1499976145}
@@ -726,15 +722,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4997206696848089353, guid: bb58477608e551041ad7c6c84fb51aa8, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8462420606901713499, guid: bb58477608e551041ad7c6c84fb51aa8, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8542224527382821674, guid: bb58477608e551041ad7c6c84fb51aa8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.01
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8542224527382821674, guid: bb58477608e551041ad7c6c84fb51aa8, type: 3}
       propertyPath: m_LocalPosition.y
@@ -924,51 +920,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!1 &846275051
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 846275053}
-  - component: {fileID: 846275052}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &846275052
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 846275051}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e49bac7b4f32234aaa19c8c9bea6221, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ThunderEffectView
-  _vfx: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
---- !u!4 &846275053
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 846275051}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.03153, y: -0, z: -0.9352}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &880904463
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1965,6 +1916,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2099050185}
   m_SourcePrefab: {fileID: 100100000, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+--- !u!4 &2099050183 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1691297996302881762, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+  m_PrefabInstance: {fileID: 2099050182}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2099050184 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5847551565396971007, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
@@ -1982,7 +1938,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91145aad127033c4c987d0548eee2d02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponEffectView
-  _vfxSocket: {fileID: 365181711}
+  _vfxSocket: {fileID: 2099050183}
   _thunderPrefab: {fileID: 656059721}
   _warriorPrefab: {fileID: 3959151464104858498}
 --- !u!1 &2119412429
@@ -2169,11 +2125,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4944696987412791066, guid: 65130c87b9ff20543a815b6dd19f3e17, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5535227399663801301, guid: 65130c87b9ff20543a815b6dd19f3e17, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8880640844167067446, guid: 65130c87b9ff20543a815b6dd19f3e17, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2243,4 +2199,3 @@ SceneRoots:
   - {fileID: 2041505426}
   - {fileID: 1738502799}
   - {fileID: 207396567}
-  - {fileID: 846275053}
