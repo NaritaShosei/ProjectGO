@@ -73,12 +73,17 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     [SerializeField] private CanvasGroup _canvasGroup;
 
     [Header("表示設定")]
-    [SerializeField] private float _lifeTime = 1.5f;        //消滅までの時間
-    [SerializeField] private float _fadeDuration = 0.2f;    //フェードの時間
-    [SerializeField] private float _popupDistance = 10f;
+    [SerializeField, Tooltip("拡大するサイズ")] private float _peakScale = 1.2f;
+    [SerializeField, Tooltip("拡大して弾む演出の最初の拡大時間（秒）")] private float _popDuration = 0.1f;
+    [SerializeField, Tooltip("拡大後に最終サイズへ戻る時間（秒）")] private float _settleDuration = 0.1f;
+    [SerializeField, Tooltip("アニメーション終了時の最終スケール値")] private float _endScale = 1f;
 
-    [SerializeField] private float _randomOffsetX = 15f;
-    [SerializeField] private float _randomOffsetY = 10f;
+    [SerializeField, Tooltip("表示されてから消滅するまでの合計時間（秒）")] private float _lifeTime = 1.5f;  
+    [SerializeField, Tooltip("消える直前にフェードアウトする時間（秒）")] private float _fadeDuration = 0.2f;
+    [SerializeField, Tooltip("上方向へ移動する距離")] private float _popupDistance = 10f;
+
+    [SerializeField, Tooltip("生成位置のX方向ランダムずらし幅（±値）")] private float _randomOffsetX = 15f;
+    [SerializeField, Tooltip("生成位置のY方向ランダムずらし幅（±値）")] private float _randomOffsetY = 10f;
 
     [Header("色設定")]
     [SerializeField] private Color _normalColor = Color.white;
@@ -115,10 +120,15 @@ public class DamagePopupView : MonoBehaviour,IDamagePopupView
     {
         Sequence seq = DOTween.Sequence();
 
+        //ダメージ表示を拡大、縮小
+        seq.Append(_rectTransform.DOScale(_peakScale, _popDuration).SetEase(Ease.OutBack));
+        seq.Append(_rectTransform.DOScale(_endScale, _settleDuration));
+
         //一定時間停止
         float wait = Mathf.Max(0f,_lifeTime - _fadeDuration);
         seq.AppendInterval(wait);
 
+        //上方向に移動＋フェードアウト
         seq.Append(_rectTransform.DOMoveY(_rectTransform.position.y + _popupDistance,_fadeDuration));
         seq.Join(_canvasGroup.DOFade(0f, _fadeDuration));
 
