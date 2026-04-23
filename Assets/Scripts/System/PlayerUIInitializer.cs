@@ -4,13 +4,11 @@ public class PlayerUIInitializer : MonoBehaviour
 {
     public void Init(Player player)
     {
-        Debug.Log("Init呼ばれた");
         if (player.TryGetComponent(out IModeController modeController))
         {
             _playerModeController = modeController;
             _playerModePresenter = new PlayerModePresenter(_playerModeController, _playerModeView);
             _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, _playerModeController);
-            _weaponEffectPresenter = new WeaponEffectPresenter(_playerModeController,_weaponEffectView);
         }
         else
         {
@@ -37,15 +35,13 @@ public class PlayerUIInitializer : MonoBehaviour
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
     [SerializeField] private LockOnMarkerView _lockOnMarkerView;
-    [SerializeField] private ThunderEffect _thunderEffect;
-    [SerializeField] private WeaponEffectView _weaponEffectView;
+    [SerializeField] private ThunderEffectView _thunderEffect;
 
     private IModeController _playerModeController;
     private PlayerModePresenter _playerModePresenter;
     private PlayerGaugePresenter _playerGaugePresenter;
     private LockOnMarkerPresenter _lockOnMarkerPresenter;
     private ThunderEffectPresenter _thunderEffectPresenter;
-    private WeaponEffectPresenter _weaponEffectPresenter;
 
     private void OnDestroy()
     {
@@ -53,6 +49,5 @@ public class PlayerUIInitializer : MonoBehaviour
         _playerGaugePresenter?.Dispose();
         _lockOnMarkerPresenter?.Dispose();
         _thunderEffectPresenter?.Dispose();
-        _weaponEffectPresenter?.Dispose();
     }
 }

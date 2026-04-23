@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-public class ThunderEffect : MonoBehaviour, ISpeedChange
+public class ThunderEffectView : MonoBehaviour, ISpeedChange
 {
     // ヒットストップ等で利用するタイムスケール
     public float TimeScale { get; set; } = 1f;
