@@ -35,7 +35,7 @@ public class PlayerUIInitializer : MonoBehaviour
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
     [SerializeField] private LockOnMarkerView _lockOnMarkerView;
-    [SerializeField] private ThunderEffect _thunderEffect;
+    [SerializeField] private ThunderEffectView _thunderEffect;
 
     private IModeController _playerModeController;
     private PlayerModePresenter _playerModePresenter;

@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 26
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
-  m_sharedMaterial: {fileID: 2649257169248792476, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 79459efec17a4d00a321bdcc27bbc385, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -200,10 +200,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfbe1f60acd0adf46b0749d5876543f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DamagePopupView
-  _damageText: {fileID: 0}
+  _damageText: {fileID: 8445579043734170176}
   _criticalObj: {fileID: 5980305884172010166}
   _canvasGroup: {fileID: 4531806476638301571}
-  _lifeTime: 1.5
+  _peakScale: 1.5
+  _popDuration: 0.1
+  _settleDuration: 0.15
+  _endScale: 1
+  _lifeTime: 1
   _fadeDuration: 0.2
   _popupDistance: 10
   _randomOffsetX: 15

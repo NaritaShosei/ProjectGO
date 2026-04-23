@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using System.Collections;
 
 public class Effect : MonoBehaviour, ISpeedChange
 {
@@ -56,7 +54,7 @@ public class Effect : MonoBehaviour, ISpeedChange
     }
 
     /// <summary>
-    /// ParticleSysytemにTimeScaleを反映
+    /// ParticleSystemにTimeScaleを反映
     /// </summary>
     private void ApplyTimeScale()
     {
