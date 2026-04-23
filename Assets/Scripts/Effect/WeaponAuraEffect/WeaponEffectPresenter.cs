@@ -1,6 +1,6 @@
 using System;
 
-public class WeaponEffectPresenter : IDisposable
+public class WeaponEffectPresenter
 {
     public WeaponEffectPresenter(IModeController modeController, WeaponEffectView weaponEffectView)
     {
