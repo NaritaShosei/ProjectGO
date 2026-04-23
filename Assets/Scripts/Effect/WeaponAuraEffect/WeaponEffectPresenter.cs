@@ -1,4 +1,6 @@
-public class WeaponEffectPresenter
+using System;
+
+public class WeaponEffectPresenter : IDisposable
 {
     public WeaponEffectPresenter(IModeController modeController, WeaponEffectView weaponEffectView)
     {
@@ -6,11 +8,14 @@ public class WeaponEffectPresenter
         _weaponEffectView = weaponEffectView;
 
         modeController.OnModeChanged += _weaponEffectView.Change;
+
+        _weaponEffectView.Change(modeController.CurrentMode);
     }
 
     public void Dispose()
     {
-        _modeController.OnModeChanged += _weaponEffectView.Change;
+        if (_modeController != null)
+            _modeController.OnModeChanged -= _weaponEffectView.Change;
     }
 
     private IModeController _modeController;

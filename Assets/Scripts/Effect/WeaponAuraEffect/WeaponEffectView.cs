@@ -5,15 +5,16 @@ public class WeaponEffectView : MonoBehaviour
 {
     public void Change(PlayerMode mode)
     {
-        _thunderInstance.SetActive(false);
-        _warriorInstance.SetActive(false);
+        Debug.Log("View起動");
+        _thunderEffect.SetActive(false);
+        _warriorEffect.SetActive(false);
         switch (mode)
         {
             case PlayerMode.Thunder:
-                _thunderInstance.SetActive(true);
+                _thunderEffect.SetActive(true);
                 break;
             case PlayerMode.Warrior:
-                _warriorInstance.SetActive(true);
+                _warriorEffect.SetActive(true);
                 break;
             default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
         }
@@ -23,15 +24,15 @@ public class WeaponEffectView : MonoBehaviour
     [SerializeField] private GameObject _thunderPrefab;
     [SerializeField] private GameObject _warriorPrefab;
 
-    private GameObject _thunderInstance;
-    private GameObject _warriorInstance;
+    private GameObject _thunderEffect;
+    private GameObject _warriorEffect;
 
     private void Awake()
     {
-        _thunderInstance = Instantiate(_thunderPrefab, _vfxSocket);
-        _warriorInstance = Instantiate(_warriorPrefab, _vfxSocket);
+        _thunderEffect = Instantiate(_thunderPrefab, _vfxSocket);
+        _warriorEffect = Instantiate(_warriorPrefab, _vfxSocket);
 
-        _thunderInstance.SetActive(false);
-        _warriorInstance.SetActive(false);
+        _thunderEffect.SetActive(false);
+        _warriorEffect.SetActive(false);
     }
 }
