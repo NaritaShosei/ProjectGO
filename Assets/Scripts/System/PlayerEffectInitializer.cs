@@ -4,11 +4,17 @@ public class PlayerEffectInitializer : MonoBehaviour
 {
     public void Init(Player player)
     {
+        //リーク対策
+        _thunderEffectPresenter?.Dispose();
+        _weaponEffectPresenter?.Dispose();
+        _thunderEffectPresenter = null;
+        _weaponEffectPresenter = null;
+
         if (player.TryGetComponent(out IModeController modeController))
         {
             _playerModeController = modeController;
             _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, _playerModeController);
-            _weaponEffectPresenter = new WeaponEffectPresenter(modeController, _weaponEffectView);
+            _weaponEffectPresenter = new WeaponEffectPresenter(_playerModeController, _weaponEffectView);
         }
         else
         {
