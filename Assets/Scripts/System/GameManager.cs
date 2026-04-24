@@ -26,8 +26,8 @@ public class GameManager : MonoBehaviour
         InitCameraManager();
         InitEnemyManager();
         InitUI();
-        StartGame();
         InitEffect();
+        StartGame();
     }
 
     private void OnDestroy()
