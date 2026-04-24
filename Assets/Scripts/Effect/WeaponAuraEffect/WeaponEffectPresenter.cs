@@ -8,16 +8,13 @@ public class WeaponEffectPresenter
         _weaponEffectView = weaponEffectView;
 
         modeController.OnModeChanged += _weaponEffectView.Change;
-
-        _weaponEffectView.Change(modeController.CurrentMode);
     }
 
     public void Dispose()
     {
-        if (_modeController != null)
-            _modeController.OnModeChanged -= _weaponEffectView.Change;
+        _modeController.OnModeChanged -= _weaponEffectView.Change;
     }
 
-    private IModeController _modeController;
-    private WeaponEffectView _weaponEffectView;
+    private readonly IModeController _modeController;
+    private readonly WeaponEffectView _weaponEffectView;
 }
