@@ -15,7 +15,10 @@ public class WeaponEffectView : MonoBehaviour
         if (next == _currentEffect)
             return;
         if (next == null)
+        {
             Debug.LogError("IWeaponEffectが設定されてない");
+            return;
+        }
 
         _currentEffect?.Stop();
         _currentEffect = next;
