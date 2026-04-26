@@ -2,12 +2,15 @@ using System;
 
 public class WeaponEffectPresenter
 {
-    public WeaponEffectPresenter(IModeController modeController, WeaponEffectView weaponEffectView)
+    public WeaponEffectPresenter(WeaponEffectView weaponEffectView,IModeController modeController)
     {
         _modeController = modeController;
         _weaponEffectView = weaponEffectView;
 
         modeController.OnModeChanged += _weaponEffectView.Change;
+
+        //初期設定しないとChangeが呼ばれないからエフェクトが出ない
+        _weaponEffectView.Change(modeController.CurrentMode);
     }
 
     public void Dispose()

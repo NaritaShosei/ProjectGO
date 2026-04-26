@@ -14,7 +14,7 @@ public class PlayerEffectInitializer : MonoBehaviour
         {
             _playerModeController = modeController;
             _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, _playerModeController);
-            _weaponEffectPresenter = new WeaponEffectPresenter(_playerModeController, _weaponEffectView);
+            _weaponEffectPresenter = new WeaponEffectPresenter( _weaponEffectView, _playerModeController);
         }
         else
         {

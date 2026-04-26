@@ -5,26 +5,30 @@ public class WeaponEffectView : MonoBehaviour
 {
     public void Change(PlayerMode mode)
     {
-        _thunderEffect.SetActive(false);
-        _warriorEffect.SetActive(false);
-        switch (mode)
+        var next = mode switch
         {
-            case PlayerMode.Thunder:
-                _thunderEffect.SetActive(true);
-                break;
-            case PlayerMode.Warrior:
-                _warriorEffect.SetActive(true);
-                break;
-            default: throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
-        }
+            PlayerMode.Thunder => _thunderEffect as IWeaponEffect,
+            PlayerMode.Warrior => _warriorEffect as IWeaponEffect,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        if (next == _currentEffect)
+            return;
+        if (next == null)
+            Debug.LogError("IWeaponEffectが設定されてない");
+
+        _currentEffect?.Stop();
+        _currentEffect = next;
+        _currentEffect?.Play();
     }
 
-    [SerializeField] private GameObject _thunderEffect;
-    [SerializeField] private GameObject _warriorEffect;
+    [SerializeField] private MonoBehaviour _thunderEffect;
+    [SerializeField] private MonoBehaviour _warriorEffect;
 
+    private IWeaponEffect _currentEffect;
     private void Awake()
     {
-        _thunderEffect.SetActive(false);
-        _warriorEffect.SetActive(false);
+        (_thunderEffect as IWeaponEffect)?.Stop();
+        (_warriorEffect as IWeaponEffect)?.Stop();
     }
 }
