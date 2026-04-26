@@ -25,8 +25,8 @@ public class WeaponEffectView : MonoBehaviour
         _currentEffect?.Play();
     }
 
-    [SerializeField] private MonoBehaviour _thunderEffect;
-    [SerializeField] private MonoBehaviour _warriorEffect;
+    [SerializeField] private ThunderWeaponEffect _thunderEffect;
+    [SerializeField] private WarriorWeaponEffect _warriorEffect;
 
     private IWeaponEffect _currentEffect;
     private void Awake()
