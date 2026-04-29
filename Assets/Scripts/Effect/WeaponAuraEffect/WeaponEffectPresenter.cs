@@ -8,7 +8,7 @@ public class WeaponEffectPresenter
     {
         _thunderEffect = thunderEffect ?? throw new ArgumentNullException(nameof(thunderEffect));
         _warriorEffect = warriorEffect ?? throw new ArgumentNullException(nameof(warriorEffect));
-        _modeController = modeController;
+        _modeController = modeController ?? throw new ArgumentNullException(nameof(modeController)); ;
 
         _thunderEffect.Stop();
         _warriorEffect.Stop();
