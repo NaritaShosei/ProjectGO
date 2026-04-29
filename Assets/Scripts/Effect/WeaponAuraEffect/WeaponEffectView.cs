@@ -1,37 +1,37 @@
-using System;
 using UnityEngine;
+using UnityEngine.VFX;
 
-public class WeaponEffectView : MonoBehaviour
+public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 {
-    public void Change(PlayerMode mode)
+    private float _timeScale = 1f;
+    [SerializeField] private VisualEffect _vfx;
+
+    // プロパティ実装
+    public float TimeScale
     {
-        var next = mode switch
+        get => _timeScale;
+        set
         {
-            PlayerMode.Thunder => _thunderEffect as IWeaponEffect,
-            PlayerMode.Warrior => _warriorEffect as IWeaponEffect,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        if (next == _currentEffect)
-            return;
-        if (next == null)
-        {
-            Debug.LogError("IWeaponEffectが設定されてない");
-            return;
+            _timeScale = value;
+            OnSpeedChange(_timeScale);
         }
-
-        _currentEffect?.Stop();
-        _currentEffect = next;
-        _currentEffect?.Play();
     }
 
-    [SerializeField] private ThunderWeaponEffect _thunderEffect;
-    [SerializeField] private WarriorWeaponEffect _warriorEffect;
-
-    private IWeaponEffect _currentEffect;
-    private void Awake()
+    //開始時の処理
+    public void Play()
     {
-        (_thunderEffect as IWeaponEffect)?.Stop();
-        (_warriorEffect as IWeaponEffect)?.Stop();
+        gameObject.SetActive(true);
+        OnSpeedChange(_timeScale);
+    }
+
+    // エフェクト停止時の処理
+    public void Stop()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void OnSpeedChange(float scale)
+    {
+        //_vfx.SetFloat("Time", scale);
     }
 }

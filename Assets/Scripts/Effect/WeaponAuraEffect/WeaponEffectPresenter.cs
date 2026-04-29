@@ -10,6 +10,9 @@ public class WeaponEffectPresenter
         _warriorEffect = warriorEffect ?? throw new ArgumentNullException(nameof(warriorEffect));
         _modeController = modeController;
 
+        _thunderEffect.Stop();
+        _warriorEffect.Stop();
+
         _modeController.OnModeChanged += Change;
 
         // 初期反映

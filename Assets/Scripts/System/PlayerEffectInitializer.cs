@@ -13,7 +13,7 @@ public class PlayerEffectInitializer : MonoBehaviour
         if (player.TryGetComponent(out IModeController modeController))
         {
             _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, modeController);
-            _weaponEffectPresenter = new WeaponEffectPresenter( _weaponEffectView, modeController);
+            _weaponEffectPresenter = new WeaponEffectPresenter(_thunderEffectView,_warriorEffectView,modeController);
         }
         else
         {
@@ -22,7 +22,8 @@ public class PlayerEffectInitializer : MonoBehaviour
     }
 
     [SerializeField] private ThunderEffectView _thunderEffect;
-    [SerializeField] private WeaponEffectView _weaponEffectView;
+    [SerializeField] private WeaponEffectView _thunderEffectView;
+    [SerializeField] private WeaponEffectView _warriorEffectView;
 
     private ThunderEffectPresenter _thunderEffectPresenter;
     private WeaponEffectPresenter _weaponEffectPresenter;
