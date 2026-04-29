@@ -19,6 +19,9 @@ public class EXPItem : MonoBehaviour, ISpeedChange
         _magnetRange = magnetRange;
     }
 
+    /// <summary>
+    /// アイテムの状態を更新するメソッド。毎フレーム呼び出される。プレイヤーとの距離を計算し、距離がマグネット範囲内であれば、プレイヤーに向かって移動する処理を行う。
+    /// </summary>
     public void Tick()
     {
         // プレイヤーとの距離を計算

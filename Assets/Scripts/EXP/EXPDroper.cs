@@ -3,8 +3,19 @@ using UnityEngine;
 
 public class EXPDropper
 {
+    /// <summary>
+    /// 経験値アイテムがドロップされたときに発火するイベント。引数にはドロップされたアイテム自身が渡される。
+    /// </summary>
     public event Action<EXPItem> OnDropAction;
+
+    /// <summary>
+    /// 経験値アイテムがリリースされたときに発火するイベント。引数にはリリースされたアイテム自身が渡される。
+    /// </summary>
     public event Action<EXPItem> OnReleaseAction;
+
+    /// <summary>
+    /// コンストラクタ。引数にはドロップするアイテムのプレハブ、ドロップするアイテムの親オブジェクト、ドロップするアイテムの初期プールサイズ、ドロップするアイテムとインタラクトするプレイヤーの情報、マグネット範囲が渡される。
+    /// </summary>
     public EXPDropper(EXPDropperContext context)
     {
         _player = context.Player;
@@ -12,6 +23,9 @@ public class EXPDropper
         _pool = new GenericObjectPool<EXPItem>(context.ItemPrefab, context.Parent, context.InitialPoolSize);
     }
 
+    /// <summary>
+    /// 経験値アイテムをドロップするメソッド。引数にはドロップする位置とドロップするアイテムの数が渡される。
+    /// </summary>
     public void DropEXP(Vector3 position, int count)
     {
         for (int i = 0; i < count; i++)
@@ -30,6 +44,9 @@ public class EXPDropper
     private float _magnetRange;
     private GenericObjectPool<EXPItem> _pool;
 
+    /// <summary>
+    /// 経験値アイテムがリリースされたときの処理を行うメソッド。引数にはリリースされたアイテム自身が渡される。
+    /// </summary>
     private void OnReleased(EXPItem item)
     {
         _pool.Release(item);
@@ -38,11 +55,20 @@ public class EXPDropper
     }
 }
 
-public struct EXPDropperContext
+public readonly struct EXPDropperContext
 {
-    public EXPItem ItemPrefab;
-    public int InitialPoolSize;
-    public Transform Parent;
-    public IPlayer Player;
-    public float MagnetRange;
+    public readonly EXPItem ItemPrefab;
+    public readonly int InitialPoolSize;
+    public readonly Transform Parent;
+    public readonly IPlayer Player;
+    public readonly float MagnetRange;
+
+    public EXPDropperContext(EXPItem itemPrefab, int initialPoolSize, Transform parent, IPlayer player, float magnetRange)
+    {
+        ItemPrefab = itemPrefab;
+        InitialPoolSize = initialPoolSize;
+        Parent = parent;
+        Player = player;
+        MagnetRange = magnetRange;
+    }
 }

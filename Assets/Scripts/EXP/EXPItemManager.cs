@@ -8,6 +8,9 @@ public class EXPItemManager : MonoBehaviour
         _player = player;
     }
 
+    /// <summary>
+    /// 経験値アイテムをドロップするメソッド。引数にはドロップする位置とドロップするアイテムの数が渡される。
+    /// </summary>
     public void DropEXP(Vector3 position, int count)
     {
         _expDropper.DropEXP(position, count);
@@ -26,14 +29,13 @@ public class EXPItemManager : MonoBehaviour
 
     private void Awake()
     {
-        _expDropper = new EXPDropper(new EXPDropperContext
-        {
-            ItemPrefab = _itemPrefab,
-            InitialPoolSize = _initialPoolSize,
-            Parent = _parent,
-            Player = _player,
-            MagnetRange = _magnetRange
-        });
+        _expDropper = new EXPDropper(new EXPDropperContext(
+            itemPrefab: _itemPrefab,
+            initialPoolSize: _initialPoolSize,
+            parent: _parent,
+            player: _player,
+            magnetRange: _magnetRange
+        ));
 
         _expDropper.OnDropAction += HandleEXPItemDropped;
         _expDropper.OnReleaseAction += HandleEXPItemReleased;
@@ -45,11 +47,17 @@ public class EXPItemManager : MonoBehaviour
         _expDropper.OnReleaseAction -= HandleEXPItemReleased;
     }
 
+    /// <summary>
+    /// 経験値アイテムがドロップされたときの処理を行うメソッド。引数にはドロップされたアイテム自身が渡される。
+    /// </summary>
     private void HandleEXPItemDropped(EXPItem item)
     {
         _activeItems.Add(item);
     }
 
+    /// <summary>
+    /// 経験値アイテムがリリースされたときの処理を行うメソッド。引数にはリリースされたアイテム自身が渡される。
+    /// </summary>
     private void HandleEXPItemReleased(EXPItem item)
     {
         _activeItems.Remove(item);
