@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
+/// <summary>
+/// 各エフェクトにつけてください
+/// </summary>
 public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 {
-    private float _timeScale = 1f;
-    [SerializeField] private VisualEffect _vfx;
-
     // プロパティ実装
     public float TimeScale
     {
@@ -33,7 +33,9 @@ public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
-
         _vfx.playRate = scale;
     }
+
+    private float _timeScale = 1f;
+    [SerializeField] private VisualEffect _vfx;
 }
