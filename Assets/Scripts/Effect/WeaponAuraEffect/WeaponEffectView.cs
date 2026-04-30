@@ -22,6 +22,7 @@ public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
     {
         gameObject.SetActive(true);
         OnSpeedChange(_timeScale);
+        
     }
 
     // エフェクト停止時の処理
@@ -32,6 +33,7 @@ public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
-        //_vfx.SetFloat("Time", scale);
+
+        _vfx.playRate = scale;
     }
 }
