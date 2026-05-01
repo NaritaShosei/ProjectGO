@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.VFX;
 
 /// <summary>
-/// 各エフェクトにつけてください
+/// 各武器纏エフェクトにつけてください
 /// </summary>
 public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 {
@@ -22,7 +22,6 @@ public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
     {
         gameObject.SetActive(true);
         OnSpeedChange(_timeScale);
-        
     }
 
     // エフェクト停止時の処理

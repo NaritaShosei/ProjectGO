@@ -13,7 +13,7 @@ public class PlayerEffectInitializer : MonoBehaviour
         if (player.TryGetComponent(out IModeController modeController))
         {
             _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, modeController);
-            _weaponEffectPresenter = new WeaponEffectPresenter(_thunderEffectView,_warriorEffectView,modeController);
+            _weaponEffectPresenter = new WeaponEffectPresenter(_thunderEffectView, _warriorEffectView, modeController);
         }
         else
         {
