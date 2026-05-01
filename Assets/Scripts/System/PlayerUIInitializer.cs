@@ -8,7 +8,6 @@ public class PlayerUIInitializer : MonoBehaviour
         {
             _playerModeController = modeController;
             _playerModePresenter = new PlayerModePresenter(_playerModeController, _playerModeView);
-            _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, _playerModeController);
         }
         else
         {
@@ -35,19 +34,16 @@ public class PlayerUIInitializer : MonoBehaviour
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
     [SerializeField] private LockOnMarkerView _lockOnMarkerView;
-    [SerializeField] private ThunderEffectView _thunderEffect;
 
     private IModeController _playerModeController;
     private PlayerModePresenter _playerModePresenter;
     private PlayerGaugePresenter _playerGaugePresenter;
     private LockOnMarkerPresenter _lockOnMarkerPresenter;
-    private ThunderEffectPresenter _thunderEffectPresenter;
 
     private void OnDestroy()
     {
         _playerModePresenter?.Dispose();
         _playerGaugePresenter?.Dispose();
         _lockOnMarkerPresenter?.Dispose();
-        _thunderEffectPresenter?.Dispose();
     }
 }
