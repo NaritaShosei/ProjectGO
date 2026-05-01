@@ -359,12 +359,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// </remarks>
     private async UniTaskVoid WaitForDeadAnimationAndDestroy()
     {
-        var expManager = ServiceLocator.Get<EXPItemManager>();
-
         if (_animationEventReceiver == null)
         {
             Destroy(gameObject);
-            expManager.DropEXP(new Vector3(transform.position.x, 0, transform.position.z), 10);
             return;
         }
 
