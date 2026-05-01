@@ -11,26 +11,17 @@ public class EXPItem : MonoBehaviour, ISpeedChange
     public float TimeScale { get => _timeScale; set => _timeScale = value; }
 
     /// <summary>
-    /// アイテムを初期化するメソッド。引数にはアイテムをインタラクトするプレイヤーの情報が渡される。
-    /// </summary>
-    public void Init(IPlayer player, float magnetRange)
-    {
-        _player = player;
-        _magnetRange = magnetRange;
-    }
-
-    /// <summary>
     /// アイテムの状態を更新するメソッド。毎フレーム呼び出される。プレイヤーとの距離を計算し、距離がマグネット範囲内であれば、プレイヤーに向かって移動する処理を行う。
     /// </summary>
-    public void Tick()
+    public void Tick(IPlayer player, float magnetRange)
     {
         // プレイヤーとの距離を計算
-        float distanceToPlayer = Vector3.Distance(transform.position, _player.GetTargetCenter().position);
+        float distanceToPlayer = Vector3.Distance(transform.position, player.GetTargetCenter().position);
         // 距離がマグネット範囲内であれば、プレイヤーに向かって移動する
-        if (distanceToPlayer <= _magnetRange)
+        if (distanceToPlayer <= magnetRange)
         {
-            Vector3 direction = (_player.GetTargetCenter().position - transform.position).normalized;
-            float speed = Mathf.Lerp(0, 10f, 1 - (distanceToPlayer / _magnetRange)); // 距離が近いほど速くなる
+            Vector3 direction = (player.GetTargetCenter().position - transform.position).normalized;
+            float speed = Mathf.Lerp(0, 10f, 1 - (distanceToPlayer / magnetRange)); // 距離が近いほど速くなる
             transform.position += direction * speed * Time.deltaTime * TimeScale;
         }
     }
@@ -60,7 +51,6 @@ public class EXPItem : MonoBehaviour, ISpeedChange
     }
 
     [SerializeField] private float _expValue;
-    private IPlayer _player;
-    private float _magnetRange;
+
     private float _timeScale;
 }

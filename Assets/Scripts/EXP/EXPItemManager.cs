@@ -32,19 +32,30 @@ public class EXPItemManager : MonoBehaviour
         _expDropper = new EXPDropper(new EXPDropperContext(
             itemPrefab: _itemPrefab,
             initialPoolSize: _initialPoolSize,
-            parent: _parent,
-            player: _player,
-            magnetRange: _magnetRange
+            parent: _parent
         ));
 
         _expDropper.OnDropAction += HandleEXPItemDropped;
         _expDropper.OnReleaseAction += HandleEXPItemReleased;
+
+        ServiceLocator.Register(this);
     }
 
     private void OnDestroy()
     {
         _expDropper.OnDropAction -= HandleEXPItemDropped;
         _expDropper.OnReleaseAction -= HandleEXPItemReleased;
+
+        ServiceLocator.Unregister<EXPItemManager>();
+    }
+
+    private void Update()
+    {
+        // アクティブな経験値アイテムの状態を更新
+        foreach (var item in _activeItems)
+        {
+            item.Tick(_player, _magnetRange);
+        }
     }
 
     /// <summary>

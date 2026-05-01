@@ -18,7 +18,7 @@ MonoBehaviour:
   _attackType: 1
   _comboIndex: 0
   _requiredCharge: 2
-  _damageMultiplier: 1
+  _damageMultiplier: 85.7
   _attackRange: 5
   _attackRadius: 5
   _nextComboAttackId: 9999
@@ -44,3 +44,4 @@ MonoBehaviour:
     _weakAndBreakOrKillMultiplier: 2.5
   _animationStateName: Warrior_Heavy_3
   _transitionDuration: -1
+  _playGroundHitSE: 0

@@ -18,8 +18,6 @@ public class EXPDropper
     /// </summary>
     public EXPDropper(EXPDropperContext context)
     {
-        _player = context.Player;
-        _magnetRange = context.MagnetRange;
         _pool = new GenericObjectPool<EXPItem>(context.ItemPrefab, context.Parent, context.InitialPoolSize);
     }
 
@@ -32,16 +30,15 @@ public class EXPDropper
         {
             var expItem = _pool.Get();
             expItem.OnReleased += OnReleased;
-            expItem.transform.position = position;
 
-            expItem.Init(_player, _magnetRange);
+            // ドロップ位置の周囲にランダムに配置
+            var randomPos = UnityEngine.Random.insideUnitSphere + position;
+            expItem.transform.position = new Vector3(randomPos.x, position.y, randomPos.z);
 
             OnDropAction?.Invoke(expItem);
         }
     }
 
-    private IPlayer _player;
-    private float _magnetRange;
     private GenericObjectPool<EXPItem> _pool;
 
     /// <summary>
@@ -60,15 +57,11 @@ public readonly struct EXPDropperContext
     public readonly EXPItem ItemPrefab;
     public readonly int InitialPoolSize;
     public readonly Transform Parent;
-    public readonly IPlayer Player;
-    public readonly float MagnetRange;
 
-    public EXPDropperContext(EXPItem itemPrefab, int initialPoolSize, Transform parent, IPlayer player, float magnetRange)
+    public EXPDropperContext(EXPItem itemPrefab, int initialPoolSize, Transform parent)
     {
         ItemPrefab = itemPrefab;
         InitialPoolSize = initialPoolSize;
         Parent = parent;
-        Player = player;
-        MagnetRange = magnetRange;
     }
 }
