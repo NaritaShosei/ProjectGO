@@ -52,8 +52,9 @@ public class EXPItemManager : MonoBehaviour
     private void Update()
     {
         // アクティブな経験値アイテムの状態を更新
-        foreach (var item in _activeItems)
+        for (int i = _activeItems.Count - 1; i >= 0; i--)
         {
+            var item = _activeItems[i];
             item.Tick(_player, _magnetRange);
         }
     }
