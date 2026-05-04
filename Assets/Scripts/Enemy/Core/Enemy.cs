@@ -384,6 +384,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         }
 
         if (this == null) return;
+
         Destroy(gameObject);
     }
 
