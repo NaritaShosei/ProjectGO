@@ -46,12 +46,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     }
 
     /// <summary>
-    /// プレイヤー参照を受け取って初期化する
+    /// 初期化する
     /// </summary>
-    public virtual void Init(IPlayer player)
-    {
-        _playerTransform = player.GetTargetCenter();
-    }
+    public virtual void Init() { }
 
     /// <summary>
     /// ノックバックの力を方向ベクトルとして直接座標に加算する
@@ -169,6 +166,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         if (oldSlot != null) oldSlot.OnSlotReleased -= HandleSlotReleased;
 
         _services = services;
+        _playerTransform = _services.PlayerInformationService.Player.GetTargetCenter();
 
         var newSlot = _services.AttackerSlot;
         if (newSlot != null) newSlot.OnSlotReleased += HandleSlotReleased;
