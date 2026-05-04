@@ -44,13 +44,13 @@ public class PlayerInformationService : IPlayerInformationService
         if (targetTransform == null) return false;
 
         // PlayerからtargetTransformへの方向ベクトルを計算
-        Vector3 directionToTarget = (_player.GetTargetCenter().position - targetTransform.transform.position).normalized;
+        Vector3 directionToTarget = (targetTransform.transform.position - _player.GetTargetCenter().position).normalized;
 
         // Playerの前方向とターゲットへの方向の内積を計算
-        float dot = Vector3.Dot(_player.GetTargetCenter().forward, targetTransform.transform.forward);
+        float dot = Vector3.Dot(_player.GetTargetCenter().forward, directionToTarget);
 
         // ViewAngleの半分の角度のcos値を閾値とする。
-        float threshold = Mathf.Cos(playerViewAngle * Mathf.Deg2Rad);
+        float threshold = Mathf.Cos((playerViewAngle * 0.5f) * Mathf.Deg2Rad);
 
         // dotがthresholdより小さい場合、targetTransformはPlayerの背後にいると判定する
         if (dot < threshold) return true;
