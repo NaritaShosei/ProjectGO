@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerUIInitializer _inGameUIInitializer;
     [SerializeField] private ItemPickupManager _itemPickupManager;
     [SerializeField] private PlayerEffectInitializer _playerEffectInitializer;
+    [SerializeField] private EXPItemManager _expManager;
 
     private SceneTransitionManager _sceneTransitionManager;
 
@@ -27,6 +28,7 @@ public class GameManager : MonoBehaviour
         InitEnemyManager();
         InitUI();
         InitEffect();
+        InitEXPManager();
         StartGame();
     }
 
@@ -99,6 +101,11 @@ public class GameManager : MonoBehaviour
     private void InitEffect()
     {
         _playerEffectInitializer.Init(_player);
+    }
+
+    private void InitEXPManager()
+    {
+        _expManager.Init(_player);
     }
 
     private void StartGame()

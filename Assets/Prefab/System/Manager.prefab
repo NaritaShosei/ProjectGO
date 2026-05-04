@@ -53,6 +53,7 @@ MonoBehaviour:
   _inGameUIInitializer: {fileID: 4773163649764372864}
   _itemPickupManager: {fileID: 9221605787384030750}
   _playerEffectInitializer: {fileID: 411399310545014901}
+  _expManager: {fileID: 9188911739395046811}
 --- !u!1 &2077946794018349390
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,6 +291,7 @@ Transform:
   - {fileID: 378753349322358893}
   - {fileID: 2114542451929730437}
   - {fileID: 1002532630286587311}
+  - {fileID: 425962379185678262}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4996710551187502800
@@ -386,6 +388,68 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillManager
   _skillDataBase: {fileID: 11400000, guid: 4d79037967742ff419d5ff316893928e, type: 2}
+--- !u!1 &6966947227818494167
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 425962379185678262}
+  - component: {fileID: 8590036200997755752}
+  - component: {fileID: 9188911739395046811}
+  m_Layer: 0
+  m_Name: EXPManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &425962379185678262
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6966947227818494167}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7036861525032570302}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8590036200997755752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6966947227818494167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 868c9d1c2e50af04d85a07b1c193c43f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EXPManager
+  _levelUpEXP: 100
+--- !u!114 &9188911739395046811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6966947227818494167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4d3454aa910edf489be089f483b8e6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EXPItemManager
+  _itemPrefab: {fileID: 3896815583660154485, guid: 838f49fbf1b17f5469827178e9ab558f, type: 3}
+  _initialPoolSize: 100
+  _parent: {fileID: 425962379185678262}
+  _magnetRange: 5
 --- !u!1 &7616060526857187252
 GameObject:
   m_ObjectHideFlags: 0
@@ -533,4 +597,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerEffectInitializer
   _thunderEffect: {fileID: 0}
-  _weaponEffectView: {fileID: 0}
+  _thunderEffectView: {fileID: 0}
+  _warriorEffectView: {fileID: 0}
