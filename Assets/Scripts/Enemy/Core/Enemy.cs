@@ -384,7 +384,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         }
 
         if (this == null) return;
-        expManager.DropEXP(new Vector3(transform.position.x, 0, transform.position.z), 10);
+
         Destroy(gameObject);
     }
 
