@@ -19,8 +19,8 @@ public class EXPManager : MonoBehaviour
     public void AddEXP(float amount)
     {
         _currentEXP += amount;
-        OnAddEXP?.Invoke(new AddEXPContext(amount, _currentLevel, _currentEXP));
         CheckLevelUp();
+        OnAddEXP?.Invoke(new AddEXPContext(amount, _currentLevel, _currentEXP));
     }
 
     [SerializeField] private float _levelUpEXP = 100f;

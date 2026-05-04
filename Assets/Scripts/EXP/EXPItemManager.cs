@@ -29,6 +29,12 @@ public class EXPItemManager : MonoBehaviour
 
     private void Awake()
     {
+        if (_itemPrefab == null)
+        {
+            Debug.LogError("EXPItemのプレハブが設定されていません");
+            return;
+        }
+
         _expDropper = new EXPDropper(new EXPDropperContext(
             itemPrefab: _itemPrefab,
             initialPoolSize: _initialPoolSize,

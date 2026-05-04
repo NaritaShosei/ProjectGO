@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EXPItem : MonoBehaviour, ISpeedChange
 {
-    private const float INTARACT_RANGE = 0.1f;
+    private const float INTERACT_RANGE = 0.1f;
 
     /// <summary>
     /// アイテムがリリースされたときに発火するイベント。引数にはリリースされたアイテム自身が渡される。
@@ -31,7 +31,7 @@ public class EXPItem : MonoBehaviour, ISpeedChange
             transform.position += direction * speed * Time.deltaTime * TimeScale;
 
             // プレイヤーとの距離がインタラクト範囲内であれば、Interactを呼び出す
-            if (distanceToPlayer <= INTARACT_RANGE)
+            if (distanceToPlayer <= INTERACT_RANGE)
             {
                 Interact();
             }
