@@ -16,7 +16,11 @@ public class CameraShake : MonoBehaviour
 
     private void Awake()
     {
-        if (_noise == null) return;
+        if (_virtualCamera == null)
+        {
+            Debug.LogWarning("移動させる対象のカメラが設定されていません");
+            return;
+        }
 
         _noise = _virtualCamera.GetComponent<CinemachineBasicMultiChannelPerlin>();
     }
