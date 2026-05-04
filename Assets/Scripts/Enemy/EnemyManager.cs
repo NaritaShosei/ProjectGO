@@ -27,6 +27,7 @@ public class EnemyManager : MonoBehaviour
         _separationService = new SeparationService(_spatialHashGrid);
         _wallAvoidanceService = new WallAvoidanceService(_wallLayerMask);
         _formationSystem = new EnemyFormationSystem();
+        _playerInformationService = new PlayerInformationService(_player, this);
     }
 
     /// <summary> エネミーの生成 </summary>
@@ -55,7 +56,8 @@ public class EnemyManager : MonoBehaviour
                 _spatialHashGrid,
                 _separationService,
                 _wallAvoidanceService,
-                _formationSystem
+                _formationSystem,
+                _playerInformationService
             ));
 
             // FormationSystemへの登録はInit前に行う
@@ -67,7 +69,7 @@ public class EnemyManager : MonoBehaviour
 
             OnEnemySpawned?.Invoke(enemy);
 
-            enemy.Init(_player);
+            enemy.Init();
 
             // SpatialHashGridに初期位置を登録する
             _spatialHashGrid.Register(enemy, pos);
@@ -133,6 +135,7 @@ public class EnemyManager : MonoBehaviour
     private ISeparationService _separationService;
     private IWallAvoidanceService _wallAvoidanceService;
     private IEnemyFormationSystem _formationSystem;
+    private IPlayerInformationService _playerInformationService;
 
     private void Awake()
     {

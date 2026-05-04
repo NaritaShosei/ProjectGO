@@ -24,10 +24,8 @@ public class MobEnemy : Enemy, IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
-    public override void Init(IPlayer player)
+    public override void Init()
     {
-        base.Init(player);
-
         _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();

@@ -6,10 +6,8 @@ using UnityEngine;
 /// </summary>
 public class GoblinEnemy : Enemy
 {
-    public override void Init(IPlayer player)
+    public override void Init()
     {
-        base.Init(player);
-
         _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
