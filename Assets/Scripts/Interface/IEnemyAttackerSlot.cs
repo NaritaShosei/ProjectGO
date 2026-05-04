@@ -16,7 +16,7 @@ public interface IEnemyAttackerSlot
     /// すでに確保済みの場合はtrueを返す
     /// Boss以外はスロット上限を超えた場合はfalseを返す
     /// </summary>
-    bool TryAcquire(int enemyId, int slotCost, bool isBoss);
+    bool TryAcquire(int enemyId, int slotCost);
 
     /// <summary>
     /// スロットを解放する

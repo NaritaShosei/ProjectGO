@@ -316,7 +316,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
         if (!_services.AttackerSlot.IsAcquired(Id))
         {
-            _services.AttackerSlot.TryAcquire(Id, 1, IsBoss);
+            _services.AttackerSlot.TryAcquire(Id, 1);
         }
     }
 

@@ -66,7 +66,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             // Playerが接敵していなければ確率キャンセルを行わない
             if (!_enemyServices.PlayerInformationService.IsPlayerEncounteringEnemy())
             {
-                Debug.Log("攻撃確定！");
                 return true;
             }
 
@@ -144,7 +143,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     }
 
     /// <summary>
-    /// 死亡時にEnemyから明示的に呼び出し、AttackerSlotを解放する
+    /// AttackerSlotを解放する
     /// </summary>
     public void ReleaseSlot()
     {
@@ -224,6 +223,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         _enemyAnimator?.SetAttacking(false);
         _state.ChangeState(EnemyState.Idle);
+
+        ReleaseSlot();
     }
 
     /// <summary>

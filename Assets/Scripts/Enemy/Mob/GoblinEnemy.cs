@@ -43,7 +43,7 @@ public class GoblinEnemy : Enemy
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            _services.AttackerSlot.TryAcquire(Id, 1, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, 1);
 
             // BarkをattackerSlotブロック内に移動
             // distanceProfileがない場合はBarkも登録しない

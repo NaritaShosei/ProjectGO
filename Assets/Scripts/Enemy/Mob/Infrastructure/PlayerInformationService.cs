@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 
+/// <summary> Playerに関する情報をEnemy向けに提供するサービス </summary>
 public class PlayerInformationService : IPlayerInformationService
 {
     public PlayerInformationService(IPlayer player, EnemyManager enemyManager)
