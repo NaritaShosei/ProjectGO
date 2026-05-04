@@ -9,16 +9,22 @@ public class EXPManager : MonoBehaviour
     public event Action<int> OnLevelUp;
 
     /// <summary>
+    /// 経験値追加イベント。経験値が追加されるたびに、追加された経験値の量、現在のレベル、現在の経験値を引数として発火する。
+    /// </summary>
+    public event Action<AddEXPContext> OnAddEXP;
+
+    /// <summary>
     /// 経験値を追加するメソッド。経験値がレベルアップに必要な量を超えると、レベルアップ処理が自動的に行われる。
     /// </summary>
     public void AddEXP(float amount)
     {
         _currentEXP += amount;
+        OnAddEXP?.Invoke(new AddEXPContext(amount, _currentLevel, _currentEXP));
         CheckLevelUp();
     }
 
     [SerializeField] private float _levelUpEXP = 100f;
-    private float _currentEXP =  0;
+    private float _currentEXP = 0;
     private int _currentLevel = 1;
 
     private void Awake()
@@ -51,5 +57,20 @@ public class EXPManager : MonoBehaviour
     {
         _currentLevel++;
         OnLevelUp?.Invoke(_currentLevel);
+        Debug.Log($"レベルアップ！現在のレベル: {_currentLevel}");
+    }
+}
+
+public readonly struct AddEXPContext
+{
+    public readonly float Amount;
+    public readonly int CurrentLevel;
+    public readonly float CurrentEXP;
+
+    public AddEXPContext(float amount, int currentLevel, float currentEXP)
+    {
+        Amount = amount;
+        CurrentLevel = currentLevel;
+        CurrentEXP = currentEXP;
     }
 }
