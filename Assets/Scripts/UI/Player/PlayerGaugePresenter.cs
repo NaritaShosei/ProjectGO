@@ -34,7 +34,7 @@ public class PlayerGaugePresenter
         _view.ThunderGaugeChange(
             _playerStats.CurrentThunderGauge,
             _playerStats.MaxThunderGauge,
-            _playerStats.InitialMaxThunderGauge
+            _playerStats.BaseMaxThunderGauge
         );
     }
 }
