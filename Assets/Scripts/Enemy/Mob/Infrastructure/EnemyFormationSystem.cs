@@ -115,17 +115,17 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
 
     /// <summary>
     /// スロットの確保を試みる
-    /// ボス以外は前衛として登録済みの場合のみ取得可能
     /// </summary>
-    public bool TryAcquire(int enemyId, int slotCost, bool isBoss)
+    public bool TryAcquire(int enemyId, int slotCost)
     {
-        if (!isBoss)
+        // 前衛として登録されていない場合は取得不可
+        if (!_entries.TryGetValue(enemyId, out var entry) || entry.IsVanguard)
         {
-            // 前衛として登録されていない場合は取得不可
-            if (!_entries.TryGetValue(enemyId, out var entry) || !entry.IsVanguard)
-                return false;
+            entry.IsVanguard = false;
+            return false;
         }
-        return _innerSlot.TryAcquire(enemyId, slotCost, isBoss);
+
+        return _innerSlot.TryAcquire(enemyId, slotCost);
     }
 
     public void Release(int enemyId, int slotCost)

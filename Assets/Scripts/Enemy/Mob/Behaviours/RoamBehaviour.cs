@@ -75,6 +75,8 @@ public class RoamBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
+        float walkSpeed = 0;
+
         // 初期待機中はアニメーションなしで待機する
         if (!_delayFinished)
         {
@@ -88,8 +90,12 @@ public class RoamBehaviour : IEnemyBehaviour
 
         if (!_state.CanMove()) return;
 
-        // Speedを毎フレーム更新する（Walk = 0.5f）
-        _enemyAnimator?.SetSpeed(0.5f);
+        // 後ろに下がる挙動のときは歩行速度をマイナスにする
+        if (_isBackStep) walkSpeed = -0.5f;
+        else walkSpeed = 0.5f;
+
+        // Speedを毎フレーム更新する
+        _enemyAnimator?.SetSpeed(walkSpeed);
 
         Vector3 toTarget = _target - _self.position;
         toTarget.y = 0f;
@@ -122,7 +128,15 @@ public class RoamBehaviour : IEnemyBehaviour
         if (dir.sqrMagnitude < 0.001f) return;
 
         // 移動方向をTurnBehaviourに通知する
-        _onRoamDirection?.Invoke(dir.normalized);
+        if (_isBackStep)
+        {
+            // 後ろに下がる挙動のときはTurnBehaviourにPlayerの方向を向かせる
+            _onRoamDirection?.Invoke(null);
+        }
+        else
+        {
+            _onRoamDirection?.Invoke(dir.normalized);
+        }
 
         Vector3 newPos = _self.position + dir.normalized * _data.RoamSpeed * deltaTime;
         _self.position = newPos;
@@ -160,6 +174,9 @@ public class RoamBehaviour : IEnemyBehaviour
     private bool _delayFinished;
     private readonly Action<Vector3?> _onRoamDirection;
 
+    // 後ろに下がる挙動のフラグ
+    private bool _isBackStep;
+
     /// <summary>
     /// プレイヤーとの距離・攻撃参加状態に応じて移動目標を設定する
     /// 遠すぎる場合はプレイヤーへ、非攻撃者が近すぎる場合はプレイヤーから離れる方向、
@@ -186,6 +203,8 @@ public class RoamBehaviour : IEnemyBehaviour
             Vector3 awayFromPlayer = distToPlayer > 0f ? -toPlayer.normalized : Vector3.back;
             float angle = UnityEngine.Random.Range(-90f, 90f);
             baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
+
+            _isBackStep = true; // 後ろに下がる挙動を有効化
         }
         else if (isAttacker && distToPlayer < _profile.MinAttackerRoamDistance)
         {
@@ -193,6 +212,8 @@ public class RoamBehaviour : IEnemyBehaviour
             Vector3 awayFromPlayer = distToPlayer > 0f ? -toPlayer.normalized : Vector3.back;
             float angle = UnityEngine.Random.Range(-90f, 90f);
             baseDir = Quaternion.Euler(0f, angle, 0f) * awayFromPlayer;
+
+            _isBackStep = true; // 後ろに下がる挙動を有効化
         }
         else if (isAttacker)
         {
@@ -201,6 +222,8 @@ public class RoamBehaviour : IEnemyBehaviour
             Vector3 lateral = Vector3.Cross(Vector3.up, dirToPlayer).normalized;
             float sign = UnityEngine.Random.value < 0.5f ? 1f : -1f;
             baseDir = lateral * sign;
+
+            _isBackStep = true; // 後ろに下がる挙動を有効化
         }
         else
         {
@@ -208,6 +231,8 @@ public class RoamBehaviour : IEnemyBehaviour
             Vector3 dirToPlayer = distToPlayer > 0f ? toPlayer.normalized : Vector3.forward;
             float angle = UnityEngine.Random.Range(-90f, 90f);
             baseDir = Quaternion.Euler(0f, angle, 0f) * dirToPlayer;
+
+            _isBackStep = true; // 後ろに下がる挙動を有効化
         }
 
         _target = _self.position + baseDir * _profile.RoamRadius;

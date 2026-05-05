@@ -39,13 +39,13 @@ public sealed class EnemyAttackerSlot : IEnemyAttackerSlot
     /// スロットの確保を試みる
     /// Boss以外はスロット上限を超えた場合はfalseを返す
     /// </summary>
-    public bool TryAcquire(int enemyId, int slotCost, bool isBoss)
+    public bool TryAcquire(int enemyId, int slotCost)
     {
         slotCost = Math.Max(1, slotCost);
 
         if (_holders.Contains(enemyId)) return true;
 
-        if (_usedSlots + slotCost > _maxSlots && !isBoss) return false;
+        if (_usedSlots + slotCost > _maxSlots) return false;
 
         _holders.Add(enemyId);
         _usedSlots += slotCost;

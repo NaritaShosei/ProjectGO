@@ -15,7 +15,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     /// </summary>
     public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null)
     {
-        _attackerSlot = services.AttackerSlot;
+        _enemyServices = services;
         _animator = animator;
         _profile = profile;
         // profileがnullの場合は背後判定を無効化する（dot < -1 は常にfalse）
@@ -44,11 +44,11 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public bool CanEnter()
     {
         if (_player == null) return false;
-        if (_attackerSlot == null) return false;
+        if (_enemyServices.AttackerSlot == null) return false;
         if (_isAttacking) return false;
 
         // スポーン時に確保済みのスロットを持っているかチェック
-        if (!_attackerSlot.IsAcquired(_enemyId)) return false;
+        if (!_enemyServices.AttackerSlot.IsAcquired(_enemyId)) return false;
 
         // パターン未選択なら攻撃不可
         if (_context.SelectedPattern == null) return false;
@@ -61,10 +61,19 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         float triggerRange = _context.SelectedPattern.AttackRange * _context.SelectedPattern.AttackTriggerRatio;
         if (_context.DistanceToPlayer > triggerRange) return false;
 
-        // 背後攻撃抑制（プレイヤー背後にいる場合は確率的にキャンセル）
-        if (_profile != null && IsInPlayerBack())
+        if (_enemyServices.PlayerInformationService.IsBehaindPlayer(_self))
         {
-            if (UnityEngine.Random.value < _profile.BackAttackSuppressChance) return false;
+            // Playerが接敵していなければ確率キャンセルを行わない
+            if (!_enemyServices.PlayerInformationService.IsPlayerEncounteringEnemy())
+            {
+                return true;
+            }
+
+            // 背後攻撃抑制（プレイヤー背後にいる場合は確率的にキャンセル）
+            if (_profile != null)
+            {
+                if (UnityEngine.Random.value < _profile.BackAttackSuppressChance) return false;
+            }
         }
 
         return true;
@@ -134,12 +143,12 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     }
 
     /// <summary>
-    /// 死亡時にEnemyから明示的に呼び出し、AttackerSlotを解放する
+    /// AttackerSlotを解放する
     /// </summary>
     public void ReleaseSlot()
     {
-        if (_attackerSlot == null) return;
-        _attackerSlot.Release(_enemyId, 1);
+        if (_enemyServices.AttackerSlot == null) return;
+        _enemyServices.AttackerSlot.Release(_enemyId, 1);
     }
 
     private Transform _self;
@@ -149,7 +158,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private IEnemyAnimator _enemyAnimator;
     private Animator _animator;
 
-    private readonly IEnemyAttackerSlot _attackerSlot;
+    private readonly EnemyServices _enemyServices;
     private readonly DistanceProfile _profile;
     private readonly float _backDotThreshold;
 
@@ -214,22 +223,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         _enemyAnimator?.SetAttacking(false);
         _state.ChangeState(EnemyState.Idle);
-    }
 
-    /// <summary>
-    /// 自分がプレイヤーの背後エリアに位置するかを判定する
-    /// </summary>
-    private bool IsInPlayerBack()
-    {
-        Vector3 toSelf = _self.position - _player.position;
-        toSelf.y = 0f;
-        if (toSelf.sqrMagnitude < 0.001f) return false;
-
-        Vector3 playerFwd = _player.forward;
-        playerFwd.y = 0f;
-
-        float dot = Vector3.Dot(playerFwd.normalized, toSelf.normalized);
-        return dot < _backDotThreshold;
+        ReleaseSlot();
     }
 
     /// <summary>
