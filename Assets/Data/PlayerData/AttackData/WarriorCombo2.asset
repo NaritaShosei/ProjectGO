@@ -24,7 +24,7 @@ MonoBehaviour:
   _nextComboAttackId: 3
   _enableKnockback: 1
   _knockbackPower: 5
-  _knockbackUpward: 2.89
+  _knockbackUpward: 0
   _enableHoming: 1
   _homingRadius: 5
   _homingAngle: 45
@@ -44,3 +44,4 @@ MonoBehaviour:
     _weakAndBreakOrKillMultiplier: 2.5
   _animationStateName: Warrior_Combo_2
   _transitionDuration: -1
+  _playGroundHitSE: 0
