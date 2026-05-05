@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    const float INPUT_THRESHOLD = 0.001f;
+    private const float INPUT_THRESHOLD = 0.001f;
 
     public event Action OnEndDodge;
 
