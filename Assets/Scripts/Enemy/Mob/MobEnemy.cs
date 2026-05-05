@@ -24,10 +24,8 @@ public class MobEnemy : Enemy, IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
-    public override void Init(IPlayer player)
+    public override void Init()
     {
-        base.Init(player);
-
         _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
@@ -65,7 +63,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            _services.AttackerSlot.TryAcquire(Id, 1, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, 1);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
             // distanceProfileがない場合はBarkも登録しない
