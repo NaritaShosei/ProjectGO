@@ -98,7 +98,7 @@ public class StatSkillSystem
             case StatSkillType.Attack: _stats.AddModifier(new DefaultModifier(amount, StatType.Attack)); break;
             case StatSkillType.Defense: _stats.AddModifier(new DefaultModifier(amount, StatType.Defense)); break;
             case StatSkillType.Critical: _stats.AddModifier(new DefaultModifier(amount, StatType.CriticalRate)); break;
-            case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount,StatType.ThunderRecover)); break;
+            case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount,StatType.ThunderGauge)); break;
         }
     }
 }

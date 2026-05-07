@@ -69,14 +69,14 @@ public class PlayerStats
     public void TakeDamage(float damage)
     {
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
+        OnHealthChanged?.Invoke(_currentHealth, MaxHealth, InitialMaxHealth);
         if (_currentHealth <= 0) OnDead?.Invoke();
     }
 
     public void Heal(float amount)
     {
-        _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
+        _currentHealth = Mathf.Min(MaxHealth, _currentHealth + amount);
+        OnHealthChanged?.Invoke(_currentHealth, MaxHealth, InitialMaxHealth);
     }
 
     // ---- 雷ゲージ操作 ----
@@ -96,20 +96,20 @@ public class PlayerStats
             // 枯渇した瞬間だけ OnDepleted を発火
             if (before > 0f && _currentThunderGauge <= 0f)
             {
-                OnThunderGaugeChanged?.Invoke(_currentThunderGauge, _maxThunderGauge, InitialMaxThunderGauge);
+                OnThunderGaugeChanged?.Invoke(_currentThunderGauge, MaxThunderGauge, InitialMaxThunderGauge);
                 OnThunderGaugeDepleted?.Invoke();
                 return;
             }
         }
         else
         {
-            _currentThunderGauge = Mathf.Min(_maxThunderGauge, _currentThunderGauge + RecoverPerSecond * deltaTime);
+            _currentThunderGauge = Mathf.Min(MaxThunderGauge, _currentThunderGauge + RecoverPerSecond * deltaTime);
         }
 
         // 変化があったときのみ通知（毎フレーム発火によるUI負荷を抑える）
         if (!Mathf.Approximately(before, _currentThunderGauge))
         {
-            OnThunderGaugeChanged?.Invoke(_currentThunderGauge, _maxThunderGauge, InitialMaxThunderGauge);
+            OnThunderGaugeChanged?.Invoke(_currentThunderGauge, MaxThunderGauge, InitialMaxThunderGauge);
         }
     }
 
@@ -122,6 +122,8 @@ public class PlayerStats
         _modifiers[modifier.TargetStat].Add(modifier);
 
         ClampCurrentValues();
+
+        NotifyStatChanged(modifier.TargetStat);
 
         OnStatsChanged?.Invoke();
     }
@@ -165,5 +167,25 @@ public class PlayerStats
 
         _currentThunderGauge =
             Mathf.Min(_currentThunderGauge, MaxThunderGauge);
+    }
+
+    private void NotifyStatChanged(StatType statType)
+    {
+        switch (statType)
+        {
+            case StatType.Health:
+                OnHealthChanged?.Invoke(
+                    _currentHealth,
+                    MaxHealth,
+                    InitialMaxHealth);
+                break;
+
+            case StatType.ThunderGauge:
+                OnThunderGaugeChanged?.Invoke(
+                    _currentThunderGauge,
+                    MaxThunderGauge,
+                    InitialMaxThunderGauge);
+                break;
+        }
     }
 }
