@@ -158,11 +158,11 @@ public class MobEnemy : Enemy, IFormationParticipant
         bool isKill = _stats.CurrentHealth <= 0;
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
-        // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
+        // 弱点ヒットは生身かつ雷神モード攻撃時に有効
         bool isWeakPoint = (!armorWasAlive
             && _defenceContext.EnemyType == EnemyType.Flesh
             && context.PlayerMode == PlayerMode.Thunder)
-            //鎧かつ闘神モードの時有効
+            //鎧かつ闘神モードの時に有効
             || (armorWasAlive && context.PlayerMode == PlayerMode.Warrior);
 
         // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
