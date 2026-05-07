@@ -6,97 +6,35 @@ public class PlayerStats
 {
     // ---- HP ----
     public float InitialMaxHealth { get; private set; }
-    public float MaxHealth => _maxHealth;
+    public float MaxHealth =>
+        ApplyModifiers(StatType.Health, _maxHealth);
     public float CurrentHealth => _currentHealth;
 
     // ---- 雷ゲージ ----
     public float InitialMaxThunderGauge { get; private set; }
-    public float MaxThunderGauge => _maxThunderGauge;
+    public float MaxThunderGauge =>
+        ApplyModifiers(StatType.ThunderGauge, _maxThunderGauge);
+
     public float CurrentThunderGauge => _currentThunderGauge;
 
-    public float DrainPerSecond
-    {
-        get
-        {
-            float value = _drainPerSecond;
+    public float DrainPerSecond =>
+        ApplyModifiers(StatType.ThunderDrain, _drainPerSecond);
 
-            if (_modifiers.TryGetValue(StatType.ThunderDrain, out var mods))
-                foreach (var mod in mods)
-                {
-                    value = mod.Modify(value);
-                }
-
-            return value;
-        }
-    }
-
-    public float RecoverPerSecond
-    {
-        get
-        {
-            float value = _recoverPerSecond;
-
-            if (_modifiers.TryGetValue(StatType.ThunderRecover, out var mods))
-                foreach (var mod in mods)
-                {
-                    value = mod.Modify(value);
-                }
-
-            return value;
-        }
-    }
+    public float RecoverPerSecond =>
+        ApplyModifiers(StatType.ThunderRecover, _recoverPerSecond);
 
     /// <summary> 1以上あれば雷神モードを使用可能 </summary>
     public bool CanUseThunder => _currentThunderGauge > 1f;
 
     // ---- 戦闘ステータス ----
-    public float AttackPower
-    {
-        get
-        {
-            float value = _attackPower;
+    public float AttackPower =>
+        ApplyModifiers(StatType.Attack, _attackPower);
 
-            if (_modifiers.TryGetValue(StatType.Attack, out var mods))
-                foreach (var mod in mods)
-                {
-                    value = mod.Modify(value);
-                }
+    public float CriticalRate =>
+        ApplyModifiers(StatType.CriticalRate, _criticalRate);
 
-            return value;
-        }
-    }
-
-    public float CriticalRate
-    {
-        get
-        {
-            float value = _criticalRate;
-
-            if (_modifiers.TryGetValue(StatType.CriticalRate, out var mods))
-                foreach (var mod in mods)
-                {
-                    value = mod.Modify(value);
-                }
-
-            return value;
-        }
-    }
-
-    public float DefensePower
-    {
-        get
-        {
-            float value = _defensePower;
-
-            if (_modifiers.TryGetValue(StatType.Defense, out var mods))
-                foreach (var mod in mods)
-                {
-                    value = mod.Modify(value);
-                }
-
-            return value;
-        }
-    }
+    public float DefensePower =>
+        ApplyModifiers(StatType.Defense, _defensePower);
 
     // ---- イベント ----
     public event Action OnDead;
@@ -175,64 +113,15 @@ public class PlayerStats
         }
     }
 
-    // ---- スキルから呼ぶ口 ----
-
-    public void AddMaxThunderGauge(float value)
-    {
-        if (value <= 0f) return;
-        _maxThunderGauge += value;
-        OnThunderGaugeChanged?.Invoke(_currentThunderGauge, _maxThunderGauge, InitialMaxThunderGauge);
-        OnStatsChanged?.Invoke();
-    }
-
-    /// <summary> 消費速度を変更する。負の値で軽減。0未満にはならない。 </summary>
-    public void AddDrainPerSecond(float delta)
-    {
-        _drainPerSecond = Mathf.Max(0f, _drainPerSecond + delta);
-        OnStatsChanged?.Invoke();
-    }
-
-    /// <summary> 回復速度を変更する。正の値で強化。0未満にはならない。 </summary>
-    public void AddRecoverPerSecond(float delta)
-    {
-        _recoverPerSecond = Mathf.Max(0f, _recoverPerSecond + delta);
-        OnStatsChanged?.Invoke();
-    }
-
     // ---- 戦闘ステータス操作 ----
-
-    public void AddAttackPower(float value)
-    {
-        _attackPower = Mathf.Max(0f, _attackPower + value);
-        OnStatsChanged?.Invoke();
-    }
-
-    public void AddCriticalRate(float value)
-    {
-        _criticalRate = Mathf.Max(0f, _criticalRate + value);
-        OnStatsChanged?.Invoke();
-    }
-
-    public void AddDefensePower(float value)
-    {
-        _defensePower = Mathf.Max(0f, _defensePower + value);
-        OnStatsChanged?.Invoke();
-    }
-
-    public void AddMaxHealth(float value)
-    {
-        if (value <= 0f) return;
-        _maxHealth += value;
-        OnHealthChanged?.Invoke(_currentHealth, _maxHealth, InitialMaxHealth);
-        OnStatsChanged?.Invoke();
-    }
-
     public void AddModifier(IStatModifier modifier)
     {
         if (!_modifiers.ContainsKey(modifier.TargetStat))
             _modifiers[modifier.TargetStat] = new List<IStatModifier>();
 
         _modifiers[modifier.TargetStat].Add(modifier);
+
+        ClampCurrentValues();
 
         OnStatsChanged?.Invoke();
     }
@@ -252,4 +141,29 @@ public class PlayerStats
     private float _defensePower;
 
     private readonly Dictionary<StatType, List<IStatModifier>> _modifiers = new();
+
+    private float ApplyModifiers(
+    StatType statType,
+    float baseValue)
+    {
+        if (!_modifiers.TryGetValue(statType, out var mods))
+            return baseValue;
+
+        float value = baseValue;
+
+        foreach (var mod in mods)
+        {
+            value = mod.Modify(value);
+        }
+
+        return value;
+    }
+
+    private void ClampCurrentValues()
+    {
+        _currentHealth = Mathf.Min(_currentHealth, MaxHealth);
+
+        _currentThunderGauge =
+            Mathf.Min(_currentThunderGauge, MaxThunderGauge);
+    }
 }
