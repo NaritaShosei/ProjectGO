@@ -93,10 +93,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         }
     }
 
-    // ---- IStatUpgradable ----
-    public void AddMaxHealth(float value) => _playerStats.AddMaxHealth(value);
-    public void AddMaxThunderGauge(float value) => _playerStats.AddMaxThunderGauge(value);
-
+    /// <summary>
+    /// ステータスに修正を加える。バフ・デバフの適用などに使用。
+    /// </summary>
     public void AddModifier(IStatModifier modifier) => _playerStats.AddModifier(modifier);
 
     public void OnSpeedChange(float timeScale)

@@ -94,11 +94,11 @@ public class StatSkillSystem
     {
         switch (type)
         {
-            case StatSkillType.HP: _stats.AddMaxHealth(amount); break;
+            case StatSkillType.HP: _stats.AddModifier(new DefaultModifier(amount,StatType.Health)); break;
             case StatSkillType.Attack: _stats.AddModifier(new DefaultModifier(amount, StatType.Attack)); break;
             case StatSkillType.Defense: _stats.AddModifier(new DefaultModifier(amount, StatType.Defense)); break;
             case StatSkillType.Critical: _stats.AddModifier(new DefaultModifier(amount, StatType.CriticalRate)); break;
-            case StatSkillType.Thunder: _stats.AddMaxThunderGauge(amount); break;
+            case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount,StatType.ThunderRecover)); break;
         }
     }
 }
