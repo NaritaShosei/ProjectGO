@@ -17,8 +17,24 @@ public interface IPlayerStats :
     IHealthStats,
     IThunderGaugeStats,
     IStatUpgradable,
-    IBaseStats
+    IBaseStats,
+    IModifierHolder,
+    IModeProvider
 {
     /// <summary> 雷ゲージ変化通知 (current, max, initialMax) </summary>
     event Action<float, float, float> OnThunderGaugeChanged;
+}
+
+
+public interface IModifierHolder
+{
+    void AddModifier(IStatModifier modifier);
+}
+
+/// <summary>
+/// 現在のモードを公開するインターフェース。
+/// </summary>
+public interface IModeProvider
+{
+    public PlayerMode CurrentMode { get; }
 }
