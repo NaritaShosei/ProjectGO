@@ -37,7 +37,7 @@ public class PlayerStats
         ApplyModifiers(StatType.Defense, _defensePower);
 
     // --- 回復量 ----
-    public float HealPoint =>
+    public float HealPower =>
         ApplyModifiers(StatType.Heal, 1f);
 
     // ---- イベント ----
@@ -79,7 +79,7 @@ public class PlayerStats
 
     public void Heal(float amount)
     {
-        amount *= HealPoint;
+        amount *= HealPower;
 
         _currentHealth =
             Mathf.Min(MaxHealth, _currentHealth + amount);
