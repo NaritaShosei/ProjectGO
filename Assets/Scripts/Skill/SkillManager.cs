@@ -10,6 +10,12 @@ public class SkillManager : MonoBehaviour
     public void Init(IPlayerStats stats, IModeController modeController,
         Transform playerTransform, EnemyManager enemyManager)
     {
+        foreach (var skill in _skillDataBase.GetAllSkills())
+        {
+            if (skill.DefaultUnlocked)
+                _unlockedSkillIDs.Add(skill.ID);
+        }
+
         if (ServiceLocator.TryGet(out EXPManager eXPManager))
         {
             _statSkillSystem = new StatSkillSystem(_statSkillDataArray, stats, eXPManager);
@@ -21,29 +27,35 @@ public class SkillManager : MonoBehaviour
     public bool TryRegisterSkillId(int id, IPlayerStats stats)
     {
         if (_skillDataBase == null) return false;
+
         var skill = _skillDataBase.GetSkill(id);
+
         if (skill == null) return false;
 
-        if (!_skillAcquireCounts.ContainsKey(id))
-            _skillAcquireCounts[id] = 0;
-        _skillAcquireCounts[id]++;
-
+        // OnAcquire
         if (skill.Timing == SkillTiming.OnAcquire)
-            skill.OnAcquire(stats, _skillAcquireCounts[id]);
+            skill.OnAcquire(stats);
 
         OnSkillAcquired?.Invoke(skill);
 
         _ownedSkillIDs.Add(id);
-        if (!skill.CanAcquire(_skillAcquireCounts[id] + 1))
-            _exhaustedSkillIDs.Add(id);
 
-        // Passive スキルは CreateUpdater() で Updater を生成して登録
-        // 同じスキルを複数回取得しても Updater は1つだけ登録する
-        if (skill.Timing == SkillTiming.Passive && _registeredSkillIDs.Add(id))
+        _exhaustedSkillIDs.Add(id);
+
+        // Passive登録
+        if (skill.Timing == SkillTiming.Passive &&
+            _registeredSkillIDs.Add(id))
         {
             var updater = skill.CreateUpdater();
+
             if (updater != null)
                 _updaters.Add(updater);
+        }
+
+        // 進化先解放
+        if (skill.EvolutionSkill != null)
+        {
+            _unlockedSkillIDs.Add(skill.EvolutionSkill.ID);
         }
 
         return true;
@@ -70,6 +82,7 @@ public class SkillManager : MonoBehaviour
             return new List<SkillBase>();
         }
         return _skillDataBase.GetAllSkills()
+            .Where(s => _unlockedSkillIDs.Contains(s.ID))
             .Where(s => !_exhaustedSkillIDs.Contains(s.ID))
             .OrderBy(_ => UnityEngine.Random.value)
             .Take(count)
@@ -85,7 +98,7 @@ public class SkillManager : MonoBehaviour
     private HashSet<int> _ownedSkillIDs = new();
     private HashSet<int> _exhaustedSkillIDs = new();
     private HashSet<int> _registeredSkillIDs = new();
-    private Dictionary<int, int> _skillAcquireCounts = new();
+    private HashSet<int> _unlockedSkillIDs = new();
 
     private IEnumerable<SkillBase> GetSkillsByTiming(SkillTiming timing)
         => GetOwnedSkills().Where(s => s.Timing == timing);
