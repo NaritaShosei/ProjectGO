@@ -19,12 +19,20 @@ public class StatSkillSystem
     {
         _statSkillDataArray = statSkillDataArray;
         _stats = stats;
+        _expManager = expManager;
 
-        expManager.OnLevelUp += AcquireRandom;
+        _expManager.OnLevelUp += AcquireRandom;
+    }
+
+    public void Dispose()
+    {
+        if (_expManager != null)
+            _expManager.OnLevelUp -= AcquireRandom;
     }
 
     [SerializeField] private StatSkillData[] _statSkillDataArray;
     private readonly IPlayerStats _stats;
+    private readonly EXPManager _expManager;
 
     /// <summary>
     /// レベルアップのたびに、_statSkillDataArray からランダムに1つ選んでパラメーターを増加させる。
@@ -35,6 +43,13 @@ public class StatSkillSystem
         if (_statSkillDataArray == null || _statSkillDataArray.Length == 0) return;
 
         var data = _statSkillDataArray[Random.Range(0, _statSkillDataArray.Length)];
+
+        if (data == null)
+        {
+            Debug.LogWarning("[StatSkill] StatSkillData に null 要素があります。設定を確認してください。");
+            return;
+        }
+
         float baseValue = GetBaseValue(data.StatType);
         float amount = data.CalculateAmount(baseValue);
 

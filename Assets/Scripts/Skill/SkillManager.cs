@@ -91,4 +91,9 @@ public class SkillManager : MonoBehaviour
         => GetOwnedSkills().Where(s => s.Timing == timing);
 
     private void Update() => _skillExecutor?.Tick();
+
+    private void OnDestroy()
+    {
+        _statSkillSystem?.Dispose();
+    }
 }
