@@ -36,6 +36,10 @@ public class PlayerStats
     public float DefensePower =>
         ApplyModifiers(StatType.Defense, _defensePower);
 
+    // --- 回復量 ----
+    public float HealPoint =>
+        ApplyModifiers(StatType.Heal, 1f);
+
     // ---- イベント ----
     public event Action OnDead;
     public event Action<float, float, float> OnHealthChanged;
@@ -75,8 +79,15 @@ public class PlayerStats
 
     public void Heal(float amount)
     {
-        _currentHealth = Mathf.Min(MaxHealth, _currentHealth + amount);
-        OnHealthChanged?.Invoke(_currentHealth, MaxHealth, InitialMaxHealth);
+        amount *= HealPoint;
+
+        _currentHealth =
+            Mathf.Min(MaxHealth, _currentHealth + amount);
+
+        OnHealthChanged?.Invoke(
+            _currentHealth,
+            MaxHealth,
+            InitialMaxHealth);
     }
 
     // ---- 雷ゲージ操作 ----

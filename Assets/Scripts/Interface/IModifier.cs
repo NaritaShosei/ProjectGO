@@ -13,5 +13,6 @@ public enum StatType
     CriticalRate,
     ThunderDrain,
     ThunderRecover,
-    ThunderGauge
+    ThunderGauge,
+    Heal
 }
