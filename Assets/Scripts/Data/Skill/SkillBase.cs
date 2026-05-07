@@ -8,7 +8,7 @@ public class SkillBase : ScriptableObject, ISkill
     public string Explanation => _explanation;
     public Sprite Icon => _icon;
     public SkillTiming Timing => _timing;
-    public SkillBase EvolutionSkill => _evolutionSkill;
+    public SkillBase UnlockedSkill => _unlockedSkill;
     public bool DefaultUnlocked => _defaultUnlocked;
 
     /// <summary>
@@ -44,9 +44,9 @@ public class SkillBase : ScriptableObject, ISkill
     [SerializeField] private Sprite _icon;          // スキルのアイコン画像
     [Tooltip("スキルの発動タイミング。")]
     [SerializeField] private SkillTiming _timing = SkillTiming.OnAttack; // スキルの発動タイミング
-    [Header("進化")]
-    [Tooltip("このスキルの進化先。nullなら進化なし。数珠つなぎで多段進化も可能。")]
-    [SerializeField] private SkillBase _evolutionSkill;
+    [Header("開放")]
+    [Tooltip("このスキルを獲得した際に開放されるスキル。")]
+    [SerializeField] private SkillBase _unlockedSkill;
     [Tooltip("ゲーム開始時にこのスキルがアンロックされているかどうか。")]
-    [SerializeField] private bool _defaultUnlocked = true;
+    [SerializeField] private bool _defaultUnlocked;
 }

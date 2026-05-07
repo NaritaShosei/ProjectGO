@@ -53,9 +53,9 @@ public class SkillManager : MonoBehaviour
         }
 
         // 進化先解放
-        if (skill.EvolutionSkill != null)
+        if (skill.UnlockedSkill != null)
         {
-            _unlockedSkillIDs.Add(skill.EvolutionSkill.ID);
+            _unlockedSkillIDs.Add(skill.UnlockedSkill.ID);
         }
 
         return true;
