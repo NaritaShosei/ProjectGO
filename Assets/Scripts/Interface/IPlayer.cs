@@ -16,7 +16,8 @@ public interface IPlayerStats :
     IDefenseStats,
     IHealthStats,
     IThunderGaugeStats,
-    IStatUpgradable
+    IStatUpgradable,
+    IBaseStats
 {
     /// <summary> 雷ゲージ変化通知 (current, max, initialMax) </summary>
     event Action<float, float, float> OnThunderGaugeChanged;

@@ -41,6 +41,9 @@ public class EnemyData : ScriptableObject
     // 死亡時にヒールアイテムをドロップする確率（0〜1）
     public float HealDropChance => _healDropChance;
 
+    // 経験値ドロップ量
+    public int ExpDropAmount => Mathf.Max(0, _expDropAmount);
+
     // Idle継続時間（秒）
     public float IdleDuration => _idleDuration;
 
@@ -95,4 +98,6 @@ public class EnemyData : ScriptableObject
     [Header("Drop")]
     [Range(0f, 1f)]
     [SerializeField] private float _healDropChance = 0.3f;
+    [Min(0)]
+    [SerializeField] private int _expDropAmount = 10;
 }

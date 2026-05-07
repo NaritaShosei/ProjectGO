@@ -10,6 +10,11 @@ public class SkillManager : MonoBehaviour
     public void Init(IPlayerStats stats, IModeController modeController,
         Transform playerTransform, EnemyManager enemyManager)
     {
+        if (ServiceLocator.TryGet(out EXPManager eXPManager))
+        {
+            _statSkillSystem = new StatSkillSystem(_statSkillDataArray, stats, eXPManager);
+        }
+
         _skillExecutor = new SkillExecutor(this, stats, modeController, playerTransform, enemyManager);
     }
 
@@ -72,8 +77,10 @@ public class SkillManager : MonoBehaviour
     }
 
     [SerializeField] private SkillDataBase _skillDataBase;
+    [SerializeField] private StatSkillData[] _statSkillDataArray;
 
     private SkillExecutor _skillExecutor;
+    private StatSkillSystem _statSkillSystem;
     private List<ISkillUpdater> _updaters = new();
     private HashSet<int> _ownedSkillIDs = new();
     private HashSet<int> _exhaustedSkillIDs = new();
@@ -84,4 +91,9 @@ public class SkillManager : MonoBehaviour
         => GetOwnedSkills().Where(s => s.Timing == timing);
 
     private void Update() => _skillExecutor?.Tick();
+
+    private void OnDestroy()
+    {
+        _statSkillSystem?.Dispose();
+    }
 }

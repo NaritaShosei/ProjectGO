@@ -11,9 +11,17 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     public float CurrentHealth => _playerStats.CurrentHealth;
     public float MaxThunderGauge => _playerStats.MaxThunderGauge;
     public float CurrentThunderGauge => _playerStats.CurrentThunderGauge;
-    public float InitialMaxThunderGauge => _playerStats.InitialMaxThunderGauge;
+    public float BaseMaxThunderGauge => _playerStats.InitialMaxThunderGauge;
 
     public float TimeScale { get; set; } = 1f;
+
+    public float BaseAttackPower => _playerData.AttackPower;
+
+    public float BaseCriticalRate => _playerData.CriticalRate;
+
+    public float BaseDefensePower => _playerData.DefensePower;
+
+    public float BaseMaxHealth => _playerData.Stats.MaxHealth;
 
     public event Action OnDead;
 

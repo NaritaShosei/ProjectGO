@@ -1,3 +1,6 @@
+/// <summary>
+/// 攻撃力のステータスを提供するインターフェース。
+/// </summary>
 public interface IAttackStats
 {
     float AttackPower { get; }
@@ -5,11 +8,17 @@ public interface IAttackStats
     float CriticalRate { get; }
 }
 
+/// <summary>
+/// 防御力のステータスを提供するインターフェース。
+/// </summary>
 public interface IDefenseStats
 {
     float DefensePower { get; }
 }
 
+/// <summary>
+/// HPのステータスを提供するインターフェース。
+/// </summary>
 public interface IHealthStats
 {
     float MaxHealth { get; }
@@ -24,5 +33,16 @@ public interface IThunderGaugeStats
 {
     float MaxThunderGauge { get; }
     float CurrentThunderGauge { get; }
-    float InitialMaxThunderGauge { get; }
+}
+
+/// <summary>
+/// 攻撃力、クリティカル率、防御力、HP、雷ゲージなどの基礎ステータスを提供するインターフェース。
+/// </summary>
+public interface IBaseStats
+{
+    float BaseAttackPower { get; }
+    float BaseCriticalRate { get; }
+    float BaseDefensePower { get; }
+    float BaseMaxHealth { get; }
+    float BaseMaxThunderGauge { get; }
 }
