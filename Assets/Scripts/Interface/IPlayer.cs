@@ -16,7 +16,6 @@ public interface IPlayerStats :
     IDefenseStats,
     IHealthStats,
     IThunderGaugeStats,
-    IStatUpgradable,
     IBaseStats,
     IModifierHolder,
     IModeProvider

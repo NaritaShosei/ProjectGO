@@ -12,5 +12,6 @@ public enum StatType
     Defense,
     CriticalRate,
     ThunderDrain,
-    ThunderRecover
+    ThunderRecover,
+    ThunderGauge
 }
