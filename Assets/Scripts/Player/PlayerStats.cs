@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerStats
@@ -12,16 +13,90 @@ public class PlayerStats
     public float InitialMaxThunderGauge { get; private set; }
     public float MaxThunderGauge => _maxThunderGauge;
     public float CurrentThunderGauge => _currentThunderGauge;
-    public float DrainPerSecond => _drainPerSecond;
-    public float RecoverPerSecond => _recoverPerSecond;
+
+    public float DrainPerSecond
+    {
+        get
+        {
+            float value = _drainPerSecond;
+
+            if (_modifiers.TryGetValue(StatType.ThunderDrain, out var mods))
+                foreach (var mod in mods)
+                {
+                    value = mod.Modify(value);
+                }
+
+            return value;
+        }
+    }
+
+    public float RecoverPerSecond
+    {
+        get
+        {
+            float value = _recoverPerSecond;
+
+            if (_modifiers.TryGetValue(StatType.ThunderRecover, out var mods))
+                foreach (var mod in mods)
+                {
+                    value = mod.Modify(value);
+                }
+
+            return value;
+        }
+    }
 
     /// <summary> 1以上あれば雷神モードを使用可能 </summary>
     public bool CanUseThunder => _currentThunderGauge > 1f;
 
     // ---- 戦闘ステータス ----
-    public float AttackPower => _attackPower;
-    public float CriticalRate => _criticalRate;
-    public float DefensePower => _defensePower;
+    public float AttackPower
+    {
+        get
+        {
+            float value = _attackPower;
+
+            if (_modifiers.TryGetValue(StatType.Attack, out var mods))
+                foreach (var mod in mods)
+                {
+                    value = mod.Modify(value);
+                }
+
+            return value;
+        }
+    }
+
+    public float CriticalRate
+    {
+        get
+        {
+            float value = _criticalRate;
+
+            if (_modifiers.TryGetValue(StatType.CriticalRate, out var mods))
+                foreach (var mod in mods)
+                {
+                    value = mod.Modify(value);
+                }
+
+            return value;
+        }
+    }
+
+    public float DefensePower
+    {
+        get
+        {
+            float value = _defensePower;
+
+            if (_modifiers.TryGetValue(StatType.Defense, out var mods))
+                foreach (var mod in mods)
+                {
+                    value = mod.Modify(value);
+                }
+
+            return value;
+        }
+    }
 
     // ---- イベント ----
     public event Action OnDead;
@@ -78,7 +153,7 @@ public class PlayerStats
 
         if (isThunderMode)
         {
-            _currentThunderGauge = Mathf.Max(0f, _currentThunderGauge - _drainPerSecond * deltaTime);
+            _currentThunderGauge = Mathf.Max(0f, _currentThunderGauge - DrainPerSecond * deltaTime);
 
             // 枯渇した瞬間だけ OnDepleted を発火
             if (before > 0f && _currentThunderGauge <= 0f)
@@ -90,7 +165,7 @@ public class PlayerStats
         }
         else
         {
-            _currentThunderGauge = Mathf.Min(_maxThunderGauge, _currentThunderGauge + _recoverPerSecond * deltaTime);
+            _currentThunderGauge = Mathf.Min(_maxThunderGauge, _currentThunderGauge + RecoverPerSecond * deltaTime);
         }
 
         // 変化があったときのみ通知（毎フレーム発火によるUI負荷を抑える）
@@ -152,6 +227,16 @@ public class PlayerStats
         OnStatsChanged?.Invoke();
     }
 
+    public void AddModifier(IStatModifier modifier)
+    {
+        if (!_modifiers.ContainsKey(modifier.TargetStat))
+            _modifiers[modifier.TargetStat] = new List<IStatModifier>();
+
+        _modifiers[modifier.TargetStat].Add(modifier);
+
+        OnStatsChanged?.Invoke();
+    }
+
     // ---- フィールド ----
 
     private float _maxHealth;
@@ -165,4 +250,6 @@ public class PlayerStats
     private float _attackPower;
     private float _criticalRate;
     private float _defensePower;
+
+    private readonly Dictionary<StatType, List<IStatModifier>> _modifiers = new();
 }
