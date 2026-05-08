@@ -169,13 +169,13 @@ public class MobEnemy : Enemy, IFormationParticipant
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        bool isKill = _stats.CurrentHealth <= 0;
+        bool willKill = _stats.CurrentHealth <= 0;
 
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
             new HitResult
             {
-                IsKill = isKill,
+                IsKill = willKill,
                 IsArmorBreak = isArmorBreak,
                 IsWeakPoint = isWeakPoint,
                 IsArmorHit = isArmorHit
@@ -183,7 +183,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         
 
-        if (!isKill) InvokeOnDamaged();
+        if (!willKill) InvokeOnDamaged();
 
         // -------- 追加効果 --------
 
