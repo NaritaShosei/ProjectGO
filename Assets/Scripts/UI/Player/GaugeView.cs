@@ -40,6 +40,8 @@ public class GaugeView : MonoBehaviour
 
     [SerializeField] private Ease _ease = Ease.Linear;
 
+    [SerializeField] private float _sizeChangeDuration = 0.2f;
+
 
     /// <summary>
     /// HPゲージTween
@@ -59,7 +61,7 @@ public class GaugeView : MonoBehaviour
         float ratio = max / initialMax;
         Vector2 size = _barContainer.sizeDelta;
         size.x = _baseWidth * ratio;
-        _barContainer.sizeDelta = size;
+        _barContainer.DOSizeDelta(size, _sizeChangeDuration);
     }
 
     /// <summary>
