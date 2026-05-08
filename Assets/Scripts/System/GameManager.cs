@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
 
     private void InitEffect()
     {
-        _playerEffectInitializer.Init(_player);
+        _playerEffectInitializer.Init(_player, _skillManager);
     }
 
     private void InitEXPManager()
