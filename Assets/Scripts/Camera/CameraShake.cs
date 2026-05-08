@@ -1,11 +1,9 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Threading.Tasks;
 using Unity.Cinemachine;
 
 public struct CameraShakeData
 {
-    public CinemachineCamera playerCamera;
     public float amplitude;
     public float frequency;
     public float duration;
@@ -28,11 +26,9 @@ public class CameraShake
     /// <summary>
     /// CameraShakeを開始
     /// </summary>
-    public async Task StartCameraShake()
+    public async UniTask StartCameraShake(CameraShakeData data)
     {
         if (_noise == null) return;
-
-        CameraShakeData data = new CameraShakeData();
 
         _noise.AmplitudeGain = data.amplitude;
         _noise.FrequencyGain = data.frequency;
