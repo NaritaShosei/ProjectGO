@@ -152,8 +152,6 @@ public class MobEnemy : Enemy, IFormationParticipant
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
-        bool isKill = _stats.CurrentHealth - damage <= 0;
-
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
         // 弱点ヒットは生身かつ雷神モード攻撃時に有効
@@ -170,6 +168,8 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
+
+        bool isKill = _stats.CurrentHealth <= 0;
 
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
