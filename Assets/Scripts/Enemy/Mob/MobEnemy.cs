@@ -152,7 +152,7 @@ public class MobEnemy : Enemy, IFormationParticipant
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
-        bool isKill = _stats.CurrentHealth - damage <= 0;
+        bool willKill = _stats.CurrentHealth - damage <= 0;
 
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
@@ -175,7 +175,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         context.OnHitResult?.Invoke(
             new HitResult
             {
-                IsKill = isKill,
+                IsKill = willKill,
                 IsArmorBreak = isArmorBreak,
                 IsWeakPoint = isWeakPoint,
                 IsArmorHit = isArmorHit
@@ -183,7 +183,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         
 
-        if (!isKill) InvokeOnDamaged();
+        if (!willKill) InvokeOnDamaged();
 
         // -------- 追加効果 --------
 
