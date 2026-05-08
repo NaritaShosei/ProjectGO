@@ -181,8 +181,6 @@ public class MobEnemy : Enemy, IFormationParticipant
                 IsArmorHit = isArmorHit
             });
 
-        
-
         if (!willKill) InvokeOnDamaged();
 
         // -------- 追加効果 --------
