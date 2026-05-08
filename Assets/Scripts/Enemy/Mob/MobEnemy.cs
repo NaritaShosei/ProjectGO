@@ -152,7 +152,7 @@ public class MobEnemy : Enemy, IFormationParticipant
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
-        bool isKill = _stats.CurrentHealth <= 0;
+        bool isKill = _stats.CurrentHealth - damage <= 0;
 
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
