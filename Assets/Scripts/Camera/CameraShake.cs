@@ -20,6 +20,8 @@ public class CameraShake
     /// <param name="duration">持続時間</param>
     public CameraShake(CinemachineCamera playerCamera)
     {
+        if (playerCamera == null) return;
+
         _noise = playerCamera.GetComponent<CinemachineBasicMultiChannelPerlin>();
     }
 
