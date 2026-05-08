@@ -137,7 +137,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
     public override void TakeDamage(DamageContext context)
     {
-        //if (_isDead) { return; }
+        if (_isDead) { return; }
 
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
@@ -152,10 +152,8 @@ public class MobEnemy : Enemy, IFormationParticipant
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
-        //超過ダメージを生身に流す
-        _stats.TakeDamage(damage);
-
         bool isKill = _stats.CurrentHealth <= 0;
+
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
         // 弱点ヒットは生身かつ雷神モード攻撃時に有効
@@ -168,6 +166,11 @@ public class MobEnemy : Enemy, IFormationParticipant
         // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
         bool isArmorHit = armorWasAlive && !isArmorBreak;
 
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+
+        //超過ダメージを生身に流す
+        _stats.TakeDamage(damage);
+
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
             new HitResult
@@ -178,7 +181,7 @@ public class MobEnemy : Enemy, IFormationParticipant
                 IsArmorHit = isArmorHit
             });
 
-        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+        
 
         if (!isKill) InvokeOnDamaged();
 
