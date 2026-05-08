@@ -92,6 +92,11 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float _posSmoothTime = 0.2f; // 位置の遅延時間
     [SerializeField] private float _rotFollowSpeed = 10f; // 回転の追従速度
 
+    [Header("カメラシェイク設定")]
+    [SerializeField] private float _amplitude = 1;//カメラ振幅
+    [SerializeField] private float _frequency = 1;//カメラ振動周期
+    [SerializeField] private float _duration = 1;//持続時間
+
     private Camera _mainCamera;
     private Transform _playerTransform;
     private ILockOnTarget _currentTarget;
@@ -100,11 +105,14 @@ public class CameraManager : MonoBehaviour
     private Transform _cameraFollowTarget; // 通常時の遅延追従用アンカー
     private Vector3 _normalFollowVelocity; // 通常追従用
     private Vector3 _lockOnCameraVelocity; // ロックオン追従用
+    private CameraShake _cameraShake; //カメラシェイク
 
     private void Awake()
     {
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
+
+        _cameraShake = new(_normalCamera);
 
         // 追従遅延を実現するための仮想アンカーを生成
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
@@ -207,5 +215,17 @@ public class CameraManager : MonoBehaviour
         Vector3 currentEuler = _lockOnCamera.transform.rotation.eulerAngles;
         _normalOrbitalFollow.HorizontalAxis.Value = currentEuler.y;
         _normalOrbitalFollow.VerticalAxis.Value = currentEuler.x;
+    }
+
+    /// <summary>
+    /// カメラシェイクの実行
+    /// </summary>
+    private void ExecutionCameraShake()
+    {
+        CameraShakeData data = new CameraShakeData();
+
+        data.amplitude += _amplitude;
+        data.frequency += _frequency;
+        data.duration += _duration;
     }
 }
