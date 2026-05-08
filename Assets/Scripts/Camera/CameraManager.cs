@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -76,6 +77,20 @@ public class CameraManager : MonoBehaviour
         _lockOnCamera.Priority = _normalPriority - 1;
 
         OnLockOnTargetChanged?.Invoke(null);
+    }
+
+    /// <summary>
+    /// カメラシェイクの実行
+    /// </summary>
+    public async UniTask ExecutionCameraShake()
+    {
+        CameraShakeData data = new CameraShakeData();
+
+        data.amplitude += _amplitude;
+        data.frequency += _frequency;
+        data.duration += _duration;
+
+        await _cameraShake.StartCameraShake(data);
     }
 
     [Header("カメラ参照")]
@@ -215,17 +230,5 @@ public class CameraManager : MonoBehaviour
         Vector3 currentEuler = _lockOnCamera.transform.rotation.eulerAngles;
         _normalOrbitalFollow.HorizontalAxis.Value = currentEuler.y;
         _normalOrbitalFollow.VerticalAxis.Value = currentEuler.x;
-    }
-
-    /// <summary>
-    /// カメラシェイクの実行
-    /// </summary>
-    private void ExecutionCameraShake()
-    {
-        CameraShakeData data = new CameraShakeData();
-
-        data.amplitude += _amplitude;
-        data.frequency += _frequency;
-        data.duration += _duration;
     }
 }
