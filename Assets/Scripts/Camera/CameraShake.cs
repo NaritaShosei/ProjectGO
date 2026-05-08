@@ -31,20 +31,24 @@ public class CameraShake
     public async UniTask StartCameraShake(CameraShakeData data)
     {
         if (_noise == null) return;
+        int shakeRequestNumber = ++_shakeRequestRestrictionNumber;
 
         _noise.AmplitudeGain = data.amplitude;
         _noise.FrequencyGain = data.frequency;
 
-        await StopCameraShake(data);
+        await StopCameraShake(data, shakeRequestNumber);
     }
 
     private CinemachineBasicMultiChannelPerlin _noise;
+    private int _shakeRequestRestrictionNumber = 0;
 
     /// <summary>
     /// CameraShakeを停止
     /// </summary>
-    private async UniTask StopCameraShake(CameraShakeData data)
+    private async UniTask StopCameraShake(CameraShakeData data, int shakeRequestNumber)
     {
+        if (_shakeRequestRestrictionNumber <= shakeRequestNumber) return;
+
         await UniTask.Delay(TimeSpan.FromSeconds(data.duration));
 
         _noise.AmplitudeGain = 0;
