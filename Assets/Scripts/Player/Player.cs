@@ -11,9 +11,19 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     public float CurrentHealth => _playerStats.CurrentHealth;
     public float MaxThunderGauge => _playerStats.MaxThunderGauge;
     public float CurrentThunderGauge => _playerStats.CurrentThunderGauge;
-    public float InitialMaxThunderGauge => _playerStats.InitialMaxThunderGauge;
+    public float BaseMaxThunderGauge => _playerStats.InitialMaxThunderGauge;
 
     public float TimeScale { get; set; } = 1f;
+
+    public float BaseAttackPower => _playerData.AttackPower;
+
+    public float BaseCriticalRate => _playerData.CriticalRate;
+
+    public float BaseDefensePower => _playerData.DefensePower;
+
+    public float BaseMaxHealth => _playerData.Stats.MaxHealth;
+
+    public PlayerMode CurrentMode => _modeController.CurrentMode;
 
     public event Action OnDead;
 
@@ -83,14 +93,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         }
     }
 
-    // ---- IStatUpgradable ----
-    public void AddAttackPower(float value) => _playerStats.AddAttackPower(value);
-    public void AddCriticalRate(float value) => _playerStats.AddCriticalRate(value);
-    public void AddDefensePower(float value) => _playerStats.AddDefensePower(value);
-    public void AddMaxHealth(float value) => _playerStats.AddMaxHealth(value);
-    public void AddMaxThunderGauge(float value) => _playerStats.AddMaxThunderGauge(value);
-    public void AddThunderDrainPerSecond(float delta) => _playerStats.AddDrainPerSecond(delta);
-    public void AddThunderRecoverPerSecond(float delta) => _playerStats.AddRecoverPerSecond(delta);
+    /// <summary>
+    /// ステータスに修正を加える。バフ・デバフの適用などに使用。
+    /// </summary>
+    public void AddModifier(IStatModifier modifier) => _playerStats.AddModifier(modifier);
 
     public void OnSpeedChange(float timeScale)
     {

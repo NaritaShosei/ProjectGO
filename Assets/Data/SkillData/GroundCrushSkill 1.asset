@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a16cbcc21f41b4b4c89749317af081c6, type: 3}
-  m_Name: ConditionalAttackBoostSkill
+  m_Name: GroundCrushSkill 1
   m_EditorClassIdentifier: Assembly-CSharp::ConditionalAttackBoostSkill
   _id: 4079
   _priority: 0
-  _name: "\u795E\u529B\u89E3\u653E"
+  _name: "\u5927\u5730\u7C89\u7815\u2160"
   _explanation: "\u30B3\u30F3\u30DC\u306E\u6700\u5F8C\u306E\u4E00\u6483\u306E\u5A01\u529B\u304C20\uFF05\u30A2\u30C3\u30D7\u3057\u3001\u3055\u3089\u306B\u7BC4\u56F2\u653B\u6483\u304C\u4ED8\u4E0E\u3055\u308C\u308B\u3002"
   _icon: {fileID: 0}
   _timing: 0
+  _evolutionSkill: {fileID: 11400000, guid: 558a011b8cb78cd4eab0e3c8484f5066, type: 2}
+  _defaultUnlocked: 1
   _boostAmount: 0.2
   _requiredComboIndex: 2
   _targetAttackType: 0
