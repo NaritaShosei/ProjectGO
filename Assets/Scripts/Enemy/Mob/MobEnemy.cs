@@ -141,6 +141,9 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         int damage = DamageSystem.Calculate(context, _defenceContext);
 
+        //ダメージ表示用に総ダメージを保存
+        int showDamage = damage;
+
         bool armorWasAlive = _defenceContext.EnemyType == EnemyType.Armor;
 
         // 鎧がダメージを肩代わり
@@ -149,33 +152,36 @@ public class MobEnemy : Enemy, IFormationParticipant
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
-        //超過ダメージを生身に流す
-        _stats.TakeDamage(damage);
-
-        bool isKill = _stats.CurrentHealth <= 0;
         bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
 
-        // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
-        bool isWeakPoint = !armorWasAlive
+        // 弱点ヒットは生身かつ雷神モード攻撃時に有効
+        bool isWeakPoint = (!armorWasAlive
             && _defenceContext.EnemyType == EnemyType.Flesh
-            && context.PlayerMode == PlayerMode.Thunder;
+            && context.PlayerMode == PlayerMode.Thunder)
+            //鎧かつ闘神モードの時に有効
+            || (armorWasAlive && context.PlayerMode == PlayerMode.Warrior);
 
         // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
         bool isArmorHit = armorWasAlive && !isArmorBreak;
+
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+
+        //超過ダメージを生身に流す
+        _stats.TakeDamage(damage);
+
+        bool willKill = _stats.CurrentHealth <= 0;
 
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
             new HitResult
             {
-                IsKill = isKill,
+                IsKill = willKill,
                 IsArmorBreak = isArmorBreak,
                 IsWeakPoint = isWeakPoint,
                 IsArmorHit = isArmorHit
             });
 
-        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
-
-        if (!isKill) InvokeOnDamaged();
+        if (!willKill) InvokeOnDamaged();
 
         // -------- 追加効果 --------
 
