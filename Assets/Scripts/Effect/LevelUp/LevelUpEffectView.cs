@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -9,6 +8,9 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
 {
     public float TimeScale { get; set; } = 1f;
 
+    /// <summary>
+    /// プレイヤーのステータスアップに応じたエフェクトを再生する
+    /// </summary>
     public void Play(StatSkillType statType)
     {
         _effectQueue.Enqueue(statType);
@@ -69,8 +71,19 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
         {
             _effectMap[data.StatSkillType] = data;
         }
+
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            // プレイヤーにくっついているエフェクトなので、両方のグループに登録しておく
+            hitStopManager.Register(this, HitStopTargetGroup.Effects);
+            hitStopManager.Register(this, HitStopTargetGroup.Player);
+        }
     }
 
+    /// <summary>
+    /// エフェクトの再生をキューで管理する。複数のステータスアップが同時に発生した場合でも、順番にエフェクトを再生できるようにするため。
+    /// </summary>
+    /// <returns></returns>
     private async UniTask ProcessQueue()
     {
         while (_effectQueue.Count > 0)
@@ -87,6 +100,10 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
         _isPlaying = false;
     }
 
+    /// <summary>
+    /// 実際にエフェクトを再生する処理。StatSkillTypeに応じて、VFXのパラメータを設定してから再生する。
+    /// </summary>
+    /// <param name="statType"></param>
     private void PlayInternal(StatSkillType statType)
     {
         if (_effectMap.TryGetValue(statType, out var data) == false)
