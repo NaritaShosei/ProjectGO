@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -6,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class StatSkillSystem
 {
+    public event Action<StatSkillType> OnApply;
+
     /// <summary>
     /// コンストラクタで、StatSkillData の配列、プレイヤーのステータスインターフェース、EXPManager を受け取る。
     /// </summary>
@@ -42,7 +45,7 @@ public class StatSkillSystem
     {
         if (_statSkillDataArray == null || _statSkillDataArray.Length == 0) return;
 
-        var data = _statSkillDataArray[Random.Range(0, _statSkillDataArray.Length)];
+        var data = _statSkillDataArray[UnityEngine.Random.Range(0, _statSkillDataArray.Length)];
 
         if (data == null)
         {
@@ -94,12 +97,14 @@ public class StatSkillSystem
     {
         switch (type)
         {
-            case StatSkillType.HP: _stats.AddModifier(new DefaultModifier(amount,StatType.Health)); break;
+            case StatSkillType.HP: _stats.AddModifier(new DefaultModifier(amount, StatType.Health)); break;
             case StatSkillType.Attack: _stats.AddModifier(new DefaultModifier(amount, StatType.Attack)); break;
             case StatSkillType.Defense: _stats.AddModifier(new DefaultModifier(amount, StatType.Defense)); break;
             case StatSkillType.Critical: _stats.AddModifier(new DefaultModifier(amount, StatType.CriticalRate)); break;
-            case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount,StatType.ThunderGauge)); break;
+            case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount, StatType.ThunderGauge)); break;
         }
+
+        OnApply?.Invoke(type);
     }
 }
 
