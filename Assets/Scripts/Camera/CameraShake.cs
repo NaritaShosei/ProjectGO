@@ -14,15 +14,12 @@ public class CameraShake
     /// <summary>
     /// コンストラクタ
     /// </summary>
-    /// <param name="playercamera">振動させるカメラ</param>
-    /// <param name="amplitude"></param>
-    /// <param name="frequency"></param>
-    /// <param name="duration">持続時間</param>
     public CameraShake(CinemachineCamera playerCamera)
     {
         if (playerCamera == null) return;
 
-        _noise = playerCamera.GetComponent<CinemachineBasicMultiChannelPerlin>();
+        _noise = playerCamera.GetCinemachineComponent(CinemachineCore.Stage.Noise)
+                 as CinemachineBasicMultiChannelPerlin;
     }
 
     /// <summary>
@@ -31,6 +28,7 @@ public class CameraShake
     public async UniTask StartCameraShake(CameraShakeData data)
     {
         if (_noise == null) return;
+
         int shakeRequestNumber = ++_shakeRequestRestrictionNumber;
 
         _noise.AmplitudeGain = data.amplitude;
@@ -47,7 +45,7 @@ public class CameraShake
     /// </summary>
     private async UniTask StopCameraShake(CameraShakeData data, int shakeRequestNumber)
     {
-        if (_shakeRequestRestrictionNumber <= shakeRequestNumber) return;
+        if (_shakeRequestRestrictionNumber != shakeRequestNumber) return;
 
         await UniTask.Delay(TimeSpan.FromSeconds(data.duration));
 

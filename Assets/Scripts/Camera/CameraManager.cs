@@ -82,13 +82,13 @@ public class CameraManager : MonoBehaviour
     /// <summary>
     /// カメラシェイクの実行
     /// </summary>
-    public async UniTask ExecutionCameraShake()
+    public async UniTask ExecutionCameraShake(float amplitude, float frequency, float duration)
     {
         CameraShakeData data = new CameraShakeData();
 
-        data.amplitude += _amplitude;
-        data.frequency += _frequency;
-        data.duration += _duration;
+        data.amplitude += amplitude;
+        data.frequency += frequency;
+        data.duration += duration;
 
         await _cameraShake.StartCameraShake(data);
     }
@@ -127,7 +127,7 @@ public class CameraManager : MonoBehaviour
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
 
-        _cameraShake = new(_normalCamera);
+        _cameraShake = new CameraShake(_normalCamera);
 
         // 追従遅延を実現するための仮想アンカーを生成
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
