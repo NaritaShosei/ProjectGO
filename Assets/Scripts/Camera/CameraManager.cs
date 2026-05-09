@@ -107,11 +107,6 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float _posSmoothTime = 0.2f; // 位置の遅延時間
     [SerializeField] private float _rotFollowSpeed = 10f; // 回転の追従速度
 
-    [Header("カメラシェイク設定")]
-    [SerializeField] private float _amplitude = 1;//カメラ振幅
-    [SerializeField] private float _frequency = 1;//カメラ振動周期
-    [SerializeField] private float _duration = 1;//持続時間
-
     private Camera _mainCamera;
     private Transform _playerTransform;
     private ILockOnTarget _currentTarget;
