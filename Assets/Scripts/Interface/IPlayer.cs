@@ -22,12 +22,16 @@ public interface IPlayerStats :
 {
     /// <summary> 雷ゲージ変化通知 (current, max, initialMax) </summary>
     event Action<float, float, float> OnThunderGaugeChanged;
+
+    event Func<bool> OnBeforeDead;
 }
 
 
 public interface IModifierHolder
 {
     void AddModifier(IStatModifier modifier);
+    void AddDamageReactionModifier(IDamageReactionModifier modifier);
+    void AddDamageModifier(IDamageModifier modifier);
 }
 
 /// <summary>
