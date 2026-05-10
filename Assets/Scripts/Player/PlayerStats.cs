@@ -84,21 +84,26 @@ public class PlayerStats
         // HPが0以下なら死亡処理へ（ただしイベントでキャンセルされる可能性もある）
         if (_currentHealth > 0) { return; }
 
-        // 死亡直前イベントを発火。true を返すハンドラーがあれば死亡をキャンセル。
-        foreach (Func<bool> handler in OnBeforeDead.GetInvocationList())
-        {
-            // 例外が発生しても他のハンドラーは呼び続けるため、個別に try-catch する。
-            try
-            {
-                if (handler.Invoke()) return;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"エラーが発生しましたが、死亡処理は続行します。例外: {e}");
-            }
-        }
+        var beforeDeadHandlers = OnBeforeDead?.GetInvocationList();
 
-        OnDead?.Invoke(); OnDead?.Invoke();
+        if (beforeDeadHandlers != null)
+        {
+            // 死亡直前イベントを発火。true を返すハンドラーがあれば死亡をキャンセル。
+            foreach (Func<bool> handler in beforeDeadHandlers)
+            {
+                // 例外が発生しても他のハンドラーは呼び続けるため、個別に try-catch する。
+                try
+                {
+                    if (handler.Invoke()) return;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"エラーが発生しましたが、死亡処理は続行します。例外: {e}");
+                }
+            }
+
+            OnDead?.Invoke();
+        }
     }
 
     public void Heal(float amount)
