@@ -293,8 +293,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         {
             while (elapsed < _playerData.InvincibleDuration)
             {
-                await UniTask.Yield(destroyCancellationToken);
                 elapsed += Time.deltaTime * TimeScale;
+                await UniTask.Yield(destroyCancellationToken);
             }
 
             _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
