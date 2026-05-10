@@ -42,6 +42,7 @@ public class GaugeView : MonoBehaviour
 
     [SerializeField] private float _sizeChangeDuration = 0.2f;
 
+    [SerializeField] private Ease _sizeChangeEase = Ease.OutCubic;
 
     /// <summary>
     /// HPゲージTween
@@ -54,6 +55,11 @@ public class GaugeView : MonoBehaviour
     private Sequence _delaySeq;
 
     /// <summary>
+    /// バーの横幅変更Tween
+    /// </summary>
+    private Sequence _sizeChangeSeq;
+
+    /// <summary>
     /// 最大HP増加時にバーの横幅を拡張する
     /// </summary>
     private void UpdateBarWidth(float max, float initialMax)
@@ -61,7 +67,13 @@ public class GaugeView : MonoBehaviour
         float ratio = max / initialMax;
         Vector2 size = _barContainer.sizeDelta;
         size.x = _baseWidth * ratio;
-        _barContainer.DOSizeDelta(size, _sizeChangeDuration);
+
+        _sizeChangeSeq?.Kill();
+
+        _sizeChangeSeq = DOTween.Sequence()
+            .Append(_barContainer.DOSizeDelta(size, _sizeChangeDuration))
+            .SetEase(_sizeChangeEase)
+            .SetLink(gameObject);
     }
 
     /// <summary>
