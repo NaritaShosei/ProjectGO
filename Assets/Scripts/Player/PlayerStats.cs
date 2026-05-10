@@ -85,18 +85,20 @@ public class PlayerStats
         if (_currentHealth > 0) { return; }
 
         // 死亡直前イベントを発火。true を返すハンドラーがあれば死亡をキャンセル。
-        if (OnBeforeDead != null)
+        foreach (Func<bool> handler in OnBeforeDead.GetInvocationList())
         {
-            foreach (Func<bool> handler in OnBeforeDead.GetInvocationList())
+            // 例外が発生しても他のハンドラーは呼び続けるため、個別に try-catch する。
+            try
             {
-                if (handler.Invoke())
-                {
-                    return;
-                }
+                if (handler.Invoke()) return;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"エラーが発生しましたが、死亡処理は続行します。例外: {e}");
             }
         }
 
-        OnDead?.Invoke();
+        OnDead?.Invoke(); OnDead?.Invoke();
     }
 
     public void Heal(float amount)

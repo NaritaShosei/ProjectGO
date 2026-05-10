@@ -47,7 +47,11 @@ public class PlayerMovement : MonoBehaviour
     /// <summary> ロックオン対象を設定する。nullを渡すとロックオン解除。 </summary>
     public void SetLockOnTarget(Transform target) => _lockOnTarget = target;
 
-    public void AddModifier(IStatModifier modifier) => _modifiers.Add(modifier);
+    public void AddModifier(IStatModifier modifier)
+    {
+        if (!_modifiers.Contains(modifier))
+            _modifiers.Add(modifier);
+    }
 
     [SerializeField] private Rigidbody _rb;
 
@@ -297,12 +301,11 @@ public class PlayerMovement : MonoBehaviour
                 elapsed += Time.deltaTime * _timeScale;
                 await UniTask.Yield(_dodgeMoveCts.Token, false);
             }
-
-            _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
         }
         catch (OperationCanceledException)
         {
             // 回避移動がキャンセルされた場合も無敵状態を解除する
+            _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
         }
     }
 

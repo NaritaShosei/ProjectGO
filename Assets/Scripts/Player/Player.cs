@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 public class Player : MonoBehaviour, IPlayer, ISpeedChange
@@ -190,6 +191,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     private List<IDamageReactionModifier> _damageReactionModifiers = new List<IDamageReactionModifier>();
     private List<IDamageModifier> _damageModifiers = new List<IDamageModifier>();
 
+    private CancellationTokenSource _damageInvincibilityCts;
+
     private void Awake()
     {
         _playerStateManager = new PlayerStateManager();
@@ -288,13 +291,20 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     /// </summary>
     private async UniTaskVoid HandleDamageInvincibilityEnd()
     {
+        _damageInvincibilityCts?.Cancel();
+        _damageInvincibilityCts?.Dispose();
+        _damageInvincibilityCts = new CancellationTokenSource();
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(
+            _damageInvincibilityCts.Token, destroyCancellationToken);
+
+
         float elapsed = 0f;
         try
         {
             while (elapsed < _playerData.InvincibleDuration)
             {
                 elapsed += Time.deltaTime * TimeScale;
-                await UniTask.Yield(destroyCancellationToken);
+                await UniTask.Yield(cts.Token);
             }
 
             _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
@@ -309,11 +319,5 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();
-    }
-
-    private void OnGUI()
-    {
-        GUI.Label(new Rect(10, 50, 500, 300), $"残りHP：{_playerStats.CurrentHealth}");
-        GUI.Label(new Rect(10, 100, 500, 300), $"雷ゲージ：{_playerStats.CurrentThunderGauge:F1} / {_playerStats.MaxThunderGauge:F1}");
     }
 }
