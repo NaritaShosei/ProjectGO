@@ -81,24 +81,22 @@ public class PlayerStats
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
         OnHealthChanged?.Invoke(_currentHealth, MaxHealth, InitialMaxHealth);
 
-        bool isCanceled = false;
+        // HPが0以下なら死亡処理へ（ただしイベントでキャンセルされる可能性もある）
+        if (_currentHealth > 0) { return; }
 
+        // 死亡直前イベントを発火。true を返すハンドラーがあれば死亡をキャンセル。
         if (OnBeforeDead != null)
         {
-            // 死亡直前イベントを呼び出し、どれかが true を返したら死亡をキャンセルする
             foreach (Func<bool> handler in OnBeforeDead.GetInvocationList())
             {
-                if (handler())
+                if (handler.Invoke())
                 {
-                    isCanceled = true;
+                    return;
                 }
             }
         }
 
-        if (!isCanceled && _currentHealth <= 0)
-        {
-            OnDead?.Invoke();
-        }
+        OnDead?.Invoke();
     }
 
     public void Heal(float amount)
