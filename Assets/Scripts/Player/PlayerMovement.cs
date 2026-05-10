@@ -1,6 +1,8 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -30,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
         _attack.OnAttackMoveRequested += HandleAttackMove;
         _animationController.OnDamagedEnd += HandleDamagedEnd;
+
+        _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
         _animationController.OnDodgeEnd += HandleDodgeEnd;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -42,6 +46,8 @@ public class PlayerMovement : MonoBehaviour
     public void SetTimeScale(float scale) => _timeScale = scale;
     /// <summary> ロックオン対象を設定する。nullを渡すとロックオン解除。 </summary>
     public void SetLockOnTarget(Transform target) => _lockOnTarget = target;
+
+    public void AddModifier(IStatModifier modifier) => _modifiers.Add(modifier);
 
     [SerializeField] private Rigidbody _rb;
 
@@ -60,6 +66,25 @@ public class PlayerMovement : MonoBehaviour
     private CancellationTokenSource _attackMoveCts;
     private bool _isAttackMoving;
     private bool _currentIsPhantom;
+
+    private DodgeData _currentDodgeData;
+
+    private List<IStatModifier> _modifiers = new List<IStatModifier>();
+
+    private float InvincibleDuration
+    {
+        get
+        {
+            float value = _currentDodgeData.InvincibleDuration;
+
+            foreach (var modifier in _modifiers)
+            {
+                value = modifier.Modify(value);
+            }
+
+            return value;
+        }
+    }
 
     private void Update()
     {
@@ -83,6 +108,7 @@ public class PlayerMovement : MonoBehaviour
         if (_animationController != null)
         {
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
+            _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
         }
         _dodgeMoveCts?.Cancel();
@@ -192,7 +218,7 @@ public class PlayerMovement : MonoBehaviour
         _isDodging = true;
         _playerStateManager.ChangeState(PlayerState.Dodge);
 
-        DodgeData dodgeData = _moveData.GetDodge(_modeController.CurrentMode);
+        _currentDodgeData = _moveData.GetDodge(_modeController.CurrentMode);
         Vector3 dodgeDir = GetDodgeDirection();
 
         if (_lockOnTarget != null || isCancelDodge)
@@ -221,7 +247,7 @@ public class PlayerMovement : MonoBehaviour
             _animationController.PlayDodge();
         }
 
-        DodgeMoveAsync(dodgeDir, dodgeData.Speed, dodgeData.Duration, _dodgeMoveCts.Token).Forget();
+        DodgeMoveAsync(dodgeDir, _currentDodgeData.Speed, _currentDodgeData.Duration, _dodgeMoveCts.Token).Forget();
     }
 
     /// <summary>
@@ -243,6 +269,34 @@ public class PlayerMovement : MonoBehaviour
 
         if (_rb) _rb.linearVelocity = Vector3.zero;
         // ステート復帰は HandleDodgeEnd（DodgeSMBのOnStateExit通知）を待つ
+    }
+
+    /// <summary>
+    /// 回避開始のSMBから無敵状態を開始するハンドラー。回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
+    /// </summary>
+    private void HandleDodgeInvincibilityStart()
+    {
+        // 回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
+        if (!_isDodging) return;
+        _playerStateManager.AddInvincible(InvincibleType.Dodge);
+
+        HandleDodgeInvincibilityEnd().Forget();
+    }
+
+    /// <summary>
+    ///　回避無敵状態を終了する非同期メソッド。回避開始から一定時間が経過したら、無敵状態を解除する。
+    /// </summary>
+    private async UniTaskVoid HandleDodgeInvincibilityEnd()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < InvincibleDuration)
+        {
+            elapsed += Time.deltaTime * _timeScale;
+            await UniTask.Yield(_dodgeMoveCts.Token, false);
+        }
+
+        _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
     }
 
     /// <summary>
