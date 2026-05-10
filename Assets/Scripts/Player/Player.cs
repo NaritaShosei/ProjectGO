@@ -289,14 +289,20 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     private async UniTaskVoid HandleDamageInvincibilityEnd()
     {
         float elapsed = 0f;
-
-        while (elapsed < _playerData.InvincibleDuration)
+        try
         {
-            await UniTask.Yield(destroyCancellationToken);
-            elapsed += Time.deltaTime * TimeScale;
-        }
+            while (elapsed < _playerData.InvincibleDuration)
+            {
+                await UniTask.Yield(destroyCancellationToken);
+                elapsed += Time.deltaTime * TimeScale;
+            }
 
-        _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
+            _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
+        }
+        catch (OperationCanceledException)
+        {
+            // オブジェクトが破壊された場合など、処理がキャンセルされたときは何もしない。
+        }
     }
 
     private void OnPlayerDead()

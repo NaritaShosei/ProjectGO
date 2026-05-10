@@ -290,13 +290,20 @@ public class PlayerMovement : MonoBehaviour
     {
         float elapsed = 0f;
 
-        while (elapsed < InvincibleDuration)
+        try
         {
-            elapsed += Time.deltaTime * _timeScale;
-            await UniTask.Yield(_dodgeMoveCts.Token, false);
-        }
+            while (elapsed < InvincibleDuration)
+            {
+                elapsed += Time.deltaTime * _timeScale;
+                await UniTask.Yield(_dodgeMoveCts.Token, false);
+            }
 
-        _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+            _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+        }
+        catch (OperationCanceledException)
+        {
+            // 回避移動がキャンセルされた場合も無敵状態を解除する
+        }
     }
 
     /// <summary>
