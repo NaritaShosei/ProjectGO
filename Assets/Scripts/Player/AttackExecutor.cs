@@ -28,7 +28,7 @@ public class AttackExecutor : MonoBehaviour
 
         Debug.Log($"{data.Mode}：{data.AttackName}で攻撃");
 
-        var context = new AttackContext(data.Mode, attackPos, transform)
+        var context = new AttackContext(data.Mode, _playerStats, attackPos, transform)
         {
             AttackPower = _playerStats.AttackPower * data.DamageMultiplier * modeData.AttackMultiplier,
         };
@@ -51,7 +51,7 @@ public class AttackExecutor : MonoBehaviour
         bool isWeakPoint = false;
         bool isArmorBreak = false;
         bool isKill = false;
-        bool isArmorHit = false; 
+        bool isArmorHit = false;
         var hitEnemyTargets = new List<ISpeedChange>();
 
         foreach (var col in cols)
@@ -70,7 +70,7 @@ public class AttackExecutor : MonoBehaviour
                 if (result.IsWeakPoint) isWeakPoint = true;
                 if (result.IsArmorBreak) isArmorBreak = true;
                 if (result.IsKill) isKill = true;
-                if (result.IsArmorHit) isArmorHit = true; 
+                if (result.IsArmorHit) isArmorHit = true;
                 if (enemy is ISpeedChange speedChange)
                     hitEnemyTargets.Add(speedChange);
             };
@@ -172,6 +172,7 @@ public struct AttackContext
 {
     public float AttackPower;
     public readonly PlayerMode PlayerMode;
+    public readonly IPlayerStats PlayerStats;
 
     // 攻撃の座標
     public readonly Vector3 AttackPosition;
@@ -194,9 +195,10 @@ public struct AttackContext
     /// <summary>感電</summary>
     public ElectricShock ElectricShock;
 
-    public AttackContext(PlayerMode mode, Vector3 attackPos, Transform playerTransform)
+    public AttackContext(PlayerMode mode, IPlayerStats playerStats, Vector3 attackPos, Transform playerTransform)
     {
         PlayerMode = mode;
+        PlayerStats = playerStats;
         AttackPosition = attackPos;
         PlayerTransform = playerTransform;
 
@@ -253,7 +255,7 @@ public struct HitResult
     public bool IsKill;
     public bool IsArmorBreak;
     public bool IsWeakPoint;
-    public bool IsArmorHit; 
+    public bool IsArmorHit;
 }
 
 /// <summary>

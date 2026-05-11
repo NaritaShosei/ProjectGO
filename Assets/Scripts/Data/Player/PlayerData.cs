@@ -12,6 +12,7 @@ public class PlayerData : ScriptableObject
     public float ThunderDrainPerSecond => _thunderDrainPerSecond;
     /// <summary> 闘神モード中の毎秒回復量。デフォルトで3秒で全回復 </summary>
     public float ThunderRecoverPerSecond => _thunderRecoverPerSecond;
+    public float InvincibleDuration => _invincibleDuration;
 
     [SerializeField] private StatsData _stats;
     [SerializeField] private float _attackPower;
@@ -23,4 +24,7 @@ public class PlayerData : ScriptableObject
     [SerializeField] private float _thunderDrainPerSecond = 100f / 3f;
     [Min(0f)]
     [SerializeField] private float _thunderRecoverPerSecond = 100f / 3f;
+
+    [Header("ダメージを受けた際の無敵時間")]
+    [SerializeField] private float _invincibleDuration = 0.2f;
 }

@@ -18,13 +18,13 @@ MonoBehaviour:
     Data:
       Speed: 10
       Duration: 0.5
-      AnimationStateName: Warrior_Dodge
+      InvincibleDuration: 0.3
   - Mode: 1
     Data:
       Speed: 10
       Duration: 0.5
-      AnimationStateName: Thunder_Dodge
+      InvincibleDuration: 0.3
   _defaultDodge:
     Speed: 10
     Duration: 0.5
-    AnimationStateName: Warrior_Dodge
+    InvincibleDuration: 0

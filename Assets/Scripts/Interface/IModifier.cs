@@ -14,5 +14,25 @@ public enum StatType
     ThunderDrain,
     ThunderRecover,
     ThunderGauge,
-    Heal
+    Heal,
+    DodgeInvincibleTime
+}
+
+/// <summary>
+/// プレイヤーがダメージを受ける際のリアクションを有効かどうかを判断するインターフェース
+/// </summary>
+public interface IDamageReactionModifier
+{
+    /// <summary>
+    /// Stateに応じてダメージリアクションを有効にするかどうかを判断する。
+    /// </summary>
+    bool CanInterrupt(PlayerState state);
+}
+
+/// <summary>
+/// プレイヤーがダメージを受ける際のダメージ量を修正するインターフェース。
+/// </summary>
+public interface IDamageModifier
+{
+    void Modify(ref float damage, PlayerMode mode);
 }
