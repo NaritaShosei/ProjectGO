@@ -30,6 +30,12 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
         return IsAliveInternal();
     }
 
+    /// <summary> エフェクトのスケールを設定する。</summary>
+    public void SetScale(Vector3 scale)
+    {
+        ApplyScaleInternal(scale);
+    }
+
     // ── IPoolable ────────────────────────────────────────────
 
     /// <summary>プールから取り出された直後に呼ばれる。</summary>
@@ -41,6 +47,7 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
         Stop();
         TimeScale = 1f;
         ApplyTimeScaleInternal(TimeScale);
+        ApplyScaleInternal(Vector3.one);
     }
 
     // ── ISpeedChange ──────────────────────────────────────────
@@ -61,6 +68,9 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
 
     /// <summary>生存判定の具体的なロジック。</summary>
     protected abstract bool IsAliveInternal();
+
+    /// <summary>スケールを実際のコンポーネントに適用する。</summary>
+    protected abstract void ApplyScaleInternal(Vector3 scale);
 
     /// <summary>
     /// タイムスケールを実際のコンポーネントに適用する。

@@ -39,6 +39,10 @@ public class ParticleEffect : EffectBase
             _rootParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
+    protected override void ApplyScaleInternal(Vector3 scale)
+    {
+        transform.localScale = scale;
+    }
     protected override void Awake()
     {
         _particles = GetComponentsInChildren<ParticleSystem>(includeInactive: true);
