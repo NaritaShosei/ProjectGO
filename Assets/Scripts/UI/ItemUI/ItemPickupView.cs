@@ -3,26 +3,38 @@ using UnityEngine;
 /// <summary>
 /// アイテムの取得時のUI表示
 /// </summary>
-public class ItemPickupView : MonoBehaviour, IItemPickupView
+public class ItemPickupView : MonoBehaviour, IItemPickupView, IPoolable
 {
     public ItemPickupViewState CurrentState => _state;
 
-    /// <summary>
-    /// アイテム位置をpresenterから受け取る
-    /// </summary>
+    // ── IPoolable ────────────────────────────────────────────
+
+    /// <summary>プールから取り出された直後。特別な処理は不要（Initialize で設定される）。</summary>
+    public void OnGet() { }
+
+    /// <summary>プールへ返却される直前。Hidden 状態にリセットする。</summary>
+    public void OnRelease()
+    {
+        // Forcibly reset without the guard in SetState
+        _state = ItemPickupViewState.Interact; // 同値ガードを回避するためダミー値を先にセット
+        SetState(ItemPickupViewState.Hidden);
+        _target = null;
+    }
+
+    // ── Public API ───────────────────────────────────────────
+
     public void Initialize(Transform target)
     {
         _target = target;
-        ResetState();
+        // OnRelease と同じリセット処理
+        _state = ItemPickupViewState.Interact;
+        SetState(ItemPickupViewState.Hidden);
     }
 
     public void SetState(ItemPickupViewState state)
     {
         if (_state == state) return;
         _state = state;
-
-        Debug.Log($"[ItemPickupView] SetState: {state}\n{System.Environment.StackTrace}", this);
-
 
         switch (state)
         {
@@ -44,19 +56,22 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
         }
     }
 
+    // ── Inspector ────────────────────────────────────────────
+
     [Header("UI")]
-    [SerializeField] private GameObject _nearUI;     // 白い丸ポチ
-    [SerializeField] private GameObject _interactUI; // 取得キーUI
+    [SerializeField] private GameObject _nearUI;
+    [SerializeField] private GameObject _interactUI;
     [SerializeField] private CanvasGroup _canvasGroup;
 
     [Header("表示高さ")]
     [SerializeField] private Vector3 _displayHeight = new Vector3(0, 1.5f, 0);
 
+    // ── Private ──────────────────────────────────────────────
+
     private Camera _mainCamera;
-    private Transform _target; //アイテムの位置
+    private Transform _target;
     private RectTransform _rectTransform;
     private bool _isBehind;
-
     private ItemPickupViewState _state;
 
     private void Awake()
@@ -111,15 +126,8 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView
     private bool TryGetCamera()
     {
         if (_mainCamera == null || !_mainCamera.isActiveAndEnabled)
-        {
             _mainCamera = Camera.main;
-        }
 
         return _mainCamera != null;
-    }
-    private void ResetState()
-    {
-        _state = ItemPickupViewState.Interact;
-        SetState(ItemPickupViewState.Hidden);
     }
 }
