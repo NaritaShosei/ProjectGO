@@ -46,7 +46,15 @@ public class TimelineEffect : EffectBase
     {
         if (_director == null) return;
 
-        var root = _director.playableGraph.GetRootPlayable(0);
+        var graph = _director.playableGraph;
+
+        if (!graph.IsValid())
+            return;
+
+        if (graph.GetRootPlayableCount() == 0)
+            return;
+
+        var root = graph.GetRootPlayable(0);
 
         if (root.IsValid())
         {
