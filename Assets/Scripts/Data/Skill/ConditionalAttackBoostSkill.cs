@@ -1,3 +1,6 @@
+using Cysharp.Threading.Tasks;
+using PixPlays.ElementalVFX;
+using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ConditionalAttackBoostSkill", menuName = "GameData/Skill/ConditionalAttackBoostSkill")]
@@ -25,12 +28,17 @@ public class ConditionalAttackBoostSkill : SkillBase
 
     public override void Apply(ref AttackContext context)
     {
-        // 攻撃力を一定割合増加
         context.AttackPower *= (1f + _boostAmount);
 
+        Vector3 groundPosition =
+            GetGroundPosition(context.AttackPosition);
+
         var ct = context;
-        context.OnAfterAttack += () => SpawnEffect(ct.AttackPosition);
-        context.OnAfterAttack += () => Skill(ct);
+
+        context.OnAfterAttack += () => SpawnEffect(groundPosition);
+
+        context.OnAfterAttack += () =>
+            Skill(ct, groundPosition);
     }
 
     [Header("条件設定")]
@@ -39,41 +47,64 @@ public class ConditionalAttackBoostSkill : SkillBase
     [SerializeField] private AttackType _targetAttackType = AttackType.LightAttack;
 
     [Header("攻撃設定")]
-    [SerializeField] private GameObject _effectPrefab;
+    [SerializeField] private string _effectKey;
     [SerializeField] private float _damageRadius = 2f;
     [SerializeField] private float _damageMultiplier = 1.5f;
     [SerializeField] private LayerMask _enemyLayer;
     [SerializeField] private KnockbackContext _knockbackContext;
 
+    private Vector3 GetGroundPosition(Vector3 position)
+    {
+        position.y = 0f;
+        return position;
+    }
+
     private void SpawnEffect(Vector3 position)
     {
-        if (_effectPrefab != null)
+
+        if (string.IsNullOrEmpty(_effectKey)) return;
+
+        if (ServiceLocator.TryGet(out EffectManager effectManager))
         {
-            GameObject.Instantiate(_effectPrefab, position, Quaternion.identity);
+            effectManager.PlayEffect(
+                _effectKey,
+                position);
         }
     }
 
-    private void Skill(AttackContext context)
+    private void Skill(
+    AttackContext context,
+    Vector3 attackPosition)
     {
-        // コンテキストから情報をもらい一定範囲の敵にダメージを与える
-        ServiceLocator.TryGet(out EnemyManager enemyManager);
-        var enemies = enemyManager.GetEnemiesInRange(context.AttackPosition, _damageRadius);
+        if (!ServiceLocator.TryGet(out EnemyManager enemyManager))
+            return;
 
-        float radiusSqr = _damageRadius * _damageRadius;
+        var enemies =
+            enemyManager.GetEnemiesInRange(
+                attackPosition,
+                _damageRadius);
 
         foreach (var enemy in enemies)
         {
             var knockback = _knockbackContext;
-            knockback.Direction = (enemy.Position - context.AttackPosition).normalized;
+
+            knockback.Direction =
+                (enemy.Position - attackPosition).normalized;
 
             var damageContext = new DamageContext
             {
-                AttackPower = context.AttackPower * _damageMultiplier,
+                AttackPower =
+                    context.AttackPower * _damageMultiplier,
+
                 PlayerMode = context.PlayerMode,
+
                 IsCritical = false,
+
                 OnHitResult = null,
+
                 Knockback = knockback
             };
+
             enemy.TakeDamage(damageContext);
         }
     }
