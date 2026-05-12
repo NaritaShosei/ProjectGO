@@ -12,6 +12,14 @@ public class EffectManager : MonoBehaviour
 {
     public void PlayEffect(string key, Vector3 position)
     {
+        PlayEffect(key, position, Vector3.one);
+    }
+
+    public void PlayEffect(
+        string key,
+        Vector3 position,
+        Vector3 scale)
+    {
         if (!_pools.TryGetValue(key, out var pool))
         {
             Debug.LogError($"Effect not found: {key}");
@@ -19,12 +27,18 @@ public class EffectManager : MonoBehaviour
         }
 
         var view = pool.Get();
-        // HitStop 登録・再生・完了待ち・返却は EffectPresenter が担う
+
+        view.SetScale(scale);
+
         var presenter = new EffectPresenter(view, pool, _hitStop);
-        presenter.PlayAsync(position, Quaternion.identity, _cts.Token).Forget();
+
+        presenter.PlayAsync(
+            position,
+            Quaternion.identity,
+            _cts.Token).Forget();
     }
 
-    [SerializeField] private Transform _poolParent;
+    [SerializeField] private Transform _effectParent;
     [SerializeField] private List<EffectData> _effectDataList;
     [SerializeField] private int _preloadCount = 5;
 
@@ -34,7 +48,8 @@ public class EffectManager : MonoBehaviour
 
     private void Awake()
     {
-        _hitStop = ServiceLocator.Get<HitStopManager>();
+        ServiceLocator.Register(this);
+
         _cts = new CancellationTokenSource();
 
         foreach (var data in _effectDataList)
@@ -50,15 +65,22 @@ public class EffectManager : MonoBehaviour
                 continue;
             }
 
-            var pool = new GenericObjectPool<EffectBase>(data.Prefab, _poolParent, _preloadCount);
+            var pool = new GenericObjectPool<EffectBase>(data.Prefab, _effectParent, _preloadCount);
             _pools[data.Key] = pool;
 
             Debug.Log($"Registered Effect: {data.Key}");
         }
     }
 
+    private void Start()
+    {
+        _hitStop = ServiceLocator.Get<HitStopManager>();
+    }
+
     private void OnDestroy()
     {
+        ServiceLocator.Unregister<EffectManager>();
+
         _cts?.Cancel();
         _cts?.Dispose();
     }
