@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class LightningStrikeUpdater : ISkillUpdater
 {
-
     public LightningStrikeUpdater(LightningStrike data)
     {
         _data = data;
@@ -34,10 +33,10 @@ public class LightningStrikeUpdater : ISkillUpdater
 
         int targetCount = Mathf.Min(_data.TargetCount, shuffled.Count);
 
-        var effects = _data.HitEffectPrefabs != null
-            ? new List<GameObject>(_data.HitEffectPrefabs)
-            : new List<GameObject>();
-        effects.Shuffle();
+        var keys = _data.HitEffectKeys != null
+            ? new List<string>(_data.HitEffectKeys)
+            : new List<string>();
+        keys.Shuffle();
 
         var alreadyHit = new HashSet<IEnemy>();
 
@@ -67,13 +66,12 @@ public class LightningStrikeUpdater : ISkillUpdater
                 enemy.TakeDamage(damageContext);
             }
 
-
-            // エフェクトのプールができたらInstantiate→Destroyの流れをやめる
-            if (effects.Count > 0)
+            if (keys.Count > 0)
             {
-                var prefab = effects[i % effects.Count];
-                var effect = Object.Instantiate(prefab, target.Position, Quaternion.identity);
-                Object.Destroy(effect, 2f);
+                var key = keys[i % keys.Count];
+
+                if (ServiceLocator.TryGet(out EffectManager effectManager))
+                    effectManager.PlayEffect(key, target.Position);
             }
         }
     }
