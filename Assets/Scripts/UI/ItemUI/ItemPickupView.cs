@@ -19,6 +19,8 @@ public class ItemPickupView : MonoBehaviour, IItemPickupView, IPoolable
         _state = ItemPickupViewState.Interact; // 同値ガードを回避するためダミー値を先にセット
         SetState(ItemPickupViewState.Hidden);
         _target = null;
+        _isBehind = false;
+        _canvasGroup.alpha = 1f; // 念のためアルファもリセット
     }
 
     // ── Public API ───────────────────────────────────────────

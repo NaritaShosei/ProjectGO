@@ -18,13 +18,15 @@ public class GroundCrush : SkillBase
             playerTransform.position +
             playerTransform.forward * _range;
 
+        Vector3 forward = playerTransform.forward;
+
         center = GetGroundPosition(center);
 
         context.OnAfterAttack += () =>
-            ActivationGroundCrush(center, playerTransform.forward, attackPower).Forget();
+            ActivationGroundCrush(center, forward, attackPower).Forget();
 
         context.OnAfterAttack += () =>
-            SpawnEffect(center, playerTransform.forward).Forget();
+            SpawnEffect(center, forward).Forget();
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -52,7 +54,7 @@ public class GroundCrush : SkillBase
     [SerializeField] private float _range = 1;                                          // 攻撃の中心とPlayerとの距離
     [SerializeField] private float _knockBackPower;                                        //ノックバックの強さ
     [SerializeField] private float _knockBackUpward;                                       //ノックバックの角度
-    [SerializeField] private string _effectKey;                                     //GroundSmashEffectを持つPrefab
+    [SerializeField] private string _effectKey;                                     // エフェクトマネージャーで設定したエフェクトのキー
 
     /// <summary>
     /// 攻撃の中心位置を地面に合わせる

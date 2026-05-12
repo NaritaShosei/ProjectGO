@@ -33,9 +33,15 @@ public class LightningStrikeUpdater : ISkillUpdater
 
         int targetCount = Mathf.Min(_data.TargetCount, shuffled.Count);
 
-        var keys = _data.HitEffectKeys != null
-            ? new List<string>(_data.HitEffectKeys)
-            : new List<string>();
+        var keys = new List<string>();
+        if (_data.HitEffectKeys != null)
+        {
+            foreach (var k in _data.HitEffectKeys)
+            {
+                if (!string.IsNullOrWhiteSpace(k))
+                    keys.Add(k);
+            }
+        }
         keys.Shuffle();
 
         var alreadyHit = new HashSet<IEnemy>();
