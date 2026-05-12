@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-public class GenericObjectPool<T> where T : Component
+/// <summary>
+/// IPoolable を実装した Component を対象とするジェネリックオブジェクトプール。
+/// Get/Release 時の初期化・後始末は IPoolable.OnGet / OnRelease に委譲するため、
+/// 外部コールバック（onGet / onRelease）は廃止した。
+/// </summary>
+public class GenericObjectPool<T> where T : Component, IPoolable
 {
-    public GenericObjectPool(T prefab, Transform parent, int preloadCount = 0, Action<T> onGet = null, Action<T> onRelease = null)
+    public GenericObjectPool(T prefab, Transform parent, int preloadCount = 0)
     {
         _prefab = prefab;
         _parent = parent;
-        _onGet = onGet;
-        _onRelease = onRelease;
 
         for (int i = 0; i < preloadCount; i++)
         {
@@ -25,7 +28,7 @@ public class GenericObjectPool<T> where T : Component
         _inPool.Remove(instance);
 
         instance.gameObject.SetActive(true);
-        _onGet?.Invoke(instance);
+        instance.OnGet();
         return instance;
     }
 
@@ -37,7 +40,7 @@ public class GenericObjectPool<T> where T : Component
         if (_inPool.Contains(instance))
             return;
 
-        _onRelease?.Invoke(instance);
+        instance.OnRelease();
         instance.gameObject.SetActive(false);
 
         _pool.Push(instance);
@@ -48,10 +51,6 @@ public class GenericObjectPool<T> where T : Component
     private readonly Transform _parent;
     private readonly Stack<T> _pool = new();
     private readonly HashSet<T> _inPool = new();
-
-    // 解放時や取得時に追加で実行したい処理用コールバック
-    private readonly Action<T> _onGet;
-    private readonly Action<T> _onRelease;
 
     private T CreateNew()
     {
