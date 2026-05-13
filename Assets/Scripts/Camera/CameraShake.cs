@@ -5,9 +5,9 @@ using Unity.Cinemachine;
 
 public struct CameraShakeData
 {
-    public float amplitude;
-    public float frequency;
-    public float duration;
+    public float amplitude;       ///振幅
+    public float frequency;       ///周期
+    public float duration;        ///持続時間
 }
 
 public class CameraShake
@@ -26,6 +26,8 @@ public class CameraShake
     /// <summary>
     /// CameraShakeを開始
     /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     public async UniTask StartCameraShake(CameraShakeData data)
     {
         if (_noise == null) return;

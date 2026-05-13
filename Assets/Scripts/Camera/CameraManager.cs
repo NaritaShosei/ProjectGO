@@ -82,14 +82,10 @@ public class CameraManager : MonoBehaviour
     /// <summary>
     /// カメラシェイクの実行
     /// </summary>
-    public async UniTask ExecutionCameraShake(float amplitude, float frequency, float duration)
+    /// <param name="data">カメラシェイクのステータスを保持する構造体</param>
+    /// <returns></returns>
+    public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
-        CameraShakeData data = new CameraShakeData();
-
-        data.amplitude += amplitude;
-        data.frequency += frequency;
-        data.duration += duration;
-
         await _cameraShake.StartCameraShake(data);
     }
 
