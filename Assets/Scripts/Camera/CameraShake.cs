@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using Unity.Cinemachine;
 
 public struct CameraShakeData
@@ -29,25 +30,51 @@ public class CameraShake
     {
         if (_noise == null) return;
 
-        int shakeRequestNumber = ++_shakeRequestRestrictionNumber;
+        ForceStopCameraShake();
+
+        _shakeCts = new CancellationTokenSource();
 
         _noise.AmplitudeGain = data.amplitude;
         _noise.FrequencyGain = data.frequency;
 
-        await StopCameraShake(data, shakeRequestNumber);
+        await StopCameraShake(data, _shakeCts.Token);
+    }
+
+    /// <summary>
+    /// カメラシェイクの強制停止
+    /// </summary>
+    public void ForceStopCameraShake()
+    {
+        if (_shakeCts == null) return;
+
+        _shakeCts.Cancel();
+        _shakeCts.Dispose();
+        _shakeCts = null;
+
+        if (_noise == null) return;
+
+        _noise.AmplitudeGain = 0;
+        _noise.FrequencyGain = 0;
     }
 
     private CinemachineBasicMultiChannelPerlin _noise;
-    private int _shakeRequestRestrictionNumber = 0;
+    private CancellationTokenSource _shakeCts;
 
     /// <summary>
     /// CameraShakeを停止
     /// </summary>
-    private async UniTask StopCameraShake(CameraShakeData data, int shakeRequestNumber)
+    private async UniTask StopCameraShake(CameraShakeData data, CancellationToken cancellationToken)
     {
-        if (_shakeRequestRestrictionNumber != shakeRequestNumber) return;
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(data.duration), cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
-        await UniTask.Delay(TimeSpan.FromSeconds(data.duration));
+        if (_noise == null) return;
 
         _noise.AmplitudeGain = 0;
         _noise.FrequencyGain = 0;
