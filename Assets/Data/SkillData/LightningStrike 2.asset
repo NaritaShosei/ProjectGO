@@ -25,7 +25,9 @@ MonoBehaviour:
   _maxInterval: 4
   _damageMultiplier: 1.6
   _searchRadius: 999
-  _hitEffectPrefabs: []
+  _hitEffectKeys:
+  - "\u9752\u3044\u96F7\u5149"
+  - "\u9EC4\u8272\u3044\u96F7\u5149"
   _areaRadius: 0
   _electricShockDuration: 0.3
   _grantEffectProbability: 1

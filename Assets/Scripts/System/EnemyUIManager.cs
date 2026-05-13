@@ -10,11 +10,9 @@ public class EnemyUIManager : MonoBehaviour
         _enemyManager = enemyManager;
         _playerTransform = playerTransform;
 
-        _gaugePool = new GenericObjectPool<EnemyGaugeView>(_gaugePrefab, _gaugeParent, 0,
-            onRelease: view => view.Cleanup());
+        _gaugePool = new GenericObjectPool<EnemyGaugeView>(_gaugePrefab, _gaugeParent, 0);
 
-        _armerGaugePool = new GenericObjectPool<EnemyGaugeView>(_armerGaugePrefab, _armerGaugeParent, 0,
-            onRelease: view => view.Cleanup());
+        _armerGaugePool = new GenericObjectPool<EnemyGaugeView>(_armerGaugePrefab, _armerGaugeParent, 0);
 
         _popupPool = new GenericObjectPool<DamagePopupView>(_popupPrefab, _popupParent, _popupPreloadCount);
 
