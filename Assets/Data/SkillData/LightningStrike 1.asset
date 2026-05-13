@@ -18,15 +18,15 @@ MonoBehaviour:
   _explanation: 
   _icon: {fileID: 0}
   _timing: 2
-  _evolutionSkill: {fileID: 11400000, guid: a05c65a211dbe2d498e4beba93a2dae0, type: 2}
+  _unlockedSkill: {fileID: 11400000, guid: a05c65a211dbe2d498e4beba93a2dae0, type: 2}
   _defaultUnlocked: 1
   _targetCount: 1
   _minInterval: 2
   _maxInterval: 4
   _damageMultiplier: 1.6
   _searchRadius: 999
-  _hitEffectPrefabs:
-  - {fileID: 8762405910555896786, guid: fcb74f28d107e284e80af037bfec14ca, type: 3}
+  _hitEffectKeys:
+  - "\u9752\u3044\u96F7\u5149"
   _areaRadius: 0
   _electricShockDuration: 0.3
   _grantEffectProbability: 1

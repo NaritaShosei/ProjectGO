@@ -19,6 +19,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnAttackExecute;
     public event Action OnModeChangeComplete;
     public event Action OnComboTransition;
+    public event Action OnDodgeInvincibilityStart;
     public event Action OnDodgeEnd;
 
 
@@ -36,6 +37,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     /// <summary>被弾アニメーション終了をSMBから受け取る</summary>
     public void AnimEvent_DamagedEnd() => OnDamagedEnd?.Invoke();
 
+    public void AnimEvent_DodgeInvincibilityStart() => OnDodgeInvincibilityStart?.Invoke();
     public void AnimEvent_DodgeEnd() => OnDodgeEnd?.Invoke();
 
     // ── 移動アニメーション ───────────────────────────────────

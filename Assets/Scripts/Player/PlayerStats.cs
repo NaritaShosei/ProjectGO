@@ -42,6 +42,12 @@ public class PlayerStats
 
     // ---- イベント ----
     public event Action OnDead;
+
+    /// <summary>
+    /// 死亡直前イベント。true を返すと死亡をキャンセルする。
+    /// </summary>
+    public event Func<bool> OnBeforeDead;
+
     public event Action<float, float, float> OnHealthChanged;
     /// <summary> (current, max, initialMax) — スタミナと同じ形式 </summary>
     public event Action<float, float, float> OnThunderGaugeChanged;
@@ -74,7 +80,30 @@ public class PlayerStats
     {
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
         OnHealthChanged?.Invoke(_currentHealth, MaxHealth, InitialMaxHealth);
-        if (_currentHealth <= 0) OnDead?.Invoke();
+
+        // HPが0以下なら死亡処理へ（ただしイベントでキャンセルされる可能性もある）
+        if (_currentHealth > 0) { return; }
+
+        var beforeDeadHandlers = OnBeforeDead?.GetInvocationList();
+
+        if (beforeDeadHandlers != null)
+        {
+            // 死亡直前イベントを発火。true を返すハンドラーがあれば死亡をキャンセル。
+            foreach (Func<bool> handler in beforeDeadHandlers)
+            {
+                // 例外が発生しても他のハンドラーは呼び続けるため、個別に try-catch する。
+                try
+                {
+                    if (handler.Invoke()) return;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"エラーが発生しましたが、死亡処理は続行します。例外: {e}");
+                }
+            }
+
+            OnDead?.Invoke();
+        }
     }
 
     public void Heal(float amount)
@@ -124,7 +153,7 @@ public class PlayerStats
         }
     }
 
-    // ---- 戦闘ステータス操作 ----
+    // --- モディファイア操作 ----
     public void AddModifier(IStatModifier modifier)
     {
         if (!_modifiers.ContainsKey(modifier.TargetStat))

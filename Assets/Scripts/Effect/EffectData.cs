@@ -4,8 +4,8 @@ using UnityEngine;
 public struct EffectData
 {
     public string Key => _key;
-    public Effect Prefab => _prefab;
+    public EffectBase Prefab => _prefab;
 
     [SerializeField] private string _key;
-    [SerializeField] private Effect _prefab;
+    [SerializeField] private EffectBase _prefab;
 }

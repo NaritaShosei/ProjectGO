@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EffectPresenter
 {
-    public EffectPresenter(Effect view, GenericObjectPool<Effect> pool, HitStopManager hitStopManager)
+    public EffectPresenter(EffectBase view, GenericObjectPool<EffectBase> pool, HitStopManager hitStopManager)
     {
         _pool = pool;
         _view = view;
@@ -22,7 +22,6 @@ public class EffectPresenter
 
             _view.Play();
 
-            // 再生終了待ち
             await UniTask.WaitUntil(() => ct.IsCancellationRequested || !_view.IsAlive(), cancellationToken: ct);
         }
         finally
@@ -35,12 +34,12 @@ public class EffectPresenter
     {
         if (_view == null) return;
         _hitStopManager?.Unregister(_view, HitStopTargetGroup.Effects);
-        _view.Cleanup();
+        // OnRelease（後始末）は pool.Release 内で IPoolable.OnRelease として呼ばれる
         _pool.Release(_view);
         _view = null;
     }
 
-    private Effect _view;
-    private GenericObjectPool<Effect> _pool;
+    private EffectBase _view;
+    private GenericObjectPool<EffectBase> _pool;
     private HitStopManager _hitStopManager;
 }

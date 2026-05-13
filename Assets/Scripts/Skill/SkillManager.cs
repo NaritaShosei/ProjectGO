@@ -6,6 +6,11 @@ using UnityEngine;
 public class SkillManager : MonoBehaviour
 {
     public event Action<SkillBase> OnSkillAcquired;
+    public event Action<StatSkillType> OnApply
+    {
+        add => _statSkillSystem.OnApply += value;
+        remove => _statSkillSystem.OnApply -= value;
+    }
 
     public void Init(IPlayerStats stats, IModeController modeController,
         Transform playerTransform, EnemyManager enemyManager)

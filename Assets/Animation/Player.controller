@@ -1340,6 +1340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5717a9b29099ef4e936e62e37364764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DodgeSMB
+  _dodgeInvincibilityStartFrame: 14
 --- !u!1109 &-3047913078075690707
 AnimatorTransition:
   m_ObjectHideFlags: 1
@@ -2256,6 +2257,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5717a9b29099ef4e936e62e37364764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DodgeSMB
+  _dodgeInvincibilityStartFrame: 14
 --- !u!1101 &2256206346027113931
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
