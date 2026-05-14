@@ -5,9 +5,12 @@ using Unity.Cinemachine;
 
 public struct CameraShakeData
 {
-    public float amplitude;       ///<summary>振幅</summary>
-    public float frequency;       ///<summary>周期</summary>
-    public float duration;        ///<summary>持続時間</summary>
+    ///<summary>振幅</summary>
+    public float Amplitude;
+    ///<summary>周期</summary>
+    public float Frequency;
+    ///<summary>持続時間</summary>
+    public float Duration;
 }
 
 public class CameraShake
@@ -36,8 +39,8 @@ public class CameraShake
 
         _shakeCts = new CancellationTokenSource();
 
-        _noise.AmplitudeGain = data.amplitude;
-        _noise.FrequencyGain = data.frequency;
+        _noise.AmplitudeGain = data.Amplitude;
+        _noise.FrequencyGain = data.Frequency;
 
         await StopCameraShake(data, _shakeCts.Token);
     }
@@ -64,7 +67,7 @@ public class CameraShake
     {
         try
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(data.duration), cancellationToken: cancellationToken);
+            await UniTask.Delay(TimeSpan.FromSeconds(data.Duration), cancellationToken: cancellationToken);
         }
         catch (OperationCanceledException)
         {
