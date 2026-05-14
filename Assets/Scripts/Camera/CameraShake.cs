@@ -5,9 +5,9 @@ using Unity.Cinemachine;
 
 public struct CameraShakeData
 {
-    public float amplitude;       ///振幅
-    public float frequency;       ///周期
-    public float duration;        ///持続時間
+    public float amplitude;       ///<summary>振幅</summary>
+    public float frequency;       ///<summary>周期</summary>
+    public float duration;        ///<summary>持続時間</summary>
 }
 
 public class CameraShake
@@ -52,11 +52,6 @@ public class CameraShake
         _shakeCts.Cancel();
         _shakeCts.Dispose();
         _shakeCts = null;
-
-        if (_noise == null) return;
-
-        _noise.AmplitudeGain = 0;
-        _noise.FrequencyGain = 0;
     }
 
     private CinemachineBasicMultiChannelPerlin _noise;
@@ -75,10 +70,13 @@ public class CameraShake
         {
             return;
         }
-
-        if (_noise == null) return;
-
-        _noise.AmplitudeGain = 0;
-        _noise.FrequencyGain = 0;
+        finally
+        {
+            if (_noise != null)
+            {
+                _noise.AmplitudeGain = 0;
+                _noise.FrequencyGain = 0;
+            }
+        }
     }
 }
