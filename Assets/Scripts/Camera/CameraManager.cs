@@ -89,6 +89,14 @@ public class CameraManager : MonoBehaviour
         await _cameraShake.StartCameraShake(data);
     }
 
+    /// <summary>
+    /// カメラシェイクを強制停止するメソッドを呼び出す
+    /// </summary>
+    public void ExecutionForceStopCameraShake()
+    {
+        _cameraShake.ForceStopCameraShake();
+    }
+
     [Header("カメラ参照")]
     [SerializeField] private CinemachineCamera _normalCamera;
     [SerializeField] private CinemachineCamera _lockOnCamera;
