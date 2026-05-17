@@ -17,11 +17,17 @@ public class EnemyEffectReceiver : MonoBehaviour
     private void Awake()
     {
         _enemy = GetComponent<Enemy>();
-        _effectManager = ServiceLocator.Get<EffectManager>();
 
         if (_enemy == null)
         {
             Debug.LogError($"{nameof(Enemy)} が見つかりません", this);
+            enabled = false;
+            return;
+        }
+
+        if (!ServiceLocator.TryGet(out _effectManager))
+        {
+            Debug.LogError($"{nameof(EffectManager)} が見つかりません", this);
             enabled = false;
             return;
         }
