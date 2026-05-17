@@ -4,18 +4,16 @@ using UnityEngine;
 public class EnemyEffectReceiver : MonoBehaviour
 {
     private Enemy _enemy;
-
     private EffectManager _effectManager;
 
-    [SerializeField]
-    private List<HitEffectRule> _rules;
-
-    [Header("Effect Ids")]
+    [Header("Effect Ids"), Tooltip("ヒット時のエフェクトID")]
     [SerializeField] private string _hitId = "hit";
     [SerializeField] private string _weakId = "weak";
     [SerializeField] private string _armorHitId = "armor_hit";
     [SerializeField] private string _armorBreakId = "armor_break";
 
+    [SerializeField,Tooltip("ヒットエフェクトのルール")]
+    private List<HitEffectRule> _rules;
 
     private void Awake()
     {
@@ -48,37 +46,40 @@ public class EnemyEffectReceiver : MonoBehaviour
         Debug.Log("HitEffect受信");
         if (_effectManager == null) return;
 
-        string key = GetEffectKey(context);
+        IReadOnlyList<string> keys = GetEffectKeys(context);
 
-        if (string.IsNullOrEmpty(key)) return;
+        if (keys == null || keys.Count == 0) return;
 
-        Debug.Log($"再生EffectKey : {key}");
+        Debug.Log($"再生EffectKey : {string.Join(", ", keys)}");
 
-        _effectManager.PlayEffect(
-            key,
-            context.Position);
+        foreach (string key in keys)
+        {
+            _effectManager.PlayEffect(
+                key,
+                context.Position);
+        }
     }
 
     /// <summary>
     /// ヒット内容に応じて再生するエフェクトキーを決定する
     /// </summary>
-    private string GetEffectKey(HitEffectContext context)
+    private IReadOnlyList<string> GetEffectKeys(HitEffectContext context)
     {
-        string id = GetEffectId(context);
+        string id = GetHitType(context);
 
         HitEffectRule rule =
-            _rules.Find(x => x.Id == id);
+            _rules.Find(x => x.Id == id && x.PlayerMode == context.PlayerMode);
 
         if (rule == null)
         {
             Debug.LogWarning($"Effect Rule が見つかりません : {id}");
-            return string.Empty;
+            return null;
         }
 
-        return rule.EffectKey;
+        return rule.EffectKeys;
     }
 
-    private string GetEffectId(HitEffectContext context)
+    private string GetHitType(HitEffectContext context)
     {
         if (context.IsArmorBreak)
         {

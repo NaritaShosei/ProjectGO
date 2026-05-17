@@ -171,6 +171,7 @@ public class MobEnemy : Enemy, IFormationParticipant
             new HitEffectContext
             {
                 Position = transform.position,
+                PlayerMode = context.PlayerMode,
                 IsWeakPoint = isWeakPoint,
                 IsCritical = context.IsCritical,
                 IsArmorHit = isArmorHit,
