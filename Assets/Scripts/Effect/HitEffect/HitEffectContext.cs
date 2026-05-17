@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public struct HitEffectContext
+public readonly struct HitEffectContext
 {
-    public Vector3 Position;
-    public PlayerMode PlayerMode;
+    public readonly Vector3 Position;
+    public readonly PlayerMode PlayerMode;
 
-    public bool IsArmorHit;
-    public bool IsArmorBreak;
+    public readonly bool IsArmorHit;
+    public readonly  bool IsArmorBreak;
 }
