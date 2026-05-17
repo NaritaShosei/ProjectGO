@@ -212,11 +212,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     private void Update()
     {
         TickThunderGauge();
-
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            TakeDamage(10);
-        }
     }
 
     private void OnDestroy()

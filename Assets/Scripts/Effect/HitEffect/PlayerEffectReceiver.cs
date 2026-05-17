@@ -24,6 +24,13 @@ public class PlayerEffectReceiver : MonoBehaviour
             return;
         }
 
+        if(_effectManager == null)
+        {
+            Debug.LogError("EffectManager が見つかりません", this);
+            enabled = false;
+            return;
+        }
+
         if (_volume != null && _volume.profile.TryGet(out _vignette))
         {
             _vignette.intensity.value = 0f;
@@ -64,6 +71,8 @@ public class PlayerEffectReceiver : MonoBehaviour
     /// <param name="context"></param>
     private void HandleDamaged(PlayerDamageEffectContext context)
     {
+        if(_effectManager == null) return;
+
         _effectManager.PlayEffect(
             _damageEffectKey,
             context.HitPosition);

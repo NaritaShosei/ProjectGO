@@ -9,6 +9,6 @@ public class HitEffectRule
     public IReadOnlyList<string> EffectKeys => _effectKeys;
 
     [SerializeField] private PlayerMode _playerMode;
-    [SerializeField] private string _id;
-    [SerializeField] private List<string> _effectKeys;
+    [SerializeField] private string _id　= string.Empty;
+    [SerializeField] private List<string> _effectKeys = new();
 }

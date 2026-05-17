@@ -8,11 +8,10 @@ public class EnemyEffectReceiver : MonoBehaviour
 
     [Header("Effect Ids"), Tooltip("ヒット時のエフェクトID")]
     [SerializeField] private string _hitId = "hit";
-    [SerializeField] private string _weakId = "weak";
     [SerializeField] private string _armorHitId = "armor_hit";
     [SerializeField] private string _armorBreakId = "armor_break";
 
-    [SerializeField,Tooltip("ヒットエフェクトのルール")]
+    [SerializeField, Tooltip("ヒットエフェクトのルール")]
     private List<HitEffectRule> _rules;
 
     private void Awake()
@@ -28,7 +27,7 @@ public class EnemyEffectReceiver : MonoBehaviour
         }
 
         _enemy.OnHitEffect += HandleHitEffect;
-    }   
+    }
 
     private void OnDestroy()
     {
@@ -63,6 +62,12 @@ public class EnemyEffectReceiver : MonoBehaviour
     /// </summary>
     private IReadOnlyList<string> GetEffectKeys(HitEffectContext context)
     {
+        if (_rules == null || _rules.Count == 0)
+        {
+            Debug.LogWarning("HitEffectRule が未設定です", this);
+            return null;
+        }
+
         //ヒットの種類を判定
         string id = GetHitType(context);
 
@@ -93,7 +98,7 @@ public class EnemyEffectReceiver : MonoBehaviour
 
         if (context.IsArmorHit)
         {
-            return _armorHitId  ;
+            return _armorHitId;
         }
 
         return _hitId;

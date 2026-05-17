@@ -155,6 +155,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             );
     }
 
+    /// <summary>
+    /// ヒットエフェクト表示用イベントを発火する
+    /// </summary>
+    /// <param name="context"></param>
     protected void InvokeOnHitEffect(HitEffectContext context)
     {
         OnHitEffect?.Invoke(context);
