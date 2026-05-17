@@ -23,10 +23,11 @@ public class PlayerEffectReceiver : MonoBehaviour
     [SerializeField] private float _flashDuration = 2.5f;
     [SerializeField] private float _flashAlpha = 0.5f;
 
-    private void Awake()
+
+    public void Init(Player player, EffectManager effectManager)
     {
-        _player = GetComponent<Player>();
-        _effectManager = ServiceLocator.Get<EffectManager>();
+        _player = player;
+        _effectManager = effectManager;
 
         if (_player == null)
         {
@@ -35,7 +36,7 @@ public class PlayerEffectReceiver : MonoBehaviour
             return;
         }
 
-        if (_volume.profile.TryGet(out _vignette))
+        if (_volume != null && _volume.profile.TryGet(out _vignette))
         {
             _vignette.intensity.value = 0f;
         }
@@ -49,6 +50,8 @@ public class PlayerEffectReceiver : MonoBehaviour
         {
             _player.OnDamagedEffect -= HandleDamaged;
         }
+        _flashCts?.Cancel();
+        _flashCts?.Dispose();
     }
 
     private void HandleDamaged(PlayerDamageEffectContext context)
