@@ -43,15 +43,13 @@ public class EnemyEffectReceiver : MonoBehaviour
     /// </summary>
     private void HandleHitEffect(HitEffectContext context)
     {
-        Debug.Log("HitEffect受信");
         if (_effectManager == null) return;
 
         IReadOnlyList<string> keys = GetEffectKeys(context);
 
         if (keys == null || keys.Count == 0) return;
 
-        Debug.Log($"再生EffectKey : {string.Join(", ", keys)}");
-
+        //登録されたエフェクトを再生
         foreach (string key in keys)
         {
             _effectManager.PlayEffect(
@@ -65,8 +63,10 @@ public class EnemyEffectReceiver : MonoBehaviour
     /// </summary>
     private IReadOnlyList<string> GetEffectKeys(HitEffectContext context)
     {
+        //ヒットの種類を判定
         string id = GetHitType(context);
 
+        //ヒットタイプ＋プレイヤーモードに対応するルールを検索
         HitEffectRule rule =
             _rules.Find(x => x.Id == id && x.PlayerMode == context.PlayerMode);
 
@@ -79,6 +79,11 @@ public class EnemyEffectReceiver : MonoBehaviour
         return rule.EffectKeys;
     }
 
+    /// <summary>
+    /// 被弾内容からヒットタイプIDを判定する
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     private string GetHitType(HitEffectContext context)
     {
         if (context.IsArmorBreak)
@@ -89,11 +94,6 @@ public class EnemyEffectReceiver : MonoBehaviour
         if (context.IsArmorHit)
         {
             return _armorHitId  ;
-        }
-
-        if (context.IsWeakPoint)
-        {
-            return _weakId;
         }
 
         return _hitId;

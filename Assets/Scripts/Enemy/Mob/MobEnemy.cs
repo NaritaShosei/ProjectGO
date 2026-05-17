@@ -172,8 +172,6 @@ public class MobEnemy : Enemy, IFormationParticipant
             {
                 Position = transform.position,
                 PlayerMode = context.PlayerMode,
-                IsWeakPoint = isWeakPoint,
-                IsCritical = context.IsCritical,
                 IsArmorHit = isArmorHit,
                 IsArmorBreak = isArmorBreak
             });
