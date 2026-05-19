@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyEffectReceiver : MonoBehaviour
 {
-    private Enemy _enemy;
+    [SerializeField] private Enemy _enemy;
     private EffectManager _effectManager;
 
     [Header("Effect Ids"), Tooltip("ヒット時のエフェクトID")]
@@ -16,8 +16,8 @@ public class EnemyEffectReceiver : MonoBehaviour
 
     private void Awake()
     {
-        _enemy = GetComponent<Enemy>();
-
+        if(_enemy == null) _enemy = GetComponent<Enemy>();
+        
         if (_enemy == null)
         {
             Debug.LogError($"{nameof(Enemy)} が見つかりません", this);
