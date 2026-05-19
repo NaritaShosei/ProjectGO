@@ -288,16 +288,40 @@ PrefabInstance:
       objectReference: {fileID: 919820666}
     - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _effectDataList.Array.size
-      value: 3
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _effectDataList.Array.data[3]._key
-      value: "\u5927\u5730\u7C89\u7815"
+      value: "\u30C6\u30B9\u30C8\u96F7\u30D2\u30C3\u30C8\u30A8\u30D5\u30A7\u30AF\u30C8"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[4]._key
+      value: "\u30C6\u30B9\u30C8\u706B\u82B1"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[5]._key
+      value: "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[6]._key
+      value: "\u30C6\u30B9\u30C8\u5CA9"
       objectReference: {fileID: 0}
     - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _effectDataList.Array.data[3]._prefab
       value: 
-      objectReference: {fileID: 567102852122591039, guid: 803bfbd5bb757094ba960334876d8581, type: 3}
+      objectReference: {fileID: 146184047964149964, guid: 618f481dad270584ab4a2b6970264d75, type: 3}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[4]._prefab
+      value: 
+      objectReference: {fileID: 1820207970970708566, guid: ee0698179a3a246439227f46b02ac3b9, type: 3}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[5]._prefab
+      value: 
+      objectReference: {fileID: 7500359468652911350, guid: c6b78d1dc878b124fb4603ee5d0c96d5, type: 3}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[6]._prefab
+      value: 
+      objectReference: {fileID: 8571136979397341754, guid: 734e025186a6da44c832f8d7210bb2dc, type: 3}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _skillUIManager
       value: 

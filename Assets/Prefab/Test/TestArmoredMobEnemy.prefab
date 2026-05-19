@@ -147,15 +147,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea4fb379d5546dc499ce0fd0e16aff6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyEffectReceiver
+  _enemy: {fileID: 0}
+  _hitId: "\u751F\u8EAB"
+  _armorHitId: "\u93A7\u30D2\u30C3\u30C8"
+  _armorBreakId: "\u93A7\u7834\u58CA"
   _rules:
-  - _id: "\u9752\u3044\u96F7\u5149"
-    _effectKey: "\u9752\u3044\u96F7\u5149"
-  - _id: "\u9752\u3044\u96F7\u5149"
-    _effectKey: "\u9752\u3044\u96F7\u5149"
-  _hitId: "\u9752\u3044\u96F7\u5149"
-  _weakId: "\u9752\u3044\u96F7\u5149"
-  _armorHitId: "\u9752\u3044\u96F7\u5149"
-  _armorBreakId: "\u9752\u3044\u96F7\u5149"
+  - _playerMode: 0
+    _id: "\u93A7\u30D2\u30C3\u30C8"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+    - "\u30C6\u30B9\u30C8\u5CA9"
+    - "\u30C6\u30B9\u30C8\u706B\u82B1"
+  - _playerMode: 0
+    _id: "\u751F\u8EAB"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+  - _playerMode: 1
+    _id: "\u751F\u8EAB"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u96F7\u30D2\u30C3\u30C8\u30A8\u30D5\u30A7\u30AF\u30C8"
+    - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+  - _playerMode: 1
+    _id: "\u93A7\u30D2\u30C3\u30C8"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u706B\u82B1"
 --- !u!1001 &3207627424300379340
 PrefabInstance:
   m_ObjectHideFlags: 0
