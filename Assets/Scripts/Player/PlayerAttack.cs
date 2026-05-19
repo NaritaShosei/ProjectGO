@@ -178,12 +178,18 @@ public class PlayerAttack : MonoBehaviour
 
     // ── 入力ハンドラ ───────────────────────────────────────
 
+    /// <summary>
+    /// 回避攻撃の入力をバッファする。
+    /// </summary>
     private void BufferDodgeAttack()
     {
         if (_stateManager.CurrentState != PlayerState.Dodge) return;
         if (_dodgeAttackConfig.IsEnabled) _hasBufferedDodgeAttack = true;
     }
 
+    /// <summary>
+    /// 回避攻撃を実行する。
+    /// </summary>
     private void PerformDodgeAttack()
     {
         if (!CanAttack()) return;
@@ -192,6 +198,9 @@ public class PlayerAttack : MonoBehaviour
         PrepareAttack(input);
     }
 
+    /// <summary>
+    /// 弱攻撃の入力を処理する。
+    /// </summary>
     private void PerformLightAttack()
     {
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
@@ -204,6 +213,9 @@ public class PlayerAttack : MonoBehaviour
         PrepareAttack(new AttackInput { AttackType = AttackType.LightAttack, ChargeTime = 0f });
     }
 
+    /// <summary>
+    /// 強攻撃のチャージ開始を処理する。
+    /// </summary>
     private void StartCharge()
     {
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
@@ -366,25 +378,54 @@ public class PlayerAttack : MonoBehaviour
 
     // ── ヘルパー ───────────────────────────────────────────
 
+    /// <summary>
+    /// 現在の攻撃と入力に基づいて、次の攻撃データを取得する。
+    /// allowCombo が true の場合、コンボ攻撃を優先して検索する。    
+    /// </summary>
     private AttackData GetNextAttack(AttackInput input, bool allowCombo)
     {
         if ((allowCombo || _isInComboWindow) && _currentAttackId != -1)
         {
-            var currentAttack = _attackRepository.GetAttackById(_currentAttackId);
-            if (currentAttack != null && currentAttack.NextComboAttackId != -1)
+            // 直接 data.NextComboAttackId を見るのではなく、
+            // リポジトリのオーバーライドテーブルを経由する
+            int nextId = _attackRepository.GetNextComboAttackId(_currentAttackId);
+
+            if (nextId != -1)
             {
-                var nextAttack = _attackRepository.GetAttackById(currentAttack.NextComboAttackId);
-                if (nextAttack != null && IsCompatibleAttack(nextAttack, input)) return nextAttack;
+                var nextAttack = _attackRepository.GetAttackById(nextId);
+
+                // チャージ入力との互換性チェック
+                if (nextAttack != null && IsCompatibleAttack(nextAttack, input))
+                    return nextAttack;
             }
-            else return null;
+            else
+            {
+                return null; // コンボ終端
+            }
         }
 
         ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
-        return _attackRepository.GetAttackData(_modeController.CurrentMode, input.AttackType, 0, chargeLevel);
+        return _attackRepository.GetAttackData(
+            _modeController.CurrentMode, input.AttackType, 0, chargeLevel);
     }
 
+    /// <summary>
+    /// 攻撃データと入力が互換性があるかどうかをチェックする。
+    /// </summary>
     private bool IsCompatibleAttack(AttackData attack, AttackInput input)
-        => attack.AttackType == input.AttackType;
+    {
+        if (attack.AttackType != input.AttackType) return false;
+
+        // チャージ攻撃の場合、必要なチャージレベルも満たすか確認
+        if (attack.RequiredCharge != ChargeLevel.None)
+        {
+            // 例えば、攻撃がLevel2を要求している場合、入力がLevel1では不十分であるべき   
+            ChargeLevel inputLevel = input.GetChargeLevel(_chargeThreshold);
+            if (inputLevel < attack.RequiredCharge) return false;
+        }
+
+        return true;
+    }
 
     private bool CanAttack() => _stateManager.CanAttack();
 
