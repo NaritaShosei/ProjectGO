@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -78,6 +79,24 @@ public class CameraManager : MonoBehaviour
         OnLockOnTargetChanged?.Invoke(null);
     }
 
+    /// <summary>
+    /// カメラシェイクの実行
+    /// </summary>
+    /// <param name="data">カメラシェイクのステータスを保持する構造体</param>
+    /// <returns></returns>
+    public async UniTask ExecutionCameraShake(CameraShakeData data)
+    {
+        await _cameraShake.StartCameraShake(data);
+    }
+
+    /// <summary>
+    /// カメラシェイクを強制停止するメソッドを呼び出す
+    /// </summary>
+    public void ExecutionForceStopCameraShake()
+    {
+        _cameraShake.ForceStopCameraShake();
+    }
+
     [Header("カメラ参照")]
     [SerializeField] private CinemachineCamera _normalCamera;
     [SerializeField] private CinemachineCamera _lockOnCamera;
@@ -100,11 +119,14 @@ public class CameraManager : MonoBehaviour
     private Transform _cameraFollowTarget; // 通常時の遅延追従用アンカー
     private Vector3 _normalFollowVelocity; // 通常追従用
     private Vector3 _lockOnCameraVelocity; // ロックオン追従用
+    private CameraShake _cameraShake; //カメラシェイク
 
     private void Awake()
     {
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
+
+        _cameraShake = new CameraShake(_normalCamera);
 
         // 追従遅延を実現するための仮想アンカーを生成
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
