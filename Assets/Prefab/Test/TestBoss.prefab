@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4413516800772587551}
   - component: {fileID: 8866840031144273841}
   - component: {fileID: 7123889049726571300}
+  - component: {fileID: 3277402634722618699}
   m_Layer: 8
   m_Name: TestBoss
   m_TagString: Untagged
@@ -132,6 +133,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TestBoss
   _data: {fileID: 11400000, guid: 4d72027c23dc078418ace48323c4131f, type: 2}
   _targetCenter: {fileID: 2830082553299517670}
+  _animator: {fileID: 0}
+  _turnProfile: {fileID: 0}
+  _distanceProfile: {fileID: 0}
+  _animationEventReceiver: {fileID: 0}
   _bossPhaseController: {fileID: 7123889049726571300}
   _armer: {fileID: 3501119557689287186}
   _core: {fileID: 3206612795821594701}
@@ -150,6 +155,42 @@ MonoBehaviour:
   _phases:
   - {fileID: 11400000, guid: 0316583822d150449b22db1743daa5bc, type: 2}
   - {fileID: 11400000, guid: 6b55d79d8097dde45916c4d3c29c002f, type: 2}
+--- !u!114 &3277402634722618699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4276309557943231815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea4fb379d5546dc499ce0fd0e16aff6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyEffectReceiver
+  _enemy: {fileID: 8866840031144273841}
+  _hitId: "\u751F\u8EAB"
+  _armorHitId: "\u93A7\u30D2\u30C3\u30C8"
+  _armorBreakId: "\u93A7\u7834\u58CA"
+  _rules:
+  - _playerMode: 0
+    _id: "\u93A7\u30D2\u30C3\u30C8"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+    - "\u30C6\u30B9\u30C8\u5CA9"
+    - "\u30C6\u30B9\u30C8\u706B\u82B1"
+  - _playerMode: 0
+    _id: "\u751F\u8EAB"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+  - _playerMode: 1
+    _id: "\u751F\u8EAB"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u96F7\u30D2\u30C3\u30C8\u30A8\u30D5\u30A7\u30AF\u30C8"
+    - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
+  - _playerMode: 1
+    _id: "\u93A7\u30D2\u30C3\u30C8"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u706B\u82B1"
 --- !u!1 &4369523725872702011
 GameObject:
   m_ObjectHideFlags: 0
