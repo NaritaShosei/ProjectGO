@@ -79,7 +79,7 @@ public class EnemyEffectReceiver : MonoBehaviour
 
         //ヒットタイプ＋プレイヤーモードに対応するルールを検索
         HitEffectRule rule =
-            _rules.Find(x => x.Id == id && x.PlayerMode == context.PlayerMode);
+            _rules.Find(x => x != null && x.Id == id && x.PlayerMode == context.PlayerMode);
 
         if (rule == null)
         {
