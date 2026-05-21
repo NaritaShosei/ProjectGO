@@ -30,6 +30,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public event Action OnDead;
 
+    /// ダメージを受けたときのイベント。ダメージのコンテキスト情報を引数として渡す。
+    public event Action<PlayerDamageEffectContext> OnDamagedEffect;
+
     /// <summary>
     /// 死亡直前イベント。
     /// true を返すと死亡をキャンセルする。
@@ -104,6 +107,13 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         int reductDamage = DamageSystem.ApplyDamageReduction(damage, DefensePower);
         _playerStats.TakeDamage(reductDamage);
+
+        //ダメージエフェクトの通知
+        OnDamagedEffect?.Invoke(
+            new PlayerDamageEffectContext
+        {
+            HitPosition = _targetCenter.position
+        });
 
         bool canInterrupt = true;
 

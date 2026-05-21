@@ -31,6 +31,11 @@ public class PlayerEffectInitializer : MonoBehaviour
         {
             Debug.LogError("PlayerにIModeControllerが見つかりませんでした。");
         }
+
+        if (player.TryGetComponent(out PlayerEffectReceiver effectReceiver))
+        {
+            effectReceiver.Init(player, ServiceLocator.Get<EffectManager>());
+        }
     }
 
     [SerializeField] private ThunderEffectView _thunderEffect;
