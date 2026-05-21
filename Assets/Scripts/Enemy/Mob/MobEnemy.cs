@@ -166,6 +166,16 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
 
+        //ヒットエフェクトの通知
+        InvokeOnHitEffect(
+            new HitEffectContext
+            {
+                Position = transform.position,
+                PlayerMode = context.PlayerMode,
+                IsArmorHit = isArmorHit,
+                IsArmorBreak = isArmorBreak
+            });
+
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
@@ -178,7 +188,7 @@ public class MobEnemy : Enemy, IFormationParticipant
                 IsKill = willKill,
                 IsArmorBreak = isArmorBreak,
                 IsWeakPoint = isWeakPoint,
-                IsArmorHit = isArmorHit
+                IsArmorHit = isArmorHit,
             });
 
         if (!willKill) InvokeOnDamaged();

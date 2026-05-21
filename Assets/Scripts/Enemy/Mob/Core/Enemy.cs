@@ -20,6 +20,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     public event Action<DamagePopupViewModel> OnDamageDealt;
 
+    //HitEffect発生を外部（レシーバーやエフェクトマネージャーなど）に通知するイベント
+    public event Action<HitEffectContext> OnHitEffect;
+
     public virtual IEnemyConditionController ConditionController { get; }
     public IEnemyAnimator EnemyAnimator => _enemyAnimator;
 
@@ -150,6 +153,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
                 worldPosition: GetTargetCenter().position
                 )
             );
+    }
+
+    /// <summary>
+    /// ヒットエフェクト表示用イベントを発火する
+    /// </summary>
+    /// <param name="context"></param>
+    protected void InvokeOnHitEffect(HitEffectContext context)
+    {
+        OnHitEffect?.Invoke(context);
     }
 
 
