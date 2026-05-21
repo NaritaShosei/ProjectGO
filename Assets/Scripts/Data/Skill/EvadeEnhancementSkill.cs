@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class EvadeEnhancementSkill : SkillBase, IStatModifier
 {
-    [Header("スキル固有設定")]
-    [SerializeField] private float dodgeInvincibleTimeBonus = 0.15f;
-
     public StatType TargetStat => StatType.DodgeInvincibleTime;
 
     public override void OnAcquire(IPlayerStats stats)
@@ -20,4 +17,7 @@ public class EvadeEnhancementSkill : SkillBase, IStatModifier
 
         return current + dodgeInvincibleTimeBonus;
     }
+
+    [Header("スキル固有設定")]
+    [SerializeField] private float dodgeInvincibleTimeBonus = 0.15f;
 }
