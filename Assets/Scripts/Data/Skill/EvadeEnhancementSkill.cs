@@ -19,5 +19,5 @@ public class EvadeEnhancementSkill : SkillBase, IStatModifier
     }
 
     [Header("スキル固有設定")]
-    [SerializeField] private float dodgeInvincibleTimeBonus = 0.15f;
+    [SerializeField, Min(0f)] private float dodgeInvincibleTimeBonus = 0.15f;
 }
