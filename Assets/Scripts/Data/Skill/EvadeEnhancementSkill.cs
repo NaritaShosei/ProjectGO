@@ -13,11 +13,11 @@ public class EvadeEnhancementSkill : SkillBase, IStatModifier
 
     public float Modify(float current)
     {
-        Debug.Log($"回避の無敵時間を{current}から{current + dodgeInvincibleTimeBonus}に変更");
+        Debug.Log($"回避の無敵時間を{current}から{current + _dodgeInvincibleTimeBonus}に変更");
 
-        return current + dodgeInvincibleTimeBonus;
+        return current + _dodgeInvincibleTimeBonus;
     }
 
     [Header("スキル固有設定")]
-    [SerializeField, Min(0f)] private float dodgeInvincibleTimeBonus = 0.15f;
+    [SerializeField, Min(0f)] private float _dodgeInvincibleTimeBonus = 0.15f;
 }
