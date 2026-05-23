@@ -43,7 +43,7 @@ public sealed class BossCore : MonoBehaviour, IEnemy
 
     public int Id => GetInstanceID();
     public bool IsBoss => true;
-    public Vector3 Position => transform.position;
+    public Transform Self => transform;
     public float TimeScale => 1f;
 
     public bool IsDead => _boss.IsDead;
