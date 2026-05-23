@@ -1,8 +1,8 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "EvadeEnhancementSkill", menuName = "GameData/Skill/EvadeEnhancementSkill")]
+[CreateAssetMenu(fileName = "DodgeInvincibleTimeSkillSkill", menuName = "GameData/Skill/DodgeInvincibleTimeSkill")]
 
-public class EvadeEnhancementSkill : SkillBase, IStatModifier
+public class DodgeInvincibleTimeSkill : SkillBase, IStatModifier
 {
     public StatType TargetStat => StatType.DodgeInvincibleTime;
 
@@ -18,6 +18,6 @@ public class EvadeEnhancementSkill : SkillBase, IStatModifier
         return current + _dodgeInvincibleTimeBonus;
     }
 
-    [Header("スキル固有設定")]
+    [Header("追加無敵時間")]
     [SerializeField, Min(0f)] private float _dodgeInvincibleTimeBonus = 0.15f;
 }
