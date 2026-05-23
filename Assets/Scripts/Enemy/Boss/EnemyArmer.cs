@@ -22,7 +22,7 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
 
     public int Id => GetInstanceID();
     public bool IsBoss => false;
-    public Vector3 Position => transform.position;
+    public Transform Self => transform;
     public float TimeScale => 1f;
 
     public bool IsDead => IsBroken;

@@ -30,7 +30,7 @@ public class RoamBehaviour : IEnemyBehaviour
 
     public void Init(BehaviourInitContext ctx)
     {
-        _self = ctx.Owner.GetTargetCenter();
+        _self = ctx.Owner.Self;
         _enemy = ctx.Owner;
         _enemyId = ctx.Owner.Id;
         _enemyAnimator = ctx.EnemyAnimator;

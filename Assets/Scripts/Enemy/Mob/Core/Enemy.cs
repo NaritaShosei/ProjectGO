@@ -26,7 +26,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     public virtual IEnemyConditionController ConditionController { get; }
     public IEnemyAnimator EnemyAnimator => _enemyAnimator;
 
-    public Vector3 Position { get => transform.position; }
+    public Transform Self { get => transform; }
 
     public int Id => GetInstanceID();
 
@@ -395,7 +395,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
             return;
         }
 
-        expManager?.DropEXP(Position, _data.ExpDropAmount);
+        expManager?.DropEXP(Self.position, _data.ExpDropAmount);
 
         if (this == null) return;
 
