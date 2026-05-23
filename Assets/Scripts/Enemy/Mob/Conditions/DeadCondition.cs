@@ -76,7 +76,7 @@ public sealed class DeadCondition : IEnemyCondition
     {
         var velocityH = _velocityH;
         float velocityV = _velocityV;
-        float groundY = enemy.Position.y;
+        float groundY = enemy.Self.position.y;
 
         while (true)
         {
@@ -99,16 +99,16 @@ public sealed class DeadCondition : IEnemyCondition
             enemy.AddKnockbackForce(velocityH * dt + Vector3.up * (velocityV * dt));
 
             // 地面クランプ（めり込み防止）
-            if (enemy.Position.y < groundY)
+            if (enemy.Self.position.y < groundY)
             {
-                var pos = enemy.Position;
+                var pos = enemy.Self.position;
                 pos.y = groundY;
                 enemy.SetPosition(pos);
                 velocityV = 0f;
             }
 
             // 停止判定（地面に接触 かつ 水平速度がゼロ）
-            if (enemy.Position.y <= groundY && velocityH.sqrMagnitude < 0.0001f)
+            if (enemy.Self.position.y <= groundY && velocityH.sqrMagnitude < 0.0001f)
                 break;
         }
     }

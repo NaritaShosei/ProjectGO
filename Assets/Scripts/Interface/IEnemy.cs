@@ -28,8 +28,8 @@ public interface IEnemy : ILockOnTarget
     /// <summary>EnemyAnimator への参照</summary>
     IEnemyAnimator EnemyAnimator { get; }
 
-    /// <summary>ワールド座標</summary>
-    Vector3 Position { get; }
+    /// <summary> 自身のTransformへの参照 </summary>
+    Transform Self { get; }
 
     /// <summary>インスタンス識別ID（AttackerSlotのキーに使用）</summary>
     int Id { get; }

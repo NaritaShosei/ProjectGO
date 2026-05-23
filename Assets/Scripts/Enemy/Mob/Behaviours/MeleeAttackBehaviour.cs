@@ -26,7 +26,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void Init(BehaviourInitContext ctx)
     {
-        _self = ctx.Owner.GetTargetCenter();
+        _self = ctx.Owner.Self;
         _enemyId = ctx.Owner.Id;
         _player = ctx.Player;
         _context = ctx.RuntimeContext;

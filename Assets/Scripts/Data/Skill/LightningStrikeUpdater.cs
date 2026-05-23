@@ -49,7 +49,7 @@ public class LightningStrikeUpdater : ISkillUpdater
         for (int i = 0; i < targetCount; i++)
         {
             var target = shuffled[i];
-            var areaTargets = enemyManager.GetEnemiesInRange(target.Position, _data.AreaRadius);
+            var areaTargets = enemyManager.GetEnemiesInRange(target.Self.position, _data.AreaRadius);
 
             foreach (var enemy in areaTargets)
             {
@@ -77,7 +77,7 @@ public class LightningStrikeUpdater : ISkillUpdater
                 var key = keys[i % keys.Count];
 
                 if (ServiceLocator.TryGet(out EffectManager effectManager))
-                    effectManager.PlayEffect(key, target.Position);
+                    effectManager.PlayEffect(key, target.Self.position);
             }
         }
     }

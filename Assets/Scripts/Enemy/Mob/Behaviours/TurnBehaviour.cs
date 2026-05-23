@@ -34,7 +34,7 @@ public class TurnBehaviour : IEnemyBehaviour
 
     public void Init(BehaviourInitContext ctx)
     {
-        _self = ctx.Owner.GetTargetCenter();
+        _self = ctx.Owner.Self;
         _player = ctx.Player;
         _state = ctx.StateContext;
     }

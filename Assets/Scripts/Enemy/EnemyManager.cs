@@ -92,7 +92,7 @@ public class EnemyManager : MonoBehaviour
         foreach (var enemy in _enemies)
         {
             if (enemy.IsDead) continue;
-            float distance = Vector3.Distance(enemy.Position, position);
+            float distance = Vector3.Distance(enemy.Self.position, position);
             if (distance <= radius)
             {
                 enemiesInRange.Add(enemy);
