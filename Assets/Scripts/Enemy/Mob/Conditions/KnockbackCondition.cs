@@ -39,7 +39,7 @@ public sealed class KnockbackCondition : IEnemyCondition
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("ノックバック開始");
 #endif
-        _groundY = enemy.Position.y;
+        _groundY = enemy.Self.position.y;
         _isFinished = false;
         _landingDone = false;
         _stunRemaining = 0f;
@@ -110,16 +110,16 @@ public sealed class KnockbackCondition : IEnemyCondition
         enemy.AddKnockbackForce(delta);
 
         // 地面クランプ（めり込み防止）
-        if (enemy.Position.y < _groundY)
+        if (enemy.Self.position.y < _groundY)
         {
-            var pos = enemy.Position;
+            var pos = enemy.Self.position;
             pos.y = _groundY;
             enemy.SetPosition(pos);
             _velocityV = 0f;
         }
 
         // 停止判定（地面に接触 かつ 水平速度がゼロ）
-        if (enemy.Position.y <= _groundY && _velocityH.sqrMagnitude < 0.0001f)
+        if (enemy.Self.position.y <= _groundY && _velocityH.sqrMagnitude < 0.0001f)
         {
             _velocityH = Vector3.zero;
             _landingDone = true;
