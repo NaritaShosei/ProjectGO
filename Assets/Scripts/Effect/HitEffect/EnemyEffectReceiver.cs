@@ -14,7 +14,7 @@ public class EnemyEffectReceiver : MonoBehaviour
     [SerializeField, Tooltip("ヒットエフェクトのルール")]
     private List<HitEffectRule> _rules;
 
-    private void Awake()
+    private void Start()
     {
         if(_enemy == null) _enemy = GetComponent<Enemy>();
         
