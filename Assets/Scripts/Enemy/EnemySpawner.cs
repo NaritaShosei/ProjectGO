@@ -1,12 +1,21 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+/// <summary>
+/// Enemyの生成と管理を行うクラス
+/// </summary>
 public class EnemySpawner : MonoBehaviour
 {
+    //プール生成するためのエネミーの一覧データ
     [SerializeField] private List<EnemyPoolData> _enemyData;
     [SerializeField] private Transform _enemyParent;
     [SerializeField] private int _preloadCount = 10;
 
+    /// <summary>
+    /// Enemyプールの辞書
+    /// Key：Enemyの識別子
+    /// Value:EnemyobjectPool
+    /// </summary>
     private readonly Dictionary<string, EnemyObjectPool> _pools = new();
 
     private void Awake()
@@ -31,6 +40,7 @@ public class EnemySpawner : MonoBehaviour
                 continue;
             }
 
+            //Enemy用のプール生成
             EnemyObjectPool pool =
                 new EnemyObjectPool(
                     data.Prefab,
@@ -41,9 +51,14 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Enemyの生成する
+    /// </summary>
+    /// <param name="poolKey">Enemyのキー</param>
+    /// <param name="position">生成位置</param>
+    /// <returns>生成されたEnemy</returns>
     public Enemy Spawn(string poolKey, Vector3 position)
     {
-        Debug.Log($"Pool Count : {_pools.Count}");
         if (!_pools.TryGetValue(poolKey, out EnemyObjectPool pool))
         {
             Debug.LogWarning($"Enemy not found: {poolKey}");
@@ -52,6 +67,7 @@ public class EnemySpawner : MonoBehaviour
 
         Enemy enemy = pool.Get();
 
+        //返却時に使用するため、PoolKeyを保存
         enemy.SetPoolKey(poolKey);
 
         enemy.transform.position = position;
@@ -60,15 +76,22 @@ public class EnemySpawner : MonoBehaviour
         return enemy;
     }
 
+    /// <summary>
+    /// Enemy死亡時の処理
+    /// </summary>
+    /// <param name="enemy">死亡したEnemy</param>
     private void HandleEnemyDeath(IEnemy enemy)
     {
+        //EnemyをEnemyクラスにキャスト
         if (enemy is not Enemy e)
         {
             Debug.LogWarning("Enemy cast failed");
             return;
         }
+
         enemy.OnDead -= HandleEnemyDeath;
 
+        //PoolKeyを元にEnemyをプールに返却
         if (_pools.TryGetValue(e.PoolKey, out var pool))
         {
             pool.Release(e);
