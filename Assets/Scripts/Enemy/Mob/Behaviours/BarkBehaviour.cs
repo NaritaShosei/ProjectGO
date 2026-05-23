@@ -20,7 +20,7 @@ public class BarkBehaviour : IEnemyBehaviour
 
     public void Init(BehaviourInitContext ctx)
     {
-        _self = ctx.Owner.GetTargetCenter();
+        _self = ctx.Owner.Self;
         _enemyAnimator = ctx.EnemyAnimator;
         _enemyId = ctx.Owner.Id;
         _player = ctx.Player;
