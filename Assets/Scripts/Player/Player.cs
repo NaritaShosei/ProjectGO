@@ -316,12 +316,14 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
                 elapsed += Time.deltaTime * TimeScale;
                 await UniTask.Yield(cts.Token);
             }
-
-            _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
         }
         catch (OperationCanceledException)
         {
             // オブジェクトが破壊された場合など、処理がキャンセルされたときは何もしない。
+        }
+        finally
+        {
+            _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
         }
     }
 

@@ -304,7 +304,10 @@ public class PlayerMovement : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 回避移動がキャンセルされた場合も無敵状態を解除する
+            // 回避移動がキャンセルされた場合も無敵状態を解除するため、ここで例外をキャッチして処理を続行する。
+        }
+        finally
+        {
             _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
         }
     }
