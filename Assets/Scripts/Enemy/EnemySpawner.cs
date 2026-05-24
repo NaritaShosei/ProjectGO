@@ -11,6 +11,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private Transform _enemyParent;
     [SerializeField] private int _preloadCount = 10;
 
+    private EnemyServices _services;
+
     /// <summary>
     /// Enemyプールの辞書
     /// Key：Enemyの識別子
@@ -18,8 +20,14 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     private readonly Dictionary<string, EnemyObjectPool> _pools = new();
 
-    private void Awake()
+    /// <summary>
+    /// EnemySpawner初期化
+    /// </summary>
+    /// <param name="services"></param>
+    public void Init(EnemyServices services)
     {
+        _services = services;
+
         foreach (EnemyPoolData data in _enemyData)
         {
             if (string.IsNullOrEmpty(data.Key))
@@ -69,10 +77,11 @@ public class EnemySpawner : MonoBehaviour
 
         //返却時に使用するため、PoolKeyを保存
         enemy.SetPoolKey(poolKey);
+        enemy.InjectServices(_services);
+        enemy.ReInitialize(position);
 
-        enemy.transform.position = position;
 
-        enemy.OnDead += HandleEnemyDeath;
+        enemy.OnReleaseRequested += HandleEnemyDeath;
         return enemy;
     }
 

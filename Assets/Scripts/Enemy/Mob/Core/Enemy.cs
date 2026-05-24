@@ -6,11 +6,12 @@ using UnityEngine;
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnDamaged;
     public event Action<IEnemy> OnArmorBroken;
+    public event Action<Enemy> OnReleaseRequested;
 
     public event Action<float, float> OnHealthChanged
     {
@@ -184,6 +185,23 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         if (newSlot != null) newSlot.OnSlotReleased += HandleSlotReleased;
     }
 
+    /// <summary>
+    /// EnemyがObjectPoolからGetされたときの初期化処理
+    /// </summary>
+    public void OnGet()
+    {
+        enabled = true;
+    }
+    
+    /// <summary>
+    /// EnemyがObjectPoolにReleaseされたときのクリーンアップ処理
+    /// </summary>
+    public void OnRelease()
+    {
+        enabled = false;
+    }
+
+
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] protected Animator _animator;
@@ -219,6 +237,23 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     // サービス参照（InjectServicesで注入される）
     protected EnemyServices _services;
+
+    //Poolの所属を識別するためのキー
+    private string _poolKey;
+
+    /// <summary>
+    /// 所属Poolのキー_返却の参照に使用
+    /// </summary>
+    public string PoolKey => _poolKey;
+
+    /// <summary>
+    /// 所属プールキーの設定
+    /// </summary>
+    /// <param name="key"></param>
+    public void SetPoolKey(string key)
+    {
+        _poolKey = key;
+    }
 
     protected virtual void Awake()
     {
@@ -311,8 +346,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     protected virtual void OnDeathInternal()
     {
         // 死亡アニメーション完了を待ってから破棄する
-        // TODO: ObjectPool導入時は WaitForDeadAnimationAndDeactivate() に切り替える
-        WaitForDeadAnimationAndDestroy().Forget();
+        // (済み): ObjectPool導入時は WaitForDeadAnimationAndDeactivate() に切り替える
+        WaitForDeadAnimationAndDeactivate().Forget();
     }
 
     /// <summary>
@@ -342,7 +377,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
 
     /// <summary>
     /// スポーン位置を指定して敵をプールから再利用するための初期化を行う。
-    /// ObjectPoolからSetActive(true)した直後に呼ぶこと。
+    /// (済み)ObjectPoolからSetActive(true)した直後に呼ぶこと。
     /// </summary>
     public virtual void ReInitialize(Vector3 spawnPosition)
     {
@@ -351,12 +386,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         _deadAnimationEnded = false;
         TimeScale = 1f;
 
+        _stats.ResetHP(_data.MaxHP);
+
         // Animatorを初期状態（Idle）に戻す
         // Dead→Exit遷移が再活性化時に誤発火しないよう即時反映する
         _animator.Play("Idle", 0, 0f);
         _animator.Update(0f);
 
-        // TODO: _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+        // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
     }
 
     /// <summary>
@@ -367,13 +404,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
     /// ObjectPool導入時は gameObject.SetActive(false) に置き換え、
     /// WaitForDeadAnimationAndDeactivate() にリネームして切り替えること。
     /// </remarks>
-    private async UniTaskVoid WaitForDeadAnimationAndDestroy()
+    private async UniTaskVoid WaitForDeadAnimationAndDeactivate()
     {
         ServiceLocator.TryGet<EXPItemManager>(out var expManager);
 
         if (_animationEventReceiver == null)
         {
-            Destroy(gameObject);
             return;
         }
 
@@ -398,8 +434,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange
         expManager?.DropEXP(Self.position, _data.ExpDropAmount);
 
         if (this == null) return;
+        ReleaseToPool();
+    }
 
-        Destroy(gameObject);
+    /// <summary>
+    /// Pool返却通知
+    /// </summary>
+    private void ReleaseToPool()
+    {
+        OnReleaseRequested?.Invoke(this);
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
