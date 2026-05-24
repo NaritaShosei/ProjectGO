@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using System.Collections.ObjectModel;
+using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -28,6 +28,22 @@ public class EnemyManager : MonoBehaviour
         _wallAvoidanceService = new WallAvoidanceService(_wallLayerMask);
         _formationSystem = new EnemyFormationSystem();
         _playerInformationService = new PlayerInformationService(_player, this);
+
+        _enemyServices = new EnemyServices(
+       _spatialHashGrid,
+       _separationService,
+       _wallAvoidanceService,
+       _formationSystem,
+       _playerInformationService
+   );
+
+        if (_enemySpawner == null)
+        {
+            Debug.LogError("EnemyManager.Init: _enemySpawner が未設定です");
+            enabled = false;
+            return;
+        }
+        _enemySpawner.Init(_enemyServices);
     }
 
     /// <summary> エネミーの生成 </summary>
@@ -83,6 +99,42 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// オブジェクトプールを使用したエネミーの生成
+    /// </summary>
+    /// <param name="poolKey">取得するEnemyのPool識別キー</param>
+    /// <param name="pos">出現座標</param>
+    public void Spawn(string poolKey, Vector3 pos)
+    {
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
+        Enemy enemy = _enemySpawner.Spawn(poolKey, pos);
+        if (enemy == null) return;
+
+        // Enemy死亡時と被弾時のイベント登録
+        enemy.OnDead += HandleEnemyDead;
+        enemy.OnDamaged += HandleEnemyDamaged;
+
+        _enemiesTransformList.Add(enemy.transform);
+
+        if (_formationSystem != null && enemy.TryGetComponent(out IFormationParticipant participant))
+        {
+            _formationSystem.Register(enemy, participant);
+        }
+
+        OnEnemySpawned?.Invoke(enemy);
+
+        enemy.Init();
+
+        _spatialHashGrid.Register(enemy, pos);
+        _enemies.Add(enemy);
+    }
+
+
     /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
@@ -127,6 +179,10 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
+    // Enemyの生成を行うクラス
+    [SerializeField] private EnemySpawner _enemySpawner;
+
+
     private List<Transform> _enemiesTransformList = new List<Transform>();
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
@@ -136,6 +192,9 @@ public class EnemyManager : MonoBehaviour
     private IWallAvoidanceService _wallAvoidanceService;
     private IEnemyFormationSystem _formationSystem;
     private IPlayerInformationService _playerInformationService;
+    
+    // Enemyに提供するサービスをまとめたクラス
+    private EnemyServices _enemyServices;
 
     private void Awake()
     {
@@ -205,5 +264,5 @@ public class EnemyManager : MonoBehaviour
     {
         GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
     }
-#endif
+#endif  
 }
