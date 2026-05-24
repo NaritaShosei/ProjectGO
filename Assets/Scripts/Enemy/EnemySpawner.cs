@@ -6,7 +6,6 @@ using System.Collections.Generic;
 /// </summary>
 public class EnemySpawner : MonoBehaviour
 {
-
     /// <summary>
     /// EnemySpawner初期化
     /// </summary>
@@ -14,6 +13,12 @@ public class EnemySpawner : MonoBehaviour
     public void Init(EnemyServices services)
     {
         _services = services;
+
+        if (_enemyData == null || _enemyData.Count == 0)
+        {
+            Debug.LogError("EnemySpawner.Init: _enemyData が未設定です");
+            return;
+        }
 
         foreach (EnemyPoolData data in _enemyData)
         {
@@ -99,7 +104,7 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        enemy.OnDead -= HandleEnemyDeath;
+        e.OnReleaseRequested -= HandleEnemyDeath;
 
         //PoolKeyを元にEnemyをプールに返却
         if (_pools.TryGetValue(e.PoolKey, out var pool))

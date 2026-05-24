@@ -37,6 +37,12 @@ public class EnemyManager : MonoBehaviour
        _playerInformationService
    );
 
+        if (_enemySpawner == null)
+        {
+            Debug.LogError("EnemyManager.Init: _enemySpawner が未設定です");
+            enabled = false;
+            return;
+        }
         _enemySpawner.Init(_enemyServices);
     }
 
@@ -258,5 +264,5 @@ public class EnemyManager : MonoBehaviour
     {
         GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
     }
-#endif
+#endif  
 }

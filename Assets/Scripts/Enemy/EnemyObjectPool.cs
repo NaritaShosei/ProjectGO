@@ -25,6 +25,11 @@ public class EnemyObjectPool
 
     public void Release(Enemy enemy)
     {
+        if (enemy == null)
+        {
+            _pool.Release(enemy);
+            return;
+        }
         Debug.Log($"Release : {enemy.name}");
         _pool.Release(enemy);
     }
