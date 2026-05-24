@@ -1341,9 +1341,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   _enemyData:
-  - _key: TestArmoredMobEnemy
+  - _key: Enemy1
     _prefab: {fileID: -8330086056522255198, guid: 6da08b1262fd0454eb17f2ac2763dcd5, type: 3}
-  _enemyParent: {fileID: 0}
+  _enemyParent: {fileID: 1349352473}
   _preloadCount: 10
 --- !u!4 &1062456376
 Transform:
