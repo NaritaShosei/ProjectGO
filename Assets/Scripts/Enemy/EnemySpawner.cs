@@ -6,19 +6,6 @@ using System.Collections.Generic;
 /// </summary>
 public class EnemySpawner : MonoBehaviour
 {
-    //プール生成するためのエネミーの一覧データ
-    [SerializeField] private List<EnemyPoolData> _enemyData;
-    [SerializeField] private Transform _enemyParent;
-    [SerializeField] private int _preloadCount = 10;
-
-    private EnemyServices _services;
-
-    /// <summary>
-    /// Enemyプールの辞書
-    /// Key：Enemyの識別子
-    /// Value:EnemyobjectPool
-    /// </summary>
-    private readonly Dictionary<string, EnemyObjectPool> _pools = new();
 
     /// <summary>
     /// EnemySpawner初期化
@@ -84,6 +71,20 @@ public class EnemySpawner : MonoBehaviour
         enemy.OnReleaseRequested += HandleEnemyDeath;
         return enemy;
     }
+
+    //プール生成するためのエネミーの一覧データ
+    [SerializeField] private List<EnemyPoolData> _enemyData;
+    [SerializeField] private Transform _enemyParent;
+    [SerializeField] private int _preloadCount = 10;
+
+    private EnemyServices _services;
+
+    /// <summary>
+    /// Enemyプールの辞書
+    /// Key：Enemyの識別子
+    /// Value:EnemyobjectPool
+    /// </summary>
+    private readonly Dictionary<string, EnemyObjectPool> _pools = new();
 
     /// <summary>
     /// Enemy死亡時の処理

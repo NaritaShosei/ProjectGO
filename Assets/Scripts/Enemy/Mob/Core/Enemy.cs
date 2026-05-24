@@ -40,6 +40,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
     public bool IsLockable => true;
 
     /// <summary>
+    /// 所属Poolのキー_返却の参照に使用
+    /// </summary>
+    public string PoolKey => _poolKey;
+
+
+    /// <summary>
     /// HitStop等でTimeScaleが変化したときに呼ばれる
     /// </summary>
     public void OnSpeedChange(float scale)
@@ -201,6 +207,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
         enabled = false;
     }
 
+    /// <summary>
+    /// 所属プールキーの設定
+    /// </summary>
+    /// <param name="key"></param>
+    public void SetPoolKey(string key)
+    {
+        _poolKey = key;
+    }
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
@@ -240,20 +254,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
 
     //Poolの所属を識別するためのキー
     private string _poolKey;
-
-    /// <summary>
-    /// 所属Poolのキー_返却の参照に使用
-    /// </summary>
-    public string PoolKey => _poolKey;
-
-    /// <summary>
-    /// 所属プールキーの設定
-    /// </summary>
-    /// <param name="key"></param>
-    public void SetPoolKey(string key)
-    {
-        _poolKey = key;
-    }
 
     protected virtual void Awake()
     {

@@ -5,8 +5,6 @@ using UnityEngine;
 /// </summary>
 public class EnemyObjectPool
 {
-    private readonly GenericObjectPool<Enemy> _pool;
-
     /// <summary>
     /// Poolの初期化
     /// </summary>
@@ -30,4 +28,6 @@ public class EnemyObjectPool
         Debug.Log($"Release : {enemy.name}");
         _pool.Release(enemy);
     }
+
+    private readonly GenericObjectPool<Enemy> _pool;
 }
