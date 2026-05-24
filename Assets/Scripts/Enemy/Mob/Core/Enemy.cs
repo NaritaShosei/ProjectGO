@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnDamaged;
@@ -198,7 +198,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
     {
         enabled = true;
     }
-    
+
     /// <summary>
     /// EnemyがObjectPoolにReleaseされたときのクリーンアップ処理
     /// </summary>
@@ -410,6 +410,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
 
         if (_animationEventReceiver == null)
         {
+            ReleaseToPool();
             return;
         }
 
@@ -442,6 +443,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange,IPoolable
     /// </summary>
     private void ReleaseToPool()
     {
+        if (OnReleaseRequested == null)
+        {
+            Debug.LogError($"{name}: OnReleaseRequested に購読者がいないため、Pool返却できません。");
+            gameObject.SetActive(false);
+            return;
+        }
         OnReleaseRequested?.Invoke(this);
     }
 
