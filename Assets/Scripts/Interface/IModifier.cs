@@ -36,14 +36,3 @@ public interface IDamageModifier
 {
     void Modify(ref float damage, PlayerMode mode);
 }
-
-/// <summary>
-/// プレイヤーの攻撃コンボチェーンを変更するインターフェース。
-/// </summary>
-public interface IComboModifier
-{
-    /// <summary>
-    /// AttackDataRepositoryに対してコンボチェーンを変更する
-    /// </summary>
-    void ModifyCombo(AttackDataRepository repository);
-}
