@@ -27,7 +27,7 @@ public sealed class ElectrifiedCondition : IEnemyCondition
     public void OnEnter(IEnemy enemy)
     {
         _time = _duration;
-        _baseLocalPos = enemy.GetTargetCenter().localPosition;
+        _baseLocalPos = enemy.Self.localPosition;
         enemy.EnemyAnimator?.SetElectrified(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -53,12 +53,12 @@ public sealed class ElectrifiedCondition : IEnemyCondition
 
         Vector3 offset = new Vector3(x, 0f, z) * intensity;
 
-        enemy.GetTargetCenter().localPosition = _baseLocalPos + offset;
+        enemy.Self.localPosition = _baseLocalPos + offset;
     }
 
     public void OnExit(IEnemy enemy)
     {
-        enemy.GetTargetCenter().localPosition = _baseLocalPos;
+        enemy.Self.localPosition = _baseLocalPos;
         enemy.EnemyAnimator?.SetElectrified(false);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

@@ -22,7 +22,7 @@ public class ApproachBehaviour : IEnemyBehaviour
 
     public void Init(BehaviourInitContext ctx)
     {
-        _self = ctx.Owner.GetTargetCenter();
+        _self = ctx.Owner.Self;
         _enemy = ctx.Owner;
         _enemyAnimator = ctx.EnemyAnimator;
         _enemyId = ctx.Owner.Id;
