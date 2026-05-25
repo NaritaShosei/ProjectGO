@@ -89,7 +89,7 @@ public class ConditionalAttackBoostSkill : SkillBase
             var knockback = _knockbackContext;
 
             knockback.Direction =
-                (enemy.Position - attackPosition).normalized;
+                (enemy.Self.position - attackPosition).normalized;
 
             var damageContext = new DamageContext
             {
