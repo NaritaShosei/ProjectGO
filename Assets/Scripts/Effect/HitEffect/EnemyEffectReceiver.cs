@@ -54,12 +54,14 @@ public class EnemyEffectReceiver : MonoBehaviour
 
         if (keys == null || keys.Count == 0) return;
 
+        Vector3 effectPosition = _enemy.GetTargetCenter().position;
+
         //登録されたエフェクトを再生
         foreach (string key in keys)
         {
             _effectManager.PlayEffect(
                 key,
-                context.Position);
+                effectPosition);
         }
     }
 

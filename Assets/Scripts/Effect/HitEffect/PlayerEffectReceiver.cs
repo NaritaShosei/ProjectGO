@@ -73,9 +73,11 @@ public class PlayerEffectReceiver : MonoBehaviour
     {
         if(_effectManager == null) return;
 
+        Vector3 hitPosition = _player.GetTargetCenter().position;
+
         _effectManager.PlayEffect(
             _damageEffectKey,
-            context.HitPosition);
+            hitPosition);
 
         PlayerDamageFlash().Forget();
     }
