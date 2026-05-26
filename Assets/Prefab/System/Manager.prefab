@@ -163,9 +163,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
   _enemyData:
-  - _key: 
-    _prefab: {fileID: 0}
-  _enemyParent: {fileID: 0}
+  - _key: Enemy1
+    _prefab: {fileID: -8330086056522255198, guid: 6da08b1262fd0454eb17f2ac2763dcd5, type: 3}
+  _enemyParent: {fileID: 7960862723501349768}
   _preloadCount: 10
 --- !u!1 &2077946794018349390
 GameObject:
