@@ -8,9 +8,8 @@ public class InputHandler : MonoBehaviour
 
     // イベント
     public event Action OnDodge;
-    public event Action OnLightAttack;
-    public event Action OnChargeStart;
-    public event Action OnChargeEnd;
+    public event Action OnLightAttackPressed;
+    public event Action OnLightAttackReleased;
     public event Action OnInteract;
     public event Action OnModeChange;
     public event Action OnLockOn;
@@ -52,11 +51,8 @@ public class InputHandler : MonoBehaviour
         _input.Player.Dodge.started += _ => OnDodge?.Invoke();
 
         // 弱攻撃 
-        _input.Player.LightAttack.performed += _ => OnLightAttack?.Invoke();
-
-        // 強攻撃
-        _input.Player.ChargeAttack.started += _ => OnChargeStart?.Invoke();
-        _input.Player.ChargeAttack.canceled += _ => OnChargeEnd?.Invoke();
+        _input.Player.LightAttack.started += _ => OnLightAttackPressed?.Invoke();
+        _input.Player.LightAttack.canceled += _ => OnLightAttackReleased?.Invoke();
 
         // インタラクト
         _input.Player.Interact.started += _ => OnInteract?.Invoke();
