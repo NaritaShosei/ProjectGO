@@ -94,8 +94,30 @@ public class SkillManager : MonoBehaviour
             .ToList();
     }
 
+    /// <summary>
+    /// 現在解放済みの最大チャージ段階を返す。
+    /// マップにエントリがなければデフォルトLv1（チャージ攻撃は必ず存在する前提）。
+    /// </summary>
+    public ChargeLevel GetMaxChargeLevel(PlayerMode mode)
+    {
+        ChargeLevel max = ChargeLevel.Level1;
+
+        if (_chargeLevelSkillMap == null) return max;
+
+        foreach (var entry in _chargeLevelSkillMap)
+        {
+            if (entry.Mode != mode) continue;
+            if (_unlockedSkillIDs.Contains(entry.RequiredSkillId))
+            {
+                if (entry.Level > max) max = entry.Level;
+            }
+        }
+        return max;
+    }
+
     [SerializeField] private SkillDataBase _skillDataBase;
     [SerializeField] private StatSkillData[] _statSkillDataArray;
+    [SerializeField] private ChargeLevelSkillEntry[] _chargeLevelSkillMap;
 
     private SkillExecutor _skillExecutor;
     private StatSkillSystem _statSkillSystem;
@@ -114,4 +136,12 @@ public class SkillManager : MonoBehaviour
     {
         _statSkillSystem?.Dispose();
     }
+}
+
+[Serializable]
+public struct ChargeLevelSkillEntry
+{
+    public PlayerMode Mode;
+    public ChargeLevel Level;
+    public int RequiredSkillId;
 }
