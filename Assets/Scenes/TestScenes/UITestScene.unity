@@ -308,7 +308,7 @@ PrefabInstance:
       objectReference: {fileID: 919820666}
     - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _effectDataList.Array.size
-      value: 7
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _effectDataList.Array.data[3]._key
@@ -327,6 +327,10 @@ PrefabInstance:
       value: "\u30C6\u30B9\u30C8\u5CA9"
       objectReference: {fileID: 0}
     - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[7]._key
+      value: "\u30C6\u30B9\u30C8\u30A2\u30FC\u30DE\u30FC\u7834\u58CA"
+      objectReference: {fileID: 0}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _effectDataList.Array.data[3]._prefab
       value: 
       objectReference: {fileID: 146184047964149964, guid: 618f481dad270584ab4a2b6970264d75, type: 3}
@@ -342,6 +346,10 @@ PrefabInstance:
       propertyPath: _effectDataList.Array.data[6]._prefab
       value: 
       objectReference: {fileID: 8571136979397341754, guid: 734e025186a6da44c832f8d7210bb2dc, type: 3}
+    - target: {fileID: 8809870427891784214, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _effectDataList.Array.data[7]._prefab
+      value: 
+      objectReference: {fileID: 1262999295889565182, guid: a6665d4df1a80984f809d252f24bcc70, type: 3}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _skillUIManager
       value: 
