@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +21,6 @@ public class AttackExecutor : MonoBehaviour
     public void Execute(AttackData data, AttackInput input, ModeData modeData)
     {
         OnSwingReady?.Invoke(data.Mode);
-
-        _lastAttackData = data;
 
         var attackPos = transform.position + transform.forward * data.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, data.AttackRadius, _layer);
@@ -76,6 +75,13 @@ public class AttackExecutor : MonoBehaviour
             };
 
             enemy.TakeDamage(damageContext);
+
+            if (data.Mode == PlayerMode.Thunder && data.HasAdditionalLightningDamage)
+            {
+                var captured = enemy;
+                var lightningPower = perHitContext.AttackPower;
+                ExecuteLightningDamageAsync(captured, lightningPower, data.Mode, data.AdditionalLightningDamages).Forget();
+            }
         }
 
         // 地面ヒット音（特定攻撃のみ）
@@ -152,17 +158,35 @@ public class AttackExecutor : MonoBehaviour
         };
     }
 
-    private AttackData _lastAttackData;
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
+    /// <summary>
+    /// ディレイ後に雷追加ダメージを与える
+    /// </summary>
+    private async UniTaskVoid ExecuteLightningDamageAsync(
+        IEnemy enemy,
+        float power,
+        PlayerMode mode,
+        AdditionalLightningDamageData[] datas)
     {
-        if (_lastAttackData == null) return;
-        Gizmos.color = Color.red;
-        var pos = transform.position + transform.forward * _lastAttackData.AttackRange;
-        Gizmos.DrawWireSphere(pos, _lastAttackData.AttackRadius);
-        Gizmos.DrawLine(transform.position, pos);
+        foreach (var data in datas)
+        {
+
+            if (data.LightningDamageDelay > 0f)
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(data.LightningDamageDelay),
+                    cancellationToken: destroyCancellationToken
+                );
+
+            if (enemy == null || enemy.IsDead) return;
+
+            enemy.TakeDamage(new DamageContext
+            {
+                AttackPower = power * data.LightningDamageMultiplier,
+                PlayerMode = mode,
+                IsCritical = false,
+                CriticalMultiplier = 1f,
+            });
+        }
     }
-#endif
 }
 
 /// <summary>
