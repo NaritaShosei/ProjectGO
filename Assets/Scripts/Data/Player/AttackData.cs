@@ -25,7 +25,8 @@ public class AttackData : ScriptableObject
     public float KnockbackPower => _knockbackPower;
     public float KnockbackUpward => _knockbackUpward;
 
-    public AttackMoveType MoveType => _moveType;
+    public bool EnableMovement => _enableMovement;  
+    public AnimationCurve MoveCurve => _moveCurve;
     public float MoveDistance => _moveDistance;
     public float MoveSpeed => _moveSpeed;
     public float MoveDuration => _moveDuration;
@@ -35,9 +36,17 @@ public class AttackData : ScriptableObject
     public HitStopData HitStopData => _hitStopData;
 
     public string AnimationStateName => _animationStateName;
+    public string ChargeAnimationStateName => _chargeAnimationStateName;
     public float TransitionDuration => _transitionDuration;
 
     public bool PlayGroundHitSE => _playGroundHitSE;
+
+    public bool IsUnlockedBySkill => _isUnlockedBySkill;
+    public int RequiredSkillId => _requiredSkillId;
+
+    public bool HasAdditionalLightningDamage => _hasAdditionalLightningDamage;
+
+    public AdditionalLightningDamageData[] AdditionalLightningDamages => _additionalLightningDamages;
 
     [Header("Basic Info")]
     [SerializeField] private int _attackId; // 攻撃ID
@@ -69,7 +78,8 @@ public class AttackData : ScriptableObject
     [SerializeField] private float _homingStrength = 10f; // ホーミングの強さ（大きいほどターゲットに向かって急激に曲がる）
 
     [Header("Movement")]
-    [SerializeField] private AttackMoveType _moveType = AttackMoveType.None; // 攻撃中の移動タイプ
+    [SerializeField] private bool _enableMovement = false; // 攻撃中の移動を有効にするかどうか
+    [SerializeField] private AnimationCurve _moveCurve = AnimationCurve.Linear(0, 0, 1, 1); // 移動の速度変化を制御するアニメーションカーブ
     [SerializeField] private float _moveDistance = 0f;
     [SerializeField] private float _moveSpeed = 0f;
     [SerializeField] private float _moveDuration = 0f;
@@ -81,10 +91,23 @@ public class AttackData : ScriptableObject
 
     [Header("Animation")]
     [SerializeField] private string _animationStateName; // Animatorのステート名
+    [SerializeField] private string _chargeAnimationStateName; //  チャージ攻撃用のAnimatorのステート名（チャージ攻撃でない場合は空文字）
     [SerializeField] private float _transitionDuration = -1f; // 遷移時間（秒）。-1の場合はデフォルト値(0.1f)を使用
 
     [Header("Sound")]
     [SerializeField] private bool _playGroundHitSE = false; // 地面ヒットSEを鳴らすか
+
+    [Header("Skill Unlock")]
+    [Tooltip("スキル解放が必要な攻撃かどうか")]
+    [SerializeField] private bool _isUnlockedBySkill = false;
+    [Tooltip("解放に必要なスキルID")]
+    [SerializeField] private int _requiredSkillId = -1;
+
+    [Header("Lightning")]
+    [Tooltip("雷の攻撃に追加ダメージを与えるかどうか")]
+    [SerializeField] private bool _hasAdditionalLightningDamage = false;
+    [Tooltip("雷の追加ダメージのデータ")]
+    [SerializeField] private AdditionalLightningDamageData[] _additionalLightningDamages;
 }
 
 // 攻撃の段階（チャージレベル）
@@ -95,7 +118,9 @@ public enum ChargeLevel
     [InspectorName("溜め1")]
     Level1 = 1,
     [InspectorName("溜め2")]
-    Level2 = 2
+    Level2 = 2,
+    [InspectorName("溜め3")]
+    Level3 = 3
 }
 
 // 攻撃タイプ
@@ -103,10 +128,6 @@ public enum AttackType
 {
     [InspectorName("弱攻撃")]
     LightAttack,
-    [InspectorName("強攻撃")]
-    HeavyAttack,
-    [InspectorName("回避攻撃")]
-    DodgeAttack
 }
 
 // モード
