@@ -113,6 +113,7 @@ public class PlayerAttack : MonoBehaviour
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private bool _isCharging;
+    private bool _isWarriorCharge;
 
     private ChargeLevel _currentChargeLevel = ChargeLevel.None;
     private bool _autoFireTriggered = false;
@@ -180,21 +181,26 @@ public class PlayerAttack : MonoBehaviour
         // コンボウィンドウ中なら次コンボのチャージ時刻だけ記録
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
         {
-            _chargeStartTime = Time.time;
-            _isCharging = true;
-            _currentChargeLevel = ChargeLevel.None;
-            _autoFireTriggered = false;
-
-            // 雷神はPressed時点でコンボバッファに積む
-            if (_modeController.CurrentMode == PlayerMode.Thunder)
+            // 闘神
+            if (_modeController.CurrentMode == PlayerMode.Warrior)
             {
-                var thunderInput = new AttackInput
-                {
-                    AttackType = AttackType.LightAttack,
-                    ChargeLevel = ChargeLevel.None
-                };
-                BufferComboInput(thunderInput);
+                _chargeStartTime = Time.time;
+                _isWarriorCharge = true;
+                _currentChargeLevel = ChargeLevel.None;
+                _autoFireTriggered = false;
+
+                return;
             }
+
+            // 雷神
+            var thunderInput = new AttackInput
+            {
+                AttackType = AttackType.LightAttack,
+                ChargeLevel = ChargeLevel.None
+            };
+
+            BufferComboInput(thunderInput);
+
             return;
         }
 
@@ -202,6 +208,7 @@ public class PlayerAttack : MonoBehaviour
 
         _chargeStartTime = Time.time;
         _isCharging = true;
+        _isWarriorCharge = true;
         _currentChargeLevel = ChargeLevel.None;
         _autoFireTriggered = false;
 
@@ -214,8 +221,13 @@ public class PlayerAttack : MonoBehaviour
         else
         {
             // 雷神モードは溜めなしで即攻撃準備
-            var input = new AttackInput { AttackType = AttackType.LightAttack, ChargeLevel = ChargeLevel.None };
-            PrepareAttack(input);
+            _isWarriorCharge = false;
+            _isCharging = false;
+            PrepareAttack(new AttackInput
+            {
+                AttackType = AttackType.LightAttack,
+                ChargeLevel = ChargeLevel.None
+            });
         }
     }
 
@@ -224,21 +236,17 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void HandleAttackReleased()
     {
-        if (!_isCharging) return;
+        // 雷神はPressed時に処理済み
+        if (_modeController.CurrentMode == PlayerMode.Thunder) return;
 
-        // 雷神はPressed時に攻撃済み
-        if (_modeController.CurrentMode == PlayerMode.Thunder)
-        {
-            _isCharging = false;
-            return;
-        }
+        // 闘神かつチャージ中でなければ無視
+        if (!_isWarriorCharge) return;
 
-        // 闘神
-        if (!_autoFireTriggered)
-        {
-            _autoFireTriggered = true;
-            FireWarriorAttack(_currentChargeLevel);
-        }
+        // 自動発動済みなら何もしない（UpdateChargingが先に処理した）
+        if (_autoFireTriggered) return;
+
+        _autoFireTriggered = true;
+        FireWarriorAttack(_currentChargeLevel);
     }
     #endregion
 
@@ -266,8 +274,9 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void CancelCharge()
     {
-        if (!_isCharging) return;
+        if (!_isCharging && !_isWarriorCharge) return;
         _isCharging = false;
+        _isWarriorCharge = false;
         _currentChargeLevel = ChargeLevel.None;
         _autoFireTriggered = false;
 
@@ -296,7 +305,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void UpdateCharging()
     {
-        if (!_isCharging || _modeController.CurrentMode != PlayerMode.Warrior) return;
+        if (!_isWarriorCharge || _modeController.CurrentMode != PlayerMode.Warrior) return;
 
         float chargeTime = Time.time - _chargeStartTime;
         ChargeLevel newLevel = ResolveChargeLevel(chargeTime);
@@ -320,8 +329,8 @@ public class PlayerAttack : MonoBehaviour
         // 解放済み最大チャージ段階に達したら自動発動
         if (!_autoFireTriggered && IsMaxChargeLevelReached(newLevel))
         {
-            FireWarriorAttack(newLevel);
             _autoFireTriggered = true;
+            FireWarriorAttack(newLevel);
         }
     }
 
@@ -368,6 +377,8 @@ public class PlayerAttack : MonoBehaviour
     private void FireWarriorAttack(ChargeLevel level)
     {
         _isCharging = false;
+        _isWarriorCharge = false;
+        _currentChargeLevel = ChargeLevel.None;
 
         var input = new AttackInput
         {
@@ -375,15 +386,22 @@ public class PlayerAttack : MonoBehaviour
             ChargeLevel = level
         };
 
-        _currentChargeLevel = ChargeLevel.None;
+        // Charging状態のときだけIdleを経由する（コンボ中はAttackingのまま）
+        if (_stateManager.CurrentState == PlayerState.Charging)
+        {
+            OnChargingEnded?.Invoke();
+            _stateManager.ChangeState(PlayerState.Idle);
 
-        OnChargingEnded?.Invoke();
-        _stateManager.ChangeState(PlayerState.Idle);
+            if (!CanAttack()) return;
 
-        if (!CanAttack()) return;
-
-        ResetComboByTime();
-        PrepareAttack(input);
+            ResetComboByTime();
+            PrepareAttack(input);
+        }
+        else
+        {
+            // コンボ中（Attacking状態）はCanAttack()を通さず直接遷移
+            BufferComboInput(input);
+        }
     }
 
     /// <summary>
