@@ -27,7 +27,8 @@ public class PlayerAttack : MonoBehaviour
         InputHandler input,
         AttackExecutor executor,
         IModeController modeController,
-        PlayerAnimationController animationController)
+        PlayerAnimationController animationController,
+        SkillManager skillManager)
     {
         _chargeThresholds = _chargeThresholdSettings
             .OrderByDescending(x => x.TimeThreshold)
@@ -38,6 +39,7 @@ public class PlayerAttack : MonoBehaviour
         _attackExecutor = executor;
         _modeController = modeController;
         _animationController = animationController;
+        _skillManager = skillManager;
 
         // R1押し始め → チャージ開始 or 即時攻撃準備
         _input.OnLightAttackPressed += HandleAttackPressed;
@@ -52,6 +54,7 @@ public class PlayerAttack : MonoBehaviour
         _animationController.OnComboWindowStart += OnComboWindowStart;
         _animationController.OnComboWindowEnd += OnComboWindowEnd;
         _animationController.OnComboTransition += TryComboTransition;
+        _animationController.OnChargeReady += OnChargeReady;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             cameraManager.OnLockOnTargetChanged += ChangeLockOnTarget;
@@ -106,6 +109,7 @@ public class PlayerAttack : MonoBehaviour
     private AttackExecutor _attackExecutor;
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
+    private SkillManager _skillManager;
 
     private ChargeThreshold[] _chargeThresholds;
 
@@ -114,6 +118,8 @@ public class PlayerAttack : MonoBehaviour
     private float _chargeStartTime = -999f;
     private bool _isCharging;
     private bool _isWarriorCharge;
+
+    private bool _canStartCharge;
 
     private ChargeLevel _currentChargeLevel = ChargeLevel.None;
     private bool _autoFireTriggered = false;
@@ -157,6 +163,7 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
             _animationController.OnComboTransition -= TryComboTransition;
+            _animationController.OnChargeReady -= OnChargeReady;
         }
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -178,6 +185,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void HandleAttackPressed()
     {
+        _canStartCharge = false;
+
         // コンボウィンドウ中なら次コンボのチャージ時刻だけ記録
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
         {
@@ -206,23 +215,27 @@ public class PlayerAttack : MonoBehaviour
 
         if (!CanAttack()) return;
 
-        _chargeStartTime = Time.time;
-        _isCharging = true;
-        _isWarriorCharge = true;
         _currentChargeLevel = ChargeLevel.None;
         _autoFireTriggered = false;
 
         // 闘神モードのみ溜め開始を通知（移動制限）
         if (_modeController.CurrentMode == PlayerMode.Warrior)
         {
+            _isCharging = true;
+            _isWarriorCharge = true;
             _stateManager.ChangeState(PlayerState.Charging);
             OnChargingStarted?.Invoke();
+
+            var idleChargeData = GetChargeAttackData(ChargeLevel.None).GetVariant(ChargeLevel.None);
+            if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
+            {
+                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
+            }
         }
         else
         {
             // 雷神モードは溜めなしで即攻撃準備
-            _isWarriorCharge = false;
-            _isCharging = false;
             PrepareAttack(new AttackInput
             {
                 AttackType = AttackType.LightAttack,
@@ -275,6 +288,7 @@ public class PlayerAttack : MonoBehaviour
     private void CancelCharge()
     {
         if (!_isCharging && !_isWarriorCharge) return;
+        _canStartCharge = false;
         _isCharging = false;
         _isWarriorCharge = false;
         _currentChargeLevel = ChargeLevel.None;
@@ -305,6 +319,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void UpdateCharging()
     {
+        if (!_canStartCharge) return;
         if (!_isWarriorCharge || _modeController.CurrentMode != PlayerMode.Warrior) return;
 
         float chargeTime = Time.time - _chargeStartTime;
@@ -315,15 +330,20 @@ public class PlayerAttack : MonoBehaviour
         {
             _currentChargeLevel = newLevel;
 
-            // チャージ段階に対応したAttackDataのチャージアニメーションを再生
-            var chargeData = GetChargeAttackData(newLevel);
-            if (chargeData != null && !string.IsNullOrEmpty(chargeData.ChargeAnimationStateName))
+            if (newLevel != ChargeLevel.None)
             {
-                float transition = chargeData.TransitionDuration < 0 ? 0.1f : chargeData.TransitionDuration;
-                _animationController.PlayChargeAnimation(chargeData.ChargeAnimationStateName, transition);
-            }
+                // チャージ段階に対応したAttackDataのチャージアニメーションを再生
+                var chargeData = GetChargeAttackData(newLevel).GetVariant(newLevel);
 
-            OnChargeLevelReached?.Invoke(newLevel);
+                Debug.Log($"Charge Level: {newLevel}, AttackName: {chargeData?.AttackName}, ChargeLevel: {newLevel.ToString()}, ChargeTime: {chargeTime:F2}s");
+                if (chargeData != null && !string.IsNullOrEmpty(chargeData.ChargeAnimationStateName))
+                {
+                    float transition = chargeData.TransitionDuration < 0 ? 0.1f : chargeData.TransitionDuration;
+                    _animationController.PlayChargeAnimation(chargeData.ChargeAnimationStateName, transition);
+                }
+
+                OnChargeLevelReached?.Invoke(newLevel);
+            }
         }
 
         // 解放済み最大チャージ段階に達したら自動発動
@@ -342,9 +362,7 @@ public class PlayerAttack : MonoBehaviour
     {
         return _attackRepository.GetAttackData(
             _modeController.CurrentMode,
-            AttackType.LightAttack,
-            0,
-            level
+            1
         );
     }
 
@@ -355,11 +373,18 @@ public class PlayerAttack : MonoBehaviour
     {
         if (current == ChargeLevel.None) return false;
 
-        ChargeLevel maxLevel = ServiceLocator.TryGet(out SkillManager sm)
-            ? sm.GetMaxChargeLevel(_modeController.CurrentMode)
-            : ChargeLevel.Level1; // SkillManagerがなければLv1を最大とする
+        ChargeLevel maxLevel = _skillManager.GetMaxChargeLevel(_modeController.CurrentMode); 
 
         return current >= maxLevel;
+    }
+
+    /// <summary>
+    /// チャージが準備完了したときに呼ばれるイベントハンドラー。チャージ開始を許可し、チャージ開始時間を記録する。
+    /// </summary>
+    private void OnChargeReady()
+    {
+        _canStartCharge = true;
+        _chargeStartTime = Time.time;
     }
     #endregion
 
@@ -376,6 +401,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FireWarriorAttack(ChargeLevel level)
     {
+        _canStartCharge = false;
         _isCharging = false;
         _isWarriorCharge = false;
         _currentChargeLevel = ChargeLevel.None;
@@ -412,7 +438,6 @@ public class PlayerAttack : MonoBehaviour
         AttackData attackData = GetNextAttack(input, allowCombo);
         if (attackData == null)
         {
-            Debug.LogWarning($"攻撃データが見つかりません: Mode={_modeController.CurrentMode} Charge={input.ChargeLevel}");
             return;
         }
 
@@ -422,12 +447,14 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = input;
         _lastAttackTime = Time.time;
 
-        SetupHoming(attackData);
+        var variant = attackData.GetVariant(input.ChargeLevel);
 
-        RequestAttackMove(attackData);
+        SetupHoming(variant);
 
-        float transition = attackData.TransitionDuration < 0 ? 0.1f : attackData.TransitionDuration;
-        _animationController.PlayAttackBlend(_currentAttackId, attackData.AnimationStateName, transition);
+        RequestAttackMove(variant);
+
+        float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
+        _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
     }
 
     /// <summary>
@@ -437,6 +464,7 @@ public class PlayerAttack : MonoBehaviour
     {
         if (_stateManager.CurrentState != PlayerState.Attacking) return;
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
+
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData);
     }
 
@@ -458,13 +486,15 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = bufferedInput;
         _lastAttackTime = Time.time;
 
-        SetupHoming(nextAttack);
+        var variant = nextAttack.GetVariant(bufferedInput.ChargeLevel);
 
-        RequestAttackMove(nextAttack);
+        SetupHoming(variant);
+
+        RequestAttackMove(variant);
 
         _stateManager.ChangeState(PlayerState.Attacking);
-        float transition = nextAttack.TransitionDuration < 0 ? 0.1f : nextAttack.TransitionDuration;
-        _animationController.PlayAttackBlend(_currentAttackId, nextAttack.AnimationStateName, transition);
+        float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
+        _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
     }
 
     /// <summary>
@@ -521,23 +551,11 @@ public class PlayerAttack : MonoBehaviour
         // 新規攻撃取得
         var data = _attackRepository.GetAttackData(
        _modeController.CurrentMode,
-       AttackType.LightAttack,
-       0,
-       input.ChargeLevel
+       1
    );
 
         if (data != null)
             return data;
-
-        if (input.ChargeLevel != ChargeLevel.None)
-        {
-            return _attackRepository.GetAttackData(
-                _modeController.CurrentMode,
-                AttackType.LightAttack,
-                0,
-                ChargeLevel.None
-            );
-        }
 
         return null;
     }
@@ -562,7 +580,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃データに基づいてホーミングの設定を行う。ホーミングが有効な場合は、ホーミングのパラメータをセットし、対象を解決する。無効な場合はホーミングをオフにする。
     /// </summary>
-    private void SetupHoming(AttackData data)
+    private void SetupHoming(AttackVariantData data)
     {
         if (data.EnableHoming)
         {
@@ -712,7 +730,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の移動要求を発行する。攻撃データに移動が有効な場合に、攻撃の移動要求イベントを発行する。イベントには移動のカーブや距離、速度、対象などの情報が含まれる。
     /// </summary>
-    private void RequestAttackMove(AttackData data)
+    private void RequestAttackMove(AttackVariantData data)
     {
         if (!data.EnableMovement) return;
 
