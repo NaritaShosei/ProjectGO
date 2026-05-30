@@ -433,10 +433,10 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の準備を行う。攻撃データの取得、状態遷移、ホーミングの設定、移動要求の発行、アニメーション再生などを行う。
     /// </summary>  
-    private bool PrepareAttack(AttackInput input, bool allowCombo = false)
+    private void PrepareAttack(AttackInput input, bool allowCombo = false)
     {
         AttackData attackData = GetNextAttack(input, allowCombo);
-        if (attackData == null) { return false; }
+        if (attackData == null) { return; }
 
         _stateManager.ChangeState(PlayerState.Attacking);
         _currentAttackId = attackData.AttackId;
@@ -449,7 +449,7 @@ public class PlayerAttack : MonoBehaviour
         if (variant == null)
         {
             Debug.LogWarning($"バリアントデータが見つかりませんでした。AttackId: {_currentAttackId}, ChargeLevel: {input.ChargeLevel}");
-            return false;
+            return;
         }
 
         SetupHoming(variant);
@@ -458,8 +458,6 @@ public class PlayerAttack : MonoBehaviour
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
-
-        return true;
     }
 
     /// <summary>
@@ -532,12 +530,11 @@ public class PlayerAttack : MonoBehaviour
         {
             var bufferedInput = _bufferedComboInput.Value;
             _bufferedComboInput = null;
-            if (PrepareAttack(bufferedInput, allowCombo: true))
-            {
-                _stateManager.ChangeState(PlayerState.Idle);
-                ResetCombo();
-            }
+            PrepareAttack(bufferedInput, allowCombo: true);
         }
+
+        _stateManager.ChangeState(PlayerState.Idle);
+        ResetCombo();
     }
 
     /// <summary>
