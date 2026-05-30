@@ -107,7 +107,7 @@ public class SkillManager : MonoBehaviour
         foreach (var entry in _chargeLevelSkillMap)
         {
             if (entry.Mode != mode) continue;
-            if (_unlockedSkillIDs.Contains(entry.RequiredSkillId))
+            if (_ownedSkillIDs.Contains(entry.RequiredSkillId))
             {
                 if (entry.Level > max) max = entry.Level;
             }
@@ -122,10 +122,10 @@ public class SkillManager : MonoBehaviour
     private SkillExecutor _skillExecutor;
     private StatSkillSystem _statSkillSystem;
     private List<ISkillUpdater> _updaters = new();
-    private HashSet<int> _ownedSkillIDs = new();
-    private HashSet<int> _exhaustedSkillIDs = new();
-    private HashSet<int> _registeredSkillIDs = new();
-    private HashSet<int> _unlockedSkillIDs = new();
+    private HashSet<int> _ownedSkillIDs = new(); // 獲得したスキルIDのセット。重複なしで管理。
+    private HashSet<int> _exhaustedSkillIDs = new(); // 既に選択肢に出たことのあるスキルIDのセット。これも重複なしで管理。
+    private HashSet<int> _registeredSkillIDs = new(); // パッシブスキルのIDセット。これも重複なしで管理。
+    private HashSet<int> _unlockedSkillIDs = new(); // 解放されたスキルIDのセット。これも重複なしで管理。
 
     private IEnumerable<SkillBase> GetSkillsByTiming(SkillTiming timing)
         => GetOwnedSkills().Where(s => s.Timing == timing);
