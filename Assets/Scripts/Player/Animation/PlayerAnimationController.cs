@@ -21,6 +21,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnComboTransition;
     public event Action OnDodgeInvincibilityStart;
     public event Action OnDodgeEnd;
+    public event Action OnChargeReady;
 
 
     /// <summary>被弾アニメーション終了イベント（PlayerMovementやPlayerが購読）</summary>
@@ -39,6 +40,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     public void AnimEvent_DodgeInvincibilityStart() => OnDodgeInvincibilityStart?.Invoke();
     public void AnimEvent_DodgeEnd() => OnDodgeEnd?.Invoke();
+
+    public void AnimEvent_ChargeReady() => OnChargeReady?.Invoke();
 
     // ── 移動アニメーション ───────────────────────────────────
 
@@ -91,16 +94,25 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     public void PlayAttackBlend(int attackId, string stateName, float transitionDuration = 0.1f)
     {
-        _animator.SetInteger(AnimParams.AttackId, attackId);
-
         if (!string.IsNullOrEmpty(stateName))
         {
             _animator.CrossFadeInFixedTime(stateName, transitionDuration, 0);
         }
         else
         {
+            _animator.SetInteger(AnimParams.AttackId, attackId);
             _animator.SetTrigger(AnimParams.Attack);
         }
+    }
+
+    /// <summary>
+    /// チャージアニメーションを再生する。
+    /// 各チャージ段階のAttackDataが持つChargeAnimationStateNameで直接遷移。
+    /// </summary>
+    public void PlayChargeAnimation(string stateName, float transitionDuration = 0.1f)
+    {
+        if (string.IsNullOrEmpty(stateName)) return;
+        _animator.CrossFadeInFixedTime(stateName, transitionDuration, 0);
     }
 
     // ── 回避アニメーション ───────────────────────────────────
@@ -208,7 +220,6 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         {
             case PlayerState.Charging:
                 _animator.SetBool(AnimParams.IsCharging, true);
-                _animator.SetLayerWeight(_animator.GetLayerIndex(AnimParams.Body), 1f);
                 break;
             case PlayerState.Dead:
                 _animator.SetTrigger(AnimParams.Dead);
@@ -221,7 +232,6 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         if (oldState == PlayerState.Charging)
         {
             _animator.SetBool(AnimParams.IsCharging, false);
-            _animator.SetLayerWeight(_animator.GetLayerIndex(AnimParams.Body), 0f);
         }
     }
 

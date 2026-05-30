@@ -62,7 +62,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _modeController.Init(_playerStats);
 
         _attackExecutor?.Init(this, skillManager);
-        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController);
+        _attack?.Init(_playerStateManager, input, _attackExecutor, _modeController, _playerAnimationController, skillManager);
         _interactor?.Init(_playerStateManager, input);
 
         _move?.Init(
@@ -111,9 +111,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         //ダメージエフェクトの通知
         OnDamagedEffect?.Invoke(
             new PlayerDamageEffectContext
-        {
-            HitPosition = _targetCenter.position
-        });
+            {
+                HitPosition = _targetCenter.position
+            });
 
         bool canInterrupt = true;
 
@@ -228,9 +228,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _playerStats.OnThunderGaugeDepleted -= HandleThunderGaugeDepleted;
         }
 
-        if (_move != null)
-            _move.OnEndDodge -= _attack.FinishDodge;
-
         if (_playerAnimationController != null)
         {
             _playerAnimationController.OnModeChangeComplete -= OnModeChangeComplete;
@@ -242,9 +239,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStats.OnDead += OnPlayerDead;
         _playerStats.OnThunderGaugeDepleted += HandleThunderGaugeDepleted;
-
-        if (_move != null && _attack != null)
-            _move.OnEndDodge += _attack.FinishDodge;
 
         if (_playerAnimationController != null && _playerStateManager != null)
             _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
@@ -316,12 +310,14 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
                 elapsed += Time.deltaTime * TimeScale;
                 await UniTask.Yield(cts.Token);
             }
-
-            _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
         }
         catch (OperationCanceledException)
         {
             // オブジェクトが破壊された場合など、処理がキャンセルされたときは何もしない。
+        }
+        finally
+        {
+            _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
         }
     }
 

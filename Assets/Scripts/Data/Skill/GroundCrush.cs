@@ -33,7 +33,7 @@ public class GroundCrush : SkillBase
     {
         bool isWarrior = context.PlayerMode == _isPlayerMode;
 
-        bool isTargetAttackType = data.AttackType == _attackType;
+        bool isTargetAttackType = true;
 
         bool isComboCount = data.ComboIndex >= _getComboCount;
 

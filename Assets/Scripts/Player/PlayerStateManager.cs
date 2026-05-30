@@ -21,6 +21,7 @@ public class PlayerStateManager
 
     public bool CanMove() => CurrentState != PlayerState.Attacking
                           && CurrentState != PlayerState.Dodge
+                          && CurrentState != PlayerState.Charging
                           && CurrentState != PlayerState.Damaged
                           && CurrentState != PlayerState.ModeChanging
                           && CurrentState != PlayerState.Dead;
@@ -31,7 +32,8 @@ public class PlayerStateManager
     /// Damaged・ModeChanging・Dodge・Deadは不可。
     /// </summary>
     public bool CanDodge() => CurrentState is PlayerState.Idle
-                           || CurrentState is PlayerState.Attacking;
+                           || CurrentState is PlayerState.Attacking
+                           || CurrentState is PlayerState.Charging;
 
     public bool IsDodging() => CurrentState is PlayerState.Dodge;
 

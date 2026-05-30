@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.AppUI.Core;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -30,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
         _attack = attack;
 
         _input.OnDodge += Dodge;
+
         _attack.OnAttackMoveRequested += HandleAttackMove;
         _animationController.OnDamagedEnd += HandleDamagedEnd;
 
@@ -108,7 +110,11 @@ public class PlayerMovement : MonoBehaviour
     private void OnDestroy()
     {
         if (_input != null) _input.OnDodge -= Dodge;
-        if (_attack != null) _attack.OnAttackMoveRequested -= HandleAttackMove;
+        if (_attack != null)
+        {
+            _attack.OnAttackMoveRequested -= HandleAttackMove;
+        }
+
         if (_animationController != null)
         {
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
@@ -304,7 +310,10 @@ public class PlayerMovement : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
-            // 回避移動がキャンセルされた場合も無敵状態を解除する
+            // 回避移動がキャンセルされた場合も無敵状態を解除するため、ここで例外をキャッチして処理を続行する。
+        }
+        finally
+        {
             _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
         }
     }
@@ -384,12 +393,7 @@ public class PlayerMovement : MonoBehaviour
 
         try
         {
-            switch (request.MoveType)
-            {
-                case AttackMoveType.Dash: await DashMove(request); break;
-                case AttackMoveType.Step: await StepMove(request); break;
-                case AttackMoveType.Curve: await DashMove(request); break;
-            }
+            await DashMove(request);
         }
         catch (OperationCanceledException) { }
         finally
@@ -405,47 +409,51 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// ダッシュ移動。プレイヤーの正面方向に向かって一定距離を滑らかに移動する。
+    /// ダッシュ移動の実装。
     /// </summary>
     private async UniTask DashMove(AttackMoveRequest request)
     {
+        if (request.Duration <= 0f)
+            return;
+
+        AnimationCurve curve = request.MoveCurve;
+
         float elapsed = 0f;
+
         Vector3 startPos = transform.position;
-        Vector3 targetPos = startPos + transform.forward * request.Distance;
-        targetPos.y = startPos.y;
 
-        while (true)
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        Vector3 dir = forward.normalized;
+
+        Vector3 targetPos = startPos + dir * request.Distance;
+
+        bool stoppedEarly = false;
+
+        while (elapsed < request.Duration)
         {
-            if (request.Duration <= 0f) return;
-            if (elapsed >= request.Duration) break;
-            if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance)
+            {
+                stoppedEarly = true;
+                break;
+            }
 
-            _rb.MovePosition(Vector3.Lerp(startPos, targetPos,
-                 Mathf.SmoothStep(0, 1, elapsed / request.Duration)));
+            float t = elapsed / request.Duration;
+            float curveValue = curve.Evaluate(t);
+
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, curveValue);
+
+            _rb.MovePosition(newPos);
+
             elapsed += Time.fixedDeltaTime * _timeScale;
-            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
+
+            await UniTask.Yield(
+                PlayerLoopTiming.FixedUpdate,
+                _attackMoveCts.Token);
         }
-    }
-
-    /// <summary>
-    /// ステップ移動。プレイヤーの正面方向に向かって一定速度で移動する。距離や時間ではなく、指定された時間が経過するか、ターゲットに近づくまで移動し続ける。
-    /// </summary>
-    private async UniTask StepMove(AttackMoveRequest request)
-    {
-        float elapsed = 0f;
-        Vector3 moveDir = transform.forward; moveDir.y = 0f;
-        float speed = request.Distance / request.Duration;
-
-        while (true)
-        {
-            if (request.Duration <= 0f) return;
-            if (elapsed >= request.Duration) break;
-            if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
-
-            _rb.linearVelocity = moveDir * speed * _timeScale;
-            elapsed += Time.fixedDeltaTime * _timeScale;
-            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
-        }
+        if (!stoppedEarly)
+            _rb.MovePosition(targetPos);
     }
 
     /// <summary>

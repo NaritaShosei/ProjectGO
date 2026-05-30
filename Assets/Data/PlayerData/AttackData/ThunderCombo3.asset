@@ -13,35 +13,68 @@ MonoBehaviour:
   m_Name: ThunderCombo3
   m_EditorClassIdentifier: Assembly-CSharp::AttackData_main
   _attackId: 3581
-  _attackName: "\u30B3\u30F3\u30DC3"
   _mode: 1
-  _attackType: 0
-  _comboIndex: 2
-  _requiredCharge: 0
-  _damageMultiplier: 1
-  _attackRange: 1
-  _attackRadius: 1
+  _comboIndex: 3
   _nextComboAttackId: 6240
-  _enableKnockback: 1
-  _knockbackPower: 5
-  _knockbackUpward: 0
-  _enableHoming: 1
-  _homingRadius: 5
-  _homingAngle: 45
-  _homingStrength: 10
-  _moveType: 2
-  _moveDistance: 1
-  _moveSpeed: 0
-  _moveDuration: 0.275
-  _stopOnHit: 1
-  _isPhantom: 0
-  _hitStopData:
-    _baseDuration: 0.08
-    _timeScale: 0
-    _targetGroup: 11
-    _weakPointMultiplier: 2
-    _breakOrKillMultiplier: 2
-    _weakAndBreakOrKillMultiplier: 2.5
-  _animationStateName: Thunder_Combo_3
-  _transitionDuration: -1
-  _playGroundHitSE: 0
+  _isUnlockedBySkill: 0
+  _requiredSkillId: -1
+  _variants:
+  - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C93"
+    _requiredCharge: 0
+    _damageMultiplier: 1
+    _attackRange: 1
+    _attackRadius: 1
+    _enableKnockback: 0
+    _knockbackPower: 5
+    _knockbackUpward: 0
+    _enableHoming: 0
+    _homingRadius: 5
+    _homingAngle: 45
+    _homingStrength: 10
+    _enableMovement: 0
+    _moveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 1
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    _moveDistance: 0
+    _moveSpeed: 0
+    _moveDuration: 0
+    _stopOnHit: 1
+    _isPhantom: 0
+    _hitStopData:
+      _baseDuration: 0.08
+      _timeScale: 0
+      _targetGroup: 11
+      _weakPointMultiplier: 1.2
+      _breakOrKillMultiplier: 1.2
+      _weakAndBreakOrKillMultiplier: 1.4
+    _animationStateName: Thunder_Combo_3
+    _transitionDuration: -1
+    _chargeAnimationStateName: 
+    _chargeTransitionDuration: -1
+    _playGroundHitSE: 0
+    _additionalLightningDamages:
+    - _lightningDamageMultiplier: 0.8
+      _lightningDamageDelay: 0.6
+    _isUnlockedBySkill: 0
+    _requiredSkillId: -1
