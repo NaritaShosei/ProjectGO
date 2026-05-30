@@ -373,7 +373,7 @@ public class PlayerAttack : MonoBehaviour
     {
         if (current == ChargeLevel.None) return false;
 
-        ChargeLevel maxLevel = _skillManager.GetMaxChargeLevel(_modeController.CurrentMode); 
+        ChargeLevel maxLevel = _skillManager.GetMaxChargeLevel(_modeController.CurrentMode);
 
         return current >= maxLevel;
     }
@@ -433,13 +433,10 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の準備を行う。攻撃データの取得、状態遷移、ホーミングの設定、移動要求の発行、アニメーション再生などを行う。
     /// </summary>  
-    private void PrepareAttack(AttackInput input, bool allowCombo = false)
+    private bool PrepareAttack(AttackInput input, bool allowCombo = false)
     {
         AttackData attackData = GetNextAttack(input, allowCombo);
-        if (attackData == null)
-        {
-            return;
-        }
+        if (attackData == null) { return false; }
 
         _stateManager.ChangeState(PlayerState.Attacking);
         _currentAttackId = attackData.AttackId;
@@ -455,6 +452,8 @@ public class PlayerAttack : MonoBehaviour
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
+
+        return true;
     }
 
     /// <summary>
@@ -521,12 +520,11 @@ public class PlayerAttack : MonoBehaviour
         {
             var bufferedInput = _bufferedComboInput.Value;
             _bufferedComboInput = null;
-            PrepareAttack(bufferedInput, allowCombo: true);
-        }
-        else
-        {
-            _stateManager.ChangeState(PlayerState.Idle);
-            ResetCombo();
+            if (PrepareAttack(bufferedInput, allowCombo: true))
+            {
+                _stateManager.ChangeState(PlayerState.Idle);
+                ResetCombo();
+            }
         }
     }
 
