@@ -446,6 +446,12 @@ public class PlayerAttack : MonoBehaviour
 
         var variant = attackData.GetVariant(input.ChargeLevel);
 
+        if (variant == null)
+        {
+            Debug.LogWarning($"バリアントデータが見つかりませんでした。AttackId: {_currentAttackId}, ChargeLevel: {input.ChargeLevel}");
+            return false;
+        }
+
         SetupHoming(variant);
 
         RequestAttackMove(variant);
@@ -486,6 +492,12 @@ public class PlayerAttack : MonoBehaviour
         _lastAttackTime = Time.time;
 
         var variant = nextAttack.GetVariant(bufferedInput.ChargeLevel);
+
+        if (variant == null)
+        {
+            Debug.LogWarning($"バリアントデータが見つかりませんでした。AttackId: {_currentAttackId}, ChargeLevel: {bufferedInput.ChargeLevel}");
+            return;
+        }
 
         SetupHoming(variant);
 
