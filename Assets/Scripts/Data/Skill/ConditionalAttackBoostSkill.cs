@@ -10,7 +10,7 @@ public class ConditionalAttackBoostSkill : SkillBase
     public override bool CanApply(AttackContext context, AttackData data)
     {
         // 攻撃タイプが一致しているか
-        bool isTargetAttackType = data.AttackType == _targetAttackType;
+        bool isTargetAttackType = true;
 
         // 必要なコンボ数に到達しているか
         bool hasRequiredComboCount = data.ComboIndex >= _requiredComboIndex;

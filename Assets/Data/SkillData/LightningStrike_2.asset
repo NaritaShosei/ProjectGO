@@ -10,23 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be655b64f5d7b3f44bc4e975e4b5b069, type: 3}
-  m_Name: LightningStrike 1
+  m_Name: LightningStrike_2
   m_EditorClassIdentifier: Assembly-CSharp::LightningStrike
-  _id: 666
+  _id: 667
   _priority: 0
-  _name: "\u96F7\u9CF4\u306E\u5BE9\u52241"
+  _name: "\u96F7\u9CF4\u306E\u5BE9\u52242"
   _explanation: 
   _icon: {fileID: 0}
   _timing: 2
-  _unlockedSkill: {fileID: 11400000, guid: a05c65a211dbe2d498e4beba93a2dae0, type: 2}
-  _defaultUnlocked: 1
-  _targetCount: 1
+  _unlockedSkill: {fileID: 11400000, guid: 53722a74beee9cd4e82e6941a3cd16e7, type: 2}
+  _defaultUnlocked: 0
+  _targetCount: 2
   _minInterval: 2
   _maxInterval: 4
   _damageMultiplier: 1.6
   _searchRadius: 999
   _hitEffectKeys:
   - "\u9752\u3044\u96F7\u5149"
+  - "\u9EC4\u8272\u3044\u96F7\u5149"
   _areaRadius: 0
   _electricShockDuration: 0.3
   _grantEffectProbability: 1

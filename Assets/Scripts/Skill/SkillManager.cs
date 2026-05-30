@@ -94,16 +94,38 @@ public class SkillManager : MonoBehaviour
             .ToList();
     }
 
+    /// <summary>
+    /// 現在解放済みの最大チャージ段階を返す。
+    /// マップにエントリがなければデフォルトLv1（チャージ攻撃は必ず存在する前提）。
+    /// </summary>
+    public ChargeLevel GetMaxChargeLevel(PlayerMode mode)
+    {
+        ChargeLevel max = ChargeLevel.Level1;
+
+        if (_chargeLevelSkillMap == null) return max;
+
+        foreach (var entry in _chargeLevelSkillMap)
+        {
+            if (entry.Mode != mode) continue;
+            if (_ownedSkillIDs.Contains(entry.RequiredSkillId))
+            {
+                if (entry.Level > max) max = entry.Level;
+            }
+        }
+        return max;
+    }
+
     [SerializeField] private SkillDataBase _skillDataBase;
     [SerializeField] private StatSkillData[] _statSkillDataArray;
+    [SerializeField] private ChargeLevelSkillEntry[] _chargeLevelSkillMap;
 
     private SkillExecutor _skillExecutor;
     private StatSkillSystem _statSkillSystem;
     private List<ISkillUpdater> _updaters = new();
-    private HashSet<int> _ownedSkillIDs = new();
-    private HashSet<int> _exhaustedSkillIDs = new();
-    private HashSet<int> _registeredSkillIDs = new();
-    private HashSet<int> _unlockedSkillIDs = new();
+    private HashSet<int> _ownedSkillIDs = new(); // 獲得したスキルIDのセット。重複なしで管理。
+    private HashSet<int> _exhaustedSkillIDs = new(); // 既に選択肢に出たことのあるスキルIDのセット。これも重複なしで管理。
+    private HashSet<int> _registeredSkillIDs = new(); // パッシブスキルのIDセット。これも重複なしで管理。
+    private HashSet<int> _unlockedSkillIDs = new(); // 解放されたスキルIDのセット。これも重複なしで管理。
 
     private IEnumerable<SkillBase> GetSkillsByTiming(SkillTiming timing)
         => GetOwnedSkills().Where(s => s.Timing == timing);
@@ -114,4 +136,12 @@ public class SkillManager : MonoBehaviour
     {
         _statSkillSystem?.Dispose();
     }
+}
+
+[Serializable]
+public struct ChargeLevelSkillEntry
+{
+    public PlayerMode Mode;
+    public ChargeLevel Level;
+    public int RequiredSkillId;
 }
