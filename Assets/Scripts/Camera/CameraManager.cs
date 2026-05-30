@@ -6,6 +6,7 @@ using UnityEngine;
 /// <summary>
 /// カメラの挙動を管理するクラス。
 /// 通常時の追従遅延およびロックオン時のターゲット追従を制御します。
+/// ターゲット選定はLockOnControllerに委譲しています。
 /// </summary>
 public class CameraManager : MonoBehaviour
 {
@@ -56,9 +57,8 @@ public class CameraManager : MonoBehaviour
         if (!IsValidTarget(target)) return;
         if (_currentTarget == target) return;
 
-        var targetComponent = target as Component;
         _currentTarget = target;
-        _currentTargetComponent = targetComponent;
+        _currentTargetComponent = target as Component;
         _lockOnCamera.Priority = _lockOnPriority;
 
         BeginLockOnBlend();
@@ -84,19 +84,6 @@ public class CameraManager : MonoBehaviour
         OnLockOnTargetChanged?.Invoke(null);
     }
 
-    /// <summary>
-    /// 入力方向に応じてロックオン対象を切り替えます。
-    /// 画面内かつ入力方向側にいる敵の中で、画面中央に最も近いものを選びます。
-    /// </summary>
-    /// <param name="inputDirection">正で右、負で左</param>
-    public void SwitchLockOnTarget(float inputDirection)
-    {
-        if (!IsLockedOn) return;
-
-        ILockOnTarget best = FindSwitchTarget(inputDirection);
-        if (best != null) LockOn(best);
-    }
-
     /// <summary>カメラシェイクを実行します。</summary>
     public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
@@ -114,34 +101,49 @@ public class CameraManager : MonoBehaviour
     #region Inspectorフィールド
 
     [Header("カメラ参照")]
+    [Tooltip("通常時に使用するCinemachineカメラ")]
     [SerializeField] private CinemachineCamera _normalCamera;
+    [Tooltip("ロックオン時に使用するCinemachineカメラ")]
     [SerializeField] private CinemachineCamera _lockOnCamera;
 
     [Header("優先度設定")]
+    [Tooltip("通常カメラのPriority。ロックオンカメラはこれより低い値で待機する")]
     [SerializeField] private int _normalPriority = 10;
+    [Tooltip("ロックオン時に設定するPriority。通常カメラより高くする必要がある")]
     [SerializeField] private int _lockOnPriority = 20;
 
     [Header("通常追従設定")]
+    [Tooltip("プレイヤー真後ろからのカメラ距離（m）")]
     [SerializeField] private float _cameraDistance = 5f;
+    [Tooltip("プレイヤーからのカメラの高さ（m）")]
     [SerializeField] private float _cameraHeight = 2f;
-    [SerializeField] private float _posSmoothTime = 0.2f;         // 通常時の位置遅延時間
-    [SerializeField] private float _cameraFollowSpeed = 15f;      // ロックオン時の位置追従速度
+    [Tooltip("通常時のカメラ位置追従の遅延時間（秒）。大きいほど追従がゆっくりになる")]
+    [SerializeField] private float _posSmoothTime = 0.2f;
 
     [Header("プレイヤー追従遊び設定")]
-    [SerializeField] private float _playerAreaRadius = 80f;       // プレイヤーが画面上でこの範囲内にいる間はカメラをほぼ動かさない（px）
-    [SerializeField] private float _playerFollowSpeedInner = 1f;  // 遊び範囲内での中心への戻り速度
-    [SerializeField] private float _playerFollowSpeedOuter = 10f; // 遊び範囲外での追従速度
+    [Tooltip("プレイヤーがこの半径（px）内にいる間はカメラをほぼ動かさない。大きいほど遊びが広くなる")]
+    [SerializeField] private float _playerAreaRadius = 80f;
+    [Tooltip("遊び範囲内でのカメラ中心への戻り速度。小さいほど緩やかに戻る")]
+    [SerializeField] private float _playerFollowSpeedInner = 1f;
+    [Tooltip("遊び範囲外でのカメラ追従速度。大きいほど素早くプレイヤーを追う")]
+    [SerializeField] private float _playerFollowSpeedOuter = 10f;
 
     [Header("ロックオン設定")]
-    [SerializeField] private float _lockOnRange = 20f;                   // ロック可能な最大距離
-    [SerializeField] private float _lockOnAreaRadius = 100f;             // ターゲットが収まるべき画面中央エリアの半径（px）
-    [SerializeField] private float _lockOnFollowSpeedMin = 2f;           // エリア逸脱時の最小回転追従速度
-    [SerializeField] private float _lockOnFollowSpeedMax = 10f;          // エリア逸脱時の最大回転追従速度
-    [SerializeField] private float _lockOnFollowSpeedDistanceMax = 300f; // この逸脱距離（px）で最大速度に達する
-    [SerializeField] private float _autoUnlockRange = 25f;               // この距離を超えると自動でロックオン解除
+    [Tooltip("ターゲットがこの半径（px）内に収まっている間はカメラが回転しないデッドゾーン")]
+    [SerializeField] private float _lockOnAreaRadius = 100f;
+    [Tooltip("ターゲットがデッドゾーンを出た直後のカメラ回転速度の最小値")]
+    [SerializeField] private float _lockOnFollowSpeedMin = 2f;
+    [Tooltip("ターゲットが大きく逸脱したときのカメラ回転速度の最大値")]
+    [SerializeField] private float _lockOnFollowSpeedMax = 10f;
+    [Tooltip("デッドゾーン境界から最大速度に達するまでの距離（px）。小さいほど速度の上がり方が急になる")]
+    [SerializeField] private float _lockOnDeadzone = 150f;
+    [Tooltip("ターゲットがこの距離（m）を超えると自動でロックオン解除する")]
+    [SerializeField] private float _autoUnlockRange = 25f;
 
     [Header("ロックオン開始ブレンド")]
+    [Tooltip("ロックオン開始時のカメラ切り替えブレンドにかかる時間（秒）")]
     [SerializeField] private float _lockOnBlendDuration = 0.4f;
+    [Tooltip("ブレンドのEaseOut強度。値が大きいほど最初の動きが速く、終わりに急激に収束する")]
     [SerializeField, Range(1f, 8f)] private float _lockOnBlendExponent = 3f;
 
     #endregion
@@ -276,7 +278,6 @@ public class CameraManager : MonoBehaviour
 
     /// <summary>
     /// エリア判定に基づいてカメラの位置と回転を更新します。
-    /// 位置はプレイヤーの画面上の逸脱量、回転はターゲットの逸脱量でそれぞれ制御します。
     /// </summary>
     private void UpdateLockOnCameraByArea(Transform targetCenter)
     {
@@ -314,7 +315,6 @@ public class CameraManager : MonoBehaviour
     {
         Vector3 rawScreenPos = _mainCamera.WorldToScreenPoint(targetCenter.position);
 
-        // カメラ後方に回った場合は最大速度で強制追従
         if (rawScreenPos.z < 0)
         {
             RotateToward(targetCenter, _lockOnFollowSpeedMax);
@@ -326,7 +326,8 @@ public class CameraManager : MonoBehaviour
 
         if (deviation <= _lockOnAreaRadius) return;
 
-        float t = Mathf.Clamp01((deviation - _lockOnAreaRadius) / (_lockOnFollowSpeedDistanceMax - _lockOnAreaRadius));
+        float deviationFromArea = deviation - _lockOnAreaRadius;
+        float t = Mathf.Clamp01(deviationFromArea / _lockOnDeadzone);
         float speed = Mathf.Lerp(_lockOnFollowSpeedMin, _lockOnFollowSpeedMax, t);
 
         RotateToward(targetCenter, speed);
@@ -347,65 +348,9 @@ public class CameraManager : MonoBehaviour
 
     #endregion
 
-    #region ターゲット選定
-
-    /// <summary>
-    /// 入力方向側にいる画面内の敵の中から、画面中央に最も近いものを返します。
-    /// </summary>
-    private ILockOnTarget FindSwitchTarget(float inputDirection)
-    {
-        Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
-        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
-        Vector3 currentScreenPos = _mainCamera.WorldToScreenPoint(_currentTarget.GetTargetCenter().position);
-
-        ILockOnTarget best = null;
-        float bestScore = float.MaxValue;
-
-        foreach (var candidate in GetLockOnCandidates())
-        {
-            if (candidate == _currentTarget) continue;
-            if (candidate is not Component comp) continue;
-            if (!candidate.IsLockable || candidate.GetTargetCenter() == null) continue;
-            if (Vector3.Distance(_playerTransform.position, comp.transform.position) > _lockOnRange) continue;
-
-            Bounds bounds = comp.GetComponent<Collider>()?.bounds ?? new Bounds(comp.transform.position, Vector3.one);
-            if (!GeometryUtility.TestPlanesAABB(frustumPlanes, bounds)) continue;
-
-            Vector3 screenPos = _mainCamera.WorldToScreenPoint(comp.transform.position);
-            if (screenPos.z < 0) continue;
-
-            // 入力方向と反対側にいる候補は除外
-            float diff = screenPos.x - currentScreenPos.x;
-            if (inputDirection > 0 && diff <= 0) continue;
-            if (inputDirection < 0 && diff >= 0) continue;
-
-            float score = Vector2.Distance(new Vector2(screenPos.x, screenPos.y), screenCenter);
-            if (score < bestScore)
-            {
-                bestScore = score;
-                best = candidate;
-            }
-        }
-
-        return best;
-    }
-
-    /// <summary>
-    /// ロックオン候補を取得します。LockOnDetector等に差し替えてください。
-    /// </summary>
-    private ILockOnTarget[] GetLockOnCandidates()
-    {
-        // TODO: LockOnDetectorなど候補管理クラスから取得する実装に差し替える
-        return FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None) as ILockOnTarget[];
-    }
-
-    #endregion
-
     #region ヘルパー
 
-    /// <summary>
-    /// ロックオン開始時のブレンド初期値を記録します。
-    /// </summary>
+    /// <summary>ロックオン開始時のブレンド初期値を記録します。</summary>
     private void BeginLockOnBlend()
     {
         _blendStartPosition = _lockOnCamera.transform.position;
@@ -414,9 +359,7 @@ public class CameraManager : MonoBehaviour
         _isLockOnBlending = true;
     }
 
-    /// <summary>
-    /// プレイヤーの真後ろにカメラを置くための目標位置を計算します。
-    /// </summary>
+    /// <summary>プレイヤーの真後ろにカメラを置くための目標位置を計算します。</summary>
     private Vector3 CalcDesiredPosition()
     {
         Vector3 back = -_playerTransform.forward;
@@ -428,9 +371,7 @@ public class CameraManager : MonoBehaviour
              + (Vector3.up * _cameraHeight);
     }
 
-    /// <summary>
-    /// プレイヤーとターゲットの中間点を見るカメラ回転を計算します。
-    /// </summary>
+    /// <summary>プレイヤーとターゲットの中間点を見るカメラ回転を計算します。</summary>
     private Quaternion CalcDesiredRotation(Transform targetCenter, Vector3 fromPosition)
     {
         Vector3 lookAtPoint = Vector3.Lerp(_playerTransform.position, targetCenter.position, 0.5f);

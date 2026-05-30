@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 /// <summary>
 /// ロックオンエリアを画面上に可視化するクラス。
+/// エディタ再生前でも表示され、値変更時に即座に反映されます。
 /// </summary>
 public class LockOnAreaVisualizer : MonoBehaviour
 {
@@ -16,11 +17,21 @@ public class LockOnAreaVisualizer : MonoBehaviour
 
     private Image _areaImage;
     private Canvas _canvas;
+    private Sprite _circleSprite;
+    private float _lastRadius = -1f;
+
+    private void OnEnable()
+    {
+        if (_areaImage == null)
+        {
+            Initialize();
+        }
+        UpdateAreaSize();
+    }
 
     private void Awake()
     {
-        SetupCanvas();
-        SetupAreaImage();
+        Initialize();
     }
 
     private void Start()
@@ -35,31 +46,93 @@ public class LockOnAreaVisualizer : MonoBehaviour
         _areaImage.enabled = _showArea;
         if (!_showArea) return;
 
-        // ロックオン状態で色を変える
         _areaImage.color = _cameraManager.IsLockedOn ? _lockedOnColor : _normalColor;
+
+        // 値が変わった時だけ更新
+        float currentRadius = _cameraManager.LockOnAreaRadius;
+        if (!Mathf.Approximately(_lastRadius, currentRadius))
+        {
+            UpdateAreaSize();
+            _lastRadius = currentRadius;
+
+#if UNITY_EDITOR
+            Debug.Log($"[LockOnAreaVisualizer] LockOnAreaRadius が変更されました: {_lastRadius}px");
+#endif
+        }
     }
 
     /// <summary>
-    /// エリアサイズをCameraManagerの設定に合わせて更新します。
+    /// インスペクタで値が変更された時に呼ばれます（エディタのみ）。
+    /// </summary>
+    private void OnValidate()
+    {
+#if UNITY_EDITOR
+        if (Application.isPlaying) return;
+        if (_areaImage != null)
+        {
+            UpdateAreaSize();
+        }
+#endif
+    }
+
+    private void OnDestroy()
+    {
+        if (_circleSprite != null && _circleSprite.texture != null)
+        {
+            DestroyImmediate(_circleSprite.texture);
+            _circleSprite = null;
+        }
+    }
+
+    /// <summary>
+    /// 初期化処理。Canvas・Image・Spriteをまとめてセットアップします。
+    /// </summary>
+    private void Initialize()
+    {
+        if (_cameraManager == null)
+        {
+            Debug.LogWarning("[LockOnAreaVisualizer] CameraManagerの参照がありません。", gameObject);
+            enabled = false;
+            return;
+        }
+
+        // Canvasのセットアップ（既存があれば使い回す）
+        _canvas = GetComponent<Canvas>();
+        if (_canvas == null)
+        {
+            _canvas = gameObject.AddComponent<Canvas>();
+            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _canvas.sortingOrder = 10;
+            gameObject.AddComponent<CanvasScaler>();
+            gameObject.AddComponent<GraphicRaycaster>();
+        }
+
+        // Imageのセットアップ（既存があれば使い回す）
+        _areaImage = GetComponentInChildren<Image>();
+        if (_areaImage == null)
+        {
+            SetupAreaImage();
+        }
+
+        // Spriteのセットアップ（既存があれば使い回す）
+        if (_circleSprite == null)
+        {
+            _circleSprite = CreateCircleSprite();
+        }
+
+        _areaImage.sprite = _circleSprite;
+        _lastRadius = -1f; // 強制更新フラグ
+    }
+
+    /// <summary>
+    /// エリアサイズをCameraManagerの値に合わせて更新します。
     /// </summary>
     public void UpdateAreaSize()
     {
-        if (_areaImage == null) return;
+        if (_areaImage == null || _cameraManager == null) return;
 
-        // CameraManagerの_lockOnAreaRadiusに合わせる
-        // publicプロパティ経由で取得する想定
-        float radius = _cameraManager != null ? _cameraManager.LockOnAreaRadius : 100f;
+        float radius = _cameraManager.LockOnAreaRadius;
         _areaImage.rectTransform.sizeDelta = new Vector2(radius * 2f, radius * 2f);
-    }
-
-    private void SetupCanvas()
-    {
-        _canvas = gameObject.AddComponent<Canvas>();
-        _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        _canvas.sortingOrder = 10;
-
-        gameObject.AddComponent<CanvasScaler>();
-        gameObject.AddComponent<GraphicRaycaster>();
     }
 
     private void SetupAreaImage()
@@ -68,11 +141,9 @@ public class LockOnAreaVisualizer : MonoBehaviour
         areaObj.transform.SetParent(transform, false);
 
         _areaImage = areaObj.AddComponent<Image>();
-        _areaImage.sprite = CreateCircleSprite();
         _areaImage.color = _normalColor;
         _areaImage.type = Image.Type.Simple;
 
-        // 画面中央に配置
         RectTransform rect = _areaImage.rectTransform;
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -81,40 +152,46 @@ public class LockOnAreaVisualizer : MonoBehaviour
 
     /// <summary>
     /// 円形スプライトをコードで生成します。
+    /// 一度だけ生成してキャッシュします。
     /// </summary>
     private Sprite CreateCircleSprite()
     {
         int size = 256;
         Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.name = "LockOnAreaCircle";
+        tex.filterMode = FilterMode.Bilinear;
+
         float center = size / 2f;
         float radius = size / 2f;
-        float borderWidth = 4f; // 枠線の太さ
+        float borderWidth = 4f;
+
+        Color[] pixels = new Color[size * size];
 
         for (int y = 0; y < size; y++)
         {
             for (int x = 0; x < size; x++)
             {
                 float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                int i = y * size + x;
 
                 if (dist > radius)
                 {
-                    // 円の外側：透明
-                    tex.SetPixel(x, y, Color.clear);
+                    pixels[i] = Color.clear;
                 }
                 else if (dist > radius - borderWidth)
                 {
-                    // 枠線部分：不透明
-                    tex.SetPixel(x, y, Color.white);
+                    pixels[i] = Color.white;
                 }
                 else
                 {
-                    // 内側：半透明
-                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, 0.3f));
+                    pixels[i] = new Color(1f, 1f, 1f, 0.3f);
                 }
             }
         }
 
+        tex.SetPixels(pixels);
         tex.Apply();
+
         return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
 }

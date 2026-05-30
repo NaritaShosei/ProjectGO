@@ -1725,6 +1725,20 @@ MonoBehaviour:
   _normalColor: {r: 1, g: 0.25943398, b: 0.25943398, a: 0.9019608}
   _lockedOnColor: {r: 1, g: 0.5, b: 0, a: 0.74509805}
   _cameraManager: {fileID: 1585643542}
+--- !u!114 &1585643545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585643540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d68fc914087c7d446abaa82aea0ecf67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LockOnController
+  _autoLockOnDuration: 2
+  _lockOnRange: 20
 --- !u!1 &1591746412
 GameObject:
   m_ObjectHideFlags: 0
@@ -3601,7 +3615,7 @@ PrefabInstance:
       objectReference: {fileID: 269304734}
     - target: {fileID: 8440135078367233537, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _lockOnAreaRadius
-      value: 100
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 8440135078367233537, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _playerAreaRadius
@@ -3642,6 +3656,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7749162525453086863, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1585643543}
+    - targetCorrespondingSourceObject: {fileID: 7749162525453086863, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1585643545}
   m_SourcePrefab: {fileID: 100100000, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
 --- !u!1001 &7257887957543716051
 PrefabInstance:
