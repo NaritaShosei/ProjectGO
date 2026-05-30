@@ -428,11 +428,14 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 targetPos = startPos + dir * request.Distance;
 
+        bool stoppedEarly = false;
+
         while (elapsed < request.Duration)
         {
             if (request.Target &&
                 Vector3.Distance(request.Target.position, transform.position) < request.StopDistance)
             {
+                stoppedEarly = true;
                 break;
             }
 
@@ -449,8 +452,8 @@ public class PlayerMovement : MonoBehaviour
                 PlayerLoopTiming.FixedUpdate,
                 _attackMoveCts.Token);
         }
-
-        _rb.MovePosition(targetPos);
+        if (!stoppedEarly)
+            _rb.MovePosition(targetPos);
     }
 
     /// <summary>

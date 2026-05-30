@@ -20,19 +20,23 @@ public class InputHandler : MonoBehaviour
     /// PlayerのActionMapの有効か非有効化の切り替え。
     /// </summary>
     /// <param name="enable">trueで有効化</param>
+
     public void EnableInput(bool enable)
     {
         if (enable)
         {
+            _isDisablingInput = false;
             _input.Player.Enable();
         }
         else
         {
+            _isDisablingInput = true;
             _input.Player.Disable();
         }
     }
 
     private PlayerInput _input;
+    private bool _isDisablingInput;
 
     private void Awake()
     {
@@ -52,7 +56,13 @@ public class InputHandler : MonoBehaviour
 
         // 弱攻撃 
         _input.Player.LightAttack.started += _ => OnLightAttackPressed?.Invoke();
-        _input.Player.LightAttack.canceled += _ => OnLightAttackReleased?.Invoke();
+        // 弱攻撃のキャンセル（ボタンを離したとき）
+        _input.Player.LightAttack.canceled += _ =>
+        {
+            if (_isDisablingInput) return;
+
+            OnLightAttackReleased?.Invoke();
+        };
 
         // インタラクト
         _input.Player.Interact.started += _ => OnInteract?.Invoke();
