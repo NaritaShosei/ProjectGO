@@ -22,6 +22,21 @@ public class AttackExecutor : MonoBehaviour
     {
         var variantData = attackData.GetVariant(attackInput.ChargeLevel);
 
+        if (variantData == null)
+        {
+            while (variantData == null && attackInput.ChargeLevel > ChargeLevel.None)
+            {
+                attackInput.ChargeLevel--;
+                variantData = attackData.GetVariant(attackInput.ChargeLevel);
+            }
+            if (variantData == null)
+            {
+                Debug.LogError($"AttackData {attackData.name}に有効なバリアントが見つかりませんでした。攻撃を実行できません。");
+                return;
+            }
+            Debug.LogWarning($"ChargeLevel {attackInput.ChargeLevel}のバリアントが見つかりませんでした。代わりにChargeLevel {attackInput.ChargeLevel}のバリアントを使用します。");
+        }
+
         OnSwingReady?.Invoke(attackData.Mode);
 
         var attackPos = transform.position + transform.forward * variantData.AttackRange;
