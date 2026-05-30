@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackData", menuName = "GameData/AttackData")]
@@ -82,6 +84,8 @@ public enum PlayerMode
     Thunder
 }
 
+#if UNITY_EDITOR
+
 [CustomEditor(typeof(AttackData))]
 public class AttackDataEditor : Editor
 {
@@ -104,3 +108,5 @@ public class AttackDataEditor : Editor
         }
     }
 }
+
+#endif
