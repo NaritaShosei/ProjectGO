@@ -37,7 +37,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     public bool IsDead => _isDead;
 
-    public bool IsLockable => true;
+    public bool IsLockable => !IsDead;
 
     /// <summary>
     /// 所属Poolのキー_返却の参照に使用
@@ -341,6 +341,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         // _shockCtsの解除
         _shockCts?.Cancel();
         _shockCts?.Dispose();
+        _shockCts = null;
     }
 
     protected virtual void OnDeathInternal()
