@@ -121,6 +121,11 @@ public class MobEnemy : Enemy, IFormationParticipant
     {
         base.ReInitialize(spawnPosition);
 
+        if (_armor != null)
+        {
+            _armor.gameObject.SetActive(true);
+        }
+
         // RuntimeContextをリセットする
         _context?.Reset();
 
