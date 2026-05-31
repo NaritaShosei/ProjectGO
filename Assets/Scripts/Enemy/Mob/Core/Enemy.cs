@@ -341,6 +341,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         // _shockCtsの解除
         _shockCts?.Cancel();
         _shockCts?.Dispose();
+        _shockCts = null;
     }
 
     protected virtual void OnDeathInternal()
