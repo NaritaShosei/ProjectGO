@@ -37,7 +37,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     public bool IsDead => _isDead;
 
-    public bool IsLockable => true;
+    public bool IsLockable => !IsDead;
 
     /// <summary>
     /// 所属Poolのキー_返却の参照に使用
