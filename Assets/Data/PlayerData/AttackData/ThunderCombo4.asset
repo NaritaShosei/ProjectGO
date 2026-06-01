@@ -16,8 +16,8 @@ MonoBehaviour:
   _mode: 1
   _comboIndex: 4
   _nextComboAttackId: -1
-  _isUnlockedBySkill: 0
-  _requiredSkillId: -1
+  _isUnlockedBySkill: 1
+  _requiredSkillId: 66987
   _variants:
   - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C94"
     _requiredCharge: 0
@@ -76,5 +76,3 @@ MonoBehaviour:
     _additionalLightningDamages:
     - _lightningDamageMultiplier: 0.9
       _lightningDamageDelay: 0.5
-    _isUnlockedBySkill: 0
-    _requiredSkillId: -1
