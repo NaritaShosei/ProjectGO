@@ -121,6 +121,16 @@ public class MobEnemy : Enemy, IFormationParticipant
     {
         base.ReInitialize(spawnPosition);
 
+        //鎧の初期化
+        if (_armor != null)
+        {
+            _armor.gameObject.SetActive(true);
+            _defenceContext.EnemyType = EnemyType.Armor;
+
+            _armor.OnBroken -= BreakArmor;
+            _armor.OnBroken += BreakArmor;
+        }
+
         // RuntimeContextをリセットする
         _context?.Reset();
 
