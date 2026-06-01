@@ -1,16 +1,16 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "AbsorptionBlowSkill", menuName = "GameData/Skill/AbsorptionBlowSkill")]
+[CreateAssetMenu(fileName = "DrainStrikeSkill", menuName = "GameData/Skill/DrainStrikeSkill")]
 
-public class AbsorptionBlowSkill : SkillBase
+public class DrainStrikeSkill : SkillBase
 {
     public override void Apply(ref AttackContext context)
     {
-        IPlayerStats cont = context.PlayerStats;
+        IPlayerStats stats = context.PlayerStats;
         float healMultiplier = context.AttackPower * _healingRate;
 
         context.OnHit += _ =>
-            cont.Healing(healMultiplier);
+            stats.Healing(healMultiplier);
     }
 
     [Header("HP回復割合")]
