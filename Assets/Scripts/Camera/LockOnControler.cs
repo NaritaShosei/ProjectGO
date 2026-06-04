@@ -53,8 +53,7 @@ public class LockOnController : MonoBehaviour
         _inputHandler.OnLockOn += HandleLockOnInput;
         _inputHandler.OnLockOnLeft += HandleLockOnLeft;
         _inputHandler.OnLockOnRight += HandleLockOnRight;
-        _inputHandler.OnLightAttack += HandleAttackInput;
-        _inputHandler.OnChargeStart += HandleAttackInput;
+        _inputHandler.OnLightAttackPressed += HandleAttackInput;
     }
 
     #endregion
@@ -79,8 +78,7 @@ public class LockOnController : MonoBehaviour
         _inputHandler.OnLockOn -= HandleLockOnInput;
         _inputHandler.OnLockOnLeft -= HandleLockOnLeft;
         _inputHandler.OnLockOnRight -= HandleLockOnRight;
-        _inputHandler.OnLightAttack -= HandleAttackInput;
-        _inputHandler.OnChargeStart -= HandleAttackInput;
+        _inputHandler.OnLightAttackPressed -= HandleAttackInput;
     }
 
     #endregion
