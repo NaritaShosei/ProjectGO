@@ -1693,6 +1693,17 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1438199670 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4380269281932468535, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+  m_PrefabInstance: {fileID: 6837170418680516860}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18ae7d8e5f658354cbc9495ea9135ea2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
 --- !u!1 &1585643540 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7749162525453086863, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
@@ -3545,6 +3556,10 @@ PrefabInstance:
       propertyPath: _lockOnMarkerView
       value: 
       objectReference: {fileID: 1600694942}
+    - target: {fileID: 5320311474982235821, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _enemySpawner
+      value: 
+      objectReference: {fileID: 1438199670}
     - target: {fileID: 7036861525032570302, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
