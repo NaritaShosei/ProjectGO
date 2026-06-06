@@ -23,24 +23,18 @@ public class AttackDataRepository : ScriptableObject
     /// <summary>
     /// 与えられた攻撃の内容を基に一致する攻撃を検索
     /// </summary>
-    public AttackData GetAttackData(
-        PlayerMode mode,
-        int comboIndex)
+    public AttackData GetAttackData(PlayerMode mode)
     {
-        // 初回アクセス時に辞書登録
-        if (_attackCache == null)
+        // モードに応じた最初の攻撃データを返す
+        switch (mode)
         {
-            BuildCache();
+            case PlayerMode.Warrior:
+                return _warriorFirstData;
+            case PlayerMode.Thunder:
+                return _thunderFirstData;
+            default:
+                return null;
         }
-
-        string key = GetCacheKey(mode, comboIndex);
-
-        if (_attackCache.TryGetValue(key, out AttackData data))
-        {
-            return data;
-        }
-
-        return null;
     }
 
     /// <summary>
@@ -50,7 +44,25 @@ public class AttackDataRepository : ScriptableObject
     {
         // 現在の攻撃データを取得
         var current = GetAttackById(currentAttackId);
-        if (current == null || current.NextComboAttackId == -1) return null;
+        if (current == null) return null;
+
+        // 差し込み攻撃が存在する場合はそちらを優先して返す
+        foreach (var data in _attackDatabase)
+        {
+            // 差し込み攻撃の条件を満たすかチェック
+            // nullチェック
+            if (data == null) continue;
+            // 差し込み攻撃の起点が現在の攻撃IDと一致するか
+            if (data.InsertAfterAttackId != current.AttackId) continue;
+            // スキル解放が必要な攻撃の場合、解放されているかチェック
+            if (!data.IsUnlockedBySkill) continue;
+            // スキル解放が必要な攻撃の場合、解放されているかチェック
+            if (unlockedSkillIds == null) continue;
+            if (!unlockedSkillIds.Contains(data.RequiredSkillId)) continue;
+            return data;
+        }
+
+        if (current.NextComboAttackId == -1) return null; // コンボ終了
 
         // 次の攻撃データを取得
         var next = GetAttackById(current.NextComboAttackId);
@@ -67,37 +79,21 @@ public class AttackDataRepository : ScriptableObject
     }
 
     [SerializeField] private List<AttackData> _attackDatabase;
+    [SerializeField] private AttackData _warriorFirstData; // 闘神の最初の攻撃データ
+    [SerializeField] private AttackData _thunderFirstData; // 雷神の最初の攻撃データ
 
     // キャッシュ用Dictionary
-    private Dictionary<string, AttackData> _attackCache;
     private Dictionary<int, AttackData> _attackCacheIDBase;
 
     private void BuildCache()
     {
-        _attackCache = new();
         _attackCacheIDBase = new();
 
-        foreach (var attack in _attackDatabase)
+        foreach (var data in _attackDatabase)
         {
-            if (attack == null) { continue; }
+            if (data == null) { continue; }
 
-            string key = GetCacheKey(
-                attack.Mode,
-                attack.ComboIndex
-            );
-
-            _attackCacheIDBase[attack.AttackId] = attack;
-            _attackCache[key] = attack;
+            _attackCacheIDBase[data.AttackId] = data;
         }
-    }
-
-    /// <summary>
-    /// 攻撃の内容を基にキャッシュ用のキーを生成する
-    /// </summary>
-    private string GetCacheKey(
-        PlayerMode mode,
-        int comboIndex)
-    {
-        return $"{mode}_{comboIndex}";
     }
 }
