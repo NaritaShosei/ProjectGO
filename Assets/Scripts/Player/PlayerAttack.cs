@@ -402,7 +402,7 @@ public class PlayerAttack : MonoBehaviour
         _bufferedComboInput = null;
 
         AttackData nextAttack = GetNextAttack(bufferedInput, allowCombo: true);
-        if (nextAttack == null) {  return; }
+        if (nextAttack == null) { return; }
 
         _isComboTransitioned = true;
         _currentAttackId = nextAttack.AttackId;
@@ -477,10 +477,7 @@ public class PlayerAttack : MonoBehaviour
         }
 
         // 新規攻撃取得
-        var data = _attackRepository.GetAttackData(
-       _modeController.CurrentMode,
-       1
-   );
+        var data = _attackRepository.GetAttackData(_modeController.CurrentMode);
 
         if (data != null)
             return data;
@@ -638,7 +635,7 @@ public class PlayerAttack : MonoBehaviour
         }
 
         // コンボ終端 or 新規攻撃
-        return _attackRepository.GetAttackData(_modeController.CurrentMode, 1);
+        return _attackRepository.GetAttackData(_modeController.CurrentMode);
     }
 
     /// <summary>
