@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using PixPlays.ElementalVFX;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +7,6 @@ using UnityEngine;
 
 public class GroundCrush : SkillBase
 {
-    public float AttackRadius => _attackRadius;
     public override void Apply(ref AttackContext context)
     {
         float attackPower = context.AttackPower * _damageMultiplier;
@@ -33,12 +31,9 @@ public class GroundCrush : SkillBase
     {
         bool isWarrior = context.PlayerMode == _isPlayerMode;
 
-        bool isTargetAttackType = true;
-
         bool isLastCombo = data.NextComboAttackId == -1;
 
         return isWarrior
-            && isTargetAttackType
             && isLastCombo;
     }
 
