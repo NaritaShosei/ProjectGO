@@ -18,20 +18,19 @@ public class LockOnTargetSelector
 
     #region コンストラクタ
 
-    /// <param name="camera">スクリーン座標変換に使用するカメラ</param>
-    /// <param name="playerTransform">距離計算の基準となるプレイヤー</param>
+    /// <param name="playerTransform">距離計算、プレイヤーの正面角度との距離を比較する</param>
     /// <param name="lockOnRange">ロックオン可能な最大距離</param>
     /// <param name="enemyManager">候補一覧の提供元</param>
     public LockOnTargetSelector(
-        Camera camera,
         Transform playerTransform,
         float lockOnRange,
-        EnemyManager enemyManager)
+        EnemyManager enemyManager,
+        Camera camera)
     {
-        _camera = camera;
         _playerTransform = playerTransform;
         _lockOnRange = lockOnRange;
         _enemyManager = enemyManager;
+        _camera = camera;
     }
 
     #endregion
@@ -40,27 +39,16 @@ public class LockOnTargetSelector
 
     /// <summary>
     /// 手動ロックオン時の初回ターゲット選択。
-    /// 優先順位：① カメラ中心に近い画面内エネミー → ② 最寄りエネミー
+    /// 優先順位：① 画面内にいる（いない場合は無視） → ② プレイヤーキャラクターの正面に近い → ③ プレイヤーに近い
+    /// 画面内の判定はEnemyのCollider.boundsを使用。Colliderがない場合はTransform.positionを点として判定。
     /// </summary>
     public ILockOnTarget SelectInitialTarget()
     {
         var candidates = GetValidCandidates();
         if (candidates.Count == 0) return null;
 
-        ILockOnTarget screenTarget = FindNearestToScreenCenter(candidates);
+        ILockOnTarget screenTarget = FindNearestToCharacterCenter(candidates);
         if (screenTarget != null) return screenTarget;
-
-        return FindNearestToPlayer(candidates);
-    }
-
-    /// <summary>
-    /// 攻撃時自動ロックオン時のターゲット選択。
-    /// 最寄りエネミーを選択する。
-    /// </summary>
-    public ILockOnTarget SelectNearestTarget()
-    {
-        var candidates = GetValidCandidates();
-        if (candidates.Count == 0) return null;
 
         return FindNearestToPlayer(candidates);
     }
@@ -119,10 +107,11 @@ public class LockOnTargetSelector
     /// </summary>
     public ILockOnTarget SelectNextTarget(ILockOnTarget defeatedTarget)
     {
+
         var candidates = GetValidCandidates(excludeTarget: defeatedTarget);
         if (candidates.Count == 0) return null;
 
-        ILockOnTarget screenTarget = FindNearestToScreenCenter(candidates);
+        ILockOnTarget screenTarget = FindNearestToCharacterCenter(candidates);
         if (screenTarget != null) return screenTarget;
 
         return FindNearestToPlayer(candidates);
@@ -133,24 +122,32 @@ public class LockOnTargetSelector
     #region プライベートメソッド
 
     /// <summary>
-    /// 有効な候補一覧を返す。
-    /// EnemyManagerのGetEnemiesInRangeで距離フィルタ済みの候補を取得し、
-    /// IsLockable・TargetCenterの存在を追加チェックする。
+    /// ロックオン可能なターゲットのリストを取得します。
     /// </summary>
-    private List<ILockOnTarget> GetValidCandidates(ILockOnTarget excludeTarget = null)
+    /// <param name="excludeTarget"></param>
+    /// <returns></returns>
+    private List<ILockOnTarget> GetValidCandidates(
+        ILockOnTarget excludeTarget = null)
     {
-        // EnemyManagerで距離フィルタ済みの候補を取得
-        // IEnemy は ILockOnTarget を継承しているため直接キャストできる
-        var inRange = _enemyManager.GetEnemiesInRange(_playerTransform.position, _lockOnRange);
+        var inRange = _enemyManager.GetEnemiesInRange(
+            _playerTransform.position,
+            _lockOnRange);
 
         var result = new List<ILockOnTarget>();
+
         foreach (var enemy in inRange)
         {
-            ILockOnTarget candidate = enemy as ILockOnTarget;
-            if (candidate == null) continue;
-            if (candidate == excludeTarget) continue;
-            if (!candidate.IsLockable) continue;
-            if (candidate.GetTargetCenter() == null) continue;
+            if (enemy is not ILockOnTarget candidate)
+                continue;
+
+            if (candidate == excludeTarget)
+                continue;
+
+            if (!candidate.IsLockable)
+                continue;
+
+            if (candidate.GetTargetCenter() == null)
+                continue;
 
             result.Add(candidate);
         }
@@ -159,32 +156,57 @@ public class LockOnTargetSelector
     }
 
     /// <summary>
-    /// 画面内エネミーの中で画面中央に最も近いものを返す。
-    /// 画面内に誰もいない場合はnullを返す。
+    /// 画面内にいる敵の中で、プレイヤーキャラクターの正面に最も近いものを返す。
+    /// 画面内の判定はEnemyのCollider.boundsを使用。Colliderがない場合はTransform.positionを点として判定。
+    /// 画面内に敵がいない場合はnullを返す。
     /// </summary>
-    private ILockOnTarget FindNearestToScreenCenter(List<ILockOnTarget> candidates)
+    /// </summary>
+    /// <param name="candidates"></param>
+    /// <returns></returns>
+    private ILockOnTarget FindNearestToCharacterCenter(
+        List<ILockOnTarget> candidates)
     {
-        Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(_camera);
-        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
-
         ILockOnTarget best = null;
-        float bestScore = float.MaxValue;
+        float bestAngle = float.MaxValue;
+
+        Plane[] frustumPlanes =
+            GeometryUtility.CalculateFrustumPlanes(_camera);
 
         foreach (var candidate in candidates)
         {
-            if (candidate is not Component comp) continue;
+            if (candidate is not Component comp)
+                continue;
 
-            Bounds bounds = comp.GetComponent<Collider>()?.bounds
-                ?? new Bounds(comp.transform.position, Vector3.one);
-            if (!GeometryUtility.TestPlanesAABB(frustumPlanes, bounds)) continue;
+            Collider collider =
+                comp.GetComponent<Collider>();
 
-            Vector3 screenPos = _camera.WorldToScreenPoint(candidate.GetTargetCenter().position);
-            if (screenPos.z < 0) continue;
+            Bounds bounds = collider != null
+                ? collider.bounds
+                : new Bounds(
+                    candidate.GetTargetCenter().position,
+                    Vector3.one);
 
-            float score = Vector2.Distance(new Vector2(screenPos.x, screenPos.y), screenCenter);
-            if (score < bestScore)
+            // 画面内に映っていない敵は除外
+            if (!GeometryUtility.TestPlanesAABB(
+                    frustumPlanes,
+                    bounds))
             {
-                bestScore = score;
+                continue;
+            }
+
+            // プレイヤー正面との角度を計算
+            Vector3 dirToCandidate =
+                (candidate.GetTargetCenter().position
+                - _playerTransform.position).normalized;
+
+            float angle =
+                Vector3.Angle(
+                    _playerTransform.forward,
+                    dirToCandidate);
+
+            if (angle < bestAngle)
+            {
+                bestAngle = angle;
                 best = candidate;
             }
         }

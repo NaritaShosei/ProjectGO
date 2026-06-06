@@ -9,9 +9,6 @@ public class LockOnController : MonoBehaviour
 {
     #region Inspectorフィールド
 
-    [Tooltip("攻撃後にロックオンが継続する時間（秒）。この時間内に次の攻撃が来なければ自動解除する")]
-    [SerializeField] private float _autoLockOnDuration = 2f;
-
     [Tooltip("ロックオン可能な最大距離（m）")]
     [SerializeField] private float _lockOnRange = 20f;
 
@@ -23,9 +20,6 @@ public class LockOnController : MonoBehaviour
     private InputHandler _inputHandler;
     private LockOnTargetSelector _selector;
 
-    private bool _isAutoLockOn;       // 自動ロックオン中かどうか
-    private float _autoLockOnTimer;   // 自動ロックオン残り時間
-
     #endregion
 
     #region 初期化
@@ -36,10 +30,10 @@ public class LockOnController : MonoBehaviour
         _inputHandler = inputHandler;
 
         _selector = new LockOnTargetSelector(
-            cameraManager.MainCamera,
             playerTransform,
             _lockOnRange,
-            enemyManager
+            enemyManager,
+            _cameraManager.MainCamera
         );
 
         SubscribeInputEvents();
@@ -53,23 +47,12 @@ public class LockOnController : MonoBehaviour
         _inputHandler.OnLockOn += HandleLockOnInput;
         _inputHandler.OnLockOnLeft += HandleLockOnLeft;
         _inputHandler.OnLockOnRight += HandleLockOnRight;
-        _inputHandler.OnLightAttackPressed += HandleAttackInput;
     }
 
     #endregion
 
     #region Unityライフサイクル
 
-    private void Update()
-    {
-        if (!_isAutoLockOn) return;
-
-        _autoLockOnTimer -= Time.deltaTime;
-        if (_autoLockOnTimer <= 0f)
-        {
-            EndAutoLockOn();
-        }
-    }
 
     private void OnDestroy()
     {
@@ -78,7 +61,6 @@ public class LockOnController : MonoBehaviour
         _inputHandler.OnLockOn -= HandleLockOnInput;
         _inputHandler.OnLockOnLeft -= HandleLockOnLeft;
         _inputHandler.OnLockOnRight -= HandleLockOnRight;
-        _inputHandler.OnLightAttackPressed -= HandleAttackInput;
     }
 
     #endregion
@@ -91,10 +73,10 @@ public class LockOnController : MonoBehaviour
     /// </summary>
     private void HandleLockOnInput()
     {
+        Debug.Log($"[LockOnController] HandleLockOnInput | IsLockedOn: {_cameraManager.IsLockedOn}"); 
         if (_cameraManager.IsLockedOn)
         {
             // 自動ロックオン中に手動ロックオンボタンを押した場合も解除
-            _isAutoLockOn = false;
             _cameraManager.Unlock();
         }
         else
@@ -102,19 +84,6 @@ public class LockOnController : MonoBehaviour
             TryManualLockOn();
         }
     }
-
-    /// <summary>
-    /// 攻撃入力。自動ロックオンを開始またはタイマーをリセットする。
-    /// 手動ロックオン中は何もしない。
-    /// </summary>
-    private void HandleAttackInput()
-    {
-        // 手動ロックオン中は自動ロックオンに干渉しない
-        if (_cameraManager.IsLockedOn && !_isAutoLockOn) return;
-
-        TryAutoLockOn();
-    }
-
     /// <summary>左方向へのターゲット切り替え。</summary>
     private void HandleLockOnLeft()
     {
@@ -123,8 +92,6 @@ public class LockOnController : MonoBehaviour
         var next = _selector.SelectSwitchTarget(_cameraManager.CurrentTarget, inputDirection: -1f);
         if (next == null) return;
 
-        // 切り替え時は自動ロックオン状態を引き継がない
-        _isAutoLockOn = false;
         _cameraManager.LockOn(next);
     }
 
@@ -136,7 +103,6 @@ public class LockOnController : MonoBehaviour
         var next = _selector.SelectSwitchTarget(_cameraManager.CurrentTarget, inputDirection: 1f);
         if (next == null) return;
 
-        _isAutoLockOn = false;
         _cameraManager.LockOn(next);
     }
 
@@ -153,39 +119,7 @@ public class LockOnController : MonoBehaviour
         var target = _selector.SelectInitialTarget();
         if (target == null) return;
 
-        _isAutoLockOn = false;
         _cameraManager.LockOn(target);
-    }
-
-    /// <summary>
-    /// 自動ロックオンを試みます。
-    /// すでに自動ロックオン中であればタイマーをリセットします。
-    /// 対象が見つからなければ何もしません。
-    /// </summary>
-    private void TryAutoLockOn()
-    {
-        // すでに自動ロックオン中ならタイマーだけリセット
-        if (_isAutoLockOn)
-        {
-            _autoLockOnTimer = _autoLockOnDuration;
-            return;
-        }
-
-        var target = _selector.SelectNearestTarget();
-        if (target == null) return;
-
-        _isAutoLockOn = true;
-        _autoLockOnTimer = _autoLockOnDuration;
-        _cameraManager.LockOn(target);
-    }
-
-    /// <summary>
-    /// 自動ロックオンをタイムアウトで終了します。
-    /// </summary>
-    private void EndAutoLockOn()
-    {
-        _isAutoLockOn = false;
-        _cameraManager.Unlock();
     }
 
     #endregion
@@ -209,7 +143,6 @@ public class LockOnController : MonoBehaviour
         }
         else
         {
-            _isAutoLockOn = false;
             _cameraManager.Unlock();
         }
     }

@@ -46,6 +46,7 @@ public class CameraManager : MonoBehaviour
         _playerTransform = player.transform;
         _cameraFollowTarget.position = _playerTransform.position;
         _normalCamera.Follow = _cameraFollowTarget;
+        _lockOnController.Init(this, ServiceLocator.Get<InputHandler>(), ServiceLocator.Get<EnemyManager>(), _playerTransform);
     }
 
     /// <summary>
@@ -145,6 +146,8 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float _lockOnBlendDuration = 0.4f;
     [Tooltip("ブレンドのEaseOut強度。値が大きいほど最初の動きが速く、終わりに急激に収束する")]
     [SerializeField, Range(1f, 8f)] private float _lockOnBlendExponent = 3f;
+    [SerializeField] 
+    private LockOnController _lockOnController;
 
     #endregion
 

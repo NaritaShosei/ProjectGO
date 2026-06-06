@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
         _player.Init(_skillManager, input);
 
         if (_player.TryGetComponent(out IModeController modeController))
-        {
+        {   
             _skillManager.Init(_player, modeController, _player.transform, _enemyManager);
         }
 
@@ -69,11 +69,6 @@ public class GameManager : MonoBehaviour
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
             cameraManager.Init(_player);
-        }
-
-        if (ServiceLocator.TryGet(out LockOnManager lockOnManager))
-        {
-            lockOnManager.Init(_player);
         }
     }
 
