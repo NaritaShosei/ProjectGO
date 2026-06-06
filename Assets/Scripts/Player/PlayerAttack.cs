@@ -67,6 +67,7 @@ public class PlayerAttack : MonoBehaviour
     {
         CancelCharge();
         ClearAttackState();
+        ResetCombo();
     }
 
     /// <summary>
@@ -191,6 +192,10 @@ public class PlayerAttack : MonoBehaviour
 
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
         {
+            // すでにコンボ入力がバッファされているなら無視
+            if (_bufferedComboInput.HasValue)
+                return;
+
             // 闘神
             if (_modeController.CurrentMode == PlayerMode.Warrior)
             {
@@ -224,7 +229,7 @@ public class PlayerAttack : MonoBehaviour
             _stateManager.ChangeState(PlayerState.Charging);
             OnChargingStarted?.Invoke();
 
-            var idleChargeData = GetChargeAttackData(ChargeLevel.None).GetVariant(ChargeLevel.None);
+            var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
                 float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
@@ -256,6 +261,29 @@ public class PlayerAttack : MonoBehaviour
         // 自動発動済みなら何もしない（UpdateChargingが先に処理した）
         if (_autoFireTriggered) return;
 
+        // チャージ段階に応じた攻撃を発動。チャージなしならコンボ入力としてバッファする
+        if (_currentChargeLevel == ChargeLevel.None)
+        {
+            CancelCharge();
+
+            var input = new AttackInput
+            {
+                AttackType = AttackType.LightAttack,
+                ChargeLevel = ChargeLevel.None
+            };
+
+            if (_stateManager.CurrentState == PlayerState.Attacking)
+            {
+                BufferComboInput(input);
+            }
+            else
+            {
+                PrepareAttack(input);
+            }
+
+            return;
+        }
+
         _autoFireTriggered = true;
         FireWarriorAttack(_currentChargeLevel);
     }
@@ -267,7 +295,12 @@ public class PlayerAttack : MonoBehaviour
     /// コンボウィンドウ中の攻撃入力をバッファする。コンボ遷移のタイミングでこの入力が存在すれば次の攻撃に繋げる。
     /// </summary>
     /// <param name="input"></param>
-    private void BufferComboInput(AttackInput input) => _bufferedComboInput = input;
+    private void BufferComboInput(AttackInput input)
+    {
+        if (_bufferedComboInput.HasValue) { return; }
+
+        _bufferedComboInput = input;
+    }
 
     /// <summary>
     /// 闘神のチャージ攻撃を発動する。チャージ段階に応じた攻撃を実行し、状態をリセットしてIdleに戻す。
@@ -319,7 +352,12 @@ public class PlayerAttack : MonoBehaviour
     private void PrepareAttack(AttackInput input, bool allowCombo = false)
     {
         AttackData attackData = GetNextAttack(input, allowCombo);
-        if (attackData == null) { return; }
+
+        if (attackData == null)
+        {
+            ResetCombo();
+            return;
+        }
 
         _stateManager.ChangeState(PlayerState.Attacking);
         _currentAttackId = attackData.AttackId;
@@ -359,12 +397,12 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void TryComboTransition()
     {
-        if (!_bufferedComboInput.HasValue) return;
+        if (!_bufferedComboInput.HasValue) { return; }
         var bufferedInput = _bufferedComboInput.Value;
         _bufferedComboInput = null;
 
         AttackData nextAttack = GetNextAttack(bufferedInput, allowCombo: true);
-        if (nextAttack == null) return;
+        if (nextAttack == null) {  return; }
 
         _isComboTransitioned = true;
         _currentAttackId = nextAttack.AttackId;
@@ -374,11 +412,7 @@ public class PlayerAttack : MonoBehaviour
 
         var variant = nextAttack.GetVariant(bufferedInput.ChargeLevel);
 
-        if (variant == null)
-        {
-            Debug.LogWarning($"バリアントデータが見つかりませんでした。AttackId: {_currentAttackId}, ChargeLevel: {bufferedInput.ChargeLevel}");
-            return;
-        }
+        if (variant == null) { return; }
 
         SetupHoming(variant);
 
@@ -394,9 +428,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FinishAttack()
     {
-        if (_stateManager.CurrentState == PlayerState.Dodge ||
-            _stateManager.IsDamaged())
-            return;
+        if (_stateManager.IsDodging() || _stateManager.IsDamaged()) { return; }
 
         _isHomingActive = false;
 
@@ -409,7 +441,6 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = null;
         _pendingAttackInput = null;
 
-        // 闘神のチャージ攻撃の発動待ち状態なら、ここでチャージ攻撃に遷移する
         if (_pendingWarriorCharge)
         {
             _stateManager.ChangeState(PlayerState.Charging);
@@ -422,6 +453,7 @@ public class PlayerAttack : MonoBehaviour
             var bufferedInput = _bufferedComboInput.Value;
             _bufferedComboInput = null;
             PrepareAttack(bufferedInput, allowCombo: true);
+            return; // PrepareAttack後はIdleに戻さない
         }
 
         _stateManager.ChangeState(PlayerState.Idle);
@@ -485,7 +517,7 @@ public class PlayerAttack : MonoBehaviour
         {
             _pendingWarriorCharge = true;
 
-            var idleChargeData = GetChargeAttackData(ChargeLevel.None).GetVariant(ChargeLevel.None);
+            var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
                 float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
@@ -567,9 +599,8 @@ public class PlayerAttack : MonoBehaviour
             if (newLevel != ChargeLevel.None)
             {
                 // チャージ段階に対応したAttackDataのチャージアニメーションを再生
-                var chargeData = GetChargeAttackData(newLevel).GetVariant(newLevel);
+                var chargeData = GetChargeAttackData().GetVariant(newLevel);
 
-                Debug.Log($"Charge Level: {newLevel}, AttackName: {chargeData?.AttackName}, ChargeLevel: {newLevel.ToString()}, ChargeTime: {chargeTime:F2}s");
                 if (chargeData != null && !string.IsNullOrEmpty(chargeData.ChargeAnimationStateName))
                 {
                     float transition = chargeData.TransitionDuration < 0 ? 0.1f : chargeData.TransitionDuration;
@@ -595,7 +626,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// チャージアニメーション取得用。コンボ中であれば次のコンボ段のデータを参照する。
     /// </summary>
-    private AttackData GetChargeAttackData(ChargeLevel level)
+    private AttackData GetChargeAttackData()
     {
         // コンボ継続中なら次のコンボ攻撃のデータを使う
         if (_currentAttackId != -1)
