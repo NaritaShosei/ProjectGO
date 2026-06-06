@@ -35,17 +35,13 @@ public class GroundCrush : SkillBase
 
         bool isTargetAttackType = true;
 
-        bool isComboCount = data.ComboIndex >= _getComboCount;
-
         bool isLastCombo = data.NextComboAttackId == -1;
 
         return isWarrior
             && isTargetAttackType
-            && isComboCount
             && isLastCombo;
     }
 
-    [SerializeField] private int _getComboCount = 2;                                       //コンボの何段目に実行するか
     [SerializeField] private float _attackRadius = 2.5f;                                   //攻撃範囲
     [SerializeField] private float _damageMultiplier = 1.8f;                               //与えるダメージ
     [SerializeField] private AttackType _attackType = AttackType.LightAttack;              //攻撃タイプ
