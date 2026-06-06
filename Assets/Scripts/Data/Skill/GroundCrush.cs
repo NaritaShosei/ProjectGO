@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using PixPlays.ElementalVFX;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +7,6 @@ using UnityEngine;
 
 public class GroundCrush : SkillBase
 {
-    public float AttackRadius => _attackRadius;
     public override void Apply(ref AttackContext context)
     {
         float attackPower = context.AttackPower * _damageMultiplier;
@@ -33,22 +31,14 @@ public class GroundCrush : SkillBase
     {
         bool isWarrior = context.PlayerMode == _isPlayerMode;
 
-        bool isTargetAttackType = true;
-
-        bool isComboCount = data.ComboIndex >= _getComboCount;
-
         bool isLastCombo = data.NextComboAttackId == -1;
 
         return isWarrior
-            && isTargetAttackType
-            && isComboCount
             && isLastCombo;
     }
 
-    [SerializeField] private int _getComboCount = 2;                                       //コンボの何段目に実行するか
     [SerializeField] private float _attackRadius = 2.5f;                                   //攻撃範囲
     [SerializeField] private float _damageMultiplier = 1.8f;                               //与えるダメージ
-    [SerializeField] private AttackType _attackType = AttackType.LightAttack;              //攻撃タイプ
     [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;                //プレイヤーが闘神モードかどうか
     [SerializeField] private float _delay = 1.0f;                                          //ヒットから発動までの待機時間
     [SerializeField] private float _range = 1;                                          // 攻撃の中心とPlayerとの距離
