@@ -39,7 +39,6 @@ public class GroundCrush : SkillBase
 
     [SerializeField] private float _attackRadius = 2.5f;                                   //攻撃範囲
     [SerializeField] private float _damageMultiplier = 1.8f;                               //与えるダメージ
-    [SerializeField] private AttackType _attackType = AttackType.LightAttack;              //攻撃タイプ
     [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;                //プレイヤーが闘神モードかどうか
     [SerializeField] private float _delay = 1.0f;                                          //ヒットから発動までの待機時間
     [SerializeField] private float _range = 1;                                          // 攻撃の中心とPlayerとの距離
