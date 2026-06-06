@@ -1,6 +1,3 @@
-using Cysharp.Threading.Tasks;
-using PixPlays.ElementalVFX;
-using System;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ConditionalAttackBoostSkill", menuName = "GameData/Skill/ConditionalAttackBoostSkill")]
@@ -9,20 +6,12 @@ public class ConditionalAttackBoostSkill : SkillBase
 {
     public override bool CanApply(AttackContext context, AttackData data)
     {
-        // 攻撃タイプが一致しているか
-        bool isTargetAttackType = true;
-
-        // 必要なコンボ数に到達しているか
-        bool hasRequiredComboCount = data.ComboIndex >= _requiredComboIndex;
-
         // コンボの最終段かどうか
         bool isLastCombo = data.NextComboAttackId == -1;
 
         bool isWarriorMode = context.PlayerMode == PlayerMode.Warrior;
 
-        return isTargetAttackType
-            && hasRequiredComboCount
-            && isLastCombo
+        return isLastCombo
             && isWarriorMode;
     }
 
@@ -43,8 +32,6 @@ public class ConditionalAttackBoostSkill : SkillBase
 
     [Header("条件設定")]
     [SerializeField] private float _boostAmount = 0.5f;
-    [SerializeField] private int _requiredComboIndex = 2;
-    [SerializeField] private AttackType _targetAttackType = AttackType.LightAttack;
 
     [Header("攻撃設定")]
     [SerializeField] private string _effectKey;
@@ -61,7 +48,6 @@ public class ConditionalAttackBoostSkill : SkillBase
 
     private void SpawnEffect(Vector3 position)
     {
-
         if (string.IsNullOrEmpty(_effectKey)) return;
 
         if (ServiceLocator.TryGet(out EffectManager effectManager))
