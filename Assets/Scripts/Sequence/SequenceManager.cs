@@ -19,17 +19,35 @@ public class SequenceManager : MonoBehaviour
         _skillManager = skillManager;
         _inputHandler = inputHandler;
         _player = player;
+
+        _battleTimer = new CountDownTimer();
+        _skillSelectTimer = new CountDownTimer();
+
+        _battleTimer.OnTimeEnded += () =>
+        {
+            Debug.LogWarning("バトルタイム切れ！ゲームオーバー");
+        };
+
+        _skillSelectTimer.OnTimeEnded += () =>
+        {
+            Debug.LogWarning("スキル選択タイム切れ！自動でスキルが選択されます");
+        };
+
         InitializeContext();
     }
 
     public void StartSequence()
     {
         StartSequence(0);
+        _battleTimer.StartTimer(_battleTimeLimit);
     }
 
     [Header("シークエンス設定")]
     [SerializeField] private SequenceDataBase _sequenceDataBase;
     [SerializeField] private int _skillSelectCount = 3;
+    [SerializeField] private float _battleTimeLimit = 180f;
+    [SerializeField] private float _bossBattleTimeLimit = 120f;
+    [SerializeField] private float _skillSelectTimeLimit = 7f;
 
     [Header("敵生成設定")]
     [SerializeField] private SpawnDataRepository _spawnDataRepository;
@@ -45,8 +63,10 @@ public class SequenceManager : MonoBehaviour
     private IPlayer _player;
     private SequenceContext _context;
     private int _currentSequenceIndex = 0;
-    private int _enemySequenceCount = 0;  // 何番目の雑魚敵シークエンスか
-    private float _sequenceStartTime;
+    private int _waveCount = 0;  // 何番目の雑魚敵シークエンスか
+
+    private CountDownTimer _battleTimer;
+    private CountDownTimer _skillSelectTimer;
 
     private void Start()
     {
@@ -97,7 +117,6 @@ public class SequenceManager : MonoBehaviour
     private void UpdateContext()
     {
         _context.RemainingEnemies = _enemyManager.GetEnemyCount();
-        _context.ElapsedTime = Time.time - _sequenceStartTime;
     }
 
     private void StartSequence(int sequenceIndex)
@@ -111,27 +130,24 @@ public class SequenceManager : MonoBehaviour
 
         _currentSequenceIndex = sequenceIndex;
         _currentSequence = _sequenceDataBase.Sequences[sequenceIndex];
-        _sequenceStartTime = Time.time;
 
         // コンテキストのリセット
-        _context.ElapsedTime = 0f;
         _context.DefeatedCount = 0;
 
         // 雑魚敵シークエンスの場合、対応するSpawnDataを設定
         if (_currentSequence.SequenceType == SequenceType.Enemy)
         {
-            if (_enemySequenceCount < _spawnDataRepository.SpawnDatas.Length)
-            {
-                _context.CurrentSpawnData = _spawnDataRepository.SpawnDatas[_enemySequenceCount];
-                _enemySequenceCount++;
-            }
-            else
-            {
-                Debug.LogWarning($"SpawnDataが不足しています。EnemySequence: {_enemySequenceCount}");
-            }
+            _battleTimer.ResumeTimer();
+
+            _context.CurrentSpawnData = GetSpawnData(_waveCount);
+            _waveCount++;
         }
+
+        // ボスシークエンスの場合、ボス用のSpawnDataを設定してタイマーをリセット
         else if (_currentSequence.SequenceType == SequenceType.Boss)
         {
+            _battleTimer.StartTimer(_bossBattleTimeLimit);
+
             // ボスシークエンスは特定のSpawnDataを使うか、直接生成するか
             if (_bossSpawnData == null)
             {
@@ -142,8 +158,12 @@ public class SequenceManager : MonoBehaviour
 
             _context.CurrentSpawnData = _bossSpawnData;
         }
+
+        // スキル獲得シークエンスの場合、敵は出現させずにスキル選択タイマーを開始
         else
         {
+            _skillSelectTimer.StartTimer(_skillSelectTimeLimit);
+            _battleTimer.PauseTimer();
             _context.CurrentSpawnData = null;
         }
 
@@ -165,6 +185,18 @@ public class SequenceManager : MonoBehaviour
         OnAllSequencesComplete?.Invoke();
     }
 
+    private SpawnData GetSpawnData(int waveIndex)
+    {
+        var spawnDatas = _spawnDataRepository.SpawnDatas;
+
+        if (waveIndex < spawnDatas.Length)
+        {
+            return spawnDatas[waveIndex];
+        }
+
+        return spawnDatas[UnityEngine.Random.Range(0, spawnDatas.Length)];
+    }
+
     private void HandleEnemyDefeated()
     {
         _context.DefeatedCount++;
@@ -177,6 +209,7 @@ public class SequenceManager : MonoBehaviour
 
     private void HandleSkillSelected(int skillid)
     {
+        _skillSelectTimer.StopTimer();
         _context.SkillSelected = true;
     }
 
