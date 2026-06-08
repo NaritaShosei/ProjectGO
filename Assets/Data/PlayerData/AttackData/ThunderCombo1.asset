@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AttackData_main
   _attackId: 2474
   _mode: 1
-  _comboIndex: 1
-  _nextComboAttackId: 3078
+  _nextComboAttackId: 3581
+  _insertAfterAttackId: -1
   _isUnlockedBySkill: 0
   _requiredSkillId: -1
   _variants:
@@ -76,5 +76,3 @@ MonoBehaviour:
     _additionalLightningDamages:
     - _lightningDamageMultiplier: 0.3
       _lightningDamageDelay: 0.2
-    _isUnlockedBySkill: 0
-    _requiredSkillId: -1

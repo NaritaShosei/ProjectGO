@@ -9,9 +9,9 @@ public class AttackData : ScriptableObject
 {
     public int AttackId => _attackId;
     public PlayerMode Mode => _mode;
-    public int ComboIndex => _comboIndex;
 
     public int NextComboAttackId => _nextComboAttackId;
+    public int InsertAfterAttackId => _insertAfterAttackId;
 
     public bool IsUnlockedBySkill => _isUnlockedBySkill;
     public int RequiredSkillId => _requiredSkillId;
@@ -40,10 +40,10 @@ public class AttackData : ScriptableObject
     [SerializeField] private PlayerMode _mode; // 闘神 or 雷神
 
     [Header("Combo")]
-    [Tooltip("コンボの何段目か（1スタート）。単発攻撃の場合は1。コンボ未対応の場合は-1。")]
-    [SerializeField] private int _comboIndex = 1; // コンボの何段目か（1スタート）。単発攻撃の場合は1。コンボ未対応の場合は-1。
     [Tooltip("次のコンボ攻撃ID。-1の場合はコンボ終了。")]
-    [SerializeField] private int _nextComboAttackId = -1; // 次のコンボ攻撃ID。-1の場合はコンボ終了。
+    [SerializeField] private int _nextComboAttackId = -1;
+    [Tooltip("この差し込み攻撃を発動する起点となるAttackDataのID。-1で無効。")]
+    [SerializeField] private int _insertAfterAttackId = -1;
 
     [Header("Skill Unlock")]
     [Tooltip("スキル解放が必要な攻撃かどうか")]

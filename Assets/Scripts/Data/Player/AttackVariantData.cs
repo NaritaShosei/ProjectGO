@@ -69,11 +69,6 @@ public class AttackVariantData
     /// <summary> 雷の追加ダメージのデータ配列 </summary>
     public AdditionalLightningDamageData[] AdditionalLightningDamages => _additionalLightningDamages;
 
-    /// <summary> スキル解放が必要な攻撃バリアントかどうか </summary>
-    public bool IsUnlockedBySkill => _isUnlockedBySkill;
-    /// <summary> 解放に必要なスキルID </summary>
-    public int RequiredSkillId => _requiredSkillId;
-
     /// <summary>
     /// 攻撃バリアントのフィールドをデフォルト値にリセットする
     /// </summary>
@@ -85,7 +80,6 @@ public class AttackVariantData
         _moveCurve = AnimationCurve.Linear(0, 0, 1, 1);
         _transitionDuration = -1f;
         _chargeTransitionDuration = -1f;
-        _requiredSkillId = -1;
     }
 
     [Header("攻撃バリアントの基本情報")]
@@ -136,10 +130,4 @@ public class AttackVariantData
     [Header("雷の追加ダメージ")]
     [Tooltip("雷の追加ダメージのデータ")]
     [SerializeField] private AdditionalLightningDamageData[] _additionalLightningDamages;
-
-    [Header("スキル解放")]
-    [Tooltip("スキル解放が必要な攻撃バリアントかどうか")]
-    [SerializeField] private bool _isUnlockedBySkill = false;
-    [Tooltip("解放に必要なスキルID")]
-    [SerializeField] private int _requiredSkillId = -1;
 }
