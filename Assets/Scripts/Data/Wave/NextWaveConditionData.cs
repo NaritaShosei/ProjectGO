@@ -7,7 +7,7 @@ using UnityEngine;
 public enum WaveConditionType
 {
     TimeElapsed,   // 指定秒数が経過したら次へ
-    KillCount,     // ウェーブ全体の撃破数が指定数に達したら次へ
+    KillCount,     // このグループの撃破数が指定数に達したら次へ
     AllDefeated,   // このグループの全エネミーが全滅したら次へ
 }
 

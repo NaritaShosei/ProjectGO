@@ -13,6 +13,12 @@ public class SpawnPointSelector : MonoBehaviour
     /// </summary>
     public void Initialize()
     {
+        if(_playerTransform == null)
+        {
+            Debug.LogError("PlayerTransformが未設定です");
+            return;
+        }
+
         _allSpawnPoints.Clear();
 
         var points = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
@@ -31,9 +37,9 @@ public class SpawnPointSelector : MonoBehaviour
     /// </summary>
     /// <param name="exclusionRadius">プレイヤーからの除外半径</param>
     /// <param name="requiredSlotCount">必要なSlot数（SpawnCountと一致確認）</param>
-    public SpawnPoint Select(float exclusionRadius, int requiredSlotCount)
+    public SpawnPoint Select(float exclusionRadius)
     {
-        var candidates = BuildCandidates(exclusionRadius, requiredSlotCount);
+        var candidates = BuildCandidates(exclusionRadius);
 
         if (candidates.Count == 0)
         {
@@ -56,7 +62,7 @@ public class SpawnPointSelector : MonoBehaviour
     /// <summary>
     /// 除外ルールを適用して候補リストを構築する
     /// </summary>
-    private List<SpawnPoint> BuildCandidates(float exclusionRadius, int requiredSlotCount)
+    private List<SpawnPoint> BuildCandidates(float exclusionRadius)
     {
         var candidates = new List<SpawnPoint>();
 
@@ -66,9 +72,6 @@ public class SpawnPointSelector : MonoBehaviour
 
             // 直前使用済みを除外
             if (point == _lastUsedPoint) continue;
-
-            //// SlotCount不一致を除外
-            //if (point.SlotCount < requiredSlotCount) continue;
 
             // プレイヤー近距離を除外
             if (IsNearPlayer(point, exclusionRadius)) continue;

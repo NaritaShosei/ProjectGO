@@ -5,6 +5,11 @@ public class EnemySequence : SequenceBase
 {
     public override bool IsComplete(SequenceContext context)
     {
+        if (context.WaveController == null)
+        {
+            Debug.LogError("[EnemySequence] WaveController が null です");
+            return false;
+        }
         return context.WaveController.IsComplete;
     }
 
@@ -13,6 +18,12 @@ public class EnemySequence : SequenceBase
         if (context.InputHandler != null)
         {
             context.InputHandler.EnableInput(true);
+        }
+
+        if(context.WaveController == null)
+        {
+            Debug.LogError("[EnemySequence] WaveController が null です");
+            return;
         }
 
         //敵の生成処理

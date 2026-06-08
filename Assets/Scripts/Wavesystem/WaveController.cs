@@ -101,12 +101,9 @@ public class WaveController
 
         var group = _currentWave.SpawnGroups[_currentGroupIndex];
 
-        int totalSpawnCount = GetTotalSpawnCount(group);
-
         SpawnPoint spawnPoint =
             _spawnPointSelector.Select(
-                group.ExclusionRadius,
-                totalSpawnCount);
+                group.ExclusionRadius);
 
         if (spawnPoint == null)
         {
@@ -183,7 +180,7 @@ public class WaveController
 
             case WaveConditionType.KillCount:
 
-                return _groupKillCount
+                return _waveKillCount
                        >= condition.Threshold;
 
             case WaveConditionType.AllDefeated:

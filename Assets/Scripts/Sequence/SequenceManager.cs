@@ -81,6 +81,15 @@ public class SequenceManager : MonoBehaviour
 
     private void InitializeContext()
     {
+        if (_spawnPointSelector == null)
+        {
+            Debug.LogError("SpawnPointSelectorが未設定");
+            enabled = false;
+            return;
+        }
+
+        _spawnPointSelector.Initialize();
+
         _context = new SequenceContext
         {
             EnemyManager = _enemyManager,
@@ -98,15 +107,6 @@ public class SequenceManager : MonoBehaviour
             _enemyManager,
             _spawnPointSelector);
         }
-
-        if (_spawnPointSelector == null)
-        {
-            Debug.LogError("SpawnPointSelectorが未設定");
-            enabled = false;
-            return;
-        }
-
-        _spawnPointSelector.Initialize();
 
         // EnemyManagerのイベント購読
         _enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
