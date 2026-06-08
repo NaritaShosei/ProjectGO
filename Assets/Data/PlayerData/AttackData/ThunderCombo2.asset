@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AttackData_main
   _attackId: 3078
   _mode: 1
-  _comboIndex: 2
   _nextComboAttackId: 3581
-  _isUnlockedBySkill: 0
-  _requiredSkillId: -1
+  _insertAfterAttackId: 2474
+  _isUnlockedBySkill: 1
+  _requiredSkillId: 66987
   _variants:
   - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C92"
     _requiredCharge: 0
@@ -76,5 +76,3 @@ MonoBehaviour:
     _additionalLightningDamages:
     - _lightningDamageMultiplier: 0.5
       _lightningDamageDelay: 0.4
-    _isUnlockedBySkill: 0
-    _requiredSkillId: -1

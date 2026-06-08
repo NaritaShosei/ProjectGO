@@ -52,14 +52,14 @@ MonoBehaviour:
     _prefab: {fileID: 770916111724383140, guid: a287effddad2445419b3ee7d4196c146, type: 3}
   - _key: "\u5927\u5730\u7C89\u7815"
     _prefab: {fileID: 567102852122591039, guid: 803bfbd5bb757094ba960334876d8581, type: 3}
-  - _key: "\u30C6\u30B9\u30C8\u96F7\u30D2\u30C3\u30C8\u30A8\u30D5\u30A7\u30AF\u30C8"
-    _prefab: {fileID: 146184047964149964, guid: 618f481dad270584ab4a2b6970264d75, type: 3}
-  - _key: "\u30C6\u30B9\u30C8\u706B\u82B1"
-    _prefab: {fileID: 1820207970970708566, guid: ee0698179a3a246439227f46b02ac3b9, type: 3}
   - _key: "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
     _prefab: {fileID: 7500359468652911350, guid: c6b78d1dc878b124fb4603ee5d0c96d5, type: 3}
+  - _key: "\u30C6\u30B9\u30C8\u706B\u82B1"
+    _prefab: {fileID: 1820207970970708566, guid: ee0698179a3a246439227f46b02ac3b9, type: 3}
   - _key: "\u30C6\u30B9\u30C8\u5CA9"
     _prefab: {fileID: 8571136979397341754, guid: 734e025186a6da44c832f8d7210bb2dc, type: 3}
+  - _key: "\u30C6\u30B9\u30C8\u96F7\u30D2\u30C3\u30C8\u30A8\u30D5\u30A7\u30AF\u30C8"
+    _prefab: {fileID: 146184047964149964, guid: 618f481dad270584ab4a2b6970264d75, type: 3}
   - _key: "\u30C6\u30B9\u30C8\u30A2\u30FC\u30DE\u30FC\u7834\u58CA"
     _prefab: {fileID: 1262999295889565182, guid: a6665d4df1a80984f809d252f24bcc70, type: 3}
   _preloadCount: 5
@@ -396,7 +396,7 @@ MonoBehaviour:
   _wallLayerMask:
     serializedVersion: 2
     m_Bits: 0
-  _enemySpawner: {fileID: 0}
+  _enemySpawner: {fileID: 4380269281932468535}
 --- !u!1 &3913965231841061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -541,6 +541,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cdd70c5089849144796ad90dd35a5120, type: 2}
   - {fileID: 11400000, guid: 3336e1da02a5ba546bf36ed3dc4c8ce8, type: 2}
   - {fileID: 11400000, guid: 37ca213cabe23b34a9deb1fe862cd85f, type: 2}
+  _chargeLevelSkillMap:
+  - Mode: 0
+    Level: 2
+    RequiredSkillId: 404
+  - Mode: 0
+    Level: 3
+    RequiredSkillId: 405
 --- !u!1 &6838469318861114545
 GameObject:
   m_ObjectHideFlags: 0
@@ -891,35 +898,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.x
-      value: 352.3479
+      value: 0.1123653
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.y
-      value: 50.681355
+      value: 359.75043
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.z
-      value: 269.6567
+      value: 269.89447
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: 0.13197988
+      value: -0.0004589334
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: -0.014365256
+      value: -0.26407152
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 3.9012322
+      value: -0.0027876794
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
-      value: 1
+      value: 1.0000001
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.y
-      value: 1
+      value: 1.0000001
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.z
@@ -1318,35 +1325,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.x
-      value: 352.3479
+      value: 0.1123653
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.y
-      value: 50.681355
+      value: 359.75043
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.z
-      value: 269.6567
+      value: 269.89447
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: 0.13197988
+      value: -0.0004589334
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: -0.014365256
+      value: -0.26407152
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 3.9012322
+      value: -0.0027876794
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
-      value: 1
+      value: 1.0000001
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.y
-      value: 1
+      value: 1.0000001
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 73101d84ac436ea4aaf3fe9407413629, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.z
