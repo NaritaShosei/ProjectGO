@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "BossBattleSequence", menuName = "GameData/Sequence/BossBattleSequence")]
 
@@ -17,11 +17,12 @@ public class BossBattleSequence : SequenceBase
         }
 
         // 敵生成処理
-        if (context.CurrentSpawnData != null)
-        {
-            var strategy = context.CurrentSpawnData.CreateStrategy(context.EnemyManager);
-            strategy.Spawn();
-        }
+        context.WaveController.StartWave(context.CurrentWaveData);
+        //if (context.CurrentWaveData != null)
+        //{
+        //    var strategy = context.CurrentWaveData.CreateStrategy(context.EnemyManager);
+        //    strategy.Spawn();
+        //}
     }
 
     public override void OnSequenceUpdate(SequenceContext context)

@@ -7,12 +7,6 @@ using UnityEngine;
 /// </summary>
 public class SpawnPointSelector : MonoBehaviour
 {
-    [Tooltip("プレイヤーのTransform")]
-    [SerializeField] private Transform _playerTransform;
-
-    private SpawnPoint _lastUsedPoint;
-    private readonly List<SpawnPoint> _allSpawnPoints = new();
-
     /// <summary>
     /// Scene上の全SpawnPointを登録する
     /// WaveManagerのInit時に呼び出す
@@ -53,6 +47,12 @@ public class SpawnPointSelector : MonoBehaviour
         return selected;
     }
 
+    [Tooltip("プレイヤーのTransform")]
+    [SerializeField] private Transform _playerTransform;
+
+    private SpawnPoint _lastUsedPoint;
+    private readonly List<SpawnPoint> _allSpawnPoints = new();
+
     /// <summary>
     /// 除外ルールを適用して候補リストを構築する
     /// </summary>
@@ -63,16 +63,18 @@ public class SpawnPointSelector : MonoBehaviour
         //除外ルールを適用して候補を絞り込む
         foreach (var point in _allSpawnPoints)
         {
+
             // 直前使用済みを除外
             if (point == _lastUsedPoint) continue;
 
-            // SlotCount不一致を除外
-            if (point.SlotCount != requiredSlotCount) continue;
+            //// SlotCount不一致を除外
+            //if (point.SlotCount < requiredSlotCount) continue;
 
             // プレイヤー近距離を除外
             if (IsNearPlayer(point, exclusionRadius)) continue;
 
             candidates.Add(point);
+            //今のところは見つからない場合はnull返すだけだけど、除外ルールを緩和して再度検索するのもアリかも
         }
 
         return candidates;

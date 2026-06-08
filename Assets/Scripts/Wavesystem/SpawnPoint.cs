@@ -7,17 +7,8 @@ using UnityEngine;
 /// </summary>
 public class SpawnPoint : MonoBehaviour
 {
-    [Tooltip("SpawnPointSelector から参照するためのKey")]
-    [SerializeField] private string _key;
-
-    [Tooltip("エネミーを生成するローカル座標リスト（インスペクターで指定）")]
-    [SerializeField] private List<Vector3> _spawnSlots = new();
-
-    public string Key => _key;
-    public int SlotCount => _spawnSlots.Count;
-
     /// <summary>
-    /// 全Slotのワールド座標をクランプして返す
+    /// 全Slotのワールド座標を取得する
     /// </summary>
     public List<Vector3> GetWorldSlotPositions()
     {
@@ -30,4 +21,34 @@ public class SpawnPoint : MonoBehaviour
         }
         return result;
     }
+
+    /// <summary>
+    /// 指定したSlotのワールド座標を取得する
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public Vector3 GetSlotPosition(int index)
+    {
+
+        if (_spawnSlots.Count == 0)
+        {
+            return transform.position;
+        }
+
+        if (index < 0 || index >= _spawnSlots.Count)
+        {
+            return transform.position;
+        }
+
+        Vector3 worldPos =
+            transform.TransformPoint(_spawnSlots[index]);
+
+        return MapManager.Instance.ClampToArea(worldPos);
+    }    
+    
+    [Tooltip("SpawnPointSelector から参照するためのKey")]
+    [SerializeField] private string _key;
+
+    [Tooltip("エネミーを生成するローカル座標リスト（インスペクターで指定）")]
+    [SerializeField] private List<Vector3> _spawnSlots = new();
 }

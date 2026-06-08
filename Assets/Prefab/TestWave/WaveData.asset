@@ -12,4 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
   m_Name: WaveData
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
-  SpawnGroups: []
+  SpawnGroups:
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy1
+      SpawnCount: 4
+    ExclusionRadius: 0
+    NextWaveConditions:
+    - WaveConditionType: 1
+      Threshold: 3
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy1
+      SpawnCount: 3
+    ExclusionRadius: 0
+    NextWaveConditions:
+    - WaveConditionType: 0
+      Threshold: 3
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy1
+      SpawnCount: 3
+    ExclusionRadius: 0
+    NextWaveConditions:
+    - WaveConditionType: 0
+      Threshold: 10

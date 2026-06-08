@@ -1,3 +1,4 @@
+using Unity.AppUI.Navigation;
 using UnityEngine;
 
 public abstract class SequenceBase : ScriptableObject
@@ -35,9 +36,10 @@ public class SequenceContext
     public SkillManager SkillManager;
     public EnemyManager EnemyManager;
     public ISkillSelectView SkillSelectView;
-    public SpawnData CurrentSpawnData;
+    public WaveData CurrentWaveData;
     public InputHandler InputHandler;
     public IPlayer Player;
+    public WaveController WaveController;
 
     public int SkillSelectCount;
 

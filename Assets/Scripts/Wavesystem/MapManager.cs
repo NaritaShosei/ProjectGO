@@ -8,22 +8,16 @@ public class MapManager : MonoBehaviour
 {
     public static MapManager Instance { get; private set; }
 
-    [SerializeField] private Vector3 _centerPosition;
-    [SerializeField] private float _radius = 50f;
+    //マップの中心位置
     public Vector3 CenterPosition => _centerPosition;
     public float Radius => _radius;
 
-    void Awake()
-    {
-        if (Instance != null)
-        {
-            Debug.LogWarning("[MapManager] 複数のインスタンスが存在します");
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-    }
-
+    /// <summary>
+    /// 指定した位置をマップの円形エリア内にクランプする
+    /// 範囲内の位置を返す
+    /// </summary>
+    /// <param name="position">補正対象座標</param>
+    /// <returns>マップ範囲内に収まる座標</returns>
     public Vector3 ClampToArea(Vector3 position)
     {
         // Y軸は無視してXZ平面で判定
@@ -39,15 +33,17 @@ public class MapManager : MonoBehaviour
         return new Vector3(clamped.x, position.y, clamped.z);
     }
 
-    /// <summary>
-    /// 指定位置がマップの円形エリア内にあるか判定
-    /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
-    public bool IsInsideArea(Vector3 position)
+    private void Awake()
     {
-        Vector3 flat = new Vector3(position.x, 0f, position.z);
-        Vector3 center = new Vector3(_centerPosition.x, 0f, _centerPosition.z);
-        return (flat - center).magnitude <= _radius;
+        if (Instance != null)
+        {
+            Debug.LogWarning("[MapManager] 複数のインスタンスが存在します");
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
     }
+
+    [SerializeField] private Vector3 _centerPosition;
+    [SerializeField] private float _radius = 50f;
 }

@@ -1,11 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "EnemySequence", menuName = "GameData/Sequence/EnemySequence")]
 public class EnemySequence : SequenceBase
 {
     public override bool IsComplete(SequenceContext context)
     {
-        return context.RemainingEnemies == 0;
+        return context.WaveController.IsComplete;
     }
 
     public override void OnSequenceStart(SequenceContext context)
@@ -15,12 +15,8 @@ public class EnemySequence : SequenceBase
             context.InputHandler.EnableInput(true);
         }
 
-        // 敵生成処理
-        if (context.CurrentSpawnData != null)
-        {
-            var strategy = context.CurrentSpawnData.CreateStrategy(context.EnemyManager);
-            strategy.Spawn();
-        }
+        //敵の生成処理
+        context.WaveController.StartWave(context.CurrentWaveData);
     }
 
     public override void OnSequenceUpdate(SequenceContext context)
