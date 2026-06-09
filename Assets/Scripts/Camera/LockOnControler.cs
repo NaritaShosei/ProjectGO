@@ -61,6 +61,12 @@ public class LockOnController : MonoBehaviour
         _inputHandler.OnLockOn -= HandleLockOnInput;
         _inputHandler.OnLockOnLeft -= HandleLockOnLeft;
         _inputHandler.OnLockOnRight -= HandleLockOnRight;
+
+        var enemyManager = ServiceLocator.Get<EnemyManager>();
+        if (enemyManager != null)
+        {
+            enemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
+        }
     }
 
     #endregion
@@ -73,7 +79,7 @@ public class LockOnController : MonoBehaviour
     /// </summary>
     private void HandleLockOnInput()
     {
-        Debug.Log($"[LockOnController] HandleLockOnInput | IsLockedOn: {_cameraManager.IsLockedOn}"); 
+        Debug.Log($"[LockOnController] HandleLockOnInput | IsLockedOn: {_cameraManager.IsLockedOn}");
         if (_cameraManager.IsLockedOn)
         {
             // 自動ロックオン中に手動ロックオンボタンを押した場合も解除

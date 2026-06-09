@@ -342,7 +342,7 @@ public class CameraManager : MonoBehaviour
     private void BeginLockOnBlend()
     {
         _blendStartPosition = _lockOnCamera.transform.position;
-        _blendStartRotation = _mainCamera.transform.rotation;
+        _blendStartRotation = _lockOnCamera.transform.rotation;
         _blendT = 0f;
         _isLockOnBlending = true;
     }
@@ -425,7 +425,7 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     private bool IsTargetOutOfRange()
     {
-        return Vector3.Distance(_playerTransform.position, _currentTargetComponent.transform.position) > _autoUnlockRange;
+        return Vector3.Distance(_playerTransform.position, _currentTarget.GetTargetCenter().position) > _autoUnlockRange;
     }
 
     #endregion

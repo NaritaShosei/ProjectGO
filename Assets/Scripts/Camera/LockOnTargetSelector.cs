@@ -160,7 +160,6 @@ public class LockOnTargetSelector
     /// 画面内の判定はEnemyのCollider.boundsを使用。Colliderがない場合はTransform.positionを点として判定。
     /// 画面内に敵がいない場合はnullを返す。
     /// </summary>
-    /// </summary>
     /// <param name="candidates"></param>
     /// <returns></returns>
     private ILockOnTarget FindNearestToCharacterCenter(
