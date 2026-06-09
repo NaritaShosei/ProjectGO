@@ -95,6 +95,8 @@ public class WaveController
 
     private int _waveKillCount;
 
+    private int _groupSpawnCount;
+
     /// <summary>
     /// 現在のSpawnGroupを実行する
     /// スポーンポイントの選択と敵のスポーンを行う
@@ -122,7 +124,6 @@ public class WaveController
 
         if (spawnPoint == null)
         {
-            ResetState();
             Debug.LogError("SpawnPoint取得失敗");
             return false;
         }
@@ -132,6 +133,7 @@ public class WaveController
         _groupStartTime = Time.time;
 
         _groupKillCount = 0;
+        _groupSpawnCount = GetTotalSpawnCount(group);
 
         return true;
     }
@@ -198,12 +200,12 @@ public class WaveController
 
             case WaveConditionType.KillCount:
 
-                return _waveKillCount
+                return _groupKillCount
                        >= condition.Threshold;
 
             case WaveConditionType.AllDefeated:
 
-                return _enemyManager.GetEnemyCount() == 0;
+                return _groupKillCount >= _groupSpawnCount;
         }
 
         return false;
@@ -224,6 +226,8 @@ public class WaveController
         if (!ExecuteCurrentGroup())
         {
             Debug.LogError("[WaveController] 次グループ開始失敗");
+            // Wave全体を失敗として終了
+            IsComplete = true;
         }
     }
 
@@ -232,8 +236,9 @@ public class WaveController
         _currentWave = null;
         _currentGroupIndex = 0;
         _groupKillCount = 0;
+        _groupSpawnCount = 0;
         _waveKillCount = 0;
-        IsComplete = true;
+        IsComplete = false;
     }
 
     /// <summary>
