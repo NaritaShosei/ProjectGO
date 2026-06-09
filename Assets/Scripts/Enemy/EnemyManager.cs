@@ -171,6 +171,24 @@ public class EnemyManager : MonoBehaviour
         Spawn(bossPrefab, position);
     }
 
+    /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
+    public void ClearAllMobEnemies()
+    {
+        foreach (var enemy in _enemies)
+        {
+            if (enemy != null && !enemy.IsDead)
+            {
+                // モブのみを対象にするため、Enemyクラスのインスタンスかどうかを確認
+                if (enemy is Enemy enemyComponent)
+                {
+                    _enemySpawner.Despawn(enemyComponent);
+                }
+            }
+        }
+        _enemies.Clear();
+        _enemiesTransformList.Clear();
+    }
+
     [Header("Spatial Hash Grid")]
     // グリッドの1辺のサイズ
     [SerializeField] private float _spatialHashGridCellSize = 2.0f;
@@ -192,7 +210,7 @@ public class EnemyManager : MonoBehaviour
     private IWallAvoidanceService _wallAvoidanceService;
     private IEnemyFormationSystem _formationSystem;
     private IPlayerInformationService _playerInformationService;
-    
+
     // Enemyに提供するサービスをまとめたクラス
     private EnemyServices _enemyServices;
 

@@ -77,6 +77,25 @@ public class EnemySpawner : MonoBehaviour
         return enemy;
     }
 
+    /// <summary> Enemyの破棄 </summary>
+    public void Despawn(Enemy enemy)
+    {
+        if (enemy == null)
+        {
+            Debug.LogWarning("Enemy is null");
+            return;
+        }
+        enemy.OnReleaseRequested -= HandleEnemyDeath;
+        if (_pools.TryGetValue(enemy.PoolKey, out EnemyObjectPool pool))
+        {
+            pool.Release(enemy);
+        }
+        else
+        {
+            Debug.LogError($"Pool not found : {enemy.PoolKey}");
+        }
+    }
+
     //プール生成するためのエネミーの一覧データ
     [SerializeField] private List<EnemyPoolData> _enemyData;
     [SerializeField] private Transform _enemyParent;

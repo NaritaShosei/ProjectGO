@@ -41,7 +41,10 @@ public class MobAndSkillState : ISequenceState
 
         // タイマー切れ → ボス登場へ
         if (context.IsTimeUp)
+        {
+            context.EnemyManager.ClearAllMobEnemies(); // タイマー切れと同時に敵を全て消す
             return SequenceStateType.BossIntroMovie;
+        }
 
         switch (_subPhase)
         {
