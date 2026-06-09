@@ -48,23 +48,28 @@ public class WaveController
     /// 新しいWaveを開始する
     /// </summary>
     /// <param name="waveData"></param>
-    public void StartWave(WaveData waveData)
+    public bool StartWave(WaveData waveData)
     {
+        ResetState();
+
         if (waveData == null)
         {
             Debug.LogError("WaveDataがnullです");
-            return;
+            return false;
+        }
+
+
+        if (waveData.SpawnGroups == null ||
+            waveData.SpawnGroups.Count == 0)
+        {
+            Debug.LogError("[WaveController] SpawnGroupが設定されていません");
+            return false;
         }
 
         _currentWave = waveData;
-
-        _currentGroupIndex = 0;
-        _groupKillCount = 0;
-        _waveKillCount = 0;
-
         IsComplete = false;
 
-        ExecuteCurrentGroup();
+        return ExecuteCurrentGroup();
     }
 
 
@@ -94,10 +99,19 @@ public class WaveController
     /// 現在のSpawnGroupを実行する
     /// スポーンポイントの選択と敵のスポーンを行う
     /// </summary>
-    private void ExecuteCurrentGroup()
+    private bool ExecuteCurrentGroup()
     {
+        if (_currentWave == null)
+        {
+            Debug.LogError("[WaveController] CurrentWaveがnullです");
+            return false;
+        }
+
         if (_currentGroupIndex >= _currentWave.SpawnGroups.Count)
-            return;
+        {
+            Debug.LogError("[WaveController] GroupIndexが範囲外です");
+            return false;
+        }
 
         var group = _currentWave.SpawnGroups[_currentGroupIndex];
 
@@ -108,8 +122,9 @@ public class WaveController
 
         if (spawnPoint == null)
         {
+            ResetState();
             Debug.LogError("SpawnPoint取得失敗");
-            return;
+            return false;
         }
 
         SpawnGroup(group, spawnPoint);
@@ -117,6 +132,8 @@ public class WaveController
         _groupStartTime = Time.time;
 
         _groupKillCount = 0;
+
+        return true;
     }
 
     /// <summary>
@@ -204,7 +221,19 @@ public class WaveController
             return;
         }
 
-        ExecuteCurrentGroup();
+        if (!ExecuteCurrentGroup())
+        {
+            Debug.LogError("[WaveController] 次グループ開始失敗");
+        }
+    }
+
+    private void ResetState()
+    {
+        _currentWave = null;
+        _currentGroupIndex = 0;
+        _groupKillCount = 0;
+        _waveKillCount = 0;
+        IsComplete = true;
     }
 
     /// <summary>
