@@ -15,4 +15,7 @@ public class SpawnGroupData
 
     [Tooltip("次グループへ進む条件（OR判定: いずれか1つが発火したら進む）")]
     public List<NextWaveConditionData> NextWaveConditions = new();
+
+    [Tooltip("使用するSpawnPointのKey。空文字の場合は自動選択")]
+    public string SpawnPointKey = "";
 }

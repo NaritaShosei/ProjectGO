@@ -20,12 +20,27 @@ public class SpawnPointSelector : MonoBehaviour
         }
 
         _allSpawnPoints.Clear();
+        _spawnPointMap.Clear();
+
 
         var points = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
 
         foreach (var point in points)
         {
             _allSpawnPoints.Add(point);
+            // Keyが設定されているPointはDictionaryにも登録
+            string key = point.Key;
+            if (!string.IsNullOrEmpty(key))
+            {
+                if (_spawnPointMap.ContainsKey(key))
+                {
+                    Debug.LogWarning($"[SpawnPointSelector] 重複したKeyが存在します: {key}");
+                }
+                else
+                {
+                    _spawnPointMap[key] = point;
+                }
+            }
         }
 
         if (_allSpawnPoints.Count == 0)
@@ -37,13 +52,49 @@ public class SpawnPointSelector : MonoBehaviour
     /// </summary>
     /// <param name="exclusionRadius">プレイヤーからの除外半径</param>
     /// <param name="requiredSlotCount">必要なSlot数（SpawnCountと一致確認）</param>
-    public SpawnPoint Select(float exclusionRadius)
+    public SpawnPoint Select(float exclusionRadius, string spawnPointKey = "")
+    {
+        // Key指定あり → 固定使用
+        if (!string.IsNullOrEmpty(spawnPointKey))
+        {
+            return SelectByKey(spawnPointKey);
+        }
+
+        // Key指定なし → 自動選択
+        return SelectAuto(exclusionRadius);
+    }
+
+    [Tooltip("プレイヤーのTransform")]
+    [SerializeField] private Transform _playerTransform;
+
+    private SpawnPoint _lastUsedPoint;
+    private readonly List<SpawnPoint> _allSpawnPoints = new();
+    private readonly Dictionary<string, SpawnPoint> _spawnPointMap = new();
+
+    /// <summary>
+    /// Keyに対応するSpawnPointを返す
+    /// </summary>
+    private SpawnPoint SelectByKey(string key)
+    {
+        if (_spawnPointMap.TryGetValue(key, out var point))
+        {
+            _lastUsedPoint = point;
+            return point;
+        }
+
+        Debug.LogError($"[SpawnPointSelector] Key '{key}' に対応するSpawnPointが見つかりません");
+        return null;
+    }
+
+    /// <summary>
+    /// 除外ルールを適用して自動選択する
+    /// </summary>
+    private SpawnPoint SelectAuto(float exclusionRadius)
     {
         var candidates = BuildCandidates(exclusionRadius);
 
         if (candidates.Count == 0)
         {
-            // 条件を満たすSpawnPointがない場合は、除外ルールを緩和して再度検索したほうがいいかもしれない
             Debug.LogWarning("[SpawnPointSelector] 有効なSpawnPointが見つかりませんでした");
             return null;
         }
@@ -53,11 +104,6 @@ public class SpawnPointSelector : MonoBehaviour
         return selected;
     }
 
-    [Tooltip("プレイヤーのTransform")]
-    [SerializeField] private Transform _playerTransform;
-
-    private SpawnPoint _lastUsedPoint;
-    private readonly List<SpawnPoint> _allSpawnPoints = new();
 
     /// <summary>
     /// 除外ルールを適用して候補リストを構築する

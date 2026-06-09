@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class SpawnPoint : MonoBehaviour
 {
+    public string Key => _key;
+
     /// <summary>
     /// 全Slotのワールド座標を取得する
     /// </summary>

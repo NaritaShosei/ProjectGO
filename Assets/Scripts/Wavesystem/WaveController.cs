@@ -103,7 +103,8 @@ public class WaveController
 
         SpawnPoint spawnPoint =
             _spawnPointSelector.Select(
-                group.ExclusionRadius);
+                group.ExclusionRadius,
+                 group.SpawnPointKey);
 
         if (spawnPoint == null)
         {
