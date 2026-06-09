@@ -365,8 +365,8 @@ Transform:
   m_GameObject: {fileID: 4276309557943231815}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 3}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 158027239318156145}
@@ -467,11 +467,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f9302d62537a2345807b442981998e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyView
+  _data: {fileID: 0}
   _targetCenter: {fileID: 2830082553299517670}
   _animator: {fileID: 0}
   _turnProfile: {fileID: 0}
   _distanceProfile: {fileID: 0}
   _animationEventReceiver: {fileID: 0}
+  _bossEnemyController:
+    _bossEnemyDatas:
+    - {fileID: 11400000, guid: d8aa0ef7ae2a6b1409ff76b64f2cc1d3, type: 2}
+    - {fileID: 11400000, guid: 71e1a300dbb3157498f51230fe689ea5, type: 2}
 --- !u!1 &8748214979764292565
 GameObject:
   m_ObjectHideFlags: 0

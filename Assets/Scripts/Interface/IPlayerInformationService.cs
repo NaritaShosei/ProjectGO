@@ -21,4 +21,8 @@ public interface IPlayerInformationService
     /// <param name="targetPosition"> 距離を測定する対象の位置 </param>
     /// <returns> Playerとの距離 </returns>
     public float ToPlayerDistance(Vector3 targetPosition);
+
+    /// <summary> Playerに対してDamageを与える処理 </summary>
+    /// <param name="damage"> Damage量 </param>
+    public void TakeDamage(float damage);
 }
