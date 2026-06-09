@@ -121,17 +121,11 @@ public class CameraManager : MonoBehaviour
     [Tooltip("通常時のカメラ位置追従の遅延時間（秒）。大きいほど追従がゆっくりになる")]
     [SerializeField] private float _posSmoothTime = 0.2f;
 
-    [Header("プレイヤー追従遊び設定")]
-    [Tooltip("プレイヤーがこの半径（px）内にいる間はカメラをほぼ動かさない。大きいほど遊びが広くなる")]
-    [SerializeField] private float _playerAreaRadius = 80f;
-    [Tooltip("遊び範囲内でのカメラ中心への戻り速度。小さいほど緩やかに戻る")]
-    [SerializeField] private float _playerFollowSpeedInner = 1f;
-    [Tooltip("遊び範囲外でのカメラ追従速度。大きいほど素早くプレイヤーを追う")]
-    [SerializeField] private float _playerFollowSpeedOuter = 10f;
-
     [Header("ロックオン設定")]
     [Tooltip("ターゲットがこの半径（px）内に収まっている間はカメラが回転しないデッドゾーン")]
     [SerializeField] private float _lockOnAreaRadius = 100f;
+    [Tooltip("カメラ位置の目標追従速度（m/s）")]
+    [SerializeField] private float _lockOnPositionSpeed = 10f;
     [Tooltip("ターゲットがデッドゾーンを出た直後のカメラ回転速度の最小値")]
     [SerializeField] private float _lockOnFollowSpeedMin = 2f;
     [Tooltip("ターゲットが大きく逸脱したときのカメラ回転速度の最大値")]
@@ -146,7 +140,8 @@ public class CameraManager : MonoBehaviour
     [SerializeField] private float _lockOnBlendDuration = 0.4f;
     [Tooltip("ブレンドのEaseOut強度。値が大きいほど最初の動きが速く、終わりに急激に収束する")]
     [SerializeField, Range(1f, 8f)] private float _lockOnBlendExponent = 3f;
-    [SerializeField] 
+
+    [SerializeField]
     private LockOnController _lockOnController;
 
     #endregion
@@ -173,9 +168,6 @@ public class CameraManager : MonoBehaviour
 
     /// <summary>最初速く、終わりにゆっくり収束する。ロックオン開始ブレンドに使用。</summary>
     private float EaseOut(float t) => 1f - Mathf.Pow(1f - t, _lockOnBlendExponent);
-
-    /// <summary>最初ゆっくり、終わりに速くなる。プレイヤー追従の遊び範囲内で使用。</summary>
-    private float EaseInCubic(float t) => t * t * t;
 
     #endregion
 
@@ -280,7 +272,7 @@ public class CameraManager : MonoBehaviour
     }
 
     /// <summary>
-    /// エリア判定に基づいてカメラの位置と回転を更新します。
+    /// カメラ位置と回転をエリア判定に基づいて更新します。
     /// </summary>
     private void UpdateLockOnCameraByArea(Transform targetCenter)
     {
@@ -289,29 +281,20 @@ public class CameraManager : MonoBehaviour
     }
 
     /// <summary>
-    /// プレイヤーの画面上の位置に応じてカメラ位置を更新します。
-    /// 遊び範囲内ではEaseInで緩やかに中心へ戻り、範囲外では速く追従します。
+    /// カメラ位置を目標位置へ一定速度で追従させます。
     /// </summary>
     private void UpdateCameraPosition()
     {
-        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
-        Vector2 playerScreenPos = GetScreenPos(_playerTransform.position);
-        float deviation = Vector2.Distance(playerScreenPos, screenCenter);
-
-        float speed = deviation > _playerAreaRadius
-            ? _playerFollowSpeedOuter
-            : _playerFollowSpeedInner * EaseInCubic(deviation / _playerAreaRadius);
-
         _lockOnCamera.transform.position = Vector3.MoveTowards(
             _lockOnCamera.transform.position,
             CalcDesiredPosition(),
-            speed * Time.fixedDeltaTime
+            _lockOnPositionSpeed * Time.fixedDeltaTime
         );
     }
 
     /// <summary>
     /// ターゲットの画面上の位置に応じてカメラ回転を更新します。
-    /// ロックオンエリア内では回転せず、エリア外に出た逸脱量に応じて速度が上がります。
+    /// デッドゾーン内では回転せず、逸脱量に応じて速度が上がります。
     /// ターゲットがカメラ後方に回り込んだ場合は最大速度で強制追従します。
     /// </summary>
     private void UpdateCameraRotation(Transform targetCenter)
@@ -353,7 +336,9 @@ public class CameraManager : MonoBehaviour
 
     #region ヘルパー
 
-    /// <summary>ロックオン開始時のブレンド初期値を記録します。</summary>
+    /// <summary>
+    /// ロックオン開始時のブレンド初期値を記録します。
+    /// </summary>
     private void BeginLockOnBlend()
     {
         _blendStartPosition = _lockOnCamera.transform.position;
@@ -362,19 +347,36 @@ public class CameraManager : MonoBehaviour
         _isLockOnBlending = true;
     }
 
-    /// <summary>プレイヤーの真後ろにカメラを置くための目標位置を計算します。</summary>
+    ///  <summary>
+    /// プレイヤーの真後ろにカメラを置くための目標位置を計算します。
+    /// </summary>
     private Vector3 CalcDesiredPosition()
     {
-        Vector3 back = -_playerTransform.forward;
-        back.y = 0f;
-        back.Normalize();
+        // ロックオン中はカメラの向きの逆方向から距離を取る
+        if (IsLockedOn)
+        {
+            Vector3 back = -_lockOnCamera.transform.forward;
+            back.y = 0f;
+            back.Normalize();
+
+            return _playerTransform.position
+                 + (back * _cameraDistance)
+                 + (Vector3.up * _cameraHeight);
+        }
+
+        // 通常時はプレイヤーの向きの逆方向
+        Vector3 backNormal = -_playerTransform.forward;
+        backNormal.y = 0f;
+        backNormal.Normalize();
 
         return _playerTransform.position
-             + (back * _cameraDistance)
+             + (backNormal * _cameraDistance)
              + (Vector3.up * _cameraHeight);
     }
 
-    /// <summary>プレイヤーとターゲットの中間点を見るカメラ回転を計算します。</summary>
+    /// <summary>
+    /// プレイヤーとターゲットの中間点を見るカメラ回転を計算します。
+    /// </summary>
     private Quaternion CalcDesiredRotation(Transform targetCenter, Vector3 fromPosition)
     {
         Vector3 lookAtPoint = Vector3.Lerp(_playerTransform.position, targetCenter.position, 0.5f);
@@ -395,14 +397,9 @@ public class CameraManager : MonoBehaviour
         _normalOrbitalFollow.VerticalAxis.Value = euler.x;
     }
 
-    /// <summary>ワールド座標をスクリーン座標（Vector2）に変換します。</summary>
-    private Vector2 GetScreenPos(Vector3 worldPos)
-    {
-        Vector3 raw = _mainCamera.WorldToScreenPoint(worldPos);
-        return new Vector2(raw.x, raw.y);
-    }
-
-    /// <summary>ターゲットが有効なロックオン対象かチェックします。</summary>
+    /// <summary>
+    /// ターゲットが有効なロックオン対象かチェックします。
+    /// </summary>
     private bool IsValidTarget(ILockOnTarget target)
     {
         if (target is not Component comp || !comp || !target.IsLockable || target.GetTargetCenter() == null)
@@ -413,7 +410,9 @@ public class CameraManager : MonoBehaviour
         return true;
     }
 
-    /// <summary>現在のターゲットが有効な状態かチェックします。</summary>
+    /// <summary>
+    /// 現在のターゲットが有効な状態かチェックします。
+    /// </summary>
     private bool IsCurrentTargetValid()
     {
         return _currentTargetComponent != null
@@ -421,7 +420,9 @@ public class CameraManager : MonoBehaviour
             && _currentTarget.GetTargetCenter() != null;
     }
 
-    /// <summary>現在のターゲットが自動解除距離を超えているかチェックします。</summary>
+    /// <summary>
+    /// 現在のターゲットが自動解除距離を超えているかチェックします。
+    /// </summary>
     private bool IsTargetOutOfRange()
     {
         return Vector3.Distance(_playerTransform.position, _currentTargetComponent.transform.position) > _autoUnlockRange;
