@@ -32,17 +32,11 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private int _skillSelectCount = 3;
 
     [Header("敵生成設定")]
-    [SerializeField] private WaveSequenceData _waveSequenceData;
-    [SerializeField] private WaveData _bossWaveData;
+    [SerializeField] private SpawnDataRepository _spawnDataRepository;
+    [SerializeField] private SpawnData _bossSpawnData;
 
     [Header("依存関係")]
     [SerializeField] private SkillSelectView _skillUIManager;
-
-    [SerializeField]
-    private EnemySpawner _enemySpawner;
-
-    [SerializeField]
-    private SpawnPointSelector _spawnPointSelector;
 
     private InputHandler _inputHandler;
     private SkillManager _skillManager;
@@ -56,9 +50,9 @@ public class SequenceManager : MonoBehaviour
 
     private void Start()
     {
-        if (_waveSequenceData == null || _waveSequenceData.Waves == null)
+        if (_spawnDataRepository == null || _spawnDataRepository.SpawnDatas == null)
         {
-            Debug.LogError("WaveSequenceDataが未設定です");
+            Debug.LogError("SpawnDataRepositoryが未設定です");
             enabled = false;
             return;
         }
@@ -71,8 +65,6 @@ public class SequenceManager : MonoBehaviour
         UpdateContext();
         _currentSequence.OnSequenceUpdate(_context);
 
-        _context.WaveController?.Tick();
-
         if (_currentSequence.IsComplete(_context))
         {
             NextSequence();
@@ -81,15 +73,6 @@ public class SequenceManager : MonoBehaviour
 
     private void InitializeContext()
     {
-        if (_spawnPointSelector == null)
-        {
-            Debug.LogError("SpawnPointSelectorが未設定");
-            enabled = false;
-            return;
-        }
-
-        _spawnPointSelector.Initialize();
-
         _context = new SequenceContext
         {
             EnemyManager = _enemyManager,
@@ -99,14 +82,6 @@ public class SequenceManager : MonoBehaviour
             InputHandler = _inputHandler,
             Player = _player
         };
-
-        if (_context.WaveController == null)
-        {
-            _context.WaveController =
-        new WaveController(
-            _enemyManager,
-            _spawnPointSelector);
-        }
 
         // EnemyManagerのイベント購読
         _enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
@@ -145,31 +120,31 @@ public class SequenceManager : MonoBehaviour
         // 雑魚敵シークエンスの場合、対応するSpawnDataを設定
         if (_currentSequence.SequenceType == SequenceType.Enemy)
         {
-            if (_enemySequenceCount < _waveSequenceData.Waves.Count)
+            if (_enemySequenceCount < _spawnDataRepository.SpawnDatas.Length)
             {
-                _context.CurrentWaveData = _waveSequenceData.Waves[_enemySequenceCount];
+                _context.CurrentSpawnData = _spawnDataRepository.SpawnDatas[_enemySequenceCount];
                 _enemySequenceCount++;
             }
             else
             {
-                Debug.LogWarning($"WaveDataが不足しています。EnemySequence: {_enemySequenceCount}");
+                Debug.LogWarning($"SpawnDataが不足しています。EnemySequence: {_enemySequenceCount}");
             }
         }
         else if (_currentSequence.SequenceType == SequenceType.Boss)
         {
             // ボスシークエンスは特定のSpawnDataを使うか、直接生成するか
-            if (_bossWaveData == null)
+            if (_bossSpawnData == null)
             {
                 Debug.LogError("BossSpawnDataが未設定です");
                 enabled = false;
                 return;
             }
 
-            _context.CurrentWaveData = _bossWaveData;
+            _context.CurrentSpawnData = _bossSpawnData;
         }
         else
         {
-            _context.CurrentWaveData = null;
+            _context.CurrentSpawnData = null;
         }
 
         Debug.Log($"シークエンス開始: {_currentSequence.SequenceType} (Sequence {sequenceIndex + 1})");
@@ -193,8 +168,6 @@ public class SequenceManager : MonoBehaviour
     private void HandleEnemyDefeated()
     {
         _context.DefeatedCount++;
-
-        _context.WaveController?.OnEnemyDefeated();
     }
 
     private void HandleBossDefeated()
