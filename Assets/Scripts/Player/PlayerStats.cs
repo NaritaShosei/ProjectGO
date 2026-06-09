@@ -86,7 +86,6 @@ public class PlayerStats
 
         var beforeDeadHandlers = OnBeforeDead?.GetInvocationList();
 
-        // 死亡直前イベントで死亡が覆される場合は、死亡処理を行わない。
         if (beforeDeadHandlers != null)
         {
             // 死亡直前イベントを発火。true を返すハンドラーがあれば死亡をキャンセル。
@@ -102,10 +101,9 @@ public class PlayerStats
                     Debug.LogError($"エラーが発生しましたが、死亡処理は続行します。例外: {e}");
                 }
             }
-        }
 
-        // 死亡イベントを発火
-        OnDead?.Invoke();
+            OnDead?.Invoke();
+        }
     }
 
     public void Heal(float amount)

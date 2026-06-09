@@ -28,6 +28,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public PlayerMode CurrentMode => _modeController.CurrentMode;
 
+    public event Action OnDead;
 
     /// ダメージを受けたときのイベント。ダメージのコンテキスト情報を引数として渡す。
     public event Action<PlayerDamageEffectContext> OnDamagedEffect;
@@ -53,8 +54,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         add => _playerStats.OnThunderGaugeChanged += value;
         remove => _playerStats.OnThunderGaugeChanged -= value;
     }
-
-    public event Action OnDead;
 
     public void Init(SkillManager skillManager, InputHandler input)
     {

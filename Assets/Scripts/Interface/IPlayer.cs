@@ -4,8 +4,6 @@ using UnityEngine;
 public interface IPlayer :
      IPlayerStats
 {
-    public event Action OnDead;
-
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
     /// </summary>
