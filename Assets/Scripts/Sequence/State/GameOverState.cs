@@ -8,9 +8,9 @@ using UnityEngine;
 /// </summary>
 public class GameOverState : ISequenceState
 {
-    public SequenceStateType StateType => SequenceStateType.GameOver;
-
     private const float GameOverDuration = 10f;
+
+    public SequenceStateType StateType => SequenceStateType.GameOver;
 
     public void OnEnter(SequenceStateContext context)
     {

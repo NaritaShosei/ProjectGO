@@ -4,9 +4,9 @@
 /// </summary>
 public class BossBattleState : ISequenceState
 {
-    public SequenceStateType StateType => SequenceStateType.BossBattle;
-
     private const float BossBattleDuration = 120f;
+
+    public SequenceStateType StateType => SequenceStateType.BossBattle;
 
     public void OnEnter(SequenceStateContext context)
     {

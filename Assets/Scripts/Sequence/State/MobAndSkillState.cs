@@ -7,21 +7,15 @@ using UnityEngine;
 /// </summary>
 public class MobAndSkillState : ISequenceState
 {
-    public SequenceStateType StateType => SequenceStateType.MobAndSkill;
-
-    private enum SubPhase { Battle, SkillSelect }
-
-    private SubPhase _subPhase;
-    private int _waveEnemySequenceIndex;
-    private SkillSelectPresenter _skillSelectPresenter;
-
     /// <summary>モブ戦全体の制限時間（秒）</summary>
     private const float MobBattleDuration = 180f;
 
     /// <summary>スキル選択の制限時間（秒）</summary>
     private const float SkillSelectDuration = 10f;
 
-    public void OnEnter(SequenceStateContext context)
+    public SequenceStateType StateType => SequenceStateType.MobAndSkill;
+
+      public void OnEnter(SequenceStateContext context)
     {
         _waveEnemySequenceIndex = 0;
 
@@ -75,7 +69,12 @@ public class MobAndSkillState : ISequenceState
         // IsTimeUpはResetTransitionFlagsで消えるため不要
     }
 
-    // ── プライベート ──────────────────────────────────────────
+    // ── プライベート ────────────────────────────────
+    private enum SubPhase { Battle, SkillSelect }
+
+    private SubPhase _subPhase;
+    private int _waveEnemySequenceIndex;
+    private SkillSelectPresenter _skillSelectPresenter;
 
     private bool _waveCleared;
     private bool _timeUpFlag;
