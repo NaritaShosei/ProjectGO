@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,8 +10,13 @@ public class SkillSelectButton : MonoBehaviour,
     ISelectHandler,
     IDeselectHandler
 {
+    /// <summary> マウスカーソルが重なった際のイベント </summary>
+    public event Action<int> OnHighlighted;
+
     public void Setup(SkillViewData viewData, Action onClick)
     {
+        _skillId = viewData.Id; // スキルIDを保持しておく
+
         _nameText.text = viewData.Name;
         _explanationText.text = viewData.Explanation;
         _icon.sprite = viewData.Icon;
@@ -48,9 +53,12 @@ public class SkillSelectButton : MonoBehaviour,
     [SerializeField] private TextMeshProUGUI _explanationText;
     [SerializeField] private Image _icon;
 
+    private int _skillId; // スキルIDを保持しておく
+
     private void OnHovered()
     {
         Debug.Log("マウスが乗った");
+        OnHighlighted?.Invoke(_skillId);
         Highlight(true);
     }
 
@@ -63,6 +71,7 @@ public class SkillSelectButton : MonoBehaviour,
     private void OnSelected()
     {
         Debug.Log("方向キー等で選択された");
+        OnHighlighted?.Invoke(_skillId);
         Highlight(true);
     }
 
