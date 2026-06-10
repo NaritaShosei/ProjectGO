@@ -45,13 +45,13 @@ public class SkillSelectPresenter : IDisposable
         // 現在選択されているスキルIDを優先して登録する
         if (_view.CurrentSelectSkillId != -1)
         {
-            _skillManager.TryRegisterSkillId(_view.CurrentSelectSkillId, _stats);
+            SelectSkill(_view.CurrentSelectSkillId);
         }
 
         // そうでなければ、選択肢の最初のスキルを登録する
         else if (_currentSkills != null && _currentSkills.Count > 0)
         {
-            _skillManager.TryRegisterSkillId(_currentSkills[0].ID, _stats);
+            SelectSkill(_currentSkills[0].ID);
         }
 
         _view.Hide();
@@ -69,6 +69,12 @@ public class SkillSelectPresenter : IDisposable
 
     /// <summary> ボタンが押されたときに呼ばれる </summary>
     private void OnSkillSelected(int skillId)
+    {
+        SelectSkill(skillId);
+    }
+
+    /// <summary> スキルが選択されたときに呼ばれる </summary>
+    private void SelectSkill(int skillId)
     {
         _skillManager.TryRegisterSkillId(skillId, _stats);
         _view.Hide();
