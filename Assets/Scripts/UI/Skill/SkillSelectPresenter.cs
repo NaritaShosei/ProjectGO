@@ -49,7 +49,7 @@ public class SkillSelectPresenter : IDisposable
         }
 
         // そうでなければ、選択肢の最初のスキルを登録する
-        else if (_currentSkills.Count > 0)
+        else if (_currentSkills != null && _currentSkills.Count > 0)
         {
             _skillManager.TryRegisterSkillId(_currentSkills[0].ID, _stats);
         }
