@@ -198,7 +198,7 @@ public class MobAndSkillState : ISequenceState
     {
         // 時間切れ時は現在選択中のスキルを自動取得（UIの先頭）
         // SkillSelectPresenterは候補リストの先頭を自動選択する仕様
-        // TODO: PresenterにAutoSelect()を追加して先頭を自動取得する
+        _skillSelectPresenter.AutoSelect();
         context.IsSkillSelected = true;
     }
 
