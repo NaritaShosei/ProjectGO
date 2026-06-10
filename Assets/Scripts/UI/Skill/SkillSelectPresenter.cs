@@ -21,6 +21,8 @@ public class SkillSelectPresenter : IDisposable
     {
         _currentSkills = _skillManager.GetSelectableSkills(candidateCount);
 
+        _isSelected = false; // スキル選択が開始されたので、選択フラグをリセット
+
         var viewData = _currentSkills
             .Select(s => new SkillViewData(
                 s.ID,
@@ -67,6 +69,8 @@ public class SkillSelectPresenter : IDisposable
     private readonly IPlayerStats _stats;
     private List<SkillBase> _currentSkills;
 
+    private bool _isSelected = false; // スキルが選択されたかどうかのフラグ
+
     /// <summary> ボタンが押されたときに呼ばれる </summary>
     private void OnSkillSelected(int skillId)
     {
@@ -76,7 +80,14 @@ public class SkillSelectPresenter : IDisposable
     /// <summary> スキルが選択されたときに呼ばれる </summary>
     private void SelectSkill(int skillId)
     {
+        if (_isSelected)
+        {
+            return; // すでにスキルが選択されている場合は何もしない
+        }
+
         _skillManager.TryRegisterSkillId(skillId, _stats);
         _view.Hide();
+
+        _isSelected = true; // スキルが選択されたことを記録
     }
 }
