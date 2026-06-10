@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,6 +22,8 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
                 {
                     OnSkillSelected?.Invoke(skills[index].Id);
                 });
+
+                _buttons[i].OnHighlighted += SetCurrentSelectSkill;
             }
             else
             {
@@ -39,4 +41,9 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
 
     [SerializeField] private SkillSelectButton[] _buttons;
     [SerializeField] private GameObject _panel;
+
+    private void SetCurrentSelectSkill(int id)
+    {
+
+    }
 }
