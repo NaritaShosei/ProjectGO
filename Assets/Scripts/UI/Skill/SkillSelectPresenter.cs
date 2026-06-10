@@ -53,6 +53,8 @@ public class SkillSelectPresenter : IDisposable
         {
             _skillManager.TryRegisterSkillId(_currentSkills[0].ID, _stats);
         }
+
+        _view.Hide();
     }
 
     public void Dispose()
