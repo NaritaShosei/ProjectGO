@@ -39,6 +39,22 @@ public class SkillSelectPresenter : IDisposable
         return true;
     }
 
+    /// <summary> 時間切れの際に呼ばれるスキル自動選択 </summary>
+    public void AutoSelect()
+    {
+        // 現在選択されているスキルIDを優先して登録する
+        if (_view.CurrentSelectSkillId != -1)
+        {
+            _skillManager.TryRegisterSkillId(_view.CurrentSelectSkillId, _stats);
+        }
+
+        // そうでなければ、選択肢の最初のスキルを登録する
+        else if (_currentSkills.Count > 0)
+        {
+            _skillManager.TryRegisterSkillId(_currentSkills[0].ID, _stats);
+        }
+    }
+
     public void Dispose()
     {
         _view.OnSkillSelected -= OnSkillSelected;
