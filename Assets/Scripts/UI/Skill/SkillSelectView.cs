@@ -5,11 +5,18 @@ using UnityEngine.EventSystems;
 
 public class SkillSelectView : MonoBehaviour, ISkillSelectView
 {
+    /// <summary> スキルが選択されたときのイベント </summary>
     public event Action<int> OnSkillSelected;
 
+    /// <summary> 現在選択されているスキルID。選択されていない場合は-1 </summary>
+    public int CurrentSelectSkillId => _currentSelectSkillId;
+
+    /// <summary> スキル選択UIを表示する。初期かもここで </summary>
     public void Show(List<SkillViewData> skills)
     {
         EventSystem.current.SetSelectedGameObject(_buttons[0].gameObject.gameObject);
+
+        _currentSelectSkillId = -1; // 初期化
 
         for (int i = 0; i < _buttons.Length; i++)
         {
@@ -34,6 +41,7 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
         _panel.gameObject.SetActive(true);
     }
 
+    /// <summary> スキル選択UIを非表示にする </summary>
     public void Hide()
     {
         _panel.gameObject.SetActive(false);
@@ -42,8 +50,10 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     [SerializeField] private SkillSelectButton[] _buttons;
     [SerializeField] private GameObject _panel;
 
+    private int _currentSelectSkillId = -1;
+
     private void SetCurrentSelectSkill(int id)
     {
-
+        _currentSelectSkillId = id;
     }
 }
