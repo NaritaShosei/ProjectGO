@@ -703,6 +703,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3686545951686008242}
   - component: {fileID: 8440135078367233537}
+  - component: {fileID: 1355759329580380758}
+  - component: {fileID: 7245693978089855125}
   m_Layer: 0
   m_Name: CameraManager
   m_TagString: Untagged
@@ -744,7 +746,46 @@ MonoBehaviour:
   _cameraDistance: 5
   _cameraHeight: 2
   _posSmoothTime: 0.2
-  _rotFollowSpeed: 10
+  _playerAreaRadius: 100
+  _playerFollowSpeedInner: 1
+  _playerFollowSpeedOuter: 50
+  _lockOnAreaRadius: 150
+  _lockOnFollowSpeedMin: 1
+  _lockOnFollowSpeedMax: 50
+  _lockOnDeadzone: 150
+  _autoUnlockRange: 25
+  _lockOnBlendDuration: 0.4
+  _lockOnBlendExponent: 3
+--- !u!114 &1355759329580380758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7749162525453086863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdb35627d11b8924dbbf65a168d5d78a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LockOnAreaVisualizer
+  _showArea: 1
+  _normalColor: {r: 1, g: 0.25943398, b: 0.25943398, a: 0.9019608}
+  _lockedOnColor: {r: 1, g: 0.5, b: 0, a: 0.74509805}
+  _cameraManager: {fileID: 8440135078367233537}
+--- !u!114 &7245693978089855125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7749162525453086863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d68fc914087c7d446abaa82aea0ecf67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LockOnController
+  _autoLockOnDuration: 2
+  _lockOnRange: 20
 --- !u!1 &7983131993696928466
 GameObject:
   m_ObjectHideFlags: 0
