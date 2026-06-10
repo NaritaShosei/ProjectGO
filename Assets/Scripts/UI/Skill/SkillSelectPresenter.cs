@@ -21,6 +21,8 @@ public class SkillSelectPresenter : IDisposable
     {
         _currentSkills = _skillManager.GetSelectableSkills(candidateCount);
 
+        _isSelected = false; // スキル選択が開始されたので、選択フラグをリセット
+
         var viewData = _currentSkills
             .Select(s => new SkillViewData(
                 s.ID,
@@ -39,6 +41,24 @@ public class SkillSelectPresenter : IDisposable
         return true;
     }
 
+    /// <summary> 時間切れの際に呼ばれるスキル自動選択 </summary>
+    public void AutoSelect()
+    {
+        // 現在選択されているスキルIDを優先して登録する
+        if (_view.CurrentSelectSkillId != -1)
+        {
+            SelectSkill(_view.CurrentSelectSkillId);
+        }
+
+        // そうでなければ、選択肢の最初のスキルを登録する
+        else if (_currentSkills != null && _currentSkills.Count > 0)
+        {
+            SelectSkill(_currentSkills[0].ID);
+        }
+
+        _view.Hide();
+    }
+
     public void Dispose()
     {
         _view.OnSkillSelected -= OnSkillSelected;
@@ -49,10 +69,25 @@ public class SkillSelectPresenter : IDisposable
     private readonly IPlayerStats _stats;
     private List<SkillBase> _currentSkills;
 
+    private bool _isSelected = false; // スキルが選択されたかどうかのフラグ
+
     /// <summary> ボタンが押されたときに呼ばれる </summary>
     private void OnSkillSelected(int skillId)
     {
+        SelectSkill(skillId);
+    }
+
+    /// <summary> スキルが選択されたときに呼ばれる </summary>
+    private void SelectSkill(int skillId)
+    {
+        if (_isSelected)
+        {
+            return; // すでにスキルが選択されている場合は何もしない
+        }
+
         _skillManager.TryRegisterSkillId(skillId, _stats);
         _view.Hide();
+
+        _isSelected = true; // スキルが選択されたことを記録
     }
 }

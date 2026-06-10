@@ -1670,6 +1670,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d0baa8475c13541a510b7f3f450011, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerModeView
+--- !u!1 &1867647184 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4996710551187502800, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+  m_PrefabInstance: {fileID: 6837170418680516860}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1867647186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1867647184}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 287caa96f257797499e27a1b804162d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceManager
+  _skillUIManager: {fileID: 288090821}
+  _skillSelectCount: 3
+  _spawnDataRepository: {fileID: 11400000, guid: 5272d01d0cbdd8d488e53d3a54f5f3c8, type: 2}
+  _bossSpawnData: {fileID: 11400000, guid: 4a9d0c01234cc7d4eb282910d3e0f3af, type: 2}
 --- !u!114 &1997347486 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8909495184104594486, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
@@ -3153,6 +3174,10 @@ PrefabInstance:
       propertyPath: _playerGaugeView
       value: 
       objectReference: {fileID: 1617911760}
+    - target: {fileID: 7748896386332537814, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _sequenceManager
+      value: 
+      objectReference: {fileID: 1867647186}
     - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _gaugeParent
       value: 
@@ -3181,10 +3206,14 @@ PrefabInstance:
       propertyPath: _viewParent
       value: 
       objectReference: {fileID: 1393089256}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4996710551187502800, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1867647186}
   m_SourcePrefab: {fileID: 100100000, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
 --- !u!1001 &7257887957543716051
 PrefabInstance:
