@@ -9,6 +9,7 @@ public class BlockDamageSkill : SkillBase,IDamageModifier,IDamageReactionModifie
     {
         stats.AddDamageModifier(this);
         stats.AddDamageReactionModifier(this);
+        _isCoolDown = false;
     }
 
     public void Modify(ref float damage, PlayerMode mode)
