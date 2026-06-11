@@ -17,9 +17,6 @@ public class BlockDamageSkill : SkillBase,IDamageModifier,IDamageReactionModifie
         {
             damage = 0;
             _isCoolDown = true;
-
-            Debug.Log($"被ダメージを{damage}に軽減");
-
             StartCoolDown(_recastTime).Forget();
         }
     }
