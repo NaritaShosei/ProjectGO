@@ -59,6 +59,11 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     {
         _isLockable = true;
         _bossEnemyController.Init(_services);
+
+        foreach(var parts in _bossEnemyPartsView)
+        {
+            parts.Init(this);
+        }
     }
 
     /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
@@ -163,25 +168,6 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
             _bossEnemyController.OnUpdate();
     }
 
-    #region ボスの装備するアーマークラス
-    /// <summary> ボスの装備するアーマー </summary>
-    public class BossArmerView : MonoBehaviour
-    {
-        public void Init(BossEnemyView bossEnemyView)
-        {
-            _bossEnemyView = bossEnemyView;
-        }
-
-        /// <summary> アーマー破壊時の処理 </summary>
-        public async UniTask ArmerBreak()
-        {
-
-        }
-        
-        private BossEnemyView _bossEnemyView = null;
-    }
-    #endregion
-
     #region ボスエネミーの各部位
     [Serializable]
     public class BossEnemyPartsView : ILockOnTarget
@@ -214,6 +200,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         public void Init(BossEnemyView bossEnemyView)
         {
             _bossEnemyView = bossEnemyView;
+
+            if(_thisPartsArmer != null) _thisPartsArmer.Init(bossEnemyView);
         }
 
         [Header("このPartsのTransform")]

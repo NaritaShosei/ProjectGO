@@ -10,12 +10,16 @@ public class DamageSystem
         DamageContext attack,
         EnemyDefenseContext defense)
     {
+        // クリティカルならその分の攻撃力をAttackPowerに上乗せする
         if (attack.IsCritical) attack.AttackPower = GetCriticalAttackPower(attack);
 
-        float damage =
-            attack.AttackPower
-          * GetEnemyDefenseTypeMultiplier(attack.PlayerMode, defense.EnemyType);
+        // 感電デバフ(仮)
+        if (defense.HasShockDebuff) attack.AttackPower *= 1.1f;
 
+        // 合計ダメージを割り出す
+        float damage = attack.AttackPower * GetEnemyDefenseTypeMultiplier(attack.PlayerMode, defense.EnemyType);
+
+        // 返り値
         return Mathf.RoundToInt(damage);
     }
 

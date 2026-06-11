@@ -36,7 +36,7 @@ public class BossEnemyController
 
     }
 
-    /// <summary> ダメージを受けた際に行うメソッド </summary>
+    /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
     public void HandleDamaged(DamageContext damageContext, BossEnemyPartsType hitParts)
     {
         // 受けて個所によって防御力(肉質)を取得
@@ -84,6 +84,7 @@ public class BossEnemyController
 
     private CompositeDisposable _disposables = new CompositeDisposable();
 
+    /// <summary> Bossが死んだ際に呼ばれるメソッド </summary>
     private void HandleDead(IEnemy enemy)
     {
         // event購読を終了
@@ -92,6 +93,7 @@ public class BossEnemyController
         _phaseChanger.OnFinishAllPhase -= _bossEnemyView.Dead;
     }
 
+    /// <summary> BossのPhaseが切り替わった際に呼ばれるメソッド </summary>
     private void HandlePhaseChange(BossEnemyData bossEnemyData)
     {
         Debug.Log("PhaseChange");
@@ -108,7 +110,7 @@ public class BossEnemyController
 
         _currentPhaseBossEnemyData.CurrentHP.Subscribe(async hp =>
         {
-            _bossEnemyUIView.CurrentBar.TakeDamage(hp).Forget();
+            await _bossEnemyUIView.CurrentBar.TakeDamage(hp);
         }).AddTo(_disposables);
     }
 }

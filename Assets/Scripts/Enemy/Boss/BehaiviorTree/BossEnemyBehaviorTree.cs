@@ -40,8 +40,8 @@ namespace BossEnemy.BehaviorTree
         /// <param name="nextNode"> 次のNode </param>
         public void ChangeNode(ITreeNode nextNode)
         {
-            if(nextNode.BehaviourTree == null) nextNode.Init(this);
-            if(nextNode == null) return;
+            if (nextNode == null) return;
+            if (nextNode.BehaviourTree == null) nextNode.Init(this);
 
             if (_currentNode != null) 
                 _currentNode.OnExit();
@@ -136,7 +136,9 @@ namespace BossEnemy.BehaviorTree
             // 子NodeがいなければこのNodeが終点となる
             get
             {
-                return _childrenNode != null || _childrenNode.Length > 0;
+                if(_childrenNode == null) return true;
+                else if(_childrenNode.Length == 0) return true;
+                else return false;
             }
         }
 

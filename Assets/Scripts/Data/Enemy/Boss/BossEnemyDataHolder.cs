@@ -1,11 +1,8 @@
 using BossEnemy.BehaviorTree;
 using System;
-using System.Collections.Generic;
 using UniRx;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 // BossEnemyに関するData
 namespace BossEnemy.Data
@@ -78,12 +75,13 @@ namespace BossEnemy.Data
         public void Init(Transform bossEnemyTransform)
         {
             // 現在の座標をセット
-            SetPosition(bossEnemyTransform.position);
+            _position = new(bossEnemyTransform.position);
+
             // 現在の回転座標をセット
-            SetRotation(bossEnemyTransform.rotation);
+            _rotation = new(bossEnemyTransform.rotation);
 
             // HPを最大値にする
-            _currentHP.Value = _maxHP;
+            _currentHP = new(_maxHP);
 
             // 各アーマーの初期化
             _rightArmArmer.Init();
@@ -191,13 +189,13 @@ namespace BossEnemy.Data
         /// <param name="damage"> ダメージ総量 </param>
         public void Damage(int damage)
         {
-            _currentHP.Value -= damage;
-
-            if (_currentHP.Value < 0)
+            if (_currentHP.Value - damage <= 0)
             {
                 _currentHP.Value = 0;
                 _isArmerBreak = true;
             }
+
+            _currentHP.Value -= damage;
         }
 
         [Header("最大HP")]

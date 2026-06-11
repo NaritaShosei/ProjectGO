@@ -1,7 +1,20 @@
-using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public sealed class BossArmerView : MonoBehaviour
+
+/// <summary> ボスの装備するアーマー </summary>
+public class BossArmerView : MonoBehaviour
 {
-    
+    public void Init(BossEnemyView bossEnemyView)
+    {
+        _bossEnemyView = bossEnemyView;
+    }
+
+    /// <summary> アーマー破壊時の処理 </summary>
+    public async UniTask ArmerBreak()
+    {
+
+    }
+
+    private BossEnemyView _bossEnemyView = null;
 }

@@ -64,7 +64,7 @@ public class EnemyData : ScriptableObject
     [SerializeField] private float _approachSpeed = 3f;
 
     [Header("Attack")]
-    [SerializeField, Tooltip("徘徊時のSpeed")] private List<EnemyAttackPattern> _attackPatterns = new();
+    [SerializeField, Tooltip("Attack")] private List<EnemyAttackPattern> _attackPatterns = new();
 
     [Header("Knockback")]
     // Power がこの値以下なら Hit（level 0）
