@@ -13,7 +13,7 @@ public class BossArmerView : MonoBehaviour
     /// <summary> アーマー破壊時の処理 </summary>
     public async UniTask ArmerBreak()
     {
-
+        await UniTask.CompletedTask;
     }
 
     private BossEnemyView _bossEnemyView = null;
