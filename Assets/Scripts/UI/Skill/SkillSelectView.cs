@@ -14,8 +14,6 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     /// <summary> スキル選択UIを表示する。初期化もここで </summary>
     public void Show(List<SkillViewData> skills)
     {
-        EventSystem.current.SetSelectedGameObject(_buttons[0].gameObject);
-
         _currentSelectSkillId = -1; // 初期化
 
         for (int i = 0; i < _buttons.Length; i++)
@@ -40,6 +38,10 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
         }
 
         _panel.gameObject.SetActive(true);
+
+        _currentSelectSkillId = skills.Count > 0 ? skills[0].Id : -1; // 最初のスキルをデフォルト選択
+
+        EventSystem.current.SetSelectedGameObject(_buttons[0].gameObject);
     }
 
     /// <summary> スキル選択UIを非表示にする </summary>

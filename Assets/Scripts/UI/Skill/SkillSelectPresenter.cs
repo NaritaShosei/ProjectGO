@@ -55,8 +55,6 @@ public class SkillSelectPresenter : IDisposable
         {
             SelectSkill(_currentSkills[0].ID);
         }
-
-        _view.Hide();
     }
 
     public void Dispose()
@@ -85,9 +83,9 @@ public class SkillSelectPresenter : IDisposable
             return; // すでにスキルが選択されている場合は何もしない
         }
 
+        _isSelected = true; // スキルが選択されたことを記録
+
         _skillManager.TryRegisterSkillId(skillId, _stats);
         _view.Hide();
-
-        _isSelected = true; // スキルが選択されたことを記録
     }
 }
