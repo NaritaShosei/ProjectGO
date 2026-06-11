@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.47
-  _comboWindowStartTime: 0.47
-  _comboWindowEndTime: 1.19
+  _attackExecuteTime: 0.59
+  _comboWindowStartTime: 0.59
+  _comboWindowEndTime: 1.09
 --- !u!1102 &-9185387951244037547
 AnimatorState:
   serializedVersion: 6
@@ -118,7 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.791
+  _attackExecuteTime: 0.6666667
   _comboWindowStartTime: 0.5
   _comboWindowEndTime: 0.863
 --- !u!114 &-8572658575067035617
@@ -156,7 +156,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 9067093048684652814, guid: a959989910b3dc24bb083ffe9aa1a88a, type: 3}
+  m_Motion: {fileID: 9067093048684652814, guid: 216f8667657c26b4290fdb6df57ccfde, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -394,7 +394,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1178167638873134046, guid: c30ad4fd9be9c30408728914a362ac61, type: 3}
+  m_Motion: {fileID: 1178167638873134046, guid: 9722ef39d30ff0e4399891e0a9bb49d1, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.68
+  _attackExecuteTime: 0.91
   _comboWindowStartTime: 0
   _comboWindowEndTime: 0
 --- !u!1102 &-7044059443295716919
@@ -437,7 +437,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 9067093048684652814, guid: 589a3469a37d7654c8e88cd4287f44ca, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: a61f7c39337c923458a3c54db4b7c1c7, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -708,7 +708,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 1827226128182048838, guid: 10d62cb2f12447643b5bab58bcce0a13, type: 3}
+    m_Motion: {fileID: 1827226128182048838, guid: e71874007d764ca4d873811d8a9f64a1, type: 3}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -857,7 +857,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -3291206362154003629, guid: 589a3469a37d7654c8e88cd4287f44ca, type: 3}
+  m_Motion: {fileID: -8481709605947105597, guid: a61f7c39337c923458a3c54db4b7c1c7, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -905,7 +905,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -8481709605947105597, guid: c30ad4fd9be9c30408728914a362ac61, type: 3}
+  m_Motion: {fileID: -8481709605947105597, guid: 9722ef39d30ff0e4399891e0a9bb49d1, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1188,7 +1188,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: a959989910b3dc24bb083ffe9aa1a88a, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: 216f8667657c26b4290fdb6df57ccfde, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1251,9 +1251,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.128
-  _comboWindowStartTime: 0.128
-  _comboWindowEndTime: 0.8
+  _attackExecuteTime: 0.7833334
+  _comboWindowStartTime: 0.7833334
+  _comboWindowEndTime: 1.05
 --- !u!114 &-3089178525533405144
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1266,7 +1266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5717a9b29099ef4e936e62e37364764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DodgeSMB
-  _dodgeInvincibilityStartFrame: 14
+  _dodgeInvincibilityStartFrame: 0
 --- !u!1109 &-3047913078075690707
 AnimatorTransition:
   m_ObjectHideFlags: 1
@@ -1304,7 +1304,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: 589a3469a37d7654c8e88cd4287f44ca, type: 3}
+  m_Motion: {fileID: 9067093048684652814, guid: a61f7c39337c923458a3c54db4b7c1c7, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1459,7 +1459,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 1827226128182048838, guid: 10d62cb2f12447643b5bab58bcce0a13, type: 3}
+    m_Motion: {fileID: 1827226128182048838, guid: e71874007d764ca4d873811d8a9f64a1, type: 3}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -1648,7 +1648,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: 54a95a1eadd7ccd478a8ec7bcb9dcc6d, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: 500ed8a1c6978cf46a42629e8683af02, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1836,7 +1836,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -8481709605947105597, guid: a959989910b3dc24bb083ffe9aa1a88a, type: 3}
+  m_Motion: {fileID: -8481709605947105597, guid: 216f8667657c26b4290fdb6df57ccfde, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1905,7 +1905,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1178167638873134046, guid: a959989910b3dc24bb083ffe9aa1a88a, type: 3}
+  m_Motion: {fileID: 1178167638873134046, guid: 216f8667657c26b4290fdb6df57ccfde, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1951,9 +1951,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 0.24
+  _attackExecuteTime: 0.2333333
   _comboWindowStartTime: 0.24
-  _comboWindowEndTime: 0.533
+  _comboWindowEndTime: 0.45
 --- !u!1101 &1188721636029302602
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2245,7 +2245,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 9067093048684652814, guid: c30ad4fd9be9c30408728914a362ac61, type: 3}
+  m_Motion: {fileID: 9067093048684652814, guid: 9722ef39d30ff0e4399891e0a9bb49d1, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -2263,9 +2263,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2bd081e79db97e40ae71ba07091c249, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttackEventSMB
-  _attackExecuteTime: 1.04
-  _comboWindowStartTime: 1.04
-  _comboWindowEndTime: 2.916667
+  _attackExecuteTime: 1
+  _comboWindowStartTime: 1
+  _comboWindowEndTime: 2.9
 --- !u!206 &4229835036541717257
 BlendTree:
   m_ObjectHideFlags: 1
@@ -2420,7 +2420,7 @@ MonoBehaviour:
   _slowDuration: 0.01
   _targetGroup: 13
   _slowTimeScale: 0.1
-  _modeChangeEndTime: 1.66
+  _modeChangeEndTime: 1.2
 --- !u!1102 &5737161912101224771
 AnimatorState:
   serializedVersion: 6
@@ -2443,7 +2443,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: a14d3f3c34b290942913aa8e84c65ad4, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: 07e7f2788438d2c449abf9534e6d6fdf, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -2525,7 +2525,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: c30ad4fd9be9c30408728914a362ac61, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: 9722ef39d30ff0e4399891e0a9bb49d1, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -2791,7 +2791,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: 6786cecfb71f5e24cbd5484f50daca2a, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: e6b56b609a2b66943896891d47f41d49, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -2817,7 +2817,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -1493303027246044120, guid: 589a3469a37d7654c8e88cd4287f44ca, type: 3}
+  m_Motion: {fileID: 1178167638873134046, guid: a61f7c39337c923458a3c54db4b7c1c7, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -2859,7 +2859,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 1827226128182048838, guid: 73098e97c2e133547b963c70e669adf4, type: 3}
+  m_Motion: {fileID: 1827226128182048838, guid: 224322a902088bb44945aea265ff87e7, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
