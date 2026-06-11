@@ -80,14 +80,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     {
         if (_isDead) { return; }
 
-        int damage = DamageSystem.Calculate(context, _defenceContext);
+        int damage = DamageSystem.CalculateDamage(context, _defenceContext);
 
         _stats.TakeDamage(damage);
 
         bool isKill = _stats.CurrentHealth <= 0;
 
         // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
-        bool isWeakPoint = _defenceContext.EnemyType == EnemyType.Flesh
+        bool isWeakPoint = _defenceContext.EnemyType == EnemyDefenceType.Flesh
             && context.PlayerMode == PlayerMode.Thunder;
 
         context.OnHitResult?.Invoke(
@@ -263,7 +263,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         // 鎧の有無はMobEnemy.Init()で上書きされる。ここではデフォルト値として生身を設定する
         _defenceContext = new EnemyDefenseContext()
         {
-            EnemyType = EnemyType.Flesh,
+            EnemyType = EnemyDefenceType.Flesh,
             HasShockDebuff = false
         };
 
