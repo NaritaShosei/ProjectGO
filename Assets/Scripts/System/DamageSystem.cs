@@ -19,7 +19,11 @@ public class DamageSystem
         if (attack.IsCritical) attack.AttackPower = GetCriticalAttackPower(attack);
 
         // 感電デバフ
-        if (defense.HasShockDebuff) attack.AttackPower *= attack.ElectricShock.UpDamagePercentage;
+        if (defense.HasShockDebuff)
+        {
+            float upDamage = attack.AttackPower * attack.ElectricShock.UpDamagePercentage;
+            attack.AttackPower += upDamage;
+        }
 
         // 合計ダメージを割り出す
         float damage = attack.AttackPower * GetEnemyDefenseTypeMultiplier(attack.PlayerMode, defense.EnemyType);
@@ -35,7 +39,7 @@ public class DamageSystem
     /// <param name="isPlayerModeAddDamage"> Trueの際にPlayerModeによってダメージの変動を行う </param>
     /// <param name="damageHitPlaceType"> ダメージが当たった場所のEnemyDefenseType </param>
     /// <returns> 合計ダメージ </returns>
-    public static int CalculateDamage(int bodyDefense, DamageContext damageContext, 
+    public static int CalculateDamage(int bodyDefense, DamageContext damageContext,
         bool isPlayerModeAddDamage = false, EnemyDefenceType damageHitPlaceType = EnemyDefenceType.Flesh)
     {
         // 合計ダメージの変数
@@ -125,6 +129,4 @@ public class DamageSystem
         if (!attack.IsCritical) return attack.AttackPower;
         return attack.AttackPower * attack.CriticalMultiplier;
     }
-
-    
 }
