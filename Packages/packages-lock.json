@@ -1,11 +1,10 @@
 {
   "dependencies": {
     "com.cysharp.unitask": {
-      "version": "2.5.10",
+      "version": "file:com.cysharp.unitask",
       "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.2d.animation": {
       "version": "13.0.2",
