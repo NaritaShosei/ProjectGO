@@ -193,7 +193,6 @@ namespace BossEnemy.Data
             {
                 _currentHP.Value = 0;
                 _isArmerBreak = true;
-                return;
             }
 
             _currentHP.Value -= damage;
