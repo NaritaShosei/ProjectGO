@@ -26,7 +26,7 @@ public class BlockDamageSkill : SkillBase,IDamageModifier,IDamageReactionModifie
 
     public bool CanInterrupt(PlayerState state)
     {
-        return false;
+        return _isCoolDown;
     }
 
     [SerializeField] private float _recastTime = 10;
