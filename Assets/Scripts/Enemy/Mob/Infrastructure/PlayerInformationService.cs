@@ -72,6 +72,13 @@ public class PlayerInformationService : IPlayerInformationService
         return distance;
     }
 
+    /// <summary> Playerに対してDamageを与える処理 </summary>
+    /// <param name="damage"> Damage量 </param>
+    public void TakeDamage(float damage)
+    {
+        _player.TakeDamage(damage);
+    }
+
     private IPlayer _player = null;
     private EnemyManager _enemyManager = null;
 

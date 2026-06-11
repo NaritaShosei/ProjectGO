@@ -44,6 +44,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
         _enemySpawner.Init(_enemyServices);
+        _bossEnemySpawner.Init(_enemyServices);
     }
 
     /// <summary> エネミーの生成 </summary>
@@ -166,9 +167,29 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary> ボスを生成 </summary>
-    public void SpawnBoss(GameObject bossPrefab, Vector3 position)
+    public void SpawnBoss(string poolKey, Vector3 pos)
     {
-        Spawn(bossPrefab, position);
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
+        IEnemy enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
+        if (enemy == null) return;
+
+        // Enemy死亡時と被弾時のイベント登録
+        enemy.OnDead += HandleEnemyDead;
+        enemy.OnDamaged += HandleEnemyDamaged;
+
+        _enemiesTransformList.Add(enemy.Self);
+
+        OnEnemySpawned?.Invoke(enemy);
+
+        enemy.Init();
+
+        _spatialHashGrid.Register(enemy, pos);
+        _enemies.Add(enemy);
     }
 
     [Header("Spatial Hash Grid")]
@@ -181,7 +202,7 @@ public class EnemyManager : MonoBehaviour
 
     // Enemyの生成を行うクラス
     [SerializeField] private EnemySpawner _enemySpawner;
-
+    [SerializeField] private BossEnemySpawner _bossEnemySpawner;
 
     private List<Transform> _enemiesTransformList = new List<Transform>();
     private List<IEnemy> _enemies = new();

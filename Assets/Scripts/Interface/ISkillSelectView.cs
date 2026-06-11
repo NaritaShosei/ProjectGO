@@ -1,13 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public interface ISkillSelectView
 {
+    public event Action<int> OnSkillSelected;
+    public int CurrentSelectSkillId { get; }
+
     public void Show(List<SkillViewData> skills);
     public void Hide();
-
-    public event Action<int> OnSkillSelected;
 }
 
 public readonly struct SkillViewData
