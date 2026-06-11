@@ -21,13 +21,15 @@ public class BossEnemySpawner : MonoBehaviour
     /// <param name="poolKey">Enemyのキー</param>
     /// <param name="position">生成位置</param>
     /// <returns>生成されたEnemy</returns>
-    public IEnemy Spawn(Vector3 position)
+    public BossEnemyView Spawn(Vector3 position, out BossEnemyUIView bossEnemyUIView)
     {
-        IEnemy enemy = _bossEnemyObjectPool.Get();
-        BossEnemyUIView bossEnemyUIView = _enemyUIObjectPool.Get();
+        BossEnemyView enemy = _bossEnemyObjectPool.Get();
+        bossEnemyUIView = _enemyUIObjectPool.Get();
 
         enemy.InjectServices(_services);
         enemy.SetPosition(position);
+
+        enemy.BossEnemyController.SetView(enemy, bossEnemyUIView);
 
         return enemy;
     }

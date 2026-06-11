@@ -55,16 +55,16 @@ public class EnemyData : ScriptableObject
 
 
     [Header("Status")]
-    [SerializeField] private float _maxHP = 100f;
+    [SerializeField, Tooltip("最大HP")] private float _maxHP = 100f;
 
     [Header("Movement")]
     [Min(0f)]
-    [SerializeField] private float _roamSpeed = 1f;
+    [SerializeField, Tooltip("徘徊時のSpeed")] private float _roamSpeed = 1f;
     [Min(0f)]
     [SerializeField] private float _approachSpeed = 3f;
 
     [Header("Attack")]
-    [SerializeField] private List<EnemyAttackPattern> _attackPatterns = new();
+    [SerializeField, Tooltip("徘徊時のSpeed")] private List<EnemyAttackPattern> _attackPatterns = new();
 
     [Header("Knockback")]
     // Power がこの値以下なら Hit（level 0）

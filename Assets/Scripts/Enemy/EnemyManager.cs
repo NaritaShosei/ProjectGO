@@ -175,7 +175,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        IEnemy enemy =　_bossEnemySpawner.Spawn(pos);
+        IEnemy enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録

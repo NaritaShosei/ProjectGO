@@ -1,3 +1,4 @@
+using BossEnemy.Data;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
@@ -23,6 +24,9 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public event Action<IEnemy> OnDead;
 
     // --- Properties ---
+
+    /// <summary> BossEnemyと内部Modelを繋ぐControllerClass </summary>
+    public BossEnemyController BossEnemyController => _bossEnemyController;
 
     /// <summary>ConditionController への参照</summary>
     public IEnemyConditionController ConditionController { get; }
@@ -54,14 +58,28 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public void Init()
     {
         _isLockable = true;
+        _bossEnemyController.Init(_services);
     }
 
     /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
     public void TakeDamage(DamageContext context)
     {
-        Debug.Log("ダメージを受けた！");
+        BossEnemyPartsType partsType = BossEnemyPartsType.None;
 
-        _bossEnemyController.HandleDamaged(context);
+        // 攻撃から一番近いボスエネミーのパーツを割り出す
+        float saveClosestDistance = 1000;
+        foreach (var bossParts in _bossEnemyPartsView)
+        {
+            float playerDistance = _services.PlayerInformationService.ToPlayerDistance(bossParts.PartsPosition);
+
+            if (playerDistance < saveClosestDistance)
+            {
+                saveClosestDistance = playerDistance;
+                partsType = bossParts.BossEnemyPartsType;
+            }
+        }
+
+        _bossEnemyController.HandleDamaged(context, partsType);
 
         OnDamaged.Invoke(this);
     }
@@ -95,7 +113,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     /// </summary>
     public Transform GetTargetCenter()
     {
-        return transform;
+        return _targetCenterTransform;
     }
 
     /// <summary>
@@ -116,15 +134,21 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         _isLockable = false;
     }
 
+    /// <summary> 死んだ際の処理 </summary>
+    public void Dead()
+    {
+        OnDead.Invoke(this);
+    }
+
     [Header("BossEnemyのController")]
     [SerializeField, Tooltip("BossEnemyのViewとModelの仲介役")] 
     private BossEnemyController _bossEnemyController;
 
-    [Header("ボスが装着する各ArmerのView")]
-    [SerializeField, Tooltip("右手Armer")] private BossArmerView _rightArmArmer;
-    [SerializeField, Tooltip("左手Armer")] private BossArmerView _leftArmArmer;
-    [SerializeField, Tooltip("右足Armer")] private BossArmerView _rightLegArmer;
-    [SerializeField, Tooltip("左足Armer")] private BossArmerView _leftLegArmer;
+    [Header("ボスエネミーの各部位のView")]
+    [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
+
+    [Header("ロックオン対象のTransform")]
+    [SerializeField] private Transform _targetCenterTransform;
 
     private EnemyServices _services;
 
@@ -141,18 +165,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
     #region ボスの装備するアーマークラス
     /// <summary> ボスの装備するアーマー </summary>
-    public class BossArmerView : ILockOnTarget
+    public class BossArmerView : MonoBehaviour
     {
-        /// <summary>
-        /// ロックオンなどの中心のTransformを取得する
-        /// </summary>
-        public Transform GetTargetCenter() => _targetCenter;
-
-        /// <summary>
-        /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
-        /// </summary>
-        public bool IsLockable => _bossEnemyView.IsLockable;
-
         public void Init(BossEnemyView bossEnemyView)
         {
             _bossEnemyView = bossEnemyView;
@@ -163,9 +177,53 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         {
 
         }
+        
+        private BossEnemyView _bossEnemyView = null;
+    }
+    #endregion
 
-        [Header("ロックオンなどの中心のTransformを取得する")]
-        [SerializeField]private Transform _targetCenter = null;
+    #region ボスエネミーの各部位
+    [Serializable]
+    public class BossEnemyPartsView : ILockOnTarget
+    {
+        /// <summary>
+        /// ロックオンなどの中心のTransformを取得する
+        /// </summary>
+        public Transform GetTargetCenter() => _partsTransform;
+
+        /// <summary>
+        /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
+        /// </summary>
+        public bool IsLockable => _bossEnemyView.IsLockable;
+
+        /// <summary>
+        /// パーツの座標
+        /// </summary>
+        public Vector3 PartsPosition => _partsTransform.position;
+
+        /// <summary>
+        /// このパーツにつけるアーマー
+        /// </summary>
+        public BossArmerView ThisPartsArmer => _thisPartsArmer;
+
+        /// <summary>
+        /// このパーツの硬さ(肉質)
+        /// </summary>
+        public BossEnemyPartsType BossEnemyPartsType => _bossEnemyPartsType;
+
+        public void Init(BossEnemyView bossEnemyView)
+        {
+            _bossEnemyView = bossEnemyView;
+        }
+
+        [Header("このPartsのTransform")]
+        [SerializeField] private Transform _partsTransform;
+
+        [Header("このパーツに装備するアーマー(なければNullにする)")]
+        [SerializeField] private BossArmerView _thisPartsArmer = null;
+
+        [Header("このPartsの硬さ(肉質)")]
+        [SerializeField] private BossEnemyPartsType _bossEnemyPartsType;
 
         private BossEnemyView _bossEnemyView = null;
     }

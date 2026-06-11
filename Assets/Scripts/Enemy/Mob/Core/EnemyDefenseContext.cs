@@ -7,7 +7,7 @@ using UnityEngine;
 public struct EnemyDefenseContext
 {
     /// <summary>鎧 / 生身</summary>
-    public EnemyType EnemyType;
+    public EnemyDefenceType EnemyType;
     /// <summary>感電弱体化状態か</summary>
     public bool HasShockDebuff;
 }
@@ -15,7 +15,7 @@ public struct EnemyDefenseContext
 /// <summary>
 /// Enemyの防御種別
 /// </summary>
-public enum EnemyType
+public enum EnemyDefenceType
 {
     [InspectorName("生身")]
     Flesh,

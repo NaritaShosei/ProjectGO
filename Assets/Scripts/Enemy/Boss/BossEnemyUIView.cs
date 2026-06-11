@@ -42,11 +42,13 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
         {
             _takeDamageSequence.Kill();
 
-            int endValue = currentHP / _maxHP;
+            float endValue = (float)currentHP / (float)_maxHP;
+
+            Debug.Log(endValue);
 
             await _takeDamageSequence.Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration));
-            await _takeDamageSequence.AppendInterval(_finishDamageDuration);
-            await _takeDamageSequence.Append(_damageBar.DOFillAmount(endValue, _finishDamageDuration));
+            await UniTask.Delay(_finishDamageDuration);
+            await _takeDamageSequence.Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
         }
 
         [Header("現在のHPを表すUI")]
@@ -60,7 +62,7 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
         private float _takeDamageAnimDuration;
 
         [SerializeField, Tooltip("HPBarのダメージ表現を終了させるまでの時間")]
-        private float _finishDamageDuration;
+        private int _finishDamageDuration;
 
         private int _maxHP;
 
@@ -73,7 +75,7 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
     /// <summary> 初期化 </summary>
     public void Init()
     {
-        
+
     }
 
     public void OnGet() { }
@@ -81,16 +83,19 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
     public void OnRelease() { }
 
     /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
-    public void PhaseChange(int currentPhase, int maxHP)
+    public void PhaseChange(BossEnemyData bossEnemyData, int currentPhase)
     {
         if (currentPhase >= _bossEnemyAllPhaseHPBarArray.Length)
         {
             Debug.LogError("存在しないPhaseのHPBarが選ばれました");
             return;
         }
-        _currentHPBar.Disable();
+
+        // 現在使用中のHPBarがあれば破棄
+        _currentHPBar?.Disable();
+
         _currentHPBar = _bossEnemyAllPhaseHPBarArray[currentPhase];
-        _currentHPBar.Init(maxHP);
+        _currentHPBar.Init(bossEnemyData.MaxHP);
     }
 
     [Header("各PhaseでのボスエネミーのHPUI")]
