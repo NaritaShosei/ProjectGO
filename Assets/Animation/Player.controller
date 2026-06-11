@@ -1266,7 +1266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5717a9b29099ef4e936e62e37364764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DodgeSMB
-  _dodgeInvincibilityStartFrame: 14
+  _dodgeInvincibilityStartFrame: 0
 --- !u!1109 &-3047913078075690707
 AnimatorTransition:
   m_ObjectHideFlags: 1
@@ -2420,7 +2420,7 @@ MonoBehaviour:
   _slowDuration: 0.01
   _targetGroup: 13
   _slowTimeScale: 0.1
-  _modeChangeEndTime: 1.66
+  _modeChangeEndTime: 1.2
 --- !u!1102 &5737161912101224771
 AnimatorState:
   serializedVersion: 6
