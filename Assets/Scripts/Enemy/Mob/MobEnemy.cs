@@ -102,7 +102,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         // 鎧登録　データがなければ裸
         if (_armor != null)
         {
-            _defenceContext.EnemyType = EnemyType.Armor;
+            _defenceContext.EnemyType = EnemyDefenceType.Armor;
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
             // Init()後に発火することで購読者がOnHealthChangedを安全に受け取れる
@@ -110,7 +110,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         }
         else
         {
-            _defenceContext.EnemyType = EnemyType.Flesh;
+            _defenceContext.EnemyType = EnemyDefenceType.Flesh;
         }
     }
 
@@ -125,7 +125,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         if (_armor != null)
         {
             _armor.gameObject.SetActive(true);
-            _defenceContext.EnemyType = EnemyType.Armor;
+            _defenceContext.EnemyType = EnemyDefenceType.Armor;
 
             _armor.OnBroken -= BreakArmor;
             _armor.OnBroken += BreakArmor;
@@ -149,24 +149,24 @@ public class MobEnemy : Enemy, IFormationParticipant
     {
         if (_isDead) { return; }
 
-        int damage = DamageSystem.Calculate(context, _defenceContext);
+        int damage = DamageSystem.CalculateDamage(context, _defenceContext);
 
         //ダメージ表示用に総ダメージを保存
         int showDamage = damage;
 
-        bool armorWasAlive = _defenceContext.EnemyType == EnemyType.Armor;
+        bool armorWasAlive = _defenceContext.EnemyType == EnemyDefenceType.Armor;
 
         // 鎧がダメージを肩代わり
-        if (_defenceContext.EnemyType == EnemyType.Armor)
+        if (_defenceContext.EnemyType == EnemyDefenceType.Armor)
         {
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
-        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
+        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyDefenceType.Flesh;
 
         // 弱点ヒットは生身かつ雷神モード攻撃時に有効
         bool isWeakPoint = (!armorWasAlive
-            && _defenceContext.EnemyType == EnemyType.Flesh
+            && _defenceContext.EnemyType == EnemyDefenceType.Flesh
             && context.PlayerMode == PlayerMode.Thunder)
             //鎧かつ闘神モードの時に有効
             || (armorWasAlive && context.PlayerMode == PlayerMode.Warrior);
@@ -308,7 +308,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// </summary>
     private void BreakArmor()
     {
-        _defenceContext.EnemyType = EnemyType.Flesh;
+        _defenceContext.EnemyType = EnemyDefenceType.Flesh;
         _armor.OnBroken -= BreakArmor;
         InvokeOnArmorBroken();
     }

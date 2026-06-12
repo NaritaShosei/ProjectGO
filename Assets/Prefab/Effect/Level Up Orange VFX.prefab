@@ -1,0 +1,839 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5903032592519319049
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5903032592519319040}
+  - component: {fileID: 5903032592519319047}
+  - component: {fileID: 5903032592519319046}
+  - component: {fileID: 5903032592519319045}
+  - component: {fileID: 5903032592519319051}
+  - component: {fileID: 5903032592519319050}
+  - component: {fileID: 5903032592519319048}
+  m_Layer: 0
+  m_Name: Level Up Blue VFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5903032592519319040
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 7526176138336370816}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!2083052967 &5903032592519319047
+VisualEffect:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  m_Enabled: 1
+  m_Asset: {fileID: 8926484042661614526, guid: 5b633feab5c77504ba87c91669e7d2bf, type: 3}
+  m_InitialEventName: hit
+  m_InitialEventNameOverriden: 0
+  m_StartSeed: 0
+  m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
+  m_ResourceVersion: 1
+  m_PropertySheet:
+    m_Float:
+      m_Array:
+      - m_Value: 1.8
+        m_Name: VFXHeight
+        m_Overridden: 1
+      - m_Value: 768
+        m_Name: SwarmSpawnRate
+        m_Overridden: 0
+      - m_Value: 1.1
+        m_Name: SwarmLifetimeMax
+        m_Overridden: 0
+      - m_Value: 0.35
+        m_Name: EyeGlowSize
+        m_Overridden: 0
+      - m_Value: 1.5
+        m_Name: SwarmDraughtMultiplier
+        m_Overridden: 0
+      - m_Value: 3
+        m_Name: SwarmGravityY
+        m_Overridden: 1
+      - m_Value: 32
+        m_Name: FervorSpawnRate
+        m_Overridden: 0
+      - m_Value: 128
+        m_Name: CreateSpikesSpawnCount
+        m_Overridden: 0
+      - m_Value: 0.5
+        m_Name: CreateSpikesLifetimeMax
+        m_Overridden: 0
+      - m_Value: 48
+        m_Name: CreateColumnSpawnCount
+        m_Overridden: 0
+      - m_Value: 0.25
+        m_Name: CreateColumnWidth
+        m_Overridden: 0
+      - m_Value: 0.8
+        m_Name: CreateColumnLifetimeMax
+        m_Overridden: 0
+      - m_Value: 8
+        m_Name: CreateWavesSpawnCount
+        m_Overridden: 0
+      - m_Value: 1.2
+        m_Name: FervorLifetimeMax
+        m_Overridden: 0
+      - m_Value: 64
+        m_Name: EndSpikesSpawnCount
+        m_Overridden: 0
+      - m_Value: 0.65
+        m_Name: EndGlowAlphaMax
+        m_Overridden: 0
+      - m_Value: 1.25
+        m_Name: EndGlowLifetimeMax
+        m_Overridden: 0
+      - m_Value: 0.5
+        m_Name: EndCircleAlpha
+        m_Overridden: 0
+      - m_Value: 64
+        m_Name: CoreSpawnRate
+        m_Overridden: 0
+      - m_Value: 384
+        m_Name: SmokeSpawnRate
+        m_Overridden: 0
+      - m_Value: 24
+        m_Name: RaysSpawnRate
+        m_Overridden: 0
+      - m_Value: 1
+        m_Name: CreateShockwaveAlpha
+        m_Overridden: 0
+      - m_Value: 48
+        m_Name: CreateRaysSpawnCount
+        m_Overridden: 0
+      - m_Value: 1.2
+        m_Name: CreateSmokeLifetimeMax
+        m_Overridden: 0
+      - m_Value: 96
+        m_Name: CreateSmokeSpawnCount
+        m_Overridden: 0
+      - m_Value: 640
+        m_Name: EndSwarmSpawnCount
+        m_Overridden: 0
+      - m_Value: 6
+        m_Name: EndShockwaveSpawnCount
+        m_Overridden: 0
+      - m_Value: 0.9
+        m_Name: EndSwarmLifetimeMax
+        m_Overridden: 0
+      - m_Value: 0.5
+        m_Name: SymbolSize
+        m_Overridden: 0
+      - m_Value: 1.9
+        m_Name: SymbolYOffsetFromGround
+        m_Overridden: 0
+      - m_Value: 1
+        m_Name: SymbolAlpha
+        m_Overridden: 1
+      - m_Value: 1.75
+        m_Name: SymbolLifetime
+        m_Overridden: 1
+      - m_Value: 1.5
+        m_Name: CritBoltsSmallSpawnDuration
+        m_Overridden: 1
+      - m_Value: 384
+        m_Name: SwarmSpawnCount
+        m_Overridden: 1
+      - m_Value: 8
+        m_Name: SpiralSpawnCount
+        m_Overridden: 1
+      - m_Value: 1.6
+        m_Name: RingSize
+        m_Overridden: 1
+      - m_Value: 96
+        m_Name: SparksSpawnCount
+        m_Overridden: 1
+      - m_Value: 8
+        m_Name: StripsSpawnCount
+        m_Overridden: 1
+      - m_Value: 1.2
+        m_Name: StripsSpawnRadius
+        m_Overridden: 1
+      - m_Value: 8
+        m_Name: CritBoltsLargeSpawnCount
+        m_Overridden: 1
+      - m_Value: 12
+        m_Name: CritBoltsSmallSpawnRate
+        m_Overridden: 1
+      - m_Value: 24
+        m_Name: CritWaveSpawnCount
+        m_Overridden: 1
+      - m_Value: 0.4
+        m_Name: CritWaveSpawnWidth
+        m_Overridden: 1
+    m_Vector2f:
+      m_Array:
+      - m_Value: {x: 0.4, y: 0.6}
+        m_Name: SwarmSizeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.04, y: 0.08}
+        m_Name: EyeBeamWidthMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.06, y: 0.14}
+        m_Name: FervorAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.5, y: 0.8}
+        m_Name: FervorSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.15, y: 0.3}
+        m_Name: CreateSpikesSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 4, y: 9}
+        m_Name: CreateSpikesGravityMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.2, y: 0.8}
+        m_Name: CreateColumnAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.5, y: 0.8}
+        m_Name: CreateColumnSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.2, y: 0.5}
+        m_Name: CreateWavesLifetimeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.3, y: 1.5}
+        m_Name: CreateWavesSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.1, y: 1}
+        m_Name: CreateWavesAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.15, y: 0.25}
+        m_Name: EndSpikesSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.3, y: 0.6}
+        m_Name: EndSpikesAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.02, y: 0.04}
+        m_Name: SwarmAlphaMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.75, y: 1}
+        m_Name: CoreAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.5, y: 1}
+        m_Name: SmokeAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.4, y: 0.8}
+        m_Name: CoreLifetimeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.75, y: 1.25}
+        m_Name: CoreSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 1, y: 1.5}
+        m_Name: SmokeSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.05, y: 0.1}
+        m_Name: RaysAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 1, y: 2}
+        m_Name: RaysSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.5, y: 1}
+        m_Name: CreateRaysAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.5, y: 1}
+        m_Name: CreateSmokeAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 1, y: 1.5}
+        m_Name: CreateSmokeSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.08, y: 0.22}
+        m_Name: EndSwarmSizeMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.05, y: 0.5}
+        m_Name: EndSwarmAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.08, y: 0.18}
+        m_Name: EndShockwaveAlphaMinMax
+        m_Overridden: 0
+      - m_Value: {x: 0.4, y: 0.6}
+        m_Name: SwarmLifetimeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.5, y: 0.6}
+        m_Name: SpiralSizeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1.2}
+        m_Name: BarsSizeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.1, y: 0.5}
+        m_Name: SpiralAlphaMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.75, y: 1}
+        m_Name: BarsAlphaMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.4, y: 0.6}
+        m_Name: SparksSizeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.1, y: 1}
+        m_Name: SparksAlphaMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.075, y: 0.1}
+        m_Name: StripsSizeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.1, y: 0.2}
+        m_Name: StripsAlphaMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.2, y: 0.35}
+        m_Name: CritBoltsSmallSizeMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.1, y: 1}
+        m_Name: CritWaveAlphaMinMax
+        m_Overridden: 1
+      - m_Value: {x: 0.4, y: 0.6}
+        m_Name: CritWaveSizeMinMax
+        m_Overridden: 1
+    m_Vector3f:
+      m_Array:
+      - m_Value: {x: 356.61206, y: 0, z: 270}
+        m_Name: VFXTransform_angles
+        m_Overridden: 1
+      - m_Value: {x: -1.7617678e-17, y: 1.0314258, z: 0.042659335}
+        m_Name: VFXTransform_position
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: VFXTransform_scale
+        m_Overridden: 1
+      - m_Value: {x: 0.1123653, y: 359.75043, z: 269.89447}
+        m_Name: SkinnedMeshTransform_angles
+        m_Overridden: 1
+      - m_Value: {x: -0.0004589334, y: -0.26407152, z: -0.0027876794}
+        m_Name: SkinnedMeshTransform_position
+        m_Overridden: 1
+      - m_Value: {x: 1.0000001, y: 1.0000001, z: 1}
+        m_Name: SkinnedMeshTransform_scale
+        m_Overridden: 1
+      - m_Value: {x: 0, y: 0.1, z: 0}
+        m_Name: VFXCenterOffset
+        m_Overridden: 1
+      - m_Value: {x: -0.000000603709, y: 0, z: 270}
+        m_Name: LeftEyeTransform_angles
+        m_Overridden: 1
+      - m_Value: {x: 6.3102135e-17, y: 1.4188018, z: -0.0022168104}
+        m_Name: LeftEyeTransform_position
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: LeftEyeTransform_scale
+        m_Overridden: 1
+      - m_Value: {x: -0.000000603709, y: 0, z: 270}
+        m_Name: RightEyeTransform_angles
+        m_Overridden: 1
+      - m_Value: {x: 0.040001586, y: 1.5107601, z: 0.07351604}
+        m_Name: RightEyeTransform_position
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: RightEyeTransform_scale
+        m_Overridden: 1
+      - m_Value: {x: -0.088, y: -0.041, z: 0.12}
+        m_Name: LeftEyeOffset
+        m_Overridden: 0
+      - m_Value: {x: 0, y: 0, z: 0}
+        m_Name: HeadTransform_angles
+        m_Overridden: 0
+      - m_Value: {x: 0, y: 0, z: 0}
+        m_Name: HeadTransform_position
+        m_Overridden: 0
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: HeadTransform_scale
+        m_Overridden: 0
+      - m_Value: {x: 356.61206, y: 0, z: 270}
+        m_Name: VFXCenterTransform_angles
+        m_Overridden: 1
+      - m_Value: {x: -1.7617678e-17, y: 1.0314258, z: 0.042659335}
+        m_Name: VFXCenterTransform_position
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: VFXCenterTransform_scale
+        m_Overridden: 1
+      - m_Value: {x: -0, y: 0, z: 0}
+        m_Name: VFXRotation_angles
+        m_Overridden: 1
+      - m_Value: {x: 0, y: 0, z: 0}
+        m_Name: VFXRotation_position
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: VFXRotation_scale
+        m_Overridden: 1
+      - m_Value: {x: 0, y: 0, z: 90}
+        m_Name: VFXRotationOffset
+        m_Overridden: 1
+      - m_Value: {x: 0, y: 0.2, z: 0}
+        m_Name: VFXOffset
+        m_Overridden: 1
+      - m_Value: {x: -0.12, y: 0.19, z: 0.16}
+        m_Name: RightEyeBeamEndOffset
+        m_Overridden: 0
+      - m_Value: {x: -0.12, y: -0.19, z: 0.16}
+        m_Name: LeftEyeBeamEndOffset
+        m_Overridden: 0
+      - m_Value: {x: -0, y: 0, z: 0}
+        m_Name: GroundParentTransform_angles
+        m_Overridden: 1
+      - m_Value: {x: 0, y: 0, z: 0}
+        m_Name: GroundParentTransform_position
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 1, z: 1}
+        m_Name: GroundParentTransform_scale
+        m_Overridden: 1
+    m_Vector4f:
+      m_Array:
+      - m_Value: {x: 1.9521693, y: 1.2422895, z: 33.89676, w: 1}
+        m_Name: SecondaryColor
+        m_Overridden: 1
+    m_Uint:
+      m_Array: []
+    m_Int:
+      m_Array: []
+    m_Matrix4x4f:
+      m_Array: []
+    m_AnimationCurve:
+      m_Array: []
+    m_Gradient:
+      m_Array:
+      - m_Value:
+          serializedVersion: 2
+          key0: {r: 0.627451, g: 11.984314, b: 11.984314, a: 1}
+          key1: {r: 1.6558532, g: 4.9675593, b: 31.626795, a: 1}
+          key2: {r: 0.627451, g: 1.882353, b: 11.984314, a: 0}
+          key3: {r: 0.17951572, g: 0.575328, b: 3.4854097, a: 0}
+          key4: {r: 0.035733357, g: 0.14336184, b: 0.6886792, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 188
+          ctime1: 22937
+          ctime2: 39321
+          ctime3: 52428
+          ctime4: 65535
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 5
+          m_NumAlphaKeys: 2
+        m_Name: ColorOverLife
+        m_Overridden: 1
+      - m_Value:
+          serializedVersion: 2
+          key0: {r: 5.2164755, g: 3.2500553, b: 0.2731139, a: 1}
+          key1: {r: 6.0084367, g: 3.8156726, b: 0.46142435, a: 1}
+          key2: {r: 11.984314, g: 8.083635, b: 1.8823531, a: 0}
+          key3: {r: 1.5529412, g: 1.2707176, b: 0.97566986, a: 0}
+          key4: {r: 0.7490196, g: 0.6431373, b: 0.47058824, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 9830
+          ctime2: 18013
+          ctime3: 43882
+          ctime4: 65535
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 5
+          m_NumAlphaKeys: 2
+        m_Name: ColorOverLife 1
+        m_Overridden: 1
+      - m_Value:
+          serializedVersion: 2
+          key0: {r: 5.2164755, g: 3.2500553, b: 0.2731139, a: 1}
+          key1: {r: 11.984314, g: 7.9686275, b: 1.882353, a: 1}
+          key2: {r: 1.5529412, g: 1.3254902, b: 0.972549, a: 0}
+          key3: {r: 0.7490196, g: 0.6431373, b: 0.47058824, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 18013
+          ctime2: 44265
+          ctime3: 65535
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 0
+          atime3: 0
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: -1
+          m_NumColorKeys: 4
+          m_NumAlphaKeys: 2
+        m_Name: SecondaryGradient
+        m_Overridden: 0
+    m_NamedObject:
+      m_Array:
+      - m_Value: {fileID: 0}
+        m_Name: SkinnedMesh
+        m_Overridden: 1
+      - m_Value: {fileID: 2800000, guid: 04f389ae0ac63ca4784402c348aa4521, type: 3}
+        m_Name: SymbolTexture
+        m_Overridden: 1
+    m_Bool:
+      m_Array: []
+--- !u!73398921 &5903032592519319046
+VFXRenderer:
+  serializedVersion: 1
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+--- !u!114 &5903032592519319045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdafc37f32b176349b1684c4455b98e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ExecuteInEditor: 1
+  m_Bindings:
+  - {fileID: 5903032592519319051}
+  - {fileID: 5903032592519319048}
+  m_VisualEffect: {fileID: 5903032592519319047}
+--- !u!114 &5903032592519319051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fdfea1f838247c40921a07afedde962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Space: 0
+  m_Property:
+    m_Name: SkinnedMeshTransform
+  Target: {fileID: 0}
+--- !u!114 &5903032592519319050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50c780b64d7b0c941a7428ec7f33a80f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5903032592519319048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5903032592519319049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fdfea1f838247c40921a07afedde962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Space: 0
+  m_Property:
+    m_Name: GroundParentTransform
+  Target: {fileID: 0}
+--- !u!1 &7526176138336370825
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7526176138336370816}
+  - component: {fileID: 4552455784530956874}
+  m_Layer: 0
+  m_Name: Level Up Orange VFX
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7526176138336370816
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7526176138336370825}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.29603958, y: -0.14262, z: -0.12065983}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5903032592519319040}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4552455784530956874
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7526176138336370825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: badbec4b346340040af1ab8747066130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelUpEffectView
+  _vfx: {fileID: 5903032592519319047}
+  _effectDataArray:
+  - _statSkillType: 0
+    _symbolTexture: {fileID: 2800000, guid: cb3208c267dda2546a5cdabcfc7d2172, type: 3}
+    _secondaryColor: {r: 2.5567203, g: 20.224806, b: 4.326269, a: 0}
+    _colorOverLife:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 0.94339156, g: 29.926897, b: 1.2098284, a: 1}
+      key2: {r: 0.29058677, g: 363.51016, b: 3.6295571, a: 0}
+      key3: {r: 0.25764707, g: 380.34235, b: 3.7516537, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 26291
+      ctime2: 45412
+      ctime3: 59753
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 2
+  - _statSkillType: 1
+    _symbolTexture: {fileID: 2800000, guid: cb3208c267dda2546a5cdabcfc7d2172, type: 3}
+    _secondaryColor: {r: 18.943594, g: 3.68149, b: 3.68149, a: 0}
+    _colorOverLife:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1024, g: 0, b: 0, a: 1}
+      key2: {r: 770.0553, g: 0.2482353, b: 0.2482353, a: 0}
+      key3: {r: 770.0553, g: 0.2482353, b: 0.2482353, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 52814
+      ctime2: 64070
+      ctime3: 65535
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 2
+  - _statSkillType: 2
+    _symbolTexture: {fileID: 2800000, guid: cb3208c267dda2546a5cdabcfc7d2172, type: 3}
+    _secondaryColor: {r: 3.6240733, g: 3.6068964, b: 19.309656, a: 0}
+    _colorOverLife:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 0.6731455, g: 4.8298388, b: 28.275522, a: 1}
+      key2: {r: 0, g: 12.7172575, b: 84.44851, a: 0}
+      key3: {r: 0, g: 12.7172575, b: 84.44851, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 29684
+      ctime2: 63453
+      ctime3: 65535
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 2
+  - _statSkillType: 3
+    _symbolTexture: {fileID: 2800000, guid: cb3208c267dda2546a5cdabcfc7d2172, type: 3}
+    _secondaryColor: {r: 20.491104, g: 22.055103, b: 2.455189, a: 0}
+    _colorOverLife:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 28.032042, g: 29.622498, b: 0.6570041, a: 1}
+      key2: {r: 79.811554, g: 84.44851, b: 0, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 33847
+      ctime2: 65535
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 3
+      m_NumAlphaKeys: 2
+  - _statSkillType: 4
+    _symbolTexture: {fileID: 2800000, guid: cb3208c267dda2546a5cdabcfc7d2172, type: 3}
+    _secondaryColor: {r: 3.8120277, g: 18.553757, b: 20.407835, a: 0}
+    _colorOverLife:
+      serializedVersion: 2
+      key0: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 0.5517234, g: 35.03328, b: 38.408012, a: 1}
+      key2: {r: 0, g: 76.92027, b: 84.44851, a: 0}
+      key3: {r: 0, g: 0, b: 0, a: 0}
+      key4: {r: 0, g: 0, b: 0, a: 0}
+      key5: {r: 0, g: 0, b: 0, a: 0}
+      key6: {r: 0, g: 0, b: 0, a: 0}
+      key7: {r: 0, g: 0, b: 0, a: 0}
+      ctime0: 0
+      ctime1: 34772
+      ctime2: 64841
+      ctime3: 0
+      ctime4: 0
+      ctime5: 0
+      ctime6: 0
+      ctime7: 0
+      atime0: 0
+      atime1: 65535
+      atime2: 0
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_ColorSpace: -1
+      m_NumColorKeys: 3
+      m_NumAlphaKeys: 2
+  _effectDuration: 2

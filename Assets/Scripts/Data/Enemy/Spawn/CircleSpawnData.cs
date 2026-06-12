@@ -1,11 +1,18 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "CircleSpawnData", menuName = "GameData/SpawnData/Circle")]
 
 public class CircleSpawnData : SpawnData
 {
+    public enum SpawnEnemyType
+    {
+        Mob,
+        Boss
+    }
+
     public Vector3 Center => _center;
     public float Radius => _radius;
+    public SpawnEnemyType SpawnEnemy => _spawnEnemyType;
 
     public override ISpawnStrategy CreateStrategy(EnemyManager enemyManager)
     {
@@ -13,8 +20,12 @@ public class CircleSpawnData : SpawnData
         return new CircleSpawnStrategy(enemyManager, this);
     }
 
+    [Header("生成を行う際の座標情報")]
     [SerializeField] private Vector3 _center;
     [SerializeField] private float _radius;
+
+    [Header("生成するEnemyの種類")]
+    [SerializeField, Tooltip("生成するEnemyの種類")] private SpawnEnemyType _spawnEnemyType;
 }
 
 public struct CircleSpawnStrategy : ISpawnStrategy
@@ -39,7 +50,16 @@ public struct CircleSpawnStrategy : ISpawnStrategy
             Vector3 pos = d.Center +
                 new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * d.Radius;
 
-            _enemyManager.Spawn(d.Enemies[i], pos);
+            switch (d.SpawnEnemy)
+            {
+                case CircleSpawnData.SpawnEnemyType.Mob:
+                    _enemyManager.Spawn(d.Enemies[i], pos);
+                    break;
+                case CircleSpawnData.SpawnEnemyType.Boss:
+                    Debug.Log("Boss戦");
+                    _enemyManager.SpawnBoss(d.Enemies[i], pos);
+                    break;
+            }
         }
     }
 }

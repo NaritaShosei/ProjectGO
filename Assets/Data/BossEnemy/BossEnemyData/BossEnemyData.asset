@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ae408edb7226e8468616aac36172061, type: 3}
+  m_Name: BossEnemyData
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Data.BossEnemyDataHolder
+  _bossEnemyDatas:
+  - _maxHP: 1000
+    _hardSpotsDefense: 40
+    _normalSpotsDefense: 100
+    _weekPointDefense: 120
+    _vitalPointDefense: 150
+    _rightArmArmer:
+      _maxHP: 15000
+      _defense: 100
+    _leftArmArmer:
+      _maxHP: 15000
+      _defense: 100
+    _rightLegArmer:
+      _maxHP: 15000
+      _defense: 100
+    _leftLegArmer:
+      _maxHP: 15000
+      _defense: 100
+  - _maxHP: 1000
+    _hardSpotsDefense: 30
+    _normalSpotsDefense: 90
+    _weekPointDefense: 110
+    _vitalPointDefense: 140
+    _rightArmArmer:
+      _maxHP: 15000
+      _defense: 90
+    _leftArmArmer:
+      _maxHP: 15000
+      _defense: 90
+    _rightLegArmer:
+      _maxHP: 15000
+      _defense: 90
+    _leftLegArmer:
+      _maxHP: 15000
+      _defense: 90
