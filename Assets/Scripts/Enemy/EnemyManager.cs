@@ -195,10 +195,18 @@ public class EnemyManager : MonoBehaviour
     /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
     public void ClearAllMobEnemies()
     {
-        foreach (var enemy in _enemies)
+        foreach (var enemy in _enemies.ToArray())
         {
             if (enemy != null && !enemy.IsDead)
             {
+                RemoveDeadEnemyTransform(enemy);
+
+                enemy.OnDead -= HandleEnemyDead;
+                enemy.OnDamaged -= HandleEnemyDamaged;
+
+                // SpatialHashGridから登録解除
+                _spatialHashGrid?.Remove(enemy);
+
                 // モブのみを対象にするため、Enemyクラスのインスタンスかどうかを確認
                 if (enemy is Enemy enemyComponent)
                 {

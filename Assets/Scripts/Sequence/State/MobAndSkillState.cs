@@ -56,7 +56,13 @@ public class MobAndSkillState : ISequenceState
         context.PhaseTimer.StopTimer();
         context.PhaseTimer.OnTimeEnded -= OnMobTimeUp;
 
-        context.SkillSelectTimer?.StopTimer();
+        if (context.SkillSelectTimer != null)
+        {
+            context.SkillSelectTimer.OnTimeEnded -= OnSkillSelectTimeUp;
+            context.SkillSelectTimer.StopTimer();
+        }
+
+        context.SkillSelectView.OnSkillSelected -= OnSkillSelected;
 
         context.EnemyManager.OnEnemyDefeated -= CheckWaveClear;
 

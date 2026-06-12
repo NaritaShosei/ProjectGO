@@ -24,6 +24,7 @@ public class CountDownTimer : IDisposable
 
         _maxTime = maxTime;
         _currentTime = maxTime;
+        _pauseCount = 0;
 
         _timerCts = new CancellationTokenSource();
 
@@ -79,13 +80,10 @@ public class CountDownTimer : IDisposable
 
                 if (_pauseCount == 0)
                 {
-                    _currentTime -= Time.deltaTime;
+                    _currentTime = Mathf.Max(0f, _currentTime - Time.deltaTime);
                     OnTimeChanged?.Invoke(_currentTime, _maxTime);
                 }
             }
-
-            _currentTime = 0;
-            OnTimeChanged?.Invoke(_currentTime, _maxTime);
 
             StopTimer();
             OnTimeEnded?.Invoke();

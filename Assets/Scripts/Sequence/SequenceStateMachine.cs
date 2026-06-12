@@ -59,6 +59,11 @@ public class SequenceStateMachine
 
     private void TransitionTo(SequenceStateType nextType)
     {
+        if (_current != null && _current.StateType == nextType)
+        {
+            return;
+        }
+
         if (!_states.TryGetValue(nextType, out var next))
         {
             Debug.LogWarning($"[SequenceStateMachine] State '{nextType}' が登録されていません。");

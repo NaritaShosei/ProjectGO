@@ -29,12 +29,19 @@ public class GameOverState : ISequenceState
     {
         if (context.IsRestartRequested)
         {
+            context.IsRestartRequested = false;
+            context.IsTitleRequested = false;
+            context.IsTimeUp = false;
+
             RestartGame(context);
             return SequenceStateType.MobAndSkill;
         }
 
         if (context.IsTitleRequested || context.IsTimeUp)
         {
+            context.IsTitleRequested = false;
+            context.IsTimeUp = false;
+
             context.SequenceManager?.NotifyTitleRequested();
             return null; // タイトル遷移はSequenceManager経由
         }
