@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 /// <summary>
@@ -46,4 +47,28 @@ public class MapManager : MonoBehaviour
     {
         ServiceLocator.Unregister<MapManager>();
     }
+
+    private void OnValidate()
+    {
+        if (_radius <= 0f)
+        {
+            Debug.LogWarning($"[MapManager] Radius must be positive. Resetting to 50f.");
+            _radius = 50f;
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        Handles.color = Color.green;
+        Handles.DrawWireDisc(
+            _centerPosition,
+            Vector3.up,
+            _radius);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(_centerPosition, 1f);
+    }
+#endif
+
 }

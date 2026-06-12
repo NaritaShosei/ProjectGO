@@ -18,7 +18,7 @@ public class SpawnPoint : MonoBehaviour
         foreach (var localSlot in _spawnSlots)
         {
             Vector3 worldPos = transform.TransformPoint(localSlot);
-            Vector3 clamped = MapManager.Instance.ClampToArea(worldPos);
+            Vector3 clamped = _mapManager.ClampToArea(worldPos);
             result.Add(clamped);
         }
         return result;
@@ -45,12 +45,24 @@ public class SpawnPoint : MonoBehaviour
         Vector3 worldPos =
             transform.TransformPoint(_spawnSlots[index]);
 
-        return MapManager.Instance.ClampToArea(worldPos);
+        return _mapManager.ClampToArea(worldPos);
     }    
-    
+
     [Tooltip("SpawnPointSelector から参照するためのKey")]
     [SerializeField] private string _key;
 
     [Tooltip("エネミーを生成するローカル座標リスト（インスペクターで指定）")]
     [SerializeField] private List<Vector3> _spawnSlots = new();
+
+    private MapManager _mapManager;
+
+    private void Awake()
+    {
+        if (ServiceLocator.TryGet(out MapManager mapManager))
+        {
+            _mapManager = mapManager;
+            return;
+        }
+        Debug.LogError("[SpawnPoint] MapManagerが取得できません");
+    }
 }
