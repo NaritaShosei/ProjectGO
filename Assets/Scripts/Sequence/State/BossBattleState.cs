@@ -1,11 +1,11 @@
+using System;
+
 /// <summary>
 /// ボス戦のState。制限時間2分。
 /// ボス撃破でエンディングムービーへ、時間切れでゲームオーバーへ遷移する。
 /// </summary>
 public class BossBattleState : ISequenceState
 {
-    private const float BossBattleDuration = 120f;
-
     public SequenceStateType StateType => SequenceStateType.BossBattle;
 
     public void OnEnter(SequenceStateContext context)
@@ -23,7 +23,7 @@ public class BossBattleState : ISequenceState
 
         context.EnemyManager.OnBossDefeated += HandleBossDefeated;
 
-        context.PhaseTimer.StartTimer(BossBattleDuration);
+        context.PhaseTimer.StartTimer(context.BossBattleTimeLimit);
         context.PhaseTimer.OnTimeEnded += HandleTimeUp;
     }
 
@@ -43,6 +43,14 @@ public class BossBattleState : ISequenceState
         context.EnemyManager.OnBossDefeated -= HandleBossDefeated;
         context.PhaseTimer.StopTimer();
         context.PhaseTimer.OnTimeEnded -= HandleTimeUp;
+
+        // 結果の保存（仮実装。実際はスコア計算などを入れる）
+        int killCount = 0;
+        int level = 0;
+        float clearTime = context.BossBattleTimeLimit - context.PhaseTimer.CurrentTime;
+
+        context.Result = new SequenceStateContext.ResultData(killCount, level, clearTime);
+
         _context = null;
     }
 

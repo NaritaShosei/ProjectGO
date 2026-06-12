@@ -11,6 +11,12 @@ public class CountDownTimer : IDisposable
     /// <summary> 時間切れイベント</summary>
     public event Action OnTimeEnded;
 
+    /// <summary>タイマー開始イベント。引数は最大時間</summary>
+    public event Action<float> OnTimerStarted;
+
+    /// <summary>毎フレームの時間更新イベント。引数は（現在時間, 最大時間）</summary>
+    public event Action<float, float> OnTimeChanged;
+
     /// <summary> タイマーを開始</summary>
     public void StartTimer(float maxTime)
     {
@@ -21,14 +27,18 @@ public class CountDownTimer : IDisposable
 
         _timerCts = new CancellationTokenSource();
 
+        OnTimerStarted?.Invoke(maxTime);
+
         UpdateTimeAsync().Forget();
     }
 
     /// <summary> タイマーを停止</summary>
     public void StopTimer()
     {
-        _timerCts?.Cancel();
-        _timerCts?.Dispose();
+        if (_timerCts == null) return;
+
+        _timerCts.Cancel();
+        _timerCts.Dispose();
         _timerCts = null;
     }
 
@@ -68,10 +78,15 @@ public class CountDownTimer : IDisposable
                 await UniTask.Yield(token);
 
                 if (_pauseCount == 0)
+                {
                     _currentTime -= Time.deltaTime;
+                    OnTimeChanged?.Invoke(_currentTime, _maxTime);
+                }
             }
 
             _currentTime = 0;
+            OnTimeChanged?.Invoke(_currentTime, _maxTime);
+
             StopTimer();
             OnTimeEnded?.Invoke();
         }

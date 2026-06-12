@@ -7,20 +7,17 @@ using UnityEngine;
 /// </summary>
 public class MobAndSkillState : ISequenceState
 {
-    /// <summary>モブ戦全体の制限時間（秒）</summary>
-    private const float MobBattleDuration = 180f;
-
-    /// <summary>スキル選択の制限時間（秒）</summary>
-    private const float SkillSelectDuration = 10f;
-
     public SequenceStateType StateType => SequenceStateType.MobAndSkill;
 
-      public void OnEnter(SequenceStateContext context)
+    public void OnEnter(SequenceStateContext context)
     {
         _waveEnemySequenceIndex = 0;
+        _waveCleared = false;
+        _timeUpFlag = false;
+        _isSkillSelected = false;
 
-        // 3分タイマー開始
-        context.PhaseTimer.StartTimer(MobBattleDuration);
+        // タイマー開始
+        context.PhaseTimer.StartTimer(context.MobBattleTimeLimit);
         context.PhaseTimer.OnTimeEnded += OnMobTimeUp;
 
         // EnemyManagerのウェーブクリア検知
@@ -46,30 +43,27 @@ public class MobAndSkillState : ISequenceState
             return SequenceStateType.BossIntroMovie;
         }
 
-        switch (_subPhase)
+        return _subPhase switch
         {
-            case SubPhase.Battle:
-                return TickBattle(context);
-
-            case SubPhase.SkillSelect:
-                return TickSkillSelect(context, deltaTime);
-        }
-
-        return null;
+            SubPhase.Battle => TickBattle(context),
+            SubPhase.SkillSelect => TickSkillSelect(context),
+            _ => null
+        };
     }
 
     public void OnExit(SequenceStateContext context)
     {
         context.PhaseTimer.StopTimer();
         context.PhaseTimer.OnTimeEnded -= OnMobTimeUp;
+
+        context.SkillSelectTimer?.StopTimer();
+
         context.EnemyManager.OnEnemyDefeated -= CheckWaveClear;
 
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
 
         context.InputHandler?.EnableInput(false);
-
-        // IsTimeUpはResetTransitionFlagsで消えるため不要
     }
 
     // ── プライベート ────────────────────────────────
@@ -81,8 +75,8 @@ public class MobAndSkillState : ISequenceState
 
     private bool _waveCleared;
     private bool _timeUpFlag;
-    private float _skillSelectTimer;
     private bool _isSkillSelected;
+    private bool _skillSelectTimeUp;
 
     private void OnMobTimeUp()
     {
@@ -114,31 +108,25 @@ public class MobAndSkillState : ISequenceState
         return null;
     }
 
-    private SequenceStateType? TickSkillSelect(SequenceStateContext context, float deltaTime)
+    private SequenceStateType? TickSkillSelect(SequenceStateContext context)
     {
         if (_timeUpFlag)
         {
-            // タイマー切れ中でもスキル選択は終わらせてからボスへ
-            ForceSelectDefaultSkill(context);
+            // バトルタイマー切れ：スキル選択を強制終了してからボスへ
+            ForceAutoSelect(context);
             context.IsTimeUp = true;
             return null;
         }
 
-        // スキル選択タイマー
-        _skillSelectTimer -= deltaTime;
-        if (_skillSelectTimer <= 0f)
+        if (_skillSelectTimeUp)
         {
-            ForceSelectDefaultSkill(context);
+            _skillSelectTimeUp = false;
+            ForceAutoSelect(context);
         }
 
         if (_isSkillSelected)
         {
-            _isSkillSelected = false; // フラグをリセット
-            context.IsSkillSelected = true; // Tick内でフラグを立てる（UIからの選択を反映）
-        }
-
-        if (context.IsSkillSelected)
-        {
+            _isSkillSelected = false;
             EndSkillSelect(context);
         }
 
@@ -147,14 +135,18 @@ public class MobAndSkillState : ISequenceState
 
     private void StartSkillSelect(SequenceStateContext context)
     {
-        context.IsSkillSelected = false;
-
         _subPhase = SubPhase.SkillSelect;
-        _skillSelectTimer = SkillSelectDuration;
+        _isSkillSelected = false;
+        _skillSelectTimeUp = false;
 
         // 世界を止める
         context.PhaseTimer.PauseTimer();
         context.InputHandler?.EnableInput(false);
+
+        // スキル選択タイマー開始
+        context.SkillSelectTimer.StartTimer(context.SkillSelectTimeLimit);
+        if (context.SkillSelectTimer != null)
+            context.SkillSelectTimer.OnTimeEnded += OnSkillSelectTimeUp;
 
         // スキル選択UIを開く
         _skillSelectPresenter?.Dispose();
@@ -180,6 +172,12 @@ public class MobAndSkillState : ISequenceState
     {
         context.SkillSelectView.OnSkillSelected -= OnSkillSelected;
 
+        if (context.SkillSelectTimer != null)
+        {
+            context.SkillSelectTimer.OnTimeEnded -= OnSkillSelectTimeUp;
+            context.SkillSelectTimer.StopTimer();
+        }
+
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
 
@@ -194,18 +192,22 @@ public class MobAndSkillState : ISequenceState
         SpawnWave(context);
     }
 
-    private void ForceSelectDefaultSkill(SequenceStateContext context)
+    private void ForceAutoSelect(SequenceStateContext context)
     {
-        // 時間切れ時は現在選択中のスキルを自動取得（UIの先頭）
-        // SkillSelectPresenterは候補リストの先頭を自動選択する仕様
-        _skillSelectPresenter.AutoSelect();
-        context.IsSkillSelected = true;
+        _skillSelectPresenter?.AutoSelect();
+        EndSkillSelect(context);
     }
 
     private void OnSkillSelected(int _)
     {
         // SkillSelectPresenter経由でスキルが選ばれた
         _isSkillSelected = true;
+    }
+
+    private void OnSkillSelectTimeUp()
+    {
+        // スキル選択タイマー切れ
+        _skillSelectTimeUp = true;
     }
 
     private void SpawnWave(SequenceStateContext context)
