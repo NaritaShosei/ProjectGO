@@ -6,8 +6,6 @@ using UnityEngine;
 /// </summary>
 public class MapManager : MonoBehaviour
 {
-    public static MapManager Instance { get; private set; }
-
     //マップの中心位置
     public Vector3 CenterPosition => _centerPosition;
     public float Radius => _radius;
@@ -33,17 +31,19 @@ public class MapManager : MonoBehaviour
         return new Vector3(clamped.x, position.y, clamped.z);
     }
 
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Debug.LogWarning("[MapManager] 複数のインスタンスが存在します");
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-    }
-
     [SerializeField] private Vector3 _centerPosition;
     [SerializeField] private float _radius = 50f;
+
+    private void Awake()
+    {
+        if (!ServiceLocator.IsRegistered<MapManager>())
+        {
+            ServiceLocator.Register(this);
+        }
+
+    }
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister<MapManager>();
+    }
 }

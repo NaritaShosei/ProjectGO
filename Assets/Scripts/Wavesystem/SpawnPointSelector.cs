@@ -8,43 +8,40 @@ using UnityEngine;
 public class SpawnPointSelector : MonoBehaviour
 {
     /// <summary>
-    /// Scene上の全SpawnPointを登録する
-    /// WaveManagerのInit時に呼び出す
+    /// SpawnPointを初期化
+    /// KeyがついているSpawnPointをDictionaryへ登録する
     /// </summary>
     public void Initialize()
     {
-        if(_playerTransform == null)
+        if (_playerTransform == null)
         {
             Debug.LogError("PlayerTransformが未設定です");
             return;
         }
 
-        _allSpawnPoints.Clear();
         _spawnPointMap.Clear();
 
-
-        var points = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
-
-        foreach (var point in points)
+        foreach (var point in _allSpawnPoints)
         {
-            _allSpawnPoints.Add(point);
-            // Keyが設定されているPointはDictionaryにも登録
+            if (point == null)
+                continue;
+
             string key = point.Key;
-            if (!string.IsNullOrEmpty(key))
+
+            if (string.IsNullOrEmpty(key))
+                continue;
+
+            if (_spawnPointMap.ContainsKey(key))
             {
-                if (_spawnPointMap.ContainsKey(key))
-                {
-                    Debug.LogWarning($"[SpawnPointSelector] 重複したKeyが存在します: {key}");
-                }
-                else
-                {
-                    _spawnPointMap[key] = point;
-                }
+                Debug.LogWarning($"[SpawnPointSelector] 重複したKeyが存在します: {key}");
+                continue;
             }
+
+            _spawnPointMap.Add(key, point);
         }
 
         if (_allSpawnPoints.Count == 0)
-            Debug.LogWarning("[SpawnPointSelector] SpawnPointがScene上に存在しません");
+            Debug.LogWarning("[SpawnPointSelector] SpawnPointが設定されていません");
     }
 
     /// <summary>
@@ -67,8 +64,10 @@ public class SpawnPointSelector : MonoBehaviour
     [Tooltip("プレイヤーのTransform")]
     [SerializeField] private Transform _playerTransform;
 
+    [Tooltip("利用可能なSpawnPoint一覧")]
+    [SerializeField] private List<SpawnPoint> _allSpawnPoints = new();
+
     private SpawnPoint _lastUsedPoint;
-    private readonly List<SpawnPoint> _allSpawnPoints = new();
     private readonly Dictionary<string, SpawnPoint> _spawnPointMap = new();
 
     /// <summary>

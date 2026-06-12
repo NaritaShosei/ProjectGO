@@ -30,7 +30,7 @@ public class WaveController
         if (_currentWave == null)
             return;
 
-        // 全Group終了後は残敵確認のみ行う
+        // 全Group終了後に残敵が全滅したらWave完了
         if (_currentGroupIndex >= _currentWave.SpawnGroups.Count)
         {
             if (_enemyManager.GetEnemyCount() == 0)
@@ -175,9 +175,9 @@ public class WaveController
 
         foreach (var condition in group.NextWaveConditions)
         {
-            if (IsConditionSatisfied(condition))
+            if (IsNextGroupConditionSatisfied(condition))
             {
-                MoveNextGroup();
+                MoveToNextGroup();
                 return;
             }
         }
@@ -188,24 +188,32 @@ public class WaveController
     /// </summary>
     /// <param name="condition"></param>
     /// <returns></returns>
-    private bool IsConditionSatisfied(
+    private bool IsNextGroupConditionSatisfied(
     NextWaveConditionData condition)
     {
         switch (condition.WaveConditionType)
         {
             case WaveConditionType.TimeElapsed:
+                {
+                    bool isTimeElapsed = Time.time - _groupStartTime
+                           >= condition.Threshold;
 
-                return Time.time - _groupStartTime
-                       >= condition.Threshold;
+                    return isTimeElapsed;
+                }
 
             case WaveConditionType.KillCount:
+                {
+                    bool hasReachedKillCount = _groupKillCount >= condition.Threshold;
 
-                return _groupKillCount
-                       >= condition.Threshold;
+                    return hasReachedKillCount;
+                }
 
             case WaveConditionType.AllDefeated:
+                {
+                    bool isAllDefeated = _groupKillCount >= _groupSpawnCount;
 
-                return _groupKillCount >= _groupSpawnCount;
+                    return isAllDefeated;
+                }
         }
 
         return false;
@@ -214,7 +222,7 @@ public class WaveController
     /// <summary>
     /// 次のグループに進む
     /// </summary>
-    private void MoveNextGroup()
+    private void MoveToNextGroup()
     {
         _currentGroupIndex++;
 
