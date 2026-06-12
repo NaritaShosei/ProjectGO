@@ -15,6 +15,12 @@ public class EnemySequence : SequenceBase
             context.InputHandler.EnableInput(true);
         }
 
+        if(context.WaveController == null)
+        {
+            Debug.LogError("[EnemySequence] WaveController が null です");
+            return;
+        }
+
         // 敵生成処理
         if (context.CurrentSpawnData != null)
         {
