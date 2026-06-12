@@ -11,8 +11,6 @@ public class SequenceManager : MonoBehaviour
     /// <summary>タイトルへ戻るリクエスト（ゲームオーバー後）</summary>
     public event Action OnTitleRequested;
 
-    public bool IsAllSequencesComplete => _stateMachine == null;
-
     public void Init(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
     {
         if (enemyManager == null || skillManager == null)
@@ -22,6 +20,22 @@ public class SequenceManager : MonoBehaviour
             return;
         }
 
+        var phaseTimer = new CountDownTimer();
+        var skillSelectTimer = new CountDownTimer();
+        var gameOverTimer = new CountDownTimer();
+
+        _battleTimerPresenter = null;
+        _skillSelectTimerPresenter = null;
+        _gameOverTimerPresenter = null;
+
+        // タイマーUIのPresenterを必要に応じて生成。nullチェックしているので、InspectorでUIを割り当てなくても動作する。
+        if (_battleTimerView != null)
+            _battleTimerPresenter = new PhaseTimerPresenter(phaseTimer, _battleTimerView);
+        if (_skillSelectTimerView != null)
+            _skillSelectTimerPresenter = new PhaseTimerPresenter(skillSelectTimer, _skillSelectTimerView);
+        if (_gameOverTimerView != null)
+            _gameOverTimerPresenter = new PhaseTimerPresenter(gameOverTimer, _gameOverTimerView);
+
         // コンテキスト構築
         _context = new SequenceStateContext
         {
@@ -30,8 +44,12 @@ public class SequenceManager : MonoBehaviour
             InputHandler = inputHandler,
             Player = player,
             SequenceManager = this,
-            PhaseTimer = new CountDownTimer(),
-            GameOverTimer = new CountDownTimer(),
+            PhaseTimer = phaseTimer,
+            SkillSelectTimer = skillSelectTimer,
+            GameOverTimer = gameOverTimer,
+            MobBattleTimeLimit = _mobBattleTimeLimit,
+            BossBattleTimeLimit = _bossBattleTimeLimit,
+            SkillSelectTimeLimit = _skillSelectTimeLimit,
             SkillSelectView = _skillUIManager,
             SkillSelectCount = _skillSelectCount,
             SpawnDataRepository = _spawnDataRepository,
@@ -68,7 +86,7 @@ public class SequenceManager : MonoBehaviour
     #endregion
 
     #region　インスペクター
-    
+
     [Header("スキル選択設定")]
     [SerializeField] private SkillSelectView _skillUIManager;
     [SerializeField] private int _skillSelectCount = 3;
@@ -77,12 +95,26 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private SpawnDataRepository _spawnDataRepository;
     [SerializeField] private SpawnData _bossSpawnData;
 
+    [Header("タイマー設定")]
+    [SerializeField] private float _mobBattleTimeLimit = 180f;
+    [SerializeField] private float _bossBattleTimeLimit = 120f;
+    [SerializeField] private float _skillSelectTimeLimit = 10f;
+
+    [Header("タイマーUI")]
+    [SerializeField] private PhaseTimerView _battleTimerView;
+    [SerializeField] private PhaseTimerView _skillSelectTimerView;
+    [SerializeField] private PhaseTimerView _gameOverTimerView;
+
     #endregion
 
     #region フィールド変数
 
     private SequenceStateMachine _stateMachine;
     private SequenceStateContext _context;
+
+    private PhaseTimerPresenter _battleTimerPresenter;
+    private PhaseTimerPresenter _skillSelectTimerPresenter;
+    private PhaseTimerPresenter _gameOverTimerPresenter;
 
     #endregion
 
@@ -99,7 +131,12 @@ public class SequenceManager : MonoBehaviour
             _context.Player.OnDead -= HandlePlayerDead;
 
         _context?.PhaseTimer?.Dispose();
+        _context?.SkillSelectTimer?.Dispose();
         _context?.GameOverTimer?.Dispose();
+
+        _battleTimerPresenter?.Dispose();
+        _skillSelectTimerPresenter?.Dispose();
+        _gameOverTimerPresenter?.Dispose();
     }
 
     #endregion

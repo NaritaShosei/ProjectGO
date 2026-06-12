@@ -21,6 +21,15 @@ public class SequenceStateContext
     /// <summary>モブ戦・ボス戦などの制限時間管理</summary>
     public CountDownTimer PhaseTimer;
 
+    /// <summary>ゲームオーバー選択タイマー（10秒）</summary>
+    public CountDownTimer GameOverTimer;
+
+    /// <summary>スキル選択タイマー</summary>
+    public CountDownTimer SkillSelectTimer;
+
+    public float MobBattleTimeLimit;
+    public float BossBattleTimeLimit;
+    public float SkillSelectTimeLimit;
     #endregion
 
     #region フラグ
@@ -67,10 +76,21 @@ public class SequenceStateContext
 
     #endregion
 
-    #region ゲームオーバータイマー
+    #region リザルト
+    public readonly struct ResultData
+    {
+        public readonly int Kills;
+        public readonly int Level;
+        public readonly float ClearTime;
+        public ResultData(int kills, int level, float clearTime)
+        {
+            Kills = kills;
+            Level = level;
+            ClearTime = clearTime;
+        }
+    }
 
-    /// <summary>ゲームオーバー選択タイマー（10秒）</summary>
-    public CountDownTimer GameOverTimer;
+    public ResultData Result;
 
     #endregion
 
