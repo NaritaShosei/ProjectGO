@@ -44,7 +44,6 @@ public class SequenceContext
     // 状態
     public int RemainingEnemies;    // 残り敵数
     public int DefeatedCount;       // 撃破数
-    public float ElapsedTime;       // 経過時間
     public bool SkillSelected;      // スキル選択済みか
     public bool BossDefeated;       // ボス撃破済みか
 }
