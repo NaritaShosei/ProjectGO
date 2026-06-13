@@ -68,8 +68,11 @@ public class SequenceStateContext
 
     #region Spawn
 
-    /// <summary>SequenceManagerに現在のSpawnDataリポジトリを渡す用途</summary>
-    public SpawnDataRepository SpawnDataRepository;
+    /// <summary>WaveSystemで使用するWaveSequenceData</summary>
+    public WaveSequenceData WaveSequenceData;
+
+    /// <summary>SpawnPointSelector（WaveControllerに渡す）</summary>
+    public SpawnPointSelector SpawnPointSelector;
 
     /// <summary>ボス用SpawnData</summary>
     public SpawnData BossSpawnData;

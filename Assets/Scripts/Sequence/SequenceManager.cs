@@ -36,6 +36,9 @@ public class SequenceManager : MonoBehaviour
         if (_gameOverTimerView != null)
             _gameOverTimerPresenter = new PhaseTimerPresenter(gameOverTimer, _gameOverTimerView);
 
+        // SpawnPointSelectorの初期化
+        _spawnPointSelector.Initialize();
+
         // コンテキスト構築
         _context = new SequenceStateContext
         {
@@ -52,7 +55,8 @@ public class SequenceManager : MonoBehaviour
             SkillSelectTimeLimit = _skillSelectTimeLimit,
             SkillSelectView = _skillUIManager,
             SkillSelectCount = _skillSelectCount,
-            SpawnDataRepository = _spawnDataRepository,
+            WaveSequenceData = _waveSequenceData,
+            SpawnPointSelector = _spawnPointSelector,
             BossSpawnData = _bossSpawnData,
         };
 
@@ -92,7 +96,8 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private int _skillSelectCount = 3;
 
     [Header("敵生成設定")]
-    [SerializeField] private SpawnDataRepository _spawnDataRepository;
+    [SerializeField] private WaveSequenceData _waveSequenceData;   
+    [SerializeField] private SpawnPointSelector _spawnPointSelector; 
     [SerializeField] private SpawnData _bossSpawnData;
 
     [Header("タイマー設定")]
