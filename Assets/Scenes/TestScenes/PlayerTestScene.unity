@@ -960,35 +960,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2b950f306ec03d8429b8c59404a42289, type: 3}
---- !u!1 &414950817 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1933743511098463970, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-  m_PrefabInstance: {fileID: 6837170418680516860}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &414950818 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4787318458227283089, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-  m_PrefabInstance: {fileID: 6837170418680516860}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &414950820
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 414950817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66060ca6dced9fd4194ecd1209bfcd15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemySpawner
-  _bossPoolData:
-    _key: Boss
-    _bossPrefab: {fileID: 5384278836889019338, guid: dd10024fcc4a56a4d842480a8e562eff, type: 3}
-    _enemyUIPrefab: {fileID: 587803215771795472, guid: 677f481a80400d7489ff00354f1786f4, type: 3}
-  _enemyParent: {fileID: 414950818}
-  _enemyUIParent: {fileID: 1652633710}
-  _preloadCount: 1
 --- !u!1 &660226414
 GameObject:
   m_ObjectHideFlags: 0
@@ -1782,11 +1753,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d0baa8475c13541a510b7f3f450011, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerModeView
---- !u!4 &1652633710 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4509286154457740210, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-  m_PrefabInstance: {fileID: 6837170418680516860}
-  m_PrefabAsset: {fileID: 0}
 --- !u!137 &1754406579 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 3099194236882851783, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
@@ -3283,42 +3249,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6767515062201692496}
     - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.x
-      value: 359.9142
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.y
-      value: 359.7917
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.z
-      value: 270.03644
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: -0.93948275
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: -0.21556273
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: -0.21681881
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
-      value: 1.0000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.y
-      value: 1.0000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.z
-      value: 0.99999994
-      objectReference: {fileID: 0}
-    - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_PropertySheet.m_NamedObject.m_Array.Array.data[0].m_Value
       value: 
       objectReference: {fileID: 1754406579}
@@ -3342,10 +3272,6 @@ PrefabInstance:
       propertyPath: _lockOnMarkerView
       value: 
       objectReference: {fileID: 1600694942}
-    - target: {fileID: 5320311474982235821, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: _bossEnemySpawner
-      value: 
-      objectReference: {fileID: 414950820}
     - target: {fileID: 7036861525032570302, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -3394,42 +3320,6 @@ PrefabInstance:
       propertyPath: Target
       value: 
       objectReference: {fileID: 343663376}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.x
-      value: 359.9142
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.y
-      value: 359.7917
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.z
-      value: 270.03644
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: -0.93948275
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: -0.21556273
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: -0.21681881
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
-      value: 1.0000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.y
-      value: 1.0000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.z
-      value: 0.99999994
-      objectReference: {fileID: 0}
     - target: {fileID: 7748896386332537814, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _player
       value: 
@@ -3438,10 +3328,10 @@ PrefabInstance:
       propertyPath: _playerGaugeView
       value: 
       objectReference: {fileID: 1617911760}
-    - target: {fileID: 7748896386332537814, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: _sequenceManager
+    - target: {fileID: 7793837620590366497, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _playerTransform
       value: 
-      objectReference: {fileID: 6837170418680516862}
+      objectReference: {fileID: 1298887711}
     - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _gaugeParent
       value: 
@@ -3466,49 +3356,27 @@ PrefabInstance:
       propertyPath: _skillUIManager
       value: 
       objectReference: {fileID: 288090821}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _battleTimerView
+      value: 
+      objectReference: {fileID: 1763262962}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _gameOverTimerView
+      value: 
+      objectReference: {fileID: 866597378}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _skillSelectTimerView
+      value: 
+      objectReference: {fileID: 352783417}
     - target: {fileID: 9221605787384030750, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _viewParent
       value: 
       objectReference: {fileID: 1393089256}
-    m_RemovedComponents:
-    - {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4996710551187502800, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6837170418680516862}
-    - targetCorrespondingSourceObject: {fileID: 1933743511098463970, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 414950820}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
---- !u!1 &6837170418680516861 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4996710551187502800, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-  m_PrefabInstance: {fileID: 6837170418680516860}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &6837170418680516862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6837170418680516861}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 287caa96f257797499e27a1b804162d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SequenceManager
-  _skillUIManager: {fileID: 288090821}
-  _skillSelectCount: 3
-  _spawnDataRepository: {fileID: 11400000, guid: 5272d01d0cbdd8d488e53d3a54f5f3c8, type: 2}
-  _bossSpawnData: {fileID: 11400000, guid: 4a9d0c01234cc7d4eb282910d3e0f3af, type: 2}
-  _mobBattleTimeLimit: 180
-  _bossBattleTimeLimit: 120
-  _skillSelectTimeLimit: 10
-  _battleTimerView: {fileID: 1763262962}
-  _skillSelectTimerView: {fileID: 352783417}
-  _gameOverTimerView: {fileID: 866597378}
 --- !u!1001 &7257887957543716051
 PrefabInstance:
   m_ObjectHideFlags: 0
