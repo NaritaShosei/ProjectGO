@@ -465,12 +465,21 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private AttackData GetNextAttack(AttackInput input, bool allowCombo)
     {
+        // デバッグ用にこのメソッドで使う条件などをログに出力する。
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"GetNextAttack called with input: {input}, allowCombo: {allowCombo}");
+        sb.AppendLine($"CurrentAttackId: {_currentAttackId}, IsInComboWindow: {_isInComboWindow}, State: {_stateManager.CurrentState}");
+
         // コンボ継続チェック
         if ((allowCombo || _isInComboWindow) && _currentAttackId != -1)
         {
             var unlockedIds = _skillManager.GetOwnedSkillIDs();
 
             var next = _attackRepository.GetNextComboAttack(_currentAttackId, unlockedIds);
+
+            sb.AppendLine($"Combo check: NextAttackId: {(next != null ? next.AttackId.ToString() : "null")}");
+            Debug.Log(sb.ToString());
+
             if (next != null) return next;
             // コンボ終端ならnullを返す（新コンボ開始はしない）
             return null;
@@ -478,6 +487,9 @@ public class PlayerAttack : MonoBehaviour
 
         // 新規攻撃取得
         var data = _attackRepository.GetAttackData(_modeController.CurrentMode);
+
+        sb.AppendLine($"New attack check: AttackId: {(data != null ? data.AttackId.ToString() : "null")}");
+        Debug.Log(sb.ToString());
 
         if (data != null)
             return data;
@@ -508,8 +520,6 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void OnComboWindowEnd()
     {
-        _isInComboWindow = false;
-
         if (_isCharging && _modeController.CurrentMode == PlayerMode.Warrior)
         {
             _pendingWarriorCharge = true;
@@ -520,7 +530,12 @@ public class PlayerAttack : MonoBehaviour
                 float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
                 _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
             }
+
+            return;
         }
+
+        // コンボウィンドウ終了時にチャージ攻撃の準備ができている場合は、コンボ継続ではなくチャージ攻撃に遷移する
+        _isInComboWindow = false;
     }
 
     #endregion
