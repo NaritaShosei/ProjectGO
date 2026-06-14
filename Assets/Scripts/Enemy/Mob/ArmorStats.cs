@@ -40,6 +40,19 @@ public sealed class ArmorStats
         OnBroken?.Invoke();
     }
 
+    /// <summary>
+    /// HPを全回復して破壊状態を解除する
+    /// </summary>
+    public void RestoreFull()
+    {
+        _isBroken = false;
+        _currentHealth = _maxHealth;
+
+        OnHealthChanged?.Invoke(
+            _currentHealth,
+            _maxHealth);
+    }
+
     private readonly float _maxHealth;
     private float _currentHealth;
     private bool _isBroken;
