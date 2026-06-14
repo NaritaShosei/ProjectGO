@@ -9,17 +9,27 @@ public class ChargeReadySMB : StateMachineBehaviour
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_fired)
-            return;
-
         if (stateInfo.normalizedTime >= 0.99f)
         {
-            _fired = true;
-
-            if (animator.TryGetComponent(out PlayerAnimationController controller))
-                controller.AnimEvent_ChargeReady();
+            FireChargeReady(animator);
         }
     }
 
+    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        FireChargeReady(animator);
+    }
+
     private bool _fired;
+
+    private void FireChargeReady(Animator animator)
+    {
+        if (_fired)
+            return;
+
+        _fired = true;
+
+        if (animator.TryGetComponent(out PlayerAnimationController controller))
+            controller.AnimEvent_ChargeReady();
+    }
 }
