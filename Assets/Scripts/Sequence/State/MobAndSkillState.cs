@@ -15,7 +15,6 @@ public class MobAndSkillState : ISequenceState
     {
         _currentWaveIndex = 0;
         _waveCleared = false;
-        _allWavesFinished = false;
         _timeUpFlag = false;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
@@ -91,12 +90,9 @@ public class MobAndSkillState : ISequenceState
     private SkillSelectPresenter _skillSelectPresenter;
 
     private bool _waveCleared;
-    private bool _allWavesFinished;
     private bool _timeUpFlag;
     private bool _isSkillSelected;
     private bool _skillSelectTimeUp;
-
-    private bool _goToBossAfterSkill;
 
     #endregion
 
@@ -129,20 +125,18 @@ public class MobAndSkillState : ISequenceState
         var waveSequence = context.WaveSequenceData;
 
         if (waveSequence == null || waveSequence.Waves == null
-            || _currentWaveIndex >= waveSequence.Waves.Count)
+            || waveSequence.Waves.Count == 0)
         {
-            // ウェーブデータがない or 全ウェーブ終了
-            _allWavesFinished = true;
+            // ウェーブデータがない
             return;
         }
 
-        // 次のウェーブを開始
-        var waveData = waveSequence.Waves[_currentWaveIndex];
+        // あまりを利用してウェーブをループさせる。
+        var waveData = waveSequence.Waves[_currentWaveIndex % waveSequence.Waves.Count];
 
         if (context.SpawnPointSelector == null)
         {
             Debug.LogError("[MobAndSkillState] SpawnPointSelectorが未設定です");
-            _allWavesFinished = true;
             return;
         }
 
@@ -152,14 +146,13 @@ public class MobAndSkillState : ISequenceState
         if (!_waveController.StartWave(waveData))
         {
             Debug.LogError($"[MobAndSkillState] ウェーブの開始に失敗しました: WaveIndex={_currentWaveIndex}");
-            _allWavesFinished = true;
             return;
         }
     }
 
     #endregion
 
-    #region 毎フレーム更新
+    #region Tick処理
 
     private SequenceStateType? TickBattle(SequenceStateContext context)
     {
@@ -179,17 +172,8 @@ public class MobAndSkillState : ISequenceState
             _waveCleared = false;
 
             _currentWaveIndex++;
-            bool hasNextWave = context.WaveSequenceData != null
-                && context.WaveSequenceData.Waves != null
-                && _currentWaveIndex < context.WaveSequenceData.Waves.Count;
 
-            StartSkillSelect(context, goToBossAfterSkill: hasNextWave);
-        }
-
-        if (_allWavesFinished && context.EnemyManager.GetEnemyCount() == 0)
-        {
-            context.EnemyManager.ClearAllMobEnemies(); // 全ウェーブ終了と同時に敵を全て消す
-            return SequenceStateType.BossIntroMovie;
+            StartSkillSelect(context);
         }
 
         return null;
@@ -224,10 +208,9 @@ public class MobAndSkillState : ISequenceState
 
     #region Skill選択制御
 
-    private void StartSkillSelect(SequenceStateContext context, bool goToBossAfterSkill = false)
+    private void StartSkillSelect(SequenceStateContext context)
     {
         _subPhase = SubPhase.SkillSelect;
-        _goToBossAfterSkill = goToBossAfterSkill;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
 
@@ -236,9 +219,11 @@ public class MobAndSkillState : ISequenceState
         context.InputHandler?.EnableInput(false);
 
         // スキル選択タイマー開始
-        context.SkillSelectTimer.StartTimer(context.SkillSelectTimeLimit);
         if (context.SkillSelectTimer != null)
+        {
+            context.SkillSelectTimer.StartTimer(context.SkillSelectTimeLimit);
             context.SkillSelectTimer.OnTimeEnded += OnSkillSelectTimeUp;
+        }
 
         // スキル選択UIを開く
         _skillSelectPresenter?.Dispose();
@@ -278,12 +263,6 @@ public class MobAndSkillState : ISequenceState
         context.InputHandler?.EnableInput(true);
 
         _subPhase = SubPhase.Battle;
-        if (_goToBossAfterSkill)
-        {
-            // 全Wave終了後のスキル選択だったのでボスへ
-            _allWavesFinished = true;
-            return;
-        }
 
         // 次のWaveを開始
         StartNextWave(context);
