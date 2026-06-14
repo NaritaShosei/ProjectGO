@@ -96,8 +96,8 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private int _skillSelectCount = 3;
 
     [Header("敵生成設定")]
-    [SerializeField] private WaveSequenceData _waveSequenceData;   
-    [SerializeField] private SpawnPointSelector _spawnPointSelector; 
+    [SerializeField] private WaveSequenceData _waveSequenceData;
+    [SerializeField] private SpawnPointSelector _spawnPointSelector;
     [SerializeField] private SpawnData _bossSpawnData;
 
     [Header("タイマー設定")]
@@ -109,6 +109,19 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private PhaseTimerView _battleTimerView;
     [SerializeField] private PhaseTimerView _skillSelectTimerView;
     [SerializeField] private PhaseTimerView _gameOverTimerView;
+
+    [Header("Sequence設定")]
+    [SerializeReference, SubclassSelector]
+    private ISequenceState[] _sequences = new ISequenceState[]
+    {
+        new IntroMovieState(),
+        new MobAndSkillState(),
+        new BossIntroMovieState(),
+        new BossBattleState(),
+        new EndingMovieState(),
+        new ResultState(),
+        new GameOverState(),
+    };
 
     #endregion
 
@@ -124,6 +137,22 @@ public class SequenceManager : MonoBehaviour
     #endregion
 
     #region Unityイベント
+
+    private void OnValidate()
+    {
+        if (_sequences != null) return;
+
+        _sequences = new ISequenceState[]
+        {
+            new IntroMovieState(),
+            new MobAndSkillState(),
+            new BossIntroMovieState(),
+            new BossBattleState(),
+            new EndingMovieState(),
+            new ResultState(),
+            new GameOverState(),
+        };
+    }
 
     private void Update()
     {
@@ -150,13 +179,15 @@ public class SequenceManager : MonoBehaviour
 
     private void RegisterStates()
     {
-        _stateMachine.RegisterState(new IntroMovieState());
-        _stateMachine.RegisterState(new MobAndSkillState());
-        _stateMachine.RegisterState(new BossIntroMovieState());
-        _stateMachine.RegisterState(new BossBattleState());
-        _stateMachine.RegisterState(new EndingMovieState());
-        _stateMachine.RegisterState(new ResultState());
-        _stateMachine.RegisterState(new GameOverState());
+        foreach (var state in _sequences)
+        {
+            if (state == null)
+            {
+                Debug.LogWarning("Nullなシークエンスが登録されています");
+                continue;
+            }
+            _stateMachine.RegisterState(state);
+        }
     }
 
     private void HandlePlayerDead()
