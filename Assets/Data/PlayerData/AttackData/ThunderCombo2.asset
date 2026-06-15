@@ -12,59 +12,77 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75b76658933f9b645922b03b8f17be3c, type: 3}
   m_Name: ThunderCombo2
   m_EditorClassIdentifier: Assembly-CSharp::AttackData_main
-  _attackId: 3078
+  _attackId: 2000
   _mode: 1
-  _nextComboAttackId: 3581
-  _insertAfterAttackId: 2474
-  _isUnlockedBySkill: 1
-  _requiredSkillId: 66987
+  _nextComboAttackId: 4000
+  _insertAfterAttackId: -1
+  _isUnlockedBySkill: 0
+  _requiredSkillId: -1
   _variants:
   - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C92"
     _requiredCharge: 0
     _damageMultiplier: 1
     _attackRange: 1
     _attackRadius: 1
-    _enableKnockback: 0
-    _knockbackPower: 5
+    _enableKnockback: 1
+    _knockbackPower: 6
     _knockbackUpward: 0
-    _enableHoming: 0
-    _homingRadius: 5
+    _enableHoming: 1
+    _homingRadius: 10
     _homingAngle: 45
-    _homingStrength: 10
-    _enableMovement: 0
+    _homingStrength: 30
+    _enableMovement: 1
     _moveCurve:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0
+        time: 0.0033340454
         value: 0
         inSlope: 0
-        outSlope: 1
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 1
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
+      - serializedVersion: 3
+        time: 0.08128684
+        value: -0.0035187155
+        inSlope: 0.002841259
+        outSlope: 0.002841259
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 1
+        outWeight: 0.25364298
+      - serializedVersion: 3
+        time: 0.3006099
+        value: 1.003054
+        inSlope: -0.013608747
+        outSlope: -0.013608747
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.25083512
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: -0.002290332
+        outSlope: -0.002290332
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.41615906
+        outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    _moveDistance: 0
-    _moveSpeed: 0
-    _moveDuration: 0
+    _moveDistance: 1.5
+    _moveSpeed: 3
+    _moveDuration: 1.5
     _stopOnHit: 1
     _isPhantom: 0
     _hitStopData:
-      _baseDuration: 0.08
+      _baseDuration: 0.15
       _timeScale: 0
-      _targetGroup: 11
+      _targetGroup: 9
       _weakPointMultiplier: 1.2
       _breakOrKillMultiplier: 1.2
       _weakAndBreakOrKillMultiplier: 1.4
@@ -74,5 +92,9 @@ MonoBehaviour:
     _chargeTransitionDuration: -1
     _playGroundHitSE: 0
     _additionalLightningDamages:
-    - _lightningDamageMultiplier: 0.5
-      _lightningDamageDelay: 0.4
+    - _lightningDamageMultiplier: 0.08
+      _lightningDamageDelay: 0.2
+    - _lightningDamageMultiplier: 0.1
+      _lightningDamageDelay: 0.25
+    - _lightningDamageMultiplier: 0.15
+      _lightningDamageDelay: 0.3
