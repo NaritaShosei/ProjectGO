@@ -5,13 +5,14 @@ public class BlinkEffect
 {
     private readonly Renderer[] _renderers;
 
-    float _blinkSpeed = 1f;
+    private int _blinkSpeed;
     
     private bool _isBlink;
 
-    public BlinkEffect(Renderer[] renderers)
+    public BlinkEffect(Renderer[] renderers ,int blinkSpeed)
     {
         _renderers = renderers;
+        _blinkSpeed = blinkSpeed;
     }
 
     public void StartBlink()
@@ -39,13 +40,13 @@ public class BlinkEffect
         {
             SetColor(Color.red);
 
-            await UniTask.Delay(100);
+            await UniTask.Delay(_blinkSpeed);
 
             if (!_isBlink) break;
 
             SetColor(Color.white);
 
-            await UniTask.Delay(100);
+            await UniTask.Delay(_blinkSpeed);
         }
     }
 
@@ -53,8 +54,6 @@ public class BlinkEffect
     {
         foreach (Renderer renderer in _renderers)
         {
-            Debug.Log(renderer.name);
-            //renderer.material.color = color;
             renderer.material.SetColor("_BaseColor", color);
         }
     }

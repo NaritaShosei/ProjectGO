@@ -30,6 +30,7 @@ public sealed class DownCondition : IEnemyCondition
     {
         // TODO: EnemyでDownから回復させる
         // 具体的にはアーマーの回復
+        if (enemy is GolemEnemy golem) { golem.RecoverArmor(); }
     }
 
     private float _time;

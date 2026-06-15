@@ -65,16 +65,18 @@ public abstract class Armor : MonoBehaviour, IArmor
     }
 
     /// <summary>
-    /// アーマーを全回復して復活させる
+    /// アーマーを復活させる（Down→復帰用）
     /// </summary>
-    public void Restore()
+    public virtual void Restore()
     {
         gameObject.SetActive(true);
 
-        _stats.RestoreFull();
-
-        _stats.OnBroken -= Broken;
+        _stats = new ArmorStats(_data);
         _stats.OnBroken += Broken;
+        _stats.OnHealthChanged += (current, max) =>
+        {
+            _onHealthChangedHealth?.Invoke(current, max);
+        };
     }
 
     [SerializeField] protected ArmorData _data;

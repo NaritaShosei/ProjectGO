@@ -229,8 +229,22 @@ public class MobEnemy : Enemy, IFormationParticipant
         _runner.ForceExitAction();
     }
 
+    /// <summary>
+    /// Golmeのために追加
+    /// Armorを再利用、再生成した後にOnBrokenイベントの再登録
+    /// </summary>
+    public void RebindArmor()
+    {
+        if (_armor == null)
+        {
+            return;
+        }
+        _armor.OnBroken -= BreakArmor;
+        _armor.OnBroken += BreakArmor;
+    }
+
     // Armorの登録
-    [SerializeField] private MobArmor _armor;
+    [SerializeField] protected MobArmor _armor;
 
     private EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;

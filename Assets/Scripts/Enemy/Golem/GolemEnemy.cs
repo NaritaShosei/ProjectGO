@@ -5,32 +5,26 @@ public class GolemEnemy : MobEnemy
     [SerializeField] private float _downDuration = 5f;
 
     [SerializeField] private Renderer[] _bodyRenderer;
+    [SerializeField] private int _blinkSpeed = 100;
 
     private BlinkEffect _blinkEffect;
-
-    private bool _isDown;
 
     public override void Init()
     {
         base.Init();
-        Renderer renderer = GetComponent<Renderer>();
-        _blinkEffect = new BlinkEffect(_bodyRenderer);
-        Debug.Log(_bodyRenderer.Length);
+        _blinkEffect = new BlinkEffect(_bodyRenderer, _blinkSpeed);
         OnArmorBroken += HandleArmorBroken;
     }
 
     protected override void OnDestroy()
     {
         OnArmorBroken -= HandleArmorBroken;
-
+        _blinkEffect?.StopBlink();
         base.OnDestroy();
     }
 
     private void HandleArmorBroken(IEnemy enemy)
     {
-        Debug.Log(_defenceContext.EnemyType);
-        _isDown = true;
-
         _blinkEffect.StartBlink();
 
         ConditionController.ApplyCondition(
@@ -40,7 +34,6 @@ public class GolemEnemy : MobEnemy
     public void RecoverArmor()
     {
         _blinkEffect.StopBlink();
-        _isDown = false;
 
         if (_armor == null)
         {
@@ -55,6 +48,8 @@ public class GolemEnemy : MobEnemy
 
     public override void TakeDamage(DamageContext context)
     {
+        bool isDown = ConditionController.HasCondition(ConditionType.Down);
+
         if (_isDead)
         {
             return;
@@ -67,7 +62,7 @@ public class GolemEnemy : MobEnemy
 
         int showDamage = damage;
 
-        if (!_isDown)
+        if (!isDown)
         {
             bool armorWasAlive =
     _defenceContext.EnemyType == EnemyDefenceType.Armor;
@@ -109,16 +104,17 @@ public class GolemEnemy : MobEnemy
             return;
         }
 
+        bool isWeakPoint = context.PlayerMode == PlayerMode.Thunder;
+
+        InvokeOnDamageDealt(
+    showDamage,
+    isWeakPoint,
+    context.IsCritical);
+
         _stats.TakeDamage(damage);
 
         bool willKill = _stats.CurrentHealth <= 0;
 
-        bool isWeakPoint = context.PlayerMode == PlayerMode.Thunder;
-
-        InvokeOnDamageDealt(
-            showDamage,
-            isWeakPoint,
-            context.IsCritical);
 
         context.OnHitResult?.Invoke(
             new HitResult
@@ -140,6 +136,14 @@ public class GolemEnemy : MobEnemy
         }
     }
 
+    //public override void OnConditionExit(ConditionType type)
+    //{
+    //    if (type == ConditionType.Down)
+    //    {
+    //        RecoverArmor();
+    //    }
+    //}
+
     public override void OnConditionInterrupt()
     {
         base.OnConditionInterrupt();
@@ -149,5 +153,5 @@ public class GolemEnemy : MobEnemy
     {
         base.UpdateEnemy(deltaTime);
     }
-}
 
+}
