@@ -14,7 +14,7 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnGetUpEnd;
     public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
-
+    public event Action OnDownEnd;
 
     /// <summary>
     /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
@@ -32,6 +32,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnGetUpEnd += HandleGetUpEnd;
         _receiver.OnKnockbackEnd += HandleKnockbackEnd;
         _receiver.OnDeadEnd += HandleDeadEnd;
+        _receiver.OnDownEnd += HandleDownEnd;
     }
 
     /// <summary>
@@ -119,6 +120,13 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnGetUpEnd -= HandleGetUpEnd;
         _receiver.OnKnockbackEnd -= HandleKnockbackEnd;
         _receiver.OnDeadEnd -= HandleDeadEnd;
+        _receiver.OnDownEnd -= HandleDownEnd;
+    }
+
+    public void SetDown(bool value)
+    {
+        if (_animator == null) return;
+        _animator.SetBool(_hashIsDown, value);
     }
 
     // Animatorパラメータのハッシュ
@@ -130,6 +138,7 @@ public class EnemyAnimator : IEnemyAnimator
 
     private static readonly int _hashIsKnockback = Animator.StringToHash("IsKnockback");
     private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
+    private static readonly int _hashIsDown =Animator.StringToHash("IsDown");
 
     private readonly Animator _animator;
 
@@ -142,4 +151,5 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleGetUpEnd() => OnGetUpEnd?.Invoke();
     private void HandleKnockbackEnd() => OnKnockbackEnd?.Invoke();
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
+    private void HandleDownEnd() => OnDownEnd?.Invoke();
 }
