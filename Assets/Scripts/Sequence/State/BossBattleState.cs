@@ -32,8 +32,8 @@ public class BossBattleState : ISequenceState
 
         context.EnemyManager.OnBossDefeated += HandleBossDefeated;
 
-        _bossBattleTimer.StartTimer(_bossBattleTimeLimit);
         _bossBattleTimer.OnTimeEnded += HandleTimeUp;
+        _bossBattleTimer.StartTimer(_bossBattleTimeLimit);
     }
 
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)

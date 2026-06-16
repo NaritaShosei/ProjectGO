@@ -24,8 +24,8 @@ public class GameOverState : ISequenceState
         if (_gameOverTimerView != null)
             _gameOverTimerPresenter = new CountDownTimerPresenter(_gameOverTimer, _gameOverTimerView);
 
-        _gameOverTimer.StartTimer(_gameOverDuration);
         _gameOverTimer.OnTimeEnded += OnGameOverTimeUp;
+        _gameOverTimer.StartTimer(_gameOverDuration);
 
         _storedContext = context;
     }

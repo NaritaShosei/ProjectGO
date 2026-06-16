@@ -32,8 +32,8 @@ public class MobAndSkillState : ISequenceState
             _skillSelectTimerPresenter = new CountDownTimerPresenter(_skillSelectTimer, _skillSelectTimerView);
 
         // タイマー開始
-        _mobBattleTimer.StartTimer(_mobBattleTimeLimit);
         _mobBattleTimer.OnTimeEnded += OnMobTimeUp;
+        _mobBattleTimer.StartTimer(_mobBattleTimeLimit);
 
         // EnemyManagerのウェーブクリア検知
         context.EnemyManager.OnEnemyDefeated += OnEnemyDefeated;
@@ -260,8 +260,8 @@ public class MobAndSkillState : ISequenceState
         // スキル選択タイマー開始
         if (_skillSelectTimer != null)
         {
-            _skillSelectTimer.StartTimer(_skillSelectTimeLimit);
             _skillSelectTimer.OnTimeEnded += OnSkillSelectTimeUp;
+            _skillSelectTimer.StartTimer(_skillSelectTimeLimit);
         }
 
         // スキル選択UIを開く
