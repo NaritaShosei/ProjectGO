@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -6,10 +7,9 @@ using UnityEngine;
 /// 10秒のタイマーで自動的にタイトルへ遷移。
 /// リスタートが選ばれた場合はモブ戦の最初からやり直す。
 /// </summary>
+[Serializable]
 public class GameOverState : ISequenceState
 {
-    private const float GameOverDuration = 10f;
-
     public SequenceStateType StateType => SequenceStateType.GameOver;
 
     public void OnEnter(SequenceStateContext context)
@@ -19,8 +19,13 @@ public class GameOverState : ISequenceState
         // TODO: ゲームオーバーUIを表示する
         // context.GameOverView?.Show(onRestart, onTitle);
 
-        context.GameOverTimer.StartTimer(GameOverDuration);
-        context.GameOverTimer.OnTimeEnded += OnGameOverTimeUp;
+        _gameOverTimer = new CountDownTimer();
+
+        if (_gameOverTimerView != null)
+            _gameOverTimerPresenter = new CountDownTimerPresenter(_gameOverTimer, _gameOverTimerView);
+
+        _gameOverTimer.OnTimeEnded += OnGameOverTimeUp;
+        _gameOverTimer.StartTimer(_gameOverDuration);
 
         _storedContext = context;
     }
@@ -51,13 +56,22 @@ public class GameOverState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
-        context.GameOverTimer.StopTimer();
-        context.GameOverTimer.OnTimeEnded -= OnGameOverTimeUp;
+        _gameOverTimer.StopTimer();
+        _gameOverTimer.OnTimeEnded -= OnGameOverTimeUp;
+
+        _gameOverTimerPresenter?.Dispose();
+        _gameOverTimerPresenter = null;
 
         // TODO: ゲームオーバーUIを非表示
     }
 
+    [Header("ゲームオーバー設定")]
+    [SerializeField, Tooltip("ゲームオーバーからタイトルへ遷移するまでの時間（秒）")] private float _gameOverDuration = 10f;
+    [SerializeField, Tooltip("ゲームオーバーの残り時間を表示するUI")] private CountDownTimerView _gameOverTimerView;
+
     private SequenceStateContext _storedContext;
+    private CountDownTimer _gameOverTimer;
+    private CountDownTimerPresenter _gameOverTimerPresenter;
 
     private void OnGameOverTimeUp() => _storedContext.IsTimeUp = true;
 
