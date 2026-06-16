@@ -83,30 +83,3 @@ public enum PlayerMode
     [InspectorName("雷神")]
     Thunder
 }
-
-#if UNITY_EDITOR
-
-[CustomEditor(typeof(AttackData))]
-public class AttackDataEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        AttackData data = (AttackData)target;
-
-        if (GUILayout.Button("攻撃バリアント追加"))
-        {
-            Undo.RecordObject(data, "Add Variant");
-
-            var variant = new AttackVariantData();
-            variant.SetDefaults();
-
-            data.AddVariant(variant);
-
-            EditorUtility.SetDirty(data);
-        }
-    }
-}
-
-#endif
