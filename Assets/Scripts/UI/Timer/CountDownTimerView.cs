@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PhaseTimerView : MonoBehaviour, IPhaseTimerView
+public class CountDownTimerView : MonoBehaviour, IPhaseTimerView
 {
     public void UpdateTimer(float current, float max)
     {
