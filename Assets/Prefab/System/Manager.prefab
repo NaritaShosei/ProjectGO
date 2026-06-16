@@ -646,17 +646,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
-  _skillUIManager: {fileID: 0}
-  _skillSelectCount: 3
-  _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
-  _spawnPointSelector: {fileID: 7793837620590366497}
-  _bossSpawnData: {fileID: 11400000, guid: 4a9d0c01234cc7d4eb282910d3e0f3af, type: 2}
-  _mobBattleTimeLimit: 180
-  _bossBattleTimeLimit: 120
-  _skillSelectTimeLimit: 10
-  _battleTimerView: {fileID: 0}
-  _skillSelectTimerView: {fileID: 0}
-  _gameOverTimerView: {fileID: 0}
   _sequences:
   - rid: 6731506274227978447
   - rid: 6731506274227978448
@@ -674,13 +663,23 @@ MonoBehaviour:
     - rid: 6731506274227978448
       type: {class: MobAndSkillState, ns: , asm: Assembly-CSharp}
       data:
+        _mobBattleTimerView: {fileID: 0}
+        _skillSelectTimerView: {fileID: 0}
+        _mobBattleTimeLimit: 180
+        _spawnPointSelector: {fileID: 7793837620590366497}
+        _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
+        _skillSelectView: {fileID: 0}
+        _skillSelectTimeLimit: 10
         _skillSelectCount: 3
     - rid: 6731506274227978449
       type: {class: BossIntroMovieState, ns: , asm: Assembly-CSharp}
       data: 
     - rid: 6731506274227978450
       type: {class: BossBattleState, ns: , asm: Assembly-CSharp}
-      data: 
+      data:
+        _bossBattleTimeLimit: 120
+        _bossBattleTimerView: {fileID: 0}
+        _bossSpawnData: {fileID: 11400000, guid: 4a9d0c01234cc7d4eb282910d3e0f3af, type: 2}
     - rid: 6731506274227978451
       type: {class: EndingMovieState, ns: , asm: Assembly-CSharp}
       data: 
@@ -689,7 +688,9 @@ MonoBehaviour:
       data: 
     - rid: 6731506274227978453
       type: {class: GameOverState, ns: , asm: Assembly-CSharp}
-      data: 
+      data:
+        _gameOverDuration: 10
+        _gameOverTimerView: {fileID: 0}
 --- !u!1 &5368403579476760681
 GameObject:
   m_ObjectHideFlags: 0
