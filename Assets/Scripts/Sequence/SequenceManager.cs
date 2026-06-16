@@ -80,10 +80,6 @@ public class SequenceManager : MonoBehaviour
     private SequenceStateMachine _stateMachine;
     private SequenceStateContext _context;
 
-    private CountDownTimerPresenter _battleTimerPresenter;
-    private CountDownTimerPresenter _skillSelectTimerPresenter;
-    private CountDownTimerPresenter _gameOverTimerPresenter;
-
     #endregion
 
     #region Unityイベント
@@ -113,10 +109,6 @@ public class SequenceManager : MonoBehaviour
     {
         if (_context?.Player != null)
             _context.Player.OnDead -= HandlePlayerDead;
-
-        _battleTimerPresenter?.Dispose();
-        _skillSelectTimerPresenter?.Dispose();
-        _gameOverTimerPresenter?.Dispose();
     }
 
     #endregion

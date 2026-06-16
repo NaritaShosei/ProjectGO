@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 
 /// <summary>
 /// エンディングムービーのState。完了またはスキップでリザルトへ遷移する。
 /// </summary>
+[Serializable]
 public class EndingMovieState : ISequenceState
 {
     public SequenceStateType StateType => SequenceStateType.EndingMovie;

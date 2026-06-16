@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -6,6 +7,7 @@ using UnityEngine;
 /// 10秒のタイマーで自動的にタイトルへ遷移。
 /// リスタートが選ばれた場合はモブ戦の最初からやり直す。
 /// </summary>
+[Serializable]
 public class GameOverState : ISequenceState
 {
     public SequenceStateType StateType => SequenceStateType.GameOver;

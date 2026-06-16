@@ -5,6 +5,7 @@ using UnityEngine;
 /// ボス戦のState。制限時間2分。
 /// ボス撃破でエンディングムービーへ、時間切れでゲームオーバーへ遷移する。
 /// </summary>
+[Serializable]
 public class BossBattleState : ISequenceState
 {
     #region パブリック

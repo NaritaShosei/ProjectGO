@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 /// <summary>
 /// ボス登場ムービーのState。
 /// 完了またはスキップで BossBattle へ遷移する。
 /// </summary>
+[Serializable]
 public class BossIntroMovieState : ISequenceState
 {
     public SequenceStateType StateType => SequenceStateType.BossIntroMovie;

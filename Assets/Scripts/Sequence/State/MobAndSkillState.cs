@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -5,6 +6,7 @@ using UnityEngine;
 /// 内部でサブフェーズ（戦闘中 / スキル選択中）を持つ。
 /// 3分タイマーが切れたら BossIntroMovie へ遷移する。
 /// </summary>
+[Serializable]
 public class MobAndSkillState : ISequenceState
 {
     #region パブリック
