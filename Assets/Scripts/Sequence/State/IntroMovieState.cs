@@ -1,8 +1,11 @@
+using System;
+
 /// <summary>
 /// 導入ムービーのState。
 /// ムービー完了またはスキップで MobAndSkill へ遷移する。
 /// 実際のTimeline再生は IMoviePlayer 経由で行う（仮実装ではフラグで即完了）。
 /// </summary>
+[Serializable]
 public class IntroMovieState : ISequenceState
 {
     public SequenceStateType StateType => SequenceStateType.IntroMovie;
