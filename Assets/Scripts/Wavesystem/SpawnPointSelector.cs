@@ -8,11 +8,39 @@ using UnityEngine;
 public class SpawnPointSelector : MonoBehaviour
 {
     /// <summary>
+    /// 条件を満たすSpawnPointを1つ選択して返す
+    /// </summary>
+    /// <param name="exclusionRadius">プレイヤーからの除外半径</param>
+    /// <param name="requiredSlotCount">必要なSlot数（SpawnCountと一致確認）</param>
+    public SpawnPoint Select(float exclusionRadius, string spawnPointKey = "")
+    {
+        // Key指定あり → 固定使用
+        if (!string.IsNullOrEmpty(spawnPointKey))
+        {
+            return SelectByKey(spawnPointKey);
+        }
+
+        // Key指定なし → 自動選択
+        return SelectAuto(exclusionRadius);
+    }
+
+    [Tooltip("プレイヤーのTransform")]
+    [SerializeField] private Transform _playerTransform;
+
+    [Tooltip("利用可能なSpawnPoint一覧")]
+    [SerializeField] private List<SpawnPoint> _allSpawnPoints = new();
+
+    private SpawnPoint _lastUsedPoint;
+    private readonly Dictionary<string, SpawnPoint> _spawnPointMap = new();
+
+    /// <summary>
     /// SpawnPointを初期化
     /// KeyがついているSpawnPointをDictionaryへ登録する
     /// </summary>
-    public void Initialize()
+    private void Awake()
     {
+        // 依存を注入する場合は外部公開メソッドで設定する形にしてもいいかも
+
         if (_playerTransform == null)
         {
             Debug.LogError("PlayerTransformが未設定です");
@@ -44,31 +72,6 @@ public class SpawnPointSelector : MonoBehaviour
             Debug.LogWarning("[SpawnPointSelector] SpawnPointが設定されていません");
     }
 
-    /// <summary>
-    /// 条件を満たすSpawnPointを1つ選択して返す
-    /// </summary>
-    /// <param name="exclusionRadius">プレイヤーからの除外半径</param>
-    /// <param name="requiredSlotCount">必要なSlot数（SpawnCountと一致確認）</param>
-    public SpawnPoint Select(float exclusionRadius, string spawnPointKey = "")
-    {
-        // Key指定あり → 固定使用
-        if (!string.IsNullOrEmpty(spawnPointKey))
-        {
-            return SelectByKey(spawnPointKey);
-        }
-
-        // Key指定なし → 自動選択
-        return SelectAuto(exclusionRadius);
-    }
-
-    [Tooltip("プレイヤーのTransform")]
-    [SerializeField] private Transform _playerTransform;
-
-    [Tooltip("利用可能なSpawnPoint一覧")]
-    [SerializeField] private List<SpawnPoint> _allSpawnPoints = new();
-
-    private SpawnPoint _lastUsedPoint;
-    private readonly Dictionary<string, SpawnPoint> _spawnPointMap = new();
 
     /// <summary>
     /// Keyに対応するSpawnPointを返す
