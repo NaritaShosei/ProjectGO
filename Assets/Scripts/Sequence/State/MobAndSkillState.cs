@@ -20,9 +20,18 @@ public class MobAndSkillState : ISequenceState
         _skillSelectTimeUp = false;
         _waveController = null;
 
+        _mobBattleTimer = new CountDownTimer();
+        _skillSelectTimer = new CountDownTimer();
+
+        if (_mobBattleTimerView != null)
+            _mobBattleTimerPresenter = new CountDownTimerPresenter(_mobBattleTimer, _mobBattleTimerView);
+
+        if (_skillSelectTimerView != null)
+            _skillSelectTimerPresenter = new CountDownTimerPresenter(_skillSelectTimer, _skillSelectTimerView);
+
         // タイマー開始
-        context.PhaseTimer.StartTimer(context.MobBattleTimeLimit);
-        context.PhaseTimer.OnTimeEnded += OnMobTimeUp;
+        _mobBattleTimer.StartTimer(_mobBattleTimeLimit);
+        _mobBattleTimer.OnTimeEnded += OnMobTimeUp;
 
         // EnemyManagerのウェーブクリア検知
         context.EnemyManager.OnEnemyDefeated += OnEnemyDefeated;
@@ -57,26 +66,48 @@ public class MobAndSkillState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
-        context.PhaseTimer.StopTimer();
-        context.PhaseTimer.OnTimeEnded -= OnMobTimeUp;
+        _mobBattleTimer.StopTimer();
+        _mobBattleTimer.OnTimeEnded -= OnMobTimeUp;
 
-        if (context.SkillSelectTimer != null)
+        if (_skillSelectTimer != null)
         {
-            context.SkillSelectTimer.OnTimeEnded -= OnSkillSelectTimeUp;
-            context.SkillSelectTimer.StopTimer();
+            _skillSelectTimer.OnTimeEnded -= OnSkillSelectTimeUp;
+            _skillSelectTimer.StopTimer();
         }
 
-        context.SkillSelectView.OnSkillSelected -= OnSkillSelected;
+        _skillSelectView.OnSkillSelected -= OnSkillSelected;
 
         context.EnemyManager.OnEnemyDefeated -= OnEnemyDefeated;
 
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
 
+        _mobBattleTimerPresenter?.Dispose();
+        _mobBattleTimerPresenter = null;
+
+        _skillSelectTimerPresenter?.Dispose();
+        _skillSelectTimerPresenter = null;
+
         _waveController = null;
 
         context.InputHandler?.EnableInput(false);
     }
+
+    #endregion
+
+    #region シリアライズ
+
+    [Header("モブ戦")]
+    [SerializeField, Tooltip("モブ戦のタイマーUI")] private CountDownTimerView _mobBattleTimerView;
+    [SerializeField, Tooltip("スキル選択のタイマーUI")] private CountDownTimerView _skillSelectTimerView;
+    [SerializeField, Tooltip("モブ戦の時間制限（秒）")] private float _mobBattleTimeLimit = 180f;
+    [SerializeField, Tooltip("スポーンポイントのセレクター")] private SpawnPointSelector _spawnPointSelector;
+    [SerializeField, Tooltip("ウェーブデータ")] private WaveSequenceData _waveSequenceData;
+
+    [Header("スキル選択")]
+    [SerializeField] private SkillSelectView _skillSelectView;
+    [SerializeField] private float _skillSelectTimeLimit = 10f;
+    [SerializeField] private int _skillSelectCount = 3;
 
     #endregion
 
@@ -88,6 +119,12 @@ public class MobAndSkillState : ISequenceState
     private int _currentWaveIndex;
     private WaveController _waveController;
     private SkillSelectPresenter _skillSelectPresenter;
+
+    private CountDownTimer _mobBattleTimer;
+    private CountDownTimer _skillSelectTimer;
+
+    private CountDownTimerPresenter _mobBattleTimerPresenter;
+    private CountDownTimerPresenter _skillSelectTimerPresenter;
 
     private bool _waveCleared;
     private bool _timeUpFlag;
@@ -122,7 +159,7 @@ public class MobAndSkillState : ISequenceState
     /// <param name="context"></param>
     private void StartNextWave(SequenceStateContext context)
     {
-        var waveSequence = context.WaveSequenceData;
+        var waveSequence = _waveSequenceData;
 
         if (waveSequence == null || waveSequence.Waves == null
             || waveSequence.Waves.Count == 0)
@@ -134,13 +171,13 @@ public class MobAndSkillState : ISequenceState
         // あまりを利用してウェーブをループさせる。
         var waveData = waveSequence.Waves[_currentWaveIndex % waveSequence.Waves.Count];
 
-        if (context.SpawnPointSelector == null)
+        if (_spawnPointSelector == null)
         {
             Debug.LogError("[MobAndSkillState] SpawnPointSelectorが未設定です");
             return;
         }
 
-        _waveController = new WaveController(context.EnemyManager, context.SpawnPointSelector);
+        _waveController = new WaveController(context.EnemyManager, _spawnPointSelector);
 
         // ウェーブ開始に失敗したら、以降のウェーブも開始できないので全ウェーブ終了フラグを立てる
         if (!_waveController.StartWave(waveData))
@@ -215,25 +252,25 @@ public class MobAndSkillState : ISequenceState
         _skillSelectTimeUp = false;
 
         // 世界を止める
-        context.PhaseTimer.PauseTimer();
+        _mobBattleTimer.PauseTimer();
         context.InputHandler?.EnableInput(false);
 
         // スキル選択タイマー開始
-        if (context.SkillSelectTimer != null)
+        if (_skillSelectTimer != null)
         {
-            context.SkillSelectTimer.StartTimer(context.SkillSelectTimeLimit);
-            context.SkillSelectTimer.OnTimeEnded += OnSkillSelectTimeUp;
+            _skillSelectTimer.StartTimer(_skillSelectTimeLimit);
+            _skillSelectTimer.OnTimeEnded += OnSkillSelectTimeUp;
         }
 
         // スキル選択UIを開く
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = new SkillSelectPresenter(
             context.SkillManager,
-            context.SkillSelectView,
+            _skillSelectView,
             context.Player
         );
 
-        bool hasSkill = _skillSelectPresenter.Open(context.SkillSelectCount);
+        bool hasSkill = _skillSelectPresenter.Open(_skillSelectCount);
         if (!hasSkill)
         {
             // 候補がない場合は即戦闘復帰
@@ -241,25 +278,25 @@ public class MobAndSkillState : ISequenceState
         }
         else
         {
-            context.SkillSelectView.OnSkillSelected += OnSkillSelected;
+            _skillSelectView.OnSkillSelected += OnSkillSelected;
         }
     }
 
     private void EndSkillSelect(SequenceStateContext context)
     {
-        context.SkillSelectView.OnSkillSelected -= OnSkillSelected;
+        _skillSelectView.OnSkillSelected -= OnSkillSelected;
 
-        if (context.SkillSelectTimer != null)
+        if (_skillSelectTimer != null)
         {
-            context.SkillSelectTimer.OnTimeEnded -= OnSkillSelectTimeUp;
-            context.SkillSelectTimer.StopTimer();
+            _skillSelectTimer.OnTimeEnded -= OnSkillSelectTimeUp;
+            _skillSelectTimer.StopTimer();
         }
 
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
 
         // 世界を再開
-        context.PhaseTimer.ResumeTimer();
+        _mobBattleTimer.ResumeTimer();
         context.InputHandler?.EnableInput(true);
 
         _subPhase = SubPhase.Battle;
