@@ -120,6 +120,8 @@ public class PlayerAttack : MonoBehaviour
     private bool _isCharging;
     private bool _isChargeComboFollowUp;
 
+    private bool _isAttackButtonHeld; // 攻撃ボタンが現在押されているかどうか
+
     private bool _pendingWarriorCharge; // コンボウィンドウ中に入力があり、OnChargeReady待ちの状態
 
     private bool _canStartCharge;
@@ -189,6 +191,7 @@ public class PlayerAttack : MonoBehaviour
     private void HandleAttackPressed()
     {
         _canStartCharge = false;
+        _isAttackButtonHeld = true;
 
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
         {
@@ -252,6 +255,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void HandleAttackReleased()
     {
+        _isAttackButtonHeld = false;
+
         // 雷神はPressed時に処理済み
         if (_modeController.CurrentMode == PlayerMode.Thunder) return;
 
@@ -261,31 +266,8 @@ public class PlayerAttack : MonoBehaviour
         // 自動発動済みなら何もしない（UpdateChargingが先に処理した）
         if (_autoFireTriggered) return;
 
-        // チャージ段階に応じた攻撃を発動。チャージなしならコンボ入力としてバッファする
-        if (_currentChargeLevel == ChargeLevel.None)
-        {
-            CancelCharge();
-
-            var input = new AttackInput
-            {
-                AttackType = AttackType.LightAttack,
-                ChargeLevel = ChargeLevel.None
-            };
-
-            if (_stateManager.CurrentState == PlayerState.Attacking)
-            {
-                BufferComboInput(input);
-            }
-            else
-            {
-                PrepareAttack(input);
-            }
-
-            return;
-        }
-
-        _autoFireTriggered = true;
-        FireWarriorAttack(_currentChargeLevel);
+        // TODO:即攻撃ではなくチャージの構えモーションが再生されてから攻撃が発動するようにする
+        
     }
     #endregion
 
@@ -471,6 +453,7 @@ public class PlayerAttack : MonoBehaviour
             var unlockedIds = _skillManager.GetOwnedSkillIDs();
 
             var next = _attackRepository.GetNextComboAttack(_currentAttackId, unlockedIds);
+
             if (next != null) return next;
             // コンボ終端ならnullを返す（新コンボ開始はしない）
             return null;
@@ -508,8 +491,6 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void OnComboWindowEnd()
     {
-        _isInComboWindow = false;
-
         if (_isCharging && _modeController.CurrentMode == PlayerMode.Warrior)
         {
             _pendingWarriorCharge = true;
@@ -520,7 +501,12 @@ public class PlayerAttack : MonoBehaviour
                 float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
                 _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
             }
+
+            return;
         }
+
+        // コンボウィンドウ終了時にチャージ攻撃の準備ができている場合は、コンボ継続ではなくチャージ攻撃に遷移する
+        _isInComboWindow = false;
     }
 
     #endregion
@@ -585,8 +571,15 @@ public class PlayerAttack : MonoBehaviour
         if (!_canStartCharge) return;
         if (!_isCharging || _modeController.CurrentMode != PlayerMode.Warrior) return;
 
+        if (_pendingWarriorCharge) return; // コンボウィンドウ中のチャージはOnComboWindowEndで処理する
+
         float chargeTime = Time.time - _chargeStartTime;
         ChargeLevel newLevel = ResolveChargeLevel(chargeTime);
+
+        if (!_isAttackButtonHeld)
+        {
+            FireWarriorAttack(newLevel);
+        }
 
         // 段階が上がったときだけアニメーションを切り替えてイベント通知
         if (newLevel != _currentChargeLevel)
