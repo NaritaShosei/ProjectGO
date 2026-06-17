@@ -8,19 +8,18 @@ public class InjuryPowerSkill : SkillBase
 
     public override void Apply(ref AttackContext context)
     {
-        Debug.Log($"攻撃力を{context.AttackPower}から{context.AttackPower + _attackStatusBonus}に上昇");
-
         context.AttackPower += _attackStatusBonus;
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
     {
-        bool isInjury = context.PlayerStats.CurrentHealth <= context.PlayerStats.MaxHealth / _isInjuryPercent;
+        bool isInjury = context.PlayerStats.CurrentHealth <= context.PlayerStats.MaxHealth * _isInjuryPercent;
 
         return isInjury;
     }
 
     [Header("攻撃力上昇量")]
     [SerializeField] private float _attackStatusBonus = 20f;
-    [SerializeField] private const float _isInjuryPercent = 2f;
+    [Header("攻撃力上昇割合")]
+    [SerializeField] private float _isInjuryPercent = 0.5f;
 }
