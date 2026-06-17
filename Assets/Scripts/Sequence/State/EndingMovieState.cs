@@ -11,10 +11,16 @@ public class EndingMovieState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
+        _context = context;
+
         context.InputHandler?.EnableInput(false);
 
-        // TODO: Timelineムービーを再生する
-        context.IsMovieCompleted = true;
+        var moviePlayer = context.MoviePlayer;
+
+        moviePlayer.OnMovieFinished += HandleMovieFinished;
+
+        moviePlayer?.PlayMovie(_movieName);
+
     }
 
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
@@ -27,6 +33,16 @@ public class EndingMovieState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
-        // TODO: ムービー停止
+        var moviePlayer = context.MoviePlayer;
+        moviePlayer.OnMovieFinished -= HandleMovieFinished;
+    }
+
+    [Header("Movie Settings")]
+    [SerializeField] private string _movieName = "Ending";
+    private SequenceStateContext _context;
+
+    private void HandleMovieFinished()
+    {
+        _context.IsMovieCompleted = true;
     }
 }

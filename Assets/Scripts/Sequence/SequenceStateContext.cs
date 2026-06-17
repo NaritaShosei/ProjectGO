@@ -13,6 +13,7 @@ public class SequenceStateContext
     public InputHandler InputHandler;
     public IPlayer Player;
     public SequenceManager SequenceManager;
+    public MoviePlayer MoviePlayer;
 
     #endregion
 
