@@ -10,7 +10,7 @@ public class MoviePlayer : MonoBehaviour
     public event Action OnMovieStarted;
     public event Action OnMovieFinished;
 
-    public void PlayMovie(string movieName)
+    public bool PlayMovie(string movieName)
     {
         if (_movieDictionary.TryGetValue(movieName, out var timelineAsset))
         {
@@ -18,11 +18,11 @@ public class MoviePlayer : MonoBehaviour
             _playableDirector.Play();
 
             OnMovieStarted?.Invoke();
+            return true;
         }
-        else
-        {
-            Debug.LogWarning($"指定されたムービー名 '{movieName}' は存在しません。");
-        }
+
+        Debug.LogWarning($"指定されたムービー名 '{movieName}' は存在しません。");
+        return false;
     }
 
     public void StopMovie()
@@ -54,16 +54,24 @@ public class MoviePlayer : MonoBehaviour
 
     private void Awake()
     {
+        if (_playableDirector == null)
+        {
+            Debug.LogError("PlayableDirector がアタッチされていません。MoviePlayer を正しく動作させるために、PlayableDirector をアタッチしてください。");
+            return;
+        }
+
         BuildDictionary();
     }
     private void OnEnable()
     {
-        _playableDirector.stopped += OnDirectorStopped;
+        if (_playableDirector != null)
+            _playableDirector.stopped += OnDirectorStopped;
     }
 
     private void OnDisable()
     {
-        _playableDirector.stopped -= OnDirectorStopped;
+        if (_playableDirector != null)
+            _playableDirector.stopped -= OnDirectorStopped;
     }
 
     private void BuildDictionary()
@@ -76,7 +84,7 @@ public class MoviePlayer : MonoBehaviour
                 continue;
             }
 
-            if (_movieDictionary.ContainsKey(data.Name) || string.IsNullOrEmpty(data.Name))
+            if (string.IsNullOrWhiteSpace(data.Name) || _movieDictionary.ContainsKey(data.Name))
             {
                 Debug.LogWarning($"MovieData の Name が重複しているか、空文字です。Name: {data.Name}");
                 continue;

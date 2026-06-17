@@ -26,7 +26,11 @@ public class BossIntroMovieState : ISequenceState
 
         moviePlayer.OnMovieFinished += HandleMovieFinished;
 
-        moviePlayer?.PlayMovie(_movieName);
+        if (!moviePlayer.PlayMovie(_movieName))
+        {
+            Debug.LogWarning($"ムービー '{_movieName}' の再生に失敗しました。");
+            context.IsMovieCompleted = true; // ムービー再生に失敗した場合も即座にムービー完了とする
+        }
     }
 
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
