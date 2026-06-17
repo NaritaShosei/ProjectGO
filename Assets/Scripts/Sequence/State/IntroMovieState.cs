@@ -38,7 +38,7 @@ public class IntroMovieState : ISequenceState
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
     {
         if (context.IsMovieCompleted)
-            return SequenceStateType.MobAndSkill;
+            return _nextSequence;
 
         return null;
     }
@@ -50,8 +50,13 @@ public class IntroMovieState : ISequenceState
         moviePlayer.OnMovieFinished -= HandleMovieFinished;
     }
 
+    [SerializeField] private string _stateName = "IntroMovieState";
+
     [Header("Movie Settings")]
     [SerializeField] private string _movieName = "Intro";
+    [Header("シークエンス設定")]
+    [SerializeField] private SequenceStateType _nextSequence = SequenceStateType.MobAndSkill;
+
     private SequenceStateContext _context;
 
     private void HandleMovieFinished()

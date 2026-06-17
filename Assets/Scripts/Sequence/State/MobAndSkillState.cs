@@ -55,7 +55,7 @@ public class MobAndSkillState : ISequenceState
         if (context.IsTimeUp)
         {
             context.EnemyManager.ClearAllMobEnemies(); // タイマー切れと同時に敵を全て消す
-            return SequenceStateType.BossIntroMovie;
+            return _nextSequence;
         }
 
         return _subPhase switch
@@ -99,6 +99,8 @@ public class MobAndSkillState : ISequenceState
 
     #region シリアライズ
 
+    [SerializeField] private string _stateName = "MobAndSkillState";
+
     [Header("モブ戦")]
     [SerializeField, Tooltip("モブ戦のタイマーUI")] private CountDownTimerView _mobBattleTimerView;
     [SerializeField, Tooltip("スキル選択のタイマーUI")] private CountDownTimerView _skillSelectTimerView;
@@ -110,6 +112,9 @@ public class MobAndSkillState : ISequenceState
     [SerializeField] private SkillSelectView _skillSelectView;
     [SerializeField] private float _skillSelectTimeLimit = 10f;
     [SerializeField] private int _skillSelectCount = 3;
+
+    [Header("シークエンス設定")]
+    [SerializeField] private SequenceStateType _nextSequence = SequenceStateType.BossIntroMovie;
 
     #endregion
 
