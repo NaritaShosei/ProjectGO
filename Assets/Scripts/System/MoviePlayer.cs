@@ -76,6 +76,12 @@ public class MoviePlayer : MonoBehaviour
 
     private void BuildDictionary()
     {
+        if (_movieData == null || _movieData.Length == 0)
+        {
+            Debug.LogWarning("MovieData が設定されていません。MoviePlayer の設定を確認してください。");
+            return;
+        }
+
         foreach (var data in _movieData)
         {
             if (data.TimelineAsset == null)
