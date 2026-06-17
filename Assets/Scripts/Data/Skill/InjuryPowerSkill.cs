@@ -8,7 +8,7 @@ public class InjuryPowerSkill : SkillBase
 
     public override void Apply(ref AttackContext context)
     {
-        context.AttackPower += _attackStatusBonus;
+        context.AttackPower *= _attackStatusBonusPercent;
     }
 
     public override bool CanApply(AttackContext context, AttackData data)
@@ -19,7 +19,7 @@ public class InjuryPowerSkill : SkillBase
     }
 
     [Header("攻撃力上昇量")]
-    [SerializeField] private float _attackStatusBonus = 20f;
+    [SerializeField] private float _attackStatusBonusPercent = 1.3f;
     [Header("攻撃力上昇割合")]
     [SerializeField] private float _isInjuryPercent = 0.5f;
 }
