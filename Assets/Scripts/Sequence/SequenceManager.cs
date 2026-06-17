@@ -63,7 +63,7 @@ public class SequenceManager : MonoBehaviour
 
     [Header("Sequence設定")]
     [SerializeField, Tooltip("シークエンス内で共通して使用するMoviePlayer")] private MoviePlayer _moviePlayer;
-    [SerializeReference, SubclassSelector,Tooltip("最初に開始するシークエンスのタイプ")] private SequenceStateType _firstSequence = SequenceStateType.IntroMovie;
+    [SerializeField, Tooltip("最初に開始するシークエンスのタイプ")] private SequenceStateType _firstSequence = SequenceStateType.IntroMovie;
     [SerializeReference, SubclassSelector]
     private ISequenceState[] _sequences = new ISequenceState[]
     {
