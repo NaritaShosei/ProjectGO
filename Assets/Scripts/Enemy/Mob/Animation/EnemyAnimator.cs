@@ -40,6 +40,7 @@ public class EnemyAnimator : IEnemyAnimator
     /// </summary>
     public void SetSpeed(float speed)
     {
+
         if (_animator == null) return;
         _animator.SetFloat(_hashSpeed, speed);
     }
@@ -129,6 +130,12 @@ public class EnemyAnimator : IEnemyAnimator
         _animator.SetBool(_hashIsDown, value);
     }
 
+    public void DownTrigger()
+    {
+        if (_animator == null) return;
+        _animator.SetTrigger(_hashDownTrigger);
+    }
+
     // Animatorパラメータのハッシュ
     private static readonly int _hashSpeed = Animator.StringToHash("Speed");
     private static readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
@@ -138,7 +145,8 @@ public class EnemyAnimator : IEnemyAnimator
 
     private static readonly int _hashIsKnockback = Animator.StringToHash("IsKnockback");
     private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
-    private static readonly int _hashIsDown =Animator.StringToHash("IsDown");
+    private static readonly int _hashIsDown = Animator.StringToHash("IsDown");
+    private static readonly int _hashDownTrigger = Animator.StringToHash("DownTrigger");
 
     private readonly Animator _animator;
 

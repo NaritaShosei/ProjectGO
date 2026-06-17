@@ -38,6 +38,8 @@ public interface IEnemyAnimator
     public void Dispose();
     /// <summary> </summary><param name="value"></param>
     public void SetDown(bool value);
+
+    public void DownTrigger();
 }
 
 /// <summary>
@@ -65,4 +67,5 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public void SetAnimSpeed(float speed) { }
     public void Dispose() { }
     public void SetDown(bool value){ }
+    public void DownTrigger() { }
 }
