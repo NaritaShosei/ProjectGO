@@ -27,6 +27,7 @@ public class SequenceManager : MonoBehaviour
             InputHandler = inputHandler,
             Player = player,
             SequenceManager = this,
+            MoviePlayer = _moviePlayer,
         };
 
         // プレイヤー死亡を購読
@@ -61,6 +62,7 @@ public class SequenceManager : MonoBehaviour
     #region　インスペクター
 
     [Header("Sequence設定")]
+    [SerializeField, Tooltip("シークエンス内で共通して使用するMoviePlayer")] private MoviePlayer _moviePlayer;
     [SerializeReference, SubclassSelector]
     private ISequenceState[] _sequences = new ISequenceState[]
     {

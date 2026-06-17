@@ -557,6 +557,82 @@ MonoBehaviour:
   _key: 2
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
+--- !u!1 &3763728631446097578
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6581172022573930489}
+  - component: {fileID: 7822539410125592448}
+  - component: {fileID: 3281229546311345012}
+  m_Layer: 0
+  m_Name: MoviePlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6581172022573930489
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763728631446097578}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7036861525032570302}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!320 &7822539410125592448
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763728631446097578}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: e2ff503f367d73346be60652a30c4811, type: 2}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings:
+  - key: {fileID: -1794435989488617269, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -865530541497857565, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -589648875302120230, guid: e2ff503f367d73346be60652a30c4811, type: 2}
+    value: {fileID: 0}
+  m_ExposedReferences:
+    m_References: []
+--- !u!114 &3281229546311345012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763728631446097578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39b692c241b6f48459e8397b3de9e51b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MoviePlayer
+  _playableDirector: {fileID: 7822539410125592448}
+  _movieData:
+  - _timelineAsset: {fileID: 11400000, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+    _name: Boss
+  - _timelineAsset: {fileID: 11400000, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    _name: Ending
+  - _timelineAsset: {fileID: 11400000, guid: e2ff503f367d73346be60652a30c4811, type: 2}
+    _name: Intro
 --- !u!1 &3913965231841061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,6 +676,7 @@ Transform:
   - {fileID: 4787318458227283089}
   - {fileID: 4297340128657640697}
   - {fileID: 4131464219702442700}
+  - {fileID: 6581172022573930489}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4996710551187502800
@@ -646,6 +723,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
+  _moviePlayer: {fileID: 3281229546311345012}
   _sequences:
   - rid: 6731506274227978447
   - rid: 6731506274227978448
@@ -659,13 +737,14 @@ MonoBehaviour:
     RefIds:
     - rid: 6731506274227978447
       type: {class: IntroMovieState, ns: , asm: Assembly-CSharp}
-      data: 
+      data:
+        _movieName: Intro
     - rid: 6731506274227978448
       type: {class: MobAndSkillState, ns: , asm: Assembly-CSharp}
       data:
         _mobBattleTimerView: {fileID: 0}
         _skillSelectTimerView: {fileID: 0}
-        _mobBattleTimeLimit: 180
+        _mobBattleTimeLimit: 5
         _spawnPointSelector: {fileID: 7793837620590366497}
         _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
         _skillSelectView: {fileID: 0}
@@ -673,7 +752,8 @@ MonoBehaviour:
         _skillSelectCount: 3
     - rid: 6731506274227978449
       type: {class: BossIntroMovieState, ns: , asm: Assembly-CSharp}
-      data: 
+      data:
+        _movieName: Boss
     - rid: 6731506274227978450
       type: {class: BossBattleState, ns: , asm: Assembly-CSharp}
       data:
@@ -682,7 +762,8 @@ MonoBehaviour:
         _bossSpawnData: {fileID: 11400000, guid: 4a9d0c01234cc7d4eb282910d3e0f3af, type: 2}
     - rid: 6731506274227978451
       type: {class: EndingMovieState, ns: , asm: Assembly-CSharp}
-      data: 
+      data:
+        _movieName: Ending
     - rid: 6731506274227978452
       type: {class: ResultState, ns: , asm: Assembly-CSharp}
       data: 
