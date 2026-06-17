@@ -17,7 +17,14 @@ public class IntroMovieState : ISequenceState
 
         context.InputHandler?.EnableInput(false);
 
-        var moviePlayer = context.MoviePlayer;  
+        var moviePlayer = context.MoviePlayer;
+
+        if (moviePlayer == null)
+        {
+            Debug.LogWarning("MoviePlayerが見つかりません。IntroMovieStateを正常に再生できません。");
+            context.IsMovieCompleted = true; // MoviePlayerがない場合は即座にムービー完了とする
+            return;
+        }
 
         moviePlayer.OnMovieFinished += HandleMovieFinished;
 

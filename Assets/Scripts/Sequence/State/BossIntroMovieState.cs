@@ -17,6 +17,13 @@ public class BossIntroMovieState : ISequenceState
 
         var moviePlayer = context.MoviePlayer;
 
+        if (moviePlayer == null)
+        {
+            Debug.LogWarning("MoviePlayerが見つかりません。BossIntroMovieStateを正常に再生できません。");
+            context.IsMovieCompleted = true; // MoviePlayerがない場合は即座にムービー完了とする
+            return;
+        }
+
         moviePlayer.OnMovieFinished += HandleMovieFinished;
 
         moviePlayer?.PlayMovie(_movieName);
