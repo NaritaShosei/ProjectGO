@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>
 /// ボス戦のState。制限時間2分。
@@ -39,10 +40,10 @@ public class BossBattleState : ISequenceState
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
     {
         if (context.IsBossDefeated)
-            return SequenceStateType.EndingMovie;
+            return _bossDefeatedSequence;
 
         if (context.IsTimeUp)
-            return SequenceStateType.GameOver;
+            return _timeUpSequence;
 
         return null;
     }
@@ -70,10 +71,15 @@ public class BossBattleState : ISequenceState
 
     #region シリアライズ
 
+    [SerializeField] private string _stateName = "BossBattleState";
+
     [Header("ボス戦設定")]
     [SerializeField, Tooltip("ボス戦の時間制限（秒）")] private float _bossBattleTimeLimit = 120f;
     [SerializeField, Tooltip("ボス戦のタイマーUI")] private CountDownTimerView _bossBattleTimerView;
     [SerializeField, Tooltip("ボスのスポーンデータ")] private SpawnData _bossSpawnData;
+    [Header("シークエンス")]
+    [SerializeField, Tooltip("タイムアップ時に遷移するシークエンス")] private SequenceStateType _timeUpSequence = SequenceStateType.GameOver;
+    [SerializeField, Tooltip("ボス撃破時に遷移するシークエンス")] private SequenceStateType _bossDefeatedSequence = SequenceStateType.EndingMovie;
 
     #endregion
 
