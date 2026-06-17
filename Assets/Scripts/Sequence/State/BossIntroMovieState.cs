@@ -11,12 +11,26 @@ public class BossIntroMovieState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
+        _context = context;
+
         context.InputHandler?.EnableInput(false);
 
-        // TODO: Timelineムービーを再生する
-        // context.MoviePlayer?.Play(MovieType.BossIntro, () => context.IsMovieCompleted = true);
+        var moviePlayer = context.MoviePlayer;
 
-        context.IsMovieCompleted = true;
+        if (moviePlayer == null)
+        {
+            Debug.LogWarning("MoviePlayerが見つかりません。BossIntroMovieStateを正常に再生できません。");
+            context.IsMovieCompleted = true; // MoviePlayerがない場合は即座にムービー完了とする
+            return;
+        }
+
+        moviePlayer.OnMovieFinished += HandleMovieFinished;
+
+        if (!moviePlayer.PlayMovie(_movieName))
+        {
+            Debug.LogWarning($"ムービー '{_movieName}' の再生に失敗しました。");
+            context.IsMovieCompleted = true; // ムービー再生に失敗した場合も即座にムービー完了とする
+        }
     }
 
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
@@ -29,6 +43,16 @@ public class BossIntroMovieState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
-        // TODO: ムービー停止
+        var moviePlayer = context.MoviePlayer;
+        moviePlayer.OnMovieFinished -= HandleMovieFinished;
+    }
+
+    [Header("Movie Settings")]
+    [SerializeField] private string _movieName = "Boss";
+    private SequenceStateContext _context;
+
+    private void HandleMovieFinished()
+    {
+        _context.IsMovieCompleted = true;
     }
 }
