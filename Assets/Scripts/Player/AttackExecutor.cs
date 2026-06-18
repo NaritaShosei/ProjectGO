@@ -111,7 +111,7 @@ public class AttackExecutor : MonoBehaviour
             if (ServiceLocator.TryGet(out HitStopManager hitStop))
             {
                 hitStop.Trigger(
-                    data: (HitStopData)variantData.HitStopData,
+                    data: variantData.HitStopData,
                     isWeakPoint: isWeakPoint,
                     isArmorBreak: isArmorBreak,
                     isKill: isKill,
