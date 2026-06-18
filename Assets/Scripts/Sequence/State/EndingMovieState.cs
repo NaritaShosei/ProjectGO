@@ -36,7 +36,7 @@ public class EndingMovieState : ISequenceState
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
     {
         if (context.IsMovieCompleted)
-            return SequenceStateType.Result;
+            return _nextSequence;
 
         return null;
     }
@@ -47,8 +47,13 @@ public class EndingMovieState : ISequenceState
         moviePlayer.OnMovieFinished -= HandleMovieFinished;
     }
 
+    [SerializeField] private string _stateName = "EndingMovieState";
+
     [Header("Movie Settings")]
     [SerializeField] private string _movieName = "Ending";
+    [Header("シークエンス設定")]
+    [SerializeField] private SequenceStateType _nextSequence = SequenceStateType.Result;
+
     private SequenceStateContext _context;
 
     private void HandleMovieFinished()
