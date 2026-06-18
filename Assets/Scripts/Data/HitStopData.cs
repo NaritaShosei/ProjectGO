@@ -17,6 +17,9 @@ public sealed class HitStopData
     /// <summary> ヒットストップ対象グループ </summary>
     public HitStopTargetGroup TargetGroup => _targetGroup;
 
+    /// <summary> 優先順位(数字が低いほど優先度が高い) </summary>
+    public int Priority => _priority;
+
     /// <summary> 弱点ヒット時の倍率 </summary>
     public float WeakPointMultiplier => _weakPointMultiplier;
 
@@ -47,6 +50,9 @@ public sealed class HitStopData
         HitStopTargetGroup.Player |
         HitStopTargetGroup.HitEnemy |
         HitStopTargetGroup.Effects;
+
+    [Tooltip("優先順位(数字が低いほど優先度が高い)")]
+    [SerializeField] private int _priority = 999;
 
     [Header("Multiplier")]
     [Tooltip("弱点ヒット時の倍率")]

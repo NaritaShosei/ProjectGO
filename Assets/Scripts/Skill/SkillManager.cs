@@ -27,6 +27,9 @@ public class SkillManager : MonoBehaviour
         }
 
         _skillExecutor = new SkillExecutor(this, stats, modeController, playerTransform, enemyManager);
+
+        // 最初から所持させるスキルの付与
+        GrantInitialSkills(stats);
     }
 
     public bool TryRegisterSkillId(int id, IPlayerStats stats)
@@ -119,6 +122,12 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private StatSkillData[] _statSkillDataArray;
     [SerializeField] private ChargeLevelSkillEntry[] _chargeLevelSkillMap;
 
+    [Header("最初から所持させるスキル")]
+    [Tooltip("ここに設定したスキルはInit時に自動で獲得済み扱いになる。\n" +
+            "※対象のSkillBaseアセットは_skillDataBaseにも登録しておくこと（IDで検索するため）。\n" +
+            "※OnAcquireを確実に発火させるため、対象スキルのTimingは「獲得時」(OnAcquire)に設定すること。")]
+    [SerializeField] private SkillBase[] _initialSkills;
+
     private SkillExecutor _skillExecutor;
     private StatSkillSystem _statSkillSystem;
     private List<ISkillUpdater> _updaters = new();
@@ -135,6 +144,31 @@ public class SkillManager : MonoBehaviour
     private void OnDestroy()
     {
         _statSkillSystem?.Dispose();
+    }
+
+    /// <summary>
+    /// _initialSkillsに設定されたスキルを、通常の獲得処理(TryRegisterSkillId)と
+    /// 同じ経路で付与する。OnAcquire発火・Passive登録・進化先解放も通常通り行われる。
+    /// </summary>
+    private void GrantInitialSkills(IPlayerStats stats)
+    {
+        if (_initialSkills == null) return;
+
+        foreach (var skill in _initialSkills)
+        {
+            if (skill == null) continue;
+
+            if (_ownedSkillIDs.Contains(skill.ID)) continue; // 重複付与防止
+
+            bool registered = TryRegisterSkillId(skill.ID, stats);
+
+            if (!registered)
+            {
+                Debug.LogWarning(
+                    $"[SkillManager] InitialSkill '{skill.name}'(ID:{skill.ID}) の登録に失敗しました。" +
+                    "SkillDataBaseに同じスキルが登録されているか確認してください。", this);
+            }
+        }
     }
 }
 

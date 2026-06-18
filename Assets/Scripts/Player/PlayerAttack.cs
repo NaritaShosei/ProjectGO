@@ -190,6 +190,9 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void HandleAttackPressed()
     {
+        // すでにチャージ中なら無視
+        if (_isCharging) return;
+
         _canStartCharge = false;
         _isAttackButtonHeld = true;
 

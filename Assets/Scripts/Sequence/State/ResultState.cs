@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -6,6 +7,7 @@ using UnityEngine;
 /// 現状は SequenceManager.OnAllSequencesComplete を発火して外部（GameManager）にシーン遷移を委ねる。
 /// インゲーム内リザルトUIにするか別シーンにするかは後で決める。
 /// </summary>
+[Serializable]
 public class ResultState : ISequenceState
 {
     public SequenceStateType StateType => SequenceStateType.Result;

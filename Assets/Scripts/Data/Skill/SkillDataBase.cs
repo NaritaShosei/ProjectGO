@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SkillDataBase", menuName = "GameData/Skill/DataBase")]
@@ -32,13 +32,24 @@ public class SkillDataBase : ScriptableObject
 
         foreach (var skill in _skills)
         {
-            if (!skill || _skillMap.ContainsKey(skill.ID))
+            if (!skill)
             {
-                Debug.LogWarning("Skillがnullか、IDが重複");
+                Debug.LogWarning("Skillがnullです");
                 continue;
             }
 
-            _skillMap[skill.ID] = skill;
+            if (_skillMap.TryGetValue(skill.ID, out SkillBase existingSkill))
+            {
+                Debug.LogWarning(
+                    $"Skill ID重複検出\n" +
+                    $"ID: {skill.ID}\n" +
+                    $"先に登録済み: {existingSkill.Name}\n" +
+                    $"重複したSkill: {skill.Name}"
+                );
+                continue;
+            }
+
+            _skillMap.Add(skill.ID, skill);
         }
     }
 }

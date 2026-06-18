@@ -80,15 +80,27 @@ public sealed class HitStopManager : IDisposable
     /// ヒットした敵（HitEnemy グループの絞り込みに使用）
     /// </param>
     public void Trigger(
-    HitStopData data,
-    bool isWeakPoint = false,
-    bool isArmorBreak = false,
-    bool isKill = false,
-    IReadOnlyList<ISpeedChange> hitEnemyTargets = null)
+        HitStopData data,
+        bool isWeakPoint = false,
+        bool isArmorBreak = false,
+        bool isKill = false,
+        IReadOnlyList<ISpeedChange> hitEnemyTargets = null)
     {
-        if (data == null) return;
-        float duration = data.GetDuration(isWeakPoint, isArmorBreak, isKill);
-        ExecuteHitStopAsync(duration, data.TimeScale, data.TargetGroup, hitEnemyTargets).Forget();
+        if (data == null)
+        {
+            return;
+        }
+
+        float duration =
+            data.GetDuration(isWeakPoint, isArmorBreak, isKill);
+
+        ExecuteHitStopAsync(
+            duration,
+            data.TimeScale,
+            data.TargetGroup,
+            data.Priority,
+            hitEnemyTargets
+        ).Forget();
     }
 
     /// <summary>
@@ -99,9 +111,16 @@ public sealed class HitStopManager : IDisposable
        float duration,
        HitStopTargetGroup targetGroup,
        float timeScale = 0f,
+       int priority = int.MaxValue,
        IReadOnlyList<ISpeedChange> hitEnemyTargets = null)
     {
-        ExecuteHitStopAsync(duration, timeScale, targetGroup, hitEnemyTargets).Forget();
+        ExecuteHitStopAsync(
+            duration,
+            timeScale,
+            targetGroup,
+            priority,
+            hitEnemyTargets
+        ).Forget();
     }
 
     /// <summary>
@@ -163,16 +182,27 @@ public sealed class HitStopManager : IDisposable
 
     private HashSet<ISpeedChange> _activeHitEnemyTargets;
 
+    private int _currentPriority = int.MaxValue;
+
     /// <summary>
     /// ヒットストップの非同期処理本体
     /// </summary>
     private async UniTaskVoid ExecuteHitStopAsync(
-        float duration,
-        float timeScale,
-        HitStopTargetGroup targetGroups,
-        IReadOnlyList<ISpeedChange> hitEnemyTargets)
+    float duration,
+    float timeScale,
+    HitStopTargetGroup targetGroups,
+    int priority,
+    IReadOnlyList<ISpeedChange> hitEnemyTargets)
     {
-        // 既存ヒットストップをキャンセル
+        // 既により高優先度が動いているなら無視
+        if (_hitStopCancellation != null &&
+            priority > _currentPriority)
+        {
+            return;
+        }
+
+        _currentPriority = priority;
+
         _hitStopCancellation?.Cancel();
         _hitStopCancellation?.Dispose();
 
@@ -187,20 +217,19 @@ public sealed class HitStopManager : IDisposable
                 TimeSpan.FromSeconds(duration),
                 DelayType.UnscaledDeltaTime,
                 PlayerLoopTiming.Update,
-                cancellation.Token
-            );
-
+                cancellation.Token);
         }
         catch (OperationCanceledException)
         {
-            // キャンセル時は何もしない
         }
         finally
         {
-            ApplySpeedScale(1f, targetGroups, hitEnemyTargets);
-
             if (ReferenceEquals(_hitStopCancellation, cancellation))
             {
+                ApplySpeedScale(1f, targetGroups, hitEnemyTargets);
+
+                _currentPriority = int.MaxValue;
+
                 _hitStopCancellation.Dispose();
                 _hitStopCancellation = null;
             }

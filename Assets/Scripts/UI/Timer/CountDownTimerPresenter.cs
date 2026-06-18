@@ -4,12 +4,12 @@ using UnityEngine;
 /// <summary>
 /// フェーズタイマーのプレゼンタークラス。UIの更新やイベントの管理を担当する。
 /// </summary>
-public class PhaseTimerPresenter : IDisposable
+public class CountDownTimerPresenter : IDisposable
 {
     /// <summary>
     /// コンストラクタ。必要な初期化を行う。
     /// </summary>
-    public PhaseTimerPresenter(CountDownTimer timer,IPhaseTimerView view)
+    public CountDownTimerPresenter(CountDownTimer timer,IPhaseTimerView view)
     {
         _timer = timer;
         _view = view;   
