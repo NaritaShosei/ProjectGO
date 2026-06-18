@@ -3441,7 +3441,7 @@ PrefabInstance:
     - target: {fileID: 7748896386332537814, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _sequenceManager
       value: 
-      objectReference: {fileID: 6837170418680516862}
+      objectReference: {fileID: 6837170418680516861}
     - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _gaugeParent
       value: 
@@ -3470,45 +3470,25 @@ PrefabInstance:
       propertyPath: _viewParent
       value: 
       objectReference: {fileID: 1393089256}
-    m_RemovedComponents:
-    - {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4996710551187502800, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6837170418680516862}
     - targetCorrespondingSourceObject: {fileID: 1933743511098463970, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 414950820}
   m_SourcePrefab: {fileID: 100100000, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
---- !u!1 &6837170418680516861 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4996710551187502800, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+--- !u!114 &6837170418680516861 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
   m_PrefabInstance: {fileID: 6837170418680516860}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6837170418680516862
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6837170418680516861}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 287caa96f257797499e27a1b804162d3, type: 3}
+  m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SequenceManager
-  _skillUIManager: {fileID: 288090821}
-  _skillSelectCount: 3
-  _spawnDataRepository: {fileID: 11400000, guid: 5272d01d0cbdd8d488e53d3a54f5f3c8, type: 2}
-  _bossSpawnData: {fileID: 11400000, guid: 4a9d0c01234cc7d4eb282910d3e0f3af, type: 2}
-  _mobBattleTimeLimit: 180
-  _bossBattleTimeLimit: 120
-  _skillSelectTimeLimit: 10
-  _battleTimerView: {fileID: 1763262962}
-  _skillSelectTimerView: {fileID: 352783417}
-  _gameOverTimerView: {fileID: 866597378}
+  m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
 --- !u!1001 &7257887957543716051
 PrefabInstance:
   m_ObjectHideFlags: 0
