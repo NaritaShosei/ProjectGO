@@ -44,7 +44,7 @@ public class JustDodgeSystem : MonoBehaviour
     }
 
     [Header("ジャスト回避判定のフレーム")]
-    [SerializeField] private int _justDodgeFrame = 15;
+    [SerializeField, Min(1)] private int _justDodgeFrame = 15;
 
     private CancellationTokenSource _windowCts;
 

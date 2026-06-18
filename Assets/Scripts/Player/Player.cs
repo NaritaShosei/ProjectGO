@@ -99,9 +99,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         if (_playerStateManager.IsDead()) return;
 
-        if (_justDodgeSystem.TryJustDodge())
+        if (_justDodgeSystem != null && _justDodgeSystem.TryJustDodge())
         {
             Debug.Log("ジャスト回避成功");
+            return;
         }
 
         if (_playerStateManager.IsInvincible()) return;
