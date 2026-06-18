@@ -98,6 +98,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) return;
+
+        if (_justDodgeSystem.TryJustDodge())
+        {
+            Debug.Log("ジャスト回避成功");
+        }
+
         if (_playerStateManager.IsInvincible()) return;
 
         // ダメージ修正を全て適用する。これにより、特定の条件で受けるダメージを増減させることができる。
@@ -195,6 +201,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     [SerializeField] private PlayerAnimationController _playerAnimationController;
     [SerializeField] private PlayerSoundHandler _soundHandler;
     [SerializeField] private Transform _targetCenter;
+    [SerializeField] private JustDodgeSystem _justDodgeSystem;
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
@@ -234,6 +241,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _playerAnimationController.OnModeChangeComplete -= OnModeChangeComplete;
             _playerAnimationController.OnDestroy();
         }
+
+        if (_move)
+            _move.OnStartDodgeInvincible -= _justDodgeSystem.JustDodgeWindowStart;
     }
 
     private void BindEvents()
@@ -243,6 +253,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         if (_playerAnimationController != null && _playerStateManager != null)
             _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
+
+        if (_move)
+            _move.OnStartDodgeInvincible += _justDodgeSystem.JustDodgeWindowStart;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             cameraManager.OnLockOnTargetChanged += SetLockOnTarget;
