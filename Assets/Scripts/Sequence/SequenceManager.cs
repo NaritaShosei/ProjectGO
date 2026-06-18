@@ -27,6 +27,7 @@ public class SequenceManager : MonoBehaviour
             InputHandler = inputHandler,
             Player = player,
             SequenceManager = this,
+            MoviePlayer = _moviePlayer,
         };
 
         // プレイヤー死亡を購読
@@ -41,7 +42,7 @@ public class SequenceManager : MonoBehaviour
     /// <summary>シークエンスを開始する</summary>
     public void StartSequence()
     {
-        _stateMachine?.Start(SequenceStateType.IntroMovie);
+        _stateMachine?.Start(_firstSequence);
     }
 
     /// <summary>ResultStateから呼ばれる</summary>
@@ -61,6 +62,8 @@ public class SequenceManager : MonoBehaviour
     #region　インスペクター
 
     [Header("Sequence設定")]
+    [SerializeField, Tooltip("シークエンス内で共通して使用するMoviePlayer")] private MoviePlayer _moviePlayer;
+    [SerializeField, Tooltip("最初に開始するシークエンスのタイプ")] private SequenceStateType _firstSequence = SequenceStateType.IntroMovie;
     [SerializeReference, SubclassSelector]
     private ISequenceState[] _sequences = new ISequenceState[]
     {
