@@ -99,8 +99,6 @@ public class MobAndSkillState : ISequenceState
 
     #region シリアライズ
 
-    [SerializeField] private string _stateName = "MobAndSkillState";
-
     [Header("モブ戦")]
     [SerializeField, Tooltip("モブ戦のタイマーUI")] private CountDownTimerView _mobBattleTimerView;
     [SerializeField, Tooltip("スキル選択のタイマーUI")] private CountDownTimerView _skillSelectTimerView;
