@@ -23,6 +23,4 @@ public class ResultState : ISequenceState
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime) => null;
 
     public void OnExit(SequenceStateContext context) { }
-
-    [SerializeField] private string _stateName = "ResultState";
 }
