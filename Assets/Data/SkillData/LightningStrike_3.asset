@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be655b64f5d7b3f44bc4e975e4b5b069, type: 3}
+  m_Name: LightningStrike_3
+  m_EditorClassIdentifier: Assembly-CSharp::LightningStrike
+  _id: 668
+  _priority: 0
+  _name: "\u96F7\u9CF4\u306E\u5BE9\u52243"
+  _explanation: 
+  _icon: {fileID: 0}
+  _timing: 2
+  _unlockedSkill: {fileID: 0}
+  _defaultUnlocked: 0
+  _targetCount: 2
+  _minInterval: 2
+  _maxInterval: 4
+  _damageMultiplier: 1.6
+  _searchRadius: 999
+  _hitEffectKeys:
+  - "\u9752\u3044\u96F7\u5149"
+  - "\u9EC4\u8272\u3044\u96F7\u5149"
+  _areaRadius: 2.5
+  _electricShockDuration: 0.3
+  _grantEffectProbability: 1
+  _upDamagePercentage: 0

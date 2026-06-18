@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75b76658933f9b645922b03b8f17be3c, type: 3}
+  m_Name: ThunderCombo6
+  m_EditorClassIdentifier: Assembly-CSharp::AttackData_main
+  _attackId: 6000
+  _mode: 1
+  _nextComboAttackId: -1
+  _insertAfterAttackId: -1
+  _isUnlockedBySkill: 1
+  _requiredSkillId: 865486
+  _variants:
+  - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C96"
+    _requiredCharge: 0
+    _damageMultiplier: 1
+    _attackRange: 1
+    _attackRadius: 1
+    _enableKnockback: 1
+    _knockbackPower: 6
+    _knockbackUpward: 0
+    _enableHoming: 1
+    _homingRadius: 10
+    _homingAngle: 45
+    _homingStrength: 30
+    _enableMovement: 1
+    _moveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.28494444
+        value: 0.40569174
+        inSlope: -0.0046729185
+        outSlope: -0.0046729185
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 1
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.38669953
+        value: 1.0024672
+        inSlope: 0.012756717
+        outSlope: 0.012756717
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 1
+        outWeight: 0.23349139
+      - serializedVersion: 3
+        time: 1
+        value: 0.99809647
+        inSlope: -0.03058453
+        outSlope: -0.03058453
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.5404034
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    _moveDistance: 2
+    _moveSpeed: 5
+    _moveDuration: 2
+    _stopOnHit: 1
+    _isPhantom: 0
+    _hitStopData:
+      _baseDuration: 0.15
+      _timeScale: 0
+      _targetGroup: 9
+      _weakPointMultiplier: 1.2
+      _breakOrKillMultiplier: 1.2
+      _weakAndBreakOrKillMultiplier: 1.4
+    _animationStateName: Thunder_Combo_6
+    _transitionDuration: -1
+    _chargeAnimationStateName: 
+    _chargeTransitionDuration: -1
+    _playGroundHitSE: 0
+    _additionalLightningDamages:
+    - _lightningDamageMultiplier: 0.05
+      _lightningDamageDelay: 0.1
+    - _lightningDamageMultiplier: 0.1
+      _lightningDamageDelay: 0.1
+    - _lightningDamageMultiplier: 0.15
+      _lightningDamageDelay: 0.1
+    - _lightningDamageMultiplier: 0.15
+      _lightningDamageDelay: 0.1

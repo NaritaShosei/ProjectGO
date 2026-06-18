@@ -24,10 +24,8 @@ public class MobEnemy : Enemy, IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
-    public override void Init(IPlayer player)
+    public override void Init()
     {
-        base.Init(player);
-
         _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
@@ -65,7 +63,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
-            _services.AttackerSlot.TryAcquire(Id, 1, isBoss: false);
+            _services.AttackerSlot.TryAcquire(Id, 1);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
             // distanceProfileがない場合はBarkも登録しない
@@ -104,7 +102,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         // 鎧登録　データがなければ裸
         if (_armor != null)
         {
-            _defenceContext.EnemyType = EnemyType.Armor;
+            _defenceContext.EnemyType = EnemyDefenceType.Armor;
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
             // Init()後に発火することで購読者がOnHealthChangedを安全に受け取れる
@@ -112,7 +110,7 @@ public class MobEnemy : Enemy, IFormationParticipant
         }
         else
         {
-            _defenceContext.EnemyType = EnemyType.Flesh;
+            _defenceContext.EnemyType = EnemyDefenceType.Flesh;
         }
     }
 
@@ -122,6 +120,16 @@ public class MobEnemy : Enemy, IFormationParticipant
     public override void ReInitialize(Vector3 spawnPosition)
     {
         base.ReInitialize(spawnPosition);
+
+        //鎧の初期化
+        if (_armor != null)
+        {
+            _armor.gameObject.SetActive(true);
+            _defenceContext.EnemyType = EnemyDefenceType.Armor;
+
+            _armor.OnBroken -= BreakArmor;
+            _armor.OnBroken += BreakArmor;
+        }
 
         // RuntimeContextをリセットする
         _context?.Reset();
@@ -141,39 +149,59 @@ public class MobEnemy : Enemy, IFormationParticipant
     {
         if (_isDead) { return; }
 
-        int damage = DamageSystem.Calculate(context, _defenceContext);
+        int damage = DamageSystem.CalculateDamage(context, _defenceContext);
 
-        bool armorWasAlive = _defenceContext.EnemyType == EnemyType.Armor;
+        //ダメージ表示用に総ダメージを保存
+        int showDamage = damage;
+
+        bool armorWasAlive = _defenceContext.EnemyType == EnemyDefenceType.Armor;
 
         // 鎧がダメージを肩代わり
-        if (_defenceContext.EnemyType == EnemyType.Armor)
+        if (_defenceContext.EnemyType == EnemyDefenceType.Armor)
         {
             if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
         }
 
+        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyDefenceType.Flesh;
+
+        // 弱点ヒットは生身かつ雷神モード攻撃時に有効
+        bool isWeakPoint = (!armorWasAlive
+            && _defenceContext.EnemyType == EnemyDefenceType.Flesh
+            && context.PlayerMode == PlayerMode.Thunder)
+            //鎧かつ闘神モードの時に有効
+            || (armorWasAlive && context.PlayerMode == PlayerMode.Warrior);
+
+        // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
+        bool isArmorHit = armorWasAlive && !isArmorBreak;
+
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+
+        //ヒットエフェクトの通知
+        InvokeOnHitEffect(
+            new HitEffectContext
+            {
+                Position = transform.position,
+                PlayerMode = context.PlayerMode,
+                IsArmorHit = isArmorHit,
+                IsArmorBreak = isArmorBreak
+            });
+
         //超過ダメージを生身に流す
         _stats.TakeDamage(damage);
 
-        bool isKill = _stats.CurrentHealth <= 0;
-        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyType.Flesh;
-
-        // 弱点ヒットは生身かつ雷神モード攻撃時のみ有効
-        bool isWeakPoint = !armorWasAlive
-            && _defenceContext.EnemyType == EnemyType.Flesh
-            && context.PlayerMode == PlayerMode.Thunder;
+        bool willKill = _stats.CurrentHealth <= 0;
 
         // -------- HitResult通知 --------
         context.OnHitResult?.Invoke(
             new HitResult
             {
-                IsKill = isKill,
+                IsKill = willKill,
                 IsArmorBreak = isArmorBreak,
-                IsWeakPoint = isWeakPoint
+                IsWeakPoint = isWeakPoint,
+                IsArmorHit = isArmorHit,
             });
 
-        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
-
-        if (!isKill) InvokeOnDamaged();
+        if (!willKill) InvokeOnDamaged();
 
         // -------- 追加効果 --------
 
@@ -280,7 +308,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// </summary>
     private void BreakArmor()
     {
-        _defenceContext.EnemyType = EnemyType.Flesh;
+        _defenceContext.EnemyType = EnemyDefenceType.Flesh;
         _armor.OnBroken -= BreakArmor;
         InvokeOnArmorBroken();
     }

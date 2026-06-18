@@ -12,35 +12,76 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75b76658933f9b645922b03b8f17be3c, type: 3}
   m_Name: ThunderCombo1
   m_EditorClassIdentifier: Assembly-CSharp::AttackData_main
-  _attackId: 2474
-  _attackName: "\u30B3\u30F3\u30DC1"
+  _attackId: 1000
   _mode: 1
-  _attackType: 0
-  _comboIndex: 0
-  _requiredCharge: 0
-  _damageMultiplier: 1
-  _attackRange: 1
-  _attackRadius: 1
-  _nextComboAttackId: 3078
-  _enableKnockback: 1
-  _knockbackPower: 5
-  _knockbackUpward: 2.89
-  _enableHoming: 1
-  _homingRadius: 5
-  _homingAngle: 360
-  _homingStrength: 10
-  _moveType: 2
-  _moveDistance: 2.53
-  _moveSpeed: 0
-  _moveDuration: 0.5
-  _stopOnHit: 1
-  _isPhantom: 0
-  _hitStopData:
-    _baseDuration: 0.08
-    _timeScale: 0
-    _targetGroup: 11
-    _weakPointMultiplier: 2
-    _breakOrKillMultiplier: 2
-    _weakAndBreakOrKillMultiplier: 2.5
-  _animationStateName: Thunder_Combo_1
-  _animationStartTime: 0.1
+  _nextComboAttackId: 2000
+  _insertAfterAttackId: -1
+  _isUnlockedBySkill: 0
+  _requiredSkillId: -1
+  _variants:
+  - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C91"
+    _requiredCharge: 0
+    _damageMultiplier: 1
+    _attackRange: 1
+    _attackRadius: 1
+    _enableKnockback: 1
+    _knockbackPower: 6
+    _knockbackUpward: 0
+    _enableHoming: 1
+    _homingRadius: 10
+    _homingAngle: 45
+    _homingStrength: 30
+    _enableMovement: 1
+    _moveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.13311574
+        value: 0.99457693
+        inSlope: 1
+        outSlope: 1
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: -0.23732758
+        outSlope: -0.23732758
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.5767783
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    _moveDistance: 1.5
+    _moveSpeed: 3
+    _moveDuration: 1.5
+    _stopOnHit: 1
+    _isPhantom: 0
+    _hitStopData:
+      _baseDuration: 0.15
+      _timeScale: 0
+      _targetGroup: 9
+      _weakPointMultiplier: 1.2
+      _breakOrKillMultiplier: 1.2
+      _weakAndBreakOrKillMultiplier: 1.4
+    _animationStateName: Thunder_Combo_1
+    _transitionDuration: -1
+    _chargeAnimationStateName: 
+    _chargeTransitionDuration: -1
+    _playGroundHitSE: 0
+    _additionalLightningDamages:
+    - _lightningDamageMultiplier: 0.2
+      _lightningDamageDelay: 0.2

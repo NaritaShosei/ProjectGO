@@ -42,10 +42,6 @@ public struct DodgeData
 {
     public float Speed;
     public float Duration;
-}
-
-public enum DodgeType
-{
-    Normal,     // ロックオンなし（前方向）
-    Directional // ロックオン中（8方向）
+    [Tooltip("回避の無敵時間")]
+    public float InvincibleDuration;
 }

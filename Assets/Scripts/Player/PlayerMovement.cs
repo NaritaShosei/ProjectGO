@@ -1,14 +1,20 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using Unity.AppUI.Core;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    const float INPUT_THRESHOLD = 0.001f;
+    private const float INPUT_THRESHOLD = 0.001f;
 
     public event Action OnEndDodge;
 
+    /// <summary>
+    /// PlayerStateManager, InputHandler, MoveData, IModeController, PlayerAnimationController, PlayerAttack を受け取って初期化する。
+    /// </summary>
     public void Init(
         PlayerStateManager playerStateManager,
         InputHandler input,
@@ -25,8 +31,11 @@ public class PlayerMovement : MonoBehaviour
         _attack = attack;
 
         _input.OnDodge += Dodge;
+
         _attack.OnAttackMoveRequested += HandleAttackMove;
         _animationController.OnDamagedEnd += HandleDamagedEnd;
+
+        _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
         _animationController.OnDodgeEnd += HandleDodgeEnd;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -35,8 +44,16 @@ public class PlayerMovement : MonoBehaviour
             Debug.LogError($"[{this}]: CameraManagerが見つかりませんでした。");
     }
 
+    /// <summary> 時間のスケールを設定する。攻撃移動や回避移動の速度に影響する </summary>
     public void SetTimeScale(float scale) => _timeScale = scale;
+    /// <summary> ロックオン対象を設定する。nullを渡すとロックオン解除。 </summary>
     public void SetLockOnTarget(Transform target) => _lockOnTarget = target;
+
+    public void AddModifier(IStatModifier modifier)
+    {
+        if (!_modifiers.Contains(modifier))
+            _modifiers.Add(modifier);
+    }
 
     [SerializeField] private Rigidbody _rb;
 
@@ -56,6 +73,25 @@ public class PlayerMovement : MonoBehaviour
     private bool _isAttackMoving;
     private bool _currentIsPhantom;
 
+    private DodgeData _currentDodgeData;
+
+    private List<IStatModifier> _modifiers = new List<IStatModifier>();
+
+    private float InvincibleDuration
+    {
+        get
+        {
+            float value = _currentDodgeData.InvincibleDuration;
+
+            foreach (var modifier in _modifiers)
+            {
+                value = modifier.Modify(value);
+            }
+
+            return value;
+        }
+    }
+
     private void Update()
     {
         if (!_isAttackMoving)
@@ -74,10 +110,15 @@ public class PlayerMovement : MonoBehaviour
     private void OnDestroy()
     {
         if (_input != null) _input.OnDodge -= Dodge;
-        if (_attack != null) _attack.OnAttackMoveRequested -= HandleAttackMove;
+        if (_attack != null)
+        {
+            _attack.OnAttackMoveRequested -= HandleAttackMove;
+        }
+
         if (_animationController != null)
         {
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
+            _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
         }
         _dodgeMoveCts?.Cancel();
@@ -87,7 +128,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ── 移動 ─────────────────────────────────────────────────
-
+    /// <summary> 移動入力に基づいてプレイヤーを移動させる。</summary>
     private void Move()
     {
         if (_isDodging) return; // 回避中は移動入力を無視（回避移動はDodgeMoveAsyncで管理）
@@ -116,6 +157,7 @@ public class PlayerMovement : MonoBehaviour
         _rb.linearVelocity = moveDir * _modeController.ModeData.MoveSpeed * inputMag * _timeScale;
     }
 
+    /// <summary> 回転処理。ロックオン中は常に敵の方向を向く。ロックオンなしは移動入力の方向を向く。 </summary>
     private void Rotate()
     {
         if (!_playerStateManager.CanMove()) return;
@@ -142,23 +184,35 @@ public class PlayerMovement : MonoBehaviour
             _moveData.RotateSpeed * Time.deltaTime * _timeScale);
     }
 
+    /// <summary> 移動アニメーションの更新。ロックオン中は入力方向に応じた8方向アニメーション、ロックオンなしはSpeedパラメータで通常移動アニメーション。 </summary>
     private void PlayMoveAnimation()
     {
         if (_playerStateManager.IsDodging()) return;
         if (_lockOnTarget != null)
+        {
+            var input = _input.MoveInput;
+            var snappedInput = SnapTo8Directions(input);
+
             _animationController.UpdateLockedMoveAnimation(
-                _input.MoveInput, transform.forward, _cameraManager.MainCamera.transform.right);
+               snappedInput, transform.forward, _cameraManager.MainCamera.transform.right);
+        }
         else
             _animationController.UpdateMoveAnimation(_rb.linearVelocity.magnitude);
     }
 
     // ── 回避 ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// 回避処理。回避可能な状態であれば、入力方向に応じて回避アニメーションを再生し、一定時間無敵で移動する。
+    /// </summary>
     private void Dodge()
     {
         if (!_playerStateManager.CanDodge()) return;
 
-        if (_playerStateManager.CurrentState == PlayerState.Attacking)
+        // 攻撃キャンセル回避かどうかを記録
+        bool isCancelDodge = _playerStateManager.CurrentState == PlayerState.Attacking;
+
+        if (isCancelDodge)
         {
             _attack.InterruptByDodge();
             _attackMoveCts?.Cancel();
@@ -167,7 +221,6 @@ public class PlayerMovement : MonoBehaviour
             _isAttackMoving = false;
         }
 
-        // 進行中の回避移動があればキャンセルして上書き
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
         _dodgeMoveCts = new CancellationTokenSource();
@@ -175,27 +228,41 @@ public class PlayerMovement : MonoBehaviour
         _isDodging = true;
         _playerStateManager.ChangeState(PlayerState.Dodge);
 
-        DodgeData dodgeData = _moveData.GetDodge(_modeController.CurrentMode);
+        _currentDodgeData = _moveData.GetDodge(_modeController.CurrentMode);
         Vector3 dodgeDir = GetDodgeDirection();
 
-        // アニメーション再生（Dodgeトリガーを発火）
-        if (_lockOnTarget != null)
+        if (_lockOnTarget != null || isCancelDodge)
         {
-            Vector3 fwd = transform.forward; fwd.y = 0f; fwd.Normalize();
-            Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
-            _animationController.PlayLockedDodge(
-                Vector3.Dot(dodgeDir, right),
-                Vector3.Dot(dodgeDir, fwd));
+            // ロックオン中の回避は入力方向に応じた8方向アニメーションで回避する。
+            var snappedInput = SnapTo8Directions(_input.MoveInput);
+            var cam = _cameraManager.MainCamera.transform;
+
+            // 入力方向をワールド空間のベクトルに変換してプレイヤーローカルに変換
+            var snappedWorldDir =
+            Vector3.ProjectOnPlane(cam.right, Vector3.up).normalized * snappedInput.x +
+            Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized * snappedInput.y;
+
+            // ワールド空間の回避方向をプレイヤーローカル空間に変換してアニメーションに渡す
+            var localDir = transform.InverseTransformDirection(snappedWorldDir.normalized);
+
+            // ロックオン中の回避アニメーションは8方向に分かれているため、入力方向を丸めてアニメーションを切り替える
+            _animationController.PlayLockedDodge(localDir.x, localDir.z);
         }
         else
         {
+            // 通常回避は前方向に向き直して前回避アニメーション
+            if (dodgeDir.sqrMagnitude > 0.001f)
+                transform.rotation = Quaternion.LookRotation(dodgeDir);
+
             _animationController.PlayDodge();
         }
 
-        // 移動のみタイマー管理。終了処理は HandleDodgeEnd（SMB通知）が担当
-        DodgeMoveAsync(dodgeDir, dodgeData.Speed, dodgeData.Duration, _dodgeMoveCts.Token).Forget();
+        DodgeMoveAsync(dodgeDir, _currentDodgeData.Speed, _currentDodgeData.Duration, _dodgeMoveCts.Token).Forget();
     }
 
+    /// <summary>
+    /// 回避移動を管理する非同期メソッド。一定時間、指定された方向に移動し続ける。
+    /// </summary>
     private async UniTaskVoid DodgeMoveAsync(Vector3 dir, float speed, float duration, CancellationToken ct)
     {
         float elapsed = 0f;
@@ -215,6 +282,43 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
+    /// 回避開始のSMBから無敵状態を開始するハンドラー。回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
+    /// </summary>
+    private void HandleDodgeInvincibilityStart()
+    {
+        // 回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
+        if (!_isDodging) return;
+        _playerStateManager.AddInvincible(InvincibleType.Dodge);
+
+        HandleDodgeInvincibilityEnd().Forget();
+    }
+
+    /// <summary>
+    ///　回避無敵状態を終了する非同期メソッド。回避開始から一定時間が経過したら、無敵状態を解除する。
+    /// </summary>
+    private async UniTaskVoid HandleDodgeInvincibilityEnd()
+    {
+        float elapsed = 0f;
+
+        try
+        {
+            while (elapsed < InvincibleDuration)
+            {
+                elapsed += Time.deltaTime * _timeScale;
+                await UniTask.Yield(_dodgeMoveCts.Token, false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // 回避移動がキャンセルされた場合も無敵状態を解除するため、ここで例外をキャッチして処理を続行する。
+        }
+        finally
+        {
+            _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+        }
+    }
+
+    /// <summary>
     /// DodgeSMB の OnStateExit → PlayerAnimationController.AnimEvent_DodgeEnd → ここ。
     /// アニメーションが実際に終わったタイミングでステートを復帰させる。
     /// </summary>
@@ -226,9 +330,13 @@ public class PlayerMovement : MonoBehaviour
         OnEndDodge?.Invoke();
     }
 
+    /// <summary>
+    /// 回避入力の方向をワールド空間で計算する。入力がない場合は前方に回避する。
+    /// </summary>
     private Vector3 GetDodgeDirection()
     {
         var input = _input.MoveInput;
+
         if (input.magnitude > INPUT_THRESHOLD)
         {
             var dir = _cameraManager.MainCamera.transform.right * input.x
@@ -241,6 +349,9 @@ public class PlayerMovement : MonoBehaviour
 
     // ── 被弾 ─────────────────────────────────────────────────
 
+    /// <summary>
+    /// 被弾アニメーション終了イベントのハンドラー。PlayerStateManagerがDamaged状態ならIdleに遷移させる。
+    /// </summary>
     private void HandleDamagedEnd()
     {
         if (_playerStateManager.IsDamaged())
@@ -249,6 +360,9 @@ public class PlayerMovement : MonoBehaviour
 
     // ── 攻撃移動 ─────────────────────────────────────────────
 
+    /// <summary>
+    /// PlayerAttackから攻撃移動のリクエストを受け取るハンドラー。現在の攻撃移動をキャンセルして新しい攻撃移動を開始する。
+    /// </summary>
     private void HandleAttackMove(AttackMoveRequest request)
     {
         _attackMoveCts?.Cancel();
@@ -264,6 +378,9 @@ public class PlayerMovement : MonoBehaviour
         PerformAttackMove(request).Forget();
     }
 
+    /// <summary>
+    /// 攻撃移動の実行。リクエストの内容に応じて、ダッシュ移動・ステップ移動・カーブ移動などを行う。
+    /// </summary>
     private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
     {
         _isAttackMoving = true;
@@ -276,12 +393,7 @@ public class PlayerMovement : MonoBehaviour
 
         try
         {
-            switch (request.MoveType)
-            {
-                case AttackMoveType.Dash: await DashMove(request); break;
-                case AttackMoveType.Step: await StepMove(request); break;
-                case AttackMoveType.Curve: await DashMove(request); break;
-            }
+            await DashMove(request);
         }
         catch (OperationCanceledException) { }
         finally
@@ -296,41 +408,72 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ダッシュ移動の実装。
+    /// </summary>
     private async UniTask DashMove(AttackMoveRequest request)
     {
+        if (request.Duration <= 0f)
+            return;
+
+        AnimationCurve curve = request.MoveCurve;
+
         float elapsed = 0f;
+
         Vector3 startPos = transform.position;
-        Vector3 targetPos = startPos + transform.forward * request.Distance;
-        targetPos.y = startPos.y;
 
-        while (true)
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        Vector3 dir = forward.normalized;
+
+        Vector3 targetPos = startPos + dir * request.Distance;
+
+        bool stoppedEarly = false;
+
+        while (elapsed < request.Duration)
         {
-            if (request.Duration <= 0f) return;
-            if (elapsed >= request.Duration) break;
-            if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
+            if (request.Target &&
+                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance)
+            {
+                stoppedEarly = true;
+                break;
+            }
 
-            _rb.MovePosition(Vector3.Lerp(startPos, targetPos,
-                 Mathf.SmoothStep(0, 1, elapsed / request.Duration)));
+            float t = elapsed / request.Duration;
+            float curveValue = curve.Evaluate(t);
+
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, curveValue);
+
+            _rb.MovePosition(newPos);
+
             elapsed += Time.fixedDeltaTime * _timeScale;
-            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
+
+            await UniTask.Yield(
+                PlayerLoopTiming.FixedUpdate,
+                _attackMoveCts.Token);
         }
+        if (!stoppedEarly)
+            _rb.MovePosition(targetPos);
     }
 
-    private async UniTask StepMove(AttackMoveRequest request)
+    /// <summary>
+    /// 入力方向を8方向に丸める。ロックオン中の回避や攻撃移動で使用する。
+    /// </summary>
+    private Vector2 SnapTo8Directions(Vector2 input)
     {
-        float elapsed = 0f;
-        Vector3 moveDir = transform.forward; moveDir.y = 0f;
-        float speed = request.Distance / request.Duration;
+        if (input.sqrMagnitude < 0.0001f)
+            return Vector2.zero;
 
-        while (true)
-        {
-            if (request.Duration <= 0f) return;
-            if (elapsed >= request.Duration) break;
-            if (request.Target && Vector3.Distance(request.Target.position, transform.position) < request.StopDistance) break;
+        // 角度取得（ラジアン → 度）
+        float angle = Mathf.Atan2(input.y, input.x) * Mathf.Rad2Deg;
 
-            _rb.linearVelocity = moveDir * speed * _timeScale;
-            elapsed += Time.fixedDeltaTime * _timeScale;
-            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, _attackMoveCts.Token);
-        }
+        // 45度刻みに丸める
+        float snappedAngle = Mathf.Round(angle / 45f) * 45f;
+
+        // ベクトルに戻す
+        float rad = snappedAngle * Mathf.Deg2Rad;
+        Vector2 result = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+
+        return result.normalized;
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 public class DamagePopupPresenter : IDisposable
 {
-    public DamagePopupPresenter(DamagePopupPool pool)
+    public DamagePopupPresenter(GenericObjectPool<DamagePopupView> pool)
     {
         _pool = pool;
     }
@@ -19,12 +19,12 @@ public class DamagePopupPresenter : IDisposable
         // 特に何もしない、Poolごと破棄される想定
     }
 
-    private readonly DamagePopupPool _pool;
+    private readonly GenericObjectPool<DamagePopupView> _pool;
 
     private void HandleRelease(IDamagePopupView view)
     {
         view.OnRelease -= HandleRelease;
-        _pool.Release(view);
+        _pool.Release(view as DamagePopupView);
     }
 }
 

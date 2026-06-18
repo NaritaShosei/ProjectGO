@@ -22,7 +22,7 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
 
     public int Id => GetInstanceID();
     public bool IsBoss => false;
-    public Vector3 Position => transform.position;
+    public Transform Self => transform;
     public float TimeScale => 1f;
 
     public bool IsDead => IsBroken;
@@ -30,8 +30,10 @@ public sealed class EnemyArmer : MonoBehaviour, IEnemy
     /// <summary>HPがゼロ以下になったかどうかを返す</summary>
     public bool IsBroken => _hp <= 0;
 
+    public bool IsLockable => true;
+
     public void InjectServices(EnemyServices services) { }
-    public void Init(IPlayer player) { }
+    public void Init() { }
     public void OnConditionInterrupt() { }
 
     public void AddKnockbackForce(Vector3 direction) { }

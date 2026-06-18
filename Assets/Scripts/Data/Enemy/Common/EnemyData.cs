@@ -41,6 +41,9 @@ public class EnemyData : ScriptableObject
     // 死亡時にヒールアイテムをドロップする確率（0〜1）
     public float HealDropChance => _healDropChance;
 
+    // 経験値ドロップ量
+    public int ExpDropAmount => Mathf.Max(0, _expDropAmount);
+
     // Idle継続時間（秒）
     public float IdleDuration => _idleDuration;
 
@@ -52,16 +55,16 @@ public class EnemyData : ScriptableObject
 
 
     [Header("Status")]
-    [SerializeField] private float _maxHP = 100f;
+    [SerializeField, Tooltip("最大HP")] private float _maxHP = 100f;
 
     [Header("Movement")]
     [Min(0f)]
-    [SerializeField] private float _roamSpeed = 1f;
+    [SerializeField, Tooltip("徘徊時のSpeed")] private float _roamSpeed = 1f;
     [Min(0f)]
     [SerializeField] private float _approachSpeed = 3f;
 
     [Header("Attack")]
-    [SerializeField] private List<EnemyAttackPattern> _attackPatterns = new();
+    [SerializeField, Tooltip("Attack")] private List<EnemyAttackPattern> _attackPatterns = new();
 
     [Header("Knockback")]
     // Power がこの値以下なら Hit（level 0）
@@ -95,4 +98,6 @@ public class EnemyData : ScriptableObject
     [Header("Drop")]
     [Range(0f, 1f)]
     [SerializeField] private float _healDropChance = 0.3f;
+    [Min(0)]
+    [SerializeField] private int _expDropAmount = 10;
 }

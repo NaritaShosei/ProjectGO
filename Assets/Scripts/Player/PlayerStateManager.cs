@@ -4,6 +4,8 @@ public class PlayerStateManager
 {
     public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
 
+    public InvincibleType CurrentInvincibleType { get; private set; } = InvincibleType.None;
+
     public event Action<PlayerState, PlayerState> OnStateChanged;
 
     public void ChangeState(PlayerState newState)
@@ -19,6 +21,7 @@ public class PlayerStateManager
 
     public bool CanMove() => CurrentState != PlayerState.Attacking
                           && CurrentState != PlayerState.Dodge
+                          && CurrentState != PlayerState.Charging
                           && CurrentState != PlayerState.Damaged
                           && CurrentState != PlayerState.ModeChanging
                           && CurrentState != PlayerState.Dead;
@@ -29,7 +32,8 @@ public class PlayerStateManager
     /// Damaged・ModeChanging・Dodge・Deadは不可。
     /// </summary>
     public bool CanDodge() => CurrentState is PlayerState.Idle
-                           || CurrentState is PlayerState.Attacking;
+                           || CurrentState is PlayerState.Attacking
+                           || CurrentState is PlayerState.Charging;
 
     public bool IsDodging() => CurrentState is PlayerState.Dodge;
 
@@ -42,6 +46,21 @@ public class PlayerStateManager
     public bool CanModeChange() => CurrentState is PlayerState.Idle;
 
     public bool CanInteract() => CurrentState is PlayerState.Idle;
+
+    public bool IsInvincible()
+    {
+        return CurrentInvincibleType != InvincibleType.None;
+    }
+
+    public void AddInvincible(InvincibleType type)
+    {
+        CurrentInvincibleType |= type;
+    }
+
+    public void RemoveInvincible(InvincibleType type)
+    {
+        CurrentInvincibleType &= ~type;
+    }
 }
 
 public enum PlayerState
@@ -53,4 +72,15 @@ public enum PlayerState
     Damaged,
     Dead,
     ModeChanging
+}
+
+/// <summary>
+/// 無敵の種類。複数の無敵状態を同時に管理するためにフラグ列挙体で定義する。
+/// </summary>
+[Flags]
+public enum InvincibleType
+{
+    None = 0, // 0000
+    Dodge = 1 << 0, // 0001
+    Damaged = 1 << 1, // 0010
 }

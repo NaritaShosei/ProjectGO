@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Enemyの共通インターフェース
 /// </summary>
-public interface IEnemy : ICharacter
+public interface IEnemy : ILockOnTarget
 {
     // --- Events ---
 
@@ -28,8 +28,8 @@ public interface IEnemy : ICharacter
     /// <summary>EnemyAnimator への参照</summary>
     IEnemyAnimator EnemyAnimator { get; }
 
-    /// <summary>ワールド座標</summary>
-    Vector3 Position { get; }
+    /// <summary> 自身のTransformへの参照 </summary>
+    Transform Self { get; }
 
     /// <summary>インスタンス識別ID（AttackerSlotのキーに使用）</summary>
     int Id { get; }
@@ -45,8 +45,8 @@ public interface IEnemy : ICharacter
 
     // --- Methods ---
 
-    /// <summary>Playerの参照を渡して初期化する</summary>
-    void Init(IPlayer player);
+    /// <summary> 初期化する </summary>
+    void Init();
 
     /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
     void TakeDamage(DamageContext context);
@@ -73,16 +73,19 @@ public readonly struct EnemyServices
     public readonly ISeparationService SeparationService;
     public readonly IWallAvoidanceService WallAvoidanceService;
     public readonly IEnemyAttackerSlot AttackerSlot;
+    public readonly IPlayerInformationService PlayerInformationService;
 
     public EnemyServices(
         ISpatialHashGrid spatialHashGrid,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
-        IEnemyAttackerSlot attackerSlot)
+        IEnemyAttackerSlot attackerSlot,
+        IPlayerInformationService playerInformationService)
     {
         SpatialHashGrid = spatialHashGrid;
         SeparationService = separationService;
         WallAvoidanceService = wallAvoidanceService;
         AttackerSlot = attackerSlot;
+        PlayerInformationService = playerInformationService;
     }
 }

@@ -4,27 +4,49 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public event Action<AttackMoveRequest> OnAttackMoveRequested;
+    #region Events
 
-    public void Init(PlayerStateManager playerStateManager,
+    /// <summary> 攻撃入力があったときに、攻撃の種類やチャージ時間などの情報を通知するイベント </summary>
+    public event Action<AttackMoveRequest> OnAttackMoveRequested;
+    /// <summary> 溜め開始を移動制限のためにPlayerMovementへ通知</summary>
+    public event Action OnChargingStarted;
+    /// <summary> 溜め終了（攻撃発動 or キャンセル）を通知</summary>
+    public event Action OnChargingEnded;
+    /// <summary> 溜め段階を通知 </summary>
+    public event Action<ChargeLevel> OnChargeLevelReached; // チャージレベルに応じたSEやエフェクトの発動に使用
+
+    #endregion
+
+    #region Public Methods
+
+    /// <summary>
+    /// 初期化する。PlayerStateManager, InputHandler, AttackExecutor, IModeController, PlayerAnimationController への参照を受け取る。
+    /// </summary>
+    public void Init(
+        PlayerStateManager playerStateManager,
         InputHandler input,
         AttackExecutor executor,
         IModeController modeController,
-        PlayerAnimationController animationController)
+        PlayerAnimationController animationController,
+        SkillManager skillManager)
     {
-        _chargeThreshold = _chargeThreshold.OrderByDescending(x => x.TimeThreshold).ToArray();
+        _chargeThresholds = _chargeThresholdSettings
+            .OrderByDescending(x => x.TimeThreshold)
+            .ToArray();
 
         _stateManager = playerStateManager;
         _input = input;
         _attackExecutor = executor;
         _modeController = modeController;
         _animationController = animationController;
+        _skillManager = skillManager;
 
-        _input.OnLightAttack += PerformLightAttack;
-        _input.OnChargeStart += StartCharge;
-        _input.OnChargeEnd += ReleaseCharge;
+        // R1押し始め → チャージ開始 or 即時攻撃準備
+        _input.OnLightAttackPressed += HandleAttackPressed;
+        // R1離し → 攻撃発動
+        _input.OnLightAttackReleased += HandleAttackReleased;
+
         _input.OnModeChange += ChangeMode;
-
         _modeController.OnModeChanged += OnModeChanged;
 
         _animationController.OnAttackExecute += ExecutePendingAttack;
@@ -32,49 +54,25 @@ public class PlayerAttack : MonoBehaviour
         _animationController.OnComboWindowStart += OnComboWindowStart;
         _animationController.OnComboWindowEnd += OnComboWindowEnd;
         _animationController.OnComboTransition += TryComboTransition;
+        _animationController.OnChargeReady += OnChargeReady;
 
-        switch (_dodgeAttackConfig.DodgeAttackType)
-        {
-            case DodgeAttackType.LightAttack:
-                _input.OnLightAttack += BufferDodgeAttack;
-                break;
-            case DodgeAttackType.HeavyAttack:
-                _input.OnChargeStart += BufferDodgeAttack;
-                break;
-        }
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged += ChangeLockOnTarget;
     }
 
     /// <summary>
-    /// 回避終了後のDodgeAttack判定。PlayerMovementのOnEndDodgeから呼ばれる。
-    /// </summary>
-    public void FinishDodge()
-    {
-        if (_dodgeAttackConfig.IsEnabled && _hasBufferedDodgeAttack)
-            PerformDodgeAttack();
-
-        _hasBufferedDodgeAttack = false;
-    }
-
-    /// <summary>
-    /// 回避による攻撃中断。PlayerMovementから呼ばれる。
-    /// 攻撃移動・コンボをリセットしてIdle相当の状態にする。
-    /// ステート変更はPlayerMovementが行うため、ここではAttack内部状態のみリセット。
+    /// 回避入力で攻撃を中断する。攻撃のキャンセルとコンボのリセットを行う。
     /// </summary>
     public void InterruptByDodge()
     {
-        // アニメーション終了イベントが来ても処理しないようペンディングをクリア
-        _pendingAttackData = null;
-        _pendingAttackInput = null;
-        _bufferedComboInput = null;
-        _isInComboWindow = false;
-        _isComboTransitioned = false;
-        _isHomingActive = false;
-        ClearHomingLock();
-
-        // 攻撃移動があれば強制キャンセル（OnAttackMoveRequestedのCTSはPlayerMovementが持つため、
-        // PlayerMovementのHandleAttackMoveがOnEndDodgeで自動的に解決する）
+        CancelCharge();
+        ClearAttackState();
+        ResetCombo();
     }
 
+    /// <summary>
+    /// コンボが途切れる条件（時間切れなど）で呼ばれる。コンボの状態をリセットする。
+    /// </summary>
     public void ResetCombo()
     {
         _currentAttackId = -1;
@@ -83,46 +81,56 @@ public class PlayerAttack : MonoBehaviour
     }
 
     /// <summary>
-    /// 被弾による攻撃中断。Player.TakeDamageから呼ばれる。
-    /// 全ての攻撃内部状態をリセットしてIdle相当の状態にする。
+    /// 被弾などで攻撃が中断される条件で呼ばれる。攻撃とコンボの状態を完全にリセットする。
     /// </summary>
     public void InterruptByDamage()
     {
-        _pendingAttackData = null;
-        _pendingAttackInput = null;
-        _bufferedComboInput = null;
-        _isInComboWindow = false;
-        _isComboTransitioned = false;
-        _isHomingActive = false;
-        _currentAttackId = -1;   // コンボチェーンもリセット
-        ClearHomingLock();
+        CancelCharge();
+        ClearAttackState();
+        _currentAttackId = -1;
     }
 
-    // ── Inspector ──────────────────────────────────────────
+    #endregion
+
+    #region Fields
+
     [SerializeField] private AttackDataRepository _attackRepository;
-    [SerializeField] private DodgeAttackConfig _dodgeAttackConfig;
     [SerializeField] private float _comboResetTime = 1.5f;
     [SerializeField]
-    private ChargeThreshold[] _chargeThreshold = new ChargeThreshold[]
+    private ChargeThreshold[] _chargeThresholdSettings = new ChargeThreshold[]
     {
-        new ChargeThreshold { TimeThreshold = 0.5f, Level = ChargeLevel.Level1 },
-        new ChargeThreshold { TimeThreshold = 1.5f, Level = ChargeLevel.Level2 }
+        new ChargeThreshold { TimeThreshold = 1.2f, Level = ChargeLevel.Level3 },
+        new ChargeThreshold { TimeThreshold = 0.8f, Level = ChargeLevel.Level2 },
+        new ChargeThreshold { TimeThreshold = 0.3f, Level = ChargeLevel.Level1 },
     };
     [SerializeField] private LayerMask _homingLayer;
 
-    // ── Private State ──────────────────────────────────────
     private PlayerStateManager _stateManager;
     private InputHandler _input;
     private AttackExecutor _attackExecutor;
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
+    private SkillManager _skillManager;
+
+    private ChargeThreshold[] _chargeThresholds;
 
     private int _currentAttackId = -1;
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
-    private bool _hasBufferedDodgeAttack = false;
-    private bool _isInComboWindow = false;
-    private bool _isComboTransitioned = false;
+    private bool _isCharging;
+    private bool _isChargeComboFollowUp;
+
+    private bool _isAttackButtonHeld; // 攻撃ボタンが現在押されているかどうか
+
+    private bool _pendingWarriorCharge; // コンボウィンドウ中に入力があり、OnChargeReady待ちの状態
+
+    private bool _canStartCharge;
+
+    private ChargeLevel _currentChargeLevel = ChargeLevel.None;
+    private bool _autoFireTriggered = false;
+
+    private bool _isInComboWindow;
+    private bool _isComboTransitioned;
 
     private bool _isHomingActive;
     private float _homingStrength;
@@ -136,7 +144,11 @@ public class PlayerAttack : MonoBehaviour
     private AttackInput? _pendingAttackInput;
     private AttackInput? _bufferedComboInput;
 
-    // ── Lifecycle ──────────────────────────────────────────
+    private ILockOnTarget _currentLockOnTarget;
+
+    #endregion
+
+    #region UnityMethods
 
     private void OnDestroy()
     {
@@ -144,16 +156,9 @@ public class PlayerAttack : MonoBehaviour
 
         if (_input != null)
         {
-            _input.OnLightAttack -= PerformLightAttack;
-            _input.OnChargeStart -= StartCharge;
-            _input.OnChargeEnd -= ReleaseCharge;
+            _input.OnLightAttackPressed -= HandleAttackPressed;
+            _input.OnLightAttackReleased -= HandleAttackReleased;
             _input.OnModeChange -= ChangeMode;
-
-            switch (_dodgeAttackConfig.DodgeAttackType)
-            {
-                case DodgeAttackType.LightAttack: _input.OnLightAttack -= BufferDodgeAttack; break;
-                case DodgeAttackType.HeavyAttack: _input.OnChargeStart -= BufferDodgeAttack; break;
-            }
         }
 
         if (_animationController != null)
@@ -163,78 +168,181 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
             _animationController.OnComboTransition -= TryComboTransition;
+            _animationController.OnChargeReady -= OnChargeReady;
         }
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+            cameraManager.OnLockOnTargetChanged -= ChangeLockOnTarget;
     }
 
-    private void Update() => PerformHoming();
-
-    // ── 入力ハンドラ ───────────────────────────────────────
-
-    private void BufferDodgeAttack()
+    private void Update()
     {
-        if (_stateManager.CurrentState != PlayerState.Dodge) return;
-        if (_dodgeAttackConfig.IsEnabled) _hasBufferedDodgeAttack = true;
+        PerformHoming();
+        UpdateCharging();
     }
 
-    private void PerformDodgeAttack()
-    {
-        if (!CanAttack()) return;
-        var input = _dodgeAttackConfig.CreateAttackInput();
-        ResetCombo();
-        PrepareAttack(input);
-    }
+    #endregion
 
-    private void PerformLightAttack()
+    #region InputHandlers
+
+    /// <summary>
+    /// 攻撃入力の処理。R1押し始めで呼ばれる。現在の状態に応じて、攻撃のチャージ開始やコンボのバッファを行う。
+    /// </summary>
+    private void HandleAttackPressed()
     {
+        // すでにチャージ中なら無視
+        if (_isCharging) return;
+
+        _canStartCharge = false;
+        _isAttackButtonHeld = true;
+
         if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
         {
-            BufferComboInput(new AttackInput { AttackType = AttackType.LightAttack, ChargeTime = 0f });
-            return;
-        }
-        if (!CanAttack()) return;
-        ResetComboByTime();
-        PrepareAttack(new AttackInput { AttackType = AttackType.LightAttack, ChargeTime = 0f });
-    }
+            // すでにコンボ入力がバッファされているなら無視
+            if (_bufferedComboInput.HasValue)
+                return;
 
-    private void StartCharge()
-    {
-        if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
-        {
-            _chargeStartTime = Time.time;
-            return;
-        }
-        if (!CanAttack()) return;
-        _chargeStartTime = Time.time;
-        _stateManager.ChangeState(PlayerState.Charging);
-    }
-
-    private void ReleaseCharge()
-    {
-        float chargeTime = Time.time - _chargeStartTime;
-        if (_stateManager.CurrentState == PlayerState.Attacking && _isInComboWindow)
-        {
-            BufferComboInput(new AttackInput
+            // 闘神
+            if (_modeController.CurrentMode == PlayerMode.Warrior)
             {
-                AttackType = AttackType.HeavyAttack,
-                ChargeTime = chargeTime,
-                WasChargeReleased = true
-            });
+                _isCharging = true;
+                _currentChargeLevel = ChargeLevel.None;
+                _autoFireTriggered = false;
+                return;
+            }
+
+            // 雷神
+            var thunderInput = new AttackInput
+            {
+                AttackType = AttackType.LightAttack,
+                ChargeLevel = ChargeLevel.None
+            };
+
+            BufferComboInput(thunderInput);
+
             return;
         }
-        if (!_stateManager.IsCharging()) return;
-        var input = new AttackInput { AttackType = AttackType.HeavyAttack, ChargeTime = chargeTime, WasChargeReleased = true };
-        _stateManager.ChangeState(PlayerState.Idle);
-        PrepareAttack(input);
+
+        if (!CanAttack()) return;
+
+        _currentChargeLevel = ChargeLevel.None;
+        _autoFireTriggered = false;
+
+        // 闘神モードのみ溜め開始を通知（移動制限）
+        if (_modeController.CurrentMode == PlayerMode.Warrior)
+        {
+            _isCharging = true;
+            _stateManager.ChangeState(PlayerState.Charging);
+            OnChargingStarted?.Invoke();
+
+            var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
+            if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
+            {
+                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
+            }
+        }
+        else
+        {
+            // 雷神モードは溜めなしで即攻撃準備
+            PrepareAttack(new AttackInput
+            {
+                AttackType = AttackType.LightAttack,
+                ChargeLevel = ChargeLevel.None
+            });
+        }
     }
 
-    private void BufferComboInput(AttackInput input) => _bufferedComboInput = input;
+    /// <summary>
+    /// 攻撃入力の処理。R1離しで呼ばれる。チャージ時間に応じた攻撃の発動や、コンボウィンドウ中のバッファからの攻撃準備を行う。
+    /// </summary>
+    private void HandleAttackReleased()
+    {
+        _isAttackButtonHeld = false;
 
-    // ── 攻撃実行 ───────────────────────────────────────────
+        // 雷神はPressed時に処理済み
+        if (_modeController.CurrentMode == PlayerMode.Thunder) return;
 
+        // 闘神かつチャージ中でなければ無視
+        if (!_isCharging) return;
+
+        // 自動発動済みなら何もしない（UpdateChargingが先に処理した）
+        if (_autoFireTriggered) return;
+
+        // TODO:即攻撃ではなくチャージの構えモーションが再生されてから攻撃が発動するようにする
+        
+    }
+    #endregion
+
+    #region Combo
+
+    /// <summary>
+    /// コンボウィンドウ中の攻撃入力をバッファする。コンボ遷移のタイミングでこの入力が存在すれば次の攻撃に繋げる。
+    /// </summary>
+    /// <param name="input"></param>
+    private void BufferComboInput(AttackInput input)
+    {
+        if (_bufferedComboInput.HasValue) { return; }
+
+        _bufferedComboInput = input;
+    }
+
+    /// <summary>
+    /// 闘神のチャージ攻撃を発動する。チャージ段階に応じた攻撃を実行し、状態をリセットしてIdleに戻す。
+    /// </summary>
+    private void FireWarriorAttack(ChargeLevel level)
+    {
+        _isChargeComboFollowUp = _currentAttackId != -1; // コンボの途中でチャージ攻撃が入るかどうか
+
+        _canStartCharge = false;
+        _isCharging = false;
+        _currentChargeLevel = ChargeLevel.None;
+
+        var input = new AttackInput
+        {
+            AttackType = AttackType.LightAttack,
+            ChargeLevel = level
+        };
+
+        // Charging状態のときだけIdleを経由する（コンボ中はAttackingのまま）
+        if (_stateManager.CurrentState == PlayerState.Charging)
+        {
+            OnChargingEnded?.Invoke();
+            _stateManager.ChangeState(PlayerState.Idle);
+
+            if (!CanAttack()) return;
+
+            if (_isChargeComboFollowUp)
+            {
+                PrepareAttack(input, allowCombo: true);
+            }
+            else
+            {
+                ResetComboByTime();
+                PrepareAttack(input);
+            }
+
+            _isChargeComboFollowUp = false;
+        }
+        else
+        {
+            // コンボ中（Attacking状態）はCanAttack()を通さず直接遷移
+            BufferComboInput(input);
+        }
+    }
+
+    /// <summary>
+    /// 攻撃の準備を行う。攻撃データの取得、状態遷移、ホーミングの設定、移動要求の発行、アニメーション再生などを行う。
+    /// </summary>  
     private void PrepareAttack(AttackInput input, bool allowCombo = false)
     {
         AttackData attackData = GetNextAttack(input, allowCombo);
-        if (attackData == null) { Debug.LogWarning($"攻撃データが見つかりません: {input.AttackType}"); return; }
+
+        if (attackData == null)
+        {
+            ResetCombo();
+            return;
+        }
 
         _stateManager.ChangeState(PlayerState.Attacking);
         _currentAttackId = attackData.AttackId;
@@ -242,51 +350,44 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = input;
         _lastAttackTime = Time.time;
 
-        if (attackData.EnableHoming)
+        var variant = attackData.GetVariant(input.ChargeLevel);
+
+        if (variant == null)
         {
-            _isHomingActive = true;
-            _homingRadius = attackData.HomingRadius;
-            _homingAngle = attackData.HomingAngle;
-            _homingStrength = attackData.HomingStrength;
-            _homingTarget = ResolveHomingTarget(_homingRadius, _homingAngle);
-        }
-        else
-        {
-            _homingTarget = null;
+            Debug.LogWarning($"バリアントデータが見つかりませんでした。AttackId: {_currentAttackId}, ChargeLevel: {input.ChargeLevel}");
+            return;
         }
 
-        if (attackData.MoveType != AttackMoveType.None)
-        {
-            OnAttackMoveRequested?.Invoke(new AttackMoveRequest
-            {
-                MoveType = attackData.MoveType,
-                Distance = attackData.MoveDistance,
-                Speed = attackData.MoveSpeed,
-                Duration = attackData.MoveDuration,
-                Target = _homingTarget,
-                StopDistance = attackData.StopOnHit ? attackData.AttackRange : 0,
-                IsPhantom = attackData.IsPhantom
-            });
-        }
+        SetupHoming(variant);
 
-        _animationController.PlayAttackBlend(_currentAttackId, attackData.AnimationStateName);
+        RequestAttackMove(variant);
+
+        float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
+        _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
     }
 
+    /// <summary>
+    /// 攻撃アニメーションの攻撃判定フレームで呼ばれる。ここで実際に攻撃を実行する。
+    /// </summary>
     private void ExecutePendingAttack()
     {
         if (_stateManager.CurrentState != PlayerState.Attacking) return;
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
+
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData);
     }
 
+    /// <summary>
+    /// コンボ遷移のタイミングで呼ばれる。バッファされた攻撃入力があれば次の攻撃に繋げる。次の攻撃が存在しない場合は何もしない。
+    /// </summary>
     private void TryComboTransition()
     {
-        if (!_bufferedComboInput.HasValue) return;
+        if (!_bufferedComboInput.HasValue) { return; }
         var bufferedInput = _bufferedComboInput.Value;
         _bufferedComboInput = null;
 
         AttackData nextAttack = GetNextAttack(bufferedInput, allowCombo: true);
-        if (nextAttack == null) return;
+        if (nextAttack == null) { return; }
 
         _isComboTransitioned = true;
         _currentAttackId = nextAttack.AttackId;
@@ -294,43 +395,25 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = bufferedInput;
         _lastAttackTime = Time.time;
 
-        if (nextAttack.EnableHoming)
-        {
-            _isHomingActive = true;
-            _homingRadius = nextAttack.HomingRadius;
-            _homingAngle = nextAttack.HomingAngle;
-            _homingStrength = nextAttack.HomingStrength;
-            _homingTarget = ResolveHomingTarget(_homingRadius, _homingAngle);
-        }
-        else { _homingTarget = null; }
+        var variant = nextAttack.GetVariant(bufferedInput.ChargeLevel);
 
-        if (nextAttack.MoveType != AttackMoveType.None)
-        {
-            OnAttackMoveRequested?.Invoke(new AttackMoveRequest
-            {
-                MoveType = nextAttack.MoveType,
-                Distance = nextAttack.MoveDistance,
-                Speed = nextAttack.MoveSpeed,
-                Duration = nextAttack.MoveDuration,
-                Target = _homingTarget,
-                StopDistance = nextAttack.StopOnHit ? nextAttack.AttackRange : 0,
-                IsPhantom = nextAttack.IsPhantom
-            });
-        }
+        if (variant == null) { return; }
+
+        SetupHoming(variant);
+
+        RequestAttackMove(variant);
 
         _stateManager.ChangeState(PlayerState.Attacking);
-        _animationController.PlayAttackBlend(
-            _currentAttackId,
-            nextAttack.AnimationStateName,
-            nextAttack.TransitionDuration < 0 ? 0.1f : nextAttack.TransitionDuration);
+        float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
+        _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
     }
 
+    /// <summary>
+    /// 攻撃アニメーションの終了フレームで呼ばれる。コンボ継続の有無をチェックし、次の攻撃に繋げるかIdleに戻す。
+    /// </summary>
     private void FinishAttack()
     {
-        // 回避・ダメージリアクション中はAttackの終了処理をスキップ
-        if (_stateManager.CurrentState == PlayerState.Dodge ||
-            _stateManager.IsDamaged())
-            return;
+        if (_stateManager.IsDodging() || _stateManager.IsDamaged()) { return; }
 
         _isHomingActive = false;
 
@@ -343,54 +426,290 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = null;
         _pendingAttackInput = null;
 
+        if (_pendingWarriorCharge)
+        {
+            _stateManager.ChangeState(PlayerState.Charging);
+            OnChargingStarted?.Invoke();
+            return;
+        }
+
         if (_bufferedComboInput.HasValue)
         {
             var bufferedInput = _bufferedComboInput.Value;
             _bufferedComboInput = null;
             PrepareAttack(bufferedInput, allowCombo: true);
+            return; // PrepareAttack後はIdleに戻さない
         }
-        else
-        {
-            _stateManager.ChangeState(PlayerState.Idle);
-            ResetCombo();
-        }
+
+        _stateManager.ChangeState(PlayerState.Idle);
+        ResetCombo();
     }
 
-    // ── ヘルパー ───────────────────────────────────────────
-
+    /// <summary>
+    /// 次の攻撃データを取得する。コンボ継続が可能な場合は次のコンボ攻撃を、そうでない場合は新しい攻撃を取得する。
+    /// </summary>
     private AttackData GetNextAttack(AttackInput input, bool allowCombo)
     {
+        // コンボ継続チェック
         if ((allowCombo || _isInComboWindow) && _currentAttackId != -1)
         {
-            var currentAttack = _attackRepository.GetAttackById(_currentAttackId);
-            if (currentAttack != null && currentAttack.NextComboAttackId != -1)
-            {
-                var nextAttack = _attackRepository.GetAttackById(currentAttack.NextComboAttackId);
-                if (nextAttack != null && IsCompatibleAttack(nextAttack, input)) return nextAttack;
-            }
-            else return null;
+            var unlockedIds = _skillManager.GetOwnedSkillIDs();
+
+            var next = _attackRepository.GetNextComboAttack(_currentAttackId, unlockedIds);
+
+            if (next != null) return next;
+            // コンボ終端ならnullを返す（新コンボ開始はしない）
+            return null;
         }
 
-        ChargeLevel chargeLevel = input.GetChargeLevel(_chargeThreshold);
-        return _attackRepository.GetAttackData(_modeController.CurrentMode, input.AttackType, 0, chargeLevel);
+        // 新規攻撃取得
+        var data = _attackRepository.GetAttackData(_modeController.CurrentMode);
+
+        if (data != null)
+            return data;
+
+        return null;
     }
 
-    private bool IsCompatibleAttack(AttackData attack, AttackInput input)
-        => attack.AttackType == input.AttackType;
-
+    /// <summary>
+    /// 現在攻撃可能かどうかをチェックする。PlayerStateManagerの状態に基づいて、攻撃が許可されているかを判断する。
+    /// </summary>
     private bool CanAttack() => _stateManager.CanAttack();
 
+    /// <summary>
+    /// コンボが途切れる条件をチェックし、必要に応じてコンボをリセットする。ここでは、最後の攻撃から一定時間が経過しているかどうかを確認する。
+    /// </summary>
     private void ResetComboByTime()
     {
         if (Time.time - _lastAttackTime > _comboResetTime) ResetCombo();
     }
 
+    /// <summary>
+    /// コンボウィンドウの開始と終了を管理する。コンボウィンドウ中は次の攻撃への入力を受け付ける状態になる。
+    /// </summary>
+    private void OnComboWindowStart() => _isInComboWindow = true;
+
+    /// <summary>
+    /// コンボウィンドウの終了を管理する。コンボウィンドウが終了すると、次の攻撃への入力は受け付けなくなる。
+    /// </summary>
+    private void OnComboWindowEnd()
+    {
+        if (_isCharging && _modeController.CurrentMode == PlayerMode.Warrior)
+        {
+            _pendingWarriorCharge = true;
+
+            var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
+            if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
+            {
+                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
+            }
+
+            return;
+        }
+
+        // コンボウィンドウ終了時にチャージ攻撃の準備ができている場合は、コンボ継続ではなくチャージ攻撃に遷移する
+        _isInComboWindow = false;
+    }
+
+    #endregion
+
+    #region Charge
+
+    /// <summary>
+    /// 状態をリセットして攻撃をキャンセルする。チャージ状態を解除し、攻撃の準備やコンボの状態もリセットする。
+    /// </summary>
+    private void ClearAttackState()
+    {
+        _pendingAttackData = null;
+        _pendingAttackInput = null;
+        _bufferedComboInput = null;
+
+        _isInComboWindow = false;
+        _isComboTransitioned = false;
+        _pendingWarriorCharge = false;
+
+        _isHomingActive = false;
+
+        ClearHomingLock();
+    }
+
+    /// <summary>
+    /// 攻撃のチャージをキャンセルする。チャージ状態を解除し、必要に応じてIdle状態に戻す。
+    /// </summary>
+    private void CancelCharge()
+    {
+        if (!_isCharging) return;
+        _canStartCharge = false;
+        _isCharging = false;
+        _pendingWarriorCharge = false;
+        _currentChargeLevel = ChargeLevel.None;
+        _autoFireTriggered = false;
+
+        if (_stateManager.CurrentState == PlayerState.Charging)
+        {
+            OnChargingEnded?.Invoke();
+            _stateManager.ChangeState(PlayerState.Idle);
+        }
+    }
+
+    /// <summary>
+    /// チャージ時間に応じたChargeLevelを解決する。設定された閾値に基づいて、適切なチャージレベルを返す。
+    /// </summary>
+    private ChargeLevel ResolveChargeLevel(float chargeTime)
+    {
+        foreach (var threshold in _chargeThresholds)
+        {
+            if (chargeTime >= threshold.TimeThreshold)
+                return threshold.Level;
+        }
+        return ChargeLevel.None;
+    }
+
+    /// <summary>
+    /// チャージ中の更新処理。毎フレーム呼ばれ、チャージ時間に応じたチャージレベルの更新や、Lv3到達での自動発動を行う。
+    /// </summary>
+    private void UpdateCharging()
+    {
+        if (!_canStartCharge) return;
+        if (!_isCharging || _modeController.CurrentMode != PlayerMode.Warrior) return;
+
+        if (_pendingWarriorCharge) return; // コンボウィンドウ中のチャージはOnComboWindowEndで処理する
+
+        float chargeTime = Time.time - _chargeStartTime;
+        ChargeLevel newLevel = ResolveChargeLevel(chargeTime);
+
+        if (!_isAttackButtonHeld)
+        {
+            FireWarriorAttack(newLevel);
+        }
+
+        // 段階が上がったときだけアニメーションを切り替えてイベント通知
+        if (newLevel != _currentChargeLevel)
+        {
+            _currentChargeLevel = newLevel;
+
+            if (newLevel != ChargeLevel.None)
+            {
+                // チャージ段階に対応したAttackDataのチャージアニメーションを再生
+                var chargeData = GetChargeAttackData().GetVariant(newLevel);
+
+                if (chargeData != null && !string.IsNullOrEmpty(chargeData.ChargeAnimationStateName))
+                {
+                    float transition = chargeData.TransitionDuration < 0 ? 0.1f : chargeData.TransitionDuration;
+                    _animationController.PlayChargeAnimation(chargeData.ChargeAnimationStateName, transition);
+                }
+
+                OnChargeLevelReached?.Invoke(newLevel);
+            }
+        }
+
+        // 解放済み最大チャージ段階に達したら自動発動
+        if (!_autoFireTriggered && IsMaxChargeLevelReached(newLevel))
+        {
+            _autoFireTriggered = true;
+            FireWarriorAttack(newLevel);
+        }
+    }
+
+    /// <summary>
+    /// 指定したチャージ段階に対応するAttackDataを取得する。
+    /// チャージアニメーション取得用。
+    /// </summary>
+    /// <summary>
+    /// チャージアニメーション取得用。コンボ中であれば次のコンボ段のデータを参照する。
+    /// </summary>
+    private AttackData GetChargeAttackData()
+    {
+        // コンボ継続中なら次のコンボ攻撃のデータを使う
+        if (_currentAttackId != -1)
+        {
+            var unlockedIds = _skillManager.GetOwnedSkillIDs();
+
+            var next = _attackRepository.GetNextComboAttack(_currentAttackId, unlockedIds);
+            if (next != null) return next;
+        }
+
+        // コンボ終端 or 新規攻撃
+        return _attackRepository.GetAttackData(_modeController.CurrentMode);
+    }
+
+    /// <summary>
+    /// 現在のチャージ段階が解放済み最大かどうかを返す
+    /// </summary>
+    private bool IsMaxChargeLevelReached(ChargeLevel current)
+    {
+        if (current == ChargeLevel.None) return false;
+
+        ChargeLevel maxLevel = _skillManager.GetMaxChargeLevel(_modeController.CurrentMode);
+
+        return current >= maxLevel;
+    }
+
+    /// <summary>
+    /// チャージが準備完了したときに呼ばれるイベントハンドラー。チャージ開始を許可し、チャージ開始時間を記録する。
+    /// </summary>
+    private void OnChargeReady()
+    {
+        _canStartCharge = true;
+        _chargeStartTime = Time.time;
+
+        _pendingWarriorCharge = false;
+    }
+    #endregion
+
+    #region Homing
+
+    /// <summary>
+    /// 攻撃データに基づいてホーミングの設定を行う。ホーミングが有効な場合は、ホーミングのパラメータをセットし、対象を解決する。無効な場合はホーミングをオフにする。
+    /// </summary>
+    private void SetupHoming(AttackVariantData data)
+    {
+        if (data.EnableHoming)
+        {
+            _isHomingActive = true;
+            _homingRadius = data.HomingRadius;
+            _homingAngle = data.HomingAngle;
+            _homingStrength = data.HomingStrength;
+
+            _homingTarget = ResolveHomingTarget(
+                _homingRadius,
+                _homingAngle);
+        }
+        else
+        {
+            _isHomingActive = false;
+            _homingTarget = null;
+        }
+    }
+
+    /// <summary>
+    /// ホーミング対象を見つける。現在のロックオンターゲットが有効ならそれを返し、そうでない場合は周囲の敵から条件に合うものを探して返す。
+    /// </summary>
     private Transform FindHomingTarget(float radius, float angle)
     {
-        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
+        if (_currentLockOnTarget != null)
+            return _currentLockOnTarget.GetTargetCenter();
+
         Transform best = null;
         float bestScore = float.MaxValue;
 
+        if (ServiceLocator.TryGet(out EnemyManager enemyManager))
+        {
+            var enemies = enemyManager.GetEnemiesInRange(transform.position, radius);
+            foreach (var enemy in enemies)
+            {
+                if (enemy.IsDead) continue;
+                var dir = (enemy.GetTargetCenter().position - transform.position).normalized;
+                float angleTo = Vector3.Angle(transform.forward, dir);
+                if (angleTo > angle) continue;
+                float dist = Vector3.Distance(transform.position, enemy.GetTargetCenter().position);
+                if (dist < bestScore) { bestScore = dist; best = enemy.GetTargetCenter(); }
+            }
+            return best;
+        }
+
+        var hits = Physics.OverlapSphere(transform.position, radius, _homingLayer);
         foreach (var hit in hits)
         {
             if (!hit.TryGetComponent(out IEnemy enemy) || enemy.IsDead) continue;
@@ -403,11 +722,14 @@ public class PlayerAttack : MonoBehaviour
         return best;
     }
 
+    /// <summary>
+    /// ホーミング対象を解決する。ロックオンターゲットが有効ならそれを返し、そうでない場合は周囲から新たにホーミング対象を探す。新しい対象が見つかればホーミングロックする。
+    /// </summary>
     private Transform ResolveHomingTarget(float radius, float angle)
     {
         if (_isHomingLocked && _lockedHomingTarget != null)
         {
-            if (_lockedHomingTarget.TryGetComponent(out IEnemy enemy) && !enemy.IsDead)
+            if (_lockedHomingTarget.TryGetComponent(out IEnemy e) && !e.IsDead)
                 return _lockedHomingTarget;
             ClearHomingLock();
         }
@@ -420,8 +742,14 @@ public class PlayerAttack : MonoBehaviour
         return newTarget;
     }
 
+    /// <summary>
+    /// ホーミングロックを解除する。ロックされた対象をクリアし、ロック状態を解除する。
+    /// </summary>
     private void ClearHomingLock() { _lockedHomingTarget = null; _isHomingLocked = false; }
 
+    /// <summary>
+    /// ホーミング処理を実行する。ホーミングが有効で対象が存在する場合、プレイヤーの向きを対象に向けて徐々に回転させる。
+    /// </summary>
     private void PerformHoming()
     {
         if (!_isHomingActive || _homingTarget == null) return;
@@ -434,24 +762,63 @@ public class PlayerAttack : MonoBehaviour
             Time.deltaTime * _homingStrength);
     }
 
-    private void OnComboWindowStart() => _isInComboWindow = true;
-    private void OnComboWindowEnd() => _isInComboWindow = false;
+    #endregion
 
+    #region ModeChange & LockOn
+
+    /// <summary>
+    /// モード変更時の処理。モードが変更されたときにコンボをリセットする。これにより、モード変更後の攻撃が新しいコンボとして始まるようになる。
+    /// </summary>
+    /// <param name="_">イベントに合わせるためのものなので使用しないが引数を付けている</param>
+    private void OnModeChanged(PlayerMode _) => ResetCombo();
+
+    /// <summary>
+    /// モード変更の入力処理。モード変更が可能な状態であれば、現在のモードに応じて新しいモードに切り替える。雷神モードへの切り替えは即時に行い、闘神モードへの切り替えは状態遷移を伴う。
+    /// </summary>
     private void ChangeMode()
     {
-        if (!_stateManager.CanModeChange()) return;
-        var newMode = _modeController.CurrentMode == PlayerMode.Warrior
-            ? PlayerMode.Thunder : PlayerMode.Warrior;
-        if (newMode == PlayerMode.Warrior) { _modeController.SwitchMode(newMode); return; }
+        if (!_stateManager.CanModeChange()) { return; }
+
+        var newMode = _modeController.CurrentMode == PlayerMode.Warrior ? PlayerMode.Thunder : PlayerMode.Warrior;
+
+        if (newMode == PlayerMode.Warrior)
+        {
+            _modeController.SwitchMode(newMode);
+            return;
+        }
+
         _stateManager.ChangeState(PlayerState.ModeChanging);
         _modeController.SwitchMode(newMode);
     }
 
-    private void OnModeChanged(PlayerMode newMode)
+    /// <summary>
+    /// ロックオンターゲットの変更処理。カメラマネージャーからロックオンターゲットの変更イベントを受け取ったときに呼ばれる。新しいターゲットが有効であればそれを現在のロックオンターゲットとして設定し、そうでない場合はロックオンターゲットをクリアする。
+    /// </summary>
+    private void ChangeLockOnTarget(ILockOnTarget target)
     {
-        Debug.Log($"モード変更: {newMode}");
-        ResetCombo();
+        _currentLockOnTarget = (target is Component c && c && target.IsLockable && target.GetTargetCenter() != null)
+            ? target : null;
     }
+
+    /// <summary>
+    /// 攻撃の移動要求を発行する。攻撃データに移動が有効な場合に、攻撃の移動要求イベントを発行する。イベントには移動のカーブや距離、速度、対象などの情報が含まれる。
+    /// </summary>
+    private void RequestAttackMove(AttackVariantData data)
+    {
+        if (!data.EnableMovement) return;
+
+        OnAttackMoveRequested?.Invoke(new AttackMoveRequest
+        {
+            MoveCurve = data.MoveCurve,
+            Distance = data.MoveDistance,
+            Speed = data.MoveSpeed,
+            Duration = data.MoveDuration,
+            Target = _homingTarget,
+            StopDistance = data.StopOnHit ? data.AttackRange : 0,
+            IsPhantom = data.IsPhantom
+        });
+    }
+    #endregion
 }
 
 [Serializable]
@@ -464,23 +831,7 @@ public struct ChargeThreshold
 public struct AttackInput
 {
     public AttackType AttackType;
-    public float ChargeTime;           // チャージした時間
-    public bool WasChargeReleased;     // チャージが解放されたか
-
-    public ChargeLevel GetChargeLevel(ChargeThreshold[] thresholds)
-    {
-        if (thresholds == null || thresholds.Length == 0)
-            return ChargeLevel.None;
-
-        // 降順でソート済みと仮定
-        for (int i = 0; i < thresholds.Length; i++)
-        {
-            if (ChargeTime >= thresholds[i].TimeThreshold)
-                return thresholds[i].Level;
-        }
-
-        return ChargeLevel.None;
-    }
+    public ChargeLevel ChargeLevel; // 直接レベルを持つ（ChargeTimeは不要）
 }
 
 /// <summary>
@@ -488,7 +839,7 @@ public struct AttackInput
 /// </summary>
 public struct AttackMoveRequest
 {
-    public AttackMoveType MoveType;
+    public AnimationCurve MoveCurve;
     public float Distance;
     public float Speed;
     public float Duration;

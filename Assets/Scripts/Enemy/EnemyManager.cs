@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
@@ -8,9 +9,9 @@ public class EnemyManager : MonoBehaviour
     public event Action OnBossDefeated;
     public event Action<IEnemy> OnEnemySpawned;
 
-    /// <summary>
-    /// プレイヤー参照と各サービスを初期化する
-    /// </summary>
+    public ReadOnlyCollection<Transform> EnemiesTransformList => _enemiesTransformList.AsReadOnly();
+
+    /// <summary> プレイヤー参照と各サービスを初期化する </summary>
     public void Init(IPlayer player)
     {
         if (player == null)
@@ -26,8 +27,29 @@ public class EnemyManager : MonoBehaviour
         _separationService = new SeparationService(_spatialHashGrid);
         _wallAvoidanceService = new WallAvoidanceService(_wallLayerMask);
         _formationSystem = new EnemyFormationSystem();
+        _playerInformationService = new PlayerInformationService(_player, this);
+
+        _enemyServices = new EnemyServices(
+       _spatialHashGrid,
+       _separationService,
+       _wallAvoidanceService,
+       _formationSystem,
+       _playerInformationService
+   );
+
+        if (_enemySpawner == null)
+        {
+            Debug.LogError("EnemyManager.Init: _enemySpawner が未設定です");
+            enabled = false;
+            return;
+        }
+        _enemySpawner.Init(_enemyServices);
+        _bossEnemySpawner.Init(_enemyServices);
     }
 
+    /// <summary> エネミーの生成 </summary>
+    /// <param name="original"> 出現させたいエネミー </param>
+    /// <param name="pos"> 出現させる場所 </param>
     public void Spawn(GameObject original, Vector3 pos)
     {
         if (_player == null)
@@ -43,13 +65,16 @@ public class EnemyManager : MonoBehaviour
             enemy.OnDead += HandleEnemyDead;
             enemy.OnDamaged += HandleEnemyDamaged;
 
+            _enemiesTransformList.Add(obj.transform);
+
             // InjectServicesをInitより前に呼ぶ
             // Init内でBehaviourを生成する際にサービスを参照するため
             enemy.InjectServices(new EnemyServices(
                 _spatialHashGrid,
                 _separationService,
                 _wallAvoidanceService,
-                _formationSystem
+                _formationSystem,
+                _playerInformationService
             ));
 
             // FormationSystemへの登録はInit前に行う
@@ -61,7 +86,7 @@ public class EnemyManager : MonoBehaviour
 
             OnEnemySpawned?.Invoke(enemy);
 
-            enemy.Init(_player);
+            enemy.Init();
 
             // SpatialHashGridに初期位置を登録する
             _spatialHashGrid.Register(enemy, pos);
@@ -75,12 +100,61 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// オブジェクトプールを使用したエネミーの生成
+    /// </summary>
+    /// <param name="poolKey">取得するEnemyのPool識別キー</param>
+    /// <param name="pos">出現座標</param>
+    public void Spawn(string poolKey, Vector3 pos)
+    {
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
+        Enemy enemy = _enemySpawner.Spawn(poolKey, pos);
+        if (enemy == null) return;
+
+        // Enemy死亡時と被弾時のイベント登録
+        enemy.OnDead += HandleEnemyDead;
+        enemy.OnDamaged += HandleEnemyDamaged;
+
+        _enemiesTransformList.Add(enemy.transform);
+
+        if (_formationSystem != null && enemy.TryGetComponent(out IFormationParticipant participant))
+        {
+            _formationSystem.Register(enemy, participant);
+        }
+
+        OnEnemySpawned?.Invoke(enemy);
+
+        enemy.Init();
+
+        _spatialHashGrid.Register(enemy, pos);
+        _enemies.Add(enemy);
+    }
+
+
     /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
 
-    /// <summary>
-    /// SpawnDataRepositoryから一括生成
-    /// </summary>
+    public IReadOnlyList<IEnemy> GetEnemiesInRange(Vector3 position, float radius)
+    {
+        List<IEnemy> enemiesInRange = new List<IEnemy>();
+        foreach (var enemy in _enemies)
+        {
+            if (enemy.IsDead) continue;
+            float distance = Vector3.Distance(enemy.Self.position, position);
+            if (distance <= radius)
+            {
+                enemiesInRange.Add(enemy);
+            }
+        }
+        return enemiesInRange;
+    }
+
+    /// <summary> SpawnDataRepositoryから一括生成 </summary>
     public void SpawnFromRepository(SpawnDataRepository repository)
     {
         if (repository == null || repository.SpawnDatas == null) return;
@@ -92,12 +166,56 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// ボスを生成
-    /// </summary>
-    public void SpawnBoss(GameObject bossPrefab, Vector3 position)
+    /// <summary> ボスを生成 </summary>
+    public void SpawnBoss(string poolKey, Vector3 pos)
     {
-        Spawn(bossPrefab, position);
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
+        IEnemy enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
+        if (enemy == null) return;
+
+        // Enemy死亡時と被弾時のイベント登録
+        enemy.OnDead += HandleEnemyDead;
+        enemy.OnDamaged += HandleEnemyDamaged;
+
+        _enemiesTransformList.Add(enemy.Self);
+
+        OnEnemySpawned?.Invoke(enemy);
+
+        enemy.Init();
+
+        _spatialHashGrid.Register(enemy, pos);
+        _enemies.Add(enemy);
+    }
+
+    /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
+    public void ClearAllMobEnemies()
+    {
+        foreach (var enemy in _enemies.ToArray())
+        {
+            if (enemy != null && !enemy.IsDead)
+            {
+                RemoveDeadEnemyTransform(enemy);
+
+                enemy.OnDead -= HandleEnemyDead;
+                enemy.OnDamaged -= HandleEnemyDamaged;
+
+                // SpatialHashGridから登録解除
+                _spatialHashGrid?.Remove(enemy);
+
+                // モブのみを対象にするため、Enemyクラスのインスタンスかどうかを確認
+                if (enemy is Enemy enemyComponent)
+                {
+                    _enemySpawner.Despawn(enemyComponent);
+                }
+            }
+        }
+        _enemies.Clear();
+        _enemiesTransformList.Clear();
     }
 
     [Header("Spatial Hash Grid")]
@@ -108,6 +226,11 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
+    // Enemyの生成を行うクラス
+    [SerializeField] private EnemySpawner _enemySpawner;
+    [SerializeField] private BossEnemySpawner _bossEnemySpawner;
+
+    private List<Transform> _enemiesTransformList = new List<Transform>();
     private List<IEnemy> _enemies = new();
     private IPlayer _player;
 
@@ -115,7 +238,20 @@ public class EnemyManager : MonoBehaviour
     private ISeparationService _separationService;
     private IWallAvoidanceService _wallAvoidanceService;
     private IEnemyFormationSystem _formationSystem;
+    private IPlayerInformationService _playerInformationService;
 
+    // Enemyに提供するサービスをまとめたクラス
+    private EnemyServices _enemyServices;
+
+    private void Awake()
+    {
+        ServiceLocator.Register(this);
+    }
+
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister<EnemyManager>();
+    }
 
     /// <summary>
     /// EnemyのOnDamagedイベントハンドラ
@@ -130,6 +266,8 @@ public class EnemyManager : MonoBehaviour
     {
         if (enemy != null)
         {
+            RemoveDeadEnemyTransform(enemy);
+
             enemy.OnDead -= HandleEnemyDead;
             enemy.OnDamaged -= HandleEnemyDamaged;
 
@@ -150,11 +288,28 @@ public class EnemyManager : MonoBehaviour
         }
     }
 
+    /// <summary> 死んだ敵の登録されているTransformをリムーブする </summary>
+    /// <param name="enemy"> 死んだ敵 </param>
+    private void RemoveDeadEnemyTransform(IEnemy enemy)
+    {
+        var enemyComponent = enemy as Component;
+
+        if (enemyComponent != null)
+        {
+            GameObject targetEnemy = enemyComponent.gameObject;
+            _enemiesTransformList.Remove(targetEnemy.transform);
+        }
+        else
+        {
+            Debug.LogError("このインターフェースの実体はUnityのComponentではありません。");
+        }
+    }
+
 #if UNITY_EDITOR
     // デバッグ用
     private void OnGUI()
     {
         GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
     }
-#endif
+#endif  
 }

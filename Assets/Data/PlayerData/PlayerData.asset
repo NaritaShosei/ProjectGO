@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   _stats: {fileID: 11400000, guid: 5d5c70d4e0afdc443bd990fc4aabdc40, type: 2}
   _attackPower: 100
-  _defensePower: 0
-  _criticalRate: 0
-  _healAmount: 50
-  _staminaRegenPerSecond: 10
-  _dodgeStaminaCost: 10
+  _defensePower: 50
+  _criticalRate: 0.1
+  _healAmount: 30
+  _thunderDrainPerSecond: 10
+  _thunderRecoverPerSecond: 15

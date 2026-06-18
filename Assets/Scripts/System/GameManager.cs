@@ -8,23 +8,30 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EnemyUIManager _enemyUIManager;
     [SerializeField] private SkillManager _skillManager;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
-    [SerializeField] private InGameUIInitializer _inGameUIInitializer;
+    [SerializeField] private PlayerUIInitializer _inGameUIInitializer;
     [SerializeField] private ItemPickupManager _itemPickupManager;
+    [SerializeField] private PlayerEffectInitializer _playerEffectInitializer;
+    [SerializeField] private EXPItemManager _expManager;
 
     private SceneTransitionManager _sceneTransitionManager;
 
     private HitStopManager _hitStopManager;
 
-    private void Start()
+    private void Awake()
     {
         // ヒットストップマネージャーを初期化してサービスロケーターに登録
         _hitStopManager = new HitStopManager();
+    }
 
+    private void Start()
+    {
         InitSequence();
         InitPlayer();
         InitCameraManager();
         InitEnemyManager();
         InitUI();
+        InitEffect();
+        InitEXPManager();
         StartGame();
     }
 
@@ -48,6 +55,11 @@ public class GameManager : MonoBehaviour
         var input = ServiceLocator.Get<InputHandler>();
 
         _player.Init(_skillManager, input);
+
+        if (_player.TryGetComponent(out IModeController modeController))
+        {   
+            _skillManager.Init(_player, modeController, _player.transform, _enemyManager);
+        }
 
         _player.OnDead += HandleGameComplete;
     }
@@ -82,6 +94,16 @@ public class GameManager : MonoBehaviour
         _inGameUIInitializer.Init(_player);
         _enemyUIManager.Init(_enemyManager, _player.transform);
         _itemPickupManager.Init(_player.transform);
+    }
+
+    private void InitEffect()
+    {
+        _playerEffectInitializer.Init(_player, _skillManager);
+    }
+
+    private void InitEXPManager()
+    {
+        _expManager.Init(_player);
     }
 
     private void StartGame()

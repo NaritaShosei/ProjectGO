@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e84fefcd0c1f73e4d95b6b7fe43bcbb1, type: 3}
+  m_Name: ChargeAttackSkill_1
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeAttackSkill
+  _id: 404
+  _priority: 0
+  _name: "\u30C1\u30E3\u30FC\u30B8\u5F37\u5316\u2160"
+  _explanation: "\u30C1\u30E3\u30FC\u30B8\u6642\u9593\u304C1\u6BB5\u968E\u5897\u52A0\u3059\u308B"
+  _icon: {fileID: 0}
+  _timing: 1
+  _unlockedSkill: {fileID: 11400000, guid: 8dacb44f80b8e974eaa65be66a1cc336, type: 2}
+  _defaultUnlocked: 1

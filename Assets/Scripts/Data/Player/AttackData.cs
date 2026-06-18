@@ -1,85 +1,58 @@
+using System.Collections.Generic;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackData", menuName = "GameData/AttackData")]
 public class AttackData : ScriptableObject
 {
     public int AttackId => _attackId;
-    public string AttackName => _attackName;
     public PlayerMode Mode => _mode;
-    public AttackType AttackType => _attackType;
-    public int ComboIndex => _comboIndex;
-    public ChargeLevel RequiredCharge => _requiredCharge;
-
-    public float DamageMultiplier => _damageMultiplier;
-    public float AttackRange => _attackRange;
-    public float AttackRadius => _attackRadius;
 
     public int NextComboAttackId => _nextComboAttackId;
+    public int InsertAfterAttackId => _insertAfterAttackId;
 
-    public bool EnableHoming => _enableHoming;
-    public float HomingRadius => _homingRadius;
-    public float HomingAngle => _homingAngle;
-    public float HomingStrength => _homingStrength;
+    public bool IsUnlockedBySkill => _isUnlockedBySkill;
+    public int RequiredSkillId => _requiredSkillId;
 
-    public bool EnableKnockback => _enableKnockback;
-    public float KnockbackPower => _knockbackPower;
-    public float KnockbackUpward => _knockbackUpward;
+    public IReadOnlyList<AttackVariantData> Variants => _variants;
 
-    public AttackMoveType MoveType => _moveType;
-    public float MoveDistance => _moveDistance;
-    public float MoveSpeed => _moveSpeed;
-    public float MoveDuration => _moveDuration;
-    public bool StopOnHit => _stopOnHit;
-    public bool IsPhantom => _isPhantom;
+    public AttackVariantData GetVariant(ChargeLevel chargeLevel)
+    {
+        foreach (var variant in _variants)
+        {
+            if (variant.RequiredCharge == chargeLevel)
+            {
+                return variant;
+            }
+        }
+        return null; // 該当するバリアントがない場合
+    }
 
-    public HitStopData HitStopData => _hitStopData;
+    public void AddVariant(AttackVariantData variant)
+    {
+        _variants.Add(variant);
+    }
 
-    public string AnimationStateName => _animationStateName;
-    public float TransitionDuration => _transitionDuration;
-
-    [Header("Basic Info")]
-    [SerializeField] private int _attackId;
-    [SerializeField] private string _attackName;
-    [SerializeField] private PlayerMode _mode;
-    [SerializeField] private AttackType _attackType;
-    [SerializeField] private int _comboIndex;
-    [SerializeField] private ChargeLevel _requiredCharge;
-
-    [Header("Damage")]
-    [SerializeField] private float _damageMultiplier = 1;
-
-    [Header("Range")]
-    [SerializeField] private float _attackRange = 1;
-    [SerializeField] private float _attackRadius = 1;
+    [Header("基本情報")]
+    [SerializeField] private int _attackId; // 攻撃ID
+    [SerializeField] private PlayerMode _mode; // 闘神 or 雷神
 
     [Header("Combo")]
+    [Tooltip("次のコンボ攻撃ID。-1の場合はコンボ終了。")]
     [SerializeField] private int _nextComboAttackId = -1;
+    [Tooltip("この差し込み攻撃を発動する起点となるAttackDataのID。-1で無効。")]
+    [SerializeField] private int _insertAfterAttackId = -1;
 
-    [Header("Knockback")]
-    [SerializeField] private bool _enableKnockback = false;
-    [SerializeField] private float _knockbackPower = 5f;
-    [SerializeField] private float _knockbackUpward = 0f;
+    [Header("Skill Unlock")]
+    [Tooltip("スキル解放が必要な攻撃かどうか")]
+    [SerializeField] private bool _isUnlockedBySkill = false;
+    [Tooltip("解放に必要なスキルID")]
+    [SerializeField] private int _requiredSkillId = -1;
 
-    [Header("Homing")]
-    [SerializeField] private bool _enableHoming = false;
-    [SerializeField] private float _homingRadius = 5f;
-    [SerializeField] private float _homingAngle = 45f;
-    [SerializeField] private float _homingStrength = 10f;
-
-    [Header("Movement")]
-    [SerializeField] private AttackMoveType _moveType = AttackMoveType.None;
-    [SerializeField] private float _moveDistance = 0f;
-    [SerializeField] private float _moveSpeed = 0f;
-    [SerializeField] private float _moveDuration = 0f;
-    [SerializeField] private bool _stopOnHit = true;
-    [SerializeField] private bool _isPhantom = false; // すり抜け攻撃かどうか 
-
-    [Header("Hit Stop")]
-    [SerializeField] private HitStopData _hitStopData;
-
-    [Header("Animation")]
-    [SerializeField] private string _animationStateName; // Animatorのステート名
-    [SerializeField] private float _transitionDuration = -1f; // 遷移時間（秒）。-1の場合はデフォルト値(0.1f)を使用
+    [Header("攻撃バリアント")]
+    [SerializeField] private List<AttackVariantData> _variants = new();
 }
 
 // 攻撃の段階（チャージレベル）
@@ -90,7 +63,9 @@ public enum ChargeLevel
     [InspectorName("溜め1")]
     Level1 = 1,
     [InspectorName("溜め2")]
-    Level2 = 2
+    Level2 = 2,
+    [InspectorName("溜め3")]
+    Level3 = 3
 }
 
 // 攻撃タイプ
@@ -98,10 +73,6 @@ public enum AttackType
 {
     [InspectorName("弱攻撃")]
     LightAttack,
-    [InspectorName("強攻撃")]
-    HeavyAttack,
-    [InspectorName("回避攻撃")]
-    DodgeAttack
 }
 
 // モード
@@ -111,19 +82,4 @@ public enum PlayerMode
     Warrior,
     [InspectorName("雷神")]
     Thunder
-}
-
-public enum AttackMoveType
-{
-    [InspectorName("移動なし")]
-    None,   // その場
-
-    [InspectorName("突進")]
-    Dash,   // 直線突進
-
-    [InspectorName("ステップ")]
-    Step,   // 小移動
-
-    [InspectorName("曲線移動 / ホーミング")]
-    Curve,  // 曲線 / ホーミング（将来）
 }

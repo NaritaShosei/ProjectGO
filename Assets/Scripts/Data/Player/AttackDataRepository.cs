@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AttackDataRepository", menuName = "GameData/AttackDataRepository")]
@@ -22,61 +23,77 @@ public class AttackDataRepository : ScriptableObject
     /// <summary>
     /// 与えられた攻撃の内容を基に一致する攻撃を検索
     /// </summary>
-    public AttackData GetAttackData(
-        PlayerMode mode,
-        AttackType type,
-        int comboIndex,
-        ChargeLevel charge)
+    public AttackData GetAttackData(PlayerMode mode)
     {
-        // 初回アクセス時に辞書登録
-        if (_attackCache == null)
+        // モードに応じた最初の攻撃データを返す
+        switch (mode)
         {
-            BuildCache();
+            case PlayerMode.Warrior:
+                return _warriorFirstData;
+            case PlayerMode.Thunder:
+                return _thunderFirstData;
+            default:
+                return null;
         }
+    }
 
-        string key = GetCacheKey(mode, type, comboIndex, charge);
+    /// <summary>
+    /// 次のコンボ攻撃を取得する。スキル解放チェックあり。
+    /// </summary>
+    public AttackData GetNextComboAttack(int currentAttackId, IEnumerable<int> unlockedSkillIds)
+    {
+        // 現在の攻撃データを取得
+        var current = GetAttackById(currentAttackId);
+        if (current == null) return null;
 
-        if (_attackCache.TryGetValue(key, out AttackData data))
+        // 差し込み攻撃が存在する場合はそちらを優先して返す
+        foreach (var data in _attackDatabase)
         {
+            // 差し込み攻撃の条件を満たすかチェック
+            // nullチェック
+            if (data == null) continue;
+            // 差し込み攻撃の起点が現在の攻撃IDと一致するか
+            if (data.InsertAfterAttackId != current.AttackId) continue;
+            // スキル解放が必要な攻撃の場合、解放されているかチェック
+            if (!data.IsUnlockedBySkill) continue;
+            // スキル解放が必要な攻撃の場合、解放されているかチェック
+            if (unlockedSkillIds == null) continue;
+            if (!unlockedSkillIds.Contains(data.RequiredSkillId)) continue;
             return data;
         }
 
-        return null;
+        if (current.NextComboAttackId == -1) return null; // コンボ終了
+
+        // 次の攻撃データを取得
+        var next = GetAttackById(current.NextComboAttackId);
+        if (next == null) return null;
+
+        // スキル解放が必要な攻撃の場合、解放されているかチェック
+        if (next.IsUnlockedBySkill)
+        {
+            if (unlockedSkillIds == null) return null;
+            if (!unlockedSkillIds.Contains(next.RequiredSkillId)) return null;
+        }
+
+        return next;
     }
 
     [SerializeField] private List<AttackData> _attackDatabase;
+    [SerializeField] private AttackData _warriorFirstData; // 闘神の最初の攻撃データ
+    [SerializeField] private AttackData _thunderFirstData; // 雷神の最初の攻撃データ
 
     // キャッシュ用Dictionary
-    private Dictionary<string, AttackData> _attackCache;
     private Dictionary<int, AttackData> _attackCacheIDBase;
 
     private void BuildCache()
     {
-        _attackCache = new();
         _attackCacheIDBase = new();
 
-        foreach (var attack in _attackDatabase)
+        foreach (var data in _attackDatabase)
         {
-            if (attack == null) { continue; }
+            if (data == null) { continue; }
 
-            string key = GetCacheKey(
-                attack.Mode,
-                attack.AttackType,
-                attack.ComboIndex,
-                attack.RequiredCharge
-            );
-
-            _attackCacheIDBase[attack.AttackId] = attack;
-            _attackCache[key] = attack;
+            _attackCacheIDBase[data.AttackId] = data;
         }
-    }
-
-    private string GetCacheKey(
-        PlayerMode mode,
-        AttackType type,
-        int comboIndex,
-        ChargeLevel charge)
-    {
-        return $"{mode}_{type}_{comboIndex}_{charge}";
     }
 }

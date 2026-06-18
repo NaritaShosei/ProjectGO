@@ -5,12 +5,31 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EnemyGaugeView : MonoBehaviour
+public class EnemyGaugeView : MonoBehaviour, IPoolable
 {
+    // ── IPoolable ────────────────────────────────────────────
+
+    /// <summary>プールから取り出された直後。ループタスクを再起動する。</summary>
+    public void OnGet()
+    {
+        _cts = new CancellationTokenSource();
+        PositionUpdateLoopAsync(_cts.Token).Forget();
+    }
+
+    /// <summary>プールへ返却される直前。表示をリセットしてループを停止する。</summary>
+    public void OnRelease()
+    {
+        ResetView();
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+    }
+
+    // ── Public API ───────────────────────────────────────────
+
     public void Initialize(Transform enemyTransform, Action<bool> onBehindCameraChanged)
     {
         _onBehindCameraChanged = onBehindCameraChanged;
-
         _linkEnemy = enemyTransform;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -18,11 +37,7 @@ public class EnemyGaugeView : MonoBehaviour
             _mainCamera = cameraManager.MainCamera;
         }
 
-        // 初期状態は非表示
         SetVisible(false);
-
-        _cts = new CancellationTokenSource();
-        PositionUpdateLoopAsync(_cts.Token).Forget();
     }
 
     public void UpdateGauge(float current, float max)
@@ -47,13 +62,7 @@ public class EnemyGaugeView : MonoBehaviour
         SetVisible(false);
     }
 
-    public void Cleanup()
-    {
-        ResetView();
-        _cts?.Cancel();
-        _cts?.Dispose();
-        _cts = null;
-    }
+    // ── Private ──────────────────────────────────────────────
 
     [SerializeField] private RectTransform _barContainer;
     [SerializeField] private Image _mainGauge;
@@ -99,14 +108,13 @@ public class EnemyGaugeView : MonoBehaviour
             if (_linkEnemy == null || _mainCamera == null) continue;
 
             var worldPos = _linkEnemy.position + Vector3.up * _verticalOffset;
-
             var screenPos = _mainCamera.WorldToScreenPoint(worldPos);
             bool isBehind = screenPos.z < 0;
 
             if (_isBehindCamera != isBehind)
             {
                 _isBehindCamera = isBehind;
-                _onBehindCameraChanged?.Invoke(isBehind); // ← 追加
+                _onBehindCameraChanged?.Invoke(isBehind);
                 ApplyVisibility();
             }
 

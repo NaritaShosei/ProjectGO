@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: CircleSpawnData 1
   m_EditorClassIdentifier: Assembly-CSharp::CircleSpawnData
   _enemies:
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
-  - {fileID: 5851137478512212370, guid: caadb141207ab1b44bfc22913e94fd35, type: 3}
+  - Enemy1
+  - Enemy1
+  - Enemy1
+  - Enemy1
+  - Enemy1
+  - Enemy1
+  - Enemy1
+  - Enemy1
   _center: {x: 0, y: 0.32, z: 7.31}
   _radius: 2.9
+  _spawnEnemyType: 0
