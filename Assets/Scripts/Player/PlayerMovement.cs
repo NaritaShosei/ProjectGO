@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 {
     private const float INPUT_THRESHOLD = 0.001f;
 
+    public event Action OnStartDodgeInvincible;
     public event Action OnEndDodge;
 
     /// <summary>
@@ -288,6 +289,9 @@ public class PlayerMovement : MonoBehaviour
     {
         // 回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
         if (!_isDodging) return;
+
+        OnStartDodgeInvincible?.Invoke();
+
         _playerStateManager.AddInvincible(InvincibleType.Dodge);
 
         HandleDodgeInvincibilityEnd().Forget();
