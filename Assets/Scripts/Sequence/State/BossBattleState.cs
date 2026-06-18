@@ -71,8 +71,6 @@ public class BossBattleState : ISequenceState
 
     #region シリアライズ
 
-    [SerializeField] private string _stateName = "BossBattleState";
-
     [Header("ボス戦設定")]
     [SerializeField, Tooltip("ボス戦の時間制限（秒）")] private float _bossBattleTimeLimit = 120f;
     [SerializeField, Tooltip("ボス戦のタイマーUI")] private CountDownTimerView _bossBattleTimerView;

@@ -50,8 +50,6 @@ public class IntroMovieState : ISequenceState
         moviePlayer.OnMovieFinished -= HandleMovieFinished;
     }
 
-    [SerializeField] private string _stateName = "IntroMovieState";
-
     [Header("Movie Settings")]
     [SerializeField] private string _movieName = "Intro";
     [Header("シークエンス設定")]

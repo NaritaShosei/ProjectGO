@@ -65,8 +65,6 @@ public class GameOverState : ISequenceState
         // TODO: ゲームオーバーUIを非表示
     }
 
-    [SerializeField] private string _stateName = "GameOverState";
-
     [Header("ゲームオーバー設定")]
     [SerializeField, Tooltip("ゲームオーバーからタイトルへ遷移するまでの時間（秒）")] private float _gameOverDuration = 10f;
     [SerializeField, Tooltip("ゲームオーバーの残り時間を表示するUI")] private CountDownTimerView _gameOverTimerView;
