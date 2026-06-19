@@ -36,7 +36,7 @@ public class BossIntroMovieState : ISequenceState
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
     {
         if (context.IsMovieCompleted)
-            return SequenceStateType.BossBattle;
+            return _nextSequence;
 
         return null;
     }
@@ -49,6 +49,9 @@ public class BossIntroMovieState : ISequenceState
 
     [Header("Movie Settings")]
     [SerializeField] private string _movieName = "Boss";
+    [Header("シークエンス設定")]
+    [SerializeField] private SequenceStateType _nextSequence = SequenceStateType.BossBattle;
+
     private SequenceStateContext _context;
 
     private void HandleMovieFinished()

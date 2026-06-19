@@ -39,7 +39,7 @@ public class GameOverState : ISequenceState
             context.IsTimeUp = false;
 
             RestartGame(context);
-            return SequenceStateType.MobAndSkill;
+            return _restartSequence;
         }
 
         if (context.IsTitleRequested || context.IsTimeUp)
@@ -68,6 +68,9 @@ public class GameOverState : ISequenceState
     [Header("ゲームオーバー設定")]
     [SerializeField, Tooltip("ゲームオーバーからタイトルへ遷移するまでの時間（秒）")] private float _gameOverDuration = 10f;
     [SerializeField, Tooltip("ゲームオーバーの残り時間を表示するUI")] private CountDownTimerView _gameOverTimerView;
+
+    [Header("シークエンス設定")]
+    [SerializeField, Tooltip("リスタート時に遷移するシークエンス")] private SequenceStateType _restartSequence = SequenceStateType.MobAndSkill;
 
     private SequenceStateContext _storedContext;
     private CountDownTimer _gameOverTimer;
