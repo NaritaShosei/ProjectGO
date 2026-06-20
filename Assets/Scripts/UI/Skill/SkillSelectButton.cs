@@ -37,13 +37,6 @@ public class SkillSelectButton : MonoBehaviour,
         }
     }
 
-    private void Update()
-    {
-        if (!_isSelected && Input.GetKeyDown(KeyCode.Mouse0) && EventSystem.current.currentSelectedGameObject == gameObject)
-        {
-            ClickAnimation().Forget();
-        }
-    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -65,6 +58,15 @@ public class SkillSelectButton : MonoBehaviour,
     // {
     //     OnSelected(); // 方向キー等で選択された時
     // }
+
+    // TODO:テスト機能です。
+    private void Update()
+    {
+        if (!_isSelected && Input.GetKeyDown(KeyCode.Mouse0) && EventSystem.current.currentSelectedGameObject == gameObject)
+        {
+            ClickAnimation().Forget();
+        }
+    }
 
     [Header("ボタン設定")]
     [SerializeField] private Button _selectButton;
