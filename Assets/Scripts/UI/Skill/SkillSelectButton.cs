@@ -8,9 +8,10 @@ using System.Threading;
 
 public class SkillSelectButton : MonoBehaviour,
     IPointerEnterHandler,
-    IPointerExitHandler,
-    ISelectHandler,
-    IDeselectHandler
+    IPointerExitHandler
+// TODO: コントローラー対応用かな？今のところこれ有効にしてるとマウスクリック後もふよふよしちゃってるから一旦殺す後ほど何とかしよう。
+// ISelectHandler,
+// IDeselectHandler
 {
     /// <summary> マウスカーソルが重なった際のイベント </summary>
     public event Action<int> OnHighlighted;
@@ -23,10 +24,24 @@ public class SkillSelectButton : MonoBehaviour,
         _explanationText.text = viewData.Explanation;
         _icon.sprite = viewData.Icon;
 
+        _isSelected = false;
+        _cts.Cancel();
+        _cts.Dispose();
+        _cts = null;
+
         _selectButton.onClick.RemoveAllListeners();
+        _selectButton.onClick.AddListener(() => ClickAnimation().Forget()); // クリックアニメーションを追加
         if (onClick != null)
         {
             _selectButton.onClick.AddListener(onClick.Invoke);
+        }
+    }
+
+    private void Update()
+    {
+        if (!_isSelected && Input.GetKeyDown(KeyCode.Mouse0) && EventSystem.current.currentSelectedGameObject == gameObject)
+        {
+            ClickAnimation().Forget();
         }
     }
 
@@ -40,15 +55,16 @@ public class SkillSelectButton : MonoBehaviour,
         OnUnhovered(); // マウスが離れたとき
     }
 
-    public void OnDeselect(BaseEventData eventData)
-    {
-        OnDeselected(); // 方向キー等で選択が解除された時
-    }
+    // TODO: コントローラー対応用かな？今のところこれ有効にしてるとマウスクリック後もふよふよしちゃってるから一旦殺す後ほど何とかしよう。
+    // public void OnDeselect(BaseEventData eventData)
+    // {
+    //     OnDeselected(); // 方向キー等で選択が解除された時
+    // }
 
-    public void OnSelect(BaseEventData eventData)
-    {
-        OnSelected(); // 方向キー等で選択された時
-    }
+    // public void OnSelect(BaseEventData eventData)
+    // {
+    //     OnSelected(); // 方向キー等で選択された時
+    // }
 
     [Header("ボタン設定")]
     [SerializeField] private Button _selectButton;
@@ -66,99 +82,146 @@ public class SkillSelectButton : MonoBehaviour,
     [Tooltip("ハイライトアニメーションの時間")]
     [SerializeField] private float _highlightDuration = 1f;
 
+    [Header("クリックアニメーション設定")]
+    [Tooltip("クリック時の拡大率")]
+    [SerializeField] private float _clickScale = 1.5f;
+    [Tooltip("クリックアニメーションの時間")]
+    [SerializeField] private float _clickDuration = 0.1f;
+
     private int _skillId; // スキルIDを保持しておく
     private float _defaultScale; // デフォルトのスケールを保持しておく
-    private bool _isHovered; // マウスが乗っているかどうかの状態を保持しておく
-    //private CancellationTokenSource _cts;
+    private bool _isSelected = false; // スキル選択済みか
+    private CancellationTokenSource _cts;
 
     private void OnHovered()
     {
+        if (_isSelected) return; // 選択済みの場合はハイライトしない
+
         Debug.Log("マウスが乗った");
         OnHighlighted?.Invoke(_skillId);
 
         _defaultScale = transform.localScale.x; // デフォルトのスケールを保持
-        _isHovered = true;
-        Highlight(true).Forget(); // ハイライトアニメーション開始
+
+        _cts = new CancellationTokenSource();
+        Highlight(true, _cts.Token).Forget(); // ハイライトアニメーション開始
     }
 
     private void OnUnhovered()
     {
+        if (_isSelected) return;
+
         Debug.Log("マウスが離れた");
 
-        _isHovered = false;
-        Highlight(false).Forget(); // ハイライトアニメーション終了
+        _cts.Cancel(); // ハイライトアニメーション停止
+        _cts.Dispose();
+        _cts = null;
+        Highlight(false, default).Forget(); // ハイライトアニメーション終了
     }
 
     private void OnSelected()
     {
+        if (_isSelected) return;
+
         Debug.Log("方向キー等で選択された");
         OnHighlighted?.Invoke(_skillId);
 
         _defaultScale = transform.localScale.x; // デフォルトのスケールを保持
-        _isHovered = true;
-        Highlight(true).Forget(); // ハイライトアニメーション開始
+        _cts = new CancellationTokenSource();
+        Highlight(true, _cts.Token).Forget(); // ハイライトアニメーション開始
     }
 
 
     private void OnDeselected()
     {
+        if (_isSelected) return;
 
         Debug.Log("方向キー等で選択が解除された");
 
-        _isHovered = false;
-        Highlight(false).Forget(); // ハイライトアニメーション終了
+        _cts.Cancel();
+        _cts.Dispose();
+        _cts = null;
+        Highlight(false, default).Forget(); // ハイライトアニメーション終了
     }
 
-    private async UniTask Highlight(bool isHovered)
+    private async UniTask Highlight(bool isHovered, CancellationToken token)
     {
-        float scale = 0f;
-
-        if (isHovered)
+        // ハイライトアニメーションの処理
+        if (isHovered && !_isSelected) // マウスが乗ったとき、かつ選択されていない場合のみアニメーションを実行
         {
-            Debug.Log("ハイライトアニメーション開始");
-            // ホバー状態への拡大アニメーション
+            // ハイライトアニメーションの開始処理
             float elapsed = 0f;
-            float defaultScale = _defaultScale; // 現在のスケールを基準にする
             while (elapsed < _hoveredDuration)
             {
+                if (token.IsCancellationRequested) return;
                 elapsed += Time.deltaTime;
                 float t = elapsed / _hoveredDuration;
-                scale = Mathf.Lerp(defaultScale, _hoveredScale, t);
-
+                float scale = Mathf.Lerp(_defaultScale, _hoveredScale, t);
                 transform.localScale = new Vector3(scale, scale, 1f);
 
-                await UniTask.Yield(); // 1フレーム待機
+                await UniTask.Yield();
             }
 
-            // ハイライトアニメーション}
+            // ハイライトアニメーションのループ処理
             elapsed = 0f;
-            while (isHovered)
+            while (!token.IsCancellationRequested)
             {
                 elapsed += Time.deltaTime;
-                float pingPongT = Mathf.PingPong(elapsed / _highlightDuration * 2f, 1f); // 0から1までの値を往復させる
-                scale = Mathf.Lerp(_hoveredScale, _animationScale, pingPongT);
-
+                float pingPongT = Mathf.PingPong(elapsed / _highlightDuration * 2f, 1f);
+                float scale = Mathf.Lerp(_hoveredScale, _animationScale, pingPongT);
                 transform.localScale = new Vector3(scale, scale, 1f);
 
-                await UniTask.Yield(); // 1フレーム待機
+                await UniTask.Yield();
             }
         }
+        // ハイライトアニメーション終了時の処理
         else
         {
-            Debug.Log("ハイライトアニメーション終了");
-            // 元のスケールへの縮小アニメーション
             float elapsed = 0f;
-            float currentScale = transform.localScale.x; // 現在のスケールを基準にする
+            float currentScale = transform.localScale.x;
             while (elapsed < _hoveredDuration)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / _hoveredDuration;
-                scale = Mathf.Lerp(currentScale, _defaultScale, t);
-
+                float scale = Mathf.Lerp(currentScale, _defaultScale, t);
                 transform.localScale = new Vector3(scale, scale, 1f);
 
-                await UniTask.Yield(); // 1フレーム待機
+                await UniTask.Yield();
             }
+        }
+    }
+
+    private async UniTaskVoid ClickAnimation()
+    {
+        if (_isSelected) return; // すでに選択済みの場合はアニメーションを実行しない
+        Debug.Log("クリックアニメーション開始");
+
+        _isSelected = true; // スキルが選択されたことを記録
+        _cts.Cancel(); // ハイライトアニメーション停止
+        _cts.Dispose();
+        _cts = null;
+
+        float elapsed = 0f;
+        float currentScale = transform.localScale.x;
+        while (elapsed < _clickDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / _clickDuration;
+            float scale = Mathf.Lerp(currentScale, _clickScale, t);
+            transform.localScale = new Vector3(scale, scale, 1f);
+
+            await UniTask.Yield();
+        }
+
+        // 元のスケールに戻す
+        elapsed = 0f;
+        while (elapsed < _clickDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / _clickDuration;
+            float scale = Mathf.Lerp(_clickScale, _defaultScale, t);
+            transform.localScale = new Vector3(scale, scale, 1f);
+
+            await UniTask.Yield();
         }
     }
 }

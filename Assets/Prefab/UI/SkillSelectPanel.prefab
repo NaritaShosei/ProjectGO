@@ -398,9 +398,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4300584677470297059, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_Name
       value: SkillSelectButton(1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _clickScale
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _hoveredScale
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _animationScale
+      value: 1.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -515,6 +531,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: SkillSelectButton(3)
       objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _clickScale
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _hoveredScale
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _animationScale
+      value: 1.1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -627,6 +655,18 @@ PrefabInstance:
     - target: {fileID: 4300584677470297059, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_Name
       value: SkillSelectButton(2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _clickScale
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _hoveredScale
+      value: 1.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+      propertyPath: _animationScale
+      value: 1.1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
