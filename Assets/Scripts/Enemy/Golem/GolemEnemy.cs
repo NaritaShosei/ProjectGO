@@ -7,6 +7,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
 
     [SerializeField] private Renderer[] _bodyRenderer;
     [SerializeField] private int _blinkSpeed = 100;
+    [SerializeField] private float _attackCooldownOverride = 5f;
 
     private EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;
@@ -74,7 +75,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
         }
         else
         {
-            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
+            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile, _attackCooldownOverride);
             _attack.Init(initCtx);
             _runner.Register(_attack);
 

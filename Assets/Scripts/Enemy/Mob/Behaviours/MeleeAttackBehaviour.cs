@@ -13,7 +13,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     /// <summary>
     /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null)
+    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null, float _enemyCooldown = 0f)
     {
         _enemyServices = services;
         _animator = animator;
@@ -22,6 +22,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _backDotThreshold = profile != null
             ? Mathf.Cos(profile.BackAttackAngle * Mathf.Deg2Rad)
             : -1f;
+        _cooldownOverride = _enemyCooldown;
     }
 
     public void Init(BehaviourInitContext ctx)
@@ -168,6 +169,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private bool _isAttacking;
     private int _hitCount;
     private bool _attackEndFired;
+    private readonly float _cooldownOverride;//攻撃のCT 後々OverrideじゃなくてEnemyDataから取れるといいかも？
 
     // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
     private const float _attackFallbackTimeout = 5f;
@@ -216,8 +218,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _isAttacking = false;
 
         // 攻撃後クールダウンをセット
-        _context.AttackCooldownRemaining = _context.SelectedPattern?.Cooldown ?? 1.5f;
-
+        float cooldown = _cooldownOverride > 0f ? _cooldownOverride : (_context.SelectedPattern?.Cooldown ?? 1.5f);
+        _context.AttackCooldownRemaining = cooldown;
+       
         // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
         _context.SelectedPattern = null;
 
