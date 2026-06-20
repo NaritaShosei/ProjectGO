@@ -34,10 +34,12 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
 
         _attack.OnAttackMoveRequested += HandleAttackMove;
+
         _animationController.OnDamagedEnd += HandleDamagedEnd;
 
         _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
         _animationController.OnDodgeEnd += HandleDodgeEnd;
+        _animationController.OnAttackComplete += HandleAttackEnd;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             _cameraManager = cameraManager;
@@ -121,6 +123,7 @@ public class PlayerMovement : MonoBehaviour
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
             _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
+            _animationController.OnAttackComplete -= HandleAttackEnd;
         }
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
@@ -458,6 +461,16 @@ public class PlayerMovement : MonoBehaviour
         }
         if (!stoppedEarly)
             _rb.MovePosition(targetPos);
+    }
+
+    /// <summary>
+    /// 攻撃アニメーション終了時のハンドラー。
+    /// </summary>
+    private void HandleAttackEnd()
+    {
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = null;
     }
 
     /// <summary>

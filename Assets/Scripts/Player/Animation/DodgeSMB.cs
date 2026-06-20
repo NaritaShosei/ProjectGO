@@ -13,8 +13,6 @@ public class DodgeSMB : StateMachineBehaviour
 
         if (animator.TryGetComponent(out PlayerAnimationController controller))
             _playerAnimationController = controller;
-
-        var clipInfo = animator.GetCurrentAnimatorClipInfo(layerIndex);
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
