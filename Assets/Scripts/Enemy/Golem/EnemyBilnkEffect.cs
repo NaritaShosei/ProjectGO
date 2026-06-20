@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using System;
 
 public class BlinkEffect
 {
@@ -11,8 +12,8 @@ public class BlinkEffect
 
     public BlinkEffect(Renderer[] renderers ,int blinkSpeed)
     {
-        _renderers = renderers;
-        _blinkSpeed = blinkSpeed;
+        _renderers = renderers ?? Array.Empty<Renderer>();
+        _blinkSpeed = Mathf.Max(1,blinkSpeed);
     }
 
     public void StartBlink()
@@ -30,7 +31,7 @@ public class BlinkEffect
 
         foreach (var renderer in _renderers)
         {
-            renderer.material.color = Color.white;
+            SetColor(Color.white);
         }
     }
 
@@ -54,6 +55,7 @@ public class BlinkEffect
     {
         foreach (Renderer renderer in _renderers)
         {
+            if (renderer == null) continue;
             renderer.material.SetColor("_BaseColor", color);
         }
     }

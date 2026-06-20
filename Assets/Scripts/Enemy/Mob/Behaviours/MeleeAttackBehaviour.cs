@@ -121,7 +121,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
             if (_timer >= duration)
             {
-                Exit();
+                Exit(notifyAttackFinished: true);
             }
         }
     }
@@ -129,7 +129,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public void OnExit()
     {
         if (!_isAttacking) return;
-        Exit();
+        Exit(notifyAttackFinished: false);
     }
 
     /// <summary>
@@ -216,7 +216,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _nextHitTime += pattern.HitInterval;
     }
 
-    private void Exit()
+    private void Exit(bool notifyAttackFinished)
     {
         if (!_isAttacking) return;
         _isAttacking = false;
@@ -233,7 +233,10 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         ReleaseSlot();
 
-        OnAttackFinished?.Invoke();
+        if (notifyAttackFinished)
+        {
+            OnAttackFinished?.Invoke();
+        }
     }
 
     /// <summary>
@@ -277,6 +280,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     {
         if (!_isAttacking) return;
         _attackEndFired = true;
-        Exit();
+        Exit(notifyAttackFinished: true);
     }
 }

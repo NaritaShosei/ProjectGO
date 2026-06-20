@@ -134,7 +134,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
 
         int showDamage = damage;
 
-        if (!isDown)
+        if (!isDown && _defenceContext.EnemyType == EnemyDefenceType.Armor && _armor != null)
         {
             bool armorWasAlive =
             _defenceContext.EnemyType == EnemyDefenceType.Armor;
@@ -175,6 +175,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
             return;
         }
 
+        // Down中、または鎧なし/生身状態は本体HPへ
         bool isWeakPoint = context.PlayerMode == PlayerMode.Thunder;
 
         InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
@@ -428,7 +429,11 @@ public class GolemEnemy : Enemy, IFormationParticipant
     protected override void OnDestroy()
     {
         OnArmorBroken -= HandleArmorBroken;
-        _attack.OnAttackFinished -= HandlePostAttack;
+        if (_attack != null)
+        {
+            _attack.OnAttackFinished -= HandlePostAttack;
+            _attack?.Dispose();
+        }
 
         if (_armor != null)
         {
@@ -436,7 +441,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
         }
 
         _bark?.Dispose();
-        _attack?.Dispose();
+       
 
         _blinkEffect?.StopBlink();
 

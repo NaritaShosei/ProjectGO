@@ -42,7 +42,7 @@ public class EnemyDownSMB : StateMachineBehaviour
     /// Animatorパラメータ DownDone のハッシュ
     /// </summary>
     private static readonly int _hashDownDone =
-       Animator.StringToHash("DownDone");
+       Animator.StringToHash("IsDown");
 
     /// <summary>
     /// Down終了通知を一度だけ送るためのフラグ
