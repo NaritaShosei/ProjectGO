@@ -84,6 +84,38 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.SetFloat(AnimParams.Speed, magnitude, 0.1f, Time.deltaTime);
     }
 
+    /// <summary>
+    /// 現在のモードに応じた移動ステートへクロスフェードする。
+    /// </summary>
+    public void MoveCrossFade(float transitionDuration = 0.1f)
+    {
+        string stateName;
+
+        if (_isLockedOn)
+        {
+            stateName = _modeController.CurrentMode switch
+            {
+                PlayerMode.Warrior => AnimParams.WarriorLockedMove,
+                PlayerMode.Thunder => AnimParams.ThunderLockedMove,
+                _ => null
+            };
+        }
+        else
+        {
+            stateName = _modeController.CurrentMode switch
+            {
+                PlayerMode.Warrior => AnimParams.WarriorFreeMove,
+                PlayerMode.Thunder => AnimParams.ThunderFreeMove,
+                _ => null
+            };
+        }
+
+        if (!string.IsNullOrEmpty(stateName))
+        {
+            _animator.CrossFadeInFixedTime(stateName, transitionDuration);
+        }
+    }
+
     // ── 攻撃アニメーション ───────────────────────────────────
 
     public void PlayAttack(int attackId)
@@ -168,6 +200,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public void SetLockedOn(bool isLockedOn)
     {
         _animator.SetBool(AnimParams.IsLockedOn, isLockedOn);
+        _isLockedOn = isLockedOn;
     }
 
     public void OnDestroy()
@@ -186,26 +219,50 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     private IModeController _modeController;
     private float _beforeAnimSpeed = 1f;
     private bool _isSpeedChanging = false;
+    private bool _isLockedOn = false;
 
     private static class AnimParams
     {
-        public const string Body = "BodyUpper";
+        // Layer
+        public const int BaseLayer = 0;
 
+        // State
+        public const string WarriorFreeMove =
+            "Base Layer.Warrior.Warrior_FreeMove";
+
+        public const string WarriorLockedMove =
+            "Base Layer.Warrior.Warrior_LockedMove";
+
+        public const string ThunderFreeMove =
+            "Base Layer.Thunder.Thunder_FreeMove";
+
+        public const string ThunderLockedMove =
+            "Base Layer.Thunder.Thunder_LockedMove";
+
+        public const string ModeChangeToThunder =
+            "ModeChangeToThunder";
+
+        // Float
         public static readonly int Speed = Animator.StringToHash("Speed");
         public static readonly int MoveX = Animator.StringToHash("MoveX");
         public static readonly int MoveY = Animator.StringToHash("MoveY");
         public static readonly int DodgeX = Animator.StringToHash("DodgeX");
         public static readonly int DodgeY = Animator.StringToHash("DodgeY");
 
-        public static readonly int Attack = Animator.StringToHash("Attack");
+        // Int
         public static readonly int AttackId = Animator.StringToHash("AttackId");
-        public static readonly int Dodge = Animator.StringToHash("Dodge");
+        public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+
+        // Bool
         public static readonly int IsCharging = Animator.StringToHash("IsCharging");
+        public static readonly int IsLockedOn = Animator.StringToHash("IsLockedOn");
+
+        // Trigger
+        public static readonly int Attack = Animator.StringToHash("Attack");
+        public static readonly int Dodge = Animator.StringToHash("Dodge");
         public static readonly int Damaged = Animator.StringToHash("Damaged");
         public static readonly int Dead = Animator.StringToHash("Dead");
-        public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
         public static readonly int ModeChange = Animator.StringToHash("ModeChange");
-        public static readonly int IsLockedOn = Animator.StringToHash("IsLockedOn");
     }
 
     private void Awake()
@@ -248,5 +305,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         // Thunderへの切替: トリガーを先に発火してからPlayerModeを更新しない
         // PlayerModeの更新はModeChangeSMBのmodeChangeEndTime後に行う
         _animator.SetTrigger(AnimParams.ModeChange);
+
+        _animator.CrossFadeInFixedTime(AnimParams.ModeChangeToThunder, 0.1f, 0);
     }
 }

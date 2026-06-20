@@ -9,42 +9,46 @@ public class DodgeSMB : StateMachineBehaviour
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _invincibilityStarted = false;
+        _isDodgeEnded = false;
 
         if (animator.TryGetComponent(out PlayerAnimationController controller))
             _playerAnimationController = controller;
-
-        var clipInfo = animator.GetCurrentAnimatorClipInfo(layerIndex);
-
-        if (clipInfo.Length > 0)
-            _frameRate = clipInfo[0].clip.frameRate;
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (_playerAnimationController == null) { return; }
+        float currentTime = stateInfo.normalizedTime * stateInfo.length;
 
-        if (_invincibilityStarted) { return; }
-
-        int currentFrame = (int)(stateInfo.normalizedTime * stateInfo.length * _frameRate);
-
-        // 無敵開始フレームに達したら無敵開始
-        if (currentFrame >= _dodgeInvincibilityStartFrame)
+        if (!_invincibilityStarted &&
+            currentTime >= _invincibleStartTime)
         {
             _playerAnimationController.AnimEvent_DodgeInvincibilityStart();
             _invincibilityStarted = true;
+        }
+
+        if (!_isDodgeEnded &&
+            currentTime >= _dodgeEndTime)
+        {
+            _playerAnimationController.AnimEvent_DodgeEnd();
+            _isDodgeEnded = true;
         }
     }
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_playerAnimationController != null)
+        if (_playerAnimationController != null && !_isDodgeEnded)
+        {
             _playerAnimationController.AnimEvent_DodgeEnd();
+            _isDodgeEnded = true;
+        }
     }
 
-    [Header("Dodge Timings (frame)")]
-    [SerializeField] private int _dodgeInvincibilityStartFrame = 3;
+    [Header("Timings (seconds)")]
+    [SerializeField, Tooltip("無敵の開始時間")] private float _invincibleStartTime = 0.05f;
+    [SerializeField, Tooltip("回避の終了時間(アニメーションより長い時間の場合はステートを抜ける際に自動的に終了する)")] private float _dodgeEndTime = 999f;
 
     private PlayerAnimationController _playerAnimationController;
     private bool _invincibilityStarted;
-    private float _frameRate;
+    private bool _isDodgeEnded;
 }
