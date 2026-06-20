@@ -25,8 +25,8 @@ public class SkillSelectButton : MonoBehaviour,
         _icon.sprite = viewData.Icon;
 
         _isSelected = false;
-        _cts.Cancel();
-        _cts.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
         _cts = null;
 
         _selectButton.onClick.RemoveAllListeners();
@@ -58,15 +58,6 @@ public class SkillSelectButton : MonoBehaviour,
     // {
     //     OnSelected(); // 方向キー等で選択された時
     // }
-
-    // TODO:テスト機能です。
-    private void Update()
-    {
-        if (!_isSelected && Input.GetKeyDown(KeyCode.Mouse0) && EventSystem.current.currentSelectedGameObject == gameObject)
-        {
-            ClickAnimation().Forget();
-        }
-    }
 
     [Header("ボタン設定")]
     [SerializeField] private Button _selectButton;
@@ -114,8 +105,8 @@ public class SkillSelectButton : MonoBehaviour,
 
         Debug.Log("マウスが離れた");
 
-        _cts.Cancel(); // ハイライトアニメーション停止
-        _cts.Dispose();
+        _cts?.Cancel(); // ハイライトアニメーション停止
+        _cts?.Dispose();
         _cts = null;
         Highlight(false, default).Forget(); // ハイライトアニメーション終了
     }
@@ -139,8 +130,8 @@ public class SkillSelectButton : MonoBehaviour,
 
         Debug.Log("方向キー等で選択が解除された");
 
-        _cts.Cancel();
-        _cts.Dispose();
+        _cts?.Cancel();
+        _cts?.Dispose();
         _cts = null;
         Highlight(false, default).Forget(); // ハイライトアニメーション終了
     }
@@ -198,8 +189,8 @@ public class SkillSelectButton : MonoBehaviour,
         Debug.Log("クリックアニメーション開始");
 
         _isSelected = true; // スキルが選択されたことを記録
-        _cts.Cancel(); // ハイライトアニメーション停止
-        _cts.Dispose();
+        _cts?.Cancel(); // ハイライトアニメーション停止
+        _cts?.Dispose();
         _cts = null;
 
         float elapsed = 0f;
