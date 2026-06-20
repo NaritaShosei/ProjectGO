@@ -282,5 +282,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         // Thunderへの切替: トリガーを先に発火してからPlayerModeを更新しない
         // PlayerModeの更新はModeChangeSMBのmodeChangeEndTime後に行う
         _animator.SetTrigger(AnimParams.ModeChange);
+
+        _animator.CrossFadeInFixedTime("ModeChangeToThunder", 0.1f, 0);
     }
 }
