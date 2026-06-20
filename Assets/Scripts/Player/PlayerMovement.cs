@@ -34,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
 
         _attack.OnAttackMoveRequested += HandleAttackMove;
-        
+
         _animationController.OnDamagedEnd += HandleDamagedEnd;
 
         _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
@@ -123,6 +123,7 @@ public class PlayerMovement : MonoBehaviour
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
             _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
+            _animationController.OnAttackComplete -= HandleAttackEnd;
         }
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
