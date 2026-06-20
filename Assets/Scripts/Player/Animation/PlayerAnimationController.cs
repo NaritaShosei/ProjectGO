@@ -84,6 +84,38 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.SetFloat(AnimParams.Speed, magnitude, 0.1f, Time.deltaTime);
     }
 
+    /// <summary>
+    /// 現在のモードに応じた移動ステートへクロスフェードする。
+    /// </summary>
+    public void MoveCrossFade(float transitionDuration = 0.1f)
+    {
+        string stateName;
+
+        if (_isLockedOn)
+        {
+            stateName = _modeController.CurrentMode switch
+            {
+                PlayerMode.Warrior => "Base Layer.Warrior.Warrior_LockedMove",
+                PlayerMode.Thunder => "Base Layer.Thunder.Thunder_LockedMove",
+                _ => null
+            };
+        }
+        else
+        {
+            stateName = _modeController.CurrentMode switch
+            {
+                PlayerMode.Warrior => "Base Layer.Warrior.Warrior_FreeMove",
+                PlayerMode.Thunder => "Base Layer.Thunder.Thunder_FreeMove",
+                _ => null
+            };
+        }
+
+        if (!string.IsNullOrEmpty(stateName))
+        {
+            _animator.CrossFadeInFixedTime(stateName, transitionDuration);
+        }
+    }
+
     // ── 攻撃アニメーション ───────────────────────────────────
 
     public void PlayAttack(int attackId)
@@ -168,6 +200,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public void SetLockedOn(bool isLockedOn)
     {
         _animator.SetBool(AnimParams.IsLockedOn, isLockedOn);
+        _isLockedOn = isLockedOn;
     }
 
     public void OnDestroy()
@@ -186,6 +219,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     private IModeController _modeController;
     private float _beforeAnimSpeed = 1f;
     private bool _isSpeedChanging = false;
+    private bool _isLockedOn = false;
 
     private static class AnimParams
     {
