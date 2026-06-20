@@ -57,7 +57,7 @@ public class EnemyBehaviourRunner
 
             if (!forced.CanContinue())
             {
-                _forced.OnExit();
+                forced.OnExit();
                 _forced = null;
                 _current = null;
             }

@@ -2,14 +2,12 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System;
 
+/// <summary>
+/// Rendererの色を一定間隔で切り替えて点滅演出を行うクラス
+/// ダメージ時のヒットエフェクトなどで使用する
+/// </summary>
 public class BlinkEffect
 {
-    private readonly Renderer[] _renderers;
-
-    private int _blinkSpeed;
-    
-    private bool _isBlink;
-
     public BlinkEffect(Renderer[] renderers ,int blinkSpeed)
     {
         _renderers = renderers ?? Array.Empty<Renderer>();
@@ -34,6 +32,12 @@ public class BlinkEffect
             SetColor(Color.white);
         }
     }
+
+    private readonly Renderer[] _renderers;
+
+    private int _blinkSpeed;
+
+    private bool _isBlink;
 
     private async UniTaskVoid BlinkLoop()
     {
