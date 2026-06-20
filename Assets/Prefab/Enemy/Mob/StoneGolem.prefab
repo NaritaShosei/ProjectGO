@@ -394,11 +394,13 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 84c85403bc40a3c47b61cd25c0d667a0, type: 2}
   _distanceProfile: {fileID: 11400000, guid: d64c95ea40de26a458c660c4cc596173, type: 2}
   _animationEventReceiver: {fileID: 7696763789007296301}
-  _armor: {fileID: 2232957639341954153}
   _downDuration: 5
   _bodyRenderer:
   - {fileID: 2179570851823708453}
   _blinkSpeed: 100
+  _attackCooldownOverride: 5
+  _barkChance: 0.5
+  _armor: {fileID: 2232957639341954153}
 --- !u!114 &6158760630654705163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -680,7 +682,7 @@ Animator:
   m_GameObject: {fileID: 868372915660358490}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: fb46b316e3ec1c3469b5ff200c5a29cf, type: 3}
-  m_Controller: {fileID: 9100000, guid: f765788d30644764099070b679e8a8a8, type: 2}
+  m_Controller: {fileID: 9100000, guid: e8cb2bca2589536458aa8f2fc069532f, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

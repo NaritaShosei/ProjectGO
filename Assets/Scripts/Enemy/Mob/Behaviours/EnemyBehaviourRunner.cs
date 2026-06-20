@@ -47,6 +47,13 @@ public class EnemyBehaviourRunner
         if (_forced != null)
         {
             _forced.Tick(deltaTime);
+
+            if (!_forced.CanContinue())
+            {
+                _forced.OnExit();
+                _forced = null;
+                _current = null;
+            }
             return;
         }
 
@@ -68,9 +75,11 @@ public class EnemyBehaviourRunner
     /// </summary>
     public void ForceBehaviour(IEnemyBehaviour behaviour)
     {
+        _forced?.OnExit();
         _current?.OnExit();
+        _current = null;
         _forced = behaviour;
-        _forced.OnEnter();
+        _forced?.OnEnter();
     }
 
     /// <summary>

@@ -8,6 +8,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
     [SerializeField] private Renderer[] _bodyRenderer;
     [SerializeField] private int _blinkSpeed = 100;
     [SerializeField] private float _attackCooldownOverride = 5f;
+    [SerializeField] private float _barkChance = 0.5f;
 
     private EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;
@@ -16,7 +17,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
 
     private MeleeAttackBehaviour _attack;
     private TurnBehaviour _turn;
-    private GolemBarkBehaviour _golemBark;
+    private BarkBehaviour _Bark;
 
     [SerializeField]
     protected MobArmor _armor;
@@ -77,6 +78,7 @@ public class GolemEnemy : Enemy, IFormationParticipant
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile, _attackCooldownOverride);
             _attack.Init(initCtx);
+            _attack.OnAttackFinished += HandlePostAttack;
             _runner.Register(_attack);
 
             // スポーン時にスロット取得を試みる
@@ -87,13 +89,13 @@ public class GolemEnemy : Enemy, IFormationParticipant
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                _golemBark = new GolemBarkBehaviour(
+                _Bark = new BarkBehaviour(
     _distanceProfile,
     _services,
-    _data.BarkChance);
+    _data.BarkChance,true);
 
-                _golemBark.Init(initCtx);
-                _runner.Register(_golemBark);
+                _Bark.Init(initCtx);
+                _runner.Register(_Bark);
             }
         }
 
@@ -147,6 +149,17 @@ public class GolemEnemy : Enemy, IFormationParticipant
         _conditionController.Tick(deltaTime);
         if (_conditionController.BlocksAction) { return; }
         _runner.Tick(deltaTime);
+    }
+
+    private void HandlePostAttack()
+    {
+        if (_Bark == null)
+            return;
+
+        if (UnityEngine.Random.value < _barkChance)
+        {
+            _runner.ForceBehaviour(_Bark);
+        }
     }
 
     /// <summary>
@@ -216,13 +229,14 @@ public class GolemEnemy : Enemy, IFormationParticipant
     protected override void OnDestroy()
     {
         OnArmorBroken -= HandleArmorBroken;
+        _attack.OnAttackFinished -= HandlePostAttack;
 
         if (_armor != null)
         {
             _armor.OnBroken -= BreakArmor;
         }
 
-        _golemBark?.Dispose();
+        _Bark?.Dispose();
         _attack?.Dispose();
 
         _blinkEffect?.StopBlink();
