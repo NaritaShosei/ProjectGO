@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// Downアニメーション終了を検知する
+/// アニメーション終了時にDownDoneを立て、Enemyへ通知する
+/// </summary>
 public class EnemyDownSMB : StateMachineBehaviour
 {
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -34,8 +38,14 @@ public class EnemyDownSMB : StateMachineBehaviour
         animator.SetBool(_hashDownDone, false);
     }
 
+    /// <summary>
+    /// Animatorパラメータ DownDone のハッシュ
+    /// </summary>
     private static readonly int _hashDownDone =
        Animator.StringToHash("DownDone");
 
+    /// <summary>
+    /// Down終了通知を一度だけ送るためのフラグ
+    /// </summary>
     private bool _downEndFired;
 }

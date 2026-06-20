@@ -1,30 +1,12 @@
 using UnityEngine;
 using System;
 
+/// <summary>
+/// ゴーレム専用Enemy
+/// 鎧破壊時のダウン・復帰・威嚇行動を持つ
+/// </summary>
 public class GolemEnemy : Enemy, IFormationParticipant
 {
-    [SerializeField] private float _downDuration = 5f;
-
-    [SerializeField] private Renderer[] _bodyRenderer;
-    [SerializeField] private int _blinkSpeed = 100;
-    [SerializeField] private float _attackCooldownOverride = 5f;
-    [SerializeField] private float _barkChance = 0.5f;
-
-    private EnemyBehaviourRunner _runner;
-    private EnemyRuntimeContext _context;
-    private EnemyStateContext _state;
-    private EnemyConditionController _conditionController;
-
-    private MeleeAttackBehaviour _attack;
-    private TurnBehaviour _turn;
-    private BarkBehaviour _Bark;
-
-    [SerializeField]
-    protected MobArmor _armor;
-
-    private BlinkEffect _blinkEffect;
-
-
     public int EnemyId => GetInstanceID();
 
     public float CombatPower =>
@@ -41,6 +23,10 @@ public class GolemEnemy : Enemy, IFormationParticipant
 
     public event Action<IArmorHealth> OnArmorRegistered;
 
+    /// <summary>
+    /// ゴーレムの初期化
+    /// Behaviour・Condition・Armorを生成して登録する
+    /// </summary>
     public override void Init()
     {
         _context = new EnemyRuntimeContext();
@@ -89,13 +75,13 @@ public class GolemEnemy : Enemy, IFormationParticipant
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
             {
-                _Bark = new BarkBehaviour(
-    _distanceProfile,
-    _services,
-    _data.BarkChance,true);
+                _bark = new BarkBehaviour(
+                        _distanceProfile,
+                        _services,
+                        _data.BarkChance,true);
 
-                _Bark.Init(initCtx);
-                _runner.Register(_Bark);
+                _bark.Init(initCtx);
+                _runner.Register(_bark);
             }
         }
 
@@ -127,72 +113,122 @@ public class GolemEnemy : Enemy, IFormationParticipant
         }
     }
 
-    protected override void UpdateEnemy(float deltaTime)
+    /// <summary>
+    /// ゴーレム専用ダメージ処理
+    ///
+    /// 通常時
+    /// ・鎧へダメージ
+    /// Down中
+    /// ・本体HPへダメージ
+    /// </summary>
+    public override void TakeDamage(DamageContext context)
     {
-        if (_runner == null || _conditionController == null) { return; }
+        bool isDown = ConditionController.HasCondition(ConditionType.Down);
 
-        // 攻撃クールダウンをTimeScale反映済みdeltaTimeで進める
-        // Behaviourの実行状態に関わらず毎フレーム減算する
-        if (_context.AttackCooldownRemaining > 0f)
+        if (_isDead)
         {
-            _context.AttackCooldownRemaining -= deltaTime;
-            if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
-        }
-
-        // スロット保持中にパターン未選択なら再選択する
-        // スポーン時取得失敗後の再取得・攻撃終了後の再選択をここで一括処理する
-        if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
-        {
-            _context.SelectedPattern = SelectPattern();
-        }
-
-        _conditionController.Tick(deltaTime);
-        if (_conditionController.BlocksAction) { return; }
-        _runner.Tick(deltaTime);
-    }
-
-    private void HandlePostAttack()
-    {
-        if (_Bark == null)
             return;
+        }
 
-        if (UnityEngine.Random.value < _barkChance)
+        int damage = DamageSystem.CalculateDamage(context, _defenceContext);
+
+        int showDamage = damage;
+
+        if (!isDown)
         {
-            _runner.ForceBehaviour(_Bark);
+            bool armorWasAlive =
+            _defenceContext.EnemyType == EnemyDefenceType.Armor;
+
+            _armor.AbsorbDamageAndReturnExcess(damage);
+
+            bool isArmorBreak =
+            armorWasAlive && _defenceContext.EnemyType == EnemyDefenceType.Flesh;
+
+            bool isWeak = context.PlayerMode == PlayerMode.Warrior;
+
+            InvokeOnDamageDealt(
+                showDamage,
+                isWeak,
+                context.IsCritical);
+
+            InvokeOnHitEffect(new HitEffectContext
+            {
+                Position = transform.position,
+                PlayerMode = context.PlayerMode,
+                IsArmorHit = !isArmorBreak,
+                IsArmorBreak = isArmorBreak
+            });
+
+            context.OnHitResult?.Invoke(
+                new HitResult
+                {
+                    IsKill = false,
+                    IsArmorBreak = isArmorBreak,
+                    IsWeakPoint = isWeak,
+                    IsArmorHit = !isArmorBreak,
+                });
+
+            if (!isArmorBreak)
+            {
+                InvokeOnDamaged();
+            }
+            return;
+        }
+
+        bool isWeakPoint = context.PlayerMode == PlayerMode.Thunder;
+
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+
+        _stats.TakeDamage(damage);
+
+        bool willKill = _stats.CurrentHealth <= 0;
+
+
+        context.OnHitResult?.Invoke(
+            new HitResult
+            {
+                IsKill = willKill,
+                IsArmorBreak = false,
+                IsWeakPoint = isWeakPoint,
+                IsArmorHit = false,
+            });
+
+        if (!willKill)
+        {
+            InvokeOnDamaged();
+        }
+
+        if (willKill)
+        {
+            _stats.Kill();
         }
     }
 
     /// <summary>
-    /// スロット解放・Behaviourの停止を行う。
-    /// 死亡時と将来のプール返却時の両方から呼ぶ想定。
+    /// Conditionによる行動中断通知
+    /// 現在実行中のBehaviourを強制終了する
     /// </summary>
-    protected virtual void OnDespawn()
-    {
-        _runner?.ForceExitAction();
-        _attack?.ReleaseSlot();
-    }
-
     public override void OnConditionInterrupt()
     {
         _runner.ForceExitAction();
     }
 
-    protected override void OnDeathInternal()
+    /// <summary>
+    /// ダウン終了後に鎧を復元する
+    /// </summary>
+    public void RecoverArmor()
     {
-        OnDespawn();
+        _blinkEffect.StopBlink();
 
-        // SetDead() と物理ノックバックを DeadCondition に委譲する
-        // ApplyImmediate を使い ConditionController 管理下に置く（Clear() でキャンセル可能にするため）
-        _conditionController.ApplyImmediate(new DeadCondition(_lastHitDirection, _data, destroyCancellationToken));
-
-        // ヒールアイテムのドロップ抽選を行う
-        if (CheckProbability(_data.HealDropChance)
-            && ServiceLocator.TryGet<ItemPickupManager>(out var itemSpawner))
+        if (_armor == null)
         {
-            itemSpawner.Spawn(transform.position);
+            Debug.LogWarning("Armor is null.");
+            return;
         }
 
-        base.OnDeathInternal();
+        _armor.Restore();
+        RebindArmor();
+        _defenceContext.EnemyType = EnemyDefenceType.Armor;
     }
 
     /// <summary>
@@ -226,6 +262,169 @@ public class GolemEnemy : Enemy, IFormationParticipant
         // TODO: アタッカースロットの再取得
     }
 
+    /// <summary>
+    /// 鎧イベントを再購読する
+    /// Armor復元後に呼ぶ
+    /// </summary>
+    public void RebindArmor()
+    {
+        if (_armor == null)
+            return;
+
+        _armor.OnBroken -= BreakArmor;
+        _armor.OnBroken += BreakArmor;
+    }
+
+    [Header("Down Settings")]
+    [SerializeField, Tooltip("鎧破壊後にダウン状態を維持する時間（秒）")]
+    private float _downDuration = 5f;
+
+    [Header("Blink Effect")]
+
+    [SerializeField, Tooltip("鎧破壊中に点滅させるRenderer")]
+    private Renderer[] _bodyRenderer;
+
+    [SerializeField, Tooltip("点滅速度")]
+    private int _blinkSpeed = 100;
+
+    [Header("Combat Settings")]
+    [SerializeField, Tooltip("ゴーレム専用の攻撃クールダウン（0以下ならAttackPattern設定を使用）")]
+    private float _attackCooldownOverride = 5f;
+
+    [SerializeField, Range(0f, 1f), Tooltip("攻撃後に威嚇へ移行する確率")] private float _barkChance = 0.5f;
+
+    [SerializeField]
+    protected MobArmor _armor;
+
+    private EnemyBehaviourRunner _runner;
+    private EnemyRuntimeContext _context;
+    private EnemyStateContext _state;
+    private EnemyConditionController _conditionController;
+
+    private MeleeAttackBehaviour _attack;
+    private TurnBehaviour _turn;
+    private BarkBehaviour _bark;
+
+    private BlinkEffect _blinkEffect;
+
+    /// <summary>
+    /// 毎フレーム更新
+    /// 攻撃CT・Condition・Behaviourを更新する
+    /// </summary>
+    protected override void UpdateEnemy(float deltaTime)
+    {
+        if (_runner == null || _conditionController == null) { return; }
+
+        // 攻撃クールダウンをTimeScale反映済みdeltaTimeで進める
+        // Behaviourの実行状態に関わらず毎フレーム減算する
+        if (_context.AttackCooldownRemaining > 0f)
+        {
+            _context.AttackCooldownRemaining -= deltaTime;
+            if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
+        }
+
+        // スロット保持中にパターン未選択なら再選択する
+        // スポーン時取得失敗後の再取得・攻撃終了後の再選択をここで一括処理する
+        if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
+        {
+            _context.SelectedPattern = SelectPattern();
+        }
+
+        _conditionController.Tick(deltaTime);
+        if (_conditionController.BlocksAction) { return; }
+        _runner.Tick(deltaTime);
+    }
+
+    /// <summary>
+    /// 攻撃終了時処理
+    /// 確率で威嚇Behaviourを強制実行する
+    /// </summary>
+    private void HandlePostAttack()
+    {
+        if (_bark == null)
+            return;
+
+        if (UnityEngine.Random.value < _barkChance)
+        {
+            _runner.ForceBehaviour(_bark);
+        }
+    }
+
+    /// <summary>
+    /// スロット解放・Behaviourの停止を行う。
+    /// 死亡時と将来のプール返却時の両方から呼ぶ想定。
+    /// </summary>
+    protected virtual void OnDespawn()
+    {
+        _runner?.ForceExitAction();
+        _attack?.ReleaseSlot();
+    }
+
+    /// <summary>
+    /// ランダムに攻撃パターンを選択する
+    /// </summary>
+    private EnemyAttackPattern SelectPattern()
+    {
+        if (_data.AttackPatterns == null ||
+            _data.AttackPatterns.Count == 0)
+            return null;
+
+        return _data.AttackPatterns[UnityEngine.Random.Range(0, _data.AttackPatterns.Count)];
+    }
+
+    /// <summary>
+    /// 確率判定
+    /// </summary>
+    private bool CheckProbability(float probability)
+    {
+        return UnityEngine.Random.value < probability;
+    }
+
+    /// <summary>
+    /// 死亡時処理
+    /// DeadCondition適用とドロップ抽選を行う
+    /// </summary>
+    protected override void OnDeathInternal()
+    {
+        OnDespawn();
+
+        // SetDead() と物理ノックバックを DeadCondition に委譲する
+        // ApplyImmediate を使い ConditionController 管理下に置く（Clear() でキャンセル可能にするため）
+        _conditionController.ApplyImmediate(new DeadCondition(_lastHitDirection, _data, destroyCancellationToken));
+
+        // ヒールアイテムのドロップ抽選を行う
+        if (CheckProbability(_data.HealDropChance)
+            && ServiceLocator.TryGet<ItemPickupManager>(out var itemSpawner))
+        {
+            itemSpawner.Spawn(transform.position);
+        }
+
+        base.OnDeathInternal();
+    }
+
+    /// <summary>
+    /// 鎧破壊時処理
+    /// 点滅演出開始とDownConditionを付与する
+    /// </summary>
+    private void HandleArmorBroken(IEnemy enemy)
+    {
+        _blinkEffect.StartBlink();
+
+        ConditionController.ApplyCondition(
+            new DownCondition(_downDuration));
+    }
+
+    /// <summary>
+    /// 鎧破壊完了処理
+    /// 防御タイプをFleshへ変更する
+    /// </summary>
+    private void BreakArmor()
+    {
+        _defenceContext.EnemyType = EnemyDefenceType.Flesh;
+        _armor.OnBroken -= BreakArmor;
+        InvokeOnArmorBroken();
+    }
+
     protected override void OnDestroy()
     {
         OnArmorBroken -= HandleArmorBroken;
@@ -236,156 +435,11 @@ public class GolemEnemy : Enemy, IFormationParticipant
             _armor.OnBroken -= BreakArmor;
         }
 
-        _Bark?.Dispose();
+        _bark?.Dispose();
         _attack?.Dispose();
 
         _blinkEffect?.StopBlink();
 
         base.OnDestroy();
-    }
-
-    private void HandleArmorBroken(IEnemy enemy)
-    {
-        _blinkEffect.StartBlink();
-
-        ConditionController.ApplyCondition(
-            new DownCondition(_downDuration));
-    }
-
-    private void BreakArmor()
-    {
-        _defenceContext.EnemyType = EnemyDefenceType.Flesh;
-        _armor.OnBroken -= BreakArmor;
-        InvokeOnArmorBroken();
-    }
-
-    public void RebindArmor()
-    {
-        if (_armor == null)
-            return;
-
-        _armor.OnBroken -= BreakArmor;
-        _armor.OnBroken += BreakArmor;
-    }
-
-    private EnemyAttackPattern SelectPattern()
-    {
-        if (_data.AttackPatterns == null ||
-            _data.AttackPatterns.Count == 0)
-            return null;
-
-        return _data.AttackPatterns[
-            UnityEngine.Random.Range(0, _data.AttackPatterns.Count)
-        ];
-    }
-
-    private bool CheckProbability(float probability)
-    {
-        return UnityEngine.Random.value < probability;
-    }
-
-    public void RecoverArmor()
-    {
-        _blinkEffect.StopBlink();
-
-        if (_armor == null)
-        {
-            Debug.LogWarning("Armor is null.");
-            return;
-        }
-
-        _armor.Restore();
-        RebindArmor();
-        _defenceContext.EnemyType = EnemyDefenceType.Armor;
-    }
-
-    public override void TakeDamage(DamageContext context)
-    {
-        bool isDown = ConditionController.HasCondition(ConditionType.Down);
-
-        if (_isDead)
-        {
-            return;
-        }
-
-        int damage =
-            DamageSystem.CalculateDamage(
-                context,
-                _defenceContext);
-
-        int showDamage = damage;
-
-        if (!isDown)
-        {
-            bool armorWasAlive =
-    _defenceContext.EnemyType == EnemyDefenceType.Armor;
-
-            _armor.AbsorbDamageAndReturnExcess(damage);
-
-            bool isArmorBreak =
-    armorWasAlive &&
-    _defenceContext.EnemyType == EnemyDefenceType.Flesh;
-            bool isWeak = context.PlayerMode == PlayerMode.Warrior;
-
-            InvokeOnDamageDealt(
-                showDamage,
-                isWeak,
-                context.IsCritical);
-
-            InvokeOnHitEffect(
-        new HitEffectContext
-        {
-            Position = transform.position,
-            PlayerMode = context.PlayerMode,
-            IsArmorHit = !isArmorBreak,
-            IsArmorBreak = isArmorBreak
-        });
-
-            context.OnHitResult?.Invoke(
-                new HitResult
-                {
-                    IsKill = false,
-                    IsArmorBreak = isArmorBreak,
-                    IsWeakPoint = isWeak,
-                    IsArmorHit = !isArmorBreak,
-                });
-
-            if (!isArmorBreak)
-            {
-                InvokeOnDamaged();
-            }
-            return;
-        }
-
-        bool isWeakPoint = context.PlayerMode == PlayerMode.Thunder;
-
-        InvokeOnDamageDealt(
-    showDamage,
-    isWeakPoint,
-    context.IsCritical);
-
-        _stats.TakeDamage(damage);
-
-        bool willKill = _stats.CurrentHealth <= 0;
-
-
-        context.OnHitResult?.Invoke(
-            new HitResult
-            {
-                IsKill = willKill,
-                IsArmorBreak = false,
-                IsWeakPoint = isWeakPoint,
-                IsArmorHit = false,
-            });
-
-        if (!willKill)
-        {
-            InvokeOnDamaged();
-        }
-
-        if (willKill)
-        {
-            _stats.Kill();
-        }
     }
 }

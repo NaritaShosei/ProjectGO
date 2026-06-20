@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -177,6 +178,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     // Attackアニメーターステートの名前
     private const string _attackStateName = "Attack";
 
+    public event Action OnAttackFinished;
+
+
     /// <summary>
     /// 実際の攻撃判定とダメージ適用を行う
     /// </summary>
@@ -228,6 +232,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _state.ChangeState(EnemyState.Idle);
 
         ReleaseSlot();
+
+        OnAttackFinished?.Invoke();
     }
 
     /// <summary>

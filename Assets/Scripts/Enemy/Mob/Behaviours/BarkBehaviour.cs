@@ -38,7 +38,9 @@ public class BarkBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-        if (_forceOnly)//威嚇の強制割り込み
+        // ForceBehaviour専用の場合は
+        // 通常のBehaviour選択対象にせず強制割り込み
+        if (_forceOnly)
             return false;
 
         if (_attackerSlot == null) return false;
