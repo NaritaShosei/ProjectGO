@@ -95,8 +95,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         {
             stateName = _modeController.CurrentMode switch
             {
-                PlayerMode.Warrior => "Base Layer.Warrior.Warrior_LockedMove",
-                PlayerMode.Thunder => "Base Layer.Thunder.Thunder_LockedMove",
+                PlayerMode.Warrior => AnimParams.WarriorLockedMove,
+                PlayerMode.Thunder => AnimParams.ThunderLockedMove,
                 _ => null
             };
         }
@@ -104,8 +104,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         {
             stateName = _modeController.CurrentMode switch
             {
-                PlayerMode.Warrior => "Base Layer.Warrior.Warrior_FreeMove",
-                PlayerMode.Thunder => "Base Layer.Thunder.Thunder_FreeMove",
+                PlayerMode.Warrior => AnimParams.WarriorFreeMove,
+                PlayerMode.Thunder => AnimParams.ThunderFreeMove,
                 _ => null
             };
         }
@@ -223,23 +223,46 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private static class AnimParams
     {
-        public const string Body = "BodyUpper";
+        // Layer
+        public const int BaseLayer = 0;
 
+        // State
+        public const string WarriorFreeMove =
+            "Base Layer.Warrior.Warrior_FreeMove";
+
+        public const string WarriorLockedMove =
+            "Base Layer.Warrior.Warrior_LockedMove";
+
+        public const string ThunderFreeMove =
+            "Base Layer.Thunder.Thunder_FreeMove";
+
+        public const string ThunderLockedMove =
+            "Base Layer.Thunder.Thunder_LockedMove";
+
+        public const string ModeChangeToThunder =
+            "ModeChangeToThunder";
+
+        // Float
         public static readonly int Speed = Animator.StringToHash("Speed");
         public static readonly int MoveX = Animator.StringToHash("MoveX");
         public static readonly int MoveY = Animator.StringToHash("MoveY");
         public static readonly int DodgeX = Animator.StringToHash("DodgeX");
         public static readonly int DodgeY = Animator.StringToHash("DodgeY");
 
-        public static readonly int Attack = Animator.StringToHash("Attack");
+        // Int
         public static readonly int AttackId = Animator.StringToHash("AttackId");
-        public static readonly int Dodge = Animator.StringToHash("Dodge");
+        public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+
+        // Bool
         public static readonly int IsCharging = Animator.StringToHash("IsCharging");
+        public static readonly int IsLockedOn = Animator.StringToHash("IsLockedOn");
+
+        // Trigger
+        public static readonly int Attack = Animator.StringToHash("Attack");
+        public static readonly int Dodge = Animator.StringToHash("Dodge");
         public static readonly int Damaged = Animator.StringToHash("Damaged");
         public static readonly int Dead = Animator.StringToHash("Dead");
-        public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
         public static readonly int ModeChange = Animator.StringToHash("ModeChange");
-        public static readonly int IsLockedOn = Animator.StringToHash("IsLockedOn");
     }
 
     private void Awake()
@@ -283,6 +306,6 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         // PlayerModeの更新はModeChangeSMBのmodeChangeEndTime後に行う
         _animator.SetTrigger(AnimParams.ModeChange);
 
-        _animator.CrossFadeInFixedTime("ModeChangeToThunder", 0.1f, 0);
+        _animator.CrossFadeInFixedTime(AnimParams.ModeChangeToThunder, 0.1f, 0);
     }
 }
