@@ -377,8 +377,6 @@ public class MobEnemy : Enemy, IFormationParticipant
                 _data.KnockbackDeceleration));
     }
 
-
-
     /// <summary>
     /// 感電抽選を行い、成功時は感電状態を付与する
     /// </summary>
