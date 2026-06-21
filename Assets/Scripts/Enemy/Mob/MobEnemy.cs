@@ -142,23 +142,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         // -------- 追加効果 --------
 
-        if (context.Knockback != null)
-        {
-            // Knockback?はそのまま渡せないので。。
-            KnockbackContext temp = (KnockbackContext)context.Knockback;
-            _lastHitDirection = temp.Direction;
-            KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
-            _conditionController.ApplyCondition(new KnockbackCondition(temp, knockbackLevel, _data.KnockbackStunDuration, _data.KnockbackDeceleration));
-        }
-
-        if (CheckProbability(context.ElectricShock.GrantEffectProbability))
-        {
-            // もちろんボスじゃないのでfalse
-            _conditionController.ApplyCondition(
-                new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
-
-            this.ActivateShockDebuff().Forget();
-        }
+        ApplyAdditionalEffects(context);
     }
 
     public override void OnConditionInterrupt()
@@ -358,6 +342,57 @@ public class MobEnemy : Enemy, IFormationParticipant
         if (power <= _data.KnockbackHitThreshold) return KnockbackLevel.Hit;
         if (power >= _data.KnockbackLargeThreshold) return KnockbackLevel.Large;
         return KnockbackLevel.Small;
+    }
+
+    /// <summary>
+    ///  ダメージ後の追加効果を適用する
+    /// （ノックバック・感電など）
+    /// </summary>
+    /// <param name="context"></param>
+    private void ApplyAdditionalEffects(DamageContext context)
+    {
+        ApplyKnockback(context);
+
+        ApplyElectricShock(context);
+    }
+
+    /// <summary>
+    /// ノックバックを適用する
+    /// </summary>
+    private void ApplyKnockback(DamageContext context)
+    {
+        if (context.Knockback == null) return;
+
+        KnockbackContext temp = (KnockbackContext)context.Knockback;
+
+        _lastHitDirection = temp.Direction;
+
+        KnockbackLevel knockbackLevel = DetermineKnockbackLevel(temp.Power);
+
+        _conditionController.ApplyCondition(
+            new KnockbackCondition(
+                temp,
+                knockbackLevel,
+                _data.KnockbackStunDuration,
+                _data.KnockbackDeceleration));
+    }
+
+
+
+    /// <summary>
+    /// 感電抽選を行い、成功時は感電状態を付与する
+    /// </summary>
+    private void ApplyElectricShock(DamageContext context)
+    {
+        if (!CheckProbability(context.ElectricShock.GrantEffectProbability))
+        {
+            return;
+        }
+
+        _conditionController.ApplyCondition(
+            new ElectrifiedCondition(context.ElectricShock.DurationEffect,enemyIsBoss: false));
+
+        this.ActivateShockDebuff().Forget();
     }
 
 #if UNITY_EDITOR
