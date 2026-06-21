@@ -34,70 +34,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         var initCtx = new BehaviourInitContext(this, _data, _playerTransform, _context, _enemyAnimator, _state);
 
-        // TurnProfileが未設定の場合は警告を出してTurnを登録しない
-        if (_turnProfile == null)
-        {
-            Debug.LogWarning($"{nameof(MobEnemy)}: TurnProfileが未設定です。Turnは無効になります。");
-        }
-        else
-        {
-            _turn = new TurnBehaviour(_turnProfile);
-            _turn.Init(initCtx);
-            _runner.RegisterTurn(_turn);
-        }
-
-        // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
-        if (_services.AttackerSlot == null)
-        {
-            Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
-        }
-        else if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0)
-        {
-            Debug.LogWarning($"{nameof(MobEnemy)}: AttackPatternsが空です。Attack・スロット取得をスキップします。");
-        }
-        else
-        {
-            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
-            _attack.Init(initCtx);
-            _runner.Register(_attack);
-
-            // スポーン時にスロット取得を試みる
-            // 満杯の場合は OnSlotReleased イベントで再試行される
-            _services.AttackerSlot.TryAcquire(Id, 1);
-
-            // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
-            // distanceProfileがない場合はBarkも登録しない
-            if (_distanceProfile != null)
-            {
-                _bark = new BarkBehaviour(_distanceProfile, _services, _data.BarkChance);
-                _bark.Init(initCtx);
-                _runner.Register(_bark);
-            }
-        }
-
-        // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
-        if (_distanceProfile == null)
-        {
-            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Approach・Bark・Roamは無効になります。");
-        }
-        else
-        {
-            var move = new ApproachBehaviour(_distanceProfile, _services);
-            move.Init(initCtx);
-            _runner.Register(move);
-
-            var roam = new RoamBehaviour(
-                _distanceProfile,
-                _services,
-                dir => _turn?.SetOverrideDirection(dir)
-            );
-            roam.Init(initCtx);
-            _runner.Register(roam);
-
-            var idle = new IdleBehaviour();
-            idle.Init(initCtx);
-            _runner.Register(idle);
-        }
+        RegisterBehaviours(initCtx);
 
         // 鎧登録　データがなければ裸
         if (_armor != null)
@@ -246,13 +183,13 @@ public class MobEnemy : Enemy, IFormationParticipant
     // Armorの登録
     [SerializeField] protected MobArmor _armor;
 
-    private EnemyBehaviourRunner _runner;
+    protected EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private EnemyConditionController _conditionController;
-    private MeleeAttackBehaviour _attack;
-    private TurnBehaviour _turn;
-    private BarkBehaviour _bark;
+    protected MeleeAttackBehaviour _attack;
+    protected TurnBehaviour _turn;
+    protected BarkBehaviour _bark;
 
     protected override void OnDestroy()
     {
@@ -315,6 +252,74 @@ public class MobEnemy : Enemy, IFormationParticipant
         }
 
         base.OnDeathInternal();
+    }
+
+    protected virtual void RegisterBehaviours(BehaviourInitContext initCtx)
+    {
+        // TurnProfileが未設定の場合は警告を出してTurnを登録しない
+        if (_turnProfile == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: TurnProfileが未設定です。Turnは無効になります。");
+        }
+        else
+        {
+            _turn = new TurnBehaviour(_turnProfile);
+            _turn.Init(initCtx);
+            _runner.RegisterTurn(_turn);
+        }
+
+        // AttackerSlotが未設定の場合は警告を出してAttackを登録しない
+        if (_services.AttackerSlot == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
+        }
+        else if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: AttackPatternsが空です。Attack・スロット取得をスキップします。");
+        }
+        else
+        {
+            _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
+            _attack.Init(initCtx);
+            _runner.Register(_attack);
+
+            // スポーン時にスロット取得を試みる
+            // 満杯の場合は OnSlotReleased イベントで再試行される
+            _services.AttackerSlot.TryAcquire(Id, 1);
+
+            // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
+            // distanceProfileがない場合はBarkも登録しない
+            if (_distanceProfile != null)
+            {
+                _bark = new BarkBehaviour(_distanceProfile, _services, _data.BarkChance);
+                _bark.Init(initCtx);
+                _runner.Register(_bark);
+            }
+        }
+
+        // DistanceProfileが未設定の場合は警告を出してMove・Bark・Roamを登録しない
+        if (_distanceProfile == null)
+        {
+            Debug.LogWarning($"{nameof(MobEnemy)}: DistanceProfileが未設定です。Approach・Bark・Roamは無効になります。");
+        }
+        else
+        {
+            var move = new ApproachBehaviour(_distanceProfile, _services);
+            move.Init(initCtx);
+            _runner.Register(move);
+
+            var roam = new RoamBehaviour(
+                _distanceProfile,
+                _services,
+                dir => _turn?.SetOverrideDirection(dir)
+            );
+            roam.Init(initCtx);
+            _runner.Register(roam);
+
+            var idle = new IdleBehaviour();
+            idle.Init(initCtx);
+            _runner.Register(idle);
+        }
     }
 
     /// <summary>

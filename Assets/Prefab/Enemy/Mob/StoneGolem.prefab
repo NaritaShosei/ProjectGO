@@ -394,13 +394,13 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 84c85403bc40a3c47b61cd25c0d667a0, type: 2}
   _distanceProfile: {fileID: 11400000, guid: d64c95ea40de26a458c660c4cc596173, type: 2}
   _animationEventReceiver: {fileID: 7696763789007296301}
+  _armor: {fileID: 2232957639341954153}
   _downDuration: 5
   _bodyRenderer:
   - {fileID: 2179570851823708453}
   _blinkSpeed: 100
   _attackCooldownOverride: 5
-  _barkChance: 0.5
-  _armor: {fileID: 2232957639341954153}
+  _barkChance: 0.52
 --- !u!114 &6158760630654705163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -414,10 +414,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyEffectReceiver
   _enemy: {fileID: 7301585828367876861}
-  _hitId: hit
-  _armorHitId: armor_hit
-  _armorBreakId: armor_break
-  _rules: []
+  _hitId: "\u751F\u8EAB"
+  _armorHitId: "\u93A7\u30D2\u30C3\u30C8"
+  _armorBreakId: "\u93A7\u7834\u58CA"
+  _rules:
+  - _playerMode: 0
+    _id: "\u93A7\u30D2\u30C3\u30C8"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u706B\u82B1"
+  - _playerMode: 0
+    _id: "\u93A7\u7834\u58CA"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u30A2\u30FC\u30DE\u30FC\u7834\u58CA"
+  - _playerMode: 1
+    _id: "\u751F\u8EAB"
+    _effectKeys:
+    - "\u30C6\u30B9\u30C8\u5CA9"
 --- !u!136 &5989024217522494440
 CapsuleCollider:
   m_ObjectHideFlags: 0
