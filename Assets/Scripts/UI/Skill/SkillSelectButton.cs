@@ -96,6 +96,8 @@ public class SkillSelectButton : MonoBehaviour,
 
         _defaultScale = transform.localScale.x; // デフォルトのスケールを保持
 
+        _cts?.Cancel();
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
         Highlight(true, _cts.Token).Forget(); // ハイライトアニメーション開始
     }
@@ -120,6 +122,9 @@ public class SkillSelectButton : MonoBehaviour,
         OnHighlighted?.Invoke(_skillId);
 
         _defaultScale = transform.localScale.x; // デフォルトのスケールを保持
+
+        _cts?.Cancel();
+        _cts?.Dispose();
         _cts = new CancellationTokenSource();
         Highlight(true, _cts.Token).Forget(); // ハイライトアニメーション開始
     }
