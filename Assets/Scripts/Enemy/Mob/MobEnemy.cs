@@ -316,10 +316,10 @@ public class MobEnemy : Enemy, IFormationParticipant
             roam.Init(initCtx);
             _runner.Register(roam);
 
-            var idle = new IdleBehaviour();
-            idle.Init(initCtx);
-            _runner.Register(idle);
         }
+        var idle = new IdleBehaviour();
+        idle.Init(initCtx);
+        _runner.Register(idle);
     }
 
     /// <summary>

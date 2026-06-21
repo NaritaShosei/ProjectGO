@@ -156,7 +156,7 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     private BlinkEffect _blinkEffect;
 
     /// <summary>
-    /// 用削除候補エラー出るよ
+    /// オブジェクト破棄時にイベント購読を解除し、BlinkEffectを停止する
     /// </summary>
     protected override void OnDestroy()
     {
