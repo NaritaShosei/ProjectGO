@@ -34,10 +34,12 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
 
         _attack.OnAttackMoveRequested += HandleAttackMove;
+
         _animationController.OnDamagedEnd += HandleDamagedEnd;
 
         _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
         _animationController.OnDodgeEnd += HandleDodgeEnd;
+        _animationController.OnAttackComplete += HandleAttackEnd;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             _cameraManager = cameraManager;
@@ -68,6 +70,8 @@ public class PlayerMovement : MonoBehaviour
     private Transform _lockOnTarget;
 
     private float _timeScale = 1f;
+
+    private bool _wasMoving;
     private bool _isDodging;
     private CancellationTokenSource _dodgeMoveCts;
     private CancellationTokenSource _attackMoveCts;
@@ -99,6 +103,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Rotate();
             PlayMoveAnimation();
+            CheckMoveStart();
         }
     }
 
@@ -121,6 +126,7 @@ public class PlayerMovement : MonoBehaviour
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
             _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
+            _animationController.OnAttackComplete -= HandleAttackEnd;
         }
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
@@ -199,6 +205,24 @@ public class PlayerMovement : MonoBehaviour
         }
         else
             _animationController.UpdateMoveAnimation(_rb.linearVelocity.magnitude);
+    }
+
+    /// <summary>
+    /// 移動入力が入り、かつ移動可能な状態になった瞬間を検知する。
+    /// 停止状態から移動状態へ遷移した際に MoveCrossFade を実行する。
+    /// </summary>
+    private void CheckMoveStart()
+    {
+        bool isMoving =
+            _playerStateManager.CanMove() &&
+            _input.MoveInput.magnitude > INPUT_THRESHOLD;
+
+        if (!_wasMoving && isMoving)
+        {
+            _animationController.MoveCrossFade();
+        }
+
+        _wasMoving = isMoving;
     }
 
     // ── 回避 ─────────────────────────────────────────────────
@@ -458,6 +482,16 @@ public class PlayerMovement : MonoBehaviour
         }
         if (!stoppedEarly)
             _rb.MovePosition(targetPos);
+    }
+
+    /// <summary>
+    /// 攻撃アニメーション終了時のハンドラー。
+    /// </summary>
+    private void HandleAttackEnd()
+    {
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = null;
     }
 
     /// <summary>
