@@ -29,12 +29,13 @@ public class SkillSelectButton : MonoBehaviour,
         _cts?.Dispose();
         _cts = null;
 
-        _selectButton.onClick.RemoveAllListeners();
-        _selectButton.onClick.AddListener(() => ClickAnimation().Forget()); // クリックアニメーションを追加
-        if (onClick != null)
+        if (onClick == null)
         {
-            _selectButton.onClick.AddListener(onClick.Invoke);
+            Debug.LogError($"{onClick}がnullです");
+            return;
         }
+            _selectButton.onClick.RemoveAllListeners();
+            _selectButton.onClick.AddListener(() => ClickAnimation(onClick).Forget()); // クリックアニメーションを追加
     }
 
 
@@ -183,7 +184,7 @@ public class SkillSelectButton : MonoBehaviour,
         }
     }
 
-    private async UniTaskVoid ClickAnimation()
+    private async UniTaskVoid ClickAnimation(Action onClick)
     {
         if (_isSelected) return; // すでに選択済みの場合はアニメーションを実行しない
         Debug.Log("クリックアニメーション開始");
@@ -216,5 +217,7 @@ public class SkillSelectButton : MonoBehaviour,
 
             await UniTask.Yield();
         }
+
+        onClick?.Invoke();
     }
 }
