@@ -349,7 +349,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// （ノックバック・感電など）
     /// </summary>
     /// <param name="context"></param>
-    private void ApplyAdditionalEffects(DamageContext context)
+    protected virtual void ApplyAdditionalEffects(DamageContext context)
     {
         ApplyKnockback(context);
 
