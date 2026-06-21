@@ -359,7 +359,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// <summary>
     /// ノックバックを適用する
     /// </summary>
-    private void ApplyKnockback(DamageContext context)
+    protected void ApplyKnockback(DamageContext context)
     {
         if (context.Knockback == null) return;
 
@@ -380,7 +380,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// <summary>
     /// 感電抽選を行い、成功時は感電状態を付与する
     /// </summary>
-    private void ApplyElectricShock(DamageContext context)
+    protected void ApplyElectricShock(DamageContext context)
     {
         if (!CheckProbability(context.ElectricShock.GrantEffectProbability))
         {
