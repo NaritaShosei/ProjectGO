@@ -20,9 +20,9 @@ public class InjuryDefenceSkill : SkillBase,IStatModifier
             return current;
     }
 
-    [Header("防御力上昇率")]
+    [Header("防御力上昇率"),Min(0f)]
     [SerializeField] private float _defenceStatusBonusPercent = 1.3f;
-    [Header("防御力上昇適応体力割合")]
+    [Header("防御力上昇適応体力割合"),Range(0f,1f)]
     [SerializeField] private float _isInjuryPercent = 0.5f;
 
     private IPlayerStats _playerStats;
