@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52045353c65f47d419d9fb476432fffb, type: 3}
+  m_Name: ID1_BossEnemy
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Data.BossEnemyMasterData
+  _bossEnemyDatas:
+  - _maxHP: 5000
+    _hardSpotsDefense: 40
+    _normalSpotsDefense: 100
+    _weekPointDefense: 120
+    _vitalPointDefense: 150
+    _rightArmArmer:
+      _maxHP: 1000
+      _defense: 100
+    _leftArmArmer:
+      _maxHP: 1000
+      _defense: 100
+    _rightLegArmer:
+      _maxHP: 1000
+      _defense: 100
+    _leftLegArmer:
+      _maxHP: 1000
+      _defense: 100
+    _closeRangeNormalAttackDataHolder:
+      _attackField:
+      - ID: 1
+        ActivationRate: 30
+      - ID: 2
+        ActivationRate: 30
+      - ID: 3
+        ActivationRate: 20
+      - ID: 4
+        ActivationRate: 10
+      - ID: 5
+        ActivationRate: 10
+    _closeRangeFinishCountAttackDataHolder:
+      _attackField:
+      - ID: 1
+        ActivationRate: 15
+      - ID: 2
+        ActivationRate: 15
+      - ID: 3
+        ActivationRate: 25
+      - ID: 4
+        ActivationRate: 15
+      - ID: 5
+        ActivationRate: 20
+    _longRangeAttackDataHolder:
+      _attackField:
+      - ID: 1
+        ActivationRate: 0
+      - ID: 2
+        ActivationRate: 0
+      - ID: 3
+        ActivationRate: 0
+      - ID: 4
+        ActivationRate: 40
+      - ID: 5
+        ActivationRate: 60
+  - _maxHP: 5000
+    _hardSpotsDefense: 40
+    _normalSpotsDefense: 100
+    _weekPointDefense: 120
+    _vitalPointDefense: 150
+    _rightArmArmer:
+      _maxHP: 1000
+      _defense: 100
+    _leftArmArmer:
+      _maxHP: 1000
+      _defense: 100
+    _rightLegArmer:
+      _maxHP: 1000
+      _defense: 100
+    _leftLegArmer:
+      _maxHP: 1000
+      _defense: 100
+    _closeRangeNormalAttackDataHolder:
+      _attackField:
+      - ID: 1
+        ActivationRate: 30
+      - ID: 2
+        ActivationRate: 30
+      - ID: 3
+        ActivationRate: 20
+      - ID: 4
+        ActivationRate: 10
+      - ID: 6
+        ActivationRate: 10
+    _closeRangeFinishCountAttackDataHolder:
+      _attackField:
+      - ID: 1
+        ActivationRate: 15
+      - ID: 2
+        ActivationRate: 15
+      - ID: 3
+        ActivationRate: 25
+      - ID: 4
+        ActivationRate: 15
+      - ID: 6
+        ActivationRate: 30
+    _longRangeAttackDataHolder:
+      _attackField:
+      - ID: 1
+        ActivationRate: 0
+      - ID: 2
+        ActivationRate: 0
+      - ID: 3
+        ActivationRate: 0
+      - ID: 4
+        ActivationRate: 50
+      - ID: 6
+        ActivationRate: 50
+  _bossName: "\u7D2B\u7D0B\u306E\u5CA9\u738B\u30D9\u30D8\u30EB\u30E8\u30C8\u30A5\u30F3"
