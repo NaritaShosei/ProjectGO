@@ -2,24 +2,27 @@ using UnityEngine;
 
 [CreateAssetMenu(fileName = "InjurypowerSkill", menuName = "GameData/Skill/InjuryPowerSkill")]
 
-public class InjuryPowerSkill : SkillBase
+public class InjuryPowerSkill : SkillBase,IStatModifier
 {
     public StatType TargetStat => StatType.Attack;
 
-    public override void Apply(ref AttackContext context)
+    public override void OnAcquire(IPlayerStats stats)
     {
-        context.AttackPower *= _attackStatusBonusPercent;
+        _playerStats = stats;
+        stats.AddModifier(this);
     }
 
-    public override bool CanApply(AttackContext context, AttackData data)
+    public float Modify(float current)
     {
-        bool isInjury = context.PlayerStats.CurrentHealth <= context.PlayerStats.MaxHealth * _isInjuryPercent;
-
-        return isInjury;
+        if (_playerStats.CurrentHealth <= _playerStats.MaxHealth * _isInjuryPercent)
+            return current * _attackStatusBonusPercent;
+        else return current;
     }
 
     [Header("攻撃力上昇量")]
     [SerializeField] private float _attackStatusBonusPercent = 1.3f;
     [Header("攻撃力上昇割合")]
     [SerializeField] private float _isInjuryPercent = 0.5f;
+
+    private IPlayerStats _playerStats;
 }
