@@ -42,6 +42,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     /// </summary>
     public void Register(IEnemy enemy, IFormationParticipant participant)
     {
+        Debug.Log($"Register : {enemy.Self.name}");
         if (enemy == null || participant == null) return;
 
         int id = participant.EnemyId;
@@ -119,7 +120,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     public bool TryAcquire(int enemyId, int slotCost)
     {
         // 前衛として登録されていない場合は取得不可
-        if (!_entries.TryGetValue(enemyId, out var entry) || entry.IsVanguard)
+        if (!_entries.TryGetValue(enemyId, out var entry) || !entry.IsVanguard)
         {
             entry.IsVanguard = false;
             return false;
@@ -180,6 +181,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     /// </summary>
     private void ReevaluateFormation()
     {
+        Debug.Log($"Formation Count : {_entries.Count}");
         int total = _entries.Count;
         if (total == 0) return;
 
