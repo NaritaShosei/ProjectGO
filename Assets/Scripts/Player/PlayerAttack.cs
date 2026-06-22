@@ -8,6 +8,7 @@ public class PlayerAttack : MonoBehaviour
 
     /// <summary> 攻撃入力があったときに、攻撃の種類やチャージ時間などの情報を通知するイベント </summary>
     public event Action<AttackMoveRequest> OnAttackMoveRequested;
+    public event Action OnAttackEnded;
     /// <summary> 溜め開始を移動制限のためにPlayerMovementへ通知</summary>
     public event Action OnChargingStarted;
     /// <summary> 溜め終了（攻撃発動 or キャンセル）を通知</summary>
@@ -67,6 +68,7 @@ public class PlayerAttack : MonoBehaviour
     {
         CancelCharge();
         ClearAttackState();
+        OnAttackEnded?.Invoke();
         ResetCombo();
     }
 
@@ -87,6 +89,7 @@ public class PlayerAttack : MonoBehaviour
     {
         CancelCharge();
         ClearAttackState();
+        OnAttackEnded?.Invoke();
         _currentAttackId = -1;
     }
 
@@ -422,6 +425,8 @@ public class PlayerAttack : MonoBehaviour
             _isComboTransitioned = false;
             return;
         }
+
+        OnAttackEnded?.Invoke();
 
         _pendingAttackData = null;
         _pendingAttackInput = null;
