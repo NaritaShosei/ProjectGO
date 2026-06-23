@@ -8,13 +8,12 @@ using UnityEngine;
 public struct CameraShakeData
 {
     ///<summary>振幅</summary>
-    public float Amplitude;
+    public float Amplitude => _amplitude;
     ///<summary>周期</summary>
-    public float Frequency;
+    public float Frequency => _frequency;
     ///<summary>持続時間</summary>
-    public float Duration;
+    public float Duration => _duration;
 
-    [Header("シェイク設定")]
     [SerializeField] private float _amplitude;
     [SerializeField] private float _frequency;
     [SerializeField] private float _duration;
