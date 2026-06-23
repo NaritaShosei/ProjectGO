@@ -110,6 +110,9 @@ public class AttackExecutor : MonoBehaviour
         {
             OnHitConfirmed?.Invoke();
 
+            if (ServiceLocator.TryGet(out CameraManager cameraManager))
+                cameraManager.ExecutionCameraShake(variantData.CameraShakeData).Forget();
+
             // HitStop
             if (ServiceLocator.TryGet(out HitStopManager hitStop))
             {
