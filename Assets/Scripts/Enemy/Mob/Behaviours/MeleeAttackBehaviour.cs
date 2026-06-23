@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -13,7 +14,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     /// <summary>
     /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null)
+    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null, float _enemyCooldown = 0f)
     {
         _enemyServices = services;
         _animator = animator;
@@ -22,6 +23,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _backDotThreshold = profile != null
             ? Mathf.Cos(profile.BackAttackAngle * Mathf.Deg2Rad)
             : -1f;
+        _cooldownOverride = _enemyCooldown;
     }
 
     public void Init(BehaviourInitContext ctx)
@@ -119,7 +121,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
             if (_timer >= duration)
             {
-                Exit();
+                Exit(notifyAttackFinished: true);
             }
         }
     }
@@ -127,7 +129,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public void OnExit()
     {
         if (!_isAttacking) return;
-        Exit();
+        Exit(notifyAttackFinished: false);
     }
 
     /// <summary>
@@ -168,12 +170,16 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private bool _isAttacking;
     private int _hitCount;
     private bool _attackEndFired;
+    private readonly float _cooldownOverride;//攻撃のCT 後々OverrideじゃなくてEnemyDataから取れるといいかも？
 
     // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
     private const float _attackFallbackTimeout = 5f;
 
     // Attackアニメーターステートの名前
     private const string _attackStateName = "Attack";
+
+    public event Action OnAttackFinished;
+
 
     /// <summary>
     /// 実際の攻撃判定とダメージ適用を行う
@@ -210,14 +216,15 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _nextHitTime += pattern.HitInterval;
     }
 
-    private void Exit()
+    private void Exit(bool notifyAttackFinished)
     {
         if (!_isAttacking) return;
         _isAttacking = false;
 
         // 攻撃後クールダウンをセット
-        _context.AttackCooldownRemaining = _context.SelectedPattern?.Cooldown ?? 1.5f;
-
+        float cooldown = _cooldownOverride > 0f ? _cooldownOverride : (_context.SelectedPattern?.Cooldown ?? 1.5f);
+        _context.AttackCooldownRemaining = cooldown;
+       
         // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
         _context.SelectedPattern = null;
 
@@ -225,6 +232,11 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _state.ChangeState(EnemyState.Idle);
 
         ReleaseSlot();
+
+        if (notifyAttackFinished)
+        {
+            OnAttackFinished?.Invoke();
+        }
     }
 
     /// <summary>
@@ -268,6 +280,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     {
         if (!_isAttacking) return;
         _attackEndFired = true;
-        Exit();
+        Exit(notifyAttackFinished: true);
     }
 }
