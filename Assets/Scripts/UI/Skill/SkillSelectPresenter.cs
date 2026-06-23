@@ -38,6 +38,7 @@ public class SkillSelectPresenter : IDisposable
         }
 
         _view.Show(viewData);
+        _view.CurrentSelectSkillId += OnSkillHighLighted;
         return true;
     }
 
@@ -45,9 +46,9 @@ public class SkillSelectPresenter : IDisposable
     public void AutoSelect()
     {
         // 現在選択されているスキルIDを優先して登録する
-        if (_view.CurrentSelectSkillId != -1)
+        if (_currentSkillId != -1)
         {
-            SelectSkill(_view.CurrentSelectSkillId);
+            SelectSkill(_currentSkillId);
         }
 
         // そうでなければ、選択肢の最初のスキルを登録する
@@ -60,11 +61,13 @@ public class SkillSelectPresenter : IDisposable
     public void Dispose()
     {
         _view.OnSkillSelected -= OnSkillSelected;
+        _view.CurrentSelectSkillId -= OnSkillHighLighted;
     }
 
     private readonly SkillManager _skillManager;
     private readonly ISkillSelectView _view;
     private readonly IPlayerStats _stats;
+    private int _currentSkillId;
     private List<SkillBase> _currentSkills;
 
     private bool _isSelected = false; // スキルが選択されたかどうかのフラグ
@@ -87,5 +90,11 @@ public class SkillSelectPresenter : IDisposable
 
         _skillManager.TryRegisterSkillId(skillId, _stats);
         _view.Hide();
+    }
+
+    private void OnSkillHighLighted(int skillid)
+    {
+        _view.UnhighlightButton(_currentSkillId);
+        _currentSkillId = skillid;
     }
 }

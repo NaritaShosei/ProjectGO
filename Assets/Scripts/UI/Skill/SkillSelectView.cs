@@ -9,7 +9,7 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     public event Action<int> OnSkillSelected;
 
     /// <summary> 現在選択されているスキルID。選択されていない場合は-1 </summary>
-    public int CurrentSelectSkillId => _currentSelectSkillId;
+    public event Action<int> CurrentSelectSkillId;
 
     /// <summary> スキル選択UIを表示する。初期化もここで </summary>
     public void Show(List<SkillViewData> skills)
@@ -23,10 +23,11 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
             if (i < skills.Count)
             {
                 // スキル選択ボタンに表示用データと押された時のイベントを渡す
-                _buttons[i].Setup(skills[index], () =>
-                {
-                    OnSkillSelected?.Invoke(skills[index].Id);
-                });
+                _buttons[i].Setup(
+                    skills[index],
+                     () => { OnSkillSelected?.Invoke(skills[index].Id); },
+                     i == 0? true : false
+                );
 
                 // マウスオーバーや選択されたときのイベントを登録
                 _buttons[i].OnHighlighted += SetCurrentSelectSkill;
@@ -56,6 +57,11 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
         }
     }
 
+    public void UnhighlightButton(int skillId)
+    {
+        _buttons[skillId].UnHighiLightButton();
+    }
+
     [SerializeField] private SkillSelectButton[] _buttons;
     [SerializeField] private GameObject _panel;
 
@@ -64,5 +70,6 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     private void SetCurrentSelectSkill(int id)
     {
         _currentSelectSkillId = id;
+        CurrentSelectSkillId?.Invoke(_currentSelectSkillId);
     }
 }
