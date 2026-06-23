@@ -363,7 +363,7 @@ public class AttackDataEditor : Editor
         // ---- カメラシェイクのデータ ----
         EditorGUILayout.LabelField("カメラシェイクのデータ", EditorStyles.miniBoldLabel);
         EditorGUILayout.PropertyField(variantProp.FindPropertyRelative("_cameraShakeData"),
-            new GUIContent("カメラシェイクのデータ"));
+            new GUIContent("カメラシェイクのデータ"), true);
     }
 
     // =========================================================
