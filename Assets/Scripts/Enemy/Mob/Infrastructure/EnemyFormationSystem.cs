@@ -121,7 +121,6 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         // 前衛として登録されていない場合は取得不可
         if (!_entries.TryGetValue(enemyId, out var entry) || !entry.IsVanguard)
         {
-            entry.IsVanguard = false;
             return false;
         }
 
