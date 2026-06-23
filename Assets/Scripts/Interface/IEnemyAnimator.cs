@@ -17,6 +17,8 @@ public interface IEnemyAnimator
     public event Action OnKnockbackEnd;
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
+    /// <summary>ダウンアニメーション終了のイベント </summary>
+    public event Action OnDownEnd;
 
     /// <summary>移動速度を設定する（Idle / Move の切り替えに使用）</summary>
     public void SetSpeed(float speed);
@@ -34,6 +36,10 @@ public interface IEnemyAnimator
     public void SetAnimSpeed(float speed);
     /// <summary>イベント購読を解除する</summary>
     public void Dispose();
+    /// <summary> </summary><param name="value"></param>
+    public void SetDown(bool value);
+
+    public void DownTrigger();
 }
 
 /// <summary>
@@ -49,6 +55,7 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public event Action OnGetUpEnd;
     public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
+    public event Action OnDownEnd;
 #pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }
@@ -59,4 +66,6 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public void SetDead() { }
     public void SetAnimSpeed(float speed) { }
     public void Dispose() { }
+    public void SetDown(bool value){ }
+    public void DownTrigger() { }
 }
