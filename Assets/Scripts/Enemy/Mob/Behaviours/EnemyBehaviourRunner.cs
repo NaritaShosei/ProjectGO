@@ -46,7 +46,21 @@ public class EnemyBehaviourRunner
         // 強制Behaviourが設定されている場合はそちらを優先
         if (_forced != null)
         {
-            _forced.Tick(deltaTime);
+            var forced = _forced;
+            forced.Tick(deltaTime);
+
+            // Tick中にOnActionFinished等で差し替え/解除された場合はここで抜ける
+            if (!ReferenceEquals(_forced, forced))
+            {
+                return;
+            }
+
+            if (!forced.CanContinue())
+            {
+                forced.OnExit();
+                _forced = null;
+                _current = null;
+            }
             return;
         }
 
@@ -68,9 +82,11 @@ public class EnemyBehaviourRunner
     /// </summary>
     public void ForceBehaviour(IEnemyBehaviour behaviour)
     {
+        _forced?.OnExit();
         _current?.OnExit();
+        _current = null;
         _forced = behaviour;
-        _forced.OnEnter();
+        _forced?.OnEnter();
     }
 
     /// <summary>
