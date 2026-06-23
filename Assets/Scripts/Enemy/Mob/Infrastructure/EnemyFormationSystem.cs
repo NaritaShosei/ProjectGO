@@ -42,7 +42,6 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     /// </summary>
     public void Register(IEnemy enemy, IFormationParticipant participant)
     {
-        Debug.Log($"Register : {enemy.Self.name}");
         if (enemy == null || participant == null) return;
 
         int id = participant.EnemyId;
@@ -181,7 +180,6 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     /// </summary>
     private void ReevaluateFormation()
     {
-        Debug.Log($"Formation Count : {_entries.Count}");
         int total = _entries.Count;
         if (total == 0) return;
 
