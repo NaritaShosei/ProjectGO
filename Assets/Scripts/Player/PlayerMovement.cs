@@ -34,12 +34,13 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
 
         _attack.OnAttackMoveRequested += HandleAttackMove;
+        _attack.OnAttackMoveStopRequested += HandleAttackMoveStop;
 
+        _attack.OnAttackEnded += HandleAttackEnd;
         _animationController.OnDamagedEnd += HandleDamagedEnd;
 
         _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
         _animationController.OnDodgeEnd += HandleDodgeEnd;
-        _animationController.OnAttackComplete += HandleAttackEnd;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             _cameraManager = cameraManager;
@@ -119,6 +120,8 @@ public class PlayerMovement : MonoBehaviour
         if (_attack != null)
         {
             _attack.OnAttackMoveRequested -= HandleAttackMove;
+            _attack.OnAttackMoveStopRequested -= HandleAttackMoveStop;
+            _attack.OnAttackEnded -= HandleAttackEnd;
         }
 
         if (_animationController != null)
@@ -126,7 +129,6 @@ public class PlayerMovement : MonoBehaviour
             _animationController.OnDamagedEnd -= HandleDamagedEnd;
             _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
-            _animationController.OnAttackComplete -= HandleAttackEnd;
         }
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
@@ -450,9 +452,14 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 startPos = transform.position;
 
-        Vector3 forward = transform.forward;
-        forward.y = 0f;
-        Vector3 dir = forward.normalized;
+        Vector3 dir = request.Direction;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.001f)
+        {
+            dir = transform.forward;
+            dir.y = 0f;
+        }
+        dir = dir.normalized;
 
         Vector3 targetPos = startPos + dir * request.Distance;
 
@@ -488,10 +495,19 @@ public class PlayerMovement : MonoBehaviour
     /// 攻撃アニメーション終了時のハンドラー。
     /// </summary>
     private void HandleAttackEnd()
+    {   
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = null;
+    }
+
+    private void HandleAttackMoveStop()
     {
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = null;
+        _isAttackMoving = false;
+        if (_rb) _rb.linearVelocity = Vector3.zero;
     }
 
     /// <summary>
