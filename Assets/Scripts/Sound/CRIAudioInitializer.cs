@@ -7,7 +7,7 @@ public class CRIAudioInitializer : MonoBehaviour
     private GameObject _bgmPlayer;
 
     [SerializeField, Header("デフォルトのBGMシート名")] 
-    private string _deaultBGMCueSheet = "InGame_BGM";
+    private string _deaultBGMCueSheet = "CueSheet_0";
 
     private void Awake()
     {

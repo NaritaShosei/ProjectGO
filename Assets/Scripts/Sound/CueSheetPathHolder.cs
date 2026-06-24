@@ -7,11 +7,11 @@ public class CueSheetPathHolder
 
     public CueSheetPathHolder()
     {
-        CueSheetPathDict.Add(CueSheetType.UI, "UI_SE");
-        CueSheetPathDict.Add(CueSheetType.Player, "Player_SE");
-        CueSheetPathDict.Add(CueSheetType.Enemy, "Enemy_SE");
-        CueSheetPathDict.Add(CueSheetType.Common, "Common_SE");
-        CueSheetPathDict.Add(CueSheetType.InGameBGM, "InGame_BGM");
+        CueSheetPathDict.Add(CueSheetType.UI, "CueSheet_1");
+        CueSheetPathDict.Add(CueSheetType.Player, "CueSheet_1");
+        CueSheetPathDict.Add(CueSheetType.Enemy, "CueSheet_1");
+        CueSheetPathDict.Add(CueSheetType.Common, "CueSheet_1");
+        CueSheetPathDict.Add(CueSheetType.InGameBGM, "CueSheet_0");
     }
 }
 
