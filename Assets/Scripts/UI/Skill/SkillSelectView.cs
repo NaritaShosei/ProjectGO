@@ -8,41 +8,48 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     /// <summary> スキルが選択されたときのイベント </summary>
     public event Action<int> OnSkillSelected;
 
-    /// <summary> 現在選択されているスキルID。選択されていない場合は-1 </summary>
-    public event Action<int> CurrentSelectSkillId;
+    /// <summary> スキルがハイライトされたときのイベント </summary>
+    public event Action<int> OnSkillHighlighted;
 
     /// <summary> スキル選択UIを表示する。初期化もここで </summary>
     public void Show(List<SkillViewData> skills)
     {
-        _currentSelectSkillId = -1; // 初期化
+        _buttonMap.Clear();
 
-        for (int i = 0; i < _buttons.Length; i++)
+        for (int i = 0; i < _buttonArray.Length; i++)
         {
             int index = i;
 
             if (i < skills.Count)
             {
+                _buttonArray[i].gameObject.SetActive(true);
+
                 // スキル選択ボタンに表示用データと押された時のイベントを渡す
-                _buttons[i].Setup(
+                _buttonArray[i].Setup(
                     skills[index],
-                     () => { OnSkillSelected?.Invoke(skills[index].Id); },
-                     i == 0? true : false
+                    () => OnSkillSelected?.Invoke(skills[index].Id)
                 );
 
-                // マウスオーバーや選択されたときのイベントを登録
-                _buttons[i].OnHighlighted += SetCurrentSelectSkill;
+                // ハイライトイベントを登録
+                _buttonArray[i].OnHighlighted += OnButtonHighlighted;
+
+                // IDとボタンを紐付け
+                _buttonMap[skills[i].Id] = _buttonArray[i];
             }
             else
             {
-                _buttons[i].gameObject.SetActive(false);
+                _buttonArray[i].gameObject.SetActive(false);
             }
         }
 
         _panel.gameObject.SetActive(true);
 
-        _currentSelectSkillId = skills.Count > 0 ? skills[0].Id : -1; // 最初のスキルをデフォルト選択
-
-        EventSystem.current.SetSelectedGameObject(_buttons[0].gameObject);
+        // 最初のスキルをデフォルトハイライト
+        if (skills.Count > 0)
+        {
+            _buttonMap[skills[0].Id].ForceHighlight();
+            EventSystem.current.SetSelectedGameObject(_buttonMap[skills[0].Id].gameObject);
+        }
     }
 
     /// <summary> スキル選択UIを非表示にする </summary>
@@ -51,25 +58,42 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
         _panel.gameObject.SetActive(false);
 
         // イベントの解除
-        foreach (var button in _buttons)
+        foreach (var button in _buttonMap.Values)
         {
-            button.OnHighlighted -= SetCurrentSelectSkill;
+            button.OnHighlighted -= OnButtonHighlighted;
+        }
+
+        _buttonMap.Clear();
+    }
+
+    /// <summary> 指定したスキルIDのボタンのハイライトを停止する </summary>
+    public void UnhighlightButton(int skillId)
+    {
+        if (skillId == -1) return;
+        if (_buttonMap.TryGetValue(skillId, out var button))
+        {
+            button.ForceUnhighlight();
         }
     }
 
-    public void UnhighlightButton(int skillId)
+    /// <summary> クリックイベント /// </summary>
+    public void SkillSelection(int skillId)
     {
-        _buttons[skillId].UnHighiLightButton();
+        if (skillId == -1)return;
+        if(_buttonMap.TryGetValue(skillId, out var button))
+        {
+            button.SkillSelection(() => OnSkillSelected?.Invoke(skillId));
+        }
     }
 
-    [SerializeField] private SkillSelectButton[] _buttons;
+    [SerializeField] private SkillSelectButton[] _buttonArray;
     [SerializeField] private GameObject _panel;
 
-    private int _currentSelectSkillId = -1;
+    // skillId → ボタンのマッピング
+    private readonly Dictionary<int, SkillSelectButton> _buttonMap = new();
 
-    private void SetCurrentSelectSkill(int id)
+    private void OnButtonHighlighted(int skillId)
     {
-        _currentSelectSkillId = id;
-        CurrentSelectSkillId?.Invoke(_currentSelectSkillId);
+        OnSkillHighlighted?.Invoke(skillId);
     }
 }

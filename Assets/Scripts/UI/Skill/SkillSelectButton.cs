@@ -15,7 +15,7 @@ public class SkillSelectButton : MonoBehaviour,
     /// <summary> マウスカーソルが重なった際のイベント </summary>
     public event Action<int> OnHighlighted;
 
-    public void Setup(SkillViewData viewData, Action onClick, bool firstHighlightSkill)
+    public void Setup(SkillViewData viewData, Action onClick)
     {
         _skillId = viewData.Id;
 
@@ -32,20 +32,20 @@ public class SkillSelectButton : MonoBehaviour,
             return;
         }
 
-        if (firstHighlightSkill)
-        {
-            OnHovered();
-        }
-
         _selectButton.onClick.RemoveAllListeners();
         _selectButton.onClick.AddListener(() => ClickAnimation(onClick).Forget());
     }
 
     public void OnPointerEnter(PointerEventData eventData) => OnHovered();
-    public void UnHighiLightButton()
-    {
-        OnUnhovered();
-    }
+
+    /// <summary> 外部からハイライトを開始する（初期選択など） </summary>
+    public void ForceHighlight() => OnHovered();
+
+    /// <summary> 外部からハイライトを停止する </summary>
+    public void ForceUnhighlight() => StopHighlight("別のスキルに選択が移った");
+
+    /// <summary>　外部からスキル選択アニメーションを再生する　/// </summary>
+    public void SkillSelection(Action onClick) => ClickAnimation(onClick).Forget();
 
     // TODO: コントローラー対応用かな？今のところこれ有効にしてるとマウスクリック後もふよふよしちゃってるから一旦殺す後ほど何とかしよう。
     // public void OnSelect(BaseEventData eventData) => OnSelected();
@@ -82,8 +82,7 @@ public class SkillSelectButton : MonoBehaviour,
     // ホバー / 選択 イベント
     // -------------------------
 
-    private void OnHovered() => StartHighlight($"マウスが乗った{_skillId}");
-    private void OnUnhovered() => StopHighlight("別のスキルに選択が映った");
+    private void OnHovered() => StartHighlight("マウスが乗った");
     private void OnSelected() => StartHighlight("方向キー等で選択された");
     private void OnDeselected() => StopHighlight("方向キー等で選択が解除された");
 

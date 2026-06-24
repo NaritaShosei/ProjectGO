@@ -5,10 +5,11 @@ using UnityEngine;
 public interface ISkillSelectView
 {
     public event Action<int> OnSkillSelected;
-    public event Action<int> CurrentSelectSkillId;
+    public event Action<int> OnSkillHighlighted;
     public void Show(List<SkillViewData> skills);
     public void Hide();
     public void UnhighlightButton(int skillId);
+    public void SkillSelection(int skillId);
 }
 
 public readonly struct SkillViewData
