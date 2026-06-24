@@ -32,6 +32,13 @@ public static class SoundCueNames
         public const string WarriorChargeReady = "WarriorChargeReady";
         public const string LightningStrike = "LightningStrike";
         public const string GroundCrush = "GroundCrush";
+        public const string ItemHealPickup = Common.ItemHealPickup;
+    }
+
+    public static class Skill
+    {
+        public const string LightningStrike = Player.LightningStrike;
+        public const string GroundCrush = Player.GroundCrush;
     }
 
     public static class Enemy
