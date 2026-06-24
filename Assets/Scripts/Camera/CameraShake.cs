@@ -28,6 +28,12 @@ public class CameraShake
     /// <returns></returns>
     public async UniTask StartCameraShake(CinemachineCamera camera, CameraShakeData data)
     {
+        if (camera == null)
+        {
+            Debug.LogWarning("カメラシェイク対象のカメラが設定されていません。");
+            return;
+        }
+
         var noise = camera.GetCinemachineComponent(CinemachineCore.Stage.Noise)
             as CinemachineBasicMultiChannelPerlin;
 
@@ -37,12 +43,15 @@ public class CameraShake
             return;
         }
 
-        _noise = noise;
+        ForceStopCameraShake();
+        var shakeCts = new CancellationTokenSource();
+        _shakeCts = shakeCts;
+        _activeNoise = noise;
 
         noise.AmplitudeGain = data.Amplitude;
         noise.FrequencyGain = data.Frequency;
 
-        await StopCameraShake(noise, data, _shakeCts.Token);
+        await StopCameraShake(noise, data, shakeCts, shakeCts.Token);
     }
 
     /// <summary>
@@ -50,6 +59,13 @@ public class CameraShake
     /// </summary>
     public void ForceStopCameraShake()
     {
+        if (_activeNoise != null)
+        {
+            _activeNoise.AmplitudeGain = 0;
+            _activeNoise.FrequencyGain = 0;
+            _activeNoise = null;
+        }
+
         if (_shakeCts == null) return;
 
         _shakeCts.Cancel();
@@ -57,16 +73,17 @@ public class CameraShake
         _shakeCts = null;
     }
 
-    private CinemachineBasicMultiChannelPerlin _noise;
+    private CinemachineBasicMultiChannelPerlin _activeNoise;
     private CancellationTokenSource _shakeCts;
 
     /// <summary>
     /// CameraShakeを停止
     /// </summary>
     private async UniTask StopCameraShake(
-    CinemachineBasicMultiChannelPerlin noise,
-    CameraShakeData data,
-    CancellationToken cancellationToken)
+        CinemachineBasicMultiChannelPerlin noise,
+        CameraShakeData data,
+        CancellationTokenSource cts,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -78,10 +95,17 @@ public class CameraShake
         }
         finally
         {
-            if (noise != null)
+            if (ReferenceEquals(_shakeCts, cts))
             {
-                noise.AmplitudeGain = 0;
-                noise.FrequencyGain = 0;
+                if (noise != null)
+                {
+                    noise.AmplitudeGain = 0;
+                    noise.FrequencyGain = 0;
+                }
+
+                _activeNoise = null;
+                _shakeCts.Dispose();
+                _shakeCts = null;
             }
         }
     }
