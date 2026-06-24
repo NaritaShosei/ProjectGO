@@ -5,10 +5,6 @@ public class CountDownTimerView : MonoBehaviour, IPhaseTimerView
 {
     public void UpdateTimer(float current, float max)
     {
-        if (_isDebug)
-        {
-            Debug.Log($"{name} => タイマー更新: {current}/{max}");
-        }
         // タイマーのUIを更新する処理をここに実装
         // 例えば、スライダーやテキストを更新するなど
 
@@ -21,9 +17,6 @@ public class CountDownTimerView : MonoBehaviour, IPhaseTimerView
             _timerText.text = $"{min:D2}:{sec:D2}:{centSec:D2}";
         }
     }
-    [Header("チェックするとデバッグログが表示されます")]
-    [SerializeField] private bool _isDebug = false;
-
     [Header("テキストの参照")]
     [SerializeField] private TextMeshProUGUI _timerText;
 }
