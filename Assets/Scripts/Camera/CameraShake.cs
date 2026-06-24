@@ -2,38 +2,40 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using Unity.Cinemachine;
+using UnityEngine;
 
+[Serializable]
 public struct CameraShakeData
 {
     ///<summary>振幅</summary>
-    public float Amplitude;
+    public float Amplitude => _amplitude;
     ///<summary>周期</summary>
-    public float Frequency;
+    public float Frequency => _frequency;
     ///<summary>持続時間</summary>
-    public float Duration;
+    public float Duration => _duration;
+
+    [SerializeField] private float _amplitude;
+    [SerializeField] private float _frequency;
+    [SerializeField] private float _duration;
 }
 
 public class CameraShake
 {
     /// <summary>
-    /// コンストラクタ
-    /// </summary>
-    public CameraShake(CinemachineCamera playerCamera)
-    {
-        if (playerCamera == null) return;
-
-        _noise = playerCamera.GetCinemachineComponent(CinemachineCore.Stage.Noise)
-                 as CinemachineBasicMultiChannelPerlin;
-    }
-
-    /// <summary>
     /// CameraShakeを開始
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    public async UniTask StartCameraShake(CameraShakeData data)
+    public async UniTask StartCameraShake(CinemachineCamera camera,CameraShakeData data)
     {
-        if (_noise == null) return;
+        _noise = camera.GetCinemachineComponent(CinemachineCore.Stage.Noise)
+            as CinemachineBasicMultiChannelPerlin;
+
+        if (_noise == null)
+        {
+            Debug.LogWarning($"現在使用中のカメラ{camera.name} に CinemachineBasicMultiChannelPerlinがアタッチされていません。");
+            return;
+        }
 
         ForceStopCameraShake();
 
