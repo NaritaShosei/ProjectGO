@@ -2,9 +2,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using Unity.Cinemachine;
-using UnityEngine;
 
-[Serializable]
 public struct CameraShakeData
 {
     ///<summary>振幅</summary>
@@ -13,11 +11,6 @@ public struct CameraShakeData
     public float Frequency;
     ///<summary>持続時間</summary>
     public float Duration;
-
-    [Header("シェイク設定")]
-    [SerializeField] private float _amplitude;
-    [SerializeField] private float _frequency;
-    [SerializeField] private float _duration;
 }
 
 public class CameraShake
