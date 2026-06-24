@@ -2,21 +2,15 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using Unity.Cinemachine;
-using UnityEngine;
 
-[Serializable]
 public struct CameraShakeData
 {
     ///<summary>振幅</summary>
-    public float Amplitude => _amplitude;
+    public float Amplitude;
     ///<summary>周期</summary>
-    public float Frequency => _frequency;
+    public float Frequency;
     ///<summary>持続時間</summary>
-    public float Duration => _duration;
-
-    [SerializeField] private float _amplitude;
-    [SerializeField] private float _frequency;
-    [SerializeField] private float _duration;
+    public float Duration;
 }
 
 public class CameraShake
