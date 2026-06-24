@@ -90,8 +90,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3460f808bb5b66d4d96df11e226681f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillUIManager
-  _buttonArray: []
   _panel: {fileID: 501372511643203817}
+  _buttons:
+  - {fileID: 335706604190411807}
+  - {fileID: 5654895057173369108}
+  - {fileID: 8265570669332203174}
 --- !u!1 &8384937130805371898
 GameObject:
   m_ObjectHideFlags: 0
@@ -377,11 +380,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 330
+      value: 320
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -66.875
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -425,6 +428,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
   m_PrefabInstance: {fileID: 4238784290619367234}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &335706604190411807 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+  m_PrefabInstance: {fileID: 4238784290619367234}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e92eb45d5452a4429d56ca46396b6a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSelectButton
 --- !u!1001 &5534554510715074043
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -495,11 +509,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 1650
+      value: 1600
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -66.875
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -534,6 +548,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+--- !u!114 &8265570669332203174 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+  m_PrefabInstance: {fileID: 5534554510715074043}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e92eb45d5452a4429d56ca46396b6a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSelectButton
 --- !u!224 &8600862024567202196 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
@@ -609,11 +634,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 990
+      value: 960
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -66.875
+      value: -50
       objectReference: {fileID: 0}
     - target: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -653,3 +678,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4292729172323505263, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
   m_PrefabInstance: {fileID: 8070940562224865865}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5654895057173369108 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4502338187059409757, guid: 82b5917ec02232240b521a6838c0fe29, type: 3}
+  m_PrefabInstance: {fileID: 8070940562224865865}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e92eb45d5452a4429d56ca46396b6a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSelectButton
