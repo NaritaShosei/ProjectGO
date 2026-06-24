@@ -82,7 +82,7 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
         if (skillId == -1)return;
         if(_buttonMap.TryGetValue(skillId, out var button))
         {
-            button.SkillSelection(() => OnSkillSelected?.Invoke(skillId));
+            button.SkillSelection(() => OnSkillSelected?.Invoke(button.Id));
         }
     }
 

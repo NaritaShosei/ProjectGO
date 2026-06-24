@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using UnityEngine;
 
 public class SkillSelectPresenter : IDisposable
 {
@@ -49,13 +51,11 @@ public class SkillSelectPresenter : IDisposable
         if (_currentSkillId != -1)
         {
             _view.SkillSelection(_currentSkillId);
-            //SelectSkill(_currentSkillId);
         }
         // そうでなければ、選択肢の最初のスキルを登録する
         else if (_currentSkills != null && _currentSkills.Count > 0)
         {
             _view.SkillSelection(_currentSkills[0].ID);
-            //SelectSkill(_currentSkills[0].ID);
         }
     }
 

@@ -15,9 +15,12 @@ public class SkillSelectButton : MonoBehaviour,
     /// <summary> マウスカーソルが重なった際のイベント </summary>
     public event Action<int> OnHighlighted;
 
+    public int Id;
+
     public void Setup(SkillViewData viewData, Action onClick)
     {
         _skillId = viewData.Id;
+        Id = _skillId;
 
         _nameText.text = viewData.Name;
         _explanationText.text = viewData.Explanation;
