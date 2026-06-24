@@ -1,34 +1,81 @@
 public static class SoundCueNames
 {
+    public static class UI
+    {
+        /// <summary>決定ボタン</summary>
+        public const string Confirm = "UiConfirm";
+
+        /// <summary>カーソル移動</summary>
+        public const string CursorMove = "UiCursorMove";
+
+        /// <summary>スキル選択表示瞬間</summary>
+        public const string SkillSelectAppear = "SkillSelectAppear";
+    }
+
     public static class Common
     {
-        public const string Finish = "finish";
-        public const string ArmorBreak = "armor_break";
-        public const string ArmorHitWeak = "enemyhit_yowai_yoroi";
-        public const string BodyHitWeak = "enemyhit_yowai";
+        /// <summary>回復アイテム取得</summary>
+        public const string ItemHealPickup = "ItemHealPickup";
+
+        /// <summary>鎧破壊</summary>
+        public const string ArmorBreak = "ArmorBreak";
+
+        /// <summary>とどめの一撃</summary>
+        public const string EnemyFinisher = "EnemyFinisher";
+
+        /// <summary>モードチェンジSE 1</summary>
+        public const string ModeChange1 = "ModeChange(1)";
+
+        /// <summary>モードチェンジSE 2</summary>
+        public const string ModeChange2 = "ModeChange(2)";
+
+        /// <summary>プレイヤー被弾</summary>
+        public const string PlayerDamage = "PlayerDamage";
     }
 
-    public static class Tousin
+    public static class Player
     {
-        public const string HammerSwing = "tousin_hammerswing";
-        public const string HammerHit = "tousin_hammer_hit";
-        public const string GroundHit = "tousin_groundhit";
-        public const string ArmorHit = "enemyhit_tuyoi_yoroi";
-        public const string BodyHit = "enemyhit_yowai";
+        /// <summary>闘神モード武器振り</summary>
+        public const string WeaponSwingWarrior = "PlayerWeaponSwingWarrior";
+
+        /// <summary>雷神モード武器振り</summary>
+        public const string WeaponSwingThunder = "PlayerWeaponSwingThunder";
+
+        /// <summary>闘神モード生身ヒット</summary>
+        public const string HitEnemyWarrior = "PlayerHitEnemyWarrior";
+
+        /// <summary>雷神モード生身ヒット</summary>
+        public const string HitEnemyThunder = "PlayerHitEnemyThunder";
+
+        /// <summary>闘神モード鎧ヒット</summary>
+        public const string HitArmorWarrior = "PlayerHitArmorWarrior";
+
+        /// <summary>雷神モード鎧ヒット</summary>
+        public const string HitArmorThunder = "PlayerHitArmorThunder";
+
+        /// <summary>雷神帯電音</summary>
+        public const string ThunderElectrify = "PlayerThunderElectrify";
+
+        /// <summary>雷鳴の審判</summary>
+        public const string LightningStrike = "LightningStrike";
+
+        /// <summary>大地粉砕</summary>
+        public const string GroundCrush = "GroundCrush";
+
+        /// <summary>闘神チャージ完了</summary>
+        public const string WarriorChargeReady = "WarriorChargeReady";
     }
 
-    public static class Raijin
+    public static class Enemy
     {
-        public const string HammerSwing = "raijin_hammerswing";
-        public const string Attack = "raijin_attack";
-        public const string Taiden = "raijin_taiden";
-        public const string BodyHit = "enemyhit_tsuyoi";
-        public const string ArmorHit = "enemyhit_yowai_yoroi";
+        /// <summary>ドラウグル武器振り</summary>
+        public const string DraugrWeaponSwing = "DraugrWeaponSwing";
+
+        /// <summary>ストーンゴーレム地面踏みつけ</summary>
+        public const string StoneGolemGroundStomp = "StoneGolemGroundStomp";
     }
 
     public static class BGM
     {
-        public const string Ingame_Intro = "In Game_Intro";
-        public const string Ingame_Loop = "In Game_Loop";
     }
 }

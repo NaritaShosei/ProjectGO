@@ -7,18 +7,20 @@ public class CueSheetPathHolder
 
     public CueSheetPathHolder()
     {
-        CueSheetPathDict.Add(CueSheetType.CommonSE, "Common_SE");
+        CueSheetPathDict.Add(CueSheetType.UI, "UI_SE");
+        CueSheetPathDict.Add(CueSheetType.Player, "Player_SE");
+        CueSheetPathDict.Add(CueSheetType.Enemy, "Enemy_SE");
+        CueSheetPathDict.Add(CueSheetType.Common, "Common_SE");
         CueSheetPathDict.Add(CueSheetType.InGameBGM, "InGame_BGM");
-        CueSheetPathDict.Add(CueSheetType.RaijinSE, "Raijin_SE");
-        CueSheetPathDict.Add(CueSheetType.TousinSE, "Tousin_SE");
     }
 }
 
 public enum CueSheetType
 {
     None,
-    CommonSE,
+    UI,
+    Player,
+    Enemy,
+    Common,
     InGameBGM,
-    RaijinSE,
-    TousinSE
 }

@@ -103,8 +103,9 @@ public class AttackExecutor : MonoBehaviour
         }
 
         // 地面ヒット音（特定攻撃のみ）
-        if (variantData.PlayGroundHitSE)
-            Sound.PlayTousnSE(gameObject, SoundCueNames.Tousin.GroundHit);
+        // if (variantData.PlayGroundHitSE)
+        // Sound.PlaySE(gameObject, SoundCueNames.GroundHit);
+        // TODO:地面ヒットSEが追加されたら対応
 
         if (hasHitResult)
         {
