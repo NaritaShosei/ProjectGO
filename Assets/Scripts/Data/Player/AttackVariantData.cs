@@ -69,9 +69,6 @@ public class AttackVariantData
     /// <summary> 雷の追加ダメージのデータ配列 </summary>
     public AdditionalLightningDamageData[] AdditionalLightningDamages => _additionalLightningDamages;
 
-    /// <summary> カメラシェイクのデータ </summary>
-    public CameraShakeData CameraShakeData => _cameraShakeData;
-
     /// <summary>
     /// 攻撃バリアントのフィールドをデフォルト値にリセットする
     /// </summary>
@@ -133,7 +130,4 @@ public class AttackVariantData
     [Header("雷の追加ダメージ")]
     [Tooltip("雷の追加ダメージのデータ")]
     [SerializeField] private AdditionalLightningDamageData[] _additionalLightningDamages;
-
-    [Header("カメラシェイク")]
-    [SerializeField] private CameraShakeData _cameraShakeData;
 }
