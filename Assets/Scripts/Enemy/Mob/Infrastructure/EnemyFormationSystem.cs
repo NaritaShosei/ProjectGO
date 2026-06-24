@@ -119,9 +119,8 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     public bool TryAcquire(int enemyId, int slotCost)
     {
         // 前衛として登録されていない場合は取得不可
-        if (!_entries.TryGetValue(enemyId, out var entry) || entry.IsVanguard)
+        if (!_entries.TryGetValue(enemyId, out var entry) || !entry.IsVanguard)
         {
-            entry.IsVanguard = false;
             return false;
         }
 
