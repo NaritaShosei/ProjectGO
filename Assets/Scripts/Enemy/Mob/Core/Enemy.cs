@@ -279,6 +279,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _enemyAnimator = new EnemyAnimator(_animator, _animationEventReceiver);
         // 死亡アニメーション終了イベントを購読する
         _enemyAnimator.OnDeadEnd += HandleDeadEnd;
+
+        if (_animationEventReceiver != null)
+        {
+            _animationEventReceiver.OnAttackEffect += HandleAttackEffect;
+        }
     }
 
     protected virtual void Update()
@@ -322,6 +327,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
             _enemyAnimator.OnDeadEnd -= HandleDeadEnd;
             _enemyAnimator.Dispose();
         }
+
+        if (_animationEventReceiver != null)
+        {
+            _animationEventReceiver.OnAttackEffect -= HandleAttackEffect;
+        }
     }
 
     /// <summary>
@@ -349,6 +359,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         // 死亡アニメーション完了を待ってから破棄する
         // (済み): ObjectPool導入時は WaitForDeadAnimationAndDeactivate() に切り替える
         WaitForDeadAnimationAndDeactivate().Forget();
+    }
+
+    protected virtual void HandleAttackEffect()
+    {
     }
 
     /// <summary>

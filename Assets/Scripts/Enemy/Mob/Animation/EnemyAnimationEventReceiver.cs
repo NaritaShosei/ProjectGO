@@ -29,6 +29,8 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
 
     public event Action OnDownEnd;
 
+    public event Action OnAttackEffect;
+
     /// <summary>EnemyAttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
     {
@@ -67,5 +69,10 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public void AnimEvent_DownEnd()
     {
         OnDownEnd?.Invoke();
+    }
+
+    public void AnimEvent_AttackEffect()
+    {
+        OnAttackEffect?.Invoke();
     }
 }

@@ -25,4 +25,7 @@ public interface IEnemyAnimationController
 
     /// <summary>ダウンアニメーション終了の通知 </summary>
     public void AnimEvent_DownEnd();
+
+    /// <summary>アタックエフェクトの再生タイミング通知</summary>
+    public void AnimEvent_AttackEffect();
 }
