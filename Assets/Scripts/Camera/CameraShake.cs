@@ -26,25 +26,23 @@ public class CameraShake
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    public async UniTask StartCameraShake(CinemachineCamera camera,CameraShakeData data)
+    public async UniTask StartCameraShake(CinemachineCamera camera, CameraShakeData data)
     {
-        _noise = camera.GetCinemachineComponent(CinemachineCore.Stage.Noise)
+        var noise = camera.GetCinemachineComponent(CinemachineCore.Stage.Noise)
             as CinemachineBasicMultiChannelPerlin;
 
-        if (_noise == null)
+        if (noise == null)
         {
             Debug.LogWarning($"現在使用中のカメラ{camera.name} に CinemachineBasicMultiChannelPerlinがアタッチされていません。");
             return;
         }
 
-        ForceStopCameraShake();
+        _noise = noise;
 
-        _shakeCts = new CancellationTokenSource();
+        noise.AmplitudeGain = data.Amplitude;
+        noise.FrequencyGain = data.Frequency;
 
-        _noise.AmplitudeGain = data.Amplitude;
-        _noise.FrequencyGain = data.Frequency;
-
-        await StopCameraShake(data, _shakeCts.Token);
+        await StopCameraShake(noise, data, _shakeCts.Token);
     }
 
     /// <summary>
@@ -65,7 +63,10 @@ public class CameraShake
     /// <summary>
     /// CameraShakeを停止
     /// </summary>
-    private async UniTask StopCameraShake(CameraShakeData data, CancellationToken cancellationToken)
+    private async UniTask StopCameraShake(
+    CinemachineBasicMultiChannelPerlin noise,
+    CameraShakeData data,
+    CancellationToken cancellationToken)
     {
         try
         {
@@ -77,10 +78,10 @@ public class CameraShake
         }
         finally
         {
-            if (_noise != null)
+            if (noise != null)
             {
-                _noise.AmplitudeGain = 0;
-                _noise.FrequencyGain = 0;
+                noise.AmplitudeGain = 0;
+                noise.FrequencyGain = 0;
             }
         }
     }
