@@ -12,13 +12,13 @@ public class CountDownTimerView : MonoBehaviour, IPhaseTimerView
         // タイマーのUIを更新する処理をここに実装
         // 例えば、スライダーやテキストを更新するなど
 
-        if(_timerText != null)
+        if (_timerText != null)
         {
             int min = Mathf.FloorToInt(current / 60f);
             int sec = Mathf.FloorToInt(current % 60f);
             int centSec = Mathf.FloorToInt(current * 100f) % 100;
 
-            _timerText.text = $"{min: 00}:{sec: 00}:{centSec: 00}";
+            _timerText.text = $"{min:D2}:{sec:D2}:{centSec:D2}";
         }
     }
     [Header("チェックするとデバッグログが表示されます")]
