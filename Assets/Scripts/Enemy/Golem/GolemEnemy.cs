@@ -133,6 +133,8 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         _armor.Restore();
         RebindArmor();
         _defenceContext.EnemyType = EnemyDefenceType.Armor;
+
+        InvokeArmorRegistered();
     }
 
     [Header("Down Settings")]
