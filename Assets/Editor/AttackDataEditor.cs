@@ -358,12 +358,6 @@ public class AttackDataEditor : Editor
         EditorGUILayout.LabelField("雷の追加ダメージ", EditorStyles.miniBoldLabel);
         EditorGUILayout.PropertyField(variantProp.FindPropertyRelative("_additionalLightningDamages"),
             new GUIContent("追加ダメージデータ"), true);
-        EditorGUILayout.Space(2);
-
-        // ---- カメラシェイクのデータ ----
-        EditorGUILayout.LabelField("カメラシェイクのデータ", EditorStyles.miniBoldLabel);
-        EditorGUILayout.PropertyField(variantProp.FindPropertyRelative("_cameraShakeData"),
-            new GUIContent("カメラシェイクのデータ"));
     }
 
     // =========================================================
