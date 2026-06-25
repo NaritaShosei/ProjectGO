@@ -71,8 +71,29 @@ public static class SoundCueNames
         /// <summary>ドラウグル武器振り</summary>
         public const string DraugrWeaponSwing = "DraugrWeaponSwing";
 
+        /// <summary>ドラウグル攻撃ボイス</summary>
+        public const string DraugrAttackVoice = "DraugrAttackVoice";
+
+        /// <summary>ドラウグル威嚇ボイス</summary>
+        public const string DraugrBark = "DraugrBark";
+
+        /// <summary>ドラウグル被弾ボイス</summary>
+        public const string DraugrDamageVoice = "DraugrDamageVoice";
+
         /// <summary>ストーンゴーレム地面踏みつけ</summary>
-        public const string StoneGolemGroundStomp = "StoneGolemGroundStomp";
+        public const string StoneGolemFootStomp = "StoneGolemGroundStomp";
+
+        /// <summary>ストーンゴーレムの足音</summary>
+        public const string StoneGolemFootstep = "StoneGolemFootstep";
+
+        /// <summary>ストーンゴーレムの威嚇</summary>
+        public const string StoneGolemBark = "StoneGolemBark";
+
+        /// <summary>ゴーレムダウンボイス</summary>
+        public const string StoneGolemDownVoice = "StoneGolemDownVoice";
+
+        /// <summary>ゴーレム死亡ボイス</summary>
+        public const string StoneGolemDeathVoice = "StoneGolemDeathVoice";
     }
 
     public static class BGM
