@@ -37,6 +37,8 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public event Action OnFootstep;
     /// <summary>Barkアニメーション開始</summary>
     public event Action OnBarkStart;
+    /// <summary>攻撃開始イベント</summary>
+    public event Action OnAttackStart;
 
     /// <summary>EnemyAttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
@@ -95,5 +97,9 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public void AnimEvent_BarkStart()
     {
         OnBarkStart?.Invoke();
+    }
+    public void AnimEvent_AttackStart()
+    {
+        OnAttackStart?.Invoke();
     }
 }

@@ -30,4 +30,9 @@ public interface IEnemyAnimationController
 
     /// <summary>アタックエフェクトの再生タイミング通知</summary>
     public void AnimEvent_AttackEffect();
+
+    public void AnimEvent_BarkStart();
+
+    /// <summary>攻撃開始の通知</summary>
+    public void AnimEvent_AttackStart();
 }

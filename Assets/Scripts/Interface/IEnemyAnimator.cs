@@ -27,6 +27,8 @@ public interface IEnemyAnimator
     public event Action OnFootstep;
     /// <summary>Bark開始イベント</summary>
     event Action OnBarkStart;
+    /// <summary>攻撃開始イベント</summary>
+    event Action OnAttackStart;
 
     /// <summary>移動速度を設定する（Idle / Move の切り替えに使用）</summary>
     public void SetSpeed(float speed);
@@ -68,6 +70,7 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public event Action OnAttackEffect;
     public event Action OnFootstep;
     public event Action OnBarkStart;
+    public event Action OnAttackStart;
 #pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }

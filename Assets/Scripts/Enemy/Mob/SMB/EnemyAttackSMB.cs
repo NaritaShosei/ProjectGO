@@ -10,6 +10,12 @@ public class EnemyAttackSMB : StateMachineBehaviour
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _attackHitFired = false;
+        _weaponSwingFired = false;
+
+        if (animator.TryGetComponent(out IEnemyAnimationController controller))
+        {
+            controller.AnimEvent_AttackStart();
+        }
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -24,6 +30,17 @@ public class EnemyAttackSMB : StateMachineBehaviour
             if (animator.TryGetComponent(out IEnemyAnimationController controller))
                 controller.AnimEvent_AttackHit();
         }
+
+        //武器スイングSE
+        if (!_attackHitFired &&currentTime >= _attackHitTime)
+        {
+            _attackHitFired = true;
+
+            if (animator.TryGetComponent(out IEnemyAnimationController controller))
+            {
+                controller.AnimEvent_AttackHit();
+            }
+        }
     }
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -36,5 +53,9 @@ public class EnemyAttackSMB : StateMachineBehaviour
     [Tooltip("攻撃ヒット判定を発火する秒数")]
     [SerializeField] private float _attackHitTime = 0.3f;
 
+    [SerializeField, Tooltip("武器のスイングするSEの発生タイミング")]
+    private float _weaponSwingTime = 0.633f;//MobEnemyは 0.633f Golemは0.6533f
+
     private bool _attackHitFired;
+    private bool _weaponSwingFired;
 }

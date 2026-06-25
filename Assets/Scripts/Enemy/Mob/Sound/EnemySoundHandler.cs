@@ -8,7 +8,6 @@ public class EnemySoundHandler : MonoBehaviour
     {
         _enemy = enemy;
 
-        _enemy.OnArmorBroken += HandleArmorBreak;
         _enemy.OnDead += HandleDead;
         _enemy.OnDamaged += HandleDamaged;
         _enemy.EnemyAnimator.OnAttackEffect += HandleAttack;
@@ -21,7 +20,6 @@ public class EnemySoundHandler : MonoBehaviour
     {
         if (_enemy == null) return;
 
-        _enemy.OnArmorBroken -= HandleArmorBreak;
         _enemy.OnDead -= HandleDead;
         _enemy.OnDamaged -= HandleDamaged;
         _enemy.EnemyAnimator.OnAttackEffect -= HandleAttack;
@@ -30,31 +28,12 @@ public class EnemySoundHandler : MonoBehaviour
         _enemy.EnemyAnimator.OnBarkStart -= HandleBark;
     }
 
-    private void HandleArmorBreak(IEnemy _)
-    {
-        Sound.PlaySE(
-            gameObject,
-            SoundCueNames.Common.ArmorBreak,
-            CueSheetType.Common);
-    }
-
     private void HandleDead(IEnemy _)
     {
+       
         switch (_enemy.EnemyType)
         {
-            case EnemyType.Draugr:
-                Sound.PlaySE(
-                    gameObject,
-                    SoundCueNames.Common.EnemyFinisher,
-                    CueSheetType.Common);
-                break;
-
             case EnemyType.StoneGolem:
-                Sound.PlaySE(
-                    gameObject,
-                    SoundCueNames.Common.EnemyFinisher,
-                    CueSheetType.Common);
-
                 Sound.PlaySE(
                     gameObject,
                     SoundCueNames.Enemy.StoneGolemDeathVoice,
@@ -67,6 +46,7 @@ public class EnemySoundHandler : MonoBehaviour
 
     private void HandleDamaged(IEnemy _)
     {
+        Debug.Log("Dameg SE triggered");
         switch (_enemy.EnemyType)
         {
             case EnemyType.Draugr:
@@ -77,6 +57,7 @@ public class EnemySoundHandler : MonoBehaviour
 
     private void HandleAttack()
     {
+        Debug.Log("Attack SE triggered");
         switch (_enemy.EnemyType)
         {
             case EnemyType.Draugr:
@@ -91,9 +72,11 @@ public class EnemySoundHandler : MonoBehaviour
 
     private void HandleBark()
     {
+        Debug.Log("Bark SE triggered");
         switch (_enemy.EnemyType)
         {
             case EnemyType.Draugr:
+                Debug.Log("Bark SE triggered2");
                 Sound.PlaySE(
                     gameObject,
                     SoundCueNames.Enemy.DraugrBark,
@@ -111,6 +94,7 @@ public class EnemySoundHandler : MonoBehaviour
 
     private void HandleDown()
     {
+        Debug.Log("Down SE triggered");
         if (_enemy.EnemyType != EnemyType.StoneGolem) return;
         Sound.PlaySE(
             gameObject,
@@ -120,6 +104,7 @@ public class EnemySoundHandler : MonoBehaviour
 
     private void HandleFootstep()
     {
+        Debug.Log("Step SE triggered");
         switch (_enemy.EnemyType)
         {
             case EnemyType.StoneGolem:

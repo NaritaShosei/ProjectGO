@@ -351,6 +351,7 @@ GameObject:
   - component: {fileID: 7301585828367876861}
   - component: {fileID: 6158760630654705163}
   - component: {fileID: 5989024217522494440}
+  - component: {fileID: 5136796591454539382}
   m_Layer: 8
   m_Name: StoneGolem
   m_TagString: Untagged
@@ -394,6 +395,8 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 84c85403bc40a3c47b61cd25c0d667a0, type: 2}
   _distanceProfile: {fileID: 11400000, guid: d64c95ea40de26a458c660c4cc596173, type: 2}
   _animationEventReceiver: {fileID: 7696763789007296301}
+  _soundHandler: {fileID: 5136796591454539382}
+  _enemyType: 1
   _armor: {fileID: 2232957639341954153}
   _downDuration: 5
   _bodyRenderer:
@@ -455,6 +458,18 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5136796591454539382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315166858859022630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3228565db4b453e42b723817d49cbe9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySoundHandler
 --- !u!1 &336853683618154536
 GameObject:
   m_ObjectHideFlags: 0
