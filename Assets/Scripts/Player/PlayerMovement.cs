@@ -148,19 +148,9 @@ public class PlayerMovement : MonoBehaviour
         if (inputMag < INPUT_THRESHOLD) { _rb.linearVelocity = Vector3.zero; return; }
 
         var camera = _cameraManager.MainCamera;
-        Vector3 moveDir;
-        if (_lockOnTarget != null)
-        {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-            moveDir = (cameraRight * vec.x
-                            + Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y).normalized;
-        }
-        else
-        {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-            Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
-            moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
-        }
+        Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+        Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+        Vector3 moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
         moveDir.y = 0f;
 
         _rb.linearVelocity = moveDir * _modeController.ModeData.MoveSpeed * inputMag * _timeScale;
@@ -171,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanMove()) return;
 
-        if (_lockOnTarget != null)
+        if (_lockOnTarget != null && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             Vector3 toTarget = _lockOnTarget.position - transform.position;
             toTarget.y = 0f;
@@ -197,7 +187,8 @@ public class PlayerMovement : MonoBehaviour
     private void PlayMoveAnimation()
     {
         if (_playerStateManager.IsDodging()) return;
-        if (_lockOnTarget != null)
+
+        if (_lockOnTarget != null && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             var input = _input.MoveInput;
             var snappedInput = SnapTo8Directions(input);
@@ -467,17 +458,16 @@ public class PlayerMovement : MonoBehaviour
 
         while (elapsed < request.Duration)
         {
-            if (request.Target &&
-                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance)
-            {
-                stoppedEarly = true;
-                break;
-            }
-
             float t = elapsed / request.Duration;
             float curveValue = curve.Evaluate(t);
 
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, curveValue);
+            if (TryClampAttackMoveStopPosition(transform.position, newPos, request.Target, request.StopDistance, out var stoppedPos))
+            {
+                _rb.MovePosition(stoppedPos);
+                stoppedEarly = true;
+                break;
+            }
 
             _rb.MovePosition(newPos);
 
@@ -488,7 +478,54 @@ public class PlayerMovement : MonoBehaviour
                 _attackMoveCts.Token);
         }
         if (!stoppedEarly)
-            _rb.MovePosition(targetPos);
+        {
+            if (TryClampAttackMoveStopPosition(transform.position, targetPos, request.Target, request.StopDistance, out var stoppedPos))
+                _rb.MovePosition(stoppedPos);
+            else
+                _rb.MovePosition(targetPos);
+        }
+    }
+
+    private bool TryClampAttackMoveStopPosition(
+        Vector3 currentPos,
+        Vector3 candidatePos,
+        Transform target,
+        float stopDistance,
+        out Vector3 stoppedPos)
+    {
+        stoppedPos = candidatePos;
+
+        if (!target || stopDistance <= 0f) return false;
+
+        Vector3 targetPos = target.position;
+        float currentDistance = HorizontalDistance(currentPos, targetPos);
+        if (currentDistance <= stopDistance)
+        {
+            stoppedPos = currentPos;
+            return true;
+        }
+
+        float candidateDistance = HorizontalDistance(candidatePos, targetPos);
+        if (candidateDistance > stopDistance) return false;
+
+        Vector3 fromTarget = currentPos - targetPos;
+        fromTarget.y = 0f;
+        if (fromTarget.sqrMagnitude <= 0.001f)
+        {
+            stoppedPos = currentPos;
+            return true;
+        }
+
+        stoppedPos = targetPos + fromTarget.normalized * stopDistance;
+        stoppedPos.y = candidatePos.y;
+        return true;
+    }
+
+    private static float HorizontalDistance(Vector3 a, Vector3 b)
+    {
+        a.y = 0f;
+        b.y = 0f;
+        return Vector3.Distance(a, b);
     }
 
     /// <summary>

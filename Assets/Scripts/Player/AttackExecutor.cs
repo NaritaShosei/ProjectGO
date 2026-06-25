@@ -140,7 +140,10 @@ public class AttackExecutor : MonoBehaviour
         context.OnAfterAttack?.Invoke();
     }
 
+    [Header("攻撃対象のレイヤー")]
     [SerializeField] private LayerMask _layer;
+    [Header("Damage Popup")]
+    [SerializeField] private Color _lightningDamagePopupColor = DamagePopupColorScope.LightningColor;
     private IPlayerStats _playerStats;
     private SkillManager _skillManager;
 
@@ -202,13 +205,17 @@ public class AttackExecutor : MonoBehaviour
 
             if (enemy == null || enemy.IsDead) return;
 
-            enemy.TakeDamage(new DamageContext
+            // このTakeDamage内で生成されるダメージポップアップだけ雷色にする。
+            using (DamagePopupColorScope.Use(_lightningDamagePopupColor))
             {
-                AttackPower = power * data.LightningDamageMultiplier,
-                PlayerMode = mode,
-                IsCritical = false,
-                CriticalMultiplier = 1f,
-            });
+                enemy.TakeDamage(new DamageContext
+                {
+                    AttackPower = power * data.LightningDamageMultiplier,
+                    PlayerMode = mode,
+                    IsCritical = false,
+                    CriticalMultiplier = 1f,
+                });
+            }
         }
     }
 }

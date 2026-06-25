@@ -6,7 +6,9 @@ public class PlayerSoundHandler : MonoBehaviour
         PlayerAnimationController animController,
         PlayerStateManager stateManager,
         IModeController modeController,
-        AttackExecutor attackExecutor)
+        AttackExecutor attackExecutor,
+        PlayerAttack playerAttack,
+        Player player)
     {
         _modeController = modeController;
 
@@ -33,6 +35,18 @@ public class PlayerSoundHandler : MonoBehaviour
             attackExecutor.OnHitResultReady += PlayHitSE;
             _attackExecutor = attackExecutor;
         }
+
+        if (playerAttack != null)
+        {
+            playerAttack.OnChargeLevelReached += PlayWarriorChargeReadySE;
+            _playerAttack = playerAttack;
+        }
+
+        if (player != null)
+        {
+            player.OnDamagedEffect += PlayDamageSE;
+            _player = player;
+        }
     }
 
     private void OnDestroy()
@@ -51,6 +65,12 @@ public class PlayerSoundHandler : MonoBehaviour
             _attackExecutor.OnSwingReady -= PlaySwingSE;
             _attackExecutor.OnHitResultReady -= PlayHitSE;
         }
+
+        if (_playerAttack != null)
+            _playerAttack.OnChargeLevelReached -= PlayWarriorChargeReadySE;
+
+        if (_player != null)
+            _player.OnDamagedEffect -= PlayDamageSE;
     }
 
     // ── スイング音 ─────────────────────────────────────
@@ -134,6 +154,22 @@ public class PlayerSoundHandler : MonoBehaviour
             CueSheetType.Player);
     }
 
+    private void PlayWarriorChargeReadySE(ChargeLevel _)
+    {
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.WarriorChargeReady,
+            CueSheetType.Player);
+    }
+
+    private void PlayDamageSE(PlayerDamageEffectContext _)
+    {
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.Damage,
+            CueSheetType.Player);
+    }
+
     private void OnModeChangeComplete()
     {
         if (_modeController.CurrentMode == PlayerMode.Thunder)
@@ -165,4 +201,6 @@ public class PlayerSoundHandler : MonoBehaviour
     private PlayerAnimationController _animController;
     private PlayerStateManager _stateManager;
     private AttackExecutor _attackExecutor;
+    private PlayerAttack _playerAttack;
+    private Player _player;
 }
