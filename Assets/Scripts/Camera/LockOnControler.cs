@@ -40,6 +40,7 @@ public class LockOnController : MonoBehaviour
 
         // 敵を倒したときの次ターゲット自動選択
         enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
+        enemyManager.OnEnemyForceRemoved += HandleEnemyForceRemoved;
     }
 
     private void SubscribeInputEvents()
@@ -66,6 +67,7 @@ public class LockOnController : MonoBehaviour
         if (enemyManager != null)
         {
             enemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
+            enemyManager.OnEnemyForceRemoved -= HandleEnemyForceRemoved;
         }
     }
 
@@ -145,6 +147,22 @@ public class LockOnController : MonoBehaviour
         if (next != null)
         {
             // 自動ロックオン状態は引き継ぐ
+            _cameraManager.LockOn(next);
+        }
+        else
+        {
+            _cameraManager.Unlock();
+        }
+    }
+
+    private void HandleEnemyForceRemoved(IEnemy removedEnemy)
+    {
+        if (!_cameraManager.IsLockedOn) return;
+        if (_cameraManager.CurrentTarget != removedEnemy) return;
+
+        var next = _selector.SelectNextTarget(removedEnemy);
+        if (next != null)
+        {
             _cameraManager.LockOn(next);
         }
         else

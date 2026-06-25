@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class EnemyUIManager : MonoBehaviour
         _popupPresenter = new DamagePopupPresenter(_popupPool);
 
         _enemyManager.OnEnemySpawned += HandleEnemySpawned;
+        _enemyManager.OnEnemyForceRemoved += HandleEnemyDead;
 
         _cts = new CancellationTokenSource();
         RangeCheckLoopAsync(_cts.Token).Forget();
@@ -46,6 +48,8 @@ public class EnemyUIManager : MonoBehaviour
 
     private Dictionary<IEnemy, EnemyGaugePresenter> _gaugePresenters = new();
     private Dictionary<IArmorHealth, ArmorGaugePresenter> _armorPresenters = new();
+    private Dictionary<IEnemy, List<IArmorHealth>> _enemyArmors = new();
+    private Dictionary<MobEnemy, Action<IArmorHealth>> _armorRegisteredHandlers = new();
 
     private GenericObjectPool<EnemyGaugeView> _gaugePool;
     private GenericObjectPool<EnemyGaugeView> _armerGaugePool;
@@ -95,7 +99,9 @@ public class EnemyUIManager : MonoBehaviour
 
         if (enemy is MobEnemy mob)
         {
-            mob.OnArmorRegistered += HandleArmorRegistered;
+            Action<IArmorHealth> armorRegisteredHandler = armor => HandleArmorRegistered(enemy, armor);
+            _armorRegisteredHandlers.Add(mob, armorRegisteredHandler);
+            mob.OnArmorRegistered += armorRegisteredHandler;
         }
 
         enemy.OnDead += HandleEnemyDead;
@@ -108,6 +114,8 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleEnemyDead(IEnemy enemy)
     {
+        ReleaseArmorGauges(enemy);
+
         if (_gaugePresenters.TryGetValue(enemy, out var presenter))
         {
             presenter.ResetView();
@@ -123,11 +131,15 @@ public class EnemyUIManager : MonoBehaviour
 
         if (enemy is MobEnemy mob)
         {
-            mob.OnArmorRegistered -= HandleArmorRegistered;
+            if (_armorRegisteredHandlers.TryGetValue(mob, out var armorRegisteredHandler))
+            {
+                mob.OnArmorRegistered -= armorRegisteredHandler;
+                _armorRegisteredHandlers.Remove(mob);
+            }
         }
     }
 
-    private void HandleArmorRegistered(IArmorHealth armor)
+    private void HandleArmorRegistered(IEnemy enemy, IArmorHealth armor)
     {
         var view = _armerGaugePool.Get();
         var presenter = new ArmorGaugePresenter(
@@ -135,26 +147,74 @@ public class EnemyUIManager : MonoBehaviour
         );
         _armorPresenters.Add(armor, presenter);
 
+        if (!_enemyArmors.TryGetValue(enemy, out var armors))
+        {
+            armors = new List<IArmorHealth>();
+            _enemyArmors.Add(enemy, armors);
+        }
+        armors.Add(armor);
+
         presenter.OnBroken += HandleArmorBroken;
     }
 
     private void HandleArmorBroken(ArmorGaugePresenter presenter)
     {
-        presenter.OnBroken -= HandleArmorBroken;
-        presenter.ResetView();
-        _armerGaugePool.Release(presenter.View);
-
-        // Dictionaryから削除
+        IArmorHealth brokenArmor = null;
         foreach (var pair in _armorPresenters)
         {
             if (pair.Value == presenter)
             {
-                _armorPresenters.Remove(pair.Key);
+                brokenArmor = pair.Key;
                 break;
             }
         }
 
+        if (brokenArmor == null) return;
+
+        RemoveArmorOwnerLink(brokenArmor);
+        ReleaseArmorGauge(brokenArmor);
+    }
+
+    private void ReleaseArmorGauges(IEnemy enemy)
+    {
+        if (!_enemyArmors.TryGetValue(enemy, out var armors)) return;
+
+        foreach (var armor in armors.ToArray())
+        {
+            ReleaseArmorGauge(armor);
+        }
+
+        _enemyArmors.Remove(enemy);
+    }
+
+    private void ReleaseArmorGauge(IArmorHealth armor)
+    {
+        if (!_armorPresenters.TryGetValue(armor, out var presenter)) return;
+
+        presenter.OnBroken -= HandleArmorBroken;
+        presenter.ResetView();
+        _armerGaugePool.Release(presenter.View);
         presenter.Dispose();
+
+        _armorPresenters.Remove(armor);
+    }
+
+    private void RemoveArmorOwnerLink(IArmorHealth armor)
+    {
+        IEnemy owner = null;
+        foreach (var pair in _enemyArmors)
+        {
+            if (pair.Value.Remove(armor))
+            {
+                owner = pair.Key;
+                break;
+            }
+        }
+
+        if (owner != null && _enemyArmors[owner].Count == 0)
+        {
+            _enemyArmors.Remove(owner);
+        }
     }
 
     private void OnDestroy()
@@ -163,6 +223,7 @@ public class EnemyUIManager : MonoBehaviour
         _cts.Dispose();
 
         _enemyManager.OnEnemySpawned -= HandleEnemySpawned;
+        _enemyManager.OnEnemyForceRemoved -= HandleEnemyDead;
 
         foreach (var pair in _gaugePresenters)
         {
@@ -172,8 +233,16 @@ public class EnemyUIManager : MonoBehaviour
         }
         _gaugePresenters.Clear();
 
+        foreach (var pair in _armorRegisteredHandlers)
+        {
+            pair.Key.OnArmorRegistered -= pair.Value;
+        }
+        _armorRegisteredHandlers.Clear();
+        _enemyArmors.Clear();
+
         foreach (var pair in _armorPresenters)
         {
+            pair.Value.OnBroken -= HandleArmorBroken;
             pair.Value.Dispose();
         }
         _armorPresenters.Clear();
