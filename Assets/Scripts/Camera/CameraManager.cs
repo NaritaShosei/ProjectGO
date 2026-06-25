@@ -88,7 +88,9 @@ public class CameraManager : MonoBehaviour
     /// <summary>カメラシェイクを実行します。</summary>
     public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
-        await _cameraShake.StartCameraShake(data);
+        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+
+        await _cameraShake.StartCameraShake(camera, data);
     }
 
     /// <summary>カメラシェイクを強制停止します。</summary>
@@ -178,7 +180,7 @@ public class CameraManager : MonoBehaviour
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
 
-        _cameraShake = new CameraShake(_normalCamera);
+        _cameraShake = new CameraShake();
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
 
         _normalCamera.Priority = _normalPriority;

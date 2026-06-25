@@ -12,8 +12,13 @@ public class PlayerSoundHandler : MonoBehaviour
 
         if (animController != null)
         {
-            animController.OnModeChangeComplete += OnModeChanged;
+            animController.OnModeChangeComplete += OnModeChangeComplete;
             _animController = animController;
+        }
+
+        if (modeController != null)
+        {
+            modeController.OnModeChanged += OnModeChanged;
         }
 
         if (stateManager != null)
@@ -33,7 +38,10 @@ public class PlayerSoundHandler : MonoBehaviour
     private void OnDestroy()
     {
         if (_animController != null)
-            _animController.OnModeChangeComplete -= OnModeChanged;
+            _animController.OnModeChangeComplete -= OnModeChangeComplete;
+
+        if (_modeController != null)
+            _modeController.OnModeChanged -= OnModeChanged;
 
         if (_stateManager != null)
             _stateManager.OnStateChanged -= OnStateChanged;
@@ -113,7 +121,20 @@ public class PlayerSoundHandler : MonoBehaviour
 
     // ── モード変更 ─────────────────────────────────────
 
-    private void OnModeChanged()
+    private void OnModeChanged(PlayerMode _)
+    {
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.ModeChange1,
+            CueSheetType.Player);
+
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.ModeChange2,
+            CueSheetType.Player);
+    }
+
+    private void OnModeChangeComplete()
     {
         if (_modeController.CurrentMode == PlayerMode.Thunder)
         {

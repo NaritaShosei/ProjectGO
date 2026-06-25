@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _bgmPlayer: {fileID: 445822391699466955}
-  _deaultBGMCueSheet: InGame_BGM
+  _deaultBGMCueSheet: BGM
 --- !u!1 &1871702979367965954
 GameObject:
   m_ObjectHideFlags: 0
@@ -171,8 +171,40 @@ MonoBehaviour:
   m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtom
   acfFile: Audio/ProjectGO.acf
   cueSheets:
-  - name: CueSheet_0
-    acbFile: Audio/CueSheet_0.acb
+  - name: BGM
+    acbFile: Audio/BGM.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Boss_SE
+    acbFile: Audio/Boss_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Common_SE
+    acbFile: Audio/Common_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Environment_SE
+    acbFile: Audio/Environment_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Golem_SE
+    acbFile: Audio/Golem_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Mob_SE
+    acbFile: Audio/Mob_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Player_SE
+    acbFile: Audio/Player_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Skill_SE
+    acbFile: Audio/Skill_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: UI_SE
+    acbFile: Audio/UI_SE.acb
     awbFile: 
     loaderStatus: 0
   dspBusSetting: 
