@@ -148,19 +148,9 @@ public class PlayerMovement : MonoBehaviour
         if (inputMag < INPUT_THRESHOLD) { _rb.linearVelocity = Vector3.zero; return; }
 
         var camera = _cameraManager.MainCamera;
-        Vector3 moveDir;
-        if (_lockOnTarget != null)
-        {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-            moveDir = (cameraRight * vec.x
-                            + Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y).normalized;
-        }
-        else
-        {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-            Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
-            moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
-        }
+        Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+        Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+        Vector3 moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
         moveDir.y = 0f;
 
         _rb.linearVelocity = moveDir * _modeController.ModeData.MoveSpeed * inputMag * _timeScale;
@@ -171,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanMove()) return;
 
-        if (_lockOnTarget != null)
+        if (_lockOnTarget != null && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             Vector3 toTarget = _lockOnTarget.position - transform.position;
             toTarget.y = 0f;
@@ -197,7 +187,8 @@ public class PlayerMovement : MonoBehaviour
     private void PlayMoveAnimation()
     {
         if (_playerStateManager.IsDodging()) return;
-        if (_lockOnTarget != null)
+
+        if (_lockOnTarget != null && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             var input = _input.MoveInput;
             var snappedInput = SnapTo8Directions(input);

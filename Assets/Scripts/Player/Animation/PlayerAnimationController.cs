@@ -91,12 +91,11 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     {
         string stateName;
 
-        if (_isLockedOn)
+        if (_isLockedOn && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             stateName = _modeController.CurrentMode switch
             {
                 PlayerMode.Warrior => AnimParams.WarriorLockedMove,
-                PlayerMode.Thunder => AnimParams.ThunderLockedMove,
                 _ => null
             };
         }
@@ -199,8 +198,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     /// </summary>
     public void SetLockedOn(bool isLockedOn)
     {
-        _animator.SetBool(AnimParams.IsLockedOn, isLockedOn);
         _isLockedOn = isLockedOn;
+        ApplyLockedOnAnimationParameter(_modeController.CurrentMode);
     }
 
     public void OnDestroy()
@@ -235,9 +234,6 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
         public const string ThunderFreeMove =
             "Base Layer.Thunder.Thunder_FreeMove";
-
-        public const string ThunderLockedMove =
-            "Base Layer.Thunder.Thunder_LockedMove";
 
         public const string ModeChangeToThunder =
             "ModeChangeToThunder";
@@ -294,6 +290,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        ApplyLockedOnAnimationParameter(newMode);
+
         // Warrior→Thunderのモードチェンジはアニメーションをスキップ
         if (newMode == PlayerMode.Warrior)
         {
@@ -307,5 +305,10 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.SetTrigger(AnimParams.ModeChange);
 
         _animator.CrossFadeInFixedTime(AnimParams.ModeChangeToThunder, 0.1f, 0);
+    }
+
+    private void ApplyLockedOnAnimationParameter(PlayerMode mode)
+    {
+        _animator.SetBool(AnimParams.IsLockedOn, _isLockedOn && mode != PlayerMode.Thunder);
     }
 }
