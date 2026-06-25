@@ -173,7 +173,7 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
     private void HandleDownEnd() => OnDownEnd?.Invoke();
     private void HandleDownStart() => OnDownStart?.Invoke();
-    private void HandleAttackEffect() => OnAttackEffect();
+    private void HandleAttackEffect() => OnAttackEffect?.Invoke();
     private void HandleFootstep() => OnFootstep?.Invoke();
     private void HandleBarkStart() => OnBarkStart?.Invoke();
 }

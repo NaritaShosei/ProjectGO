@@ -1,5 +1,6 @@
-using UnityEngine;
 using System;
+using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 /// <summary>
 /// ゴーレム専用Enemy
@@ -249,7 +250,9 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
 
     protected override void HandleAttackEffect()
     {
-        _effectManager?.PlayEffect(_attackEffecktText, _attackEffectPoint.position);
+        if (_effectManager == null) return;
+        Vector3 pos = _attackEffectPoint != null ? _attackEffectPoint.position : transform.position;
+        _effectManager.PlayEffect(_attackEffecktText, pos);
     }
     private void HandleDownStart()
     {

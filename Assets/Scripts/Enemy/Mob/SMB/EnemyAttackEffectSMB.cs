@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class EnemyAttackEffectSMB : StateMachineBehaviour
 {
-    [Header("Timings (seconds)")]
-    [SerializeField]
+    [Header("Effect Timing (normalized 0-1)")]
+    [SerializeField,Range(0f, 1f)]
     private float _effectTiming = 0.2f;
 
     private bool _effectFired; 
