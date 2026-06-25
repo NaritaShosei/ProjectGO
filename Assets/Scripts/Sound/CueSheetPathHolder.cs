@@ -23,6 +23,4 @@ public enum CueSheetType
     Enemy,
     Common,
     InGameBGM,
-    Golem,
-    Mob
 }
