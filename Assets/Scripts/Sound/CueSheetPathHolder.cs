@@ -12,8 +12,6 @@ public class CueSheetPathHolder
         CueSheetPathDict.Add(CueSheetType.Enemy, "Enemy_SE");
         CueSheetPathDict.Add(CueSheetType.Common, "Common_SE");
         CueSheetPathDict.Add(CueSheetType.InGameBGM, "InGame_BGM");
-        CueSheetPathDict.Add(CueSheetType.Golem, "Golem_SE");
-        CueSheetPathDict.Add(CueSheetType.Mob, "Mob_SE");
     }
 }
 
