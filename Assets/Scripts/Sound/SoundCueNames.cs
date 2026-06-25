@@ -81,7 +81,7 @@ public static class SoundCueNames
         public const string DraugrDamageVoice = "DraugrDamageVoice";
 
         /// <summary>ストーンゴーレム地面踏みつけ</summary>
-        public const string StoneGolemFootStomp = "StoneGolemGroundStomp";
+        public const string StoneGolemFootStomp = "StoneGolemFootStomp";
 
         /// <summary>ストーンゴーレムの足音</summary>
         public const string StoneGolemFootstep = "StoneGolemFootstep";
