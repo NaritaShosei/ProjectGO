@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
-  m_Name: WaveData
+  m_Name: WaveData 1
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
-    - EnemyTypeKey: Enemy_Armor_Medium
+    - EnemyTypeKey: Enemy_Medium
+      SpawnCount: 3
+    - EnemyTypeKey: Enemy_Armor_Light
       SpawnCount: 2
-    ExclusionRadius: 5
+    ExclusionRadius: 0
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
-    SpawnPointKey: 4
+    SpawnPointKey: 
