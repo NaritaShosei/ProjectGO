@@ -370,6 +370,7 @@ public class PlayerAttack : MonoBehaviour
         SetupHoming(variant);
         _activeAttackVariant = variant;
 
+        FaceAttackTarget();
         RequestAttackMove(variant);
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
@@ -412,6 +413,7 @@ public class PlayerAttack : MonoBehaviour
         SetupHoming(variant);
         _activeAttackVariant = variant;
 
+        FaceAttackTarget();
         RequestAttackMove(variant);
 
         _stateManager.ChangeState(PlayerState.Attacking);
@@ -839,8 +841,24 @@ public class PlayerAttack : MonoBehaviour
         });
     }
 
+    private void FaceAttackTarget()
+    {
+        Vector3 direction = ResolveAttackMoveDirection();
+        if (direction.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(direction);
+    }
+
     private Vector3 ResolveAttackMoveDirection()
     {
+        Transform lockOnTarget = GetCurrentLockOnTargetCenter();
+        if (lockOnTarget != null)
+        {
+            Vector3 toTarget = lockOnTarget.position - transform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude > 0.001f)
+                return toTarget.normalized;
+        }
+
         if (_homingTarget != null)
         {
             Vector3 toTarget = _homingTarget.position - transform.position;
@@ -852,6 +870,18 @@ public class PlayerAttack : MonoBehaviour
         Vector3 forward = transform.forward;
         forward.y = 0f;
         return forward.sqrMagnitude > 0.001f ? forward.normalized : Vector3.forward;
+    }
+
+    private Transform GetCurrentLockOnTargetCenter()
+    {
+        if (_currentLockOnTarget is not Component targetComponent ||
+            !targetComponent ||
+            !_currentLockOnTarget.IsLockable)
+        {
+            return null;
+        }
+
+        return _currentLockOnTarget.GetTargetCenter();
     }
 
     private void HandleAttackHitConfirmed()
