@@ -55,10 +55,10 @@ public class EnemySoundHandler : MonoBehaviour
                     SoundCueNames.Common.EnemyFinisher,
                     CueSheetType.Common);
 
-                //Sound.PlaySE(
-                //    gameObject,
-                //    SoundCueNames.Enemy.StoneGolemDeathVoice,
-                //    CueSheetType.Golem);
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Enemy.StoneGolemDeathVoice,
+                    CueSheetType.Golem);
                 break;
 
         }
@@ -70,7 +70,7 @@ public class EnemySoundHandler : MonoBehaviour
         switch (_enemy.EnemyType)
         {
             case EnemyType.Draugr:
-                //Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrDamageVoice, CueSheetType.Mob);
+                Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrDamageVoice, CueSheetType.Mob);
                 break;
         }
     }
@@ -80,11 +80,11 @@ public class EnemySoundHandler : MonoBehaviour
         switch (_enemy.EnemyType)
         {
             case EnemyType.Draugr:
-                //Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrAttackVoice, CueSheetType.Mob);
-                //Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrWeaponSwing, CueSheetType.Mob);
+                Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrAttackVoice, CueSheetType.Mob);
+                Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrWeaponSwing, CueSheetType.Mob);
                 break;
             case EnemyType.StoneGolem:
-                //Sound.PlaySE(gameObject, SoundCueNames.Enemy.StoneGolemFootStomp, CueSheetType.Golem);
+                Sound.PlaySE(gameObject, SoundCueNames.Enemy.StoneGolemFootStomp, CueSheetType.Golem);
                 break;
         }
     }
@@ -94,17 +94,17 @@ public class EnemySoundHandler : MonoBehaviour
         switch (_enemy.EnemyType)
         {
             case EnemyType.Draugr:
-                //Sound.PlaySE(
-                //    gameObject,
-                //    SoundCueNames.Enemy.DraugrBark,
-                //    CueSheetType.Mob);
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Enemy.DraugrBark,
+                    CueSheetType.Mob);
                 break;
 
             case EnemyType.StoneGolem:
-                //Sound.PlaySE(
-                //    gameObject,
-                //    SoundCueNames.Enemy.StoneGolemBark,
-                //    CueSheetType.Golem);
+                Sound.PlaySE(
+                gameObject,
+                    SoundCueNames.Enemy.StoneGolemBark,
+                    CueSheetType.Golem);
                 break;
         }
     }
@@ -112,10 +112,10 @@ public class EnemySoundHandler : MonoBehaviour
     private void HandleDown()
     {
         if (_enemy.EnemyType != EnemyType.StoneGolem) return;
-        //Sound.PlaySE(
-        //    gameObject,
-        //    SoundCueNames.Enemy.StoneGolemDownVoice,
-        //    CueSheetType.Golem);
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Enemy.StoneGolemDownVoice,
+            CueSheetType.Golem);
     }
 
     private void HandleFootstep()
@@ -123,10 +123,10 @@ public class EnemySoundHandler : MonoBehaviour
         switch (_enemy.EnemyType)
         {
             case EnemyType.StoneGolem:
-                //Sound.PlaySE(
-                //    gameObject,
-                //    SoundCueNames.Enemy.StoneGolemFootstep,
-                //    CueSheetType.Golem);
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Enemy.StoneGolemFootstep,
+                    CueSheetType.Golem);
                 break;
         }
     }
