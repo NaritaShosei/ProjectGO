@@ -9,9 +9,15 @@ public class CueSheetPathHolder
     {
         CueSheetPathDict.Add(CueSheetType.UI, "UI_SE");
         CueSheetPathDict.Add(CueSheetType.Player, "Player_SE");
-        CueSheetPathDict.Add(CueSheetType.Enemy, "Enemy_SE");
+        CueSheetPathDict.Add(CueSheetType.Enemy, "Mob_SE");
+        CueSheetPathDict.Add(CueSheetType.Mob, "Mob_SE");
+        CueSheetPathDict.Add(CueSheetType.Golem, "Golem_SE");
+        CueSheetPathDict.Add(CueSheetType.Boss, "Boss_SE");
         CueSheetPathDict.Add(CueSheetType.Common, "Common_SE");
-        CueSheetPathDict.Add(CueSheetType.InGameBGM, "InGame_BGM");
+        CueSheetPathDict.Add(CueSheetType.Skill, "Skill_SE");
+        CueSheetPathDict.Add(CueSheetType.Environment, "Environment_SE");
+        CueSheetPathDict.Add(CueSheetType.BGM, "BGM");
+        CueSheetPathDict.Add(CueSheetType.InGameBGM, "BGM");
     }
 }
 
@@ -21,6 +27,12 @@ public enum CueSheetType
     UI,
     Player,
     Enemy,
+    Mob,
+    Golem,
+    Boss,
     Common,
+    Skill,
+    Environment,
+    BGM,
     InGameBGM,
 }
