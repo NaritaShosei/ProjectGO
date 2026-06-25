@@ -17,11 +17,12 @@ public class GroundCrush : SkillBase
             playerTransform.forward * _range;
 
         Vector3 forward = playerTransform.forward;
+        GameObject playerObject = playerTransform.gameObject;
 
         center = GetGroundPosition(center);
 
         context.OnAfterAttack += () =>
-            ActivationGroundCrush(center, forward, attackPower).Forget();
+            ActivationGroundCrush(playerObject, center, forward, attackPower).Forget();
 
         context.OnAfterAttack += () =>
             SpawnEffect(center, forward).Forget();
@@ -62,11 +63,20 @@ public class GroundCrush : SkillBase
     /// <param name="attackPower">攻撃力</param>
     /// <returns></returns>
     private async UniTask ActivationGroundCrush(
+    GameObject playerObject,
     Vector3 center,
     Vector3 forward,
     float attackPower)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(_delay));
+
+        if (playerObject != null)
+        {
+            Sound.PlaySE(
+                playerObject,
+                SoundCueNames.Skill.GroundCrush,
+                CueSheetType.Skill);
+        }
 
         EnemyManager enemyManager = ServiceLocator.Get<EnemyManager>();
 
