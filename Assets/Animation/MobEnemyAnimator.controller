@@ -66,6 +66,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
   _attackHitTime: 0.3
+  _weaponSwingTime: 0.633
 --- !u!114 &-7788459553001155151
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -782,6 +783,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
   _attackHitTime: 1.09
+  _weaponSwingTime: 0.32
 --- !u!1101 &4997727682768932297
 AnimatorStateTransition:
   m_ObjectHideFlags: 1

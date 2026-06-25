@@ -2,19 +2,20 @@ using UnityEngine;
 
 public class EnemySoundHandler : MonoBehaviour
 {
-    private Enemy _enemy;
-
     public void Init(Enemy enemy)
     {
         _enemy = enemy;
 
         _enemy.OnDead += HandleDead;
         _enemy.OnDamaged += HandleDamaged;
-        _enemy.EnemyAnimator.OnAttackEffect += HandleAttack;
+        _enemy.EnemyAnimator.OnAttackStart += HandleAttack;
         _enemy.EnemyAnimator.OnDownStart += HandleDown;
         _enemy.EnemyAnimator.OnFootstep += HandleFootstep;
         _enemy.EnemyAnimator.OnBarkStart += HandleBark;
+        _enemy.EnemyAnimator.OnWeaponSwing += HandleWeaponSwing;
     }
+
+    private Enemy _enemy;
 
     private void OnDestroy()
     {
@@ -22,10 +23,11 @@ public class EnemySoundHandler : MonoBehaviour
 
         _enemy.OnDead -= HandleDead;
         _enemy.OnDamaged -= HandleDamaged;
-        _enemy.EnemyAnimator.OnAttackEffect -= HandleAttack;
+        _enemy.EnemyAnimator.OnAttackStart -= HandleAttack;
         _enemy.EnemyAnimator.OnDownStart -= HandleDown;
         _enemy.EnemyAnimator.OnFootstep -= HandleFootstep;
         _enemy.EnemyAnimator.OnBarkStart -= HandleBark;
+        _enemy.EnemyAnimator.OnWeaponSwing -= HandleWeaponSwing;
     }
 
     private void HandleDead(IEnemy _)
@@ -62,10 +64,26 @@ public class EnemySoundHandler : MonoBehaviour
         {
             case EnemyType.Draugr:
                 Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrAttackVoice, CueSheetType.Mob);
-                Sound.PlaySE(gameObject, SoundCueNames.Enemy.DraugrWeaponSwing, CueSheetType.Mob);
                 break;
+        }
+    }
+
+    private void HandleWeaponSwing()
+    {
+        switch (_enemy.EnemyType)
+        {
+            case EnemyType.Draugr:
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Enemy.DraugrWeaponSwing,
+                    CueSheetType.Mob);
+                break;
+
             case EnemyType.StoneGolem:
-                Sound.PlaySE(gameObject, SoundCueNames.Enemy.StoneGolemFootStomp, CueSheetType.Golem);
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Enemy.StoneGolemGroundStomp,
+                    CueSheetType.Golem);
                 break;
         }
     }

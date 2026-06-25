@@ -20,6 +20,7 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnFootstep;
     public event Action OnBarkStart;
     public event Action OnAttackStart;
+    public event Action OnWeaponSwing;
 
     /// <summary>
     /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
@@ -43,6 +44,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnFootstep += HandleFootstep;
         _receiver.OnBarkStart += HandleBarkStart;
         _receiver.OnAttackStart += HandleAttackStart;
+        _receiver.OnWeaponSwing += HandleWeaponSwing;
     }
 
     /// <summary>
@@ -137,6 +139,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnFootstep -= HandleFootstep;
         _receiver.OnBarkStart -= HandleBarkStart;
         _receiver.OnAttackStart -= HandleAttackStart;
+        _receiver.OnWeaponSwing -= HandleWeaponSwing;
     }
 
     public void SetDown(bool value)
@@ -180,4 +183,5 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleFootstep() => OnFootstep?.Invoke();
     private void HandleBarkStart() => OnBarkStart?.Invoke();
     private void HandleAttackStart() => OnAttackStart?.Invoke();
+    private void HandleWeaponSwing() => OnWeaponSwing?.Invoke();
 }

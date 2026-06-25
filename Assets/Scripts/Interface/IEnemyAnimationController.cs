@@ -35,4 +35,10 @@ public interface IEnemyAnimationController
 
     /// <summary>攻撃開始の通知</summary>
     public void AnimEvent_AttackStart();
+
+    /// <summary>足音イベント</summary>
+    public void AnimEvent_Footstep();
+
+    /// <summary>武器スイングSEタイミング</summary>
+    public void AnimEvent_WeaponSwing();
 }
