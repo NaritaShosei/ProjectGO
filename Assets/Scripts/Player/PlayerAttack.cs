@@ -597,6 +597,7 @@ public class PlayerAttack : MonoBehaviour
         if (!_isAttackButtonHeld)
         {
             FireWarriorAttack(newLevel);
+            return;
         }
 
         // 段階が上がったときだけアニメーションを切り替えてイベント通知
@@ -624,6 +625,7 @@ public class PlayerAttack : MonoBehaviour
         {
             _autoFireTriggered = true;
             FireWarriorAttack(newLevel);
+            return;
         }
     }
 
@@ -834,9 +836,16 @@ public class PlayerAttack : MonoBehaviour
             Duration = data.MoveDuration,
             Direction = moveDirection,
             Target = _homingTarget,
-            StopDistance = data.StopOnHit ? data.AttackRange : 0,
+            StopDistance = CalculateAttackMoveStopDistance(data),
             IsPhantom = data.IsPhantom
         });
+    }
+
+    private float CalculateAttackMoveStopDistance(AttackVariantData data)
+    {
+        if (_homingTarget == null) return 0f;
+
+        return Mathf.Max(0f, data.AttackRange);
     }
 
     private Vector3 ResolveAttackMoveDirection()
