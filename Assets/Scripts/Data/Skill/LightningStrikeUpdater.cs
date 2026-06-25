@@ -32,6 +32,10 @@ public class LightningStrikeUpdater : ISkillUpdater
         shuffled.Shuffle();
 
         int targetCount = Mathf.Min(_data.TargetCount, shuffled.Count);
+        Sound.PlaySE(
+            shuffled[0].Self.gameObject,
+            SoundCueNames.Skill.LightningStrike,
+            CueSheetType.Skill);
 
         var keys = new List<string>();
         if (_data.HitEffectKeys != null)
