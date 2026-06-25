@@ -7,6 +7,7 @@ using System;
 /// </summary>
 public class GolemEnemy : MobEnemy, IFormationParticipant
 {
+    public event Action OnDownStarted;
     /// <summary>
     /// ゴーレムの初期化
     /// Behaviour・Condition・Armorを生成して登録する
@@ -249,6 +250,10 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     protected override void HandleAttackEffect()
     {
         _effectManager?.PlayEffect(_attackEffecktText, _attackEffectPoint.position);
+    }
+    private void HandleDownStart()
+    {
+        OnDownStarted?.Invoke();
     }
 
     /// <summary>
