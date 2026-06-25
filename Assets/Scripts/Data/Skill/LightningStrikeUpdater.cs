@@ -73,7 +73,11 @@ public class LightningStrikeUpdater : ISkillUpdater
                     }
                 };
 
-                enemy.TakeDamage(damageContext);
+                // このTakeDamage内で生成されるダメージポップアップだけ雷色にする。
+                using (DamagePopupColorScope.Use(DamagePopupColorScope.LightningColor))
+                {
+                    enemy.TakeDamage(damageContext);
+                }
             }
 
             if (keys.Count > 0)
