@@ -26,7 +26,6 @@ public class EnemyDownSMB : StateMachineBehaviour
             if (animator.TryGetComponent(out IEnemyAnimationController c))
             {
                 c.AnimEvent_DownEnd();
-                c.AnimEvent_DownStart();
             }
         }
     }
