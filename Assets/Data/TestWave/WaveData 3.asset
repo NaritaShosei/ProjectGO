@@ -24,16 +24,18 @@ MonoBehaviour:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Light
       SpawnCount: 2
+    - EnemyTypeKey: Stone_Golem
+      SpawnCount: 1
     ExclusionRadius: 5
     NextWaveConditions:
-    - WaveConditionType: 1
-      Threshold: 1
+    - WaveConditionType: 2
+      Threshold: 0
     SpawnPointKey: 
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Light
       SpawnCount: 2
     ExclusionRadius: 5
     NextWaveConditions:
-    - WaveConditionType: 1
-      Threshold: 1
+    - WaveConditionType: 2
+      Threshold: 0
     SpawnPointKey: 

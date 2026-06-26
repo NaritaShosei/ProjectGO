@@ -478,7 +478,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 1f4271d91ff70304c9681d34cf5657a0, type: 2}
+  m_Motion: {fileID: 7400012, guid: ce65fa103f0e84b4289374b2a4bf93f8, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -522,7 +522,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: c68c7ff4eee29364fbdf62e7df0445d4, type: 2}
+    m_Motion: {fileID: 7400004, guid: ce65fa103f0e84b4289374b2a4bf93f8, type: 3}
     m_Threshold: 0.5
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -530,7 +530,7 @@ BlendTree:
     m_DirectBlendParameter: Speed
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 8b7edae5b7999564bac5c390964fcd7e, type: 2}
+    m_Motion: {fileID: 7400002, guid: ce65fa103f0e84b4289374b2a4bf93f8, type: 3}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -768,7 +768,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5200d8c2d418da4fa93ffc4b1d5f391, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
-  _attackHitTime: 1.09
+  _attackHitTime: 0.84
 --- !u!1101 &4997727682768932297
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
