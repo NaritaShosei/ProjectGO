@@ -52,7 +52,7 @@ public class DamagePopupView : MonoBehaviour, IDamagePopupView, IPoolable
 
         _canvasGroup.alpha = 1f;
         _damageText.text = viewModel.Damage.ToString();
-        _damageText.color = viewModel.IsWeakPoint ? _weakColor : _normalColor;
+        _damageText.color = viewModel.TextColor ?? (viewModel.IsWeakPoint ? _weakColor : _normalColor);
         _criticalObj.SetActive(viewModel.IsCritical);
 
         var screenPos = _mainCamera.WorldToScreenPoint(viewModel.WorldPosition);

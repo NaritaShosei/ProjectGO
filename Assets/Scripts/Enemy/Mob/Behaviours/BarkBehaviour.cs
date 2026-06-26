@@ -11,11 +11,12 @@ public class BarkBehaviour : IEnemyBehaviour
     /// <summary>
     /// DistanceProfile・AttackerSlot はBarkBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public BarkBehaviour(DistanceProfile profile, EnemyServices services, float barkChance)
+    public BarkBehaviour(DistanceProfile profile, EnemyServices services, float barkChance, bool forceOnly = false)
     {
         _profile = profile;
         _attackerSlot = services.AttackerSlot;
         _barkChance = barkChance;
+        _forceOnly = forceOnly;
     }
 
     public void Init(BehaviourInitContext ctx)
@@ -37,6 +38,11 @@ public class BarkBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
+        // ForceBehaviour専用の場合は
+        // 通常のBehaviour選択対象にせず強制割り込み
+        if (_forceOnly)
+            return false;
+
         if (_attackerSlot == null) return false;
         if (_player == null) return false;
 
@@ -50,6 +56,7 @@ public class BarkBehaviour : IEnemyBehaviour
         bool isOnCooldown = _context.AttackCooldownRemaining > 0f;
         bool hasNoSlot = !_attackerSlot.IsAcquired(_enemyId);
         if (!isOnCooldown && !hasNoSlot) return false;
+
 
         // 確率判定：falseのときはRoamが選ばれる
         return UnityEngine.Random.value < _barkChance;
@@ -108,6 +115,7 @@ public class BarkBehaviour : IEnemyBehaviour
 
     private int _enemyId;
     private bool _barkEnded;
+    private readonly bool _forceOnly;
 
     private readonly DistanceProfile _profile;
     private readonly float _barkChance;

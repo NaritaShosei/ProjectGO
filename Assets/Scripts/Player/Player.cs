@@ -76,7 +76,13 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
 
-        _soundHandler?.Init(_playerAnimationController, _playerStateManager, _modeController, _attackExecutor);
+        _soundHandler?.Init(
+            _playerAnimationController,
+            _playerStateManager,
+            _modeController,
+            _attackExecutor,
+            _attack,
+            this);
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
             hitStopManager.Register(this, HitStopTargetGroup.Player);
@@ -98,6 +104,13 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     public void TakeDamage(float damage)
     {
         if (_playerStateManager.IsDead()) return;
+
+        if (_justDodgeSystem != null && _justDodgeSystem.TryJustDodge())
+        {
+            Debug.Log("ジャスト回避成功");
+            return;
+        }
+
         if (_playerStateManager.IsInvincible()) return;
 
         // ダメージ修正を全て適用する。これにより、特定の条件で受けるダメージを増減させることができる。
@@ -185,8 +198,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _move.SetTimeScale(timeScale);
     }
 
+    [Header("Data")]
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
+
+    [Header("参照")]
     [SerializeField] private PlayerMovement _move;
     [SerializeField] private PlayerAttack _attack;
     [SerializeField] private PlayerInteractor _interactor;
@@ -195,6 +211,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     [SerializeField] private PlayerAnimationController _playerAnimationController;
     [SerializeField] private PlayerSoundHandler _soundHandler;
     [SerializeField] private Transform _targetCenter;
+    [SerializeField] private JustDodgeSystem _justDodgeSystem;
+
+    [Header("ヒットストップ設定")]
+    [SerializeField] private HitStopData _hitStopData;
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
@@ -234,6 +254,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _playerAnimationController.OnModeChangeComplete -= OnModeChangeComplete;
             _playerAnimationController.OnDestroy();
         }
+
+        if (_move != null && _justDodgeSystem != null)
+        {
+            _move.OnStartDodgeInvincible -= _justDodgeSystem.JustDodgeWindowStart;
+            _justDodgeSystem.OnJustDodgeSuccess -= HandleJustDodgeSuccess;
+        }
     }
 
     private void BindEvents()
@@ -243,6 +269,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         if (_playerAnimationController != null && _playerStateManager != null)
             _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
+
+        if (_move != null && _justDodgeSystem != null)
+        {
+            _move.OnStartDodgeInvincible += _justDodgeSystem.JustDodgeWindowStart;
+            _justDodgeSystem.OnJustDodgeSuccess += HandleJustDodgeSuccess;
+        }
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             cameraManager.OnLockOnTargetChanged += SetLockOnTarget;
@@ -320,6 +352,18 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         {
             _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
         }
+    }
+
+    /// <summary>
+    /// ジャスト回避成功時の処理。
+    /// </summary>
+    private void HandleJustDodgeSuccess()
+    {
+        // TODO:ここに直書きではなく、JustDodgeEffectPlayerのようなクラスをはさんだほうがいい
+
+        if (!ServiceLocator.TryGet(out HitStopManager hitStopManager)) return;
+
+        hitStopManager.Trigger(_hitStopData);
     }
 
     private void OnPlayerDead()

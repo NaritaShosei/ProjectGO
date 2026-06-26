@@ -8,6 +8,8 @@ public class PlayerAttack : MonoBehaviour
 
     /// <summary> 攻撃入力があったときに、攻撃の種類やチャージ時間などの情報を通知するイベント </summary>
     public event Action<AttackMoveRequest> OnAttackMoveRequested;
+    public event Action OnAttackMoveStopRequested;
+    public event Action OnAttackEnded;
     /// <summary> 溜め開始を移動制限のためにPlayerMovementへ通知</summary>
     public event Action OnChargingStarted;
     /// <summary> 溜め終了（攻撃発動 or キャンセル）を通知</summary>
@@ -40,6 +42,7 @@ public class PlayerAttack : MonoBehaviour
         _modeController = modeController;
         _animationController = animationController;
         _skillManager = skillManager;
+        _attackExecutor.OnHitConfirmed += HandleAttackHitConfirmed;
 
         // R1押し始め → チャージ開始 or 即時攻撃準備
         _input.OnLightAttackPressed += HandleAttackPressed;
@@ -67,6 +70,7 @@ public class PlayerAttack : MonoBehaviour
     {
         CancelCharge();
         ClearAttackState();
+        OnAttackEnded?.Invoke();
         ResetCombo();
     }
 
@@ -87,6 +91,7 @@ public class PlayerAttack : MonoBehaviour
     {
         CancelCharge();
         ClearAttackState();
+        OnAttackEnded?.Invoke();
         _currentAttackId = -1;
     }
 
@@ -139,6 +144,7 @@ public class PlayerAttack : MonoBehaviour
     private Transform _homingTarget;
     private Transform _lockedHomingTarget;
     private bool _isHomingLocked;
+    private AttackVariantData _activeAttackVariant;
 
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
@@ -160,6 +166,9 @@ public class PlayerAttack : MonoBehaviour
             _input.OnLightAttackReleased -= HandleAttackReleased;
             _input.OnModeChange -= ChangeMode;
         }
+
+        if (_attackExecutor != null)
+            _attackExecutor.OnHitConfirmed -= HandleAttackHitConfirmed;
 
         if (_animationController != null)
         {
@@ -190,6 +199,9 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void HandleAttackPressed()
     {
+        // すでにチャージ中なら無視
+        if (_isCharging) return;
+
         _canStartCharge = false;
         _isAttackButtonHeld = true;
 
@@ -356,7 +368,9 @@ public class PlayerAttack : MonoBehaviour
         }
 
         SetupHoming(variant);
+        _activeAttackVariant = variant;
 
+        FaceAttackTarget();
         RequestAttackMove(variant);
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
@@ -397,7 +411,9 @@ public class PlayerAttack : MonoBehaviour
         if (variant == null) { return; }
 
         SetupHoming(variant);
+        _activeAttackVariant = variant;
 
+        FaceAttackTarget();
         RequestAttackMove(variant);
 
         _stateManager.ChangeState(PlayerState.Attacking);
@@ -420,8 +436,11 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        OnAttackEnded?.Invoke();
+
         _pendingAttackData = null;
         _pendingAttackInput = null;
+        _activeAttackVariant = null;
 
         if (_pendingWarriorCharge)
         {
@@ -520,6 +539,7 @@ public class PlayerAttack : MonoBehaviour
     {
         _pendingAttackData = null;
         _pendingAttackInput = null;
+        _activeAttackVariant = null;
         _bufferedComboInput = null;
 
         _isInComboWindow = false;
@@ -579,6 +599,7 @@ public class PlayerAttack : MonoBehaviour
         if (!_isAttackButtonHeld)
         {
             FireWarriorAttack(newLevel);
+            return;
         }
 
         // 段階が上がったときだけアニメーションを切り替えてイベント通知
@@ -606,6 +627,7 @@ public class PlayerAttack : MonoBehaviour
         {
             _autoFireTriggered = true;
             FireWarriorAttack(newLevel);
+            return;
         }
     }
 
@@ -804,16 +826,77 @@ public class PlayerAttack : MonoBehaviour
     {
         if (!data.EnableMovement) return;
 
+        Vector3 moveDirection = ResolveAttackMoveDirection();
+        if (moveDirection.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(moveDirection);
+
         OnAttackMoveRequested?.Invoke(new AttackMoveRequest
         {
             MoveCurve = data.MoveCurve,
             Distance = data.MoveDistance,
             Speed = data.MoveSpeed,
             Duration = data.MoveDuration,
+            Direction = moveDirection,
             Target = _homingTarget,
-            StopDistance = data.StopOnHit ? data.AttackRange : 0,
+            StopDistance = CalculateAttackMoveStopDistance(data),
             IsPhantom = data.IsPhantom
         });
+    }
+
+    private float CalculateAttackMoveStopDistance(AttackVariantData data)
+    {
+        if (_homingTarget == null) return 0f;
+
+        return Mathf.Max(0f, data.AttackRange);
+    }
+
+    private void FaceAttackTarget()
+    {
+        Vector3 direction = ResolveAttackMoveDirection();
+        if (direction.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(direction);
+    }
+
+    private Vector3 ResolveAttackMoveDirection()
+    {
+        Transform lockOnTarget = GetCurrentLockOnTargetCenter();
+        if (lockOnTarget != null)
+        {
+            Vector3 toTarget = lockOnTarget.position - transform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude > 0.001f)
+                return toTarget.normalized;
+        }
+
+        if (_homingTarget != null)
+        {
+            Vector3 toTarget = _homingTarget.position - transform.position;
+            toTarget.y = 0f;
+            if (toTarget.sqrMagnitude > 0.001f)
+                return toTarget.normalized;
+        }
+
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        return forward.sqrMagnitude > 0.001f ? forward.normalized : Vector3.forward;
+    }
+
+    private Transform GetCurrentLockOnTargetCenter()
+    {
+        if (_currentLockOnTarget is not Component targetComponent ||
+            !targetComponent ||
+            !_currentLockOnTarget.IsLockable)
+        {
+            return null;
+        }
+
+        return _currentLockOnTarget.GetTargetCenter();
+    }
+
+    private void HandleAttackHitConfirmed()
+    {
+        if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
+        OnAttackMoveStopRequested?.Invoke();
     }
     #endregion
 }
@@ -840,6 +923,7 @@ public struct AttackMoveRequest
     public float Distance;
     public float Speed;
     public float Duration;
+    public Vector3 Direction;
     public Transform Target; // 攻撃時の一番近い敵
     public float StopDistance; // 敵がいるときに攻撃を止める距離
     public bool IsPhantom; // 攻撃がファントムかどうか

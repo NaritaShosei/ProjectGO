@@ -13,23 +13,8 @@ public class SequenceStateContext
     public InputHandler InputHandler;
     public IPlayer Player;
     public SequenceManager SequenceManager;
+    public MoviePlayer MoviePlayer;
 
-    #endregion
-
-    #region タイマー
-
-    /// <summary>モブ戦・ボス戦などの制限時間管理</summary>
-    public CountDownTimer PhaseTimer;
-
-    /// <summary>ゲームオーバー選択タイマー（10秒）</summary>
-    public CountDownTimer GameOverTimer;
-
-    /// <summary>スキル選択タイマー</summary>
-    public CountDownTimer SkillSelectTimer;
-
-    public float MobBattleTimeLimit;
-    public float BossBattleTimeLimit;
-    public float SkillSelectTimeLimit;
     #endregion
 
     #region フラグ
@@ -52,27 +37,8 @@ public class SequenceStateContext
     /// <summary>ゲームオーバー後にタイトルへ戻るが選ばれたか</summary>
     public bool IsTitleRequested;
 
-    #endregion
-
-    #region スキル選択
-
     /// <summary>スキル選択が完了したか</summary>
     public bool IsSkillSelected;
-
-    /// <summary>スキル選択候補の数</summary>
-    public int SkillSelectCount = 3;
-
-    public ISkillSelectView SkillSelectView;
-
-    #endregion
-
-    #region Spawn
-
-    /// <summary>SequenceManagerに現在のSpawnDataリポジトリを渡す用途</summary>
-    public SpawnDataRepository SpawnDataRepository;
-
-    /// <summary>ボス用SpawnData</summary>
-    public SpawnData BossSpawnData;
 
     #endregion
 

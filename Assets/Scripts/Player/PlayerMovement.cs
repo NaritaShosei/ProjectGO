@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 {
     private const float INPUT_THRESHOLD = 0.001f;
 
+    public event Action OnStartDodgeInvincible;
     public event Action OnEndDodge;
 
     /// <summary>
@@ -33,6 +34,9 @@ public class PlayerMovement : MonoBehaviour
         _input.OnDodge += Dodge;
 
         _attack.OnAttackMoveRequested += HandleAttackMove;
+        _attack.OnAttackMoveStopRequested += HandleAttackMoveStop;
+
+        _attack.OnAttackEnded += HandleAttackEnd;
         _animationController.OnDamagedEnd += HandleDamagedEnd;
 
         _animationController.OnDodgeInvincibilityStart += HandleDodgeInvincibilityStart;
@@ -67,6 +71,8 @@ public class PlayerMovement : MonoBehaviour
     private Transform _lockOnTarget;
 
     private float _timeScale = 1f;
+
+    private bool _wasMoving;
     private bool _isDodging;
     private CancellationTokenSource _dodgeMoveCts;
     private CancellationTokenSource _attackMoveCts;
@@ -98,6 +104,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Rotate();
             PlayMoveAnimation();
+            CheckMoveStart();
         }
     }
 
@@ -113,6 +120,8 @@ public class PlayerMovement : MonoBehaviour
         if (_attack != null)
         {
             _attack.OnAttackMoveRequested -= HandleAttackMove;
+            _attack.OnAttackMoveStopRequested -= HandleAttackMoveStop;
+            _attack.OnAttackEnded -= HandleAttackEnd;
         }
 
         if (_animationController != null)
@@ -139,19 +148,9 @@ public class PlayerMovement : MonoBehaviour
         if (inputMag < INPUT_THRESHOLD) { _rb.linearVelocity = Vector3.zero; return; }
 
         var camera = _cameraManager.MainCamera;
-        Vector3 moveDir;
-        if (_lockOnTarget != null)
-        {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-            moveDir = (cameraRight * vec.x
-                            + Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized * vec.y).normalized;
-        }
-        else
-        {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
-            Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
-            moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
-        }
+        Vector3 cameraRight = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+        Vector3 cameraForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+        Vector3 moveDir = (cameraRight * vec.x + cameraForward * vec.y).normalized;
         moveDir.y = 0f;
 
         _rb.linearVelocity = moveDir * _modeController.ModeData.MoveSpeed * inputMag * _timeScale;
@@ -162,7 +161,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanMove()) return;
 
-        if (_lockOnTarget != null)
+        if (_lockOnTarget != null && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             Vector3 toTarget = _lockOnTarget.position - transform.position;
             toTarget.y = 0f;
@@ -188,7 +187,8 @@ public class PlayerMovement : MonoBehaviour
     private void PlayMoveAnimation()
     {
         if (_playerStateManager.IsDodging()) return;
-        if (_lockOnTarget != null)
+
+        if (_lockOnTarget != null && _modeController.CurrentMode != PlayerMode.Thunder)
         {
             var input = _input.MoveInput;
             var snappedInput = SnapTo8Directions(input);
@@ -198,6 +198,24 @@ public class PlayerMovement : MonoBehaviour
         }
         else
             _animationController.UpdateMoveAnimation(_rb.linearVelocity.magnitude);
+    }
+
+    /// <summary>
+    /// 移動入力が入り、かつ移動可能な状態になった瞬間を検知する。
+    /// 停止状態から移動状態へ遷移した際に MoveCrossFade を実行する。
+    /// </summary>
+    private void CheckMoveStart()
+    {
+        bool isMoving =
+            _playerStateManager.CanMove() &&
+            _input.MoveInput.magnitude > INPUT_THRESHOLD;
+
+        if (!_wasMoving && isMoving)
+        {
+            _animationController.MoveCrossFade();
+        }
+
+        _wasMoving = isMoving;
     }
 
     // ── 回避 ─────────────────────────────────────────────────
@@ -288,6 +306,9 @@ public class PlayerMovement : MonoBehaviour
     {
         // 回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
         if (!_isDodging) return;
+
+        OnStartDodgeInvincible?.Invoke();
+
         _playerStateManager.AddInvincible(InvincibleType.Dodge);
 
         HandleDodgeInvincibilityEnd().Forget();
@@ -422,9 +443,14 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 startPos = transform.position;
 
-        Vector3 forward = transform.forward;
-        forward.y = 0f;
-        Vector3 dir = forward.normalized;
+        Vector3 dir = request.Direction;
+        dir.y = 0f;
+        if (dir.sqrMagnitude <= 0.001f)
+        {
+            dir = transform.forward;
+            dir.y = 0f;
+        }
+        dir = dir.normalized;
 
         Vector3 targetPos = startPos + dir * request.Distance;
 
@@ -432,17 +458,16 @@ public class PlayerMovement : MonoBehaviour
 
         while (elapsed < request.Duration)
         {
-            if (request.Target &&
-                Vector3.Distance(request.Target.position, transform.position) < request.StopDistance)
-            {
-                stoppedEarly = true;
-                break;
-            }
-
             float t = elapsed / request.Duration;
             float curveValue = curve.Evaluate(t);
 
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, curveValue);
+            if (TryClampAttackMoveStopPosition(transform.position, newPos, request.Target, request.StopDistance, out var stoppedPos))
+            {
+                _rb.MovePosition(stoppedPos);
+                stoppedEarly = true;
+                break;
+            }
 
             _rb.MovePosition(newPos);
 
@@ -453,7 +478,73 @@ public class PlayerMovement : MonoBehaviour
                 _attackMoveCts.Token);
         }
         if (!stoppedEarly)
-            _rb.MovePosition(targetPos);
+        {
+            if (TryClampAttackMoveStopPosition(transform.position, targetPos, request.Target, request.StopDistance, out var stoppedPos))
+                _rb.MovePosition(stoppedPos);
+            else
+                _rb.MovePosition(targetPos);
+        }
+    }
+
+    private bool TryClampAttackMoveStopPosition(
+        Vector3 currentPos,
+        Vector3 candidatePos,
+        Transform target,
+        float stopDistance,
+        out Vector3 stoppedPos)
+    {
+        stoppedPos = candidatePos;
+
+        if (!target || stopDistance <= 0f) return false;
+
+        Vector3 targetPos = target.position;
+        float currentDistance = HorizontalDistance(currentPos, targetPos);
+        if (currentDistance <= stopDistance)
+        {
+            stoppedPos = currentPos;
+            return true;
+        }
+
+        float candidateDistance = HorizontalDistance(candidatePos, targetPos);
+        if (candidateDistance > stopDistance) return false;
+
+        Vector3 fromTarget = currentPos - targetPos;
+        fromTarget.y = 0f;
+        if (fromTarget.sqrMagnitude <= 0.001f)
+        {
+            stoppedPos = currentPos;
+            return true;
+        }
+
+        stoppedPos = targetPos + fromTarget.normalized * stopDistance;
+        stoppedPos.y = candidatePos.y;
+        return true;
+    }
+
+    private static float HorizontalDistance(Vector3 a, Vector3 b)
+    {
+        a.y = 0f;
+        b.y = 0f;
+        return Vector3.Distance(a, b);
+    }
+
+    /// <summary>
+    /// 攻撃アニメーション終了時のハンドラー。
+    /// </summary>
+    private void HandleAttackEnd()
+    {   
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = null;
+    }
+
+    private void HandleAttackMoveStop()
+    {
+        _attackMoveCts?.Cancel();
+        _attackMoveCts?.Dispose();
+        _attackMoveCts = null;
+        _isAttackMoving = false;
+        if (_rb) _rb.linearVelocity = Vector3.zero;
     }
 
     /// <summary>
