@@ -25,4 +25,20 @@ public interface IEnemyAnimationController
 
     /// <summary>ダウンアニメーション終了の通知 </summary>
     public void AnimEvent_DownEnd();
+    /// <summary>ダウンアニメーションの開始</summary>
+    public void AnimEvent_DownStart();
+
+    /// <summary>アタックエフェクトの再生タイミング通知</summary>
+    public void AnimEvent_AttackEffect();
+
+    public void AnimEvent_BarkStart();
+
+    /// <summary>攻撃開始の通知</summary>
+    public void AnimEvent_AttackStart();
+
+    /// <summary>足音イベント</summary>
+    public void AnimEvent_Footstep();
+
+    /// <summary>武器スイングSEタイミング</summary>
+    public void AnimEvent_WeaponSwing();
 }
