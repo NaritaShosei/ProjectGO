@@ -47,13 +47,11 @@ public static class SoundCueNames
         public const string DraugrAttackVoice = "DraugrAttackVoice";
         public const string DraugrBark = "DraugrBark";
         public const string DraugrDamageVoice = "DraugrDamageVoice";
-        public const string StoneGolemFootStomp = "StoneGolemFootStomp";
+        public const string StoneGolemGroundStomp = "StoneGolemGroundStomp";
         public const string StoneGolemFootstep = "StoneGolemFootstep";
         public const string StoneGolemBark = "StoneGolemBark";
         public const string StoneGolemDownVoice = "StoneGolemDownVoice";
         public const string StoneGolemDeathVoice = "StoneGolemDeathVoice";
-
-        public const string StoneGolemGroundStomp = StoneGolemFootStomp;
     }
 
     public static class Boss

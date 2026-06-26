@@ -15,6 +15,12 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
     public event Action OnDownEnd;
+    public event Action OnAttackEffect;
+    public event Action OnDownStart;
+    public event Action OnFootstep;
+    public event Action OnBarkStart;
+    public event Action OnAttackStart;
+    public event Action OnWeaponSwing;
 
     /// <summary>
     /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
@@ -33,6 +39,12 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnKnockbackEnd += HandleKnockbackEnd;
         _receiver.OnDeadEnd += HandleDeadEnd;
         _receiver.OnDownEnd += HandleDownEnd;
+        _receiver.OnDownStart += HandleDownStart;
+        _receiver.OnAttackEffect += HandleAttackEffect;
+        _receiver.OnFootstep += HandleFootstep;
+        _receiver.OnBarkStart += HandleBarkStart;
+        _receiver.OnAttackStart += HandleAttackStart;
+        _receiver.OnWeaponSwing += HandleWeaponSwing;
     }
 
     /// <summary>
@@ -122,6 +134,12 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnKnockbackEnd -= HandleKnockbackEnd;
         _receiver.OnDeadEnd -= HandleDeadEnd;
         _receiver.OnDownEnd -= HandleDownEnd;
+        _receiver.OnDownStart -= HandleDownStart;
+        _receiver.OnAttackEffect -= HandleAttackEffect;
+        _receiver.OnFootstep -= HandleFootstep;
+        _receiver.OnBarkStart -= HandleBarkStart;
+        _receiver.OnAttackStart -= HandleAttackStart;
+        _receiver.OnWeaponSwing -= HandleWeaponSwing;
     }
 
     public void SetDown(bool value)
@@ -160,4 +178,10 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleKnockbackEnd() => OnKnockbackEnd?.Invoke();
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
     private void HandleDownEnd() => OnDownEnd?.Invoke();
+    private void HandleDownStart() => OnDownStart?.Invoke();
+    private void HandleAttackEffect() => OnAttackEffect?.Invoke();
+    private void HandleFootstep() => OnFootstep?.Invoke();
+    private void HandleBarkStart() => OnBarkStart?.Invoke();
+    private void HandleAttackStart() => OnAttackStart?.Invoke();
+    private void HandleWeaponSwing() => OnWeaponSwing?.Invoke();
 }

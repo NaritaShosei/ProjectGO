@@ -29,6 +29,19 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
 
     public event Action OnDownEnd;
 
+    /// <summary>Downスタート時のイベント</summary>
+    public event Action OnDownStart;
+    /// <summary>攻撃開始時のイベント</summary>
+    public event Action OnAttackEffect;
+    /// <summary>歩行時のイベント</summary>
+    public event Action OnFootstep;
+    /// <summary>Barkアニメーション開始</summary>
+    public event Action OnBarkStart;
+    /// <summary>攻撃開始イベント</summary>
+    public event Action OnAttackStart;
+    /// <summary>武器スイングSEイベント</summary>
+    public event Action OnWeaponSwing;
+
     /// <summary>EnemyAttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
     {
@@ -64,8 +77,37 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     {
         OnDeadEnd?.Invoke();
     }
+
     public void AnimEvent_DownEnd()
     {
         OnDownEnd?.Invoke();
+    }
+
+    public void AnimEvent_DownStart()
+    {
+        OnDownStart?.Invoke();
+    }
+
+    public void AnimEvent_AttackEffect()
+    {
+        OnAttackEffect?.Invoke();
+    }
+    public void AnimEvent_Footstep()
+    {
+        OnFootstep?.Invoke();
+    }
+    public void AnimEvent_BarkStart()
+    {
+        OnBarkStart?.Invoke();
+    }
+
+    public void AnimEvent_AttackStart()
+    {
+        OnAttackStart?.Invoke();
+    }
+
+    public void AnimEvent_WeaponSwing()
+    {
+        OnWeaponSwing?.Invoke();
     }
 }

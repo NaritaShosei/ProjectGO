@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 
 /// <summary>
 /// ゴーレム専用Enemy
@@ -16,6 +16,7 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         base.Init();
 
         _blinkEffect = new BlinkEffect(_bodyRenderer,_blinkSpeed);
+        _effectManager = ServiceLocator.Get<EffectManager>();
 
         OnArmorBroken += HandleArmorBroken;
 
@@ -133,6 +134,8 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         _armor.Restore();
         RebindArmor();
         _defenceContext.EnemyType = EnemyDefenceType.Armor;
+
+        InvokeArmorRegistered();
     }
 
     [Header("Down Settings")]
@@ -153,7 +156,14 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
 
     [SerializeField, Range(0f, 1f), Tooltip("攻撃後に威嚇へ移行する確率")] private float _barkChance = 0.5f;
 
+    [SerializeField]
+    private Transform _attackEffectPoint;
+
+    [SerializeField]
+    private String _attackEffecktText;
+
     private BlinkEffect _blinkEffect;
+    private EffectManager _effectManager;
 
     /// <summary>
     /// オブジェクト破棄時にイベント購読を解除し、BlinkEffectを停止する
@@ -234,6 +244,13 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
             move.Init(initCtx);
             _runner.Register(move);
         }
+    }
+
+    protected override void HandleAttackEffect()
+    {
+        if (_effectManager == null) return;
+        Vector3 pos = _attackEffectPoint != null ? _attackEffectPoint.position : transform.position;
+        _effectManager.PlayEffect(_attackEffecktText, pos);
     }
 
     /// <summary>
