@@ -10,25 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
-  m_Name: WaveData 6
+  m_Name: WaveData 7
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Heavy
-      SpawnCount: 2
-    - EnemyTypeKey: StoneGolem
-      SpawnCount: 1
-    ExclusionRadius: 5
+      SpawnCount: 4
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 3
+    - EnemyTypeKey: Enemy_Armor_Light
+      SpawnCount: 3
+    ExclusionRadius: 0
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
     SpawnPointKey: 
   - SpawnEntries:
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 4
     - EnemyTypeKey: StoneGolem
       SpawnCount: 1
-    - EnemyTypeKey: StoneGolem
-      SpawnCount: 1
-    ExclusionRadius: 5
+    ExclusionRadius: 0
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0

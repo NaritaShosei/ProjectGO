@@ -23,7 +23,9 @@ MonoBehaviour:
     SpawnPointKey: 
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 3
+      SpawnCount: 1
+    - EnemyTypeKey: Enemy_Medium
+      SpawnCount: 2
     ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 2
