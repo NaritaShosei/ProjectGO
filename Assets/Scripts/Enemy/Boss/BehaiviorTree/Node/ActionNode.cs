@@ -1,12 +1,9 @@
-using System;
-using UniRx;
 using UnityEngine;
 
-# region BossEnemy関連のusing
+#region BossEnemy関連のusing
 using BossEnemy.Data;
-using BossEnemy.Data.Repositry;
 using BossEnemy.Model.CoreLogic;
-# endregion
+#endregion
 
 namespace BossEnemy.BehaviorTree.Node.ActionNode
 {
@@ -32,6 +29,7 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
             _attack = bossAttack;
         }
 
+        /// <summary> 次に実行する攻撃データを設定する </summary>
         public void SetNextAttackData(BossEnemyAttackData bossEnemyAttackData)
         {
             _bossEnemyAttackData = bossEnemyAttackData;
@@ -39,8 +37,9 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
 
         public override void OnEnter()
         {
-            _attack.AttackActionStart(_bossEnemyAttackData);
+            // 攻撃開始直後に終了通知が来ても取りこぼさないよう、先に購読してから攻撃を開始する。
             _attack.OnAttackFinish += RunningEnd;
+            _attack.AttackActionStart(_bossEnemyAttackData);
         }
 
         public override void OnExit()
@@ -57,7 +56,11 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
     #region ターゲット追尾アクション
     public class TargetChaseAction : ActionNode
     {
-        public TargetChaseAction(Transform target, BossMove bossEnemyMove, BossEnemyData bossEnemyData, IPlayerInformationService playerInformationService)
+        public TargetChaseAction(
+            Transform target,
+            BossMove bossEnemyMove,
+            BossEnemyData bossEnemyData,
+            IPlayerInformationService playerInformationService)
         {
             _target = target;
             _bossEnemyMove = bossEnemyMove;
@@ -65,6 +68,7 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
             _playerInformationService = playerInformationService;
         }
 
+        /// <summary> 追跡を終了するプレイヤーとの距離を設定する </summary>
         public void SetGoalDistance(float distance)
         {
             _goalDistance = distance;
@@ -72,79 +76,120 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
 
         public override void OnEnter()
         {
-            Debug.Log("追跡開始");
-
-            if (_goalDistance == 0) RunningEnd();
+            // 追跡不要な状態なら、その場で停止して次のNodeへ進める。
+            if (_target == null || _goalDistance <= 0f || IsInGoalDistance())
+            {
+                StopAndFinish();
+            }
         }
 
         public override void OnUpdate()
         {
+            if (_target == null || IsInGoalDistance())
+            {
+                StopAndFinish();
+                return;
+            }
+
             _bossEnemyMove.MoveTargetPosition(_target, _bossData.WalkSpeed);
 
-            if (_goalDistance >= _playerInformationService.ToPlayerDistance(_bossData.Position.Value))
+            if (IsInGoalDistance())
             {
-                _bossEnemyMove.StopMove();
-                RunningEnd();
+                StopAndFinish();
             }
         }
 
         public override void OnExit()
         {
-            Debug.Log("追跡終了");
+            _bossEnemyMove.StopMove();
         }
 
         private float _goalDistance = 0;
 
-        private Transform _target;
+        private readonly Transform _target;
 
         private readonly BossMove _bossEnemyMove;
 
-        private BossEnemyData _bossData;
+        private readonly BossEnemyData _bossData;
 
-        private IPlayerInformationService _playerInformationService;
+        private readonly IPlayerInformationService _playerInformationService;
+
+        /// <summary> 現在の位置が攻撃可能距離に入っているか </summary>
+        private bool IsInGoalDistance()
+        {
+            return _goalDistance >= _playerInformationService.ToPlayerDistance(_bossData.Position.Value);
+        }
+
+        private void StopAndFinish()
+        {
+            _bossEnemyMove.StopMove();
+            RunningEnd();
+        }
     }
     #endregion
 
+    #region ターゲット方向への振り向きアクション
     public class LookAtTargetAction : ActionNode
     {
-        public LookAtTargetAction(Transform target, BossMove bossEnemyMove, BossEnemyData bossEnemyData, 
-            IPlayerInformationService playerInformationService, float lookSpeed, float finishAngleThreshold)
+        public LookAtTargetAction(
+            Transform target,
+            BossMove bossEnemyMove,
+            BossEnemyData bossEnemyData,
+            IPlayerInformationService playerInformationService,
+            float lookSpeed,
+            float finishAngleThreshold)
         {
             _target = target;
             _bossEnemyMove = bossEnemyMove;
-            _bossData = bossEnemyData;
-            _playerInformationService = playerInformationService;
             _lookSpeed = lookSpeed;
             _finishAngleThreshold = finishAngleThreshold;
         }
 
+        public override void OnEnter()
+        {
+            _bossEnemyMove.StopMove();
+        }
+
         public override void OnUpdate()
         {
+            if (_target == null)
+            {
+                StopAndFinish();
+                return;
+            }
+
             _bossEnemyMove.LookAtTarget(_target, _lookSpeed, _finishAngleThreshold, out bool isFinish);
 
             if (isFinish)
             {
-                RunningEnd();
+                StopAndFinish();
             }
         }
 
-        private float _lookSpeed;
+        public override void OnExit()
+        {
+            _bossEnemyMove.StopMove();
+        }
 
-        private float _finishAngleThreshold;
+        private readonly float _lookSpeed;
 
-        private Transform _target;
+        private readonly float _finishAngleThreshold;
+
+        private readonly Transform _target;
 
         private readonly BossMove _bossEnemyMove;
 
-        private BossEnemyData _bossData;
-
-        private IPlayerInformationService _playerInformationService;
+        private void StopAndFinish()
+        {
+            _bossEnemyMove.StopMove();
+            RunningEnd();
+        }
     }
+    #endregion
 
     #region ダウンした時のアクション
     public class DownAction : ActionNode
     {
-
     }
     #endregion
 
@@ -152,7 +197,6 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
     /// <summary> ボスのPhase変更時のNode </summary>
     public class PhaseChangeAction : ActionNode
     {
-
     }
     #endregion
 
@@ -160,7 +204,6 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
     /// <summary> ボス討伐成功時のNode </summary>
     public class DefeatAction : ActionNode
     {
-
     }
     #endregion
 
