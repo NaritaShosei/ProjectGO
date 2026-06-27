@@ -43,10 +43,24 @@ public class CameraManager : MonoBehaviour
             return;
         }
 
+        if (_cameraFollowTarget == null || _normalCamera == null || _lockOnCamera == null || _lockOnController == null)
+        {
+            Debug.LogError("[CameraManager] Required camera references are missing.", this);
+            return;
+        }
+
         _playerTransform = player.transform;
         _cameraFollowTarget.position = _playerTransform.position;
         _normalCamera.Follow = _cameraFollowTarget;
-        _lockOnController.Init(this, ServiceLocator.Get<InputHandler>(), ServiceLocator.Get<EnemyManager>(), _playerTransform);
+
+        if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
+        {
+            _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform);
+        }
+        else
+        {
+            Debug.LogError("[CameraManager] InputHandler or EnemyManager is missing. LockOn is disabled.", this);
+        }
     }
 
     /// <summary>
@@ -182,6 +196,12 @@ public class CameraManager : MonoBehaviour
 
         _cameraShake = new CameraShake();
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
+
+        if (_normalCamera == null || _lockOnCamera == null)
+        {
+            Debug.LogError("[CameraManager] CinemachineCamera reference is missing.", this);
+            return;
+        }
 
         _normalCamera.Priority = _normalPriority;
         _lockOnCamera.Priority = _normalPriority - 1;

@@ -5,6 +5,12 @@ public class EXPItemManager : MonoBehaviour
 {
     public void Init(IPlayer player)
     {
+        if (player == null)
+        {
+            Debug.LogError("[EXPItemManager] Player is null.", this);
+            return;
+        }
+
         _player = player;
     }
 
@@ -13,6 +19,12 @@ public class EXPItemManager : MonoBehaviour
     /// </summary>
     public void DropEXP(Vector3 position, int count)
     {
+        if (_expDropper == null)
+        {
+            Debug.LogError("[EXPItemManager] DropEXP called before initialization.", this);
+            return;
+        }
+
         _expDropper.DropEXP(position, count);
     }
 
@@ -31,7 +43,7 @@ public class EXPItemManager : MonoBehaviour
     {
         if (_itemPrefab == null)
         {
-            Debug.LogError("EXPItemのプレハブが設定されていません");
+            Debug.LogError("[EXPItemManager] EXPItem prefab is missing.", this);
             return;
         }
 
@@ -49,18 +61,29 @@ public class EXPItemManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        _expDropper.OnDropAction -= HandleEXPItemDropped;
-        _expDropper.OnReleaseAction -= HandleEXPItemReleased;
+        if (_expDropper != null)
+        {
+            _expDropper.OnDropAction -= HandleEXPItemDropped;
+            _expDropper.OnReleaseAction -= HandleEXPItemReleased;
+        }
 
         ServiceLocator.Unregister<EXPItemManager>();
     }
 
     private void Update()
     {
+        if (_player == null) return;
+
         // アクティブな経験値アイテムの状態を更新
         for (int i = _activeItems.Count - 1; i >= 0; i--)
         {
             var item = _activeItems[i];
+            if (item == null)
+            {
+                _activeItems.RemoveAt(i);
+                continue;
+            }
+
             item.Tick(_player, _magnetRange);
         }
     }
@@ -70,7 +93,8 @@ public class EXPItemManager : MonoBehaviour
     /// </summary>
     private void HandleEXPItemDropped(EXPItem item)
     {
-        _activeItems.Add(item);
+        if (item != null)
+            _activeItems.Add(item);
     }
 
     /// <summary>
