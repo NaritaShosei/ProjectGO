@@ -113,7 +113,7 @@ public class MobAndSkillState : ISequenceState
     [SerializeField, Tooltip("モブ戦の時間制限（秒）")] private float _mobBattleTimeLimit = 180f;
     [SerializeField, Tooltip("スポーンポイントのセレクター")] private SpawnPointSelector _spawnPointSelector;
     [SerializeField, Tooltip("ウェーブデータ")] private WaveSequenceData _waveSequenceData;
-    [SerializeField, Tooltip("モブ戦のSpawnGroup進行状況とシークエンス名を表示するUI")] private SequenceStatusView _sequenceStatusView;
+    [SerializeField, Tooltip("モブ戦のWave数とシークエンス名を表示するUI")] private SequenceStatusView _sequenceStatusView;
     [SerializeField, Tooltip("UIに表示するモブ戦のシークエンス名")] private string _mobSequenceName = "モブ戦";
 
     [Header("スキル選択")]
@@ -201,7 +201,7 @@ public class MobAndSkillState : ISequenceState
             return;
         }
 
-        UpdateSpawnGroupStatus();
+        UpdateWaveStatus();
     }
 
     #endregion
@@ -214,23 +214,22 @@ public class MobAndSkillState : ISequenceState
             return;
 
         _sequenceStatusPresenter.Show();
-        UpdateSpawnGroupStatus();
+        UpdateWaveStatus();
     }
 
-    private void UpdateSpawnGroupStatus()
+    private void UpdateWaveStatus()
     {
         if (_sequenceStatusPresenter == null)
             return;
 
-        if (_waveController == null || _waveController.MaxGroupCount <= 0)
+        if (_waveController == null)
         {
             _sequenceStatusPresenter.ClearProgress();
             return;
         }
 
         _sequenceStatusPresenter.UpdateProgress(
-            _waveController.CurrentGroupNumber,
-            _waveController.MaxGroupCount
+            _currentWaveIndex + 1
         );
     }
 
@@ -248,7 +247,7 @@ public class MobAndSkillState : ISequenceState
 
         // ウェーブを進行
         _waveController?.Tick();
-        UpdateSpawnGroupStatus();
+        UpdateWaveStatus();
 
         bool waveComplete = _waveController != null && _waveController.IsComplete;
 

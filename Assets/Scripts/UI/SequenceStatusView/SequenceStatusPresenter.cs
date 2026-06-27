@@ -20,11 +20,10 @@ public class SequenceStatusPresenter : IDisposable
         _view.Hide();
     }
 
-    public void UpdateProgress(int current, int max)
+    public void UpdateProgress(int current)
     {
         int safeCurrent = Mathf.Max(0, current);
-        int safeMax = Mathf.Max(0, max);
-        _view.SetProgress(safeCurrent, safeMax);
+        _view.SetProgress(safeCurrent);
     }
 
     public void ClearProgress()

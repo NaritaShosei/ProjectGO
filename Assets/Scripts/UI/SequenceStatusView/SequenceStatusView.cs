@@ -21,12 +21,12 @@ public class SequenceStatusView : MonoBehaviour, ISequenceStatusView
         _sequenceNameText.text = sequenceName;
     }
 
-    public void SetProgress(int current, int max)
+    public void SetProgress(int current)
     {
         if (_waveText == null)
             return;
 
-        _waveText.text = $"{_progressLabel}{current}/{max}";
+        _waveText.text = $"{_progressLabel}{current}";
     }
 
     public void ClearProgress()
