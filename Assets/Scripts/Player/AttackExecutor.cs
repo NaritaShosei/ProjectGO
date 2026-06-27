@@ -11,6 +11,7 @@ public class AttackExecutor : MonoBehaviour
 
     /// <summary> スイング音通知用。攻撃判定が出る瞬間に発火する </summary>
     public event Action<PlayerMode> OnSwingReady;
+    public event Action OnHitConfirmed;
 
     public void Init(IPlayerStats stats, SkillManager manager)
     {
@@ -102,11 +103,17 @@ public class AttackExecutor : MonoBehaviour
         }
 
         // 地面ヒット音（特定攻撃のみ）
-        if (variantData.PlayGroundHitSE)
-            Sound.PlayTousnSE(gameObject, SoundCueNames.Tousin.GroundHit);
+        // if (variantData.PlayGroundHitSE)
+        // Sound.PlaySE(gameObject, SoundCueNames.GroundHit);
+        // TODO:地面ヒットSEが追加されたら対応
 
         if (hasHitResult)
         {
+            OnHitConfirmed?.Invoke();
+
+            if (ServiceLocator.TryGet(out CameraManager cameraManager))
+                cameraManager.ExecutionCameraShake(variantData.CameraShakeData).Forget();
+
             // HitStop
             if (ServiceLocator.TryGet(out HitStopManager hitStop))
             {
@@ -133,7 +140,10 @@ public class AttackExecutor : MonoBehaviour
         context.OnAfterAttack?.Invoke();
     }
 
+    [Header("攻撃対象のレイヤー")]
     [SerializeField] private LayerMask _layer;
+    [Header("Damage Popup")]
+    [SerializeField] private Color _lightningDamagePopupColor = DamagePopupColorScope.LightningColor;
     private IPlayerStats _playerStats;
     private SkillManager _skillManager;
 
@@ -195,13 +205,17 @@ public class AttackExecutor : MonoBehaviour
 
             if (enemy == null || enemy.IsDead) return;
 
-            enemy.TakeDamage(new DamageContext
+            // このTakeDamage内で生成されるダメージポップアップだけ雷色にする。
+            using (DamagePopupColorScope.Use(_lightningDamagePopupColor))
             {
-                AttackPower = power * data.LightningDamageMultiplier,
-                PlayerMode = mode,
-                IsCritical = false,
-                CriticalMultiplier = 1f,
-            });
+                enemy.TakeDamage(new DamageContext
+                {
+                    AttackPower = power * data.LightningDamageMultiplier,
+                    PlayerMode = mode,
+                    IsCritical = false,
+                    CriticalMultiplier = 1f,
+                });
+            }
         }
     }
 }

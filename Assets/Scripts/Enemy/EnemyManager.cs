@@ -8,6 +8,7 @@ public class EnemyManager : MonoBehaviour
     public event Action OnEnemyDefeated;
     public event Action OnBossDefeated;
     public event Action<IEnemy> OnEnemySpawned;
+    public event Action<IEnemy> OnEnemyForceRemoved;
 
     public ReadOnlyCollection<Transform> EnemiesTransformList => _enemiesTransformList.AsReadOnly();
 
@@ -197,7 +198,7 @@ public class EnemyManager : MonoBehaviour
     {
         foreach (var enemy in _enemies.ToArray())
         {
-            if (enemy != null && !enemy.IsDead)
+            if (enemy != null && !enemy.IsBoss && !enemy.IsDead)
             {
                 RemoveDeadEnemyTransform(enemy);
 
@@ -207,6 +208,10 @@ public class EnemyManager : MonoBehaviour
                 // SpatialHashGridから登録解除
                 _spatialHashGrid?.Remove(enemy);
 
+                _enemies.Remove(enemy);
+
+                OnEnemyForceRemoved?.Invoke(enemy);
+
                 // モブのみを対象にするため、Enemyクラスのインスタンスかどうかを確認
                 if (enemy is Enemy enemyComponent)
                 {
@@ -214,8 +219,6 @@ public class EnemyManager : MonoBehaviour
                 }
             }
         }
-        _enemies.Clear();
-        _enemiesTransformList.Clear();
     }
 
     [Header("Spatial Hash Grid")]

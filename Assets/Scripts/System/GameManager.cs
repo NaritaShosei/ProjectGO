@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EXPItemManager _expManager;
 
     private SceneTransitionManager _sceneTransitionManager;
-
     private HitStopManager _hitStopManager;
 
     private void Awake()
@@ -50,15 +49,34 @@ public class GameManager : MonoBehaviour
         _hitStopManager?.Dispose();
     }
 
+    private bool CheckReference(Object reference, string fieldName)
+    {
+        if (reference != null) return true;
+
+        Debug.LogError($"[GameManager] Missing reference: {fieldName}", this);
+        return false;
+    }
+
     private void InitPlayer()
     {
-        var input = ServiceLocator.Get<InputHandler>();
+        if (!CheckReference(_player, nameof(_player))) return;
+        if (!CheckReference(_skillManager, nameof(_skillManager))) return;
+
+        if (!ServiceLocator.TryGet(out InputHandler input))
+        {
+            Debug.LogError("[GameManager] InputHandler is missing.", this);
+            return;
+        }
 
         _player.Init(_skillManager, input);
 
         if (_player.TryGetComponent(out IModeController modeController))
-        {   
+        {
             _skillManager.Init(_player, modeController, _player.transform, _enemyManager);
+        }
+        else
+        {
+            Debug.LogError("[GameManager] IModeController is missing on Player.", this);
         }
 
         _player.OnDead += HandleGameComplete;
@@ -66,24 +84,49 @@ public class GameManager : MonoBehaviour
 
     private void InitCameraManager()
     {
+        if (!CheckReference(_player, nameof(_player))) return;
+
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
             cameraManager.Init(_player);
+        }
+        else
+        {
+            Debug.LogError("[GameManager] CameraManager is missing.", this);
         }
     }
 
     private void InitEnemyManager()
     {
+        if (!CheckReference(_enemyManager, nameof(_enemyManager))) return;
+        if (!CheckReference(_player, nameof(_player))) return;
+
         _enemyManager.Init(_player);
     }
 
     private void InitSequence()
     {
-        var input = ServiceLocator.Get<InputHandler>();
+        if (!CheckReference(_sequenceManager, nameof(_sequenceManager))) return;
+        if (!CheckReference(_enemyManager, nameof(_enemyManager))) return;
+        if (!CheckReference(_skillManager, nameof(_skillManager))) return;
+        if (!CheckReference(_player, nameof(_player))) return;
+
+        if (!ServiceLocator.TryGet(out InputHandler input))
+        {
+            Debug.LogError("[GameManager] InputHandler is missing.", this);
+            return;
+        }
 
         _sequenceManager.Init(_enemyManager, _skillManager, input, _player);
 
-        _sceneTransitionManager = ServiceLocator.Get<SceneTransitionManager>();
+        if (ServiceLocator.TryGet(out SceneTransitionManager sceneTransitionManager))
+        {
+            _sceneTransitionManager = sceneTransitionManager;
+        }
+        else
+        {
+            Debug.LogError("[GameManager] SceneTransitionManager is missing.", this);
+        }
 
         // SequenceManagerのイベントを購読
         _sequenceManager.OnAllSequencesComplete += HandleGameComplete;
@@ -91,24 +134,48 @@ public class GameManager : MonoBehaviour
 
     private void InitUI()
     {
-        _inGameUIInitializer.Init(_player);
-        _enemyUIManager.Init(_enemyManager, _player.transform);
-        _itemPickupManager.Init(_player.transform);
+        if (_inGameUIInitializer != null && _player != null)
+            _inGameUIInitializer.Init(_player);
+        else
+            Debug.LogError("[GameManager] PlayerUIInitializer or Player is missing.", this);
+
+        if (_enemyUIManager != null && _enemyManager != null && _player != null)
+            _enemyUIManager.Init(_enemyManager, _player.transform);
+        else
+            Debug.LogError("[GameManager] EnemyUIManager, EnemyManager, or Player is missing.", this);
+
+        if (_itemPickupManager != null && _player != null)
+            _itemPickupManager.Init(_player.transform);
+        else
+            Debug.LogError("[GameManager] ItemPickupManager or Player is missing.", this);
     }
 
     private void InitEffect()
     {
-        _playerEffectInitializer.Init(_player, _skillManager);
+        if (_playerEffectInitializer != null && _player != null)
+            _playerEffectInitializer.Init(_player, _skillManager);
+        else
+            Debug.LogError("[GameManager] PlayerEffectInitializer or Player is missing.", this);
     }
 
     private void InitEXPManager()
     {
-        _expManager.Init(_player);
+        if (_expManager != null)
+            _expManager.Init(_player);
+        else
+            Debug.LogError("[GameManager] EXPItemManager is missing.", this);
     }
 
     private void StartGame()
     {
-        _sequenceManager.StartSequence();
+        if (_sequenceManager != null)
+        {
+            _sequenceManager.StartSequence();
+        }
+        else
+        {
+            Debug.LogError("[GameManager] SequenceManager is missing.", this);
+        }
     }
 
     private async void HandleGameComplete()
@@ -116,6 +183,12 @@ public class GameManager : MonoBehaviour
         Debug.Log("ゲーム完了。リザルトへ遷移します");
 
         // リザルトデータの準備などを行う場合はここで
+
+        if (_sceneTransitionManager == null)
+        {
+            Debug.LogError("[GameManager] SceneTransitionManager is missing.", this);
+            return;
+        }
 
         await _sceneTransitionManager.TransitionToResult();
     }

@@ -76,7 +76,13 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         _playerAnimationController.Init(_playerStateManager, _modeController);
 
-        _soundHandler?.Init(_playerAnimationController, _playerStateManager, _modeController, _attackExecutor);
+        _soundHandler?.Init(
+            _playerAnimationController,
+            _playerStateManager,
+            _modeController,
+            _attackExecutor,
+            _attack,
+            this);
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
             hitStopManager.Register(this, HitStopTargetGroup.Player);

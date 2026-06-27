@@ -13,6 +13,12 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
     /// </summary>
     public void Play(StatSkillType statType)
     {
+        if (_vfx == null)
+        {
+            Debug.LogError("[LevelUpEffectView] VisualEffect is missing.", this);
+            return;
+        }
+
         _effectQueue.Enqueue(statType);
 
         if (_isPlaying)
@@ -25,10 +31,11 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
         ProcessQueue().Forget();
     }
 
-
     public void OnSpeedChange(float scale)
     {
         TimeScale = scale;
+
+        if (_vfx == null) return;
 
         // VFXの再生速度を変更
         _vfx.playRate = TimeScale;
@@ -62,14 +69,23 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
     private static readonly int HitEventID =
         Shader.PropertyToID("hit");
 
-
     private void Awake()
     {
+        if (_vfx == null) _vfx = GetComponent<VisualEffect>();
+
+        if (_vfx == null)
+        {
+            Debug.LogError("[LevelUpEffectView] VisualEffect is missing.", this);
+        }
+
         _effectMap = new Dictionary<StatSkillType, LevelUpEffectData>();
 
-        foreach (var data in _effectDataArray)
+        if (_effectDataArray != null)
         {
-            _effectMap[data.StatSkillType] = data;
+            foreach (var data in _effectDataArray)
+            {
+                _effectMap[data.StatSkillType] = data;
+            }
         }
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
@@ -106,20 +122,17 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
     /// <param name="statType"></param>
     private void PlayInternal(StatSkillType statType)
     {
+        if (_vfx == null) return;
+
         if (_effectMap.TryGetValue(statType, out var data) == false)
         {
-            Debug.LogWarning(
-                $"[LevelUpEffectView] {statType} の設定がありません。");
-
+            Debug.LogWarning($"[LevelUpEffectView] Missing settings for {statType}.", this);
             return;
         }
 
         _vfx.SetTexture(SymbolTextureID, data.SymbolTexture);
-
         _vfx.SetVector4(SecondaryColorID, data.SecondaryColor);
-
         _vfx.SetGradient(LifeColorID, data.ColorOverLife);
-
         _vfx.SendEvent(HitEventID);
     }
 }

@@ -3,17 +3,24 @@ using UnityEngine;
 public class PlayerSoundHandler : MonoBehaviour
 {
     public void Init(
-       PlayerAnimationController animController,
-       PlayerStateManager stateManager,
-       IModeController modeController,
-       AttackExecutor attackExecutor)
+        PlayerAnimationController animController,
+        PlayerStateManager stateManager,
+        IModeController modeController,
+        AttackExecutor attackExecutor,
+        PlayerAttack playerAttack,
+        Player player)
     {
         _modeController = modeController;
 
         if (animController != null)
         {
-            animController.OnModeChangeComplete += OnModeChanged;
+            animController.OnModeChangeComplete += OnModeChangeComplete;
             _animController = animController;
+        }
+
+        if (modeController != null)
+        {
+            modeController.OnModeChanged += OnModeChanged;
         }
 
         if (stateManager != null)
@@ -28,83 +35,172 @@ public class PlayerSoundHandler : MonoBehaviour
             attackExecutor.OnHitResultReady += PlayHitSE;
             _attackExecutor = attackExecutor;
         }
+
+        if (playerAttack != null)
+        {
+            playerAttack.OnChargeLevelReached += PlayWarriorChargeReadySE;
+            _playerAttack = playerAttack;
+        }
+
+        if (player != null)
+        {
+            player.OnDamagedEffect += PlayDamageSE;
+            _player = player;
+        }
     }
 
     private void OnDestroy()
     {
         if (_animController != null)
-        {
-            _animController.OnModeChangeComplete -= OnModeChanged;
-        }
+            _animController.OnModeChangeComplete -= OnModeChangeComplete;
 
-        if (_stateManager != null) _stateManager.OnStateChanged -= OnStateChanged; 
-        
+        if (_modeController != null)
+            _modeController.OnModeChanged -= OnModeChanged;
+
+        if (_stateManager != null)
+            _stateManager.OnStateChanged -= OnStateChanged;
+
         if (_attackExecutor != null)
         {
             _attackExecutor.OnSwingReady -= PlaySwingSE;
             _attackExecutor.OnHitResultReady -= PlayHitSE;
         }
+
+        if (_playerAttack != null)
+            _playerAttack.OnChargeLevelReached -= PlayWarriorChargeReadySE;
+
+        if (_player != null)
+            _player.OnDamagedEffect -= PlayDamageSE;
     }
 
-    // ── スイング音 ────────────────────────────────────────
+    // ── スイング音 ─────────────────────────────────────
+
     private void PlaySwingSE(PlayerMode mode)
     {
-        if (mode == PlayerMode.Warrior)
-            Sound.PlayTousnSE(gameObject, SoundCueNames.Tousin.HammerSwing);
-        else
+        switch (mode)
         {
-            Sound.PlayRaijinSE(gameObject, SoundCueNames.Raijin.HammerSwing);
-            Sound.PlayRaijinSE(gameObject, SoundCueNames.Raijin.Attack);
+            case PlayerMode.Warrior:
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Player.WeaponSwingWarrior,
+                    CueSheetType.Player);
+                break;
+
+            case PlayerMode.Thunder:
+                Sound.PlaySE(
+                    gameObject,
+                    SoundCueNames.Player.WeaponSwingThunder,
+                    CueSheetType.Player);
+                break;
         }
     }
 
-    // ── ヒット音 ──────────────────────────────────────────
+    // ── ヒット音 ───────────────────────────────────────
+
     private void PlayHitSE(HitSoundContext ctx)
     {
-        // 共通SE（モード問わず優先）
-        if (ctx.IsKill) { Sound.PlayCommonSE(gameObject, SoundCueNames.Common.Finish); return; }
-        if (ctx.IsArmorBreak) { Sound.PlayCommonSE(gameObject, SoundCueNames.Common.ArmorBreak); return; }
+        if (ctx.IsKill)
+        {
+            Sound.PlaySE(
+                gameObject,
+                SoundCueNames.Common.EnemyFinisher,
+                CueSheetType.Common);
 
-        // モード別ヒット音
+            return;
+        }
+
+        if (ctx.IsArmorBreak)
+        {
+            Sound.PlaySE(
+                gameObject,
+                SoundCueNames.Common.ArmorBreak,
+                CueSheetType.Common);
+
+            return;
+        }
+
         if (ctx.PlayerMode == PlayerMode.Warrior)
         {
-            // 弱点 = 鎧ヒット / 非弱点 = 生身ヒット（闘神は鎧が弱点）
-            var cue = ctx.IsArmorHit
-                ? SoundCueNames.Tousin.ArmorHit
-                : SoundCueNames.Tousin.BodyHit;
-            Sound.PlayTousnSE(gameObject, cue);
+            Sound.PlaySE(
+                gameObject,
+                ctx.IsArmorHit
+                    ? SoundCueNames.Player.HitArmorWarrior
+                    : SoundCueNames.Player.HitEnemyWarrior,
+                CueSheetType.Player);
         }
         else
         {
-            // 弱点 = 生身ヒット / 非弱点 = 鎧ヒット（雷神は生身が弱点）
-            var cue = ctx.IsWeakPoint
-                ? SoundCueNames.Raijin.BodyHit
-                : SoundCueNames.Raijin.ArmorHit;
-            Sound.PlayRaijinSE(gameObject, cue);
+            Sound.PlaySE(
+                gameObject,
+                ctx.IsArmorHit
+                    ? SoundCueNames.Player.HitArmorThunder
+                    : SoundCueNames.Player.HitEnemyThunder,
+                CueSheetType.Player);
         }
     }
 
-    // ── 帯電ループ ────────────────────────────────────────
-    private void OnModeChanged()
-    {
-        var mode = _modeController.CurrentMode;
+    // ── モード変更 ─────────────────────────────────────
 
-        if (mode == PlayerMode.Thunder)
-            Sound.PlayRaijinLoopSE(gameObject, SoundCueNames.Raijin.Taiden);
+    private void OnModeChanged(PlayerMode _)
+    {
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.ModeChange1,
+            CueSheetType.Player);
+
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.ModeChange2,
+            CueSheetType.Player);
+    }
+
+    private void PlayWarriorChargeReadySE(ChargeLevel _)
+    {
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.WarriorChargeReady,
+            CueSheetType.Player);
+    }
+
+    private void PlayDamageSE(PlayerDamageEffectContext _)
+    {
+        Sound.PlaySE(
+            gameObject,
+            SoundCueNames.Player.Damage,
+            CueSheetType.Player);
+    }
+
+    private void OnModeChangeComplete()
+    {
+        if (_modeController.CurrentMode == PlayerMode.Thunder)
+        {
+            Sound.PlayLoopSE(
+                gameObject,
+                SoundCueNames.Player.ThunderElectrify,
+                CueSheetType.Player);
+        }
         else
-            Sound.StopLoopSE(gameObject, SoundCueNames.Raijin.Taiden);
+        {
+            Sound.StopLoopSE(
+                gameObject,
+                SoundCueNames.Player.ThunderElectrify);
+        }
     }
 
-    // ── ステート変化 ──────────────────────────────────────
-    private void OnStateChanged(PlayerState old, PlayerState next)
+    // ── ステート変更 ───────────────────────────────────
+
+    private void OnStateChanged(PlayerState oldState, PlayerState newState)
     {
-        if (next == PlayerState.Dead)
+        if (newState == PlayerState.Dead)
+        {
             Sound.StopSE(gameObject);
+        }
     }
 
-    // ── フィールド ────────────────────────────────────────
     private IModeController _modeController;
     private PlayerAnimationController _animController;
     private PlayerStateManager _stateManager;
     private AttackExecutor _attackExecutor;
+    private PlayerAttack _playerAttack;
+    private Player _player;
 }

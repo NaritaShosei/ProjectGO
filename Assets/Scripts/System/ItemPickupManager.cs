@@ -7,6 +7,18 @@ public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
 {
     public void Init(Transform playerTransform)
     {
+        if (playerTransform == null)
+        {
+            Debug.LogError("[ItemPickupManager] PlayerTransform is null.", this);
+            return;
+        }
+
+        if (_itemPrefab == null || _viewPrefab == null)
+        {
+            Debug.LogError("[ItemPickupManager] ItemPrefab or ViewPrefab is missing.", this);
+            return;
+        }
+
         _playerTransform = playerTransform;
         _itemPool = new GenericObjectPool<HealItem>(_itemPrefab, _itemParent);
         _viewPool = new GenericObjectPool<ItemPickupView>(_viewPrefab, _viewParent);
@@ -16,6 +28,12 @@ public class ItemPickupManager : MonoBehaviour, IItemInteractHandler
 
     public void Spawn(Vector3 position)
     {
+        if (_itemPool == null || _viewPool == null || _playerTransform == null)
+        {
+            Debug.LogError("[ItemPickupManager] Spawn called before valid initialization.", this);
+            return;
+        }
+
         var item = _itemPool.Get();
         item.transform.position = position;
 
