@@ -399,7 +399,7 @@ namespace BossEnemy.Data
         public float Damage => _damage;
         /// <summary> 攻撃範囲 </summary>
         public float AttackRange => _attackRange;
-        /// <summary> 攻撃が発生する距離 </summary>
+        /// <summary> 攻撃を開始する距離(どこからでも届く場合は0) </summary>
         public float AttackHitDistance => _attackHitDistance;
         /// <summary> ノックバックする力 </summary>
         public float NockBackPower => _nockBackPower;

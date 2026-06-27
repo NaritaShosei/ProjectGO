@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CircleHitAreaView : HitAreaBase
 {
-    public override event Action<HitAreaBase> OnDespawn;
+    public override event Action<HitAreaBase, HitAreaType> OnDespawn;
 
     public async override UniTask ActiveView()
     {
@@ -20,8 +20,8 @@ public class CircleHitAreaView : HitAreaBase
         _sheen.innerRadius = _minInnerRadius;
 
         _simpleRedLoop.outerRadius = range / 2;
-        _lateralGradient.innerRadius = range;
-        _sheen.innerRadius = range;
+        _lateralGradient.outerRadius = range;
+        _sheen.outerRadius = range;
     }
 
     public override void SetDespawnTime(float despawnTime)
@@ -32,7 +32,7 @@ public class CircleHitAreaView : HitAreaBase
     public override void Despawn()
     {
         this.gameObject.SetActive(false);
-        OnDespawn?.Invoke(this);
+        OnDespawn?.Invoke(this, HitAreaType.Circle);
     }
 
     private float _despawnTime;

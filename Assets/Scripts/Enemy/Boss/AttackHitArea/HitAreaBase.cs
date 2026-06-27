@@ -4,7 +4,7 @@ using System;
 
 public abstract class HitAreaBase : MonoBehaviour
 {
-    public abstract event Action<HitAreaBase> OnDespawn;
+    public abstract event Action<HitAreaBase, HitAreaType> OnDespawn;
 
     public abstract UniTask ActiveView();
 

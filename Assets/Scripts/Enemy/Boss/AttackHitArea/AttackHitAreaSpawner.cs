@@ -6,7 +6,7 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
 {
     public void Spawn(HitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime)
     {
-        CircleHitAreaView hitArea = GetHitArea(hitAreaType);
+        HitAreaBase hitArea = GetHitArea(hitAreaType);
         hitArea.gameObject.transform.position = spawnCenterPos;
         hitArea.OnDespawn += Release;
         hitArea.SetRange(range);
@@ -15,13 +15,13 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
     }
 
     [Header("円形のHitArea")]
-    [SerializeField] private CircleHitAreaView _circleHitEffect;
+    [SerializeField] private HitAreaBase _circleHitEffect;
 
-    private Dictionary<HitAreaType, Queue<CircleHitAreaView>> _pool = new();
+    private Dictionary<HitAreaType, Queue<HitAreaBase>> _pool = new();
 
-    private CircleHitAreaView GetHitArea(HitAreaType hitAreaType)
+    private HitAreaBase GetHitArea(HitAreaType hitAreaType)
     {
-        CircleHitAreaView hitArea = null;
+        HitAreaBase hitArea = null;
 
         switch (hitAreaType)
         {
@@ -40,11 +40,11 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
         return null;
     }
 
-    private bool TryGet(out CircleHitAreaView result, HitAreaType hitAreaType)
+    private bool TryGet(out HitAreaBase result, HitAreaType hitAreaType)
     {
         if (_pool.ContainsKey(hitAreaType))
         {
-            if (_pool[hitAreaType].TryDequeue(out CircleHitAreaView obj))
+            if (_pool[hitAreaType].TryDequeue(out HitAreaBase obj))
             {
                 result = obj;
                 return true;
@@ -55,9 +55,9 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
         return false;
     }
 
-    private void Release(HitAreaBase hitArea)
+    private void Release(HitAreaBase hitArea, HitAreaType hitAreaType)
     {
         hitArea.OnDespawn -= Release;
-
+        _pool[hitAreaType].Enqueue(hitArea);
     }
 }

@@ -132,6 +132,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e79de9fdec0b4840b9181f6cd0c8585, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.ChargeSMB
+  _startMoveTime: 0.8
+  _endMoveTime: 1.6
 --- !u!1101 &-7487135078225682260
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
