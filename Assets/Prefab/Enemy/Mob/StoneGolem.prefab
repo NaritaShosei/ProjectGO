@@ -351,7 +351,6 @@ GameObject:
   - component: {fileID: 7301585828367876861}
   - component: {fileID: 6158760630654705163}
   - component: {fileID: 5989024217522494440}
-  - component: {fileID: 5136796591454539382}
   m_Layer: 8
   m_Name: StoneGolem
   m_TagString: Untagged
@@ -395,8 +394,6 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 84c85403bc40a3c47b61cd25c0d667a0, type: 2}
   _distanceProfile: {fileID: 11400000, guid: d64c95ea40de26a458c660c4cc596173, type: 2}
   _animationEventReceiver: {fileID: 7696763789007296301}
-  _soundHandler: {fileID: 5136796591454539382}
-  _enemyType: 1
   _armor: {fileID: 2232957639341954153}
   _downDuration: 5
   _bodyRenderer:
@@ -404,8 +401,6 @@ MonoBehaviour:
   _blinkSpeed: 100
   _attackCooldownOverride: 5
   _barkChance: 0.52
-  _attackEffectPoint: {fileID: 4792808834329252107}
-  _attackEffecktText: "\u5927\u5730\u7C89\u7815"
 --- !u!114 &6158760630654705163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,18 +453,6 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5136796591454539382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 315166858859022630}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3228565db4b453e42b723817d49cbe9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemySoundHandler
 --- !u!1 &336853683618154536
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,7 +682,6 @@ Transform:
   - {fileID: 3552210386689605197}
   - {fileID: 1277519113122577122}
   - {fileID: 7655169624917475776}
-  - {fileID: 4792808834329252107}
   m_Father: {fileID: 1086601411383579548}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &4821917941713793549
@@ -1272,37 +1254,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1277519113122577122}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2398836030666444658
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4792808834329252107}
-  m_Layer: 0
-  m_Name: GameObject (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4792808834329252107
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2398836030666444658}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.562, y: 0, z: -0.07}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 6348492763003575672}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2428512062954499080
 GameObject:

@@ -2,7 +2,6 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
-using static EnemyServices;
 
 /// <summary>
 /// Enemyの基底クラス
@@ -25,14 +24,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     //HitEffect発生を外部（レシーバーやエフェクトマネージャーなど）に通知するイベント
     public event Action<HitEffectContext> OnHitEffect;
 
-    //SE関係のイベント
-    public event Action OnAttackSE;
-    public event Action OnBarkSE;
-    public event Action OnDownSE;
-
     public virtual IEnemyConditionController ConditionController { get; }
     public IEnemyAnimator EnemyAnimator => _enemyAnimator;
-    public EnemyType EnemyType => _enemyType;
 
     public Transform Self { get => transform; }
 
@@ -236,11 +229,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     // EnemyAnimatorと同じGameObjectにアタッチされたReceiverへの参照
     [SerializeField] private EnemyAnimationEventReceiver _animationEventReceiver;
 
-    //SEのハンドラー
-    [SerializeField]private EnemySoundHandler _soundHandler;
-
-    [SerializeField]private EnemyType _enemyType;
-
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
@@ -291,12 +279,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _enemyAnimator = new EnemyAnimator(_animator, _animationEventReceiver);
         // 死亡アニメーション終了イベントを購読する
         _enemyAnimator.OnDeadEnd += HandleDeadEnd;
-
-        if (_animationEventReceiver != null)
-        {
-            _animationEventReceiver.OnAttackEffect += HandleAttackEffect;
-        }
-        _soundHandler?.Init(this);
     }
 
     protected virtual void Update()
@@ -340,11 +322,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
             _enemyAnimator.OnDeadEnd -= HandleDeadEnd;
             _enemyAnimator.Dispose();
         }
-
-        if (_animationEventReceiver != null)
-        {
-            _animationEventReceiver.OnAttackEffect -= HandleAttackEffect;
-        }
     }
 
     /// <summary>
@@ -372,21 +349,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         // 死亡アニメーション完了を待ってから破棄する
         // (済み): ObjectPool導入時は WaitForDeadAnimationAndDeactivate() に切り替える
         WaitForDeadAnimationAndDeactivate().Forget();
-    }
-
-    protected virtual void HandleAttackEffect()
-    {
-        OnAttackSE?.Invoke();
-    }
-
-    protected void InvokeOnBarkSE()
-    {
-        OnBarkSE?.Invoke();
-    }
-
-    protected void InvokeOnDownSE()
-    {
-        OnDownSE?.Invoke();
     }
 
     /// <summary>

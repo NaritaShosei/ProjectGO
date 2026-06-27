@@ -43,7 +43,7 @@ public class MobEnemy : Enemy, IFormationParticipant
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
             // Init()後に発火することで購読者がOnHealthChangedを安全に受け取れる
-            InvokeArmorRegistered();
+            OnArmorRegistered?.Invoke(_armor);
         }
         else
         {
@@ -304,14 +304,6 @@ public class MobEnemy : Enemy, IFormationParticipant
         var idle = new IdleBehaviour();
         idle.Init(initCtx);
         _runner.Register(idle);
-    }
-
-    /// <summary>
-    /// Armor登録イベントを発火する
-    /// </summary>
-    protected void InvokeArmorRegistered()
-    {
-        OnArmorRegistered?.Invoke(_armor);
     }
 
     /// <summary>

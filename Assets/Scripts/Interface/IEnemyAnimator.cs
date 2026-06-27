@@ -19,18 +19,6 @@ public interface IEnemyAnimator
     public event Action OnDeadEnd;
     /// <summary>ダウンアニメーション終了のイベント </summary>
     public event Action OnDownEnd;
-    /// <summary>ダウン開始イベント</summary>
-    public event Action OnDownStart;
-    /// <summary>攻撃エフェクト・SE発火イベント</summary>
-    public event Action OnAttackEffect;
-    /// <summary>歩行時のイベント</summary>
-    public event Action OnFootstep;
-    /// <summary>Bark開始イベント</summary>
-    event Action OnBarkStart;
-    /// <summary>攻撃開始イベント</summary>
-    event Action OnAttackStart;
-    /// <summary>武器スイングSEイベント</summary>
-    public event Action OnWeaponSwing;
 
     /// <summary>移動速度を設定する（Idle / Move の切り替えに使用）</summary>
     public void SetSpeed(float speed);
@@ -68,12 +56,6 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
     public event Action OnDownEnd;
-    public event Action OnDownStart;
-    public event Action OnAttackEffect;
-    public event Action OnFootstep;
-    public event Action OnBarkStart;
-    public event Action OnAttackStart;
-    public event Action OnWeaponSwing;
 #pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }
