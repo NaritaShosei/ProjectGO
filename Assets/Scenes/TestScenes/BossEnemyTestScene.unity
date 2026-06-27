@@ -2765,6 +2765,74 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f41ef287c2d98be428ca43d259e3fa28, type: 3}
+--- !u!1001 &4588598202027048872
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3888326202347260338, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_Name
+      value: AttackHitAreaSpawner
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.2873
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.00001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.22335
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427916067021265418, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+--- !u!114 &4588598202027048873 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2863959258576345544, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+  m_PrefabInstance: {fileID: 4588598202027048872}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2c6a664cf32e714298fff1c8d5d4413, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AttackHitAreaSpawner
 --- !u!1001 &5218043289900606605
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3061,6 +3129,10 @@ PrefabInstance:
       propertyPath: _enemyUIParent
       value: 
       objectReference: {fileID: 1617911759}
+    - target: {fileID: 7246669613523359550, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _attackHitAreaSpawner
+      value: 
+      objectReference: {fileID: 4588598202027048873}
     - target: {fileID: 7457554239091016240, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: Target
       value: 
@@ -3351,3 +3423,4 @@ SceneRoots:
   - {fileID: 1617911759}
   - {fileID: 386668023}
   - {fileID: 353906787}
+  - {fileID: 4588598202027048872}

@@ -1,3 +1,5 @@
+using System;
+using UniRx;
 using UnityEngine;
 
 namespace BossEnemy.BehaviorTree
@@ -5,11 +7,22 @@ namespace BossEnemy.BehaviorTree
     /// <summary> Nodeへの遷移結果 </summary>
     public enum NodeCondition
     {
-        Ready,
         Success,
         Failure,
         Running
     }
+
+    #region 実行中の実行終了時に実行終了を通知するクラス
+    public class NodeRunningEndNotifier
+    {
+        public event Action OnRunningEnd;
+
+        public void RunningEnd()
+        {
+            OnRunningEnd?.Invoke();
+        }
+    }
+    #endregion
 
     #region TreeのNode遷移を行い操作するクラス
     /// <summary>
@@ -17,23 +30,11 @@ namespace BossEnemy.BehaviorTree
     /// </summary>
     public class BehaviorController
     {
-        public BehaviorController(ITreeNode origin)
+        public BehaviorController(ITreeNode origin, NodeRunningEndNotifier runningEndNotifier)
         {
             _originNode = origin;
-        }
-
-        /// <summary> Treeの探索を開始する </summary>
-        public void StartSearch()
-        {
-            Debug.Log("探索開始");
-            ChangeNode(_originNode);
-        }
-
-        /// <summary> Treeの探索を強制的に最初からやり直す </summary>
-        public void ForceRestartSearch()
-        {
-            Debug.Log("探索強制再始動");
-            ChangeNode(_originNode);
+            _nodeRunningEndNotifier = runningEndNotifier;
+            _nodeRunningEndNotifier.OnRunningEnd += OnRunning;
         }
 
         /// <summary> 毎フレーム実行する処理 </summary>
@@ -44,15 +45,45 @@ namespace BossEnemy.BehaviorTree
             _currentNode.OnUpdate();
         }
 
+        /// <summary> 次の行動を決める </summary>
+        public void OnRunning()
+        {
+            if(_originNode == null) return;
+
+            if(_currentNode != null)
+                _currentNode.OnExit();
+
+            _currentNode = _originNode;
+            NodeCondition runningCondition = NodeCondition.Success;
+
+            int count = 0;
+            while (runningCondition != NodeCondition.Running)
+            {
+                runningCondition = _currentNode.TryGetNextNode(ref _currentNode);
+                count++;
+
+                if(runningCondition == NodeCondition.Failure)
+                {
+                    Debug.LogError("行動の選択を失敗しました");
+                    Debug.LogError("現在のノード：" + _currentNode.GetType().Name);
+                    Debug.LogError("階層段階：" + count);
+                    return;
+                }
+            }
+
+            ChangeNode(_currentNode);
+        }
+
         /// <summary> 現在のNodeを変更する </summary>
         /// <param name="nextNode"> 次のNode </param>
         public void ChangeNode(ITreeNode nextNode)
         {
             if (nextNode == null) return;
-            if (nextNode.Controller == null) nextNode.Init(this);
+            if (!nextNode.IsInit) nextNode.Init(this, _nodeRunningEndNotifier);
 
-            if (_currentNode != null) 
-                _currentNode.OnExit();
+            Debug.Log("現在のノード：" + nextNode.GetType().Name);
+
+            _disposables.Clear();
 
             _currentNode = nextNode;
             _currentNode.OnEnter();
@@ -63,6 +94,10 @@ namespace BossEnemy.BehaviorTree
 
         /// <summary> Entry地点のNode </summary>
         private readonly ITreeNode _originNode = null;
+
+        private readonly NodeRunningEndNotifier _nodeRunningEndNotifier;
+
+        private CompositeDisposable _disposables = new CompositeDisposable();
     }
     #endregion
 
@@ -73,11 +108,22 @@ namespace BossEnemy.BehaviorTree
         /// <summary> BossEnemyを操るBehaviourTree </summary>
         BehaviorController Controller { get; }
 
+        /// <summary> 初期化済み判定フラグ </summary>
+        public bool IsInit { get; }
+
         /// <summary> BehaviourTreeをSetする </summary>
-        void Init(BehaviorController behaviourTree);
+        void Init(BehaviorController behaviourController, NodeRunningEndNotifier nodeRunningEndNotifier);
 
         /// <summary> このNodeへの遷移条件を確認して結果を返す </summary>
         NodeCondition TryEntry();
+
+        /// <summary> 子ノードから遷移可能なノードを選出して渡す </summary>
+        /// <param name="nextNode"> 次のNode </param>
+        /// <returns> 
+        /// 次のNodeへの遷移結果フラグ
+        /// このフラグがFalseなら現在のNodeをゴールとする
+        /// </returns>
+        NodeCondition TryGetNextNode(ref ITreeNode nextNode);
 
         /// <summary> このNodeへの遷移が成功した際の処理 </summary>
         void OnEnter();
@@ -92,19 +138,29 @@ namespace BossEnemy.BehaviorTree
     /// <summary> BehaviorTreeのNodeの基底クラス </summary>
     public abstract class TreeNodeBase : ITreeNode
     {
+        public bool IsInit => _isInit;
+
         public BehaviorController Controller => _behaviorController;
 
-        public virtual void Init(BehaviorController behaviourController)
+        public virtual void Init(BehaviorController behaviourController, NodeRunningEndNotifier nodeRunningEndNotifier)
         {
+            _isInit = true;
             _behaviorController = behaviourController;
+            _nodeRunningEndNotifier = nodeRunningEndNotifier;
         }
 
         public abstract NodeCondition TryEntry();
+        public abstract NodeCondition TryGetNextNode(ref ITreeNode nextNode);
         public virtual void OnEnter() { return; }
         public virtual void OnUpdate() { return; }
         public virtual void OnExit() { return; }
 
+        private NodeRunningEndNotifier _nodeRunningEndNotifier = null;
         private BehaviorController _behaviorController = null;
+
+        private bool _isInit = false;
+
+        protected void RunningEnd() => _nodeRunningEndNotifier.RunningEnd();
     }
     #endregion
 
@@ -119,22 +175,32 @@ namespace BossEnemy.BehaviorTree
 
         public override NodeCondition TryEntry()
         {
-            foreach (var node in _childrenNode)
+            return NodeCondition.Success;
+        }
+        
+        public override NodeCondition TryGetNextNode(ref ITreeNode nextNode)
+        {
+            foreach (var child in _childrenNode)
             {
-                NodeCondition condition = node.TryEntry();
-
-                switch (condition)
+                if(child.TryEntry() == NodeCondition.Success)
                 {
-                    case NodeCondition.Success:
-                        Controller.ChangeNode(node);
-                        break;
-                    case NodeCondition.Failure:
-                        continue;
+                    nextNode = child;
+                    return NodeCondition.Success;
                 }
 
-                return condition;
+                if (child.TryEntry() == NodeCondition.Running)
+                {
+                    nextNode = child;
+                    return NodeCondition.Running;
+                }
             }
 
+            Debug.LogError("すべてのノードに入れませんでした");
+            
+            foreach (var child in _childrenNode)
+            {
+                Debug.Log(child.GetType().Name);
+            }
             return NodeCondition.Failure;
         }
 
@@ -150,6 +216,18 @@ namespace BossEnemy.BehaviorTree
         public SequenceNode(ITreeNode[] childrenNode)
         {
             _childrenNode = childrenNode;
+
+            _sequenceChildNodeRunningEndNotifier.OnRunningEnd += OnChildRunningEnd;
+        }
+
+        public override void Init(BehaviorController behaviourController, NodeRunningEndNotifier nodeRunningEndNotifier)
+        {
+            base.Init(behaviourController, nodeRunningEndNotifier);
+
+            foreach (var child in _childrenNode)
+            {
+                child.Init(Controller, _sequenceChildNodeRunningEndNotifier);
+            }
         }
 
         public override NodeCondition TryEntry()
@@ -157,32 +235,89 @@ namespace BossEnemy.BehaviorTree
             return NodeCondition.Success;
         }
 
+        public override NodeCondition TryGetNextNode(ref ITreeNode nextNode)
+        {
+            return NodeCondition.Running;
+        }
+
         public override void OnEnter()
         {
-            if (_runningNode == null) return;
-
-            _runningNode.OnEnter();
+            Debug.Log("Enter");
+            ProceedSequence();
         }
 
         public override void OnUpdate()
         {
-            if (_runningNode == null) return;
-
-            _runningNode.OnUpdate();
+            if (_currentNode == null) return;
+            _currentNode.OnUpdate();
         }
 
         public override void OnExit()
         {
-            if (_runningNode == null) return;
+            Debug.Log("Exit");
+            _sequenceCount = 0;
 
-            _runningNode.OnExit();
+            if (_currentNode != null)
+                _currentNode.OnExit();
+
+            _currentNode = null;
         }
+
+        public void CurrentNodeRunningEnd()
+        {
+            if(_sequenceCount >= _childrenNode.Length)
+            {
+                RunningEnd();
+                return;
+            };
+
+            OnEnterNextChildNode(_childrenNode[_sequenceCount]);
+        }
+
+
+
+        public void OnEnterNextChildNode(ITreeNode nextNode)
+        {
+            if (nextNode == null) return;
+
+            if (_currentNode != null)
+            {
+                _currentNode.OnExit();
+            }
+
+            _currentNode = nextNode;
+            _currentNode.OnEnter();
+
+            _sequenceCount++;
+        }
+
+        private int _sequenceCount = 0;
 
         /// <summary> 子ノード </summary>
         private ITreeNode[] _childrenNode = null;
 
         /// <summary> 現在実行中のノード </summary>
-        private ITreeNode _runningNode = null;
+        private ITreeNode _currentNode = null;
+
+        /// <summary> シーケンス内のノード専用Notifier </summary>
+        private NodeRunningEndNotifier _sequenceChildNodeRunningEndNotifier = new();
+
+        private void OnChildRunningEnd()
+        {
+            Debug.Log("Sequenceを進めます");
+            ProceedSequence();
+        }
+
+        private void ProceedSequence()
+        {
+            if (_sequenceCount >= _childrenNode.Length)
+            {
+                RunningEnd();
+                return;
+            };
+
+            OnEnterNextChildNode(_childrenNode[_sequenceCount]);
+        }
     }
     #endregion
 }

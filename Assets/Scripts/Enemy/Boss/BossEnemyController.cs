@@ -1,20 +1,24 @@
-using BossEnemy.Data;
 using Cysharp.Threading.Tasks;
 using System;
 using UniRx;
 using UnityEngine;
-using static BossEnemyView;
+
+# region BossEnemy関連のusing
+using BossEnemy.BehaviorTree;
+using BossEnemy.Data;
+using BossEnemy.Data.Repositry;
+using BossEnemy.Model.CoreLogic;
+using BossEnemy.Data.Repository;
+# endregion
+
 
 [Serializable]
 public class BossEnemyController
 {
-    /// <summary> 現在のPhaseのBossEnemyData </summary>
-    public BossEnemyData CurrentBossData => _currentPhaseBossEnemyData;
-
     /// <summary> 初期化 </summary>
     /// <param name="bossEnemyView"> BossのViewClass </param>
     /// <param name="enemyServices"> Enemy共通のServicesClass </param>
-    public void Init(EnemyServices enemyServices)
+    public void Init(EnemyServices enemyServices, BossEnemyAnimationEventReceiver bossEnemyAnimationEventReceiver)
     {
         if(_bossEnemyView == null || _bossEnemyUIView == null)
         {
@@ -22,78 +26,42 @@ public class BossEnemyController
             return;
         }
 
-        _deadEventDisposables = new();
-        _phaseChangeEventDisposables = new();
-        _phaseChanger = new(_bossEnemyMasterData);
+        // Animationによるイベントの通知クラスを取得
+        _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
 
-        // イベントを登録
-        _phaseChanger.OnPhaseChange += HandlePhaseChange;
+        // BossEnemyのマスターデータを取得
+        _bossEnemyMasterDataRepository = new();
+        _bossEnemyMasterDataRepository.Init(_csvBossEnemyMasterData.text);
+        _bossEnemyMasterData = _bossEnemyMasterDataRepository.GetData(_id);
 
-        _phaseChanger.IsAllPhaseFinish.Subscribe(isFinish =>
-        {
-            if (isFinish)
-            {
-                HandleDead(_bossEnemyView);
-            }
-        }).AddTo(_deadEventDisposables);
+        // 各種ロジックを初期化
+        _takeDamage = new();
+        _bossMove = new();
+        _bossAttack = new(enemyServices.PlayerInformationService);
 
-        // PhaseChangeシステムを初期化
-        _phaseChanger.Init();
-    }
+        // BehaviorTreeの初期化
+        _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove);
 
-    /// <summary> 毎フレーム行われる処理を行うメソッド </summary>
-    public void OnUpdate()
-    {
+        // Enemyがうけられるサービス一覧
+        _enemyServices = enemyServices;
 
+        // Phase切り替えシステムを初期化
+        _phaseChange = new(_bossEnemyMasterData);
 
-    }
+        // 全てのPhaseが終了した際のイベントを登録
+        _phaseChange.OnFinishAllPhase += _deadEventDisposables.Dispose;
+        _phaseChange.OnFinishAllPhase += () => HandleDead(_bossEnemyView);
 
-    /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
-    public void HandleDamaged(DamageContext damageContext, BossEnemyPartsView hitParts)
-    {
-        int defense = 0;
-        int damage = 0;
+        // 攻撃データのリポジトリの初期化
+        _attackDataRepositry = new(_csvBossEnemyMasterData);
 
-        if (_currentPhaseBossEnemyData == null) Debug.LogError("BossEnemyDataが設定されていません");
+        RegisterPhaseChangeEventAction();
 
-        if (hitParts.Armor == null || hitParts.Armor.IsBreak)
-        {
-            // 受けて個所によって防御力(肉質)を取得
-            defense = DamageSystem.GetHitPartsDefense(hitParts.BossEnemyPartsType, _currentPhaseBossEnemyData);
-
-            // Damageを計算
-            if (hitParts.BossEnemyPartsType == BossEnemyPartsType.VitalPoint 
-                || hitParts.BossEnemyPartsType == BossEnemyPartsType.WeekPoint)
-            {
-                // 弱点への攻撃ならPlayerもModeによるダメージの減増を行う
-                damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Flesh);
-            }
-            else damage = DamageSystem.CalculateDamage(defense, damageContext);
-
-            _currentPhaseBossEnemyData.TakeDamage(damage);
-        }
-        else
-        {
-            defense = DamageSystem.GetHitPartsArmorDefense(hitParts.Armor.AttachmentPoints, _currentPhaseBossEnemyData);
-
-            damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Armor);
-
-            switch (hitParts.Armor.AttachmentPoints)
-            {
-                case ArmorAttachmentPoint.LeftArm:
-                    _currentPhaseBossEnemyData.LeftArmArmer.Damage(damage);
-                    break;
-                case ArmorAttachmentPoint.RightArm:
-                    _currentPhaseBossEnemyData.RightArmArmer.Damage(damage);
-                    break;
-                case ArmorAttachmentPoint.LeftLeg:
-                    _currentPhaseBossEnemyData.LeftLegArmer.Damage(damage);
-                    break;
-                case ArmorAttachmentPoint.RightLeg:
-                    _currentPhaseBossEnemyData.RightLegArmer.Damage(damage);
-                    break;
-            }
-        }
+        // 最初のPhaseを開始
+        _phaseChange.StartFirstPhase();
+        RegisterBossDataChangeEventAction();
+        RegisterBossAttackEventAction();
+        RegisterTakeDamageEventAction();
     }
 
     /// <summary> Viewを設定する </summary>
@@ -103,121 +71,178 @@ public class BossEnemyController
         _bossEnemyUIView = bossEnemyUIView;
     }
 
+    /// <summary> 毎フレーム行われる処理を行うメソッド </summary>
+    public void OnUpdate()
+    {
+        _bossEnemyBehaviorTree.OnUpdate();
+    }
+
     [Header("BossEnemy全体のMasterData")]
     [SerializeField, Tooltip("BossEnemy全体のMasterData")]
     private TextAsset _csvBossEnemyMasterData = null;
-
-    [Header("PhaseごとのEnemyのMasterData")]
-    [SerializeField, Tooltip("PhaseごとのEnemyのMasterData")]
-    private BossEnemyMasterData _bossEnemyMasterData = null;
 
     [Header("BossEnemyのAIBehaviorTree")]
     [SerializeField, Tooltip("BossEnemyのAI")]
     private BossEnemyBehaviorTree _bossEnemyBehaviorTree = null;
 
-    // BossEnemyの各種ViewClass
+    [Header("生成するBossのID")]
+    [SerializeField, Tooltip("生成するBossのID")]
+    private int _id = 1;
+
+    private BossEnemyMasterData _bossEnemyMasterData = null;
+
+    // BossEnemyの各種View
     private BossEnemyView _bossEnemyView = null;
     private BossEnemyUIView _bossEnemyUIView = null;
 
-    // BossEnemyの内部System
-    private BossEnemyPhaseChanger _phaseChanger = null;
-    private AttackDataRepository _attackDataRepositry = null;
+    // BossEnemyの内部ロジック
+    private BossAttack _bossAttack = null;
+    private BossMove _bossMove = null;
+    private Damage _takeDamage = null;
+    private PhaseChange _phaseChange = null;
+    private BossEnemyAttackDataRepositry _attackDataRepositry = null;
+    private BossEnemyMasterDataRepository _bossEnemyMasterDataRepository = null;
 
     // BossEnemyのBehaviorTree
     private BossEnemyBehaviorTree _behaviorTree = null;
 
     // 現在のPhaseのBossEnemyData
-    private BossEnemyData _currentPhaseBossEnemyData = null;
+    private ReactiveProperty<BossEnemyData> _currentPhaseBossEnemyData = new();
 
+    // BossEnemyの受けられるサービス
+    private EnemyServices _enemyServices;
+
+    // Animationによるイベントの通知クラス
+    private BossEnemyAnimationEventReceiver _enemyAnimationEventReceiver = null;
+
+    // 複数の非同期処理やイベントイベントの購読管理・解除Class
     private CompositeDisposable _deadEventDisposables = new CompositeDisposable();
     private CompositeDisposable _phaseChangeEventDisposables = new CompositeDisposable();
 
     /// <summary> Bossが死んだ際に呼ばれるメソッド </summary>
     private void HandleDead(IEnemy enemy)
     {
-        _bossEnemyView.Dead(); 
-
-        // event購読を終了
-        _phaseChanger.OnPhaseChange -= HandlePhaseChange;
+        Debug.Log("死んだンゴ");
         _deadEventDisposables.Dispose();
         _phaseChangeEventDisposables.Dispose();
+
+        _bossEnemyView.Dead();
+
+        // event購読を終了
+        _enemyAnimationEventReceiver.OnAttackHit -= _bossAttack.Hit;
+        _bossEnemyView.OnTakeDamage -= _takeDamage.TakeDamage;
+        _enemyAnimationEventReceiver.OnAttackEnd -= _bossEnemyView.AttackEnd;
+        _enemyAnimationEventReceiver.OnAttackEnd -= _bossAttack.Finish;
+        _phaseChange.OnPhaseChanged -= _bossEnemyView.ArmorInit;
+        _phaseChange.OnPhaseChanged -= _bossEnemyView.PhaseChange;
+        _phaseChange.OnPhaseChanged -= HandlePhaseChange;
     }
 
     /// <summary> BossのPhaseが切り替わった際に呼ばれるイベント </summary>
-    private void HandlePhaseChange(BossEnemyData bossEnemyData)
+    private void RegisterPhaseChangeEventAction()
     {
-        _phaseChangeEventDisposables.Clear();
+        _phaseChange.OnPhaseChanged += HandlePhaseChange;
+        _phaseChange.OnPhaseChanged += _bossEnemyView.ArmorInit;
+        _phaseChange.OnPhaseChanged += _bossEnemyView.PhaseChange;
+    }
 
-        Debug.Log("PhaseChange");
-        _currentPhaseBossEnemyData = bossEnemyData;
-        _currentPhaseBossEnemyData.Init(_bossEnemyView.Self);
+    private void HandlePhaseChange()
+    {
+        Debug.Log("Phaseが変わりました");
 
-        // BehaviorTreeの初期化
-        _bossEnemyBehaviorTree.Init(_currentPhaseBossEnemyData, _phaseChanger);
+        _phaseChangeEventDisposables.Dispose();
+        _phaseChangeEventDisposables = new();
 
-        // BossのTransformData変動時のイベント登録
-        HandleBossTransform();
+        _phaseChange.CurrentPhaseBossData.Init(_bossEnemyView.Self);
+        _currentPhaseBossEnemyData.Value = _phaseChange.CurrentPhaseBossData;
+    }
 
-        // 各所鎧のHP変動時のイベント登録
-        HandleArmorHPFluctuation();
-
-        _bossEnemyView.ArmorInit();
-
-        _bossEnemyUIView.PhaseChange(bossEnemyData, _phaseChanger.CurrentPhase);
-
-        _currentPhaseBossEnemyData.CurrentHP.Subscribe(async hp =>
+    private void RegisterBossDataChangeEventAction()
+    {
+        _currentPhaseBossEnemyData.Subscribe(data =>
         {
-            await _bossEnemyUIView.CurrentBar.TakeDamage(hp);
-        }).AddTo(_phaseChangeEventDisposables);
+            Debug.Log("データの切り替えを検知");
+
+            // 移動処理とのDataの連動
+            _bossMove.SetBossEnemy(data);
+
+            // BossDataとViewのTransformを連動
+            RegisterBossMoveEventAction();
+
+            // ダメージロジックの初期化
+            _takeDamage.Init(data);
+
+            // 各所鎧のHP変動時のイベント登録
+            RegisterArmorHPFluctuationEventAction();
+
+            // BossUIとの連動
+            _bossEnemyUIView.PhaseChange(data, _phaseChange.CurrentPhase);
+
+            // BehaviorTreeのPhase切り替え処理
+            _bossEnemyBehaviorTree.HandlePhaseChanged(data, _attackDataRepositry, _enemyServices.PlayerInformationService);
+
+            // HPが0になったときフェーズを切り替える処理
+            data.CurrentHP.Subscribe(hp =>{ if (hp == 0)_phaseChange.ChangeNextPhase();  }).AddTo(_phaseChangeEventDisposables);
+
+        }).AddTo(_deadEventDisposables);
+    }
+
+    private void RegisterBossMoveEventAction()
+    {
+        // Data内のBossEnemyの座標が変わるたびにView側に変更を反映する
+        _currentPhaseBossEnemyData.Value.Position.Subscribe(position => 
+        { _bossEnemyView.SetPosition(position); }).AddTo(_phaseChangeEventDisposables);
+
+        // Data内のBossEnemyのQuaternionが変わるたびにView側に変更を反映する
+        _currentPhaseBossEnemyData.Value.Rotation.Subscribe(rotation =>
+        { _bossEnemyView.SetRotation(rotation); }).AddTo(_phaseChangeEventDisposables);
+
+        // Data内のBossEnemyのVelocityが変わるたびにView側に変更を反映する
+        _currentPhaseBossEnemyData.Value.Velocity.Subscribe(velocity =>
+        { _bossEnemyView.SetVelocity(velocity); }).AddTo(_phaseChangeEventDisposables);
+    }
+
+    public void RegisterBossAttackEventAction()
+    {
+        _bossAttack.OnAttackStart += _bossEnemyView.Attack;
+        _enemyAnimationEventReceiver.OnMove += _bossMove.MoveTargetPositionRightOnTime;
+        _enemyAnimationEventReceiver.OnAttackHit += _bossAttack.Hit;
+        _enemyAnimationEventReceiver.OnAttackEnd += _bossEnemyView.AttackEnd;
+        _enemyAnimationEventReceiver.OnAttackEnd += _bossAttack.Finish;
+    }
+
+    public void RegisterTakeDamageEventAction()
+    {
+        _bossEnemyView.OnTakeDamage += _takeDamage.TakeDamage;
     }
 
     /// <summary> 各所鎧のHP変動時のイベント </summary>
-    private void HandleArmorHPFluctuation()
+    private void RegisterArmorHPFluctuationEventAction()
     {
         // 左腕の鎧のHP変動時
-        _currentPhaseBossEnemyData.LeftArmArmer.CurrentHP.Subscribe(async hp =>
+        _currentPhaseBossEnemyData.Value.LeftArmArmer.CurrentHP.Subscribe(hp =>
         {
-            Debug.Log($"残りの左腕の鎧のHP： {hp}");
-            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.LeftArmArmer, ArmorAttachmentPoint.LeftArm);
+            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.Value.LeftArmArmer, ArmorAttachmentPoint.LeftArm);
         }).AddTo(_phaseChangeEventDisposables);
 
         // 右腕の鎧のHP変動時
-        _currentPhaseBossEnemyData.RightArmArmer.CurrentHP.Subscribe(async hp =>
+        _currentPhaseBossEnemyData.Value.RightArmArmer.CurrentHP.Subscribe(hp =>
         {
-            Debug.Log($"残りの右腕の鎧のHP： {hp}");
-            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.RightArmArmer, ArmorAttachmentPoint.RightArm);
+            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.Value.RightArmArmer, ArmorAttachmentPoint.RightArm);
         }).AddTo(_phaseChangeEventDisposables);
 
         // 左足の鎧のHP変動時
-        _currentPhaseBossEnemyData.LeftLegArmer.CurrentHP.Subscribe(async hp =>
+        _currentPhaseBossEnemyData.Value.LeftLegArmer.CurrentHP.Subscribe(hp =>
         {
-            Debug.Log($"残りの左足の鎧のHP： {hp}");
-            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.LeftLegArmer, ArmorAttachmentPoint.LeftLeg);
+            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.Value.LeftLegArmer, ArmorAttachmentPoint.LeftLeg);
         }).AddTo(_phaseChangeEventDisposables);
 
         // 右足の鎧のHP変動時
-        _currentPhaseBossEnemyData.RightLegArmer.CurrentHP.Subscribe(async hp =>
+        _currentPhaseBossEnemyData.Value.RightLegArmer.CurrentHP.Subscribe(hp =>
         {
-            Debug.Log($"残りの右足の鎧のHP： {hp}");
-            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.RightLegArmer, ArmorAttachmentPoint.RightLeg);
+            ArmorHPFluctuationEventAction(hp, _currentPhaseBossEnemyData.Value.RightLegArmer, ArmorAttachmentPoint.RightLeg);
         }).AddTo(_phaseChangeEventDisposables);
     }
-
-    private void HandleBossTransform()
-    {
-        // Data内のBossEnemyの座標が変わるたびにView側に変更を反映する
-        _currentPhaseBossEnemyData.Position.Subscribe(position =>
-        {
-            _bossEnemyView.SetPosition(position);
-        }).AddTo(_phaseChangeEventDisposables);
-
-        // Data内のBossEnemyのQuaternionが変わるたびにView側に変更を反映する
-        _currentPhaseBossEnemyData.Rotation.Subscribe(rotation =>
-        {
-            _bossEnemyView.SetRotation(rotation);
-        }).AddTo(_phaseChangeEventDisposables);
-    }
-
 
     private void ArmorHPFluctuationEventAction(int currentHP, BossArmorData armorData, ArmorAttachmentPoint attachmentPointsType)
     {

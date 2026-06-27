@@ -6,9 +6,6 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     // Receiverから中継するイベント（外部への単一エントリポイント）
     public event Action OnAttackHit;
     public event Action OnAttackEnd;
-    public event Action OnBarkEnd;
-    public event Action OnGetUpEnd;
-    public event Action OnKnockbackEnd;
     public event Action OnDeadEnd;
     public event Action OnPhaseChangeEnd;
 
@@ -24,9 +21,6 @@ public class BossEnemyAnimator : IBossEnemyAnimator
 
         _receiver.OnAttackHit += HandleAttackHit;
         _receiver.OnAttackEnd += HandleAttackEnd;
-        _receiver.OnBarkEnd += HandleBarkEnd;
-        _receiver.OnGetUpEnd += HandleGetUpEnd;
-        _receiver.OnKnockbackEnd += HandleKnockbackEnd;
         _receiver.OnDeadEnd += HandleDeadEnd;
         _receiver.OnPhaseChangeEnd += HandlePhaseChangeEnd;
     }
@@ -34,53 +28,25 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     /// <summary>
     /// 移動速度を設定する（Idle / Move の切り替えに使用）
     /// </summary>
-    public void SetSpeed(float speed)
+    public void SetSpeed(float xSpeed, float zSpeed)
     {
         if (_animator == null) return;
-        _animator.SetFloat(_hashSpeed, speed);
+        _animator.SetFloat(_hashXSpeed, xSpeed);
+        _animator.SetFloat(_hashZSpeed, zSpeed);
     }
 
     /// <summary>
     /// 攻撃中フラグを設定する
     /// </summary>
-    public void SetAttacking(bool value)
+    public void SetAttacking(bool value, string triggerValue = null)
     {
         if (_animator == null) return;
-        _animator.SetBool(_hashIsAttacking, value);
-    }
+            _animator.SetBool(_hashIsAttacking, value);
 
-    /// <summary>
-    /// 複数の攻撃Animationの中から任意のAnimationフラグを立てる
-    /// </summary>
-    public void SetAttackTrigger(string triggerName)
-    {
-        if (_animator == null) return;
-        _animator.SetTrigger(triggerName);
-    }
+        Debug.Log("攻撃のトリガー" + triggerValue);
 
-    /// <summary>
-    /// Barkフラグを設定する
-    /// </summary>
-    public void SetBarking(bool value)
-    {
-        if (_animator == null) return;
-        _animator.SetBool(_hashIsBarking, value);
-    }
-
-    /// <summary>
-    /// ノックバックフラグを設定する。
-    /// value = true のとき KnockbackLevel も同時に書き込む。
-    /// value = false のとき KnockbackLevel はリセットしない（仕様通り）。
-    /// </summary>
-    public void SetKnockback(bool value, KnockbackLevel level = KnockbackLevel.Hit)
-    {
-        if (_animator == null) return;
-        _animator.SetBool(_hashIsKnockback, value);
-
-        if (value)
-        {
-            _animator.SetInteger(_hashKnockbackLevel, (int)level);
-        }
+        if(triggerValue != null) 
+            _animator.SetTrigger(triggerValue);
     }
 
     /// <summary>
@@ -99,6 +65,12 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     {
         if (_animator == null) return;
         _animator.SetBool(_hashIsDead, true);
+    }
+
+    public void SetPhaseChange()
+    {
+        if (_animator == null) return;
+        _animator.SetTrigger(_hashPhaseChange);
     }
 
     /// <summary>
@@ -121,22 +93,18 @@ public class BossEnemyAnimator : IBossEnemyAnimator
 
         _receiver.OnAttackHit -= HandleAttackHit;
         _receiver.OnAttackEnd -= HandleAttackEnd;
-        _receiver.OnBarkEnd -= HandleBarkEnd;
-        _receiver.OnGetUpEnd -= HandleGetUpEnd;
-        _receiver.OnKnockbackEnd -= HandleKnockbackEnd;
         _receiver.OnDeadEnd -= HandleDeadEnd;
         _receiver.OnPhaseChangeEnd -= HandlePhaseChangeEnd;
     }
 
     // Animatorパラメータのハッシュ
-    private static readonly int _hashSpeed = Animator.StringToHash("Speed");
-    private static readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
-    private static readonly int _hashIsBarking = Animator.StringToHash("IsBarking");
-    private static readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
-    private static readonly int _hashIsDead = Animator.StringToHash("IsDead");
-
-    private static readonly int _hashIsKnockback = Animator.StringToHash("IsKnockback");
-    private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
+    private readonly int _hashCurrentHP = Animator.StringToHash("CurrentHP");
+    private readonly int _hashXSpeed = Animator.StringToHash("Speed_x");
+    private readonly int _hashZSpeed = Animator.StringToHash("Speed_z");
+    private readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
+    private readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
+    private readonly int _hashIsDead = Animator.StringToHash("IsDead");
+    private readonly int _hashPhaseChange = Animator.StringToHash("PhaseChangeTrigger");
 
     private readonly Animator _animator;
 
@@ -145,9 +113,6 @@ public class BossEnemyAnimator : IBossEnemyAnimator
 
     private void HandleAttackHit() => OnAttackHit?.Invoke();
     private void HandleAttackEnd() => OnAttackEnd?.Invoke();
-    private void HandleBarkEnd() => OnBarkEnd?.Invoke();
-    private void HandleGetUpEnd() => OnGetUpEnd?.Invoke();
-    private void HandleKnockbackEnd() => OnKnockbackEnd?.Invoke();
     private void HandleDeadEnd() => OnDeadEnd?.Invoke();
     private void HandlePhaseChangeEnd() => OnPhaseChangeEnd?.Invoke();
 }

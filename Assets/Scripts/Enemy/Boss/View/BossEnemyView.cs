@@ -1,4 +1,5 @@
 using BossEnemy.Data;
+using BossEnemy.SMB;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
@@ -19,6 +20,9 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
     /// <summary>ダメージを受けて生存したときに発火するイベント（被弾入れ替え判定に使用）</summary>
     public event Action<IEnemy> OnDamaged;
+
+    /// <summary>ダメージを受けたときに発火するイベント</summary>
+    public event Action<DamageContext, PartsType, bool, ArmorAttachmentPoint> OnTakeDamage;
 
     /// <summary>死亡時に発火するイベント</summary>
     public event Action<IEnemy> OnDead;
@@ -58,11 +62,18 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public void Init()
     {
         _isLockable = true;
-        _bossEnemyController.Init(_services);
+        _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
+        _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
 
-        foreach(var parts in _bossEnemyPartsView)
+        foreach (var parts in _bossEnemyPartsView)
         {
             parts.Init(this);
+        }
+
+        foreach (var behaviour in _animator.GetBehaviours<AttackSMBBase>())
+        {
+            behaviour.Init(_bossEnemyAnimationEventReceiver, _bossEnemyAnimator, _attackInformationHolder, 
+                _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
         }
     }
 
@@ -73,6 +84,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
         // 攻撃から一番近いボスエネミーのパーツを割り出す
         float saveClosestDistance = 1000;
+        bool isGuardArmor = false;
+        ArmorAttachmentPoint armorAttachmentPoint = ArmorAttachmentPoint.None;
         foreach (var bossParts in _bossEnemyPartsView)
         {
             float playerDistance = _services.PlayerInformationService.ToPlayerDistance(bossParts.PartsPosition);
@@ -81,14 +94,32 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
             {
                 saveClosestDistance = playerDistance;
                 parts = bossParts;
+
+                if (bossParts.Armor != null) 
+                {
+                    if(!bossParts.Armor.IsBreak) isGuardArmor = true;
+                }
+
+                if (isGuardArmor) armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
             }
         }
 
-        _bossEnemyController.HandleDamaged(context, parts);
-
-        OnDamaged.Invoke(this);
+        Debug.Log("ダメージを検出(アーマーのガード:" + isGuardArmor + ")" + "(こうげきかしょ:" + parts.PartsType + ")");
+        OnTakeDamage?.Invoke(context, parts.PartsType, isGuardArmor, armorAttachmentPoint);
     }
 
+    public void Attack(BossEnemyAttackData bossEnemyAttackData)
+    {
+        _attackInformationHolder.SetData(bossEnemyAttackData);
+        _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
+    }
+
+    public void AttackEnd()
+    {
+        _bossEnemyAnimator.SetAttacking(false);
+    }
+
+    #region 鎧関連の処理
     public void ArmorInit()
     {
         foreach (var bossArmor in _bossArmorViews)
@@ -99,9 +130,9 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
     public void ArmorBreak(ArmorAttachmentPoint attachmentPointsType)
     {
-        foreach(var bossArmor in _bossArmorViews)
+        foreach (var bossArmor in _bossArmorViews)
         {
-            if(bossArmor.AttachmentPoints == attachmentPointsType)
+            if (bossArmor.AttachmentPoints == attachmentPointsType)
             {
                 bossArmor.BreakArmer().Forget();
             }
@@ -118,6 +149,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
             }
         }
     }
+    #endregion
 
     /// <summary>ノックバックの力を与える</summary>
     public void AddKnockbackForce(Vector3 direction)
@@ -131,15 +163,33 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
     }
 
-    /// <summary>位置を直接セットする</summary>
+    public void PhaseChange()
+    {
+        _bossEnemyAnimator.SetPhaseChange();
+    }
+
+    /// <summary>位置をセットする</summary>
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
     }
 
+    /// <summary>回転をセットする</summary>
     public void SetRotation(Quaternion quaternion)
     {
         transform.rotation = quaternion;
+    }
+
+    /// <summary>速度をセットする</summary>
+    public void SetVelocity(Vector3 velocity)
+    {
+        _bossEnemyAnimator.SetSpeed(velocity.x, velocity.z);
+    }
+
+    /// <summary> 各種Spawnerを設定する </summary>
+    public void SetSpawner(IAttackHitAreaSpawner attackHitAreaSpawner)
+    {
+        _attackHitAreaSpawner = attackHitAreaSpawner;
     }
 
     /// <summary>各サービスを注入する。EnemyManagerのSpawnから呼ぶ想定</summary>
@@ -177,6 +227,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     /// <summary> 死んだ際の処理 </summary>
     public void Dead()
     {
+        _isDead = true;
+        _bossEnemyAnimator.SetDead();
         OnDead.Invoke(this);
         Debug.Log("Boss討伐完了");
     }
@@ -194,9 +246,19 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     [Header("ロックオン対象のTransform")]
     [SerializeField] private Transform _targetCenterTransform;
 
+    [Header("ボスエネミーのAnimator")]
+    [SerializeField] private Animator _animator;
+
+    private BossEnemyAnimator _bossEnemyAnimator;
+    private BossEnemyAnimationEventReceiver _bossEnemyAnimationEventReceiver = new();
+    private AttackInformationHolder _attackInformationHolder = new();
+
     private EnemyServices _services;
 
-    private bool _isDead;
+    // 各種Spawner
+    private IAttackHitAreaSpawner _attackHitAreaSpawner = null;
+
+    private bool _isDead = false;
     private bool _isLockable;
 
     private void Update()
@@ -233,7 +295,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         /// <summary>
         /// このパーツの硬さ(肉質)
         /// </summary>
-        public BossEnemyPartsType BossEnemyPartsType => _bossEnemyPartsType;
+        public PartsType PartsType => _bossEnemyPartsType;
 
         public void Init(BossEnemyView bossEnemyView)
         {
@@ -249,7 +311,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         [SerializeField] private BossArmorView _thisPartsArmer = null;
 
         [Header("このPartsの硬さ(肉質)")]
-        [SerializeField] private BossEnemyPartsType _bossEnemyPartsType;
+        [SerializeField] private PartsType _bossEnemyPartsType;
 
         private BossEnemyView _bossEnemyView = null;
     }

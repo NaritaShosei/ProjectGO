@@ -1,8 +1,12 @@
+using BossEnemy.BehaviorTree.Node.ActionNode;
 using BossEnemy.Data;
-using UniRx;
+using BossEnemy.Data.Repositry;
+using BossEnemy.Model.CoreLogic;
 using System;
+using UniRx;
+using UnityEngine;
 
-namespace BossEnemy.BehaviorTree.Node.Decorator
+namespace BossEnemy.BehaviorTree.Node.DecoratorNode
 {
     /// <summary> 通ったら子Nodeを実行して、通らなければFailureを返すNode </summary>
     public abstract class DecoratorNode : TreeNodeBase
@@ -12,22 +16,64 @@ namespace BossEnemy.BehaviorTree.Node.Decorator
             _childNode = childNode;
         }
 
-        public override void OnEnter()
+        public override NodeCondition TryGetNextNode(ref ITreeNode nextNode)
         {
-            if (_childNode.TryEntry() == NodeCondition.Success)
+            if(_childNode == null)
             {
-                Controller.ChangeNode(_childNode);
-                return;
+                Debug.LogError("子ノードがNullです");
+                return NodeCondition.Failure;
             }
 
-            Controller.StartSearch();
+            if (_childNode.TryEntry() == NodeCondition.Running || _childNode.TryEntry() == NodeCondition.Success)
+            {
+                nextNode = _childNode;
+                return NodeCondition.Success;
+            }
+
+            return NodeCondition.Failure;
         }
 
         /// <summary> 子ノード </summary>
         protected ITreeNode _childNode = null;
     }
 
+    /// <summary> 攻撃の選択Node </summary>
+    public class AttackSelect : DecoratorNode
+    {
+        public AttackSelect(ITreeNode child, 
+            BossEnemyAttackField bossEnemyAttackField, 
+            BossEnemyAttackDataRepositry bossEnemyAttackDataRepositry, 
+            AttackAction attackNode, 
+            TargetChaseAction targetChaseAction): base (child)
+        {
+            _bossEnemyAttackField = bossEnemyAttackField;
+            _bossEnemyAttackDataRepositry = bossEnemyAttackDataRepositry;
+            _attackNode = attackNode;
+            _playerChase = targetChaseAction;
+        }
 
+        public override NodeCondition TryEntry()
+        {
+            int id = AttackDataSelector.GetRandamSelectAttackDataID(_bossEnemyAttackField);
+
+            BossEnemyAttackData attackData = _bossEnemyAttackDataRepositry.GetData(id);
+
+            Debug.Log("攻撃選択:" + attackData.Name);
+
+            _attackNode.SetNextAttackData(attackData);
+            _playerChase.SetGoalDistance(attackData.AttackHitDistance);
+
+            return NodeCondition.Success;
+        }
+
+        private readonly BossEnemyAttackDataRepositry _bossEnemyAttackDataRepositry;
+
+        private readonly BossEnemyAttackField _bossEnemyAttackField;
+
+        private readonly AttackAction _attackNode;
+
+        private readonly TargetChaseAction _playerChase;
+    }
 
     #region 残りのHPに応じてEntryが可能となるDecoratorNode
     /// <summary> 残りのHPに応じてEntryが可能となるDecoratorNode </summary>
@@ -92,39 +138,40 @@ namespace BossEnemy.BehaviorTree.Node.Decorator
             _childNode = child;
         }
 
-        public void ArmorBreak() => _isArmorBreak = true;
+        public void CanEntry() => _canEntry = true;
 
         public override NodeCondition TryEntry()
         {
-            if (_isArmorBreak)
+            if (_canEntry)
             {
-                _isArmorBreak = false;
+                _canEntry = false;
                 return NodeCondition.Success;
             }
 
             return NodeCondition.Failure;
         }
 
-        private bool _isArmorBreak = false;
+        private bool _canEntry = false;
     }
     #endregion
 
     #region Playerとの距離に応じてEntryが可能となるDecoratorNode
-    /// <summary> Playerとの距離に応じてEntryが可能となるDecoratorNode </summary>
-    public class DependingOnDistanceFromPlayerNode : DecoratorNode
+    /// <summary> Playerとの距離が一定数より近ければEntryが可能となるDecoratorNode </summary>
+    public class CloseToPlayerNode : DecoratorNode
     {
-        public DependingOnDistanceFromPlayerNode(ITreeNode child, IPlayerInformationService playerInformationService,
-            BossEnemyData bossEnemyData, float nodeEntryLine, bool isEntryCloseDistance
-            ) : base(child)
+        public CloseToPlayerNode(ITreeNode child, IPlayerInformationService playerInformationService,
+            BossEnemyData bossEnemyData, float nodeEntryLine) : base(child)
         {
             _playerInformation = playerInformationService;
+            _bossEnemyData = bossEnemyData;
+            _nodeEntryLine = nodeEntryLine;
         }
 
         public override NodeCondition TryEntry()
         {
-            float distance = _playerInformation.ToPlayerDistance(_bossEnemyData.Position.Value);
+            float playerDistance = _playerInformation.ToPlayerDistance(_bossEnemyData.Position.Value);
 
-            if (distance > _nodeEntryLine) return NodeCondition.Success;
+            if (playerDistance < _nodeEntryLine) return NodeCondition.Success;
 
             return NodeCondition.Failure;
         }
@@ -135,33 +182,39 @@ namespace BossEnemy.BehaviorTree.Node.Decorator
         // ボスエネミーのデータ
         private BossEnemyData _bossEnemyData;
 
-        // このフラグがTrueだとEntry条件がPlayerとの距離がEntryLineより近いとEntry可能になる
-        private readonly bool _isEntryCloseDistance;
-
         // このノードのエントリー可能条件となる数値
         private readonly float _nodeEntryLine;
     }
     #endregion
 
-    #region 現在のBossEnemyのPhaseが最後のPhaseだった場合にEntry可能になるDecoratorNode
-    /// <summary> 現在のBossEnemyのPhaseが最後のPhaseだった場合にEntry可能になるDecoratorNode </summary>
-    public class LastPhaseNode : DecoratorNode
+    #region CountDownを行いカウントが0になったときEntryが可能となるDecoratorNode
+    public class CountDownNode : DecoratorNode
     {
-        public LastPhaseNode(ITreeNode child, BossEnemyPhaseChanger phaseChanger) : base(child)
+        public CountDownNode (ITreeNode child, int countStartValue) : base(child)
         {
-            _phaseChanger = phaseChanger;
+            _startValue = countStartValue;
+            _currentCount = _startValue;
         }
+
+        public void CountDown() => _currentCount--;
+
+        public void Reset() => _currentCount = _startValue;
 
         public override NodeCondition TryEntry()
         {
-            if(_phaseChanger.IsAllPhaseFinish.Value) return NodeCondition.Success;
+            if (_currentCount == 0)
+            {
+                Debug.Log("Entry成功");
+                Reset();
+                return NodeCondition.Success;
+            }
 
+            CountDown();
             return NodeCondition.Failure;
         }
 
-        private readonly BossEnemyPhaseChanger _phaseChanger;
-
-        private readonly int _lastPhaseNum;
+        private int _currentCount;
+        private readonly int _startValue;
     }
     #endregion
 }

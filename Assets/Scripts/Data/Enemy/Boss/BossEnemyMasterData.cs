@@ -8,7 +8,7 @@ using UnityEngine;
 namespace BossEnemy.Data
 {
     /// <summary> ボスエネミーを構成する各パーツの種類 </summary>
-    public enum BossEnemyPartsType
+    public enum PartsType
     {
         None, // default値
         Hard, // 硬い
@@ -18,8 +18,8 @@ namespace BossEnemy.Data
     }
 
     /// <summary> 1体のBossEnemyのマスターデータをPhaseごとに分けて保持するホルダークラス </summary>
-    [CreateAssetMenu(fileName = "BossEnemyMasterData", menuName = "BossEnemy/MasterData")]
-    public class BossEnemyMasterData : ScriptableObject
+
+    public class BossEnemyMasterData 
     {
         public BossEnemyData[] BossEnemyDatas => _bossEnemyDatas;
         public string BossName => _bossName;
@@ -74,10 +74,13 @@ namespace BossEnemy.Data
         public IReadOnlyReactiveProperty<Quaternion> Rotation => _rotation;
 
         /// <summary> BossEnemyの移動速度 </summary>
-        public IReadOnlyReactiveProperty<Vector3> MoveVelocity => _velocity;
+        public IReadOnlyReactiveProperty<Vector3> Velocity => _velocity;
 
         /// <summary> 最大HP </summary>
         public int MaxHP => _maxHP;
+
+        /// <summary> 歩行速度 </summary>
+        public float WalkSpeed => _walkSpeed;
 
         /// <summary> 硬い箇所の防御力 </summary>
         public int HardSpotsDefense => _currentHardSpotsDefense;
@@ -103,6 +106,15 @@ namespace BossEnemy.Data
         /// <summary> ボスが装着する左足ArmerのData </summary>
         public BossArmorData LeftLegArmer => _leftLegArmer;
 
+        /// <summary> 通常近距離攻撃 </summary>
+        public BossEnemyAttackField CloseRangeNormalAttackFieldHolder => _closeRangeNormalAttackDataHolder;
+
+        /// <summary> 通常近距離攻撃カウント3到達時特殊近距離攻撃 </summary>
+        public BossEnemyAttackField CloseRangeFinishCountAttackFieldHolder => _closeRangeFinishCountAttackDataHolder;
+
+        /// <summary> 遠距離攻撃 </summary>
+        public BossEnemyAttackField LongRangeAttackFieldHolder => _longRangeAttackDataHolder;
+
         /// <summary> BossEnemyの初期化メソッド </summary>
         public void Init(Transform bossEnemyTransform)
         {
@@ -111,6 +123,9 @@ namespace BossEnemy.Data
 
             // 現在の回転座標をセット
             _rotation = new(bossEnemyTransform.rotation);
+
+            // BossEnemyの移動速度を初期化
+            _velocity = new(Vector3.zero);
 
             // HPを最大値にする
             _currentHP = new(_maxHP);
@@ -136,6 +151,10 @@ namespace BossEnemy.Data
         /// <param name="rotation"> 新しい回転 </param>
         public void SetRotation(Quaternion rotation) => _rotation.Value = rotation;
 
+        /// <summary> BossEnemyの移動速度を設定する </summary>
+        /// <param name="velocity"> 移動速度 </param>
+        public void SetVelocity(Vector3 velocity) => _velocity.Value = velocity;
+
         /// <summary> BossEnemy </summary>
         /// <param name="damage"></param>
         public void TakeDamage(int damage)
@@ -154,6 +173,10 @@ namespace BossEnemy.Data
         [Header("ボスの最大HP")]
         [SerializeField, Tooltip("BossEnemyの最大HP")]
         private int _maxHP = 10000;
+
+        [Header("ボスの歩行速度")]
+        [SerializeField, Tooltip("ボスの歩行速度")]
+        private float _walkSpeed = 10000;
 
         [Header("BossEnemyの硬度(肉質)の値")]
         [SerializeField, Tooltip("硬度(肉質)の高い部位の硬さ")] private int _hardSpotsDefense = 30;
@@ -201,7 +224,7 @@ namespace BossEnemy.Data
 
         #region DataConstruct
 #if UNITY_EDITOR
-        public void DataConstruct(int maxHP, 
+        public void DataConstruct(int maxHP, float walkSpeed,
             int hardSpotsDefense, int normalSpotsDefense, int weekPointDefense, int vitalPointDefense,
             BossArmorData rightArmArmer, BossArmorData leftArmArmer, BossArmorData rightLegArmer, BossArmorData leftLegArmer,
             BossEnemyAttackField closeRangeNormalAttackDataHolder, 
@@ -209,6 +232,7 @@ namespace BossEnemy.Data
             BossEnemyAttackField longRangeAttackDataHolder)
         {
             _maxHP = maxHP;
+            _walkSpeed = walkSpeed;
             _hardSpotsDefense = hardSpotsDefense;
             _normalSpotsDefense = normalSpotsDefense;
             _weekPointDefense = weekPointDefense;
@@ -246,10 +270,10 @@ namespace BossEnemy.Data
         /// <summary> Armerの初期化メソッド </summary>
         public void Init()
         {
-            _currentHP.Value = _maxHP;
+            if (_currentHP == null) _currentHP = new(_maxHP);
+            else _currentHP.Value = _maxHP;
             _isArmorBreak = false;
             _currentDefense = _defense;
-            _currentHP = new(_maxHP);
         }
 
         /// <summary> Armerの修復メソッド </summary>
@@ -342,15 +366,18 @@ namespace BossEnemy.Data
     public struct BossEnemyAttackData
     {
         public BossEnemyAttackData(
-            int id, string name, float attackTotalTime, float attackDuration, float damage, 
-            float attackRange, float nockBackPower, float coolTime, string animParam)
+            int id, string name, float attackChargeTime, float attackDuration, float recoveryTime, float attackAreaEffectStartTime,
+            float damage, float attackRange, float attackHitDistance, float nockBackPower, float coolTime, string animParam)
         {
             _attackID = id;
             _attackName = name;
-            _attackTotalTime = attackTotalTime;
+            _attackChargeTime = attackChargeTime;
             _attackDuration = attackDuration;
+            _recoveryTime = damage;
+            _attackAreaEffectStartTime = attackAreaEffectStartTime;
             _damage = damage;
             _attackRange = attackRange;
+            _attackHitDistance = attackHitDistance;
             _nockBackPower = nockBackPower;
             _coolTime = coolTime;
             _animParamName = animParam;
@@ -360,14 +387,20 @@ namespace BossEnemy.Data
         public int ID => _attackID;
         /// <summary> 攻撃名称 </summary>
         public string Name => _attackName;
-        /// <summary> 発生時間 </summary>
-        public float AttackTotalTime => _attackTotalTime;
+        /// <summary> 攻撃判定開始までの時間 </summary>
+        public float AttackChargeTime => _attackChargeTime;
         /// <summary> 攻撃持続時間 </summary>
         public float AttackDuration => _attackDuration;
+        /// <summary> 攻撃後硬直時間 </summary>
+        public float RecoveryTime => _recoveryTime;
+        /// <summary> 攻撃範囲エフェクト発生までの時間 </summary>
+        public float AttackAreaEffectStartTime => _attackAreaEffectStartTime;
         /// <summary> 一撃のダメージ量 </summary>
         public float Damage => _damage;
         /// <summary> 攻撃範囲 </summary>
         public float AttackRange => _attackRange;
+        /// <summary> 攻撃が発生する距離 </summary>
+        public float AttackHitDistance => _attackHitDistance;
         /// <summary> ノックバックする力 </summary>
         public float NockBackPower => _nockBackPower;
         /// <summary> 攻撃のクールタイム </summary>
@@ -382,16 +415,25 @@ namespace BossEnemy.Data
         private string _attackName;
 
         // 発生時間
-        private float _attackTotalTime;
+        private float _attackChargeTime;
 
         // 攻撃の持続時間
         private float _attackDuration;
+
+        // 攻撃後硬直時間
+        private float _recoveryTime;
+
+        // 攻撃範囲エフェクト発生までの時間
+        private float _attackAreaEffectStartTime;
 
         // 一撃のダメージ量
         private float _damage;
         
         // 攻撃範囲
         private float _attackRange;
+
+        // 攻撃が届く距離
+        private float _attackHitDistance;
 
         // ノックバックする力
         private float _nockBackPower;

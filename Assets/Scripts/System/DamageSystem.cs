@@ -79,20 +79,20 @@ public class DamageSystem
     /// <param name="partsType"> 被弾場所 </param>
     /// <param name="bossEnemyData"> 被弾したBossEnemyのData </param>
     /// <returns> 被弾場所の硬度(肉質) </returns>
-    public static int GetHitPartsDefense(BossEnemyPartsType partsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsDefense(PartsType partsType, BossEnemyData bossEnemyData)
     {
         switch (partsType)
         {
-            case BossEnemyPartsType.None:
+            case PartsType.None:
                 Debug.LogError("PartsNone");
                 break;
-            case BossEnemyPartsType.Hard:
+            case PartsType.Hard:
                 return bossEnemyData.HardSpotsDefense;
-            case BossEnemyPartsType.Normal:
+            case PartsType.Normal:
                 return bossEnemyData.NormalSpotsDefense;
-            case BossEnemyPartsType.WeekPoint:
+            case PartsType.WeekPoint:
                 return bossEnemyData.WeekPointDefense;
-            case BossEnemyPartsType.VitalPoint:
+            case PartsType.VitalPoint:
                 return bossEnemyData.VitalPointDefense;
         }
 

@@ -8,68 +8,59 @@ using UnityEngine;
 /// IEnemyAnimationControllerを継承したIBossEnemyAnimationControllerを実装し、SMBからanimator.TryGetComponent()で取得される。
 /// </summary>
 
-public class BossEnemyAnimationEventReceiver : MonoBehaviour, IBossEnemyAnimationController
+public class BossEnemyAnimationEventReceiver
 {
+    /// <summary>Animation中に動く際のイベント(目的地と到達までの時間)</summary>
+    public event Action<Vector3, float> OnMove;
+
     /// <summary>攻撃ヒットタイミングのイベント</summary>
     public event Action OnAttackHit;
 
     /// <summary>攻撃アニメーション終了のイベント</summary>
     public event Action OnAttackEnd;
 
-    /// <summary>Barkアニメーション終了のイベント</summary>
-    public event Action OnBarkEnd;
+    /// <summary>Phase切り替え終了のイベント</summary>
+    public event Action OnPhaseChangeEnd;
 
-    /// <summary>GetUpアニメーション終了のイベント</summary>
-    public event Action OnGetUpEnd;
-
-    /// <summary>ノックバック（Hit/Small）アニメーション終了のイベント</summary>
-    public event Action OnKnockbackEnd;
+    /// <summary>ダウンアニメーション終了のイベント</summary>
+    public event Action OnDownEnd;
 
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
 
-    /// <summary> Phase遷移が完了した際のイベント </summary>
-    public event Action OnPhaseChangeEnd;
+    /// <summary>AttackSMB から移動開始タイミングで呼ばれる</summary>
+    public void AnimEvent_Move(Vector3 goal, float time)
+    {
+        OnMove?.Invoke(goal, time);
+    }
 
-    /// <summary>  </summary>
+    /// <summary>AttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
     {
         OnAttackHit?.Invoke();
     }
 
-    /// <summary>  </summary>
+    /// <summary>AttackSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_AttackEnd()
     {
         OnAttackEnd?.Invoke();
     }
 
-    /// <summary>  </summary>
-    public void AnimEvent_BarkEnd()
+    /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>
+    public void AnimEvent_PhaseChangeEnd()
     {
-        OnBarkEnd?.Invoke();
+        OnPhaseChangeEnd?.Invoke();
     }
 
-    /// <summary>  </summary>
-    public void AnimEvent_GetUpEnd()
+    /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>
+    public void AnimEvent_DownEnd()
     {
-        OnGetUpEnd?.Invoke();
+        OnDownEnd?.Invoke();
     }
 
-    /// <summary>  </summary>
-    public void AnimEvent_KnockbackEnd()
-    {
-        OnKnockbackEnd?.Invoke();
-    }
-
-    /// <summary>  </summary>
+    /// <summary>DeadSMB からステート終了時に呼ばれる</summary>
     public void AnimEvent_DeadEnd()
     {
         OnDeadEnd?.Invoke();
-    }
-
-    /// <summary>  </summary>
-    public void AnimEvent_BossPhaseChangeEnd()
-    {
-        OnPhaseChangeEnd?.Invoke();
     }
 }

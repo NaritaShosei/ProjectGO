@@ -70,12 +70,6 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
 
     public HPBarUI CurrentBar => _currentHPBar;
 
-    /// <summary> 初期化 </summary>
-    public void Init(BossEnemyData bossEnemyData, int currentPhase)
-    {
-
-    }
-
     public void OnGet() { }
 
     public void OnRelease() { }
@@ -89,15 +83,30 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
             return;
         }
 
+        _disposable?.Dispose();
+        _disposable = new();
+
         // 現在使用中のHPBarがあれば破棄
         _currentHPBar?.Disable();
 
         _currentHPBar = _bossEnemyAllPhaseHPBarArray[currentPhase];
         _currentHPBar.Init(bossEnemyData.MaxHP);
+
+        bossEnemyData.CurrentHP.Subscribe(async hp =>
+        {
+            await CurrentBar.TakeDamage(hp);
+        }).AddTo(_disposable);
     }
 
     [Header("各PhaseでのボスエネミーのHPUI")]
     [SerializeField] private HPBarUI[] _bossEnemyAllPhaseHPBarArray;
 
     private HPBarUI _currentHPBar = null;
+
+    private CompositeDisposable _disposable;
+
+    private void OnDestroy()
+    {
+        _disposable?.Dispose();
+    }
 }
