@@ -42,5 +42,5 @@ public class SequenceStatusView : MonoBehaviour, ISequenceStatusView
     [SerializeField] private TextMeshProUGUI _waveText;
 
     [Header("Display")]
-    [SerializeField] private string _progressLabel = "SpawnGroup ";
+    [SerializeField] private string _progressLabel = "Wave ";
 }
