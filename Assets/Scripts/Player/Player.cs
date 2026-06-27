@@ -212,9 +212,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     [SerializeField] private PlayerSoundHandler _soundHandler;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] private JustDodgeSystem _justDodgeSystem;
-
-    [Header("ヒットストップ設定")]
-    [SerializeField] private HitStopData _hitStopData;
+    [SerializeField] private JustDodgeEffectPlayer _justDodgeEffectPlayer;
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
@@ -359,11 +357,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     /// </summary>
     private void HandleJustDodgeSuccess()
     {
-        // TODO:ここに直書きではなく、JustDodgeEffectPlayerのようなクラスをはさんだほうがいい
+        var context = new JustDodgeContext();
 
-        if (!ServiceLocator.TryGet(out HitStopManager hitStopManager)) return;
-
-        hitStopManager.Trigger(_hitStopData);
+        _justDodgeEffectPlayer.Play(context);
     }
 
     private void OnPlayerDead()
