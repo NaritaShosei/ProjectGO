@@ -57,7 +57,6 @@ public class BarkBehaviour : IEnemyBehaviour
         bool hasNoSlot = !_attackerSlot.IsAcquired(_enemyId);
         if (!isOnCooldown && !hasNoSlot) return false;
 
-
         // 確率判定：falseのときはRoamが選ばれる
         return UnityEngine.Random.value < _barkChance;
     }

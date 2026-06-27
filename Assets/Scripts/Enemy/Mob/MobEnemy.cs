@@ -164,6 +164,16 @@ public class MobEnemy : Enemy, IFormationParticipant
         _armor.OnBroken += BreakArmor;
     }
 
+    protected void InvokeArmorRegistered()
+    {
+        if (_armor == null)
+        {
+            return;
+        }
+
+        OnArmorRegistered?.Invoke(_armor);
+    }
+
     // Armorの登録
     [SerializeField] protected MobArmor _armor;
 
@@ -304,14 +314,6 @@ public class MobEnemy : Enemy, IFormationParticipant
         var idle = new IdleBehaviour();
         idle.Init(initCtx);
         _runner.Register(idle);
-    }
-
-    /// <summary>
-    /// Armor登録イベントを発火する
-    /// </summary>
-    protected void InvokeArmorRegistered()
-    {
-        OnArmorRegistered?.Invoke(_armor);
     }
 
     /// <summary>
