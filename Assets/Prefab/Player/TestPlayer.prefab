@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 8069266211170886861}
   - component: {fileID: 5786415077606400648}
   - component: {fileID: 6126189937113880516}
+  - component: {fileID: 8966819175010067479}
   m_Layer: 3
   m_Name: TestPlayer
   m_TagString: Untagged
@@ -65,14 +66,7 @@ MonoBehaviour:
   _soundHandler: {fileID: 5786415077606400648}
   _targetCenter: {fileID: 3784771225125332287}
   _justDodgeSystem: {fileID: 6126189937113880516}
-  _hitStopData:
-    _baseDuration: 5
-    _timeScale: 0.1
-    _targetGroup: 14
-    _priority: 1
-    _weakPointMultiplier: 1.2
-    _breakOrKillMultiplier: 1.2
-    _weakAndBreakOrKillMultiplier: 1.4
+  _justDodgeEffectPlayer: {fileID: 8966819175010067479}
 --- !u!114 &6265858459617693970
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,6 +211,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JustDodgeSystem
   _justDodgeFrame: 15
+--- !u!114 &8966819175010067479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5847551565396971007}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a674f9424e730c40a21e356cd8be0e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JustDodgeEffectPlayer
+  _hitStopData:
+    _baseDuration: 5
+    _timeScale: 0.1
+    _targetGroup: 14
+    _priority: 1
+    _weakPointMultiplier: 1.2
+    _breakOrKillMultiplier: 1.2
+    _weakAndBreakOrKillMultiplier: 1.4
+  _volume: {fileID: 0}
+  _vignetteMin: 0.116
+  _vignetteMax: 0.719
+  _vignetteDuration: 5
+  _vignetteCloseDuration: 0.3
+  _vignetteCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _defaultVignetteColor: {r: 0, g: 0, b: 0, a: 1}
+  _vignetteColor: {r: 0.18555348, g: 0.6405652, b: 0.82641506, a: 1}
 --- !u!1 &6848730639649579340
 GameObject:
   m_ObjectHideFlags: 0
