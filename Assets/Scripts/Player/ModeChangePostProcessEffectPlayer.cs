@@ -11,12 +11,12 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 {
-    [Header("References")]
+    [Header("参照")]
     [SerializeField] private PlayerModeController _modeController;
     [Tooltip("未設定の場合はシーン内の Volume を自動取得します。")]
     [SerializeField] private Volume _volume;
 
-    [Header("Timing")]
+    [Header("時間設定")]
     [Tooltip("演出全体の再生時間")]
     [SerializeField, Min(0.01f)] private float _duration = 1.1f;
     [Tooltip("演出の強さの時間変化")]
@@ -26,7 +26,7 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         new Keyframe(0.42f, 0.55f),
         new Keyframe(1f, 0f));
 
-    [Header("Look")]
+    [Header("見た目")]
     [Tooltip("雷神モード突入時の Vignette 色")]
     [SerializeField] private Color _vignetteColor = new Color(0.25f, 0.75f, 1f);
     [Tooltip("演出ピーク時の Vignette 強度")]
@@ -49,6 +49,9 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     private Bloom _bloom;
     private ColorAdjustments _colorAdjustments;
     private CancellationTokenSource _effectCts;
+    private PostProcessSnapshot _activeSnapshot;
+    private bool _hasActiveSnapshot;
+    private int _effectPlayVersion;
 
     private void Awake()
     {
@@ -75,7 +78,7 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         if (_modeController != null)
             _modeController.OnModeChanged -= HandleModeChanged;
 
-        StopEffect();
+        StopEffect(restore: true);
     }
 
     private void HandleModeChanged(PlayerMode newMode)
@@ -88,27 +91,30 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
         if (!isWarriorToThunder) return;
 
-        StopEffect();
+        // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
+        StopEffect(restore: true);
+
         _effectCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-        PlayEffect(_effectCts.Token).Forget();
+        _effectPlayVersion++;
+
+        PlayEffect(_effectCts.Token, _effectPlayVersion).Forget();
     }
 
     private void CacheVolumeComponents()
     {
         if (_volume == null)
         {
-            Debug.LogWarning("[ModeChangePostProcessEffectPlayer] Volume is missing.", this);
+            Debug.LogWarning("[ModeChangePostProcessEffectPlayer] Volume が存在しません。", this);
             return;
         }
 
         if (_volume.profile == null)
         {
-            Debug.LogWarning("[ModeChangePostProcessEffectPlayer] Volume profile is missing.", this);
+            Debug.LogWarning("[ModeChangePostProcessEffectPlayer] Volume Profile が存在しません。", this);
             return;
         }
 
         // Profile に存在するコンポーネントだけを操作する。
-        // どれかが未設定でも、残りのポストプロセスだけで演出できるようにしている。
         _volume.profile.TryGet(out _vignette);
         _volume.profile.TryGet(out _chromaticAberration);
         _volume.profile.TryGet(out _lensDistortion);
@@ -116,12 +122,14 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         _volume.profile.TryGet(out _colorAdjustments);
     }
 
-    private async UniTaskVoid PlayEffect(CancellationToken token)
+    private async UniTask PlayEffect(CancellationToken token, int playVersion)
     {
         if (_volume == null || _volume.profile == null) return;
 
-        // 他の演出やシーンの初期値を壊さないよう、再生前の値と overrideState を保存して最後に戻す。
         var snapshot = CaptureSnapshot();
+        _activeSnapshot = snapshot;
+        _hasActiveSnapshot = true;
+
         SetOverrideState(true);
 
         float elapsed = 0f;
@@ -145,7 +153,9 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         }
         finally
         {
-            Restore(snapshot);
+            // 連続再生時、古い非同期処理が新しい演出の値を戻してしまうのを防ぐ。
+            if (playVersion == _effectPlayVersion)
+                Restore(snapshot);
         }
     }
 
@@ -267,13 +277,18 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
             _colorAdjustments.postExposure.overrideState = snapshot.PostExposureOverride;
             _colorAdjustments.saturation.overrideState = snapshot.SaturationOverride;
         }
+
+        _hasActiveSnapshot = false;
     }
 
-    private void StopEffect()
+    private void StopEffect(bool restore)
     {
         _effectCts?.Cancel();
         _effectCts?.Dispose();
         _effectCts = null;
+
+        if (restore && _hasActiveSnapshot)
+            Restore(_activeSnapshot);
     }
 
     private struct PostProcessSnapshot
