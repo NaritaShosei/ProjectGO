@@ -7,6 +7,8 @@ using UnityEngine;
 public class WaveController
 {
     public bool IsComplete { get; private set; }
+    public int CurrentGroupNumber => _currentWave == null ? 0 : Mathf.Min(_currentGroupIndex + 1, MaxGroupCount);
+    public int MaxGroupCount => _currentWave?.SpawnGroups?.Count ?? 0;
 
     public WaveController(
         EnemyManager enemyManager,
