@@ -15,15 +15,15 @@ MonoBehaviour:
   active: 1
   shadows:
     m_OverrideState: 1
-    m_Value: {x: 0.7198163, y: 0.8802346, z: 1, w: 0.000000050809668}
+    m_Value: {x: 0.6871727, y: 0.8849344, z: 1, w: -0.28229252}
   midtones:
     m_OverrideState: 1
-    m_Value: {x: 1, y: 0, z: 0.0051116943, w: 0.30560276}
+    m_Value: {x: 1, y: 0, z: 0.54465294, w: 0.39114594}
   highlights:
-    m_OverrideState: 1
-    m_Value: {x: 0.21694529, y: 1, z: 0.20139301, w: -1}
+    m_OverrideState: 0
+    m_Value: {x: 0.21694529, y: 1, z: 0.20139301, w: 1}
   shadowsStart:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 0
   shadowsEnd:
     m_OverrideState: 0
@@ -32,6 +32,47 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0.55
   highlightsEnd:
+    m_OverrideState: 0
+    m_Value: 1
+--- !u!114 &-7508620016560847418
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5485954d14dfb9a4c8ead8edb0ded5b1, type: 3}
+  m_Name: LiftGammaGain
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.LiftGammaGain
+  active: 1
+  lift:
+    m_OverrideState: 1
+    m_Value: {x: 0.90230477, y: 1, z: 0.9892829, w: 0}
+  gamma:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 1, z: 1, w: 0.051325917}
+  gain:
+    m_OverrideState: 1
+    m_Value: {x: 0.81169105, y: 1, z: 0.87643963, w: 0.38494432}
+--- !u!114 &-5111502079476545081
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb60a22f311433c4c962b888d1393f88, type: 3}
+  m_Name: PaniniProjection
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.PaniniProjection
+  active: 1
+  distance:
+    m_OverrideState: 0
+    m_Value: 0
+  cropToFit:
     m_OverrideState: 0
     m_Value: 1
 --- !u!114 &-4902442235179789164
@@ -268,10 +309,10 @@ MonoBehaviour:
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.116
+    m_Value: 0.455
   smoothness:
     m_OverrideState: 1
-    m_Value: 1
+    m_Value: 0.119
   rounded:
     m_OverrideState: 0
     m_Value: 0
@@ -297,6 +338,9 @@ MonoBehaviour:
   - {fileID: -4902442235179789164}
   - {fileID: -3893950679599803464}
   - {fileID: -8869105967427121628}
+  - {fileID: -5111502079476545081}
+  - {fileID: 8430501531143493553}
+  - {fileID: -7508620016560847418}
 --- !u!114 &437690649027505891
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -309,7 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c01700fd266d6914ababb731e09af2eb, type: 3}
   m_Name: DepthOfField
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.DepthOfField
-  active: 1
+  active: 0
   mode:
     m_OverrideState: 1
     m_Value: 2
@@ -532,3 +576,43 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
+--- !u!114 &8430501531143493553
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97c23e3b12dc18c42a140437e53d3951, type: 3}
+  m_Name: Tonemapping
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Tonemapping
+  active: 0
+  mode:
+    m_OverrideState: 1
+    m_Value: 2
+  neutralHDRRangeReductionMode:
+    m_OverrideState: 0
+    m_Value: 2
+  acesPreset:
+    m_OverrideState: 0
+    m_Value: 3
+  hueShiftAmount:
+    m_OverrideState: 0
+    m_Value: 0
+  detectPaperWhite:
+    m_OverrideState: 0
+    m_Value: 0
+  paperWhite:
+    m_OverrideState: 0
+    m_Value: 300
+  detectBrightnessLimits:
+    m_OverrideState: 0
+    m_Value: 1
+  minNits:
+    m_OverrideState: 0
+    m_Value: 0.005
+  maxNits:
+    m_OverrideState: 0
+    m_Value: 1000
