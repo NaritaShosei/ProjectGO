@@ -359,7 +359,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         var context = new JustDodgeContext();
 
-        _justDodgeEffectPlayer.Play(context);
+        _justDodgeEffectPlayer?.Play(context);
     }
 
     private void OnPlayerDead()

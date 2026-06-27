@@ -100,6 +100,12 @@ public class JustDodgeEffectPlayer : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_vignette != null)
+        {
+            _vignette.intensity.value = _vignetteMin;
+            _vignette.color.value = _defaultVignetteColor;
+        }
+
         _vignetteCts?.Cancel();
         _vignetteCts?.Dispose();
         _vignetteCts = null;
