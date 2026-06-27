@@ -50,6 +50,10 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
                 return true;
             }
         }
+        else
+        {
+            _pool.Add(hitAreaType, new Queue<HitAreaBase>());
+        }
 
         result = null;
         return false;
