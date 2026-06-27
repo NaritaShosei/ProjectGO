@@ -24,7 +24,9 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
                 return NodeCondition.Failure;
             }
 
-            if (_childNode.TryEntry() == NodeCondition.Running || _childNode.TryEntry() == NodeCondition.Success)
+            NodeCondition condition = _childNode.TryEntry();
+
+            if (condition == NodeCondition.Running || condition == NodeCondition.Success)
             {
                 nextNode = _childNode;
                 return NodeCondition.Success;

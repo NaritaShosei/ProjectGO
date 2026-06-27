@@ -373,7 +373,7 @@ namespace BossEnemy.Data
             _attackName = name;
             _attackChargeTime = attackChargeTime;
             _attackDuration = attackDuration;
-            _recoveryTime = damage;
+            _recoveryTime = recoveryTime;
             _attackAreaEffectStartTime = attackAreaEffectStartTime;
             _damage = damage;
             _attackRange = attackRange;

@@ -95,12 +95,14 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
                 saveClosestDistance = playerDistance;
                 parts = bossParts;
 
-                if (bossParts.Armor != null) 
-                {
-                    if(!bossParts.Armor.IsBreak) isGuardArmor = true;
-                }
+                isGuardArmor = false;
+                armorAttachmentPoint = ArmorAttachmentPoint.None;
 
-                if (isGuardArmor) armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
+                if (bossParts.Armor != null && !bossParts.Armor.IsBreak)
+                {
+                    isGuardArmor = true;
+                    armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
+                }
             }
         }
 

@@ -211,7 +211,7 @@ namespace BossEnemy.Model.CoreLogic
         public void FinishAllPhase()
         {
             _isFirstChangePhase = true;
-            OnFinishAllPhase();
+            OnFinishAllPhase?.Invoke();
             _disposables?.Dispose();
         }
 

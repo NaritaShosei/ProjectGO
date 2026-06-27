@@ -23,8 +23,8 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            _hitCenterPos = _bossEnemyTransform.position + (_bossEnemyTransform.forward * _attackData.AttackHitDistance);
             _attackData = _informationHolder.AttackData;
+            _hitCenterPos = _bossEnemyTransform.position + (_bossEnemyTransform.forward * _attackData.AttackHitDistance);
             _isAnimRunning = true;
             _isChargeComplete = false;
             _attackHitFired = false;
