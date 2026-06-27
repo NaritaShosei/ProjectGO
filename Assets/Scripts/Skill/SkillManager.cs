@@ -8,13 +8,29 @@ public class SkillManager : MonoBehaviour
     public event Action<SkillBase> OnSkillAcquired;
     public event Action<StatSkillType> OnApply
     {
-        add => _statSkillSystem.OnApply += value;
-        remove => _statSkillSystem.OnApply -= value;
+        add
+        {
+            if (_statSkillSystem != null)
+                _statSkillSystem.OnApply += value;
+            else
+                Debug.LogWarning("[SkillManager] StatSkillSystem is not initialized.", this);
+        }
+        remove
+        {
+            if (_statSkillSystem != null)
+                _statSkillSystem.OnApply -= value;
+        }
     }
 
     public void Init(IPlayerStats stats, IModeController modeController,
         Transform playerTransform, EnemyManager enemyManager)
     {
+        if (_skillDataBase == null)
+        {
+            Debug.LogError("[SkillManager] SkillDataBase is missing.", this);
+            return;
+        }
+
         foreach (var skill in _skillDataBase.GetAllSkills())
         {
             if (skill.DefaultUnlocked)
@@ -24,6 +40,10 @@ public class SkillManager : MonoBehaviour
         if (ServiceLocator.TryGet(out EXPManager eXPManager))
         {
             _statSkillSystem = new StatSkillSystem(_statSkillDataArray, stats, eXPManager);
+        }
+        else
+        {
+            Debug.LogWarning("[SkillManager] EXPManager is missing. Stat skills are disabled.", this);
         }
 
         _skillExecutor = new SkillExecutor(this, stats, modeController, playerTransform, enemyManager);
