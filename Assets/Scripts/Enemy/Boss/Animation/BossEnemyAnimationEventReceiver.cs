@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using UnityEngine;
 
@@ -12,6 +13,9 @@ public class BossEnemyAnimationEventReceiver
 {
     /// <summary>Animation中に動く際のイベント(目的地と到達までの時間)</summary>
     public event Action<Vector3, float> OnMove;
+
+    /// <summary>BossEnemyのIsTriggerのOnOffを切り替えるイベント</summary>
+    public event Action<bool> OnColliderIsTriggerIsEnabled;
 
     /// <summary>攻撃ヒットタイミングのイベント</summary>
     public event Action OnAttackHit;
@@ -32,6 +36,12 @@ public class BossEnemyAnimationEventReceiver
     public void AnimEvent_Move(Vector3 goal, float time)
     {
         OnMove?.Invoke(goal, time);
+    }
+
+    /// <summary> BossEnemyのIsTriggerのOnOffを切り替える </summary>
+    public void AnimEvent_ColliderIsTriggerIsEnabled(bool isTrigger)
+    {
+        OnColliderIsTriggerIsEnabled?.Invoke(isTrigger);
     }
 
     /// <summary>AttackSMB から攻撃ヒットタイミングで呼ばれる</summary>

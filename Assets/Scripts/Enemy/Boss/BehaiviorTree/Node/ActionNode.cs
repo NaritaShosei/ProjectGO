@@ -190,6 +190,55 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
     #region ダウンした時のアクション
     public class DownAction : ActionNode
     {
+        public DownAction(BossEnemyData bossEnemyData, BossDown bossDown, float oneLegBreakDownTime, float allLegBreakDownTime)
+        {
+            _data = bossEnemyData;
+            _bossDown = bossDown;
+            _oneLegBreakDownTime = oneLegBreakDownTime;
+            _allLegBreakDownTime = allLegBreakDownTime;
+        }
+
+        public override void OnEnter()
+        {
+            Debug.Log("EntryDownAction");
+
+            _bossDown.Down();
+
+            if(_data.LeftLegArmer.IsArmorBreak && _data.RightLegArmer.IsArmorBreak)
+            {
+                _downTime = _allLegBreakDownTime;
+                return;
+            }
+
+            _downTime = _oneLegBreakDownTime;
+        }
+
+        public override void OnUpdate()
+        {
+            // 前回のフレームからの経過時間を足していく
+            _elapsedTime += Time.deltaTime;
+
+            if (_elapsedTime >= _downTime)
+            {
+                _bossDown.RiseUp();
+                RunningEnd();
+            }
+        }
+
+        public override void OnExit()
+        {
+            _elapsedTime = 0;
+            _downTime = 0;
+        }
+
+        private float _downTime = 0;
+        private float _elapsedTime = 0f;
+
+        private BossEnemyData _data;
+        private BossDown _bossDown;
+        
+        private readonly float _oneLegBreakDownTime;
+        private readonly float _allLegBreakDownTime;
     }
     #endregion
 

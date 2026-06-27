@@ -45,28 +45,34 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
         public AttackSelect(ITreeNode child, 
             BossEnemyAttackField bossEnemyAttackField, 
             BossEnemyAttackDataRepositry bossEnemyAttackDataRepositry, 
+            AttackCoolTimer bossEnemyAttackCoolTimer,
             AttackAction attackNode, 
             TargetChaseAction targetChaseAction): base (child)
         {
             _bossEnemyAttackField = bossEnemyAttackField;
             _bossEnemyAttackDataRepositry = bossEnemyAttackDataRepositry;
+            _attackCoolTimer = bossEnemyAttackCoolTimer;
             _attackNode = attackNode;
             _playerChase = targetChaseAction;
         }
 
         public override NodeCondition TryEntry()
         {
-            int id = AttackDataSelector.GetRandamSelectAttackDataID(_bossEnemyAttackField);
+            int id = AttackDataSelector.GetRandamSelectAttackDataID(_bossEnemyAttackField, _attackCoolTimer.AttackCoolTimeList);
+
+            if (id == 0) Debug.LogError("攻撃が取得できませんでした");
 
             BossEnemyAttackData attackData = _bossEnemyAttackDataRepositry.GetData(id);
 
             Debug.Log("攻撃選択:" + attackData.Name);
 
             _attackNode.SetNextAttackData(attackData);
-            _playerChase.SetGoalDistance(attackData.AttackHitDistance);
+            _playerChase.SetGoalDistance(attackData.AttackStartDistance);
 
             return NodeCondition.Success;
         }
+
+        private readonly AttackCoolTimer _attackCoolTimer;
 
         private readonly BossEnemyAttackDataRepositry _bossEnemyAttackDataRepositry;
 
@@ -95,6 +101,7 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
 
             // Entryが可能となるHPのLineを設定する
             _nodeEntryLine = entryHPLine;
+            _isEntryHPAbove = isEntryAboveHP;
         }
 
         public void Dispose()
@@ -140,20 +147,24 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
             _childNode = child;
         }
 
-        public void CanEntry() => _canEntry = true;
+        public void BreakArmor(ArmorAttachmentPoint armorAttachmentPoint)
+        {
+            _armorBreakingPoint = armorAttachmentPoint;
+        }
 
         public override NodeCondition TryEntry()
         {
-            if (_canEntry)
+            if(_armorBreakingPoint == ArmorAttachmentPoint.LeftLeg || _armorBreakingPoint == ArmorAttachmentPoint.RightLeg)
             {
-                _canEntry = false;
+                Debug.Log("Down");
+                _armorBreakingPoint = ArmorAttachmentPoint.None;
                 return NodeCondition.Success;
             }
 
             return NodeCondition.Failure;
         }
 
-        private bool _canEntry = false;
+        private ArmorAttachmentPoint _armorBreakingPoint = ArmorAttachmentPoint.None;
     }
     #endregion
 

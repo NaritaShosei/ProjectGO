@@ -4,19 +4,22 @@ using System;
 
 # region BossEnemy関連using
 using BossEnemy.Data;
+using Cysharp.Threading.Tasks;
 #endregion
 
 namespace BossEnemy.Model.CoreLogic
 {
+    #region 攻撃処理
     public class BossAttack
     {
         public event Action<BossEnemyAttackData> OnAttackStart;
 
         public event Action OnAttackFinish;
 
-        public BossAttack(IPlayerInformationService playerInformationService)
+        public BossAttack(IPlayerInformationService playerInformationService, AttackCoolTimer attackCoolTimer)
         {
             _playerInformationService = playerInformationService;
+            _attackCoolTimer = attackCoolTimer;
         }
 
         public void AttackActionStart(BossEnemyAttackData attackData)
@@ -34,14 +37,16 @@ namespace BossEnemy.Model.CoreLogic
         public void Finish()
         {
             Debug.Log("攻撃終了");
+            _attackCoolTimer.StartCoolTime(_currentAttackData.ID, _currentAttackData.CoolTime).Forget();
             OnAttackFinish?.Invoke();
-
         }
 
         private IPlayerInformationService _playerInformationService;
+        private AttackCoolTimer _attackCoolTimer;
 
         private BossEnemyAttackData _currentAttackData;
     }
+    #endregion
 
     #region 移動処理
     public class BossMove
@@ -153,6 +158,11 @@ namespace BossEnemy.Model.CoreLogic
         public void StopMove()
         {
             _bossEnemyData.SetVelocity(Vector3.zero);
+        }
+
+        public void ColliderIsTrigger(bool isTrigger)
+        {
+            _bossEnemyData.SetColliderIsTrigger(isTrigger);
         }
 
         private BossEnemyData _bossEnemyData;
@@ -289,6 +299,32 @@ namespace BossEnemy.Model.CoreLogic
 
         private BossEnemyData _currentBossEnemyData;
         private bool _isInit = false;
+    }
+    #endregion
+
+    #region BossDown処理
+    public class BossDown
+    {
+        public event Action<bool, bool> OnDown;
+
+        public event Action OnRiseUp;
+
+        public void Init(BossEnemyData bossEnemyData)
+        {
+            _bossEnemyData = bossEnemyData;
+        }
+
+        public void Down()
+        {
+            OnDown?.Invoke(_bossEnemyData.LeftLegArmer.IsArmorBreak, _bossEnemyData.RightLegArmer.IsArmorBreak);
+        }
+
+        public void RiseUp()
+        {
+            OnRiseUp?.Invoke();
+        }
+
+        BossEnemyData _bossEnemyData;
     }
     #endregion
 

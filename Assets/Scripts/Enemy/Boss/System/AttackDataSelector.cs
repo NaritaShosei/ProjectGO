@@ -1,9 +1,10 @@
 using BossEnemy.Data;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class AttackDataSelector
 { 
-    public static int GetRandamSelectAttackDataID(BossEnemyAttackField bossEnemyAttackField)
+    public static int GetRandamSelectAttackDataID(BossEnemyAttackField bossEnemyAttackField, List<int> coolTimeAttackList)
     {
         if (bossEnemyAttackField.AttackField == null || bossEnemyAttackField.AttackField.Length == 0) return default;
 
@@ -11,6 +12,8 @@ public class AttackDataSelector
         float totalChance = 0f;
         foreach (var attack in bossEnemyAttackField.AttackField)
         {
+            if (coolTimeAttackList.Contains(attack.ID)) continue;
+
             totalChance += attack.ActivationRate;
         }
 
@@ -21,6 +24,8 @@ public class AttackDataSelector
         float currentSum = 0f;
         foreach (var attack in bossEnemyAttackField.AttackField)
         {
+            if (coolTimeAttackList.Contains(attack.ID)) continue;
+
             currentSum += attack.ActivationRate;
             if (randomPoint <= currentSum)
             {

@@ -121,6 +121,13 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         _bossEnemyAnimator.SetAttacking(false);
     }
 
+    public void Down(bool isBreakLeftLeg, bool isBreakrightLeg)
+    {
+        _bossEnemyAnimator.SetBreakingArmor(isBreakLeftLeg, isBreakrightLeg);
+    }
+
+    public void RiseUp() => _bossEnemyAnimator.SetIsDown(false);
+
     #region 鎧関連の処理
     public void ArmorInit()
     {
@@ -168,6 +175,12 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public void PhaseChange()
     {
         _bossEnemyAnimator.SetPhaseChange();
+    }
+
+    /// <summary>ColliderのIsTriggerをセットする</summary>
+    public void SetIsTrigger(bool isTrigger)
+    {
+        _bossCollider.isTrigger = isTrigger;
     }
 
     /// <summary>位置をセットする</summary>
@@ -262,6 +275,13 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
     private bool _isDead = false;
     private bool _isLockable;
+
+    private BoxCollider _bossCollider;
+
+    private void Awake()
+    {
+        _bossCollider = GetComponent<BoxCollider>();
+    }
 
     private void Update()
     {

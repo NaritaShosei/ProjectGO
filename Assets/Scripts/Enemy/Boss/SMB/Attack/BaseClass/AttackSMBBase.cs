@@ -24,9 +24,10 @@ namespace BossEnemy.SMB
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             _attackData = _informationHolder.AttackData;
-            _hitCenterPos = _bossEnemyTransform.position + (_bossEnemyTransform.forward * _attackData.AttackHitDistance);
+            _hitCenterPos = _bossEnemyTransform.position + 
+                (_bossEnemyTransform.forward * _attackData.AttackHitAreaCenterDistance);
             _isAnimRunning = true;
-            _isChargeComplete = false;
+            _isChargeCompleted = false;
             _attackHitFired = false;
             _isAttackAreaActive = false;
             Debug.Log("アニメーション合計時間：" + stateInfo.length);
@@ -60,18 +61,21 @@ namespace BossEnemy.SMB
 
         public virtual void AttackSequence()
         {
-            if (!_isChargeComplete && _attackData.AttackChargeTime < _elapsedSeconds)
+            // 攻撃
+            if (!_isChargeCompleted && _attackData.AttackChargeTime < _elapsedSeconds)
             {
                 _attackHitFired = true;
-                _isChargeComplete = true;
+                _isChargeCompleted = true;
             }
+
 
             if(!_isAttackAreaActive && _elapsedSeconds > _attackData.AttackAreaEffectStartTime)
             {
-                float despawnTime = _attackData.AttackChargeTime + _attackData.AttackDuration - _elapsedSeconds;
+                float despawnTime = (_attackData.AttackChargeTime + _attackData.AttackDuration) - _elapsedSeconds;
                 _attackHitAreaSpawner.Spawn(HitAreaType.Circle, _hitCenterPos, _attackData.AttackRange, despawnTime);
                 _isAttackAreaActive = true;
             }
+
 
             if (_attackHitFired)
             {
@@ -104,7 +108,7 @@ namespace BossEnemy.SMB
 
         protected bool _attackHitFired = false;
 
-        protected bool _isChargeComplete = false;
+        protected bool _isChargeCompleted = false;
 
         protected bool _isAnimRunning = false;
 

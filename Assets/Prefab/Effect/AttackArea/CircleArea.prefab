@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Indicator_Circle_Simple_Red_Loop
       objectReference: {fileID: 0}
+    - target: {fileID: 903264671345410106, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
+      propertyPath: outerRadius
+      value: 0.002
+      objectReference: {fileID: 0}
     - target: {fileID: 1049279178348497797, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -108,6 +112,22 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 5393888505970539601, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
+      propertyPath: innerRadius
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5393888505970539601, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
+      propertyPath: outerRadius
+      value: 0.002
+      objectReference: {fileID: 0}
+    - target: {fileID: 6699798161477729616, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
+      propertyPath: innerRadius
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 6699798161477729616, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
+      propertyPath: outerRadius
+      value: 5.399924
+      objectReference: {fileID: 0}
     - target: {fileID: 7634176976893525258, guid: 2d48d4b83d4472c4b8b56ee8aad0f196, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -123,7 +143,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 2481968640056120981}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 271498f36ec95b3488847b73cb4c54d8, type: 3}
   m_Name: 
@@ -139,7 +159,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 2481968640056120981}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 271498f36ec95b3488847b73cb4c54d8, type: 3}
   m_Name: 
@@ -150,7 +170,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 2481968640056120981}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 271498f36ec95b3488847b73cb4c54d8, type: 3}
   m_Name: 

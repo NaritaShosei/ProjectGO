@@ -1,11 +1,13 @@
-using UnityEngine;
 using System;
+using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class BossEnemyAnimator : IBossEnemyAnimator
 {
     // Receiverから中継するイベント（外部への単一エントリポイント）
     public event Action OnAttackHit;
     public event Action OnAttackEnd;
+    public event Action OnDownEnd;
     public event Action OnDeadEnd;
     public event Action OnPhaseChangeEnd;
 
@@ -41,12 +43,50 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     public void SetAttacking(bool value, string triggerValue = null)
     {
         if (_animator == null) return;
-            _animator.SetBool(_hashIsAttacking, value);
+        _animator.SetBool(_hashIsAttacking, value);
 
         Debug.Log("攻撃のトリガー" + triggerValue);
 
-        if(triggerValue != null) 
+        if (triggerValue != null)
             _animator.SetTrigger(triggerValue);
+    }
+
+    /// <summary>
+    /// 各所アーマー破壊フラグを設定する
+    /// </summary>
+    public void SetBreakingArmor(bool isBreakingLeftLeg, bool isBreakingRightLeg)
+    {
+        if (isBreakingLeftLeg && isBreakingRightLeg)
+        {
+            Debug.Log("両足");
+            _animator.SetTrigger(_hashIsBreakAllArmor);
+        }
+        else if (isBreakingLeftLeg)
+        {
+            Debug.Log("左足");
+            _animator.SetTrigger(_hashIsBreakLeftLegArmor);
+        }
+        else if (isBreakingRightLeg)
+        {
+            Debug.Log("右足");
+            _animator.SetTrigger(_hashIsBreakRightLegArmor);
+        }
+        else
+        {
+            Debug.Log("全部無事");
+            return;
+        }
+
+        SetIsDown(true);
+    }
+
+    /// <summary>
+    /// ダウンフラグを設定する
+    /// </summary>
+    public void SetIsDown(bool isDown)
+    {
+        Debug.Log("ダウンします");
+        _animator.SetBool(_hashIsDown, isDown);
     }
 
     /// <summary>
@@ -83,6 +123,7 @@ public class BossEnemyAnimator : IBossEnemyAnimator
         _animator.speed = speed;
     }
 
+
     /// <summary>
     /// Receiverのイベント購読を解除する。
     /// EnemyのOnDestroyから呼ぶこと。
@@ -98,9 +139,12 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     }
 
     // Animatorパラメータのハッシュ
-    private readonly int _hashCurrentHP = Animator.StringToHash("CurrentHP");
     private readonly int _hashXSpeed = Animator.StringToHash("Speed_x");
     private readonly int _hashZSpeed = Animator.StringToHash("Speed_z");
+    private readonly int _hashIsBreakLeftLegArmor = Animator.StringToHash("IsBreakLeftLegArmor");
+    private readonly int _hashIsBreakRightLegArmor = Animator.StringToHash("IsBreakRightLegArmor");
+    private readonly int _hashIsBreakAllArmor = Animator.StringToHash("IsBreakAllLegArmor");
+    private readonly int _hashIsDown = Animator.StringToHash("IsDown");
     private readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
     private readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
     private readonly int _hashIsDead = Animator.StringToHash("IsDead");

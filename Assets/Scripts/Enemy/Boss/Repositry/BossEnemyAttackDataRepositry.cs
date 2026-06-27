@@ -43,7 +43,8 @@ namespace BossEnemy.Data.Repositry
                         _bossMasterData[x, 8],
                         _bossMasterData[x, 9],
                         _bossMasterData[x, 10],
-                        _bossMasterData[x, 11]
+                        _bossMasterData[x, 11],
+                        _bossMasterData[x, 12],
                     };
 
                     return BuildAttackData(attackDataStrings);
@@ -61,7 +62,7 @@ namespace BossEnemy.Data.Repositry
 
         private const string _attackDataArrayStartKey = "AttackData";
 
-        private const int _attackDataStringLength = 12;
+        private const int _attackDataStringLength = 13;
 
         private BossEnemyAttackData BuildAttackData(string[] attackDataStrings)
         {
@@ -78,7 +79,8 @@ namespace BossEnemy.Data.Repositry
                 float.Parse(attackDataStrings[8]),
                 float.Parse(attackDataStrings[9]),
                 float.Parse(attackDataStrings[10]),
-                attackDataStrings[11]
+                float.Parse(attackDataStrings[11]),
+                attackDataStrings[12]
             );
 
         }

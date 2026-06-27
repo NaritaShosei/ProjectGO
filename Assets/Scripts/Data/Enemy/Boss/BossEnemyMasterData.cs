@@ -76,6 +76,9 @@ namespace BossEnemy.Data
         /// <summary> BossEnemyの移動速度 </summary>
         public IReadOnlyReactiveProperty<Vector3> Velocity => _velocity;
 
+        /// <summary> BossEnemyの衝突判定 </summary>
+        public IReadOnlyReactiveProperty<bool> IsTigger => _isTrigger;
+
         /// <summary> 最大HP </summary>
         public int MaxHP => _maxHP;
 
@@ -130,6 +133,9 @@ namespace BossEnemy.Data
             // HPを最大値にする
             _currentHP = new(_maxHP);
 
+            // 衝突判定の初期化
+            _isTrigger = new(false);
+
             // 各アーマーの初期化
             _rightArmArmer.Init();
             _leftArmArmer.Init();
@@ -155,8 +161,11 @@ namespace BossEnemy.Data
         /// <param name="velocity"> 移動速度 </param>
         public void SetVelocity(Vector3 velocity) => _velocity.Value = velocity;
 
-        /// <summary> BossEnemy </summary>
-        /// <param name="damage"></param>
+        /// <summary> BossEnemyの体の衝突判定を設定する </summary>
+        /// <param name="velocity"> 衝突判定 </param>
+        public void SetColliderIsTrigger(bool isCollision) => _isTrigger.Value = isCollision;
+
+        /// <summary> BossEnemyダメージ </summary>
         public void TakeDamage(int damage)
         {
             if (_currentHP.Value - damage <= 0)
@@ -216,6 +225,9 @@ namespace BossEnemy.Data
         // BossEnemyの現在のHP
         private ReactiveProperty<int> _currentHP;
 
+        // 衝突判定のオンオフフラグ
+        private ReactiveProperty<bool> _isTrigger;
+
         // BossEnemyの各部位の現在の防御力
         private int _currentHardSpotsDefense;
         private int _currentNormalSpotsDefense;
@@ -270,6 +282,7 @@ namespace BossEnemy.Data
         /// <summary> Armerの初期化メソッド </summary>
         public void Init()
         {
+            Debug.Log("アーマー初期化");
             if (_currentHP == null) _currentHP = new(_maxHP);
             else _currentHP.Value = _maxHP;
             _isArmorBreak = false;
@@ -289,8 +302,8 @@ namespace BossEnemy.Data
         {
             if (_currentHP.Value - damage <= 0)
             {
-                _currentHP.Value = 0;
                 BreakArmor();
+                _currentHP.Value = 0;
                 return;
             }
 
@@ -312,7 +325,7 @@ namespace BossEnemy.Data
         private int _currentDefense;
 
         // アーマーのHPが0になって壊れた際にTrueになるフラグ
-        private bool _isArmorBreak = true;
+        private bool _isArmorBreak = false;
 
         private void BreakArmor()
         {
@@ -367,7 +380,7 @@ namespace BossEnemy.Data
     {
         public BossEnemyAttackData(
             int id, string name, float attackChargeTime, float attackDuration, float recoveryTime, float attackAreaEffectStartTime,
-            float damage, float attackRange, float attackHitDistance, float nockBackPower, float coolTime, string animParam)
+            float damage, float attackRange, float attackHitAreaCenterDistance, float attackStartDistance, float nockBackPower, float coolTime, string animParam)
         {
             _attackID = id;
             _attackName = name;
@@ -377,7 +390,8 @@ namespace BossEnemy.Data
             _attackAreaEffectStartTime = attackAreaEffectStartTime;
             _damage = damage;
             _attackRange = attackRange;
-            _attackHitDistance = attackHitDistance;
+            _attackHitAreaCenterDistance = attackHitAreaCenterDistance;
+            _attackStartDistance = attackStartDistance;
             _nockBackPower = nockBackPower;
             _coolTime = coolTime;
             _animParamName = animParam;
@@ -399,8 +413,10 @@ namespace BossEnemy.Data
         public float Damage => _damage;
         /// <summary> 攻撃範囲 </summary>
         public float AttackRange => _attackRange;
+        /// <summary> 攻撃範囲の中心座標までの距離 </summary>
+        public float AttackHitAreaCenterDistance => _attackHitAreaCenterDistance;
         /// <summary> 攻撃を開始する距離(どこからでも届く場合は0) </summary>
-        public float AttackHitDistance => _attackHitDistance;
+        public float AttackStartDistance => _attackStartDistance;
         /// <summary> ノックバックする力 </summary>
         public float NockBackPower => _nockBackPower;
         /// <summary> 攻撃のクールタイム </summary>
@@ -432,8 +448,11 @@ namespace BossEnemy.Data
         // 攻撃範囲
         private float _attackRange;
 
+        // 攻撃範囲の中心座標
+        private float _attackHitAreaCenterDistance;
+
         // 攻撃が届く距離
-        private float _attackHitDistance;
+        private float _attackStartDistance;
 
         // ノックバックする力
         private float _nockBackPower;

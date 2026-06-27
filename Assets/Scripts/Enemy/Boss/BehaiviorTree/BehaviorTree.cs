@@ -217,7 +217,7 @@ namespace BossEnemy.BehaviorTree
         {
             _childrenNode = childrenNode;
 
-            _sequenceChildNodeRunningEndNotifier.OnRunningEnd += OnChildRunningEnd;
+            _sequenceChildNodeRunningEndNotifier.OnRunningEnd += ProceedSequence;
         }
 
         public override void Init(BehaviorController behaviourController, NodeRunningEndNotifier nodeRunningEndNotifier)
@@ -242,7 +242,6 @@ namespace BossEnemy.BehaviorTree
 
         public override void OnEnter()
         {
-            Debug.Log("Enter");
             ProceedSequence();
         }
 
@@ -254,7 +253,6 @@ namespace BossEnemy.BehaviorTree
 
         public override void OnExit()
         {
-            Debug.Log("Exit");
             _sequenceCount = 0;
 
             if (_currentNode != null)
@@ -262,19 +260,6 @@ namespace BossEnemy.BehaviorTree
 
             _currentNode = null;
         }
-
-        public void CurrentNodeRunningEnd()
-        {
-            if(_sequenceCount >= _childrenNode.Length)
-            {
-                RunningEnd();
-                return;
-            };
-
-            OnEnterNextChildNode(_childrenNode[_sequenceCount]);
-        }
-
-
 
         public void OnEnterNextChildNode(ITreeNode nextNode)
         {
@@ -285,10 +270,11 @@ namespace BossEnemy.BehaviorTree
                 _currentNode.OnExit();
             }
 
+            _sequenceCount++;
+
             _currentNode = nextNode;
             _currentNode.OnEnter();
 
-            _sequenceCount++;
         }
 
         private int _sequenceCount = 0;
@@ -301,12 +287,6 @@ namespace BossEnemy.BehaviorTree
 
         /// <summary> シーケンス内のノード専用Notifier </summary>
         private NodeRunningEndNotifier _sequenceChildNodeRunningEndNotifier = new();
-
-        private void OnChildRunningEnd()
-        {
-            Debug.Log("Sequenceを進めます");
-            ProceedSequence();
-        }
 
         private void ProceedSequence()
         {

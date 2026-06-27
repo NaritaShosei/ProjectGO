@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1dcb62f5f422149b3753f583e6e927, type: 3}
   m_Name: ID1_BossEnemyBehaviorTree
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyBehaviorTree
+  _oneLegBreakDownTime: 10
+  _allLegBreakDownTime: 15
   _normalAttackCount: 3
   _bossTerritoryDistance: 2
   _lookSpeed: 1.05
-  _finishAngleThreshold: 5
+  _finishAngleThreshold: 2

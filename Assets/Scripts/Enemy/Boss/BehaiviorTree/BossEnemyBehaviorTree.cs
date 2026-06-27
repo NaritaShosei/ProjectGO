@@ -14,12 +14,14 @@ namespace BossEnemy.BehaviorTree
     [CreateAssetMenu(fileName = "BossEnemyBehaviorTree", menuName = "BossEnemy/BehaviorTree")]
     public class BossEnemyBehaviorTree : ScriptableObject
     {
-        public void Init(BossAttack attack, BossMove move)
+        public void Init(BossAttack attack, BossMove move, BossDown bossDown, AttackCoolTimer attackCoolTimer)
         {
             _isInit = true;
 
             _attack = attack;
             _move = move;
+            _bossDown = bossDown;
+            _attackCoolTimer = attackCoolTimer;
         }
 
         public void OnUpdate()
@@ -46,24 +48,23 @@ namespace BossEnemy.BehaviorTree
             _behaviorController.OnRunning();
         }
 
-        public void HandleBossArmorBreak()
+        public void HandleBossArmorBreak(ArmorAttachmentPoint attachmentPointsType)
         {
             if (!_isInit) return;
             if (_breakArmorNode == null) return;
 
-            _breakArmorNode.CanEntry();
+            _breakArmorNode.BreakArmor(attachmentPointsType);
             _behaviorController.OnRunning();
         }
 
         public void HandleDead()
         {
+            _behaviorController.OnRunning();
             _isInit = false;
         }
 
         // BehaviorTreeの操作Class
         private BehaviorController _behaviorController;
-
-        private BossMove _move;
 
         // 初期化確認フラグ
         private bool _isInit = false;
@@ -72,7 +73,15 @@ namespace BossEnemy.BehaviorTree
 
         [Header("----------装備破壊時の行動関連変数----------")]
 
+        [Header("片足破壊でダウンする時間")]
+        [SerializeField] private float _oneLegBreakDownTime = 2.0f;
+
+        [Header("両足破壊でダウンする時間")]
+        [SerializeField] private float _allLegBreakDownTime = 2.0f;
+
         private BreakArmorNode _breakArmorNode;
+
+        private BossDown _bossDown;
 
         #endregion
 
@@ -87,6 +96,7 @@ namespace BossEnemy.BehaviorTree
         [SerializeField] private float _bossTerritoryDistance = 2.0f;
 
         private BossAttack _attack;
+        private AttackCoolTimer _attackCoolTimer;
 
         // 通常攻撃回数カウントノード
         private CountDownNode _normalAttackCountDownNode;
@@ -108,17 +118,23 @@ namespace BossEnemy.BehaviorTree
         [Header("振り向く際の振り向き終了角度との許される誤差")]
         [SerializeField] private float _finishAngleThreshold = 2.0f;
 
+        private BossMove _move;
+
         #endregion
 
         private ITreeNode BuildArmorBreakActionTree(BossEnemyData bossEnemyData)
         {
-            return new NullAction(); // ToDo:Armor破壊時の処理
+            DownAction downAction = new DownAction(bossEnemyData, _bossDown, _oneLegBreakDownTime, _allLegBreakDownTime);
+
+            return _breakArmorNode = new(downAction);
         }
 
         private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,
             BossEnemyAttackDataRepositry dataRepositry,
             IPlayerInformationService playerInformationService)
         {
+            // ---攻撃シーケンスアクションノード↓---
+
             // 攻撃を行う際のシーケンスで動く3つのノードを生成
             TargetChaseAction targetChaseAction = new(playerInformationService.Player.GetTargetCenter(), 
                 _move, bossEnemyData, playerInformationService);
@@ -128,15 +144,24 @@ namespace BossEnemy.BehaviorTree
             LookAtTargetAction lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(), 
                 _move, bossEnemyData, playerInformationService, _lookSpeed, _finishAngleThreshold); ;
             
-
             // 攻撃シーケンスを生成
             ITreeNode[] attackSequenceChildren = new ITreeNode[] { targetChaseAction, attackNode ,lookAtTargetAction };
             SequenceNode attackSequence = new(attackSequenceChildren);
 
-            // 攻撃選択ノード
-            _closeRangeNormalAttackSelect = new(attackSequence, bossEnemyData.CloseRangeNormalAttackFieldHolder, dataRepositry, attackNode, targetChaseAction);
-            _closeRangeSpecialAttackSelect = new(attackSequence, bossEnemyData.CloseRangeFinishCountAttackFieldHolder, dataRepositry, attackNode, targetChaseAction);
-            _longRangeAttackSelect = new(attackSequence, bossEnemyData.LongRangeAttackFieldHolder, dataRepositry, attackNode, targetChaseAction);
+            // ---攻撃選択ノード↓-------------------
+
+            // 1.近距離通常攻撃
+            _closeRangeNormalAttackSelect = new(attackSequence, bossEnemyData.CloseRangeNormalAttackFieldHolder, 
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
+
+            // 2.通常攻撃3回以上攻撃
+            _closeRangeSpecialAttackSelect = new(attackSequence, bossEnemyData.CloseRangeFinishCountAttackFieldHolder, 
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
+
+            // 3.遠距離攻撃
+            _longRangeAttackSelect = new(attackSequence, bossEnemyData.LongRangeAttackFieldHolder,
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
+
 
             // カウントダウンを行いカウントが0になったときに近距離の特殊攻撃を行うノード
             _normalAttackCountDownNode = new(_closeRangeSpecialAttackSelect, _normalAttackCount);

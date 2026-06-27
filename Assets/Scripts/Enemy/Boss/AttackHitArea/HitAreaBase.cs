@@ -6,7 +6,7 @@ public abstract class HitAreaBase : MonoBehaviour
 {
     public abstract event Action<HitAreaBase, HitAreaType> OnDespawn;
 
-    public abstract UniTask ActiveView();
+    public abstract void ActiveView(float range, float despawnTime);
 
     public abstract void SetRange(float range);
 

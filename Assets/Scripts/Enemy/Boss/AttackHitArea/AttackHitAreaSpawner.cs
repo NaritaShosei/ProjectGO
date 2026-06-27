@@ -9,13 +9,11 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
         HitAreaBase hitArea = GetHitArea(hitAreaType);
         hitArea.gameObject.transform.position = spawnCenterPos;
         hitArea.OnDespawn += Release;
-        hitArea.SetRange(range);
-        hitArea.SetDespawnTime(despawnTime);
-        hitArea.ActiveView().Forget();
+        hitArea.ActiveView(range, despawnTime);
     }
 
     [Header("円形のHitArea")]
-    [SerializeField] private HitAreaBase _circleHitEffect;
+    [SerializeField] private CircleHitAreaView _circleHitEffect;
 
     private Dictionary<HitAreaType, Queue<HitAreaBase>> _pool = new();
 
@@ -34,7 +32,9 @@ public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
                     hitArea.gameObject.SetActive(true);
                     return hitArea;
                 }
-                return hitArea = Instantiate(_circleHitEffect);
+                hitArea = Instantiate(_circleHitEffect);
+                hitArea.gameObject.transform.SetParent(gameObject.transform, true);
+                return hitArea;
         }
 
         return null;

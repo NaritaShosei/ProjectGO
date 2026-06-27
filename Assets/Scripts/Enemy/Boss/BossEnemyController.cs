@@ -37,10 +37,11 @@ public class BossEnemyController
         // 各種ロジックを初期化
         _takeDamage = new();
         _bossMove = new();
-        _bossAttack = new(enemyServices.PlayerInformationService);
+        _bossAttack = new(enemyServices.PlayerInformationService, _attackCoolTimer);
+        _bossDown = new();
 
         // BehaviorTreeの初期化
-        _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove);
+        _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove, _bossDown, _attackCoolTimer);
 
         // Enemyがうけられるサービス一覧
         _enemyServices = enemyServices;
@@ -51,6 +52,7 @@ public class BossEnemyController
         // 全てのPhaseが終了した際のイベントを登録
         _phaseChange.OnFinishAllPhase += _deadEventDisposables.Dispose;
         _phaseChange.OnFinishAllPhase += () => HandleDead(_bossEnemyView);
+        _phaseChange.OnFinishAllPhase += _bossEnemyBehaviorTree.HandleDead;
 
         // 攻撃データのリポジトリの初期化
         _attackDataRepositry = new(_csvBossEnemyMasterData);
@@ -62,6 +64,7 @@ public class BossEnemyController
         RegisterBossDataChangeEventAction();
         RegisterBossAttackEventAction();
         RegisterTakeDamageEventAction();
+        RegisterBossDownEventAction();
     }
 
     /// <summary> Viewを設定する </summary>
@@ -100,14 +103,17 @@ public class BossEnemyController
     private BossMove _bossMove = null;
     private Damage _takeDamage = null;
     private PhaseChange _phaseChange = null;
+    private BossDown _bossDown = null;
+
+    // 各種リポジトリ
     private BossEnemyAttackDataRepositry _attackDataRepositry = null;
     private BossEnemyMasterDataRepository _bossEnemyMasterDataRepository = null;
 
-    // BossEnemyのBehaviorTree
-    private BossEnemyBehaviorTree _behaviorTree = null;
-
     // 現在のPhaseのBossEnemyData
     private ReactiveProperty<BossEnemyData> _currentPhaseBossEnemyData = new();
+
+    // BossEnemyの攻撃のクールタイム
+    private AttackCoolTimer _attackCoolTimer = new();
 
     // BossEnemyの受けられるサービス
     private EnemyServices _enemyServices;
@@ -136,6 +142,14 @@ public class BossEnemyController
         _phaseChange.OnPhaseChanged -= _bossEnemyView.ArmorInit;
         _phaseChange.OnPhaseChanged -= _bossEnemyView.PhaseChange;
         _phaseChange.OnPhaseChanged -= HandlePhaseChange;
+        _bossDown.OnDown -= _bossEnemyView.Down;
+        _bossDown.OnRiseUp -= _bossEnemyView.RiseUp;
+    }
+
+    private void RegisterBossDownEventAction()
+    {
+        _bossDown.OnDown += _bossEnemyView.Down;
+        _bossDown.OnRiseUp += _bossEnemyView.RiseUp;
     }
 
     /// <summary> BossのPhaseが切り替わった際に呼ばれるイベント </summary>
@@ -172,8 +186,11 @@ public class BossEnemyController
             // ダメージロジックの初期化
             _takeDamage.Init(data);
 
+            // 鎧破壊の初期化
+            _bossDown.Init(data);
+
             // 各所鎧のHP変動時のイベント登録
-            RegisterArmorHPFluctuationEventAction();
+            RegisterArmorDamageEventAction();
 
             // BossUIとの連動
             _bossEnemyUIView.PhaseChange(data, _phaseChange.CurrentPhase);
@@ -183,6 +200,9 @@ public class BossEnemyController
 
             // HPが0になったときフェーズを切り替える処理
             data.CurrentHP.Subscribe(hp =>{ if (hp == 0)_phaseChange.ChangeNextPhase();  }).AddTo(_phaseChangeEventDisposables);
+
+            // Bossの衝突判定のオンオフ
+            data.IsTigger.Subscribe(isTrigger => { _bossEnemyView.SetIsTrigger(isTrigger); }).AddTo(_phaseChangeEventDisposables);
 
         }).AddTo(_deadEventDisposables);
     }
@@ -204,9 +224,19 @@ public class BossEnemyController
 
     public void RegisterBossAttackEventAction()
     {
+        // 攻撃開始時
         _bossAttack.OnAttackStart += _bossEnemyView.Attack;
+
+        // 攻撃中ColliderIsTrigger時
+        _enemyAnimationEventReceiver.OnColliderIsTriggerIsEnabled += _bossMove.ColliderIsTrigger;
+
+        // 攻撃中移動時
         _enemyAnimationEventReceiver.OnMove += _bossMove.MoveTargetPositionRightOnTime;
+
+        // 攻撃ヒット時
         _enemyAnimationEventReceiver.OnAttackHit += _bossAttack.Hit;
+
+        // 攻撃終了時
         _enemyAnimationEventReceiver.OnAttackEnd += _bossEnemyView.AttackEnd;
         _enemyAnimationEventReceiver.OnAttackEnd += _bossAttack.Finish;
     }
@@ -217,7 +247,7 @@ public class BossEnemyController
     }
 
     /// <summary> 各所鎧のHP変動時のイベント </summary>
-    private void RegisterArmorHPFluctuationEventAction()
+    private void RegisterArmorDamageEventAction()
     {
         // 左腕の鎧のHP変動時
         _currentPhaseBossEnemyData.Value.LeftArmArmer.CurrentHP.Subscribe(hp =>
@@ -249,7 +279,7 @@ public class BossEnemyController
         if (currentHP == 0)
         {
             _bossEnemyView.ArmorBreak(attachmentPointsType);
-            _bossEnemyBehaviorTree.HandleBossArmorBreak();
+            _bossEnemyBehaviorTree.HandleBossArmorBreak(attachmentPointsType);
         }
         else if (armorData.IsArmorBreak)
         {
