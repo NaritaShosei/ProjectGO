@@ -28,6 +28,7 @@ public class BossBattleState : ISequenceState
         ShowSequenceStatus();
 
         context.InputHandler?.EnableInput(true);
+        Cursor.visible = false;
 
         // ボスをスポーン
         if (_bossSpawnData != null)
@@ -64,6 +65,9 @@ public class BossBattleState : ISequenceState
 
         _sequenceStatusPresenter?.Dispose();
         _sequenceStatusPresenter = null;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         // 結果の保存（仮実装。実際はスコア計算などを入れる）
         int killCount = 0;
