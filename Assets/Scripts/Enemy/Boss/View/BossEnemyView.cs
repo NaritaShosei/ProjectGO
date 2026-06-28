@@ -303,7 +303,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
 
         _isDead = true;
         _bossEnemyAnimator.SetDead();
-        OnDead.Invoke(this);
+        OnDead?.Invoke(this);
         Debug.Log("Boss討伐完了");
     }
 

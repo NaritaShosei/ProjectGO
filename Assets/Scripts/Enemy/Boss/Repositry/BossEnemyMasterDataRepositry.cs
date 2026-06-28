@@ -41,6 +41,8 @@ namespace BossEnemy.Data.Repository
         /// </summary>
         public void Init(string csvText)
         {
+            if (csvText == null) return;
+
             _masterDataCache.Clear();
 
             if (string.IsNullOrEmpty(csvText))

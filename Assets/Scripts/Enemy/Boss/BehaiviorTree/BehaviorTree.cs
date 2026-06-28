@@ -190,13 +190,15 @@ namespace BossEnemy.BehaviorTree
         {
             foreach (var child in _childrenNode)
             {
-                if(child.TryEntry() == NodeCondition.Success)
+                NodeCondition childCondition = child.TryEntry();
+
+                if (childCondition == NodeCondition.Success)
                 {
                     nextNode = child;
                     return NodeCondition.Success;
                 }
 
-                if (child.TryEntry() == NodeCondition.Running)
+                if (childCondition == NodeCondition.Running)
                 {
                     nextNode = child;
                     return NodeCondition.Running;

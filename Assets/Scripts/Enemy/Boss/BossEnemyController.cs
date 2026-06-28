@@ -44,7 +44,7 @@ public class BossEnemyController
         _bossEnemyView.TimeScaleProperty.Subscribe(timeScale =>
         { 
             _bossMove.SetTimeScale(timeScale); 
-        });
+        }).AddTo(_deadEventDisposables);
 
         // BehaviorTreeの初期化
         _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove, _bossDown, _attackCoolTimer);
@@ -150,6 +150,10 @@ public class BossEnemyController
         _phaseChange.OnPhaseChanged -= HandlePhaseChange;
         _bossDown.OnDown -= _bossEnemyView.Down;
         _bossDown.OnRiseUp -= _bossEnemyView.RiseUp;
+        _bossAttack.OnAttackStart -= _bossEnemyView.Attack;
+        _enemyAnimationEventReceiver.OnColliderIsTriggerIsEnabled -= _bossMove.ColliderIsTrigger;
+        _enemyAnimationEventReceiver.OnMove -= _bossMove.MoveTargetPositionRightOnTime;
+        _enemyAnimationEventReceiver.OnAttackHit -= _bossAttack.Hit;
     }
 
     private void RegisterBossDownEventAction()
