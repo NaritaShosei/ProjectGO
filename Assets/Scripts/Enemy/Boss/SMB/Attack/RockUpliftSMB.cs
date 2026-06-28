@@ -12,23 +12,7 @@ namespace BossEnemy.SMB
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // 自ステートへの遷移中、遷移元の古いステートからの OnStateUpdate が
-            // 共有メンバ変数を上書きしてリセットを汚染するのを防ぐため、処理をスキップする
-            if (animator.IsInTransition(layerIndex) && stateInfo.normalizedTime >= 0.5f) return;
-
-            // アニメーション開始からの経過秒数計測
-            _elapsedSeconds = stateInfo.normalizedTime * stateInfo.length;
-
-            AttackSequence();
-
-            if (_isAnimRunning)
-            {
-                if (stateInfo.length <= _elapsedSeconds)
-                {
-                    _bossAnimator.SetAttacking(false);
-                    _isAnimRunning = false;
-                }
-            }
+            base.OnStateUpdate(animator, stateInfo, layerIndex);
         }
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

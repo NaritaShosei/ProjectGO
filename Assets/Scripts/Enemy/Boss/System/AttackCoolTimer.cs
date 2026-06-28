@@ -8,22 +8,14 @@ public class AttackCoolTimer
 {
     public List<int> AttackCoolTimeList => _coolTimeList;
 
-    public async UniTask StartCoolTime(int id, float coolTime = 0)
+    public async UniTask StartCoolTime(int id, float coolTime)
     {
         if (_coolTimeList.Contains(id)) return;
 
         _coolTimeList.Add(id);
 
-        // coolTimeが0の場合時間を設けず好きなタイミングで手動解放させる
-        if (coolTime == 0) return;
-
         await UniTask.Delay(TimeSpan.FromSeconds(coolTime), delayTiming: PlayerLoopTiming.Update);
 
-        _coolTimeList.Remove(id);
-    }
-
-    public void FinishCoolTime(int id)
-    {
         _coolTimeList.Remove(id);
     }
 

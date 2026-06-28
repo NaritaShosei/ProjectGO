@@ -79,8 +79,6 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
         _isLockable = true;
         foreach (var detection in _collisionDetections) detection.Init();
         SetPosture(PostureType.Stand);
-        _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
-        _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
 
         foreach (var parts in _activeBossEnemyPartsView)
         {
@@ -339,6 +337,11 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
 
     private BossEnemyPartsView[] _activeBossEnemyPartsView;
     private BoxCollider _activeBossCollider;
+
+    private void Awake()
+    {
+        _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
+    }
 
     private void Update()
     {

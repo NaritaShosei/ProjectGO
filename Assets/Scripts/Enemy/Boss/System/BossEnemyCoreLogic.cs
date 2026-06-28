@@ -66,6 +66,7 @@ namespace BossEnemy.Model.CoreLogic
         {
             // speed * Time.deltaTime で「1フレームあたりの移動量」にする
             float oneFrameSpeed = chaseSpeed * Time.deltaTime;
+            oneFrameSpeed *= _timeScale;
 
             float savePosY = _bossEnemyData.Position.Value.y;
             Vector3 movePosition = Vector3.MoveTowards(_bossEnemyData.Position.Value, target.position, oneFrameSpeed);
@@ -77,7 +78,7 @@ namespace BossEnemy.Model.CoreLogic
             float velocityZ = Mathf.Abs(_bossEnemyData.Position.Value.z - movePosition.z) * powerAdjustment;
 
             // speed * Time.deltaTime で「1フレームあたりの移動量」にする
-            _bossEnemyData.SetPosition(movePosition * _timeScale);
+            _bossEnemyData.SetPosition(movePosition);
 
             // ターゲット方向へ向きを向かせる
             Vector3 direction = (target.position - _bossEnemyData.Position.Value) * _timeScale;
