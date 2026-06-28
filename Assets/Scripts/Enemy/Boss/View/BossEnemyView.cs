@@ -131,6 +131,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
     {
         _attackInformationHolder.SetData(bossEnemyAttackData);
         _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
+        Debug.Log(bossEnemyAttackData.AnimParamName);
     }
 
     public void AttackEnd()

@@ -70,6 +70,7 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
 
             Debug.Log("攻撃選択:" + attackData.Name);
 
+
             _attackNode.SetNextAttackData(attackData);
             _playerChase.SetGoalDistance(attackData.AttackStartDistance);
 

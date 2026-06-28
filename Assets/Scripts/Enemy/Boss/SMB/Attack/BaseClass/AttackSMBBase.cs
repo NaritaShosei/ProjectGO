@@ -71,8 +71,7 @@ namespace BossEnemy.SMB
 
             if(!_isAttackAreaActive && _elapsedSeconds > _attackData.AttackAreaEffectStartTime)
             {
-                float despawnTime = (_attackData.AttackChargeTime + _attackData.AttackDuration) - _elapsedSeconds;
-                _attackHitAreaSpawner.Spawn(HitAreaType.Circle, _hitCenterPos, _attackData.AttackRange, despawnTime);
+                _attackHitAreaSpawner.Spawn(HitAreaType.Circle, _hitCenterPos, _attackData.AttackRange, _attackAreaDespawnTime);
                 _isAttackAreaActive = true;
             }
 
@@ -91,6 +90,8 @@ namespace BossEnemy.SMB
                 }
             }
         }
+
+        [SerializeField] protected float _attackAreaDespawnTime = 1.0f;
 
         protected AttackInformationHolder _informationHolder;
 

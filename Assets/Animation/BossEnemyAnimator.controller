@@ -93,6 +93,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ee48b8e5d0118847b8b05b56cb0b345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
+  _effectPrefab: {fileID: 8833923644228565619, guid: 2aa072756bb89ba43b4c51482593ab69, type: 3}
+  _consecutiveAttackInterval: 0.57
+  _attackDistance: 2.77
 --- !u!1101 &-8068644729839142665
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1172,9 +1175,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.24999993
+  m_TransitionDuration: 0.24999976
   m_TransitionOffset: 0
-  m_ExitTime: 0
+  m_ExitTime: 0.82285583
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1329,7 +1332,7 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
-  - m_Name: RockUplift
+  - m_Name: Rock
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -1834,7 +1837,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: RockUplift
+    m_ConditionEvent: Rock
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -4480522881168560535}
@@ -1843,8 +1846,8 @@ AnimatorStateTransition:
   m_IsExit: 0
   serializedVersion: 3
   m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0
+  m_TransitionOffset: 0.0075446973
+  m_ExitTime: 0.8357129
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
