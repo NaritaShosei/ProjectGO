@@ -13,9 +13,12 @@ public class AttackDataSelector
         foreach (var attack in bossEnemyAttackField.AttackField)
         {
             if (coolTimeAttackList.Contains(attack.ID)) continue;
+            if (attack.ActivationRate <= 0f) continue;
 
             totalChance += attack.ActivationRate;
         }
+
+        if (totalChance <= 0f) return default;
 
         // 0 から 合計値 までの間でランダムな値を1つ取得
         float randomPoint = Random.Range(0f, totalChance);
@@ -25,6 +28,7 @@ public class AttackDataSelector
         foreach (var attack in bossEnemyAttackField.AttackField)
         {
             if (coolTimeAttackList.Contains(attack.ID)) continue;
+            if (attack.ActivationRate <= 0f) continue;
 
             currentSum += attack.ActivationRate;
             if (randomPoint <= currentSum)
@@ -34,6 +38,6 @@ public class AttackDataSelector
         }
 
         // 基本的にはここには到達しませんが、安全のため最後の要素を返す
-        return bossEnemyAttackField.AttackField[bossEnemyAttackField.AttackField.Length - 1].ID;
+        return default;
     }
 }

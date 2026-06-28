@@ -1,5 +1,6 @@
 using System;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Text;
 
 public class CSVDateLoader
 {
@@ -8,20 +9,28 @@ public class CSVDateLoader
     /// <returns> 2次元配列に変換されたCSVデータ </returns>
     public static string[,] ParseCsv(string csvData)
     {
+        if (string.IsNullOrEmpty(csvData)) return new string[0, 0];
+
         // CSVデータを行ごとに分割
         string[] rows = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
-        // 最初の行を解析して列数を取得
-        string[] firstRow = SplitCsvLine(rows[0]);
+        List<string[]> parsedRows = new List<string[]>(rows.Length);
         int rowCount = rows.Length;
-        int colCount = firstRow.Length;
+        int colCount = 0;
+
+        for (int i = 0; i < rowCount; i++)
+        {
+            string[] cols = SplitCsvLine(rows[i]);
+            parsedRows.Add(cols);
+            colCount = Math.Max(colCount, cols.Length);
+        }
 
         // CSVデータを2次元配列に変換
         string[,] result = new string[rowCount, colCount];
 
         for (int i = 0; i < rowCount; i++)
         {
-            string[] cols = SplitCsvLine(rows[i]);
+            string[] cols = parsedRows[i];
 
             for (int j = 0; j < colCount; j++)
             {
@@ -38,16 +47,38 @@ public class CSVDateLoader
     /// <returns> 分割されたフィールドの配列 </returns>
     private static string[] SplitCsvLine(string line)
     {
-        // 正規表現を使用して、ダブルクォーテーションで囲まれたフィールドとカンマで区切られたフィールドを分割
-        MatchCollection matches = Regex.Matches(line, "\"([^\"]*)\"|([^,]+)");
+        List<string> fields = new List<string>();
+        StringBuilder current = new StringBuilder();
+        bool inQuotes = false;
 
-        string[] fields = new string[matches.Count];
-
-        for (int i = 0; i < matches.Count; i++)
+        for (int i = 0; i < line.Length; i++)
         {
-            fields[i] = matches[i].Value.Trim('"'); // ダブルクォーテーションを削除
+            char c = line[i];
+
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                {
+                    current.Append('"');
+                    i++;
+                }
+                else
+                {
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                fields.Add(current.ToString());
+                current.Clear();
+            }
+            else
+            {
+                current.Append(c);
+            }
         }
 
-        return fields;
+        fields.Add(current.ToString());
+        return fields.ToArray();
     }
 }

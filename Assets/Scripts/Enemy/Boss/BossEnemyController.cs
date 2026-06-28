@@ -64,13 +64,13 @@ public class BossEnemyController
         _attackDataRepositry = new(_csvBossEnemyMasterData);
 
         RegisterPhaseChangeEventAction();
-
-        // 最初のPhaseを開始
-        _phaseChange.StartFirstPhase();
         RegisterBossDataChangeEventAction();
         RegisterBossAttackEventAction();
         RegisterTakeDamageEventAction();
         RegisterBossDownEventAction();
+
+        // 最初のPhaseを開始
+        _phaseChange.StartFirstPhase();
     }
 
     /// <summary> Viewを設定する </summary>
@@ -181,6 +181,8 @@ public class BossEnemyController
     {
         _currentPhaseBossEnemyData.Subscribe(data =>
         {
+            if (data == null) return;
+
             Debug.Log("データの切り替えを検知");
 
             // BossUIとの連動

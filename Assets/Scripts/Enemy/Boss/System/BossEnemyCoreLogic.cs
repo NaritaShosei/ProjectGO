@@ -81,7 +81,7 @@ namespace BossEnemy.Model.CoreLogic
             _bossEnemyData.SetPosition(movePosition);
 
             // ターゲット方向へ向きを向かせる
-            Vector3 direction = (target.position - _bossEnemyData.Position.Value) * _timeScale;
+            Vector3 direction = target.position - _bossEnemyData.Position.Value;
             direction.y = 0; // 高度差を無視して水平な向きにする
 
             if (direction != Vector3.zero)
@@ -107,13 +107,13 @@ namespace BossEnemy.Model.CoreLogic
             Vector3 requiredVelocity = remainingDirection / time;
 
             // 速度に1フレームの時間をかけて、このフレームの移動量を計算
-            Vector3 frameMovement = requiredVelocity * Time.deltaTime;
+            Vector3 frameMovement = requiredVelocity * Time.deltaTime * _timeScale;
 
             // 現在の座標に移動量を足した「到達すべき座標」を返す
             _bossEnemyData.SetPosition(_bossEnemyData.Position.Value + frameMovement);
 
             // ターゲット方向へ向きを向かせる
-            Vector3 direction = (target - _bossEnemyData.Position.Value) * _timeScale;
+            Vector3 direction = target - _bossEnemyData.Position.Value;
             direction.y = 0; // 高度差を無視して水平な向きにする
 
             if (direction != Vector3.zero)
@@ -133,7 +133,7 @@ namespace BossEnemy.Model.CoreLogic
             }
 
             // ターゲットへの方向ベクトルを計算（自身の位置からターゲットの位置を引く）
-            Vector3 direction = (target.position - _bossEnemyData.Position.Value) * _timeScale;
+            Vector3 direction = target.position - _bossEnemyData.Position.Value;
 
             // 移動速度設定
             Vector3 moveVelocity = new Vector3(Mathf.Abs(direction.x), 0, Mathf.Abs(direction.z));
@@ -149,7 +149,7 @@ namespace BossEnemy.Model.CoreLogic
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
 
                 // 現在の回転から目標の回転へ、Time.deltaTimeをかけてゆっくり補間
-                _bossEnemyData.SetRotation(Quaternion.Slerp(_bossEnemyData.Rotation.Value, targetRotation, lookSpeed * Time.deltaTime));
+                _bossEnemyData.SetRotation(Quaternion.Slerp(_bossEnemyData.Rotation.Value, targetRotation, lookSpeed * Time.deltaTime * _timeScale));
                 float angleDiff = Quaternion.Angle(_bossEnemyData.Rotation.Value, targetRotation);
 
                 // 角度の差がしきい値以下になったかチェック

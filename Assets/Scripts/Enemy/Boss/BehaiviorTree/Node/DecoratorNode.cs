@@ -68,6 +68,12 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
 
             BossEnemyAttackData attackData = _bossEnemyAttackDataRepositry.GetData(id);
 
+            if (attackData.ID == 0)
+            {
+                Debug.LogError($"攻撃データが見つかりません ID:{id}");
+                return NodeCondition.Failure;
+            }
+
             Debug.Log("攻撃選択:" + attackData.Name);
 
 

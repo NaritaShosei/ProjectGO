@@ -90,6 +90,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
             behaviour.Init(_bossEnemyAnimationEventReceiver, _bossEnemyAnimator, _attackInformationHolder, 
                 _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
         }
+
+        _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
     }
 
     /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
