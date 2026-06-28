@@ -40,6 +40,8 @@ public class BossEnemyController
         _bossAttack = new(enemyServices.PlayerInformationService, _attackCoolTimer);
         _bossDown = new();
 
+        // BossMoveにTimeScaleを反映
+
         // BehaviorTreeの初期化
         _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove, _bossDown, _attackCoolTimer);
 
@@ -177,6 +179,9 @@ public class BossEnemyController
         {
             Debug.Log("データの切り替えを検知");
 
+            // BossUIとの連動
+            _bossEnemyUIView.PhaseChange(data, _phaseChange.CurrentPhase);
+
             // 移動処理とのDataの連動
             _bossMove.SetBossEnemy(data);
 
@@ -186,17 +191,14 @@ public class BossEnemyController
             // ダメージロジックの初期化
             _takeDamage.Init(data);
 
+            // BehaviorTreeのPhase切り替え処理
+            _bossEnemyBehaviorTree.HandlePhaseChanged(data, _attackDataRepositry, _enemyServices.PlayerInformationService);
+
             // 鎧破壊の初期化
             _bossDown.Init(data);
 
             // 各所鎧のHP変動時のイベント登録
             RegisterArmorDamageEventAction();
-
-            // BossUIとの連動
-            _bossEnemyUIView.PhaseChange(data, _phaseChange.CurrentPhase);
-
-            // BehaviorTreeのPhase切り替え処理
-            _bossEnemyBehaviorTree.HandlePhaseChanged(data, _attackDataRepositry, _enemyServices.PlayerInformationService);
 
             // HPが0になったときフェーズを切り替える処理
             data.CurrentHP.Subscribe(hp =>{ if (hp == 0)_phaseChange.ChangeNextPhase();  }).AddTo(_phaseChangeEventDisposables);

@@ -57,6 +57,11 @@ namespace BossEnemy.Model.CoreLogic
             _bossEnemyData = bossEnemyData;
         }
 
+        public void SetTimeScale(float timeScale)
+        {
+            _timeScale = timeScale;
+        }
+
         public void MoveTargetPosition(Transform target, float chaseSpeed)
         {
             // speed * Time.deltaTime で「1フレームあたりの移動量」にする
@@ -72,10 +77,10 @@ namespace BossEnemy.Model.CoreLogic
             float velocityZ = Mathf.Abs(_bossEnemyData.Position.Value.z - movePosition.z) * powerAdjustment;
 
             // speed * Time.deltaTime で「1フレームあたりの移動量」にする
-            _bossEnemyData.SetPosition(movePosition);
+            _bossEnemyData.SetPosition(movePosition * _timeScale);
 
             // ターゲット方向へ向きを向かせる
-            Vector3 direction = target.position - _bossEnemyData.Position.Value;
+            Vector3 direction = (target.position - _bossEnemyData.Position.Value) * _timeScale;
             direction.y = 0; // 高度差を無視して水平な向きにする
 
             if (direction != Vector3.zero)
@@ -107,7 +112,7 @@ namespace BossEnemy.Model.CoreLogic
             _bossEnemyData.SetPosition(_bossEnemyData.Position.Value + frameMovement);
 
             // ターゲット方向へ向きを向かせる
-            Vector3 direction = target - _bossEnemyData.Position.Value;
+            Vector3 direction = (target - _bossEnemyData.Position.Value) * _timeScale;
             direction.y = 0; // 高度差を無視して水平な向きにする
 
             if (direction != Vector3.zero)
@@ -127,7 +132,7 @@ namespace BossEnemy.Model.CoreLogic
             }
 
             // ターゲットへの方向ベクトルを計算（自身の位置からターゲットの位置を引く）
-            Vector3 direction = target.position - _bossEnemyData.Position.Value;
+            Vector3 direction = (target.position - _bossEnemyData.Position.Value) * _timeScale;
 
             // 移動速度設定
             Vector3 moveVelocity = new Vector3(Mathf.Abs(direction.x), 0, Mathf.Abs(direction.z));
@@ -166,6 +171,7 @@ namespace BossEnemy.Model.CoreLogic
         }
 
         private BossEnemyData _bossEnemyData;
+        private float _timeScale;
     }
     #endregion
 
@@ -202,6 +208,7 @@ namespace BossEnemy.Model.CoreLogic
         public void ChangeNextPhase()
         {
             if(!_isFirstChangePhase) _currentPhase++;
+            Debug.Log("現在のフェーズ：" + _currentPhase);
 
             // 全Phase終了時の処理
             if (_bossEnemyMasterData.BossEnemyDatas.Length <= _currentPhase)
@@ -321,6 +328,12 @@ namespace BossEnemy.Model.CoreLogic
 
         public void RiseUp()
         {
+            if(_bossEnemyData.LeftLegArmer.IsArmorBreak && _bossEnemyData.RightLegArmer.IsArmorBreak)
+            {
+                _bossEnemyData.LeftLegArmer.Repair();
+                _bossEnemyData.RightLegArmer.Repair();
+            }
+
             OnRiseUp?.Invoke();
         }
 

@@ -26,9 +26,6 @@ public class BossEnemyAnimationEventReceiver
     /// <summary>Phase切り替え終了のイベント</summary>
     public event Action OnPhaseChangeEnd;
 
-    /// <summary>ダウンアニメーション終了のイベント</summary>
-    public event Action OnDownEnd;
-
     /// <summary>死亡アニメーション終了のイベント</summary>
     public event Action OnDeadEnd;
 
@@ -60,12 +57,6 @@ public class BossEnemyAnimationEventReceiver
     public void AnimEvent_PhaseChangeEnd()
     {
         OnPhaseChangeEnd?.Invoke();
-    }
-
-    /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>
-    public void AnimEvent_DownEnd()
-    {
-        OnDownEnd?.Invoke();
     }
 
     /// <summary>DeadSMB からステート終了時に呼ばれる</summary>

@@ -74,6 +74,14 @@ namespace BossEnemy.BehaviorTree
             ChangeNode(_currentNode);
         }
 
+        public void StopRunning()
+        {
+            if (_originNode == null) return;
+
+            if (_currentNode != null)
+                _currentNode.OnExit();
+        }
+
         /// <summary> 現在のNodeを変更する </summary>
         /// <param name="nextNode"> 次のNode </param>
         public void ChangeNode(ITreeNode nextNode)

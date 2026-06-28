@@ -4,9 +4,9 @@ public class StopMotionSMB : StateMachineBehaviour
 {
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if(!_isStop && stateInfo.length < _stopTime)
+        if(!_isStop && stateInfo.normalizedTime * stateInfo.length > _stopTime)
         {
-            animator.speed = 0;
+            animator.speed = 0.0001f;
             _isStop = true;
         }
     }
@@ -18,5 +18,5 @@ public class StopMotionSMB : StateMachineBehaviour
     }
 
     private bool _isStop = false;
-    [SerializeField] private float _stopTime = 1.0f;  
+    [SerializeField] private float _stopTime = 1.0f;
 }

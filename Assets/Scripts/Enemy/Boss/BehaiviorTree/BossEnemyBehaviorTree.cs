@@ -35,6 +35,12 @@ namespace BossEnemy.BehaviorTree
             BossEnemyAttackDataRepositry attackDataRepositry,
             IPlayerInformationService playerInformationService)
         {
+            if(_behaviorController != null) _behaviorController.StopRunning();
+
+            // 共通で使いまわすNodeの初期化
+            _lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(),
+                _move, bossEnemyData, _lookSpeed, _finishAngleThreshold);
+
             ITreeNode[] originChildrenNode = new ITreeNode[]
             {
                 BuildArmorBreakActionTree(bossEnemyData),
@@ -50,7 +56,7 @@ namespace BossEnemy.BehaviorTree
 
         public void HandleBossArmorBreak(ArmorAttachmentPoint attachmentPointsType)
         {
-            if (!_isInit) return;
+            if (!_isInit || _downAction.IsDown) return;
             if (_breakArmorNode == null) return;
 
             _breakArmorNode.BreakArmor(attachmentPointsType);
@@ -59,9 +65,10 @@ namespace BossEnemy.BehaviorTree
 
         public void HandleDead()
         {
-            _behaviorController.OnRunning();
             _isInit = false;
         }
+
+        LookAtTargetAction _lookAtTargetAction;
 
         // BehaviorTreeの操作Class
         private BehaviorController _behaviorController;
@@ -80,9 +87,9 @@ namespace BossEnemy.BehaviorTree
         [SerializeField] private float _allLegBreakDownTime = 2.0f;
 
         private BreakArmorNode _breakArmorNode;
+        private DownAction _downAction;
 
         private BossDown _bossDown;
-
         #endregion
 
         #region 攻撃行動関連変数
@@ -124,9 +131,13 @@ namespace BossEnemy.BehaviorTree
 
         private ITreeNode BuildArmorBreakActionTree(BossEnemyData bossEnemyData)
         {
-            DownAction downAction = new DownAction(bossEnemyData, _bossDown, _oneLegBreakDownTime, _allLegBreakDownTime);
+            _downAction = new DownAction(bossEnemyData, _bossDown, _oneLegBreakDownTime, _allLegBreakDownTime);
 
-            return _breakArmorNode = new(downAction);
+            ITreeNode[] downSequenceChildren = new ITreeNode[]{ _downAction, _lookAtTargetAction };
+
+            SequenceNode downSequence = new(downSequenceChildren);
+
+            return _breakArmorNode = new(_downAction);
         }
 
         private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,
@@ -141,11 +152,11 @@ namespace BossEnemy.BehaviorTree
 
             AttackAction attackNode = new AttackAction(_attack);
 
-            LookAtTargetAction lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(), 
-                _move, bossEnemyData, playerInformationService, _lookSpeed, _finishAngleThreshold); ;
+            _lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(), _move,
+                bossEnemyData, _lookSpeed, _finishAngleThreshold);
             
             // 攻撃シーケンスを生成
-            ITreeNode[] attackSequenceChildren = new ITreeNode[] { targetChaseAction, attackNode ,lookAtTargetAction };
+            ITreeNode[] attackSequenceChildren = new ITreeNode[] { targetChaseAction, attackNode ,_lookAtTargetAction };
             SequenceNode attackSequence = new(attackSequenceChildren);
 
             // ---攻撃選択ノード↓-------------------

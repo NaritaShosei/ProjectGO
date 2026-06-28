@@ -16,9 +16,12 @@ namespace BossEnemy.SMB
             
             if(_elapsedSeconds > _startMoveTime && _elapsedSeconds < _endMoveTime)
             {
-                if (_goalPos == Vector3.zero && _goalTime == 0) SetMoveGoal();
-
+                if (_goalPos == Vector3.zero && _goalTime == 0)
+                {
+                    SetMoveGoal();
                     _animationEventReceiver.AnimEvent_ColliderIsTriggerIsEnabled(true);
+                }
+
                 _animationEventReceiver.AnimEvent_Move(_goalPos, _goalTime);
             }
         }

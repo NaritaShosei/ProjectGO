@@ -135,7 +135,6 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
             Transform target,
             BossMove bossEnemyMove,
             BossEnemyData bossEnemyData,
-            IPlayerInformationService playerInformationService,
             float lookSpeed,
             float finishAngleThreshold)
         {
@@ -198,9 +197,12 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
             _allLegBreakDownTime = allLegBreakDownTime;
         }
 
+        public bool IsDown => _isDown;
+
         public override void OnEnter()
         {
             Debug.Log("EntryDownAction");
+            _isDown = true;
 
             _bossDown.Down();
 
@@ -220,6 +222,7 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
 
             if (_elapsedTime >= _downTime)
             {
+                Debug.Log("立ち上がりーよ");
                 _bossDown.RiseUp();
                 RunningEnd();
             }
@@ -227,6 +230,14 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
 
         public override void OnExit()
         {
+            if(_elapsedTime < _downTime)
+            {
+                Debug.Log("立ち上がりーよ");
+                _bossDown.RiseUp();
+                RunningEnd();
+            }
+
+            _isDown = false;
             _elapsedTime = 0;
             _downTime = 0;
         }
@@ -239,6 +250,8 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
         
         private readonly float _oneLegBreakDownTime;
         private readonly float _allLegBreakDownTime;
+
+        private bool _isDown = false;
     }
     #endregion
 

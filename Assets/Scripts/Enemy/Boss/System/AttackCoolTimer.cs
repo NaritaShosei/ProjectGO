@@ -17,7 +17,7 @@ public class AttackCoolTimer
         // coolTimeが0の場合時間を設けず好きなタイミングで手動解放させる
         if (coolTime == 0) return;
 
-        await UniTask.Delay(TimeSpan.FromSeconds(3), delayTiming: PlayerLoopTiming.Update);
+        await UniTask.Delay(TimeSpan.FromSeconds(coolTime), delayTiming: PlayerLoopTiming.Update);
 
         _coolTimeList.Remove(id);
     }

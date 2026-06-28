@@ -2,13 +2,22 @@ using BossEnemy.Data;
 using BossEnemy.SMB;
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using UniRx;
 using UnityEngine;
+
+public enum PostureType
+{
+    [InspectorName("立つ")] Stand,
+    [InspectorName("しゃがむ")] Crouch,
+    [InspectorName("倒れる")] SpreadEagled
+}
 
 /// <summary>
 /// ボス本体のViewClass
 /// </summary>
-public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
+public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
 {
     // --- Events ---
 
@@ -48,7 +57,13 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public bool IsBoss => true;
 
     /// <summary>HitStop等で使用するタイムスケール（DeadCondition の物理スケーリングに使用）</summary>
-    public float TimeScale { get; }
+    public float TimeScale
+    {
+        get { return _timeScale.Value; }
+        set { _timeScale.Value = value; }
+    }
+
+    public IReadOnlyReactiveProperty<float> TimeScaleProperty => _timeScale;
 
     /// <summary> 死亡判定 </summary>
     public bool IsDead => _isDead;
@@ -62,10 +77,12 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public void Init()
     {
         _isLockable = true;
+        foreach (var detection in _collisionDetections) detection.Init();
+        SetPosture(PostureType.Stand);
         _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
         _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
 
-        foreach (var parts in _bossEnemyPartsView)
+        foreach (var parts in _activeBossEnemyPartsView)
         {
             parts.Init(this);
         }
@@ -86,7 +103,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         float saveClosestDistance = 1000;
         bool isGuardArmor = false;
         ArmorAttachmentPoint armorAttachmentPoint = ArmorAttachmentPoint.None;
-        foreach (var bossParts in _bossEnemyPartsView)
+        foreach (var bossParts in _activeBossEnemyPartsView)
         {
             float playerDistance = _services.PlayerInformationService.ToPlayerDistance(bossParts.PartsPosition);
 
@@ -124,9 +141,24 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     public void Down(bool isBreakLeftLeg, bool isBreakrightLeg)
     {
         _bossEnemyAnimator.SetBreakingArmor(isBreakLeftLeg, isBreakrightLeg);
+
+        if(isBreakLeftLeg && isBreakrightLeg)
+        {
+            SetPosture(PostureType.SpreadEagled);
+            return;
+        }
+
+        if (isBreakLeftLeg || isBreakrightLeg)
+        {
+            SetPosture(PostureType.Crouch);
+        }
     }
 
-    public void RiseUp() => _bossEnemyAnimator.SetIsDown(false);
+    public void RiseUp()
+    {
+        _bossEnemyAnimator.SetIsDown(false);
+        SetPosture(PostureType.Stand);
+    }
 
     #region 鎧関連の処理
     public void ArmorInit()
@@ -177,10 +209,28 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         _bossEnemyAnimator.SetPhaseChange();
     }
 
+    public void SetPosture(PostureType postureType)
+    {
+        foreach(var collision in _collisionDetections)
+        {
+            if(collision.CollisionDetectionPostureType == postureType)
+            {
+                _activeBossCollider = collision.BossCollider;
+                _activeBossCollider.enabled = true;
+
+                _activeBossEnemyPartsView = collision.BossEnemyPartsView;
+            }
+            else
+            {
+                collision.BossCollider.enabled = false;
+            }
+        }
+    }
+
     /// <summary>ColliderのIsTriggerをセットする</summary>
     public void SetIsTrigger(bool isTrigger)
     {
-        _bossCollider.isTrigger = isTrigger;
+        _activeBossCollider.isTrigger = isTrigger;
     }
 
     /// <summary>位置をセットする</summary>
@@ -221,6 +271,12 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
         return _targetCenterTransform;
     }
 
+    public void OnSpeedChange (float timeScale)
+    {
+        _timeScale.Value = timeScale;
+        _bossEnemyAnimator.SetAnimSpeed(timeScale);
+    }
+
     /// <summary>
     /// プールから取り出された直後に呼ばれる。
     /// 状態のリセットや初期化処理を実装する。
@@ -252,8 +308,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     [SerializeField, Tooltip("BossEnemyのViewとModelの仲介役")] 
     private BossEnemyController _bossEnemyController;
 
-    [Header("ボスエネミーの各部位のView")]
-    [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
+    [Header("ボスの当たり判定")]
+    [SerializeField] private CollisionDetectionByPose[] _collisionDetections;
 
     [Header("ボスエネミーの各所鎧のView")]
     [SerializeField] private BossArmorView[] _bossArmorViews;
@@ -276,12 +332,10 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
     private bool _isDead = false;
     private bool _isLockable;
 
-    private BoxCollider _bossCollider;
+    private ReactiveProperty<float> _timeScale = new(1.0f);
 
-    private void Awake()
-    {
-        _bossCollider = GetComponent<BoxCollider>();
-    }
+    private BossEnemyPartsView[] _activeBossEnemyPartsView;
+    private BoxCollider _activeBossCollider;
 
     private void Update()
     {
@@ -289,6 +343,32 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable
 
         if (!_isDead) _bossEnemyController.OnUpdate();
     }
+
+    #region ボスの姿勢ごとの当たり判定
+    [Serializable]
+    public struct CollisionDetectionByPose
+    {
+        public PostureType CollisionDetectionPostureType => _postureType;
+
+        public BoxCollider BossCollider => _bossCollider;
+
+        public BossEnemyPartsView[] BossEnemyPartsView => _bossEnemyPartsView;
+
+        public void Init()
+        {
+            _bossCollider.enabled = false;
+        }
+
+        [Header("姿勢")]
+        [SerializeField] private PostureType _postureType;
+
+        [Header("当たり判定のCollider")]
+        [SerializeField] private BoxCollider _bossCollider;
+
+        [Header("各部位")]
+        [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
+    }
+    #endregion
 
     #region ボスエネミーの各部位
     [Serializable]

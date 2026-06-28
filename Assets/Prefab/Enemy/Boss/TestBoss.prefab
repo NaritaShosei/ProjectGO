@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4929166335880881968}
   - component: {fileID: 5384278836889019338}
   - component: {fileID: 5926199642172762860}
+  - component: {fileID: -201228068887793092}
+  - component: {fileID: 5846569062886913893}
   m_Layer: 8
   m_Name: TestBoss
   m_TagString: Untagged
@@ -110,34 +112,55 @@ MonoBehaviour:
     _csvBossEnemyMasterData: {fileID: 4900000, guid: dcac7d650206e3440918e090e5b30480, type: 3}
     _bossEnemyBehaviorTree: {fileID: 11400000, guid: e399fdc048f9faa45a32193411b37d9b, type: 2}
     _id: 1
-  _bossEnemyPartsView:
-  - _partsTransform: {fileID: 5872542059872794645}
-    _thisPartsArmer: {fileID: 0}
-    _bossEnemyPartsType: 4
-  - _partsTransform: {fileID: 4691140211608636077}
-    _thisPartsArmer: {fileID: 4844691738782336105}
-    _bossEnemyPartsType: 3
-  - _partsTransform: {fileID: 2232843387132253359}
-    _thisPartsArmer: {fileID: 983337129313592890}
-    _bossEnemyPartsType: 3
-  - _partsTransform: {fileID: 4617018445820813901}
-    _thisPartsArmer: {fileID: 5968608258100992785}
-    _bossEnemyPartsType: 3
-  - _partsTransform: {fileID: 8260101295111760022}
-    _thisPartsArmer: {fileID: 8813377864037507280}
-    _bossEnemyPartsType: 3
-  - _partsTransform: {fileID: 1949805295635981671}
-    _thisPartsArmer: {fileID: 0}
-    _bossEnemyPartsType: 2
-  - _partsTransform: {fileID: 1603289260114062113}
-    _thisPartsArmer: {fileID: 0}
-    _bossEnemyPartsType: 1
+  _collisionDetections:
+  - _postureType: 0
+    _bossCollider: {fileID: 5926199642172762860}
+    _bossEnemyPartsView:
+    - _partsTransform: {fileID: 2232843387132253359}
+      _thisPartsArmer: {fileID: 983337129313592890}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 4691140211608636077}
+      _thisPartsArmer: {fileID: 4844691738782336105}
+      _bossEnemyPartsType: 3
+  - _postureType: 1
+    _bossCollider: {fileID: -201228068887793092}
+    _bossEnemyPartsView:
+    - _partsTransform: {fileID: 195018681710358864}
+      _thisPartsArmer: {fileID: 0}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 8260101295111760022}
+      _thisPartsArmer: {fileID: 8813377864037507280}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 4617018445820813901}
+      _thisPartsArmer: {fileID: 5968608258100992785}
+      _bossEnemyPartsType: 3
+  - _postureType: 2
+    _bossCollider: {fileID: 5846569062886913893}
+    _bossEnemyPartsView:
+    - _partsTransform: {fileID: 5872542059872794645}
+      _thisPartsArmer: {fileID: 0}
+      _bossEnemyPartsType: 4
+    - _partsTransform: {fileID: 1171409517277184852}
+      _thisPartsArmer: {fileID: 0}
+      _bossEnemyPartsType: 2
+    - _partsTransform: {fileID: 4617018445820813901}
+      _thisPartsArmer: {fileID: 5968608258100992785}
+      _bossEnemyPartsType: 2
+    - _partsTransform: {fileID: 8260101295111760022}
+      _thisPartsArmer: {fileID: 8813377864037507280}
+      _bossEnemyPartsType: 2
+    - _partsTransform: {fileID: 2232843387132253359}
+      _thisPartsArmer: {fileID: 983337129313592890}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 4691140211608636077}
+      _thisPartsArmer: {fileID: 4844691738782336105}
+      _bossEnemyPartsType: 3
   _bossArmorViews:
   - {fileID: 8813377864037507280}
   - {fileID: 983337129313592890}
   - {fileID: 5968608258100992785}
   - {fileID: 4844691738782336105}
-  _targetCenterTransform: {fileID: 8919724968825436532}
+  _targetCenterTransform: {fileID: 5598298742981777708}
   _animator: {fileID: 7216495116482001527}
 --- !u!65 &5926199642172762860
 BoxCollider:
@@ -156,10 +179,52 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 2.625462, y: 5.6899176, z: 1.716111}
+  m_Center: {x: -0.04936093, y: 2.7264557, z: 0.03962028}
+--- !u!65 &-201228068887793092
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4276309557943231815}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 3.3, y: 3.3, z: 3.2}
+  m_Center: {x: 0.022751808, y: 1.644962, z: -0.028809547}
+--- !u!65 &5846569062886913893
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4276309557943231815}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.979245, y: 5.6746254, z: 1.716111}
-  m_Center: {x: -0.006434083, y: 2.7341018, z: 0.03962028}
+  m_Size: {x: 4, y: 3, z: 9}
+  m_Center: {x: 0, y: 1.5, z: 0.49999976}
 --- !u!1 &6095283038893357010
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,6 +349,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4844691738782336105}
   m_SourcePrefab: {fileID: 100100000, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
+--- !u!4 &195018681710358864 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5190282236231305546, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
+  m_PrefabInstance: {fileID: 3840639999468931046}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1170878255649594512 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6524737110132810890, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
@@ -302,14 +372,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArmorView
   _armorAttachmentPointsType: 4
---- !u!4 &1603289260114062113 stripped
+--- !u!4 &1171409517277184852 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 2525594347270614215, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
-  m_PrefabInstance: {fileID: 3840639999468931046}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1949805295635981671 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -5889678968305589631, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
+  m_CorrespondingSourceObject: {fileID: -6553547776463928142, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
   m_PrefabInstance: {fileID: 3840639999468931046}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2232843387132253359 stripped
@@ -348,6 +413,11 @@ Transform:
 --- !u!4 &4691140211608636077 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -840213173817881269, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
+  m_PrefabInstance: {fileID: 3840639999468931046}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5598298742981777708 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -505081897593774390, guid: 70d383e9c71dcdf4ebbae971c608bd53, type: 3}
   m_PrefabInstance: {fileID: 3840639999468931046}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &5843707629311866118 stripped

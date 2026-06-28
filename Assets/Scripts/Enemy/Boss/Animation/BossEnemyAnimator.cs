@@ -56,6 +56,8 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     /// </summary>
     public void SetBreakingArmor(bool isBreakingLeftLeg, bool isBreakingRightLeg)
     {
+        if (_animator == null) return;
+
         if (isBreakingLeftLeg && isBreakingRightLeg)
         {
             Debug.Log("両足");
@@ -85,7 +87,7 @@ public class BossEnemyAnimator : IBossEnemyAnimator
     /// </summary>
     public void SetIsDown(bool isDown)
     {
-        Debug.Log("ダウンします");
+        if (_animator == null) return;
         _animator.SetBool(_hashIsDown, isDown);
     }
 

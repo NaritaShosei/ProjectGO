@@ -60,7 +60,11 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
         {
             int id = AttackDataSelector.GetRandamSelectAttackDataID(_bossEnemyAttackField, _attackCoolTimer.AttackCoolTimeList);
 
-            if (id == 0) Debug.LogError("攻撃が取得できませんでした");
+            if (id == 0)
+            {
+                Debug.LogError("攻撃が取得できませんでした");
+                return NodeCondition.Failure;
+            }
 
             BossEnemyAttackData attackData = _bossEnemyAttackDataRepositry.GetData(id);
 
