@@ -79,21 +79,42 @@ public class DamageSystem
     /// <param name="partsType"> 被弾場所 </param>
     /// <param name="bossEnemyData"> 被弾したBossEnemyのData </param>
     /// <returns> 被弾場所の硬度(肉質) </returns>
-    public static int GetHitPartsDefense(BossEnemyPartsType partsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsDefense(PartsType partsType, BossEnemyData bossEnemyData)
     {
         switch (partsType)
         {
-            case BossEnemyPartsType.None:
+            case PartsType.None:
                 Debug.LogError("PartsNone");
                 break;
-            case BossEnemyPartsType.Hard:
+            case PartsType.Hard:
                 return bossEnemyData.HardSpotsDefense;
-            case BossEnemyPartsType.Normal:
+            case PartsType.Normal:
                 return bossEnemyData.NormalSpotsDefense;
-            case BossEnemyPartsType.WeekPoint:
+            case PartsType.WeekPoint:
                 return bossEnemyData.WeekPointDefense;
-            case BossEnemyPartsType.VitalPoint:
+            case PartsType.VitalPoint:
                 return bossEnemyData.VitalPointDefense;
+        }
+
+        return 0;
+    }
+
+    /// <summary> BossEnemyの被弾場所の鎧の硬度(肉質)を割り出す </summary>
+    public static int GetHitPartsArmorDefense(ArmorAttachmentPoint attachmentPointsType, BossEnemyData bossEnemyData)
+    {
+        switch (attachmentPointsType)
+        {
+            case ArmorAttachmentPoint.None:
+                Debug.LogError("PartsNone");
+                break;
+            case ArmorAttachmentPoint.LeftArm:
+                return bossEnemyData.LeftArmArmer.Defense;
+            case ArmorAttachmentPoint.RightArm:
+                return bossEnemyData.RightArmArmer.Defense;
+            case ArmorAttachmentPoint.LeftLeg:
+                return bossEnemyData.LeftLegArmer.Defense;
+            case ArmorAttachmentPoint.RightLeg:
+                return bossEnemyData.RightLegArmer.Defense;
         }
 
         return 0;

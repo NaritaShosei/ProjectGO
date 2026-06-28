@@ -1,208 +1,194 @@
-using BossEnemy.Data;
-using System;
 using UnityEngine;
+using UniRx;
+
+# region BossEnemy関連のusing
+using BossEnemy.BehaviorTree.Node.ActionNode;
+using BossEnemy.BehaviorTree.Node.DecoratorNode;
+using BossEnemy.Data;
+using BossEnemy.Data.Repositry;
+using BossEnemy.Model.CoreLogic;
+# endregion
 
 namespace BossEnemy.BehaviorTree
 {
-    /// <summary> Nodeへの遷移結果 </summary>
-    public enum NodeCondition
+    [CreateAssetMenu(fileName = "BossEnemyBehaviorTree", menuName = "BossEnemy/BehaviorTree")]
+    public class BossEnemyBehaviorTree : ScriptableObject
     {
-        Ready,
-        Success,
-        Failure
-    }
-
-    /// <summary> BossEnemyAIBehaviorTree </summary>
-    [Serializable]
-    public class BossEnemyBehaviorTree
-    {
-        public BossEnemyBehaviorTree(
-            EnemyServices services,
-            BossEnemyData bossEnemyData)
+        public void Init(BossAttack attack, BossMove move, BossDown bossDown, AttackCoolTimer attackCoolTimer)
         {
-            _services = services;
-            _enemyData = bossEnemyData;
-            _originNode = bossEnemyData.OriginNode;
+            _isInit = true;
+
+            _attack = attack;
+            _move = move;
+            _bossDown = bossDown;
+            _attackCoolTimer = attackCoolTimer;
         }
 
-        public EnemyServices Services => _services;
-
-        public BossEnemyData BossEnemyData => _enemyData;
-
-        /// <summary> Treeの探索を開始する </summary>
-        public void StartSearchNode()
-        {
-            Debug.Log("探索開始");
-            ChangeNode(_originNode);
-        }
-
-        /// <summary> 現在のNodeを変更する </summary>
-        /// <param name="nextNode"> 次のNode </param>
-        public void ChangeNode(ITreeNode nextNode)
-        {
-            if (nextNode == null) return;
-            if (nextNode.BehaviourTree == null) nextNode.Init(this);
-
-            if (_currentNode != null) 
-                _currentNode.OnExit();
-
-            _currentNode = nextNode;
-            _currentNode.OnEnter();
-        }
-
-        /// <summary> 毎フレーム実行する処理 </summary>
         public void OnUpdate()
         {
-            if (_currentNode == null) return;
+            if (!_isInit) return;
 
-            _currentNode.OnUpdate();
+            _behaviorController?.OnUpdate();
         }
 
-        /// <summary> OriginNodeを置き換える </summary>
-        public void ChangeOriginNode(ITreeNode originNode) => _originNode = originNode;
-
-        /// <summary> 現在のNode </summary>
-        private ITreeNode _currentNode = null;
-
-        /// <summary> Entry地点のNode </summary>
-        private ITreeNode _originNode = null;
-
-        /// <summary> Enemyが取得できるサービス </summary>
-        private EnemyServices _services;
-
-        /// <summary> 操作するEnemyのデータクラス </summary>
-        private BossEnemyData _enemyData;
-    }
-
-    /// <summary> TreeNodeのInterface </summary>
-    public interface ITreeNode
-    {
-        /// <summary> BossEnemyを操るBehaviourTree </summary>
-        BossEnemyBehaviorTree BehaviourTree { get; }
-
-        /// <summary> BehaviourTreeをSetする </summary>
-        void Init(BossEnemyBehaviorTree behaviourTree);
-
-        /// <summary> このNodeへの遷移条件を確認して結果を返す </summary>
-        NodeCondition TryEntry();
-
-        /// <summary> このNodeへの遷移が成功した際の処理 </summary>
-        void OnEnter();
-
-        /// <summary> このNodeの実行中の処理 </summary>
-        void OnUpdate();
-
-        /// <summary> このNodeを離れる際の処理 </summary>
-        void OnExit();
-    }
-
-    /// <summary> BehaviorTreeのNodeの基底クラス </summary>
-    public abstract class TreeNode : ITreeNode
-    {
-        public BossEnemyBehaviorTree BehaviourTree => _behaviorTree;
-
-        public virtual void Init(BossEnemyBehaviorTree behaviourTree)
+        public void HandlePhaseChanged(BossEnemyData bossEnemyData,
+            BossEnemyAttackDataRepositry attackDataRepositry,
+            IPlayerInformationService playerInformationService)
         {
-            _behaviorTree = behaviourTree;
-        }
+            if(_behaviorController != null) _behaviorController.StopRunning();
 
-        public abstract NodeCondition TryEntry();
-        public virtual void OnEnter() { return; }
-        public virtual void OnUpdate() { return; }
-        public virtual void OnExit() { return; }
+            // 共通で使いまわすNodeの初期化
+            _lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(),
+                _move, bossEnemyData, _lookSpeed, _finishAngleThreshold);
 
-        private BossEnemyBehaviorTree _behaviorTree = null;
-    }
-
-    /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部) </summary>
-    public abstract class ActionNode : TreeNode
-    {
-        
-    }
-
-    /// <summary> 通ったら子Nodeを実行して、通らなければFailureを返すNode </summary>
-    public abstract class DecoratorNode : TreeNode
-    {
-        [Header("子Node")]
-        [SerializeField, Tooltip("子Node")]
-        protected TreeNode _childNode = null;
-    }
-
-    /// <summary> 子ノードを順番に実行して一番最初にSuccessになったNodeを実行する </summary>
-    public class SelectorNode : TreeNode
-    {
-        public bool IsEndNode
-        {
-            // 子NodeがいなければこのNodeが終点となる
-            get
+            ITreeNode[] originChildrenNode = new ITreeNode[]
             {
-                if(_childrenNode == null) return true;
-                else if(_childrenNode.Length == 0) return true;
-                else return false;
-            }
+                BuildArmorBreakActionTree(bossEnemyData),
+                BuildAttackActionTree(bossEnemyData, attackDataRepositry, playerInformationService)
+            };
+
+            SelectorNode originNode = new(originChildrenNode);
+
+            _behaviorController = new(originNode, new NodeRunningEndNotifier());
+
+            _behaviorController.OnRunning();
         }
 
-        public override NodeCondition TryEntry()
+        public void HandleBossArmorBreak(ArmorAttachmentPoint attachmentPointsType)
         {
-            foreach (var node in _childrenNode)
-            {
-                NodeCondition condition = node.TryEntry();
+            if (!_isInit || _downAction.IsDown) return;
+            if (_breakArmorNode == null) return;
 
-                switch (condition)
-                {
-                    case NodeCondition.Success:
-                        BehaviourTree.ChangeNode(node);
-                        break;
-                    case NodeCondition.Failure:
-                        continue;
-                }
-
-                return condition;
-            }
-
-            return NodeCondition.Failure;
+            _breakArmorNode.BreakArmor(attachmentPointsType);
+            _behaviorController.OnRunning();
         }
 
-        [Header("子Node")]
-        [SerializeField, Tooltip("子Node")]
-        private TreeNode[] _childrenNode = null;
+        public void HandleDead()
+        {
+            _isInit = false;
+        }
+
+        LookAtTargetAction _lookAtTargetAction;
+
+        // BehaviorTreeの操作Class
+        private BehaviorController _behaviorController;
+
+        // 初期化確認フラグ
+        private bool _isInit = false;
+
+        #region 装備破壊時の行動関連変数
+
+        [Header("----------装備破壊時の行動関連変数----------")]
+
+        [Header("片足破壊でダウンする時間")]
+        [SerializeField] private float _oneLegBreakDownTime = 2.0f;
+
+        [Header("両足破壊でダウンする時間")]
+        [SerializeField] private float _allLegBreakDownTime = 2.0f;
+
+        private BreakArmorNode _breakArmorNode;
+        private DownAction _downAction;
+
+        private BossDown _bossDown;
+        #endregion
+
+        #region 攻撃行動関連変数
+
+        [Header("--------------攻撃行動関連変数--------------")]
+
+        [Header("特別近接攻撃が可能となる通常攻撃回数")]
+        [SerializeField] private int _normalAttackCount = 3;
+
+        [Header("近距離攻撃判定の出る間合い")]
+        [SerializeField] private float _bossTerritoryDistance = 2.0f;
+
+        private BossAttack _attack;
+        private AttackCoolTimer _attackCoolTimer;
+
+        // 通常攻撃回数カウントノード
+        private CountDownNode _normalAttackCountDownNode;
+
+        // 各攻撃選択肢ノード
+        private AttackSelect _closeRangeNormalAttackSelect;
+        private AttackSelect _closeRangeSpecialAttackSelect;
+        private AttackSelect _longRangeAttackSelect;
+
+        #endregion
+
+        #region 移動行動関連変数
+
+        [Header("--------------移動行動関連変数--------------")]
+
+        [Header("Bossの振り向きの速度")]
+        [SerializeField] private float _lookSpeed = 3;
+
+        [Header("振り向く際の振り向き終了角度との許される誤差")]
+        [SerializeField] private float _finishAngleThreshold = 2.0f;
+
+        private BossMove _move;
+
+        #endregion
+
+        private ITreeNode BuildArmorBreakActionTree(BossEnemyData bossEnemyData)
+        {
+            _downAction = new DownAction(bossEnemyData, _bossDown, _oneLegBreakDownTime, _allLegBreakDownTime);
+
+            ITreeNode[] downSequenceChildren = new ITreeNode[]{ _downAction, _lookAtTargetAction };
+
+            SequenceNode downSequence = new(downSequenceChildren);
+
+            return _breakArmorNode = new(downSequence);
+        }
+
+        private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,
+            BossEnemyAttackDataRepositry dataRepositry,
+            IPlayerInformationService playerInformationService)
+        {
+            // ---攻撃シーケンスアクションノード↓---
+
+            // 攻撃を行う際のシーケンスで動く3つのノードを生成
+            TargetChaseAction targetChaseAction = new(playerInformationService.Player.GetTargetCenter(), 
+                _move, bossEnemyData, playerInformationService);
+
+            AttackAction attackNode = new AttackAction(_attack);
+
+            _lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(), _move,
+                bossEnemyData, _lookSpeed, _finishAngleThreshold);
+            
+            // 攻撃シーケンスを生成
+            ITreeNode[] attackSequenceChildren = new ITreeNode[] { targetChaseAction, attackNode ,_lookAtTargetAction };
+            SequenceNode attackSequence = new(attackSequenceChildren);
+
+            // ---攻撃選択ノード↓-------------------
+
+            // 1.近距離通常攻撃
+            _closeRangeNormalAttackSelect = new(attackSequence, bossEnemyData.CloseRangeNormalAttackFieldHolder, 
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
+
+            // 2.通常攻撃3回以上攻撃
+            _closeRangeSpecialAttackSelect = new(attackSequence, bossEnemyData.CloseRangeFinishCountAttackFieldHolder, 
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
+
+            // 3.遠距離攻撃
+            _longRangeAttackSelect = new(attackSequence, bossEnemyData.LongRangeAttackFieldHolder,
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
+
+
+            // カウントダウンを行いカウントが0になったときに近距離の特殊攻撃を行うノード
+            _normalAttackCountDownNode = new(_closeRangeSpecialAttackSelect, _normalAttackCount);
+
+            // ターゲットが近距離の際のノード
+            ITreeNode[] closeAttackSelectorChild = new ITreeNode[] { _normalAttackCountDownNode, _closeRangeNormalAttackSelect };
+            SelectorNode closeAttackSelector = new(closeAttackSelectorChild);
+            
+            // ターゲットの距離を見て近いときはEntryできるノード
+            CloseToPlayerNode closeRangeTarget = new(closeAttackSelector, playerInformationService, bossEnemyData, _bossTerritoryDistance);
+
+            // 上記のノード軍の最上位ノードを生成
+            ITreeNode[] attackSelectorChild = new ITreeNode[] { closeRangeTarget, _longRangeAttackSelect };
+            SelectorNode attackSelector = new(attackSelectorChild);
+
+            return attackSelector;
+        }
     }
-
-    /// <summary> 子ノードをすべて順番に実行する </summary>
-    public class SequenceNode : TreeNode
-    {
-        public override NodeCondition TryEntry()
-        {
-            return NodeCondition.Success;
-        }
-
-        public override void OnEnter()
-        {
-            if (_runningNode == null) return;
-
-            _runningNode.OnEnter();
-        }
-
-        public override void OnUpdate()
-        {
-            if (_runningNode == null) return;
-
-            _runningNode.OnUpdate();
-        }
-
-        public override void OnExit()
-        {
-            if (_runningNode == null) return;
-
-            _runningNode.OnExit();
-        }
-
-        [Header("子Node")]
-        [SerializeField, Tooltip("子Node")]
-        private TreeNode[] _childrenNode = null;
-
-        /// <summary> 現在実行中のノード </summary>
-        private ITreeNode _runningNode = null;
-    }
-
 }
