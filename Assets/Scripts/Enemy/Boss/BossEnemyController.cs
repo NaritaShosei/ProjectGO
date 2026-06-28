@@ -15,6 +15,8 @@ using BossEnemy.Data.Repository;
 [Serializable]
 public class BossEnemyController
 {
+    public BossEnemyData CurrentBossData => _currentPhaseBossEnemyData.Value;
+
     /// <summary> 初期化 </summary>
     /// <param name="bossEnemyView"> BossのViewClass </param>
     /// <param name="enemyServices"> Enemy共通のServicesClass </param>
@@ -134,7 +136,6 @@ public class BossEnemyController
     /// <summary> Bossが死んだ際に呼ばれるメソッド </summary>
     private void HandleDead(IEnemy enemy)
     {
-        Debug.Log("死んだンゴ");
         _deadEventDisposables.Dispose();
         _phaseChangeEventDisposables.Dispose();
 
@@ -186,8 +187,6 @@ public class BossEnemyController
         _currentPhaseBossEnemyData.Subscribe(data =>
         {
             if (data == null) return;
-
-            Debug.Log("データの切り替えを検知");
 
             // BossUIとの連動
             _bossEnemyUIView.PhaseChange(data, _phaseChange.CurrentPhase);

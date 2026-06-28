@@ -97,12 +97,15 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
     /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
     public void TakeDamage(DamageContext context)
     {
+        DamagePopupViewModel damagePopupViewModel;
         BossEnemyPartsView parts = null;
 
         // 攻撃から一番近いボスエネミーのパーツを割り出す
         float saveClosestDistance = 1000;
         bool isGuardArmor = false;
         ArmorAttachmentPoint armorAttachmentPoint = ArmorAttachmentPoint.None;
+        Vector3 vector3 = Vector3.zero;
+        bool isWeekPoint = false;
         foreach (var bossParts in _activeBossEnemyPartsView)
         {
             float playerDistance = _services.PlayerInformationService.ToPlayerDistance(bossParts.PartsPosition);
@@ -120,8 +123,31 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
                     isGuardArmor = true;
                     armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
                 }
+
+                vector3 = bossParts.Armor.gameObject.transform.position;
+
+                switch (bossParts.PartsType)
+                {
+                    case PartsType.None:
+                        break;
+                    case PartsType.Normal:
+                        isWeekPoint = false;
+                        break;
+                    case PartsType.Hard:
+                        isWeekPoint = false;
+                        break;
+                    case PartsType.WeekPoint:
+                        isWeekPoint = true;
+                        break;
+                    case PartsType.VitalPoint:
+                        isWeekPoint = true;
+                        break;
+                }
             }
         }
+
+        damagePopupViewModel = new(DamageSystem.CalculateDamage(context, default), isWeekPoint, true, vector3);
+        OnDamageDealt?.Invoke(damagePopupViewModel);
 
         Debug.Log("ダメージを検出(アーマーのガード:" + isGuardArmor + ")" + "(こうげきかしょ:" + parts.PartsType + ")");
         OnTakeDamage?.Invoke(context, parts.PartsType, isGuardArmor, armorAttachmentPoint);
