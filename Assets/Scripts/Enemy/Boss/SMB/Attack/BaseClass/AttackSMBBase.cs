@@ -42,7 +42,7 @@ namespace BossEnemy.SMB
             // アニメーション開始からの経過秒数計測
             _elapsedSeconds = stateInfo.normalizedTime * stateInfo.length;
 
-            AttackSequence();
+            AttackSequence(animator, stateInfo, layerIndex);
 
             if (_isAnimRunning)
             {
@@ -59,7 +59,7 @@ namespace BossEnemy.SMB
             _animationEventReceiver.AnimEvent_AttackEnd();
         }
 
-        public virtual void AttackSequence()
+        public virtual void AttackSequence(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             // 攻撃
             if (!_isChargeCompleted && _attackData.AttackChargeTime < _elapsedSeconds)
