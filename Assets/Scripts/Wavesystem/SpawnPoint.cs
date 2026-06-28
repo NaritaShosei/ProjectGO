@@ -18,7 +18,7 @@ public class SpawnPoint : MonoBehaviour
         foreach (var localSlot in _spawnSlots)
         {
             Vector3 worldPos = transform.TransformPoint(localSlot);
-            Vector3 clamped = _mapManager.ClampToArea(worldPos);
+            Vector3 clamped = _mapManager != null ? _mapManager.ClampToArea(worldPos) : worldPos;
             result.Add(clamped);
         }
         return result;
@@ -45,7 +45,7 @@ public class SpawnPoint : MonoBehaviour
         Vector3 worldPos =
             transform.TransformPoint(_spawnSlots[index]);
 
-        return _mapManager.ClampToArea(worldPos);
+        return _mapManager != null ? _mapManager.ClampToArea(worldPos) : worldPos;
     }    
 
     [Tooltip("SpawnPointSelector から参照するためのKey")]

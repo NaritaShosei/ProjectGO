@@ -26,6 +26,12 @@ public class LockOnController : MonoBehaviour
 
     public void Init(CameraManager cameraManager, InputHandler inputHandler, EnemyManager enemyManager, Transform playerTransform)
     {
+        if (cameraManager == null || inputHandler == null || enemyManager == null || playerTransform == null)
+        {
+            Debug.LogError("[LockOnController] Init arguments are missing.", this);
+            return;
+        }
+
         _cameraManager = cameraManager;
         _inputHandler = inputHandler;
 
@@ -40,6 +46,7 @@ public class LockOnController : MonoBehaviour
 
         // 敵を倒したときの次ターゲット自動選択
         enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
+        enemyManager.OnEnemyForceRemoved += HandleEnemyForceRemoved;
     }
 
     private void SubscribeInputEvents()
@@ -56,16 +63,17 @@ public class LockOnController : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_inputHandler == null) return;
+        if (_inputHandler != null)
+        {
+            _inputHandler.OnLockOn -= HandleLockOnInput;
+            _inputHandler.OnLockOnLeft -= HandleLockOnLeft;
+            _inputHandler.OnLockOnRight -= HandleLockOnRight;
+        }
 
-        _inputHandler.OnLockOn -= HandleLockOnInput;
-        _inputHandler.OnLockOnLeft -= HandleLockOnLeft;
-        _inputHandler.OnLockOnRight -= HandleLockOnRight;
-
-        var enemyManager = ServiceLocator.Get<EnemyManager>();
-        if (enemyManager != null)
+        if (ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
             enemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
+            enemyManager.OnEnemyForceRemoved -= HandleEnemyForceRemoved;
         }
     }
 
@@ -79,6 +87,8 @@ public class LockOnController : MonoBehaviour
     /// </summary>
     private void HandleLockOnInput()
     {
+        if (_cameraManager == null || _selector == null) return;
+
         Debug.Log($"[LockOnController] HandleLockOnInput | IsLockedOn: {_cameraManager.IsLockedOn}");
         if (_cameraManager.IsLockedOn)
         {
@@ -91,8 +101,10 @@ public class LockOnController : MonoBehaviour
         }
     }
     /// <summary>左方向へのターゲット切り替え。</summary>
+
     private void HandleLockOnLeft()
     {
+        if (_cameraManager == null || _selector == null) return;
         if (!_cameraManager.IsLockedOn) return;
 
         var next = _selector.SelectSwitchTarget(_cameraManager.CurrentTarget, inputDirection: -1f);
@@ -104,6 +116,7 @@ public class LockOnController : MonoBehaviour
     /// <summary>右方向へのターゲット切り替え。</summary>
     private void HandleLockOnRight()
     {
+        if (_cameraManager == null || _selector == null) return;
         if (!_cameraManager.IsLockedOn) return;
 
         var next = _selector.SelectSwitchTarget(_cameraManager.CurrentTarget, inputDirection: 1f);
@@ -122,6 +135,8 @@ public class LockOnController : MonoBehaviour
     /// </summary>
     private void TryManualLockOn()
     {
+        if (_cameraManager == null || _selector == null) return;
+
         var target = _selector.SelectInitialTarget();
         if (target == null) return;
 
@@ -145,6 +160,23 @@ public class LockOnController : MonoBehaviour
         if (next != null)
         {
             // 自動ロックオン状態は引き継ぐ
+            _cameraManager.LockOn(next);
+        }
+        else
+        {
+            _cameraManager.Unlock();
+        }
+    }
+
+    private void HandleEnemyForceRemoved(IEnemy removedEnemy)
+    {
+        if (_cameraManager == null || _selector == null) return;
+        if (!_cameraManager.IsLockedOn) return;
+        if (_cameraManager.CurrentTarget != removedEnemy) return;
+
+        var next = _selector.SelectNextTarget(removedEnemy);
+        if (next != null)
+        {
             _cameraManager.LockOn(next);
         }
         else

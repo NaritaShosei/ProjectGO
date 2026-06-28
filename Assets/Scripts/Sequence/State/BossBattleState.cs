@@ -22,6 +22,11 @@ public class BossBattleState : ISequenceState
         if (_bossBattleTimerView != null)
             _bossBattleTimerPresenter = new CountDownTimerPresenter(_bossBattleTimer, _bossBattleTimerView);
 
+        if (_sequenceStatusView != null)
+            _sequenceStatusPresenter = new SequenceStatusPresenter(_sequenceStatusView, _bossSequenceName);
+
+        ShowSequenceStatus();
+
         context.InputHandler?.EnableInput(true);
 
         // ボスをスポーン
@@ -57,6 +62,9 @@ public class BossBattleState : ISequenceState
         _bossBattleTimerPresenter?.Dispose();
         _bossBattleTimerPresenter = null;
 
+        _sequenceStatusPresenter?.Dispose();
+        _sequenceStatusPresenter = null;
+
         // 結果の保存（仮実装。実際はスコア計算などを入れる）
         int killCount = 0;
         int level = 0;
@@ -71,11 +79,11 @@ public class BossBattleState : ISequenceState
 
     #region シリアライズ
 
-    [SerializeField] private string _stateName = "BossBattleState";
-
     [Header("ボス戦設定")]
     [SerializeField, Tooltip("ボス戦の時間制限（秒）")] private float _bossBattleTimeLimit = 120f;
     [SerializeField, Tooltip("ボス戦のタイマーUI")] private CountDownTimerView _bossBattleTimerView;
+    [SerializeField, Tooltip("ボス戦のシークエンス名を表示するUI")] private SequenceStatusView _sequenceStatusView;
+    [SerializeField, Tooltip("UIに表示するボス戦のシークエンス名")] private string _bossSequenceName = "ボス戦";
     [SerializeField, Tooltip("ボスのスポーンデータ")] private SpawnData _bossSpawnData;
     [Header("シークエンス")]
     [SerializeField, Tooltip("タイムアップ時に遷移するシークエンス")] private SequenceStateType _timeUpSequence = SequenceStateType.GameOver;
@@ -88,6 +96,20 @@ public class BossBattleState : ISequenceState
     private SequenceStateContext _context;
     private CountDownTimer _bossBattleTimer;
     private CountDownTimerPresenter _bossBattleTimerPresenter;
+    private SequenceStatusPresenter _sequenceStatusPresenter;
+
+    #endregion
+
+    #region UI
+
+    private void ShowSequenceStatus()
+    {
+        if (_sequenceStatusPresenter == null)
+            return;
+
+        _sequenceStatusPresenter.Show();
+        _sequenceStatusPresenter.ClearProgress();
+    }
 
     #endregion
 

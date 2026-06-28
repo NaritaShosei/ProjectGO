@@ -119,6 +119,7 @@ public class SpawnPointSelector : MonoBehaviour
         {
 
             // 直前使用済みを除外
+            if (point == null) continue;
             if (point == _lastUsedPoint) continue;
 
             // プレイヤー近距離を除外
@@ -136,6 +137,7 @@ public class SpawnPointSelector : MonoBehaviour
     /// </summary>
     private bool IsNearPlayer(SpawnPoint point, float exclusionRadius)
     {
+        if (point == null) return false;
         if (_playerTransform == null) return false;
 
         Vector3 pointFlat = new Vector3(point.transform.position.x, 0f, point.transform.position.z);

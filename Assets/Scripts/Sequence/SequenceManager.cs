@@ -13,10 +13,9 @@ public class SequenceManager : MonoBehaviour
 
     public void Init(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
     {
-        if (enemyManager == null || skillManager == null)
+        if (enemyManager == null || skillManager == null || inputHandler == null || player == null)
         {
             Debug.LogError("EnemyManager、SkillManagerが未設定です");
-            enabled = false;
             return;
         }
         // コンテキスト構築
@@ -120,6 +119,12 @@ public class SequenceManager : MonoBehaviour
 
     private void RegisterStates()
     {
+        if (_sequences == null)
+        {
+            Debug.LogError("[SequenceManager] Sequences are missing.", this);
+            return;
+        }
+
         foreach (var state in _sequences)
         {
             if (state == null)

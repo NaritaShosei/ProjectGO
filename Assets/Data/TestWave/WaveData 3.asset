@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
+  m_Name: WaveData 3
+  m_EditorClassIdentifier: Assembly-CSharp::WaveData
+  SpawnGroups:
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy_Armor_Light
+      SpawnCount: 3
+    - EnemyTypeKey: Enemy_Armor_Medium
+      SpawnCount: 2
+    ExclusionRadius: 0
+    NextWaveConditions:
+    - WaveConditionType: 2
+      Threshold: 0
+    SpawnPointKey: 
+  - SpawnEntries:
+    - EnemyTypeKey: StoneGolem
+      SpawnCount: 1
+    - EnemyTypeKey: StoneGolem
+      SpawnCount: 1
+    ExclusionRadius: 5
+    NextWaveConditions:
+    - WaveConditionType: 2
+      Threshold: 0
+    SpawnPointKey: 
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy_Armor_Light
+      SpawnCount: 2
+    ExclusionRadius: 0
+    NextWaveConditions:
+    - WaveConditionType: 2
+      Threshold: 0
+    SpawnPointKey: 

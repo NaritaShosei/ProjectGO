@@ -47,8 +47,6 @@ public class EndingMovieState : ISequenceState
         moviePlayer.OnMovieFinished -= HandleMovieFinished;
     }
 
-    [SerializeField] private string _stateName = "EndingMovieState";
-
     [Header("Movie Settings")]
     [SerializeField] private string _movieName = "Ending";
     [Header("シークエンス設定")]

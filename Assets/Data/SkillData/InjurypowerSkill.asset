@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41abbb6c55384fa48b0332106a784ae4, type: 3}
+  m_Name: InjurypowerSkill
+  m_EditorClassIdentifier: Assembly-CSharp::InjuryPowerSkill
+  _id: 65719
+  _priority: 0
+  _name: "\u7015\u6B7B\u306E\u529B"
+  _explanation: "HP\u304C50%\u4EE5\u4E0B\u306E\u3068\u304D\u653B\u6483\u529B\u304C\u4E0A\u6607\u3059\u308B"
+  _icon: {fileID: 0}
+  _timing: 1
+  _unlockedSkill: {fileID: 0}
+  _defaultUnlocked: 1
+  _attackStatusBonusPercent: 1.3
+  _isInjuryPercent: 0.5

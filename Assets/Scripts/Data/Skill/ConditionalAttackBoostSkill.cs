@@ -24,6 +24,12 @@ public class ConditionalAttackBoostSkill : SkillBase
 
         var ct = context;
 
+        GameObject playerObject = context.PlayerTransform != null
+            ? context.PlayerTransform.gameObject
+            : null;
+
+        context.OnAfterAttack += () => PlaySound(playerObject);
+
         context.OnAfterAttack += () => SpawnEffect(groundPosition);
 
         context.OnAfterAttack += () =>
@@ -56,6 +62,16 @@ public class ConditionalAttackBoostSkill : SkillBase
                 _effectKey,
                 position);
         }
+    }
+
+    private void PlaySound(GameObject playerObject)
+    {
+        if (playerObject == null) return;
+
+        Sound.PlaySE(
+            playerObject,
+            SoundCueNames.Skill.GroundCrush,
+            CueSheetType.Skill);
     }
 
     private void Skill(

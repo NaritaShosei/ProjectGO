@@ -19,6 +19,8 @@ public sealed class DownCondition : IEnemyCondition
     {
         // TODO: EnemyでDownを開始させる
         // 具体的にはアニメーションの開始や被ダメージ量アップ状態の登録
+        enemy.EnemyAnimator?.SetDown(true);
+        enemy.EnemyAnimator?.DownTrigger();
     }
 
     public void Tick(IEnemy enemy, float dt)
@@ -30,6 +32,11 @@ public sealed class DownCondition : IEnemyCondition
     {
         // TODO: EnemyでDownから回復させる
         // 具体的にはアーマーの回復
+        enemy.EnemyAnimator?.SetDown(false);
+        if (enemy is GolemEnemy golem)
+        {
+            golem.RecoverArmor();
+        }
     }
 
     private float _time;

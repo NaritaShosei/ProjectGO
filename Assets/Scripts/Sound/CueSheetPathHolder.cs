@@ -7,18 +7,32 @@ public class CueSheetPathHolder
 
     public CueSheetPathHolder()
     {
-        CueSheetPathDict.Add(CueSheetType.CommonSE, "Common_SE");
-        CueSheetPathDict.Add(CueSheetType.InGameBGM, "InGame_BGM");
-        CueSheetPathDict.Add(CueSheetType.RaijinSE, "Raijin_SE");
-        CueSheetPathDict.Add(CueSheetType.TousinSE, "Tousin_SE");
+        CueSheetPathDict.Add(CueSheetType.UI, "UI_SE");
+        CueSheetPathDict.Add(CueSheetType.Player, "Player_SE");
+        CueSheetPathDict.Add(CueSheetType.Enemy, "Mob_SE");
+        CueSheetPathDict.Add(CueSheetType.Mob, "Mob_SE");
+        CueSheetPathDict.Add(CueSheetType.Golem, "Golem_SE");
+        CueSheetPathDict.Add(CueSheetType.Boss, "Boss_SE");
+        CueSheetPathDict.Add(CueSheetType.Common, "Common_SE");
+        CueSheetPathDict.Add(CueSheetType.Skill, "Skill_SE");
+        CueSheetPathDict.Add(CueSheetType.Environment, "Environment_SE");
+        CueSheetPathDict.Add(CueSheetType.BGM, "BGM");
+        CueSheetPathDict.Add(CueSheetType.InGameBGM, "BGM");
     }
 }
 
 public enum CueSheetType
 {
     None,
-    CommonSE,
+    UI,
+    Player,
+    Enemy,
+    Mob,
+    Golem,
+    Boss,
+    Common,
+    Skill,
+    Environment,
+    BGM,
     InGameBGM,
-    RaijinSE,
-    TousinSE
 }

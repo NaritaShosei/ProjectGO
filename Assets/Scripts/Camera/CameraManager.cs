@@ -43,10 +43,24 @@ public class CameraManager : MonoBehaviour
             return;
         }
 
+        if (_cameraFollowTarget == null || _normalCamera == null || _lockOnCamera == null || _lockOnController == null)
+        {
+            Debug.LogError("[CameraManager] Required camera references are missing.", this);
+            return;
+        }
+
         _playerTransform = player.transform;
         _cameraFollowTarget.position = _playerTransform.position;
         _normalCamera.Follow = _cameraFollowTarget;
-        _lockOnController.Init(this, ServiceLocator.Get<InputHandler>(), ServiceLocator.Get<EnemyManager>(), _playerTransform);
+
+        if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
+        {
+            _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform);
+        }
+        else
+        {
+            Debug.LogError("[CameraManager] InputHandler or EnemyManager is missing. LockOn is disabled.", this);
+        }
     }
 
     /// <summary>
@@ -88,7 +102,9 @@ public class CameraManager : MonoBehaviour
     /// <summary>カメラシェイクを実行します。</summary>
     public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
-        await _cameraShake.StartCameraShake(data);
+        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+
+        await _cameraShake.StartCameraShake(camera, data);
     }
 
     /// <summary>カメラシェイクを強制停止します。</summary>
@@ -178,8 +194,14 @@ public class CameraManager : MonoBehaviour
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
 
-        _cameraShake = new CameraShake(_normalCamera);
+        _cameraShake = new CameraShake();
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
+
+        if (_normalCamera == null || _lockOnCamera == null)
+        {
+            Debug.LogError("[CameraManager] CinemachineCamera reference is missing.", this);
+            return;
+        }
 
         _normalCamera.Priority = _normalPriority;
         _lockOnCamera.Priority = _normalPriority - 1;

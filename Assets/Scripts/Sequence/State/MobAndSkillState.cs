@@ -31,6 +31,11 @@ public class MobAndSkillState : ISequenceState
         if (_skillSelectTimerView != null)
             _skillSelectTimerPresenter = new CountDownTimerPresenter(_skillSelectTimer, _skillSelectTimerView);
 
+        if (_sequenceStatusView != null)
+            _sequenceStatusPresenter = new SequenceStatusPresenter(_sequenceStatusView, _mobSequenceName);
+
+        ShowSequenceStatus();
+
         // タイマー開始
         _mobBattleTimer.OnTimeEnded += OnMobTimeUp;
         _mobBattleTimer.StartTimer(_mobBattleTimeLimit);
@@ -92,6 +97,9 @@ public class MobAndSkillState : ISequenceState
 
         _waveController = null;
 
+        _sequenceStatusPresenter?.Dispose();
+        _sequenceStatusPresenter = null;
+
         context.InputHandler?.EnableInput(false);
     }
 
@@ -99,14 +107,14 @@ public class MobAndSkillState : ISequenceState
 
     #region シリアライズ
 
-    [SerializeField] private string _stateName = "MobAndSkillState";
-
     [Header("モブ戦")]
     [SerializeField, Tooltip("モブ戦のタイマーUI")] private CountDownTimerView _mobBattleTimerView;
     [SerializeField, Tooltip("スキル選択のタイマーUI")] private CountDownTimerView _skillSelectTimerView;
     [SerializeField, Tooltip("モブ戦の時間制限（秒）")] private float _mobBattleTimeLimit = 180f;
     [SerializeField, Tooltip("スポーンポイントのセレクター")] private SpawnPointSelector _spawnPointSelector;
     [SerializeField, Tooltip("ウェーブデータ")] private WaveSequenceData _waveSequenceData;
+    [SerializeField, Tooltip("モブ戦のWave数とシークエンス名を表示するUI")] private SequenceStatusView _sequenceStatusView;
+    [SerializeField, Tooltip("UIに表示するモブ戦のシークエンス名")] private string _mobSequenceName = "モブ戦";
 
     [Header("スキル選択")]
     [SerializeField] private SkillSelectView _skillSelectView;
@@ -132,6 +140,7 @@ public class MobAndSkillState : ISequenceState
 
     private CountDownTimerPresenter _mobBattleTimerPresenter;
     private CountDownTimerPresenter _skillSelectTimerPresenter;
+    private SequenceStatusPresenter _sequenceStatusPresenter;
 
     private bool _waveCleared;
     private bool _timeUpFlag;
@@ -177,7 +186,6 @@ public class MobAndSkillState : ISequenceState
 
         // あまりを利用してウェーブをループさせる。
         var waveData = waveSequence.Waves[_currentWaveIndex % waveSequence.Waves.Count];
-
         if (_spawnPointSelector == null)
         {
             Debug.LogError("[MobAndSkillState] SpawnPointSelectorが未設定です");
@@ -192,6 +200,37 @@ public class MobAndSkillState : ISequenceState
             Debug.LogError($"[MobAndSkillState] ウェーブの開始に失敗しました: WaveIndex={_currentWaveIndex}");
             return;
         }
+
+        UpdateWaveStatus();
+    }
+
+    #endregion
+
+    #region UI
+
+    private void ShowSequenceStatus()
+    {
+        if (_sequenceStatusPresenter == null)
+            return;
+
+        _sequenceStatusPresenter.Show();
+        UpdateWaveStatus();
+    }
+
+    private void UpdateWaveStatus()
+    {
+        if (_sequenceStatusPresenter == null)
+            return;
+
+        if (_waveController == null)
+        {
+            _sequenceStatusPresenter.ClearProgress();
+            return;
+        }
+
+        _sequenceStatusPresenter.UpdateProgress(
+            _currentWaveIndex + 1
+        );
     }
 
     #endregion
@@ -208,6 +247,7 @@ public class MobAndSkillState : ISequenceState
 
         // ウェーブを進行
         _waveController?.Tick();
+        UpdateWaveStatus();
 
         bool waveComplete = _waveController != null && _waveController.IsComplete;
 

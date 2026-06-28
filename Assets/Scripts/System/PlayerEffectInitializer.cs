@@ -4,6 +4,12 @@ public class PlayerEffectInitializer : MonoBehaviour
 {
     public void Init(Player player, SkillManager skillManager)
     {
+        if (player == null)
+        {
+            Debug.LogError("[PlayerEffectInitializer] Player is null.", this);
+            return;
+        }
+
         //リーク対策
         _thunderEffectPresenter?.Dispose();
         _weaponEffectPresenter?.Dispose();
@@ -13,28 +19,50 @@ public class PlayerEffectInitializer : MonoBehaviour
         _weaponEffectPresenter = null;
         _levelUpEffectPresenter = null;
 
-        if (skillManager != null)
+        if (skillManager != null && _levelUpEffectView != null)
         {
             _levelUpEffectPresenter = new LevelUpEffectPresenter(_levelUpEffectView, skillManager);
         }
         else
         {
-            Debug.LogError("SkillManagerが見つかりませんでした。");
+            Debug.LogError("[PlayerEffectInitializer] SkillManager or LevelUpEffectView is missing.", this);
         }
 
         if (player.TryGetComponent(out IModeController modeController))
         {
-            _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, modeController);
-            _weaponEffectPresenter = new WeaponEffectPresenter(_thunderEffectView, _warriorEffectView, modeController);
+            if (_thunderEffect != null)
+            {
+                _thunderEffectPresenter = new ThunderEffectPresenter(_thunderEffect, modeController);
+            }
+            else
+            {
+                Debug.LogError("[PlayerEffectInitializer] ThunderEffectView is missing.", this);
+            }
+
+            if (_thunderEffectView != null && _warriorEffectView != null)
+            {
+                _weaponEffectPresenter = new WeaponEffectPresenter(_thunderEffectView, _warriorEffectView, modeController);
+            }
+            else
+            {
+                Debug.LogError("[PlayerEffectInitializer] WeaponEffectView is missing.", this);
+            }
         }
         else
         {
-            Debug.LogError("PlayerにIModeControllerが見つかりませんでした。");
+            Debug.LogError("[PlayerEffectInitializer] IModeController is missing.", this);
         }
 
         if (player.TryGetComponent(out PlayerEffectReceiver effectReceiver))
         {
-            effectReceiver.Init(player, ServiceLocator.Get<EffectManager>());
+            if (ServiceLocator.TryGet(out EffectManager effectManager))
+            {
+                effectReceiver.Init(player, effectManager);
+            }
+            else
+            {
+                Debug.LogError("[PlayerEffectInitializer] EffectManager is missing.", this);
+            }
         }
     }
 

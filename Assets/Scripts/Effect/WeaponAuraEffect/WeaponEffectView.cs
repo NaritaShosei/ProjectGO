@@ -32,9 +32,21 @@ public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
+        if (_vfx == null) return;
+
         _vfx.playRate = scale;
     }
 
     private float _timeScale = 1f;
     [SerializeField] private VisualEffect _vfx;
+
+    private void Awake()
+    {
+        if (_vfx == null) _vfx = GetComponent<VisualEffect>();
+
+        if (_vfx == null)
+        {
+            Debug.LogError("[WeaponEffectView] VisualEffect is missing.", this);
+        }
+    }
 }

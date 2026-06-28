@@ -22,4 +22,7 @@ public interface IEnemyAnimationController
 
     /// <summary>死亡アニメーション終了の通知</summary>
     public void AnimEvent_DeadEnd();
+
+    /// <summary>ダウンアニメーション終了の通知 </summary>
+    public void AnimEvent_DownEnd();
 }
