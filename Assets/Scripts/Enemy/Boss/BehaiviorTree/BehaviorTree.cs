@@ -62,7 +62,9 @@ namespace BossEnemy.BehaviorTree
                 runningCondition = _currentNode.TryGetNextNode(ref _currentNode);
                 count++;
 
-                if(runningCondition == NodeCondition.Failure)
+                Debug.Log("ランニング：" + _currentNode.GetType().Name);
+
+                if (runningCondition == NodeCondition.Failure)
                 {
                     Debug.LogError("行動の選択を失敗しました");
                     Debug.LogError("現在のノード：" + _currentNode.GetType().Name);
@@ -88,8 +90,6 @@ namespace BossEnemy.BehaviorTree
         {
             if (nextNode == null) return;
             if (!nextNode.IsInit) nextNode.Init(this, _nodeRunningEndNotifier);
-
-            Debug.Log("現在のノード：" + nextNode.GetType().Name);
 
             _disposables.Clear();
 

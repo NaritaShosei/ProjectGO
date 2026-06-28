@@ -137,7 +137,7 @@ namespace BossEnemy.BehaviorTree
 
             SequenceNode downSequence = new(downSequenceChildren);
 
-            return _breakArmorNode = new(_downAction);
+            return _breakArmorNode = new(downSequence);
         }
 
         private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,

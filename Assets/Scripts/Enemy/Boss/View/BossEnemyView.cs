@@ -298,6 +298,8 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
     /// <summary> 死んだ際の処理 </summary>
     public void Dead()
     {
+        if (_isDead) return;
+
         _isDead = true;
         _bossEnemyAnimator.SetDead();
         OnDead.Invoke(this);

@@ -37,6 +37,8 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
 
         public override void OnEnter()
         {
+            Debug.Log("攻撃終了");
+
             // 攻撃開始直後に終了通知が来ても取りこぼさないよう、先に購読してから攻撃を開始する。
             _attack.OnAttackFinish += RunningEnd;
             _attack.AttackActionStart(_bossEnemyAttackData);
@@ -44,6 +46,7 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
 
         public override void OnExit()
         {
+            Debug.Log("攻撃終了");
             _attack.OnAttackFinish -= RunningEnd;
         }
 
@@ -203,6 +206,7 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
         {
             Debug.Log("EntryDownAction");
             _isDown = true;
+            _isRiseUp = false;
 
             _bossDown.Down();
 
@@ -220,21 +224,21 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
             // 前回のフレームからの経過時間を足していく
             _elapsedTime += Time.deltaTime;
 
-            if (_elapsedTime >= _downTime)
+            if (_elapsedTime >= _downTime && !_isRiseUp)
             {
                 Debug.Log("立ち上がりーよ");
                 _bossDown.RiseUp();
                 RunningEnd();
+                _isRiseUp = true;
             }
         }
 
         public override void OnExit()
         {
-            if(_elapsedTime < _downTime)
+            if(_elapsedTime < _downTime && !_isRiseUp)
             {
                 Debug.Log("立ち上がりーよ");
                 _bossDown.RiseUp();
-                RunningEnd();
             }
 
             _isDown = false;
@@ -252,6 +256,7 @@ namespace BossEnemy.BehaviorTree.Node.ActionNode
         private readonly float _allLegBreakDownTime;
 
         private bool _isDown = false;
+        private bool _isRiseUp = false;
     }
     #endregion
 
