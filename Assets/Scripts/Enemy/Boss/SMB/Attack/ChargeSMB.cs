@@ -5,6 +5,10 @@ namespace BossEnemy.SMB
 {
     public class ChargeSMB : AttackSMBBase
     {
+        protected override string AttackStartVoiceCueName => SoundCueNames.Boss.RushAttackVoice;
+
+        protected override string AttackCueName => SoundCueNames.Boss.RushAttack;
+
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateEnter(animator, stateInfo, layerIndex);

@@ -145,12 +145,16 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
 
         if(isBreakLeftLeg && isBreakrightLeg)
         {
+            PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownVoice);
+            PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownImpact);
             SetPosture(PostureType.SpreadEagled);
             return;
         }
 
         if (isBreakLeftLeg || isBreakrightLeg)
         {
+            PlayBossSE(SoundCueNames.Boss.OneLegBreakVoice);
+            PlayBossSE(SoundCueNames.Boss.OneLegBreakDownImpact);
             SetPosture(PostureType.Crouch);
         }
     }
@@ -350,6 +354,11 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
         if (_bossEnemyController == null) return;
 
         if (!_isDead) _bossEnemyController.OnUpdate();
+    }
+
+    private void PlayBossSE(string cueName)
+    {
+        Sound.PlaySE(gameObject, cueName, CueSheetType.Boss);
     }
 
     #region ボスの姿勢ごとの当たり判定
