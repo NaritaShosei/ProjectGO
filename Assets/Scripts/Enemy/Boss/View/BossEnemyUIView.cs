@@ -33,14 +33,15 @@ public class BossEnemyUIView : MonoBehaviour, IPoolable
         {
             _currentHPBar.gameObject.SetActive(false);
             _damageBar.gameObject.SetActive(false);
-            _takeDamageSequence.Kill();
+            _takeDamageSequence?.Kill();
             _takeDamageSequence = null;
         }
 
         /// <summary> ダメージを受けた際の処理 </summary>
         public async UniTask TakeDamage(int currentHP)
         {
-            _takeDamageSequence.Kill();
+            _takeDamageSequence?.Kill();
+            _takeDamageSequence = DOTween.Sequence();
 
             float endValue = (float)currentHP / (float)_maxHP;
 
