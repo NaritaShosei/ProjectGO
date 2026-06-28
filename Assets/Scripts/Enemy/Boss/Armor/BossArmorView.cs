@@ -19,6 +19,8 @@ public class BossArmorView : MonoBehaviour
     {
         if (_isBreak == false) return;
 
+
+
         this.gameObject.SetActive(true);
         _isBreak = false;
     }
@@ -27,6 +29,8 @@ public class BossArmorView : MonoBehaviour
     public async UniTask BreakArmer()
     {
         if (_isBreak == true) return;
+
+
 
         this.gameObject.SetActive(false);
         _isBreak = true;
@@ -37,4 +41,11 @@ public class BossArmorView : MonoBehaviour
     private ArmorAttachmentPoint _armorAttachmentPointsType;
 
     private bool _isBreak = false;
+
+    private EffectManager _effectManager;
+
+    private void Awake()
+    {
+        _effectManager = FindFirstObjectByType<EffectManager>();
+    }
 }
