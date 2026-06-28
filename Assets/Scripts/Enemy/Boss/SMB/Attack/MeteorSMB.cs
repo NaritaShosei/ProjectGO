@@ -4,8 +4,12 @@ namespace BossEnemy.SMB
 {
     public class MeteorSMB : AttackSMBBase
     {
+        protected override string AttackStartVoiceCueName => SoundCueNames.Boss.MeteorVoice;
+
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            _attackCount = 0;
+            _playedImpactCount = 0;
             base.OnStateEnter(animator, stateInfo, layerIndex);
         }
 
@@ -43,6 +47,12 @@ namespace BossEnemy.SMB
             // 攻撃開始
             if (_attackHitFired && _elapsedSeconds <= _attackData.AttackChargeTime + _attackData.AttackDuration)
             {
+                if (_playedImpactCount < _attackCount)
+                {
+                    PlayBossSE(SoundCueNames.Boss.MeteorImpact);
+                    _playedImpactCount++;
+                }
+
                 _effectManager.PlayEffect(_attackData.AnimParamName, _attackPos);
 
                 if (AttackHitDetectionSystem.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
@@ -66,6 +76,7 @@ namespace BossEnemy.SMB
         [SerializeField] private float _attackDistance;
 
         private int _attackCount = 0;
+        private int _playedImpactCount = 0;
         private const int _maxAttackCount = 4;
         Vector3 _attackPos = Vector3.zero;
 

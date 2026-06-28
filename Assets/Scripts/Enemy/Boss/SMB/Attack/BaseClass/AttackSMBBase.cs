@@ -30,6 +30,7 @@ namespace BossEnemy.SMB
             _isChargeCompleted = false;
             _attackHitFired = false;
             _isAttackAreaActive = false;
+            PlayBossSE(AttackStartVoiceCueName);
             Debug.Log("アニメーション合計時間：" + stateInfo.length);
         }
 
@@ -64,6 +65,7 @@ namespace BossEnemy.SMB
             // 攻撃
             if (!_isChargeCompleted && _attackData.AttackChargeTime < _elapsedSeconds)
             {
+                PlayBossSE(AttackCueName);
                 _attackHitFired = true;
                 _isChargeCompleted = true;
             }
@@ -93,6 +95,10 @@ namespace BossEnemy.SMB
 
         [SerializeField] protected float _attackAreaDespawnTime = 1.0f;
 
+        protected virtual string AttackStartVoiceCueName => null;
+
+        protected virtual string AttackCueName => null;
+
         protected AttackInformationHolder _informationHolder;
 
         protected BossEnemyAttackData _attackData;
@@ -120,6 +126,14 @@ namespace BossEnemy.SMB
         protected Transform _bossEnemyTransform;
 
         protected IPlayer _target;
+
+        protected void PlayBossSE(string cueName)
+        {
+            if (string.IsNullOrEmpty(cueName)) return;
+            if (_bossEnemyTransform == null) return;
+
+            Sound.PlaySE(_bossEnemyTransform.gameObject, cueName, CueSheetType.Boss);
+        }
     }
 
     public class AttackInformationHolder
