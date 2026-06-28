@@ -2,8 +2,6 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using Unity.AppUI.Core;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -603,7 +601,7 @@ public class PlayerMovement : MonoBehaviour
     /// 攻撃アニメーション終了時のハンドラー。
     /// </summary>
     private void HandleAttackEnd()
-    {   
+    {
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = null;
