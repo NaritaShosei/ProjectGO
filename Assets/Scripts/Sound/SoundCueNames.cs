@@ -73,7 +73,7 @@ public static class SoundCueNames
         public const string ChargePunchVoice = "BossChargePunchVoice";
         public const string RushAttackVoice = "BossRushAttackVoice";
         public const string RockEruptionVoice = "BossRockEruptionVoice";
-        public const string MeteorVoice = "BossMeteorVoice";
+        public const string MeteorVoice = "BossMeteorImpactVoice";
         public const string OneLegBreakVoice = "BossOneLegBreakVoice";
         public const string TwoLegBreakDownVoice = "BossTwoLegBreakDownVoice";
     }
