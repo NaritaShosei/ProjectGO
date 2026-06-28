@@ -9,6 +9,8 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private const float INPUT_THRESHOLD = 0.001f;
+    private const float ATTACK_MOVE_CAST_SKIN = 0.02f;
+    private const float ATTACK_MOVE_MIN_CAST_DISTANCE = 0.001f;
 
     public event Action OnStartDodgeInvincible;
     public event Action OnEndDodge;
@@ -464,12 +466,16 @@ public class PlayerMovement : MonoBehaviour
             Vector3 newPos = Vector3.Lerp(startPos, targetPos, curveValue);
             if (TryClampAttackMoveStopPosition(transform.position, newPos, request.Target, request.StopDistance, out var stoppedPos))
             {
-                _rb.MovePosition(stoppedPos);
+                MoveAttackPosition(stoppedPos, request.Target);
                 stoppedEarly = true;
                 break;
             }
 
-            _rb.MovePosition(newPos);
+            if (MoveAttackPosition(newPos, request.Target))
+            {
+                stoppedEarly = true;
+                break;
+            }
 
             elapsed += Time.fixedDeltaTime * _timeScale;
 
@@ -480,10 +486,75 @@ public class PlayerMovement : MonoBehaviour
         if (!stoppedEarly)
         {
             if (TryClampAttackMoveStopPosition(transform.position, targetPos, request.Target, request.StopDistance, out var stoppedPos))
-                _rb.MovePosition(stoppedPos);
+                MoveAttackPosition(stoppedPos, request.Target);
             else
-                _rb.MovePosition(targetPos);
+                MoveAttackPosition(targetPos, request.Target);
         }
+    }
+
+    private bool MoveAttackPosition(Vector3 candidatePos, Transform target)
+    {
+        // 攻撃移動は1フレームの移動量が大きいため、MovePosition前に進行方向へスイープして貫通を防ぐ。
+        if (TryResolveAttackMoveCollision(transform.position, candidatePos, target, out var resolvedPos))
+        {
+            _rb.MovePosition(resolvedPos);
+            return true;
+        }
+
+        _rb.MovePosition(candidatePos);
+        return false;
+    }
+
+    private bool TryResolveAttackMoveCollision(
+        Vector3 currentPos,
+        Vector3 candidatePos,
+        Transform target,
+        out Vector3 resolvedPos)
+    {
+        resolvedPos = candidatePos;
+
+        Vector3 delta = candidatePos - currentPos;
+        float distance = delta.magnitude;
+        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE) return false;
+
+        Vector3 direction = delta / distance;
+        // Rigidbody自身の形状を移動先まで投げ、途中の壁や障害物を検出する。
+        var hits = _rb.SweepTestAll(
+            direction,
+            distance + ATTACK_MOVE_CAST_SKIN,
+            QueryTriggerInteraction.Ignore);
+
+        if (hits == null || hits.Length == 0) return false;
+
+        float nearestDistance = float.MaxValue;
+        foreach (var hit in hits)
+        {
+            if (!hit.collider) continue;
+            if (ShouldIgnoreAttackMoveHit(hit.collider, target)) continue;
+            // 床や段差の上面で攻撃移動が止まりすぎないよう、上向きの接触面は無視する。
+            if (hit.normal.y > 0.5f) continue;
+
+            nearestDistance = Mathf.Min(nearestDistance, hit.distance);
+        }
+
+        if (nearestDistance == float.MaxValue) return false;
+
+        // めり込みを避けるため、衝突点より少し手前を最終位置にする。
+        float safeDistance = Mathf.Max(0f, nearestDistance - ATTACK_MOVE_CAST_SKIN);
+        resolvedPos = currentPos + direction * Mathf.Min(safeDistance, distance);
+        return true;
+    }
+
+    private bool ShouldIgnoreAttackMoveHit(Collider hitCollider, Transform target)
+    {
+        if (hitCollider.isTrigger) return true;
+        if (!target) return false;
+
+        // ホーミング対象の敵コライダーでは止めず、壁などの環境コライダーだけで止める。
+        Transform hitTransform = hitCollider.transform;
+        return hitTransform == target ||
+               hitTransform.IsChildOf(target) ||
+               target.IsChildOf(hitTransform);
     }
 
     private bool TryClampAttackMoveStopPosition(
