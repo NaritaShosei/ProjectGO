@@ -45,6 +45,7 @@ public class MobAndSkillState : ISequenceState
 
         // 入力有効化
         context.InputHandler?.EnableInput(true);
+        HideCursor();
 
         // 最初のウェーブをスポーン
         StartNextWave(context);
@@ -101,6 +102,7 @@ public class MobAndSkillState : ISequenceState
         _sequenceStatusPresenter = null;
 
         context.InputHandler?.EnableInput(false);
+        ShowCursor();
     }
 
     #endregion
@@ -301,6 +303,7 @@ public class MobAndSkillState : ISequenceState
         // 世界を止める
         _mobBattleTimer.PauseTimer();
         context.InputHandler?.EnableInput(false);
+        ShowCursor();
 
         // スキル選択タイマー開始
         if (_skillSelectTimer != null)
@@ -345,6 +348,7 @@ public class MobAndSkillState : ISequenceState
         // 世界を再開
         _mobBattleTimer.ResumeTimer();
         context.InputHandler?.EnableInput(true);
+        HideCursor();
 
         _subPhase = SubPhase.Battle;
 
@@ -356,6 +360,17 @@ public class MobAndSkillState : ISequenceState
     {
         _skillSelectPresenter?.AutoSelect();
         EndSkillSelect(context);
+    }
+
+    private static void HideCursor()
+    {
+        Cursor.visible = false;
+    }
+
+    private static void ShowCursor()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     #endregion
