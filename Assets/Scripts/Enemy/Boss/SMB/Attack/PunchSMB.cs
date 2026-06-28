@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class PunchSMB : AttackSMBBase
 {
+    protected override string AttackStartVoiceCueName => SoundCueNames.Boss.HandSweepVoice;
+
+    protected override string AttackCueName => SoundCueNames.Boss.HandSweep;
+
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         base.OnStateEnter(animator, stateInfo, layerIndex);
