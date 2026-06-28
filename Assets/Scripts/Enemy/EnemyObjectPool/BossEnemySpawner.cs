@@ -28,6 +28,7 @@ public class BossEnemySpawner : MonoBehaviour
 
         enemy.InjectServices(_services);
         enemy.SetPosition(position);
+        enemy.SetSpawner(_attackHitAreaSpawner);
 
         enemy.BossEnemyController.SetView(enemy, bossEnemyUIView);
 
@@ -44,6 +45,9 @@ public class BossEnemySpawner : MonoBehaviour
 
     [Header("最初のBossEnemyの生成数")]
     [SerializeField] private int _preloadCount = 1;
+
+    [Header("BossEnemyが使用するSpawner")]
+    [SerializeField] private AttackHitAreaSpawner _attackHitAreaSpawner;
 
     private EnemyServices _services;
     private GenericObjectPool<BossEnemyView> _bossEnemyObjectPool;
