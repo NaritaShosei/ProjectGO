@@ -106,6 +106,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
         ArmorAttachmentPoint armorAttachmentPoint = ArmorAttachmentPoint.None;
         Vector3 vector3 = Vector3.zero;
         bool isWeekPoint = false;
+        bool isHitArmor = false;
         foreach (var bossParts in _activeBossEnemyPartsView)
         {
             float playerDistance = _services.PlayerInformationService.ToPlayerDistance(bossParts.PartsPosition);
@@ -120,6 +121,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
 
                 if (bossParts.Armor != null && !bossParts.Armor.IsBreak)
                 {
+                    isHitArmor = true;
                     isGuardArmor = true;
                     armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
                 }
@@ -145,6 +147,15 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
                 }
             }
         }
+
+        HitResult result = new HitResult()
+        {
+            IsKill = false,
+            IsArmorBreak = false,
+            IsWeakPoint = isWeekPoint,
+            IsArmorHit = isHitArmor,
+        };
+        context.OnHitResult?.Invoke(result);
 
         damagePopupViewModel = new(DamageSystem.CalculateDamage(context, default), isWeekPoint, true, vector3);
         OnDamageDealt?.Invoke(damagePopupViewModel);
