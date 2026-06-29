@@ -8,7 +8,7 @@ namespace BossEnemy.Model.System
     {
         public static int GetRandamSelectAttackDataID(AttackDataSelectionPool selectionPool, List<int> coolTimeAttackList)
         {
-            if (selectionPool.SelectionPool == null || selectionPool.SelectionPool.Length == 0) return default;
+            if (selectionPool == null || selectionPool.SelectionPool.Length == 0 || selectionPool.SelectionPool == null) return default;
 
             // すべての攻撃の確率（重み）の合計を計算する
             float totalChance = 0f;

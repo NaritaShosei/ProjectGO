@@ -75,7 +75,10 @@ namespace BossEnemy.View
 
         public void OnGet() { }
 
-        public void OnRelease() { }
+        public void OnRelease()
+        {
+            _disposable?.Dispose();
+        }
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
         public void PhaseChange(BossEnemyData bossEnemyData, int currentPhase)

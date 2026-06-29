@@ -12,6 +12,8 @@ namespace BossEnemy.Infrastructure.Repository
     {
         public void Init(string textAsset)
         {
+            _attackDataDict.Clear();
+
             if (textAsset == null || string.IsNullOrEmpty(textAsset))
             {
                 Debug.LogError("Boss attack CSV is not set.");

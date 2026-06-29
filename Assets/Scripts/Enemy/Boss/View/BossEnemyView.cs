@@ -45,7 +45,7 @@ namespace BossEnemy.View
         public IEnemyConditionController ConditionController { get; }
 
         /// <summary>EnemyAnimator への参照</summary>
-        public IEnemyAnimator EnemyAnimator { get; }
+        public IEnemyAnimator EnemyAnimator => null;
 
         /// <summary> 自身のTransformへの参照 </summary>
         public Transform Self => transform;
@@ -76,6 +76,7 @@ namespace BossEnemy.View
         /// <summary> 初期化する </summary>
         public void Init()
         {
+            _isDead = false;
             _isLockable = true;
             SetPosture(PostureType.Stand);
 

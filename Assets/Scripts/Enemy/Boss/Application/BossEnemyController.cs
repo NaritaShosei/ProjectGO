@@ -32,6 +32,9 @@ namespace BossEnemy.Application
                 return;
             }
 
+            _phaseChangeEventDisposables = new();
+            _deadEventDisposables = new();
+
             // Animationによるイベントの通知クラスを取得
             _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
 

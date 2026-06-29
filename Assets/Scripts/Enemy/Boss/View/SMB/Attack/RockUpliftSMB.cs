@@ -48,11 +48,16 @@ namespace BossEnemy.View.SMB
             }
         }
 
-        [SerializeField] private int _attackInterval;
+        [Header("攻撃の間隔を開けるフレーム数")]
+        [SerializeField] private int _attackIntervalFlame;
+
+        [Header("攻撃の範囲エフェクトの生成の高さ")]
+        [SerializeField] private float _attackAreaCircleGeneratePosY = 0.2f;
+
+        [Header("攻撃の回数")]
+        [SerializeField] private int _maxAttackCount = 4;
 
         private CancellationTokenSource _cts;
-        private const int _maxAttackCount = 4;
-        private float _attackAreaCircleGeneratePosY = 0f;
         Vector3 _attackPos = Vector3.zero;
 
         private EffectManager _effectManager;
@@ -82,7 +87,7 @@ namespace BossEnemy.View.SMB
                     _attackHitFired = false;
                 }
 
-                await UniTask.Delay(_attackInterval);
+                await UniTask.Delay(_attackIntervalFlame);
             }
         }
 

@@ -36,8 +36,11 @@ namespace BossEnemy.Infrastructure
                         hitArea.gameObject.SetActive(true);
                         return hitArea;
                     }
+
                     hitArea = Instantiate(_circleHitEffect);
-                    hitArea.gameObject.transform.SetParent(gameObject.transform, true);
+
+                    if (hitArea != null)
+                        hitArea.gameObject.transform.SetParent(gameObject.transform, true);
                     return hitArea;
             }
 

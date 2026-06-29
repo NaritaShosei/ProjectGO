@@ -258,6 +258,12 @@ namespace BossEnemy.Model.System.Logic
         public void TakeDamage(DamageContext damageContext, BodysDefensesType hitPartsType, bool isHitArmor,
             ArmorAttachmentPointType attachmentPoints = ArmorAttachmentPointType.None)
         {
+            if(isHitArmor && attachmentPoints == ArmorAttachmentPointType.None)
+            {
+                Debug.LogError("Armorの装備箇所がわかりません");
+                return;
+            }
+
             int defense = 0;
             int damage = 0;
 
