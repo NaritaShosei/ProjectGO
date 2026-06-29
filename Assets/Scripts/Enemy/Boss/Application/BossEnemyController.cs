@@ -36,7 +36,6 @@ namespace BossEnemy.Application
             _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
 
             // BossEnemyのマスターデータを取得
-            _bossEnemyMasterDataRepository = new();
             _bossEnemyMasterDataRepository.Init(_csvBossEnemyMasterData.text);
             _bossEnemyMasterData = _bossEnemyMasterDataRepository.GetData(_id);
 
@@ -67,7 +66,7 @@ namespace BossEnemy.Application
             _phaseChange.OnFinishAllPhase += _bossEnemyBehaviorTree.HandleDead;
 
             // 攻撃データのリポジトリの初期化
-            _attackDataRepositry = new(_csvBossEnemyMasterData);
+            _attackDataRepositry.Init(_csvBossEnemyMasterData.text);
 
             RegisterPhaseChangeEventAction();
             RegisterBossDataChangeEventAction();
@@ -104,6 +103,14 @@ namespace BossEnemy.Application
         [SerializeField, Tooltip("生成するBossのID")]
         private int _id = 1;
 
+        [Header("各種リポジトリインターフェース")]
+
+        [SerializeReference, SubclassSelector]
+        private IBossEnemyAttackDataRepository _attackDataRepositry;
+
+        [SerializeReference, SubclassSelector]
+        private IBossEnemyMasterDataRepository _bossEnemyMasterDataRepository;
+
         private BossEnemyMasterData _bossEnemyMasterData = null;
 
         // BossEnemyの各種View
@@ -116,10 +123,6 @@ namespace BossEnemy.Application
         private Damage _takeDamage = null;
         private PhaseChange _phaseChange = null;
         private BossDown _bossDown = null;
-
-        // 各種リポジトリ
-        private BossEnemyAttackDataRepository _attackDataRepositry = null;
-        private BossEnemyMasterDataRepository _bossEnemyMasterDataRepository = null;
 
         // 現在のPhaseのBossEnemyData
         private ReactiveProperty<BossEnemyData> _currentPhaseBossEnemyData = new();

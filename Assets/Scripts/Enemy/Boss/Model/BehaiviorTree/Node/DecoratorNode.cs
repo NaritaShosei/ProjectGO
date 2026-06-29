@@ -3,11 +3,10 @@ using UniRx;
 using UnityEngine;
 
 #region BossEnemy関連
-using BossEnemy.Model.BehaviorTree;
+using BossEnemy.Model.Interface;
 using BossEnemy.Data;
 using BossEnemy.Enum;
 using BossEnemy.Model.System;
-using BossEnemy.Infrastructure.Repository;
 #endregion
 
 namespace BossEnemy.Model.BehaviorTree
@@ -48,7 +47,7 @@ namespace BossEnemy.Model.BehaviorTree
     {
         public AttackSelect(ITreeNode child, 
             AttackDataSelectionPool bossEnemyAttackField, 
-            BossEnemyAttackDataRepository bossEnemyAttackDataRepositry, 
+            IBossEnemyAttackDataRepository bossEnemyAttackDataRepositry, 
             AttackCoolTimer bossEnemyAttackCoolTimer,
             AttackAction attackNode, 
             TargetChaseAction targetChaseAction): base (child)
@@ -89,7 +88,7 @@ namespace BossEnemy.Model.BehaviorTree
 
         private readonly AttackCoolTimer _attackCoolTimer;
 
-        private readonly BossEnemyAttackDataRepository _bossEnemyAttackDataRepositry;
+        private readonly IBossEnemyAttackDataRepository _bossEnemyAttackDataRepositry;
 
         private readonly AttackDataSelectionPool _bossEnemyAttackField;
 

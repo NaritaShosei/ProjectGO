@@ -255,7 +255,7 @@ namespace BossEnemy.Model.System.Logic
         }
 
         /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
-        public void TakeDamage(DamageContext damageContext, PartsType hitPartsType, bool isHitArmor,
+        public void TakeDamage(DamageContext damageContext, BodysDefensesType hitPartsType, bool isHitArmor,
             ArmorAttachmentPointType attachmentPoints = ArmorAttachmentPointType.None)
         {
             int defense = 0;
@@ -269,8 +269,8 @@ namespace BossEnemy.Model.System.Logic
                 defense = DamageSystem.GetHitPartsDefense(hitPartsType, _currentBossEnemyData);
 
                 // Damageを計算
-                if (hitPartsType == PartsType.VitalPoint
-                    || hitPartsType == PartsType.WeekPoint)
+                if (hitPartsType == BodysDefensesType.VitalPoint
+                    || hitPartsType == BodysDefensesType.WeekPoint)
                 {
                     // 弱点への攻撃ならPlayerもModeによるダメージの減増を行う
                     damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Flesh);

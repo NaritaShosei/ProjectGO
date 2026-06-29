@@ -48,9 +48,7 @@ namespace BossEnemy.View.SMB
             }
         }
 
-        [SerializeField] private EffectBase _effectPrefab;
-
-        [SerializeField] private int _consecutiveAttackInterval;
+        [SerializeField] private int _attackInterval;
 
         private CancellationTokenSource _cts;
         private const int _maxAttackCount = 4;
@@ -84,7 +82,7 @@ namespace BossEnemy.View.SMB
                     _attackHitFired = false;
                 }
 
-                await UniTask.Delay(_consecutiveAttackInterval);
+                await UniTask.Delay(_attackInterval);
             }
         }
 

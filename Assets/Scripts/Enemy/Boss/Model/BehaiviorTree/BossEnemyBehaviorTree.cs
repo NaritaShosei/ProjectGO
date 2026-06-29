@@ -4,7 +4,7 @@ using UniRx;
 # region BossEnemy関連のusing
 using BossEnemy.Data;
 using BossEnemy.Enum;
-using BossEnemy.Infrastructure.Repository;
+using BossEnemy.Model.Interface;
 using BossEnemy.Model.System;
 using BossEnemy.Model.System.Logic;
 # endregion
@@ -32,7 +32,7 @@ namespace BossEnemy.Model.BehaviorTree
         }
 
         public void HandlePhaseChanged(BossEnemyData bossEnemyData,
-            BossEnemyAttackDataRepository attackDataRepositry,
+            IBossEnemyAttackDataRepository attackDataRepositry,
             IPlayerInformationService playerInformationService)
         {
             if(_behaviorController != null) _behaviorController.StopRunning();
@@ -141,7 +141,7 @@ namespace BossEnemy.Model.BehaviorTree
         }
 
         private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,
-            BossEnemyAttackDataRepository dataRepositry,
+            IBossEnemyAttackDataRepository dataRepositry,
             IPlayerInformationService playerInformationService)
         {
             // ---攻撃シーケンスアクションノード↓---

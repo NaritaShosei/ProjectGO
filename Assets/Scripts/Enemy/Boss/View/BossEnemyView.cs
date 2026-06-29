@@ -31,7 +31,7 @@ namespace BossEnemy.View
         public event Action<IEnemy> OnDamaged;
 
         /// <summary>ダメージを受けたときに発火するイベント</summary>
-        public event Action<DamageContext, PartsType, bool, ArmorAttachmentPointType> OnTakeDamage;
+        public event Action<DamageContext, BodysDefensesType, bool, ArmorAttachmentPointType> OnTakeDamage;
 
         /// <summary>死亡時に発火するイベント</summary>
         public event Action<IEnemy> OnDead;
@@ -77,7 +77,6 @@ namespace BossEnemy.View
         public void Init()
         {
             _isLockable = true;
-            foreach (var detection in _collisionDetections) detection.Init();
             SetPosture(PostureType.Stand);
 
             foreach (var parts in _activeBossEnemyPartsView)
@@ -125,23 +124,22 @@ namespace BossEnemy.View
                         isGuardArmor = true;
                         armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
                     }
-
-                    vector3 = bossParts.Armor.gameObject.transform.position;
+                    vector3 = bossParts.PartsPosition; 
 
                     switch (bossParts.PartsType)
                     {
-                        case PartsType.None:
+                        case BodysDefensesType.None:
                             break;
-                        case PartsType.Normal:
+                        case BodysDefensesType.Normal:
                             isWeekPoint = false;
                             break;
-                        case PartsType.Hard:
+                        case BodysDefensesType.Hard:
                             isWeekPoint = false;
                             break;
-                        case PartsType.WeekPoint:
+                        case BodysDefensesType.WeekPoint:
                             isWeekPoint = true;
                             break;
-                        case PartsType.VitalPoint:
+                        case BodysDefensesType.VitalPoint:
                             isWeekPoint = true;
                             break;
                     }
@@ -257,14 +255,9 @@ namespace BossEnemy.View
             {
                 if (collision.CollisionDetectionPostureType == postureType)
                 {
-                    _activeBossCollider = collision.BossCollider;
-                    _activeBossCollider.enabled = true;
-
+                    _bossCollider.size = collision.BossColliderSize;
+                    _bossCollider.center = collision.BossColliderCenter;
                     _activeBossEnemyPartsView = collision.BossEnemyPartsView;
-                }
-                else
-                {
-                    collision.BossCollider.enabled = false;
                 }
             }
         }
@@ -272,7 +265,7 @@ namespace BossEnemy.View
         /// <summary>ColliderのIsTriggerをセットする</summary>
         public void SetIsTrigger(bool isTrigger)
         {
-            _activeBossCollider.isTrigger = isTrigger;
+            _bossCollider.isTrigger = isTrigger;
         }
 
         /// <summary>位置をセットする</summary>
@@ -353,7 +346,7 @@ namespace BossEnemy.View
         private BossEnemyController _bossEnemyController;
 
         [Header("ボスの当たり判定")]
-        [SerializeField] private CollisionDetectionByPose[] _collisionDetections;
+        [SerializeField] private CollisionInformation[] _collisionDetections;
 
         [Header("ボスエネミーの各所鎧のView")]
         [SerializeField] private BossArmorView[] _bossArmorViews;
@@ -363,6 +356,9 @@ namespace BossEnemy.View
 
         [Header("ボスエネミーのAnimator")]
         [SerializeField] private Animator _animator;
+
+        [Header("ボスエネミーの当たり判定")]
+        [SerializeField] private BoxCollider _bossCollider;
 
         [Header("ボスエネミーのAnimationEventReceiver")]
         [SerializeReference, SubclassSelector]
@@ -382,7 +378,6 @@ namespace BossEnemy.View
         private ReactiveProperty<float> _timeScale = new(1.0f);
 
         private BossEnemyPartsView[] _activeBossEnemyPartsView;
-        private BoxCollider _activeBossCollider;
 
         private void Awake()
         {
@@ -401,26 +396,24 @@ namespace BossEnemy.View
             Sound.PlaySE(gameObject, cueName, CueSheetType.Boss);
         }
 
-        #region ボスの姿勢ごとの当たり判定
+        #region ボスの姿勢ごとの当たり判定情報
         [Serializable]
-        public struct CollisionDetectionByPose
+        public struct CollisionInformation
         {
             public PostureType CollisionDetectionPostureType => _postureType;
 
-            public BoxCollider BossCollider => _bossCollider;
+            public Vector3 BossColliderSize => _size;
+
+            public Vector3 BossColliderCenter => _center;
 
             public BossEnemyPartsView[] BossEnemyPartsView => _bossEnemyPartsView;
-
-            public void Init()
-            {
-                _bossCollider.enabled = false;
-            }
 
             [Header("姿勢")]
             [SerializeField] private PostureType _postureType;
 
-            [Header("当たり判定のCollider")]
-            [SerializeField] private BoxCollider _bossCollider;
+            [Header("当たり判定のCollider情報")]
+            [SerializeField] private Vector3 _center;
+            [SerializeField] private Vector3 _size;
 
             [Header("各部位")]
             [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
@@ -454,7 +447,7 @@ namespace BossEnemy.View
             /// <summary>
             /// このパーツの硬さ(肉質)
             /// </summary>
-            public PartsType PartsType => _bossEnemyPartsType;
+            public BodysDefensesType PartsType => _bossEnemyPartsType;
 
             public void Init(BossEnemyView bossEnemyView)
             {
@@ -470,7 +463,7 @@ namespace BossEnemy.View
             [SerializeField] private BossArmorView _thisPartsArmer = null;
 
             [Header("このPartsの硬さ(肉質)")]
-            [SerializeField] private PartsType _bossEnemyPartsType;
+            [SerializeField] private BodysDefensesType _bossEnemyPartsType;
 
             private BossEnemyView _bossEnemyView = null;
         }

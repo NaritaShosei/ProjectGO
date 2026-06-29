@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using UniRx;
 using UnityEngine;
@@ -12,6 +13,13 @@ namespace BossEnemy.Model.BehaviorTree
         Running
     }
 
+    /// <summary> BehaviorTreeのもととなるインターフェース </summary>
+    public interface IBehaviorTree
+    {
+        
+    }
+
+
     #region 実行中の実行終了時に実行終了を通知するクラス
     public class NodeRunningEndNotifier
     {
@@ -25,6 +33,7 @@ namespace BossEnemy.Model.BehaviorTree
     #endregion
 
     #region TreeのNode遷移を行い操作するクラス
+
     /// <summary>
     /// BehaviorTreeの操作クラス
     /// </summary>

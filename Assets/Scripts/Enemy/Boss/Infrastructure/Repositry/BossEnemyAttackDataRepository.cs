@@ -4,14 +4,15 @@ using UnityEngine;
 
 // BossEnemy関連
 using BossEnemy.Data;
+using BossEnemy.Model.Interface;
 
 namespace BossEnemy.Infrastructure.Repository
 {
-    public class BossEnemyAttackDataRepository
+    public class BossEnemyAttackDataRepository : IBossEnemyAttackDataRepository
     {
-        public BossEnemyAttackDataRepository(TextAsset textAsset)
+        public void Init(string textAsset)
         {
-            if (textAsset == null || string.IsNullOrEmpty(textAsset.text))
+            if (textAsset == null || string.IsNullOrEmpty(textAsset))
             {
                 Debug.LogError("Boss attack CSV is not set.");
                 _bossMasterData = new string[0, 0];
@@ -19,7 +20,7 @@ namespace BossEnemy.Infrastructure.Repository
                 return;
             }
 
-            _bossMasterData = CSVDateLoader.ParseCsv(textAsset.text);
+            _bossMasterData = CSVDateLoader.ParseCsv(textAsset);
             _attackDataArrayStartNum = -1;
 
 
@@ -84,9 +85,9 @@ namespace BossEnemy.Infrastructure.Repository
 
         private Dictionary<int, BossEnemyAttackData> _attackDataDict = new();
 
-        private readonly string[,] _bossMasterData;
+        private string[,] _bossMasterData;
 
-        private readonly int _attackDataArrayStartNum;
+        private int _attackDataArrayStartNum;
 
         private const string _attackDataArrayStartKey = "AttackData";
 

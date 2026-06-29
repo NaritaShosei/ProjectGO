@@ -4,11 +4,12 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 using BossEnemy.Data;
+using BossEnemy.Model.Interface;
 
 
 namespace BossEnemy.Infrastructure.Repository
 {
-    public class BossEnemyMasterDataRepository
+    public class BossEnemyMasterDataRepository : IBossEnemyMasterDataRepository
     {
         // ボスのマスターデータをキャッシュする辞書 (Key: ボスID, Value: 生成されたMasterData)
         private readonly Dictionary<int, BossEnemyMasterData> _masterDataCache = new Dictionary<int, BossEnemyMasterData>();

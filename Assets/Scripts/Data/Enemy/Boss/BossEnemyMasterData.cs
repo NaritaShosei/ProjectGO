@@ -8,7 +8,7 @@ using UnityEngine;
 namespace BossEnemy.Data
 {
     /// <summary> ボスエネミーを構成する各パーツの種類 </summary>
-    public enum PartsType
+    public enum BodysDefensesType
     {
         None, // default値
         Hard, // 硬い
