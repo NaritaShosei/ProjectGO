@@ -11,12 +11,12 @@ public class CSVDataCreator : EditorWindow
 {
     private string _gasUrl = "";
     private string _scriptableObjectName = "";
-    private string _dataSaveFilePath = "";
     private string _outPutCsvFilePath = "";
 
     private DataType _dataType;
 
     private int _spaceSize = 10;
+    private const string _dataSaveFilePath = "Assets/Data/CSV";
 
     [MenuItem("Tools/GenerateCSVData")]
     public static void ShowWindow()
@@ -35,11 +35,6 @@ public class CSVDataCreator : EditorWindow
         EditorGUILayout.Space(_spaceSize);
         EditorGUILayout.LabelField("生成するDataのGASURL");
         _gasUrl = EditorGUILayout.TextField("GASURL", _gasUrl);
-
-        //生成するDataを選択
-        EditorGUILayout.Space(_spaceSize);
-        EditorGUILayout.LabelField("データの生成先のPath");
-        _dataSaveFilePath = EditorGUILayout.TextField("DataSaveFilePath", _dataSaveFilePath);
 
         // GASから取得したCSVデータを保存するファイル名のパスを設定
         _outPutCsvFilePath = _dataSaveFilePath + "/" + _scriptableObjectName + "CSV" + ".csv";
