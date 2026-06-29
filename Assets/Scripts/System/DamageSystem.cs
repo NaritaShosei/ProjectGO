@@ -1,5 +1,8 @@
-using BossEnemy.Data;
 using UnityEngine;
+
+// Boss関連
+using BossEnemy.Enum;
+using BossEnemy.Data;
 
 public class DamageSystem
 {

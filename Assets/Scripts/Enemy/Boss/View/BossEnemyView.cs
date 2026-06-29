@@ -1,11 +1,13 @@
-using BossEnemy.Data;
-using BossEnemy.SMB;
 using Cysharp.Threading.Tasks;
 using System;
-using System.Collections.Generic;
-using System.Threading;
 using UniRx;
 using UnityEngine;
+
+#region BossEnemy関連
+using BossEnemy.Enum;
+using BossEnemy.Data;
+using BossEnemy.SMB;
+#endregion
 
 public enum PostureType
 {
@@ -365,7 +367,7 @@ public class BossEnemyView : MonoBehaviour, IEnemy, IPoolable, ISpeedChange
     [SerializeField] private Animator _animator;
 
     private BossEnemyAnimator _bossEnemyAnimator;
-    private BossEnemyAnimationEventReceiver _bossEnemyAnimationEventReceiver = new();
+    private AnimationEventReceiver _bossEnemyAnimationEventReceiver = new();
     private AttackInformationHolder _attackInformationHolder = new();
 
     private EnemyServices _services;
