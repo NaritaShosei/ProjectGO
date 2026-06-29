@@ -149,6 +149,14 @@ MonoBehaviour:
   - {fileID: 4742455164658953048}
   _targetCenterTransform: {fileID: 8919724968825436532}
   _animator: {fileID: 3505442431232840939}
+  _bossEnemyAnimationEventReceiver:
+    rid: 8435113030945079715
+  references:
+    version: 2
+    RefIds:
+    - rid: 8435113030945079715
+      type: {class: AnimationEventReceiver, ns: BossEnemy.Infrastructure, asm: Assembly-CSharp}
+      data: 
 --- !u!65 &5926199642172762860
 BoxCollider:
   m_ObjectHideFlags: 0

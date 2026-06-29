@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BossEnemy.Data.Repositry
+// BossEnemy関連
+using BossEnemy.Data;
+
+namespace BossEnemy.Infrastructure.Repository
 {
-    public class BossEnemyAttackDataRepositry
+    public class BossEnemyAttackDataRepository
     {
-        public BossEnemyAttackDataRepositry(TextAsset textAsset)
+        public BossEnemyAttackDataRepository(TextAsset textAsset)
         {
             if (textAsset == null || string.IsNullOrEmpty(textAsset.text))
             {

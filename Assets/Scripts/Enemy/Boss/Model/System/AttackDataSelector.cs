@@ -2,42 +2,46 @@ using BossEnemy.Data;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackDataSelector
-{ 
-    public static int GetRandamSelectAttackDataID(BossEnemyAttackField bossEnemyAttackField, List<int> coolTimeAttackList)
+namespace BossEnemy.Model.System
+{
+    public class AttackDataSelector
     {
-        if (bossEnemyAttackField.AttackField == null || bossEnemyAttackField.AttackField.Length == 0) return default;
-
-        // すべての攻撃の確率（重み）の合計を計算する
-        float totalChance = 0f;
-        foreach (var attack in bossEnemyAttackField.AttackField)
+        public static int GetRandamSelectAttackDataID(AttackDataSelectionPool selectionPool, List<int> coolTimeAttackList)
         {
-            if (coolTimeAttackList.Contains(attack.ID)) continue;
-            if (attack.ActivationRate <= 0f) continue;
+            if (selectionPool.SelectionPool == null || selectionPool.SelectionPool.Length == 0) return default;
 
-            totalChance += attack.ActivationRate;
-        }
-
-        if (totalChance <= 0f) return default;
-
-        // 0 から 合計値 までの間でランダムな値を1つ取得
-        float randomPoint = Random.Range(0f, totalChance);
-
-        // 各攻撃の確率を足しながら、ランダム値を超えた瞬間の一手を決定
-        float currentSum = 0f;
-        foreach (var attack in bossEnemyAttackField.AttackField)
-        {
-            if (coolTimeAttackList.Contains(attack.ID)) continue;
-            if (attack.ActivationRate <= 0f) continue;
-
-            currentSum += attack.ActivationRate;
-            if (randomPoint <= currentSum)
+            // すべての攻撃の確率（重み）の合計を計算する
+            float totalChance = 0f;
+            foreach (var attack in selectionPool.SelectionPool)
             {
-                return attack.ID;
-            }
-        }
+                if (coolTimeAttackList.Contains(attack.ID)) continue;
+                if (attack.ActivationRate <= 0f) continue;
 
-        // 基本的にはここには到達しませんが、安全のため最後の要素を返す
-        return default;
+                totalChance += attack.ActivationRate;
+            }
+
+            if (totalChance <= 0f) return default;
+
+            // 0 から 合計値 までの間でランダムな値を1つ取得
+            float randomPoint = Random.Range(0f, totalChance);
+
+            // 各攻撃の確率を足しながら、ランダム値を超えた瞬間の一手を決定
+            float currentSum = 0f;
+            foreach (var attack in selectionPool.SelectionPool)
+            {
+                if (coolTimeAttackList.Contains(attack.ID)) continue;
+                if (attack.ActivationRate <= 0f) continue;
+
+                currentSum += attack.ActivationRate;
+                if (randomPoint <= currentSum)
+                {
+                    return attack.ID;
+                }
+            }
+
+            // 基本的にはここには到達しませんが、安全のため最後の要素を返す
+            return default;
+        }
     }
 }
+

@@ -1,7 +1,7 @@
-using BossEnemy.SMB;
+using BossEnemy.View;
 using UnityEngine;
 
-namespace BossEnemy.SMB
+namespace BossEnemy.View.SMB
 {
     public class StompingLeftSMB : AttackSMBBase
     {

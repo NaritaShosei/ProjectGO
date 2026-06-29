@@ -4,20 +4,23 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class AttackCoolTimer
+namespace BossEnemy.Model.System
 {
-    public List<int> AttackCoolTimeList => _coolTimeList;
-
-    public async UniTask StartCoolTime(int id, float coolTime)
+    public class AttackCoolTimer
     {
-        if (_coolTimeList.Contains(id)) return;
+        public List<int> AttackCoolTimeList => _coolTimeList;
 
-        _coolTimeList.Add(id);
+        public async UniTask StartCoolTime(int id, float coolTime)
+        {
+            if (_coolTimeList.Contains(id)) return;
 
-        await UniTask.Delay(TimeSpan.FromSeconds(coolTime), delayTiming: PlayerLoopTiming.Update);
+            _coolTimeList.Add(id);
 
-        _coolTimeList.Remove(id);
+            await UniTask.Delay(TimeSpan.FromSeconds(coolTime), delayTiming: PlayerLoopTiming.Update);
+
+            _coolTimeList.Remove(id);
+        }
+
+        private List<int> _coolTimeList = new();
     }
-
-    private List<int> _coolTimeList  = new();
 }

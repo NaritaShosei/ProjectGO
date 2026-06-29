@@ -1,14 +1,14 @@
 using UniRx;
 using UnityEngine;
 using System;
+using Cysharp.Threading.Tasks;
 
 # region BossEnemy関連using
 using BossEnemy.Data;
 using BossEnemy.Enum;
-using Cysharp.Threading.Tasks;
 #endregion
 
-namespace BossEnemy.Model.CoreLogic
+namespace BossEnemy.Model.System.Logic
 {
     #region 攻撃処理
     public class BossAttack
@@ -256,7 +256,7 @@ namespace BossEnemy.Model.CoreLogic
 
         /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
         public void TakeDamage(DamageContext damageContext, PartsType hitPartsType, bool isHitArmor,
-            ArmorAttachmentPoint attachmentPoints = ArmorAttachmentPoint.None)
+            ArmorAttachmentPointType attachmentPoints = ArmorAttachmentPointType.None)
         {
             int defense = 0;
             int damage = 0;
@@ -288,16 +288,16 @@ namespace BossEnemy.Model.CoreLogic
 
                 switch (attachmentPoints)
                 {
-                    case ArmorAttachmentPoint.LeftArm:
+                    case ArmorAttachmentPointType.LeftArm:
                         _currentBossEnemyData.LeftArmArmer.Damage(damage);
                         break;
-                    case ArmorAttachmentPoint.RightArm:
+                    case ArmorAttachmentPointType.RightArm:
                         _currentBossEnemyData.RightArmArmer.Damage(damage);
                         break;
-                    case ArmorAttachmentPoint.LeftLeg:
+                    case ArmorAttachmentPointType.LeftLeg:
                         _currentBossEnemyData.LeftLegArmer.Damage(damage);
                         break;
-                    case ArmorAttachmentPoint.RightLeg:
+                    case ArmorAttachmentPointType.RightLeg:
                         _currentBossEnemyData.RightLegArmer.Damage(damage);
                         break;
                 }

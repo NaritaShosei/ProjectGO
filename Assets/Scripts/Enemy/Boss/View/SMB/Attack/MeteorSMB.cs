@@ -1,6 +1,9 @@
-using BossEnemy.SMB;
 using UnityEngine;
-namespace BossEnemy.SMB
+
+//BossEnemy関連
+using BossEnemy.Model.System;
+
+namespace BossEnemy.View.SMB
 {
     public class MeteorSMB : AttackSMBBase
     {
@@ -55,7 +58,7 @@ namespace BossEnemy.SMB
 
                 _effectManager.PlayEffect(_attackData.AnimParamName, _attackPos);
 
-                if (AttackHitDetectionChecker.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
+                if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
                 {
                     _animationEventReceiver.AnimEvent_AttackHit();
                     _attackHitFired = false;
