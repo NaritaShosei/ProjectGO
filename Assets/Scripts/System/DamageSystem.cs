@@ -1,5 +1,8 @@
-using BossEnemy.Data;
 using UnityEngine;
+
+// Boss関連
+using BossEnemy.Enum;
+using BossEnemy.Data;
 
 public class DamageSystem
 {
@@ -79,20 +82,20 @@ public class DamageSystem
     /// <param name="partsType"> 被弾場所 </param>
     /// <param name="bossEnemyData"> 被弾したBossEnemyのData </param>
     /// <returns> 被弾場所の硬度(肉質) </returns>
-    public static int GetHitPartsDefense(PartsType partsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsDefense(BodysDefensesType partsType, BossEnemyData bossEnemyData)
     {
         switch (partsType)
         {
-            case PartsType.None:
+            case BodysDefensesType.None:
                 Debug.LogError("PartsNone");
                 break;
-            case PartsType.Hard:
+            case BodysDefensesType.Hard:
                 return bossEnemyData.HardSpotsDefense;
-            case PartsType.Normal:
+            case BodysDefensesType.Normal:
                 return bossEnemyData.NormalSpotsDefense;
-            case PartsType.WeekPoint:
+            case BodysDefensesType.WeekPoint:
                 return bossEnemyData.WeekPointDefense;
-            case PartsType.VitalPoint:
+            case BodysDefensesType.VitalPoint:
                 return bossEnemyData.VitalPointDefense;
         }
 
@@ -100,20 +103,20 @@ public class DamageSystem
     }
 
     /// <summary> BossEnemyの被弾場所の鎧の硬度(肉質)を割り出す </summary>
-    public static int GetHitPartsArmorDefense(ArmorAttachmentPoint attachmentPointsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsArmorDefense(ArmorAttachmentPointType attachmentPointsType, BossEnemyData bossEnemyData)
     {
         switch (attachmentPointsType)
         {
-            case ArmorAttachmentPoint.None:
+            case ArmorAttachmentPointType.None:
                 Debug.LogError("PartsNone");
                 break;
-            case ArmorAttachmentPoint.LeftArm:
+            case ArmorAttachmentPointType.LeftArm:
                 return bossEnemyData.LeftArmArmer.Defense;
-            case ArmorAttachmentPoint.RightArm:
+            case ArmorAttachmentPointType.RightArm:
                 return bossEnemyData.RightArmArmer.Defense;
-            case ArmorAttachmentPoint.LeftLeg:
+            case ArmorAttachmentPointType.LeftLeg:
                 return bossEnemyData.LeftLegArmer.Defense;
-            case ArmorAttachmentPoint.RightLeg:
+            case ArmorAttachmentPointType.RightLeg:
                 return bossEnemyData.RightLegArmer.Defense;
         }
 

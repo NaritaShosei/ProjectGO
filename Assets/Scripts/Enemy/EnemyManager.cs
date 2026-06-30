@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 
+using BossEnemy.View;
+
 public class EnemyManager : MonoBehaviour
 {
     public event Action OnEnemyDefeated;
