@@ -46,7 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5200d8c2d418da4fa93ffc4b1d5f391, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
-  _attackHitTime: 1.5
+  _attackHitTime: 1.7
+  _weaponSwingTime: 0.55
 --- !u!1102 &-7471881730005279811
 AnimatorState:
   serializedVersion: 6
@@ -114,6 +115,7 @@ AnimatorState:
   - {fileID: 1175884930355844829}
   m_StateMachineBehaviours:
   - {fileID: -8270940160055624994}
+  - {fileID: 1272849374352344267}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -400,7 +402,8 @@ AnimatorState:
   m_Transitions:
   - {fileID: 3617620304841174452}
   - {fileID: -4115504339737502035}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: 4502780900135483804}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -462,6 +465,19 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &1272849374352344267
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824d8ee1413e99946a75ca97238d8699, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackEffectSMB
+  _effectTiming: 0.49
 --- !u!1101 &2814668747069275216
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -549,7 +565,8 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 861195843637033608}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: 5928899181280400153}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -564,6 +581,20 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
+--- !u!114 &4502780900135483804
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2362b8904c559b741a56af2c58f4bc8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFootstepSMB
+  _leftFootTime: 0.01
+  _rightFootTime: 0.557
 --- !u!1101 &4630030680606881927
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -614,6 +645,18 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &5928899181280400153
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84d2d9bed8e38d744a2cc366d7206454, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDownStartSMB
 --- !u!1102 &6474621220943160091
 AnimatorState:
   serializedVersion: 6

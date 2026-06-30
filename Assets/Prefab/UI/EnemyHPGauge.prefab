@@ -8,13 +8,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1697814442800229027, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 49dca3d1792c46647b8f799aef0314d9, type: 3}
     - target: {fileID: 2997453900133418942, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: _baseWidth
       value: 300
       objectReference: {fileID: 0}
+    - target: {fileID: 5280115309391900322, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5676324677777588110, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_Name
       value: EnemyHPGauge
+      objectReference: {fileID: 0}
+    - target: {fileID: 5888138155191040375, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 49dca3d1792c46647b8f799aef0314d9, type: 3}
+    - target: {fileID: 5888138155191040375, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_FillAmount
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5995988843454613346, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -90,7 +106,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7338700968044244562, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -306.95
+      value: -310
       objectReference: {fileID: 0}
     - target: {fileID: 7338700968044244562, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1697814442800229027, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 94abbd42eff72d84e919dd34c8ee024a, type: 3}
     - target: {fileID: 2997453900133418942, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: _baseWidth
       value: 300
@@ -21,6 +25,10 @@ PrefabInstance:
       value: EnemyArmerHPGauge
       objectReference: {fileID: 0}
     - target: {fileID: 5888138155191040375, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 94abbd42eff72d84e919dd34c8ee024a, type: 3}
+    - target: {fileID: 5888138155191040375, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_Color.b
       value: 1
       objectReference: {fileID: 0}
@@ -31,6 +39,10 @@ PrefabInstance:
     - target: {fileID: 5888138155191040375, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_Color.r
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5888138155191040375, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
+      propertyPath: m_FillAmount
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5995988843454613346, guid: 2eca31ca8731fcf4cab567c0e3b590d8, type: 3}
       propertyPath: m_AnchoredPosition.x
