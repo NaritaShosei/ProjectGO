@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.View;
-using BossEnemy.Infrastructure;
-
 public class BossEnemySpawner : MonoBehaviour
 {
     /// <summary>
@@ -50,7 +47,7 @@ public class BossEnemySpawner : MonoBehaviour
     [SerializeField] private int _preloadCount = 1;
 
     [Header("BossEnemyが使用するSpawner")]
-    [SerializeField] private AttackHitAreaSpawner _attackHitAreaSpawner;
+    [SerializeField] private IAttackHitAreaSpawner _attackHitAreaSpawner;
 
     private EnemyServices _services;
     private GenericObjectPool<BossEnemyView> _bossEnemyObjectPool;

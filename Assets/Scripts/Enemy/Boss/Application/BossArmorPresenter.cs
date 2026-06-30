@@ -1,9 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Application
+public class BossArmorPresenter
 {
-    public class BossArmorPresenter
-    {
-
-    }
+    
 }

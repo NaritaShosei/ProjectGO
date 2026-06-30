@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BossEnemy.Enum
 {
-    public enum ArmorAttachmentPointType
+    public enum ArmorAttachmentPoint
     {
         None,
         RightArm,

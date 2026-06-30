@@ -1,14 +1,14 @@
 using UniRx;
 using UnityEngine;
 using System;
-using Cysharp.Threading.Tasks;
 
 # region BossEnemy関連using
 using BossEnemy.Data;
 using BossEnemy.Enum;
+using Cysharp.Threading.Tasks;
 #endregion
 
-namespace BossEnemy.Model.System.Logic
+namespace BossEnemy.Model.CoreLogic
 {
     #region 攻撃処理
     public class BossAttack
@@ -255,15 +255,9 @@ namespace BossEnemy.Model.System.Logic
         }
 
         /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
-        public void TakeDamage(DamageContext damageContext, BodysDefensesType hitPartsType, bool isHitArmor,
-            ArmorAttachmentPointType attachmentPoints = ArmorAttachmentPointType.None)
+        public void TakeDamage(DamageContext damageContext, PartsType hitPartsType, bool isHitArmor,
+            ArmorAttachmentPoint attachmentPoints = ArmorAttachmentPoint.None)
         {
-            if(isHitArmor && attachmentPoints == ArmorAttachmentPointType.None)
-            {
-                Debug.LogError("Armorの装備箇所がわかりません");
-                return;
-            }
-
             int defense = 0;
             int damage = 0;
 
@@ -275,8 +269,8 @@ namespace BossEnemy.Model.System.Logic
                 defense = DamageSystem.GetHitPartsDefense(hitPartsType, _currentBossEnemyData);
 
                 // Damageを計算
-                if (hitPartsType == BodysDefensesType.VitalPoint
-                    || hitPartsType == BodysDefensesType.WeekPoint)
+                if (hitPartsType == PartsType.VitalPoint
+                    || hitPartsType == PartsType.WeekPoint)
                 {
                     // 弱点への攻撃ならPlayerもModeによるダメージの減増を行う
                     damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Flesh);
@@ -294,16 +288,16 @@ namespace BossEnemy.Model.System.Logic
 
                 switch (attachmentPoints)
                 {
-                    case ArmorAttachmentPointType.LeftArm:
+                    case ArmorAttachmentPoint.LeftArm:
                         _currentBossEnemyData.LeftArmArmer.Damage(damage);
                         break;
-                    case ArmorAttachmentPointType.RightArm:
+                    case ArmorAttachmentPoint.RightArm:
                         _currentBossEnemyData.RightArmArmer.Damage(damage);
                         break;
-                    case ArmorAttachmentPointType.LeftLeg:
+                    case ArmorAttachmentPoint.LeftLeg:
                         _currentBossEnemyData.LeftLegArmer.Damage(damage);
                         break;
-                    case ArmorAttachmentPointType.RightLeg:
+                    case ArmorAttachmentPoint.RightLeg:
                         _currentBossEnemyData.RightLegArmer.Damage(damage);
                         break;
                 }

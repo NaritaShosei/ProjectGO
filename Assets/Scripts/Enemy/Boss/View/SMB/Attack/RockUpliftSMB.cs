@@ -3,10 +3,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-// BossEnemy関連
-using BossEnemy.Model.System;
-
-namespace BossEnemy.View.SMB
+namespace BossEnemy.SMB
 {
     public class RockUpliftSMB : AttackSMBBase
     {
@@ -81,7 +78,7 @@ namespace BossEnemy.View.SMB
                 PlayBossSE(SoundCueNames.Boss.RockEruption);
                 _effectManager.PlayEffect(_attackData.AnimParamName, _attackPos);
 
-                if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
+                if (AttackHitDetectionChecker.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
                 {
                     _animationEventReceiver.AnimEvent_AttackHit();
                     _attackHitFired = false;

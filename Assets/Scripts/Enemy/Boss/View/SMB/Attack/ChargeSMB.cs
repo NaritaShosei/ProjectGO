@@ -1,7 +1,7 @@
-using BossEnemy.View;
+using BossEnemy.SMB;
 using UnityEngine;
 
-namespace BossEnemy.View.SMB
+namespace BossEnemy.SMB
 {
     public class ChargeSMB : AttackSMBBase
     {

@@ -3,7 +3,7 @@ using System;
 using UniRx;
 using UnityEngine;
 
-namespace BossEnemy.Model.BehaviorTree
+namespace BossEnemy.BehaviorTree
 {
     /// <summary> Nodeへの遷移結果 </summary>
     public enum NodeCondition

@@ -6,54 +6,50 @@ using BossEnemy.Enum;
 #endregion
 
 
-namespace BossEnemy.View
+/// <summary> ボスの装備するアーマー </summary>
+public class BossArmorView : MonoBehaviour
 {
-    /// <summary> ボスの装備するアーマー </summary>
-    public class BossArmorView : MonoBehaviour
+    public ArmorAttachmentPoint AttachmentPoints => _armorAttachmentPointsType;
+
+    public bool IsBreak => _isBreak;
+
+    public void Init()
     {
-        public ArmorAttachmentPointType AttachmentPoints => _armorAttachmentPointsType;
+        RepairArmor().Forget();
+    }
 
-        public bool IsBreak => _isBreak;
-
-        public void Init()
-        {
-            RepairArmor().Forget();
-        }
-
-        /// <summary> アーマー修復時の処理 </summary>
-        public async UniTask RepairArmor()
-        {
-            if (_isBreak == false) return;
+    /// <summary> アーマー修復時の処理 </summary>
+    public async UniTask RepairArmor()
+    {
+        if (_isBreak == false) return;
 
 
 
-            this.gameObject.SetActive(true);
-            _isBreak = false;
-        }
+        this.gameObject.SetActive(true);
+        _isBreak = false;
+    }
 
-        /// <summary> アーマー破壊時の処理 </summary>
-        public async UniTask BreakArmer()
-        {
-            if (_isBreak == true) return;
+    /// <summary> アーマー破壊時の処理 </summary>
+    public async UniTask BreakArmer()
+    {
+        if (_isBreak == true) return;
 
 
 
-            this.gameObject.SetActive(false);
-            _isBreak = true;
-        }
+        this.gameObject.SetActive(false);
+        _isBreak = true;
+    }
 
-        [Header("Armorの装着ヶ所を示すEnum")]
-        [SerializeField, Tooltip("Armorの装着ヶ所を示すEnum")]
-        private ArmorAttachmentPointType _armorAttachmentPointsType;
+    [Header("Armorの装着ヶ所を示すEnum")]
+    [SerializeField, Tooltip("Armorの装着ヶ所を示すEnum")]
+    private ArmorAttachmentPoint _armorAttachmentPointsType;
 
-        private bool _isBreak = false;
+    private bool _isBreak = false;
 
-        private EffectManager _effectManager;
+    private EffectManager _effectManager;
 
-        private void Awake()
-        {
-            _effectManager = FindFirstObjectByType<EffectManager>();
-        }
+    private void Awake()
+    {
+        _effectManager = FindFirstObjectByType<EffectManager>();
     }
 }
-

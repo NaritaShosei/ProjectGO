@@ -6,8 +6,7 @@ using UnityEngine;
 using BossEnemy.Data;
 using BossEnemy.Model.Interface;
 
-
-namespace BossEnemy.Infrastructure.Repository
+namespace BossEnemy.Data.Repository
 {
     public class BossEnemyMasterDataRepository : IBossEnemyMasterDataRepository
     {
@@ -36,7 +35,7 @@ namespace BossEnemy.Infrastructure.Repository
         private static readonly FieldInfo ArmorMaxHPField = typeof(BossArmorData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo ArmorDefenseField = typeof(BossArmorData).GetField("_defense", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private static readonly FieldInfo AttackFieldField = typeof(AttackDataSelectionPool).GetField("_attackField", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo AttackFieldField = typeof(BossEnemyAttackField).GetField("_attackField", BindingFlags.NonPublic | BindingFlags.Instance);
 
         /// <summary>
         /// CSVのテキストデータをもとにリポジトリを初期化し、すべてのボスデータをメモリにキャッシュします。
@@ -189,16 +188,16 @@ namespace BossEnemy.Infrastructure.Repository
             return armorData;
         }
 
-        private static AttackDataSelectionPool CreateAttackField(string[] idsRow, string[] ratesRow)
+        private static BossEnemyAttackField CreateAttackField(string[] idsRow, string[] ratesRow)
         {
-            List<AttackDataSelectionPool.AttackCondition> conditions = new List<AttackDataSelectionPool.AttackCondition>();
+            List<BossEnemyAttackField.AttackCondition> conditions = new List<BossEnemyAttackField.AttackCondition>();
 
             for (int col = 2; col < idsRow.Length; col++)
             {
                 string idText = GetCell(idsRow, col);
                 if (string.IsNullOrWhiteSpace(idText)) continue;
 
-                AttackDataSelectionPool.AttackCondition condition = new AttackDataSelectionPool.AttackCondition
+                BossEnemyAttackField.AttackCondition condition = new BossEnemyAttackField.AttackCondition
                 {
                     ID = ParseInt(idsRow, col, -1, "Attack ID"),
                     ActivationRate = ParseInt(ratesRow, col, -1, "Activation Rate")
@@ -206,7 +205,7 @@ namespace BossEnemy.Infrastructure.Repository
                 conditions.Add(condition);
             }
 
-            AttackDataSelectionPool attackField = new AttackDataSelectionPool();
+            BossEnemyAttackField attackField = new BossEnemyAttackField();
             AttackFieldField.SetValue(attackField, conditions.ToArray());
             return attackField;
         }

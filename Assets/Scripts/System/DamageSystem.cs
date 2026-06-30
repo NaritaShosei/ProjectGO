@@ -103,20 +103,20 @@ public class DamageSystem
     }
 
     /// <summary> BossEnemyの被弾場所の鎧の硬度(肉質)を割り出す </summary>
-    public static int GetHitPartsArmorDefense(ArmorAttachmentPointType attachmentPointsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsArmorDefense(ArmorAttachmentPoint attachmentPointsType, BossEnemyData bossEnemyData)
     {
         switch (attachmentPointsType)
         {
-            case ArmorAttachmentPointType.None:
+            case ArmorAttachmentPoint.None:
                 Debug.LogError("PartsNone");
                 break;
-            case ArmorAttachmentPointType.LeftArm:
+            case ArmorAttachmentPoint.LeftArm:
                 return bossEnemyData.LeftArmArmer.Defense;
-            case ArmorAttachmentPointType.RightArm:
+            case ArmorAttachmentPoint.RightArm:
                 return bossEnemyData.RightArmArmer.Defense;
-            case ArmorAttachmentPointType.LeftLeg:
+            case ArmorAttachmentPoint.LeftLeg:
                 return bossEnemyData.LeftLegArmer.Defense;
-            case ArmorAttachmentPointType.RightLeg:
+            case ArmorAttachmentPoint.RightLeg:
                 return bossEnemyData.RightLegArmer.Defense;
         }
 

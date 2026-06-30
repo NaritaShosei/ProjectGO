@@ -2,10 +2,10 @@ using UnityEngine;
 
 #region BossEnemy関連のusing
 using BossEnemy.Data;
-using BossEnemy.Model.System.Logic;
+using BossEnemy.Model.CoreLogic;
 #endregion
 
-namespace BossEnemy.Model.BehaviorTree
+namespace BossEnemy.BehaviorTree.Node.ActionNode
 {
     /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部) </summary>
     public abstract class ActionNode : TreeNodeBase

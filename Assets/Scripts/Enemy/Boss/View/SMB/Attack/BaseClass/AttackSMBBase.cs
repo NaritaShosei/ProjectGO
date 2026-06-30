@@ -1,16 +1,13 @@
+using BossEnemy.Data;
 using UnityEngine;
 
-// BossEnemy関連
-using BossEnemy.Data;
-using BossEnemy.Model.Interface;
-using BossEnemy.Model.System;
 
-namespace BossEnemy.View.SMB
+namespace BossEnemy.SMB
 {
     public class AttackSMBBase : StateMachineBehaviour
     {
         public void Init(
-            IAnimationEventReceiver bossEnemyAnimationEventReceiver,
+            AnimationEventReceiver bossEnemyAnimationEventReceiver,
             BossEnemyAnimator bossAnimator,
             AttackInformationHolder attackInformation,
             IAttackHitAreaSpawner attackHitAreaSpawner,
@@ -83,7 +80,7 @@ namespace BossEnemy.View.SMB
 
             if (_attackHitFired)
             {
-                if(AttackHitChecker.TryHitAttack(HitAreaType.Circle, _hitCenterPos, _target, _attackData.AttackRange))
+                if(AttackHitDetectionChecker.TryHitAttack(HitAreaType.Circle, _hitCenterPos, _target, _attackData.AttackRange))
                 {
                     _animationEventReceiver.AnimEvent_AttackHit();
                     _attackHitFired = false;
@@ -106,7 +103,7 @@ namespace BossEnemy.View.SMB
 
         protected BossEnemyAttackData _attackData;
 
-        protected IAnimationEventReceiver _animationEventReceiver = null;
+        protected AnimationEventReceiver _animationEventReceiver = null;
 
         protected BossEnemyAnimator _bossAnimator = null;
 
@@ -137,5 +134,17 @@ namespace BossEnemy.View.SMB
 
             Sound.PlaySE(_bossEnemyTransform.gameObject, cueName, CueSheetType.Boss);
         }
+    }
+
+    public class AttackInformationHolder
+    {
+        public BossEnemyAttackData AttackData => _attackData;
+
+        public void SetData(BossEnemyAttackData attackData)
+        {
+            _attackData = attackData;
+        }
+
+        private BossEnemyAttackData _attackData;
     }
 }
