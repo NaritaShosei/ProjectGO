@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class PlayerReviveSkill : SkillBase
 {
-    public StatType TargetStat => StatType.Heal;
-
     public override void OnAcquire(IPlayerStats stats)
     {
         _playerStats = stats;
