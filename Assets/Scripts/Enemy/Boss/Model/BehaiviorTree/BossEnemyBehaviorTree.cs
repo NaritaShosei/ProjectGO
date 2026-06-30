@@ -2,15 +2,14 @@ using UnityEngine;
 using UniRx;
 
 # region BossEnemy関連のusing
-using BossEnemy.BehaviorTree.Node.ActionNode;
-using BossEnemy.BehaviorTree.Node.DecoratorNode;
 using BossEnemy.Data;
 using BossEnemy.Enum;
-using BossEnemy.Data.Repositry;
-using BossEnemy.Model.CoreLogic;
+using BossEnemy.Model.Interface;
+using BossEnemy.Model.System;
+using BossEnemy.Model.System.Logic;
 # endregion
 
-namespace BossEnemy.BehaviorTree
+namespace BossEnemy.Model.BehaviorTree
 {
     [CreateAssetMenu(fileName = "BossEnemyBehaviorTree", menuName = "BossEnemy/BehaviorTree")]
     public class BossEnemyBehaviorTree : ScriptableObject
@@ -33,7 +32,7 @@ namespace BossEnemy.BehaviorTree
         }
 
         public void HandlePhaseChanged(BossEnemyData bossEnemyData,
-            BossEnemyAttackDataRepositry attackDataRepositry,
+            IBossEnemyAttackDataRepository attackDataRepositry,
             IPlayerInformationService playerInformationService)
         {
             if(_behaviorController != null) _behaviorController.StopRunning();
@@ -55,7 +54,7 @@ namespace BossEnemy.BehaviorTree
             _behaviorController.OnRunning();
         }
 
-        public void HandleBossArmorBreak(ArmorAttachmentPoint attachmentPointsType)
+        public void HandleBossArmorBreak(ArmorAttachmentPointType attachmentPointsType)
         {
             if (!_isInit || _downAction.IsDown) return;
             if (_breakArmorNode == null) return;
@@ -142,7 +141,7 @@ namespace BossEnemy.BehaviorTree
         }
 
         private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,
-            BossEnemyAttackDataRepositry dataRepositry,
+            IBossEnemyAttackDataRepository dataRepositry,
             IPlayerInformationService playerInformationService)
         {
             // ---攻撃シーケンスアクションノード↓---

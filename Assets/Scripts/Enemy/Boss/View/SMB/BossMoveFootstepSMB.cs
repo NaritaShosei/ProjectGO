@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.SMB
+namespace BossEnemy.View.SMB
 {
     public class BossMoveFootstepSMB : StateMachineBehaviour
     {

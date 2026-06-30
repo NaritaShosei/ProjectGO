@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-public class VisualEffectView : EffectBase
+public class VisualEffectContoller : EffectBase
 {
     [SerializeField] private VisualEffect _rootVFX;
-    [SerializeField] private int 
     private VisualEffect[] _vfxs;
 
     // 生存判定のバグ（即回収）を防ぐためのフラグ

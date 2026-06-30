@@ -1,4 +1,4 @@
-using BossEnemy.BehaviorTree;
+using BossEnemy.Model.BehaviorTree;
 using System;
 using UniRx;
 using UnityEditor;
@@ -110,13 +110,13 @@ namespace BossEnemy.Data
         public BossArmorData LeftLegArmer => _leftLegArmer;
 
         /// <summary> 通常近距離攻撃 </summary>
-        public BossEnemyAttackField CloseRangeNormalAttackFieldHolder => _closeRangeNormalAttackDataHolder;
+        public AttackDataSelectionPool CloseRangeNormalAttackFieldHolder => _closeRangeNormalAttackDataHolder;
 
         /// <summary> 通常近距離攻撃カウント3到達時特殊近距離攻撃 </summary>
-        public BossEnemyAttackField CloseRangeFinishCountAttackFieldHolder => _closeRangeFinishCountAttackDataHolder;
+        public AttackDataSelectionPool CloseRangeFinishCountAttackFieldHolder => _closeRangeFinishCountAttackDataHolder;
 
         /// <summary> 遠距離攻撃 </summary>
-        public BossEnemyAttackField LongRangeAttackFieldHolder => _longRangeAttackDataHolder;
+        public AttackDataSelectionPool LongRangeAttackFieldHolder => _longRangeAttackDataHolder;
 
         /// <summary> BossEnemyの初期化メソッド </summary>
         public void Init(Transform bossEnemyTransform)
@@ -203,15 +203,15 @@ namespace BossEnemy.Data
 
         [Header("通常近距離攻撃")]
         [SerializeField, Tooltip("通常近距離攻撃")] 
-        private BossEnemyAttackField _closeRangeNormalAttackDataHolder;
+        private AttackDataSelectionPool _closeRangeNormalAttackDataHolder;
 
         [Header("通常近距離攻撃3カウント到達時の近距離攻撃")]
         [SerializeField, Tooltip("通常近距離攻撃3回到達時の特殊近距離攻撃")]
-        private BossEnemyAttackField _closeRangeFinishCountAttackDataHolder;
+        private AttackDataSelectionPool _closeRangeFinishCountAttackDataHolder;
 
         [Header("遠距離攻撃")]
         [SerializeField, Tooltip("遠距離攻撃")]
-        private BossEnemyAttackField _longRangeAttackDataHolder;
+        private AttackDataSelectionPool _longRangeAttackDataHolder;
 
         // BossEnemyの座標
         private ReactiveProperty<Vector3> _position;
@@ -239,9 +239,9 @@ namespace BossEnemy.Data
         public void DataConstruct(int maxHP, float walkSpeed,
             int hardSpotsDefense, int normalSpotsDefense, int weekPointDefense, int vitalPointDefense,
             BossArmorData rightArmArmer, BossArmorData leftArmArmer, BossArmorData rightLegArmer, BossArmorData leftLegArmer,
-            BossEnemyAttackField closeRangeNormalAttackDataHolder, 
-            BossEnemyAttackField closeRangeFinishCountAttackDataHolder,
-            BossEnemyAttackField longRangeAttackDataHolder)
+            AttackDataSelectionPool closeRangeNormalAttackDataHolder, 
+            AttackDataSelectionPool closeRangeFinishCountAttackDataHolder,
+            AttackDataSelectionPool longRangeAttackDataHolder)
         {
             _maxHP = maxHP;
             _walkSpeed = walkSpeed;
@@ -348,7 +348,7 @@ namespace BossEnemy.Data
 
     /// <summary> ボスエネミーの攻撃情報 </summary>
     [Serializable]
-    public class BossEnemyAttackField
+    public class AttackDataSelectionPool
     {
         [Serializable]
         public struct AttackCondition
@@ -360,7 +360,7 @@ namespace BossEnemy.Data
             public int ActivationRate;
         }
 
-        public AttackCondition[] AttackField => _attackField;
+        public AttackCondition[] SelectionPool => _attackField;
 
         [SerializeField, Tooltip("ボスエネミーの攻撃マスターデータ")]
         private AttackCondition[] _attackField;

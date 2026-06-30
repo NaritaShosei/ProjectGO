@@ -1,24 +1,28 @@
-using BossEnemy.SMB;
+using BossEnemy.View;
 using UnityEngine;
 
-public class PunchSMB : AttackSMBBase
+namespace BossEnemy.View.SMB
 {
-    protected override string AttackStartVoiceCueName => SoundCueNames.Boss.HandSweepVoice;
-
-    protected override string AttackCueName => SoundCueNames.Boss.HandSweep;
-
-    public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    public class PunchSMB : AttackSMBBase
     {
-        base.OnStateEnter(animator, stateInfo, layerIndex);
+        protected override string AttackStartVoiceCueName => SoundCueNames.Boss.HandSweepVoice;
+
+        protected override string AttackCueName => SoundCueNames.Boss.HandSweep;
+
+        public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        {
+            base.OnStateEnter(animator, stateInfo, layerIndex);
+        }
+
+        public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        {
+            base.OnStateUpdate(animator, stateInfo, layerIndex);
+        }
+
+        public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+        {
+            base.OnStateExit(animator, stateInfo, layerIndex);
+        }
     }
 
-    public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        base.OnStateUpdate(animator, stateInfo, layerIndex);
-    }
-
-    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        base.OnStateExit(animator, stateInfo, layerIndex);
-    }
 }

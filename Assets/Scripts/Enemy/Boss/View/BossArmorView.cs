@@ -6,50 +6,54 @@ using BossEnemy.Enum;
 #endregion
 
 
-/// <summary> ボスの装備するアーマー </summary>
-public class BossArmorView : MonoBehaviour
+namespace BossEnemy.View
 {
-    public ArmorAttachmentPoint AttachmentPoints => _armorAttachmentPointsType;
-
-    public bool IsBreak => _isBreak;
-
-    public void Init()
+    /// <summary> ボスの装備するアーマー </summary>
+    public class BossArmorView : MonoBehaviour
     {
-        RepairArmor().Forget();
-    }
+        public ArmorAttachmentPointType AttachmentPoints => _armorAttachmentPointsType;
 
-    /// <summary> アーマー修復時の処理 </summary>
-    public async UniTask RepairArmor()
-    {
-        if (_isBreak == false) return;
+        public bool IsBreak => _isBreak;
 
+        public void Init()
+        {
+            RepairArmor().Forget();
+        }
 
-
-        this.gameObject.SetActive(true);
-        _isBreak = false;
-    }
-
-    /// <summary> アーマー破壊時の処理 </summary>
-    public async UniTask BreakArmer()
-    {
-        if (_isBreak == true) return;
+        /// <summary> アーマー修復時の処理 </summary>
+        public async UniTask RepairArmor()
+        {
+            if (_isBreak == false) return;
 
 
 
-        this.gameObject.SetActive(false);
-        _isBreak = true;
-    }
+            this.gameObject.SetActive(true);
+            _isBreak = false;
+        }
 
-    [Header("Armorの装着ヶ所を示すEnum")]
-    [SerializeField, Tooltip("Armorの装着ヶ所を示すEnum")]
-    private ArmorAttachmentPoint _armorAttachmentPointsType;
+        /// <summary> アーマー破壊時の処理 </summary>
+        public async UniTask BreakArmer()
+        {
+            if (_isBreak == true) return;
 
-    private bool _isBreak = false;
 
-    private EffectManager _effectManager;
 
-    private void Awake()
-    {
-        _effectManager = FindFirstObjectByType<EffectManager>();
+            this.gameObject.SetActive(false);
+            _isBreak = true;
+        }
+
+        [Header("Armorの装着ヶ所を示すEnum")]
+        [SerializeField, Tooltip("Armorの装着ヶ所を示すEnum")]
+        private ArmorAttachmentPointType _armorAttachmentPointsType;
+
+        private bool _isBreak = false;
+
+        private EffectManager _effectManager;
+
+        private void Awake()
+        {
+            _effectManager = FindFirstObjectByType<EffectManager>();
+        }
     }
 }
+

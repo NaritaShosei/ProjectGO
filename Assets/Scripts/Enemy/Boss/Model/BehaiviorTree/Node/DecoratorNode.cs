@@ -3,13 +3,13 @@ using UniRx;
 using UnityEngine;
 
 #region BossEnemy関連
-using BossEnemy.BehaviorTree.Node.ActionNode;
+using BossEnemy.Model.Interface;
 using BossEnemy.Data;
 using BossEnemy.Enum;
-using BossEnemy.Data.Repositry;
+using BossEnemy.Model.System;
 #endregion
 
-namespace BossEnemy.BehaviorTree.Node.DecoratorNode
+namespace BossEnemy.Model.BehaviorTree
 {
     /// <summary> 通ったら子Nodeを実行して、通らなければFailureを返すNode </summary>
     public abstract class DecoratorNode : TreeNodeBase
@@ -46,8 +46,8 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
     public class AttackSelect : DecoratorNode
     {
         public AttackSelect(ITreeNode child, 
-            BossEnemyAttackField bossEnemyAttackField, 
-            BossEnemyAttackDataRepositry bossEnemyAttackDataRepositry, 
+            AttackDataSelectionPool bossEnemyAttackField, 
+            IBossEnemyAttackDataRepository bossEnemyAttackDataRepositry, 
             AttackCoolTimer bossEnemyAttackCoolTimer,
             AttackAction attackNode, 
             TargetChaseAction targetChaseAction): base (child)
@@ -88,9 +88,9 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
 
         private readonly AttackCoolTimer _attackCoolTimer;
 
-        private readonly BossEnemyAttackDataRepositry _bossEnemyAttackDataRepositry;
+        private readonly IBossEnemyAttackDataRepository _bossEnemyAttackDataRepositry;
 
-        private readonly BossEnemyAttackField _bossEnemyAttackField;
+        private readonly AttackDataSelectionPool _bossEnemyAttackField;
 
         private readonly AttackAction _attackNode;
 
@@ -161,24 +161,24 @@ namespace BossEnemy.BehaviorTree.Node.DecoratorNode
             _childNode = child;
         }
 
-        public void BreakArmor(ArmorAttachmentPoint armorAttachmentPoint)
+        public void BreakArmor(ArmorAttachmentPointType armorAttachmentPoint)
         {
             _armorBreakingPoint = armorAttachmentPoint;
         }
 
         public override NodeCondition TryEntry()
         {
-            if(_armorBreakingPoint == ArmorAttachmentPoint.LeftLeg || _armorBreakingPoint == ArmorAttachmentPoint.RightLeg)
+            if(_armorBreakingPoint == ArmorAttachmentPointType.LeftLeg || _armorBreakingPoint == ArmorAttachmentPointType.RightLeg)
             {
                 Debug.Log("Down");
-                _armorBreakingPoint = ArmorAttachmentPoint.None;
+                _armorBreakingPoint = ArmorAttachmentPointType.None;
                 return NodeCondition.Success;
             }
 
             return NodeCondition.Failure;
         }
 
-        private ArmorAttachmentPoint _armorBreakingPoint = ArmorAttachmentPoint.None;
+        private ArmorAttachmentPointType _armorBreakingPoint = ArmorAttachmentPointType.None;
     }
     #endregion
 
