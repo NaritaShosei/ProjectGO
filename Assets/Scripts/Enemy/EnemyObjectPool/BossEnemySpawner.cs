@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+using BossEnemy.View;
+using BossEnemy.Infrastructure;
+
 public class BossEnemySpawner : MonoBehaviour
 {
     /// <summary>

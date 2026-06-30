@@ -93,9 +93,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ee48b8e5d0118847b8b05b56cb0b345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
-  _attackAreaDespawnTime: 1.5
-  _effectPrefab: {fileID: 8833923644228565619, guid: 2aa072756bb89ba43b4c51482593ab69, type: 3}
-  _consecutiveAttackInterval: 100
+  _attackAreaDespawnTime: 1
+  _attackIntervalFlame: 100
 --- !u!1101 &-8068644729839142665
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
