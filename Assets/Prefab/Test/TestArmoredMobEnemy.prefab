@@ -45,6 +45,7 @@ GameObject:
   - component: {fileID: 640612532259396523}
   - component: {fileID: -8330086056522255198}
   - component: {fileID: 8057836371575198857}
+  - component: {fileID: 5150607616298102398}
   m_Layer: 8
   m_Name: TestArmoredMobEnemy
   m_TagString: Untagged
@@ -166,6 +167,8 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 362aa867931ba5444ae43e73f8223e3e, type: 2}
   _distanceProfile: {fileID: 11400000, guid: 28f4a609b4f245e4e8ec74a84e56b62b, type: 2}
   _animationEventReceiver: {fileID: 6344822612628370091}
+  _soundHandler: {fileID: 5150607616298102398}
+  _enemyType: 0
   _armor: {fileID: 186864388146565}
 --- !u!114 &8057836371575198857
 MonoBehaviour:
@@ -211,6 +214,18 @@ MonoBehaviour:
     _id: "\u93A7\u7834\u58CA"
     _effectKeys:
     - "\u30C6\u30B9\u30C8\u30A2\u30FC\u30DE\u30FC\u7834\u58CA"
+--- !u!114 &5150607616298102398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5851137478512212370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3228565db4b453e42b723817d49cbe9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySoundHandler
 --- !u!1001 &3207627424300379340
 PrefabInstance:
   m_ObjectHideFlags: 0

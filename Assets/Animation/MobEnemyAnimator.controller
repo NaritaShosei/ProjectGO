@@ -89,6 +89,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25a0ee400e08fbd42afee1ae3e4bd1d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBarkSMB
+--- !u!114 &-234567890234567890
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 824d8ee1413e99946a75ca97238d8699, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackEffectSMB
+  _effectTiming: 0.52
 --- !u!1101 &-5672172337218330462
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -770,6 +783,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
   _attackHitTime: 0.84
   _weaponSwingTime: 0.32
+--- !u!114 &123456789123456789
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2362b8904c559b741a56af2c58f4bc8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFootstepSMB
+  _leftFootTime: 0.1
+  _rightFootTime: 0.557
 --- !u!1101 &4997727682768932297
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -831,7 +858,8 @@ AnimatorState:
   - {fileID: 3381916412857576136}
   - {fileID: 4558453643188241010}
   - {fileID: 4165462628607681788}
-  m_StateMachineBehaviours: []
+  m_StateMachineBehaviours:
+  - {fileID: 123456789123456789}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -1073,6 +1101,7 @@ AnimatorState:
   m_Transitions:
   - {fileID: 8964058316493861854}
   m_StateMachineBehaviours:
+  - {fileID: -234567890234567890}
   - {fileID: 4630767809863787672}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
