@@ -95,6 +95,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackAreaDespawnTime: 1
   _attackIntervalFlame: 100
+  _attackAreaCircleGeneratePosY: 0.2
+  _maxAttackCount: 4
 --- !u!1101 &-8068644729839142665
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -692,7 +694,7 @@ AnimatorStateMachine:
     m_Position: {x: 250, y: 240, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -1717891024771181069}
-    m_Position: {x: 250, y: 320, z: 0}
+    m_Position: {x: 240, y: 330, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -797,8 +799,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
   _attackAreaDespawnTime: 1
-  _consecutiveAttackInterval: 1
-  _attackDistance: 1
+  _consecutiveAttackInterval: 0.3
+  _maxAttackCount: 15
+  _attackAreaEffectPosY: 0.2
+  _meteorEffectPosY: -1
+  _attackHitTime: 1.05
 --- !u!1102 &-3522209484792423587
 AnimatorState:
   serializedVersion: 6
