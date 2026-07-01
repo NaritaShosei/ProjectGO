@@ -31,7 +31,7 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
 
     /// <summary>Downスタート時のイベント</summary>
     public event Action OnDownStart;
-    /// <summary>攻撃開始時のイベント</summary>
+    /// <summary>攻撃エフェクト発火タイミングのイベント</summary>
     public event Action OnAttackEffect;
     /// <summary>歩行時のイベント</summary>
     public event Action OnFootstep;

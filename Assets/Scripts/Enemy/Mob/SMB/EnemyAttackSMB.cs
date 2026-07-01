@@ -22,9 +22,9 @@ public class EnemyAttackSMB : StateMachineBehaviour
     {
         if (animator.speed == 0f) return;
         float currentTime = stateInfo.normalizedTime * stateInfo.length;
-        float normalizedTime = stateInfo.normalizedTime % 1f;
+
         // 武器スイングSE
-        if (!_weaponSwingFired && normalizedTime >= _weaponSwingTime)
+        if (!_weaponSwingFired && currentTime >= _weaponSwingTime)
         {
             _weaponSwingFired = true;
 
