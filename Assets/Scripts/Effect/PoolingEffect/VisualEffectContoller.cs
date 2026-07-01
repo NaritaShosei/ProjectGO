@@ -76,8 +76,6 @@ public class VisualEffectContoller : EffectBase
 
     protected override bool IsAliveInternal()
     {
-        Debug.Log("a");
-
         _currentAliveTime += Time.deltaTime;
 
         if(_currentAliveTime > _despawnTime)

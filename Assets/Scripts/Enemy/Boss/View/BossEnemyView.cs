@@ -104,7 +104,7 @@ namespace BossEnemy.View
             float saveClosestDistance = 1000;
             bool isGuardArmor = false;
             ArmorAttachmentPointType armorAttachmentPoint = ArmorAttachmentPointType.None;
-            Vector3 vector3 = Vector3.zero;
+            Vector3 hitPos = Vector3.zero;
             bool isWeekPoint = false;
             bool isHitArmor = false;
             foreach (var bossParts in _activeBossEnemyPartsView)
@@ -125,7 +125,8 @@ namespace BossEnemy.View
                         isGuardArmor = true;
                         armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
                     }
-                    vector3 = bossParts.PartsPosition; 
+
+                    hitPos = bossParts.PartsPosition; 
 
                     switch (bossParts.PartsType)
                     {
@@ -156,11 +157,20 @@ namespace BossEnemy.View
             };
             context.OnHitResult?.Invoke(result);
 
-            damagePopupViewModel = new(DamageSystem.CalculateDamage(context, default), isWeekPoint, true, vector3);
+            damagePopupViewModel = new(DamageSystem.CalculateDamage(context, default), isWeekPoint, true, hitPos);
             OnDamageDealt?.Invoke(damagePopupViewModel);
 
             Debug.Log("ダメージを検出(アーマーのガード:" + isGuardArmor + ")" + "(こうげきかしょ:" + parts.PartsType + ")");
             OnTakeDamage?.Invoke(context, parts.PartsType, isGuardArmor, armorAttachmentPoint);
+
+            if (isHitArmor)
+            {
+                _effectManager.PlayEffect("BossArmorHit", hitPos);
+            }
+            else
+            {
+                _effectManager.PlayEffect("テスト血しぶき", hitPos);
+            }
         }
 
         public void Attack(BossEnemyAttackData bossEnemyAttackData)
@@ -367,6 +377,7 @@ namespace BossEnemy.View
 
         private BossEnemyAnimator _bossEnemyAnimator;
         private AttackInformationHolder _attackInformationHolder = new();
+        private EffectManager _effectManager;
 
         private EnemyServices _services;
 
@@ -383,6 +394,7 @@ namespace BossEnemy.View
         private void Awake()
         {
             _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
+            _effectManager = FindFirstObjectByType<EffectManager>();
         }
 
         private void Update()
