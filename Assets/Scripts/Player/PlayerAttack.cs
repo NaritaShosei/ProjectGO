@@ -815,7 +815,13 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ChangeLockOnTarget(ILockOnTarget target)
     {
-        _currentLockOnTarget = (target is Component c && c && target.IsLockable && target.GetTargetCenter() != null)
+        if(target  == null)
+        {
+            _currentLockOnTarget = null;
+            return;
+        }
+
+        _currentLockOnTarget = (target.IsLockable && target.GetTargetCenter() != null)
             ? target : null;
     }
 
