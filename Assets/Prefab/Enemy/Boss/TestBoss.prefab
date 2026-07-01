@@ -114,17 +114,17 @@ MonoBehaviour:
     _bossEnemyMasterDataRepository:
       rid: 8435113032726348266
   _collisionDetections:
-  - _postureType: 0
+  - _postureType: 1
     _center: {x: 0, y: 2.8, z: 0}
     _size: {x: 2.8, y: 6, z: 1.7}
     _bossEnemyPartsView:
-    - _partsTransform: {fileID: 1556475710922351665}
+    - _partsTransform: {fileID: 5692632009021566593}
       _thisPartsArmer: {fileID: 4742455164658953048}
       _bossEnemyPartsType: 3
-    - _partsTransform: {fileID: 5368104356030593587}
+    - _partsTransform: {fileID: 8229516161478282158}
       _thisPartsArmer: {fileID: 7277117343900439331}
       _bossEnemyPartsType: 3
-  - _postureType: 1
+  - _postureType: 2
     _center: {x: 0, y: 1.8, z: 0}
     _size: {x: 3.5, y: 4, z: 4}
     _bossEnemyPartsView:
@@ -137,16 +137,25 @@ MonoBehaviour:
     - _partsTransform: {fileID: 4493183286772769957}
       _thisPartsArmer: {fileID: 0}
       _bossEnemyPartsType: 2
-  - _postureType: 2
+  - _postureType: 3
     _center: {x: 0, y: 1, z: 0}
     _size: {x: 2.8, y: 3, z: 6.5}
     _bossEnemyPartsView:
-    - _partsTransform: {fileID: 431365490342172297}
+    - _partsTransform: {fileID: 1426456106875106497}
       _thisPartsArmer: {fileID: 0}
       _bossEnemyPartsType: 4
-    - _partsTransform: {fileID: 4493183286772769957}
+    - _partsTransform: {fileID: 2747819325788669450}
       _thisPartsArmer: {fileID: 0}
-      _bossEnemyPartsType: 2
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 1481966387699403985}
+      _thisPartsArmer: {fileID: 0}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 5692632009021566593}
+      _thisPartsArmer: {fileID: 0}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 8229516161478282158}
+      _thisPartsArmer: {fileID: 0}
+      _bossEnemyPartsType: 3
   _bossArmorViews:
   - {fileID: 6809613413332555307}
   - {fileID: 7277117343900439331}
@@ -337,19 +346,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArmorView
   _armorAttachmentPointsType: 3
---- !u!4 &431365490342172297 stripped
+--- !u!4 &1426456106875106497 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 7220330512823533555, guid: 515dcde663cee6045a211d08123d2735, type: 3}
+  m_CorrespondingSourceObject: {fileID: 8215844168678612411, guid: 515dcde663cee6045a211d08123d2735, type: 3}
   m_PrefabInstance: {fileID: 7047923377733347706}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1481966387699403985 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -766104055648623189, guid: 515dcde663cee6045a211d08123d2735, type: 3}
-  m_PrefabInstance: {fileID: 7047923377733347706}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1556475710922351665 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -840213173817881269, guid: 515dcde663cee6045a211d08123d2735, type: 3}
   m_PrefabInstance: {fileID: 7047923377733347706}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2747819325788669450 stripped
@@ -390,9 +394,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossArmorView
   _armorAttachmentPointsType: 4
---- !u!4 &5368104356030593587 stripped
+--- !u!4 &5692632009021566593 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: -6075331157781015735, guid: 515dcde663cee6045a211d08123d2735, type: 3}
+  m_CorrespondingSourceObject: {fileID: 3372926048177489915, guid: 515dcde663cee6045a211d08123d2735, type: 3}
   m_PrefabInstance: {fileID: 7047923377733347706}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &7240149431936207932 stripped
@@ -416,5 +420,10 @@ MonoBehaviour:
 --- !u!4 &7369570715077103249 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 515dcde663cee6045a211d08123d2735, type: 3}
+  m_PrefabInstance: {fileID: 7047923377733347706}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8229516161478282158 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1439565975422264020, guid: 515dcde663cee6045a211d08123d2735, type: 3}
   m_PrefabInstance: {fileID: 7047923377733347706}
   m_PrefabAsset: {fileID: 0}

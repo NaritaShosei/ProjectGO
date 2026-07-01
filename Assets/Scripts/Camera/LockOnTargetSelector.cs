@@ -48,7 +48,10 @@ public class LockOnTargetSelector
         if (candidates.Count == 0) return null;
 
         ILockOnTarget screenTarget = FindNearestToCharacterCenter(candidates);
-        if (screenTarget != null) return screenTarget;
+        if (screenTarget != null)
+        {
+            return screenTarget;
+        }
 
         return FindNearestToPlayer(candidates);
     }
@@ -129,27 +132,24 @@ public class LockOnTargetSelector
     private List<ILockOnTarget> GetValidCandidates(
         ILockOnTarget excludeTarget = null)
     {
-        var inRange = _enemyManager.GetEnemiesInRange(
+        IReadOnlyList<ILockOnTarget> inRange = _enemyManager.GetLockOnTarget(
             _playerTransform.position,
             _lockOnRange);
 
         var result = new List<ILockOnTarget>();
 
-        foreach (var enemy in inRange)
+        foreach (var target in inRange)
         {
-            if (enemy is not ILockOnTarget candidate)
+            if (target == excludeTarget)
                 continue;
 
-            if (candidate == excludeTarget)
+            if (!target.IsLockable)
                 continue;
 
-            if (!candidate.IsLockable)
+            if (target.GetTargetCenter() == null)
                 continue;
 
-            if (candidate.GetTargetCenter() == null)
-                continue;
-
-            result.Add(candidate);
+            result.Add(target);
         }
 
         return result;
@@ -173,12 +173,22 @@ public class LockOnTargetSelector
 
         foreach (var candidate in candidates)
         {
-            if (candidate is not Component comp)
-                continue;
+            // ログ表示用にターゲットの名前を取得
+            string targetName = candidate.GetTargetCenter() != null ? candidate.GetTargetCenter().name : "Unknown Target";
 
-            Collider collider =
-                comp.GetComponent<Collider>();
+            // --- 【変更点】Componentでなくても弾かないように修正 ---
+            Collider collider = null;
+            if (candidate is Component comp)
+            {
+                // Component型である場合のみ、Colliderの取得を試みる
+                collider = comp.GetComponent<Collider>();
+            }
+            else
+            {
+                Debug.Log($"[LockOn] {targetName} は純粋なデータクラス（非Component）として処理します。");
+            }
 
+            // collider が null の場合は、自動的に GetTargetCenter() の座標を基準に Bounds が作られます
             Bounds bounds = collider != null
                 ? collider.bounds
                 : new Bounds(
@@ -186,30 +196,70 @@ public class LockOnTargetSelector
                     Vector3.one);
 
             // 画面内に映っていない敵は除外
-            if (!GeometryUtility.TestPlanesAABB(
-                    frustumPlanes,
-                    bounds))
+            if (!GeometryUtility.TestPlanesAABB(frustumPlanes, bounds))
             {
+                Debug.Log($"[LockOn] {targetName} は画面外（視界の外）にいるため除外されました。");
                 continue;
             }
 
             // プレイヤー正面との角度を計算
             Vector3 dirToCandidate =
-                (candidate.GetTargetCenter().position
-                - _playerTransform.position).normalized;
+                (candidate.GetTargetCenter().position - _playerTransform.position).normalized;
 
-            float angle =
-                Vector3.Angle(
-                    _playerTransform.forward,
-                    dirToCandidate);
+            float angle = Vector3.Angle(_playerTransform.forward, dirToCandidate);
 
-            if (angle < bestAngle)
+            if (angle >= bestAngle)
             {
+                Debug.Log($"[LockOn] {targetName} は画面内ですが、現在の最適対象（角度: {bestAngle}°）より正面ではないため保留されました。（この敵の角度: {angle}°）");
+            }
+            else
+            {
+                Debug.Log($"[LockOn] ★最優先ターゲット更新★: {targetName} (角度: {angle}°) が現在の候補に選ばれました。");
                 bestAngle = angle;
                 best = candidate;
             }
-        }
 
+            #region 修正前
+            //    if (candidate is not Component comp)
+            //        continue;
+
+            //    Collider collider =
+            //        comp.GetComponent<Collider>();
+
+            //    Bounds bounds = collider != null
+            //        ? collider.bounds
+            //        : new Bounds(
+            //            candidate.GetTargetCenter().position,
+            //            Vector3.one);
+
+            //    // 画面内に映っていない敵は除外
+            //    if (!GeometryUtility.TestPlanesAABB(
+            //            frustumPlanes,
+            //            bounds))
+            //    {
+            //        continue;
+            //    }
+
+            //    // プレイヤー正面との角度を計算
+            //    Vector3 dirToCandidate =
+            //        (candidate.GetTargetCenter().position
+            //        - _playerTransform.position).normalized;
+
+            //    float angle =
+            //        Vector3.Angle(
+            //            _playerTransform.forward,
+            //            dirToCandidate);
+
+            //    if (angle < bestAngle)
+            //    {
+            //        bestAngle = angle;
+            //        best = candidate;
+            //    }
+            //}
+
+            //Debug.Log(best.GetTargetCenter());
+            #endregion
+        }
         return best;
     }
 

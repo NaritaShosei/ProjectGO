@@ -10,6 +10,7 @@ using BossEnemy.View.SMB;
 using BossEnemy.Application;
 using BossEnemy.Enum;
 using BossEnemy.Data;
+using System.Collections.Generic;
 #endregion
 
 namespace BossEnemy.View
@@ -36,8 +37,10 @@ namespace BossEnemy.View
         /// <summary>死亡時に発火するイベント</summary>
         public event Action<IEnemy> OnDead;
 
-        // --- Properties ---
+        /// <summary>ロックオン可能なパーツが変わった際ベント<新しいターゲット、古いターゲット></summary>
+        public event Action<IReadOnlyList<ILockOnTarget>, IReadOnlyList<ILockOnTarget>> OnChangeLockOnParts;
 
+        // --- Properties ---
         /// <summary> BossEnemyと内部Modelを繋ぐControllerClass </summary>
         public BossEnemyController BossEnemyController => _bossEnemyController;
 
@@ -70,6 +73,9 @@ namespace BossEnemy.View
 
         /// <summary> ロックオン可能か(非アクティブ状態でオフにしたい場合など)。 </summary>
         public bool IsLockable => _isLockable;
+
+        /// <summary> 現在攻撃可能なボスの部位 </summary>
+        public BossEnemyPartsView[] ActiveBossEnemyPartsView => _activeBossEnemyPartsView;
 
         // --- Methods ---
 
@@ -262,6 +268,18 @@ namespace BossEnemy.View
 
         public void SetPosture(PostureType postureType)
         {
+            if (postureType == _currentPostureType) return;
+
+            BossEnemyPartsView[] lockOnOldTargets = null;
+            if (_activeBossEnemyPartsView != null)
+            {
+                lockOnOldTargets = _activeBossEnemyPartsView;
+                foreach (var oldTarget in _activeBossEnemyPartsView)
+                {
+                    oldTarget.SetLockable(false);
+                }
+            }
+
             foreach (var collision in _collisionDetections)
             {
                 if (collision.CollisionDetectionPostureType == postureType)
@@ -269,6 +287,17 @@ namespace BossEnemy.View
                     _bossCollider.size = collision.BossColliderSize;
                     _bossCollider.center = collision.BossColliderCenter;
                     _activeBossEnemyPartsView = collision.BossEnemyPartsView;
+                    _currentPostureType = postureType;
+
+                    BossEnemyPartsView[] lockOnNewTargets = _activeBossEnemyPartsView;
+
+                    foreach(var newTarget in _activeBossEnemyPartsView)
+                    {
+                        newTarget.SetLockable(true);
+                    }
+
+                    OnChangeLockOnParts.Invoke(lockOnNewTargets, lockOnOldTargets);
+                    return;
                 }
             }
         }
@@ -390,6 +419,7 @@ namespace BossEnemy.View
         private ReactiveProperty<float> _timeScale = new(1.0f);
 
         private BossEnemyPartsView[] _activeBossEnemyPartsView;
+        private PostureType _currentPostureType = PostureType.None;
 
         private void Awake()
         {
@@ -440,12 +470,15 @@ namespace BossEnemy.View
             /// <summary>
             /// ロックオンなどの中心のTransformを取得する
             /// </summary>
-            public Transform GetTargetCenter() => _partsTransform;
+            public Transform GetTargetCenter()
+            {
+                return _partsTransform;
+            }
 
             /// <summary>
             /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
             /// </summary>
-            public bool IsLockable => _bossEnemyView.IsLockable;
+            public bool IsLockable => _isLockable;
 
             /// <summary>
             /// パーツの座標
@@ -469,6 +502,8 @@ namespace BossEnemy.View
                 if (_thisPartsArmer != null) _thisPartsArmer.Init();
             }
 
+            public void SetLockable (bool lockable) => _isLockable = lockable;
+
             [Header("このPartsのTransform")]
             [SerializeField] private Transform _partsTransform;
 
@@ -477,6 +512,8 @@ namespace BossEnemy.View
 
             [Header("このPartsの硬さ(肉質)")]
             [SerializeField] private BodysDefensesType _bossEnemyPartsType;
+
+            private bool _isLockable = false;
 
             private BossEnemyView _bossEnemyView = null;
         }

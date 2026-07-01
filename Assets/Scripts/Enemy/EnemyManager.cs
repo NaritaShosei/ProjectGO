@@ -95,6 +95,7 @@ public class EnemyManager : MonoBehaviour
             _spatialHashGrid.Register(enemy, pos);
 
             _enemies.Add(enemy);
+            _lockOnTargets.Add(enemy);
         }
         else
         {
@@ -136,6 +137,7 @@ public class EnemyManager : MonoBehaviour
 
         _spatialHashGrid.Register(enemy, pos);
         _enemies.Add(enemy);
+        _lockOnTargets.Add(enemy);
     }
 
 
@@ -155,6 +157,23 @@ public class EnemyManager : MonoBehaviour
             }
         }
         return enemiesInRange;
+    }
+
+    public IReadOnlyList<ILockOnTarget> GetLockOnTarget(Vector3 position, float radius)
+    {
+        List<ILockOnTarget> targets = new List<ILockOnTarget>();
+        foreach (var target in _lockOnTargets)
+        {
+            float distance = Vector3.Distance(target.GetTargetCenter().position, position);
+            if (distance <= radius)
+            {
+                if (target.IsLockable)
+                {
+                    targets.Add(target);
+                }
+            }
+        }
+        return targets;
     }
 
     /// <summary> SpawnDataRepositoryから一括生成 </summary>
@@ -178,12 +197,13 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        IEnemy enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
+        BossEnemyView enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
         enemy.OnDead += HandleEnemyDead;
         enemy.OnDamaged += HandleEnemyDamaged;
+        enemy.OnChangeLockOnParts += HandleChangeBossEnemyLockOnParts;
 
         _enemiesTransformList.Add(enemy.Self);
 
@@ -237,6 +257,7 @@ public class EnemyManager : MonoBehaviour
 
     private List<Transform> _enemiesTransformList = new List<Transform>();
     private List<IEnemy> _enemies = new();
+    private List<ILockOnTarget> _lockOnTargets = new List<ILockOnTarget>();
     private IPlayer _player;
 
     private ISpatialHashGrid _spatialHashGrid;
@@ -290,8 +311,33 @@ public class EnemyManager : MonoBehaviour
             {
                 OnEnemyDefeated?.Invoke();
             }
+
+            if (enemy is not BossEnemyView bossEnemy) return;
+
+            bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
+            HandleChangeBossEnemyLockOnParts(null, bossEnemy.ActiveBossEnemyPartsView);
         }
     }
+
+    private void HandleChangeBossEnemyLockOnParts(IReadOnlyList<ILockOnTarget> newTargets, IReadOnlyList<ILockOnTarget> oldTargets)
+    {
+        if (oldTargets != null)
+        {
+            foreach (var target in oldTargets)
+            {
+                if (_lockOnTargets.Contains(target)) _lockOnTargets.Remove(target);
+            }
+        }
+
+        if (newTargets != null)
+        {
+            foreach (var target in newTargets)
+            {
+                _lockOnTargets.Add(target);
+            }
+        }
+    }
+
 
     /// <summary> 死んだ敵の登録されているTransformをリムーブする </summary>
     /// <param name="enemy"> 死んだ敵 </param>
@@ -303,6 +349,7 @@ public class EnemyManager : MonoBehaviour
         {
             GameObject targetEnemy = enemyComponent.gameObject;
             _enemiesTransformList.Remove(targetEnemy.transform);
+            _lockOnTargets.Remove(enemy);
         }
         else
         {
