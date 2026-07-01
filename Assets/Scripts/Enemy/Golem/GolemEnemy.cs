@@ -159,7 +159,7 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     private Transform _attackEffectPoint;
 
     [SerializeField]
-    private String _attackEffecktText;
+    private string _attackEffectKey;
 
     private BlinkEffect _blinkEffect;
     private EffectManager _effectManager;
@@ -264,7 +264,7 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     {
         if (_effectManager == null) return;
         Vector3 pos = _attackEffectPoint != null ? _attackEffectPoint.position : transform.position;
-        _effectManager.PlayEffect(_attackEffecktText, pos);
+        _effectManager.PlayEffect(_attackEffectKey, pos);
     }
 
     /// <summary>
