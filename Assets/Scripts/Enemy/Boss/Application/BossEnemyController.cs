@@ -217,7 +217,7 @@ namespace BossEnemy.Application
                 RegisterArmorDamageEventAction();
 
                 // BehaviorTreeのPhase切り替え処理
-                _bossEnemyBehaviorTree.HandlePhaseChanged(data, _attackDataRepositry, _enemyServices.PlayerInformationService);
+                _bossEnemyBehaviorTree.HandlePhaseChanged(_phaseChange.CurrentPhase, data, _attackDataRepositry, _enemyServices.PlayerInformationService);
 
 
                 // HPが0になったときフェーズを切り替える処理
