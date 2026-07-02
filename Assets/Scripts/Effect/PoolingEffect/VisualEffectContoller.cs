@@ -10,13 +10,13 @@ public class VisualEffectContoller : EffectBase
     {
         base.OnGet();
 
-        // 原因対策2：プールから出た瞬間、外側が忘れていても強制的に自身をアクティブにする
+        // プールから出た瞬間、外側が忘れていても強制的に自身をアクティブにする
         if (!gameObject.activeSelf)
         {
             gameObject.SetActive(true);
         }
 
-        // 原因対策3：位置ズレ対策（再生前のフレームでVFXのシミュレーションが走るのを防ぐ）
+        // 位置ズレ対策（再生前のフレームでVFXのシミュレーションが走るのを防ぐ）
         if (_rootVFX != null)
         {
             _rootVFX.enabled = true;
@@ -47,7 +47,7 @@ public class VisualEffectContoller : EffectBase
         // 子オブジェクトを含めて全てのVisualEffectコンポーネントを収集
         _vfxs = GetComponentsInChildren<VisualEffect>(includeInactive: true);
 
-        // 原因対策1：_rootVFXが未設定なら、自分自身から自動取得
+        // _rootVFXが未設定なら、自分自身から自動取得
         if (_rootVFX == null)
         {
             _rootVFX = GetComponent<VisualEffect>();
@@ -62,11 +62,11 @@ public class VisualEffectContoller : EffectBase
             // 現在の生存期間を初期化
             _currentAliveTime = 0;
 
-            // 原因対策3の続き：再生が呼ばれた＝位置が確定したとみなして一時停止を解除
+            // 再生が呼ばれた＝位置が確定したとみなして一時停止を解除
             _rootVFX.enabled = true;
             _rootVFX.pause = false;
 
-            // 原因対策4：再生直後のフレームはパーティクル数が0になるため、生存フラグを立てる
+            // 再生直後のフレームはパーティクル数が0になるため、生存フラグを立てる
             _isStarting = true;
 
             // 再生イベントを送信
