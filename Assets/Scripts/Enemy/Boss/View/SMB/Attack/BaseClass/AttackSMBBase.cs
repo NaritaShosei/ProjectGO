@@ -4,6 +4,7 @@ using UnityEngine;
 using BossEnemy.Data;
 using BossEnemy.Model.Interface;
 using BossEnemy.Model.System;
+using Cysharp.Threading.Tasks;
 
 namespace BossEnemy.View.SMB
 {
@@ -13,12 +14,14 @@ namespace BossEnemy.View.SMB
             IAnimationEventReceiver bossEnemyAnimationEventReceiver,
             BossEnemyAnimator bossAnimator,
             AttackInformationHolder attackInformation,
+            CameraManager cameraManager,
             IAttackHitAreaSpawner attackHitAreaSpawner,
             Transform bossEnemyTransform, IPlayer player)
         {
             _animationEventReceiver = bossEnemyAnimationEventReceiver;
             _bossAnimator = bossAnimator;
             _informationHolder = attackInformation;
+            _cameraManager = cameraManager;
             _attackHitAreaSpawner = attackHitAreaSpawner;
             _bossEnemyTransform = bossEnemyTransform;
             _target = player;
@@ -83,7 +86,8 @@ namespace BossEnemy.View.SMB
 
             if (_attackHitFired)
             {
-                if(AttackHitChecker.TryHitAttack(HitAreaType.Circle, _hitCenterPos, _target, _attackData.AttackRange))
+                _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
+                if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, _hitCenterPos, _target, _attackData.AttackRange))
                 {
                     _animationEventReceiver.AnimEvent_AttackHit();
                     _attackHitFired = false;
@@ -98,9 +102,14 @@ namespace BossEnemy.View.SMB
 
         [SerializeField] protected float _attackAreaDespawnTime = 1.0f;
 
+        [Header("攻撃時のCameraShakeData")]
+        [SerializeField] protected CameraShakeData _cameraShakeData;
+
         protected virtual string AttackStartVoiceCueName => null;
 
         protected virtual string AttackCueName => null;
+
+        protected CameraManager _cameraManager = null;
 
         protected AttackInformationHolder _informationHolder;
 

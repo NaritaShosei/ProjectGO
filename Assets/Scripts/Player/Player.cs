@@ -312,7 +312,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerAnimationController?.SetLockedOn(target != null);
 
-        if (target is not Component targetComponent || !targetComponent || !target.IsLockable || target.GetTargetCenter() == null)
+        if (target == null || !target.IsLockable || target.GetTargetCenter() == null)
         {
             _move?.SetLockOnTarget(null);
             return;

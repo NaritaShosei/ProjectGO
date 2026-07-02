@@ -81,6 +81,7 @@ namespace BossEnemy.View.SMB
                 PlayBossSE(SoundCueNames.Boss.RockEruption);
                 _effectManager.PlayEffect(_attackData.AnimParamName, _attackPos);
 
+                _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
                 if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
                 {
                     _animationEventReceiver.AnimEvent_AttackHit();
