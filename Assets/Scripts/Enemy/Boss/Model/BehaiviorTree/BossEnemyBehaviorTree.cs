@@ -31,7 +31,9 @@ namespace BossEnemy.Model.BehaviorTree
             _behaviorController?.OnUpdate();
         }
 
-        public void HandlePhaseChanged(BossEnemyData bossEnemyData,
+        public void HandlePhaseChanged(
+            int currentPhase,
+            BossEnemyData bossEnemyData,
             IBossEnemyAttackDataRepository attackDataRepositry,
             IPlayerInformationService playerInformationService)
         {
@@ -41,10 +43,16 @@ namespace BossEnemy.Model.BehaviorTree
             _lookAtTargetAction = new(playerInformationService.Player.GetTargetCenter(),
                 _move, bossEnemyData, _lookSpeed, _finishAngleThreshold);
 
+            switch (currentPhase)
+            {
+                case _firstPhaseNum: _currentPhaseFirstAttackDataSelectionPool = _firstPhaseFirstAttackSelectionPool; break;
+                case _secondPhaseNum: _currentPhaseFirstAttackDataSelectionPool = _secondPhaseFirstAttackSelectionPool; break;
+            }
+
             ITreeNode[] originChildrenNode = new ITreeNode[]
             {
-                BuildArmorBreakActionTree(bossEnemyData),
-                BuildAttackActionTree(bossEnemyData, attackDataRepositry, playerInformationService)
+                GetArmorBreakActionTree(bossEnemyData),
+                GetAttackActionTree(bossEnemyData, attackDataRepositry, playerInformationService)
             };
 
             SelectorNode originNode = new(originChildrenNode);
@@ -75,6 +83,24 @@ namespace BossEnemy.Model.BehaviorTree
 
         // 初期化確認フラグ
         private bool _isInit = false;
+
+        #region Phase切り替え時の行動関連変数
+
+        [Header("-------Phase切り替え時の行動関連変数--------")]
+
+        [Header("最初のフェーズの最初の攻撃")]
+        [SerializeField] private AttackDataSelectionPool _firstPhaseFirstAttackSelectionPool = new AttackDataSelectionPool();
+
+        [Header("フェーズ2切り替え時の最初の攻撃")]
+        [SerializeField] private AttackDataSelectionPool _secondPhaseFirstAttackSelectionPool = new AttackDataSelectionPool();
+
+        private AttackDataSelectionPool _currentPhaseFirstAttackDataSelectionPool = null;
+        private PhaseChangedNode _phaseChangedNode = null;
+
+        private const int _firstPhaseNum = 0;
+        private const int _secondPhaseNum = 1;
+
+        #endregion
 
         #region 装備破壊時の行動関連変数
 
@@ -109,10 +135,12 @@ namespace BossEnemy.Model.BehaviorTree
         private CountDownNode _normalAttackCountDownNode;
 
         // 各攻撃選択肢ノード
-        private AttackSelect _closeRangeNormalAttackSelect;
-        private AttackSelect _closeRangeSpecialAttackSelect;
-        private AttackSelect _longRangeAttackSelect;
+        private AttackSelection _closeRangeNormalAttackSelect;
+        private AttackSelection _closeRangeSpecialAttackSelect;
+        private AttackSelection _longRangeAttackSelect;
+        private AttackSelection _phaseChangedFirstAttackSelect;
 
+        private SequenceNode _attackActionSequence;
         #endregion
 
         #region 移動行動関連変数
@@ -129,7 +157,7 @@ namespace BossEnemy.Model.BehaviorTree
 
         #endregion
 
-        private ITreeNode BuildArmorBreakActionTree(BossEnemyData bossEnemyData)
+        private ITreeNode GetArmorBreakActionTree(BossEnemyData bossEnemyData)
         {
             _downAction = new DownAction(bossEnemyData, _bossDown, _oneLegBreakDownTime, _allLegBreakDownTime);
 
@@ -140,7 +168,7 @@ namespace BossEnemy.Model.BehaviorTree
             return _breakArmorNode = new(downSequence);
         }
 
-        private ITreeNode BuildAttackActionTree(BossEnemyData bossEnemyData,
+        private ITreeNode GetAttackActionTree(BossEnemyData bossEnemyData,
             IBossEnemyAttackDataRepository dataRepositry,
             IPlayerInformationService playerInformationService)
         {
@@ -157,22 +185,25 @@ namespace BossEnemy.Model.BehaviorTree
             
             // 攻撃シーケンスを生成
             ITreeNode[] attackSequenceChildren = new ITreeNode[] { targetChaseAction, attackNode ,_lookAtTargetAction };
-            SequenceNode attackSequence = new(attackSequenceChildren);
+            _attackActionSequence = new(attackSequenceChildren);
 
             // ---攻撃選択ノード↓-------------------
 
             // 1.近距離通常攻撃
-            _closeRangeNormalAttackSelect = new(attackSequence, bossEnemyData.CloseRangeNormalAttackFieldHolder, 
+            _closeRangeNormalAttackSelect = new(_attackActionSequence, bossEnemyData.CloseRangeNormalAttackFieldHolder, 
                 dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
 
             // 2.通常攻撃3回以上攻撃
-            _closeRangeSpecialAttackSelect = new(attackSequence, bossEnemyData.CloseRangeFinishCountAttackFieldHolder, 
+            _closeRangeSpecialAttackSelect = new(_attackActionSequence, bossEnemyData.CloseRangeFinishCountAttackFieldHolder, 
                 dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
 
             // 3.遠距離攻撃
-            _longRangeAttackSelect = new(attackSequence, bossEnemyData.LongRangeAttackFieldHolder,
+            _longRangeAttackSelect = new(_attackActionSequence, bossEnemyData.LongRangeAttackFieldHolder,
                 dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
 
+            // 4.フェーズ切り替え時最初の攻撃
+            _phaseChangedFirstAttackSelect = new(_attackActionSequence, _currentPhaseFirstAttackDataSelectionPool,
+                dataRepositry, _attackCoolTimer, attackNode, targetChaseAction);
 
             // カウントダウンを行いカウントが0になったときに近距離の特殊攻撃を行うノード
             _normalAttackCountDownNode = new(_closeRangeSpecialAttackSelect, _normalAttackCount);
@@ -184,8 +215,12 @@ namespace BossEnemy.Model.BehaviorTree
             // ターゲットの距離を見て近いときはEntryできるノード
             CloseToPlayerNode closeRangeTarget = new(closeAttackSelector, playerInformationService, bossEnemyData, _bossTerritoryDistance);
 
+            // フェーズ切り替え時に一度だけは入れるノード
+            _phaseChangedNode = new(_phaseChangedFirstAttackSelect);
+            _phaseChangedNode.ChangePhase();
+
             // 上記のノード軍の最上位ノードを生成
-            ITreeNode[] attackSelectorChild = new ITreeNode[] { closeRangeTarget, _longRangeAttackSelect };
+            ITreeNode[] attackSelectorChild = new ITreeNode[] { _phaseChangedNode , closeRangeTarget, _longRangeAttackSelect };
             SelectorNode attackSelector = new(attackSelectorChild);
 
             return attackSelector;
