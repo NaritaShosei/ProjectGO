@@ -43,9 +43,9 @@ namespace BossEnemy.Model.BehaviorTree
     }
 
     /// <summary> 攻撃の選択Node </summary>
-    public class AttackSelect : DecoratorNode
+    public class AttackSelection : DecoratorNode
     {
-        public AttackSelect(ITreeNode child, 
+        public AttackSelection(ITreeNode child, 
             AttackDataSelectionPool bossEnemyAttackField, 
             IBossEnemyAttackDataRepository bossEnemyAttackDataRepositry, 
             AttackCoolTimer bossEnemyAttackCoolTimer,
@@ -179,6 +179,36 @@ namespace BossEnemy.Model.BehaviorTree
         }
 
         private ArmorAttachmentPointType _armorBreakingPoint = ArmorAttachmentPointType.None;
+    }
+    #endregion
+
+    #region Phaseが切り替わった際に一度だけEntryが可能となるDecoratorNode
+    public class PhaseChangedNode : DecoratorNode
+    {
+        public PhaseChangedNode(ITreeNode child) : base(child)
+        {
+            _childNode = child;
+            _canEntry = false;
+        }
+
+        public void ChangePhase()
+        {
+            _canEntry = true;
+        }
+
+        public override NodeCondition TryEntry()
+        {
+            if (_canEntry)
+            {
+                _canEntry = false;
+                return NodeCondition.Success;
+            }
+
+            return NodeCondition.Failure;
+        }
+
+        private int _currentPhase = 0;
+        private bool _canEntry = false;
     }
     #endregion
 

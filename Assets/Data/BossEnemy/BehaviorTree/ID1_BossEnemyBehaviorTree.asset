@@ -12,6 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b1dcb62f5f422149b3753f583e6e927, type: 3}
   m_Name: ID1_BossEnemyBehaviorTree
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyBehaviorTree
+  _firstPhaseFirstAttackSelectionPool:
+    _attackField:
+    - ID: 6
+      ActivationRate: 100
+  _secondPhaseFirstAttackSelectionPool:
+    _attackField:
+    - ID: 7
+      ActivationRate: 100
   _oneLegBreakDownTime: 10
   _allLegBreakDownTime: 15
   _normalAttackCount: 3
