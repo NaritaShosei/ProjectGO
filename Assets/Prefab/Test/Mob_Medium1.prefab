@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 7671823680619389335}
   - component: {fileID: 1540282048846161363}
   - component: {fileID: 258673169019590428}
+  - component: {fileID: 6388321239759012407}
   m_Layer: 8
   m_Name: Mob_Medium1
   m_TagString: Untagged
@@ -198,6 +199,8 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 362aa867931ba5444ae43e73f8223e3e, type: 2}
   _distanceProfile: {fileID: 11400000, guid: 28f4a609b4f245e4e8ec74a84e56b62b, type: 2}
   _animationEventReceiver: {fileID: 7651705810147927590}
+  _soundHandler: {fileID: 6388321239759012407}
+  _enemyType: 0
   _armor: {fileID: 0}
 --- !u!114 &258673169019590428
 MonoBehaviour:
@@ -236,6 +239,18 @@ MonoBehaviour:
     _effectKeys:
     - "\u30C6\u30B9\u30C8\u706B\u82B1"
     - "\u30C6\u30B9\u30C8\u5CA9"
+--- !u!114 &6388321239759012407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3488705074941606510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3228565db4b453e42b723817d49cbe9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySoundHandler
 --- !u!1 &6484599513889276019
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,15 +488,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2.5
+      value: 2.75
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2.5
+      value: 2.75
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2.5
+      value: 2.75
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalPosition.x

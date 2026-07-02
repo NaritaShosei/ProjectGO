@@ -229,6 +229,7 @@ GameObject:
   - component: {fileID: 7469027508442278846}
   - component: {fileID: 6657380966366696474}
   - component: {fileID: 3406474487311268722}
+  - component: {fileID: 7717175208988588775}
   m_Layer: 8
   m_Name: Mob_Armor_Ligth1
   m_TagString: Untagged
@@ -289,12 +290,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22284876e53ec864d905a56d7f3bfa7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MobEnemy
-  _data: {fileID: 11400000, guid: 38cfe4155b237ee43a58717872f9ec03, type: 2}
+  _data: {fileID: 11400000, guid: b23e753ca7b585b4a9bc2adb6b749ee5, type: 2}
   _targetCenter: {fileID: 4618630676314677390}
   _animator: {fileID: 4828883015233932139}
   _turnProfile: {fileID: 11400000, guid: 362aa867931ba5444ae43e73f8223e3e, type: 2}
   _distanceProfile: {fileID: 11400000, guid: 28f4a609b4f245e4e8ec74a84e56b62b, type: 2}
   _animationEventReceiver: {fileID: 3389916578526349029}
+  _soundHandler: {fileID: 7717175208988588775}
+  _enemyType: 0
   _armor: {fileID: 4814497315725255431}
 --- !u!114 &3406474487311268722
 MonoBehaviour:
@@ -341,6 +344,18 @@ MonoBehaviour:
     _effectKeys:
     - "\u30C6\u30B9\u30C8\u706B\u82B1"
     - "\u30C6\u30B9\u30C8\u5CA9"
+--- !u!114 &7717175208988588775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3801929445349576463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3228565db4b453e42b723817d49cbe9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySoundHandler
 --- !u!1 &9014138937959122343
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,7 +381,7 @@ Transform:
   m_GameObject: {fileID: 9014138937959122343}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.023, y: 0.757, z: -0.003}
+  m_LocalPosition: {x: 0.023, y: 1.039, z: -0.003}
   m_LocalScale: {x: 0.33333334, y: 0.33333334, z: 0.33333334}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -482,15 +497,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalScale.y
-      value: 2
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalScale.z
-      value: 2
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 40aa580e93f01954ea4032cbefaff9d0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2343,6 +2358,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3207514931574581577, guid: f709f7f04c8b2ce45b91549924dddaa6, type: 3}
+      propertyPath: _data
+      value: 
+      objectReference: {fileID: 11400000, guid: 83ca074ce915a604dad8dc3259fbc0e4, type: 2}
     - target: {fileID: 3413042657038700062, guid: f709f7f04c8b2ce45b91549924dddaa6, type: 3}
       propertyPath: m_IsTrigger
       value: 1
