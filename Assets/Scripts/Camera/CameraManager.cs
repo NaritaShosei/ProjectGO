@@ -73,11 +73,11 @@ public class CameraManager : MonoBehaviour
         if (_currentTarget == target) return;
 
         _currentTarget = target;
-        _currentTargetComponent = target as Component;
         _lockOnCamera.Priority = _lockOnPriority;
 
         BeginLockOnBlend();
 
+        Debug.Log(_currentTarget);
         OnLockOnTargetChanged?.Invoke(_currentTarget);
     }
 
@@ -87,12 +87,11 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     public void Unlock()
     {
-        if (_currentTarget == null && _currentTargetComponent == null) return;
+        if (_currentTarget == null) return;
 
         ApplyRotationToNormalCamera();
 
         _currentTarget = null;
-        _currentTargetComponent = null;
         _lockOnCamera.Priority = _normalPriority - 1;
         _isLockOnBlending = false;
 
@@ -167,7 +166,6 @@ public class CameraManager : MonoBehaviour
     private Camera _mainCamera;
     private Transform _playerTransform;
     private ILockOnTarget _currentTarget;
-    private Component _currentTargetComponent;
     private CinemachineOrbitalFollow _normalOrbitalFollow;
     private Transform _cameraFollowTarget;
     private Vector3 _normalFollowVelocity;
@@ -424,7 +422,7 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     private bool IsValidTarget(ILockOnTarget target)
     {
-        if (target is not Component comp || !comp || !target.IsLockable || target.GetTargetCenter() == null)
+        if (!target.IsLockable || target.GetTargetCenter() == null)
         {
             Debug.LogWarning("ロックオン対象が無効です。");
             return false;
@@ -437,8 +435,7 @@ public class CameraManager : MonoBehaviour
     /// </summary>
     private bool IsCurrentTargetValid()
     {
-        return _currentTargetComponent != null
-            && _currentTarget.IsLockable
+        return _currentTarget.IsLockable
             && _currentTarget.GetTargetCenter() != null;
     }
 

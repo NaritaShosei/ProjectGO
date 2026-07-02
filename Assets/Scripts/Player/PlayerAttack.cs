@@ -279,7 +279,7 @@ public class PlayerAttack : MonoBehaviour
         if (_autoFireTriggered) return;
 
         // TODO:即攻撃ではなくチャージの構えモーションが再生されてから攻撃が発動するようにする
-        
+
     }
     #endregion
 
@@ -815,7 +815,13 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ChangeLockOnTarget(ILockOnTarget target)
     {
-        _currentLockOnTarget = (target is Component c && c && target.IsLockable && target.GetTargetCenter() != null)
+        if (target == null)
+        {
+            _currentLockOnTarget = null;
+            return;
+        }
+
+        _currentLockOnTarget = (target.IsLockable && target.GetTargetCenter() != null)
             ? target : null;
     }
 
@@ -883,9 +889,9 @@ public class PlayerAttack : MonoBehaviour
 
     private Transform GetCurrentLockOnTargetCenter()
     {
-        if (_currentLockOnTarget is not Component targetComponent ||
-            !targetComponent ||
-            !_currentLockOnTarget.IsLockable)
+        if (_currentLockOnTarget == null ||
+!_currentLockOnTarget.IsLockable ||
+_currentLockOnTarget.GetTargetCenter() == null)
         {
             return null;
         }
