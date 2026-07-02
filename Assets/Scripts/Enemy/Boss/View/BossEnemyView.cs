@@ -86,6 +86,11 @@ namespace BossEnemy.View
             _isLockable = true;
             SetPosture(PostureType.Stand);
 
+            if(!ServiceLocator.TryGet(out _cameraManager))
+            {
+                Debug.Log("取得失敗");
+            }
+
             foreach (var parts in _activeBossEnemyPartsView)
             {
                 parts.Init(this);
@@ -94,7 +99,7 @@ namespace BossEnemy.View
             foreach (var behaviour in _animator.GetBehaviours<AttackSMBBase>())
             {
                 behaviour.Init(_bossEnemyAnimationEventReceiver, _bossEnemyAnimator, _attackInformationHolder,
-                    _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
+                    _cameraManager, _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
             }
 
             _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
@@ -154,6 +159,7 @@ namespace BossEnemy.View
                 }
             }
 
+            // ダメージのポップアップ
             HitResult result = new HitResult()
             {
                 IsKill = false,
@@ -169,14 +175,9 @@ namespace BossEnemy.View
             Debug.Log("ダメージを検出(アーマーのガード:" + isGuardArmor + ")" + "(こうげきかしょ:" + parts.PartsType + ")");
             OnTakeDamage?.Invoke(context, parts.PartsType, isGuardArmor, armorAttachmentPoint);
 
-            if (isHitArmor)
-            {
-                _effectManager.PlayEffect("BossArmorHit", hitPos);
-            }
-            else
-            {
-                _effectManager.PlayEffect("テスト血しぶき", hitPos);
-            }
+            // 攻撃を受けた際のEffect
+            if (isHitArmor) _effectManager.PlayEffect(_takeArmorDamageEffectKey, hitPos);
+            else _effectManager.PlayEffect(_takeDamageEffectKey, hitPos);
         }
 
         public void Attack(BossEnemyAttackData bossEnemyAttackData)
@@ -407,6 +408,7 @@ namespace BossEnemy.View
         private BossEnemyAnimator _bossEnemyAnimator;
         private AttackInformationHolder _attackInformationHolder = new();
         private EffectManager _effectManager;
+        private CameraManager _cameraManager;
 
         private EnemyServices _services;
 
@@ -420,6 +422,9 @@ namespace BossEnemy.View
 
         private BossEnemyPartsView[] _activeBossEnemyPartsView;
         private PostureType _currentPostureType = PostureType.None;
+
+        private const string _takeArmorDamageEffectKey = "BossArmorHit";
+        private const string _takeDamageEffectKey = "テスト血しぶき";
 
         private void Awake()
         {
