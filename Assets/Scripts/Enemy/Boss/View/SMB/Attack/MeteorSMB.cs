@@ -92,7 +92,7 @@ namespace BossEnemy.View.SMB
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
 
-                PlayBossSE(SoundCueNames.Boss.RockEruption);
+                PlayBossSE(SoundCueNames.Boss.MeteorImpact);
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
                 if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, attackPos, _target, _attackData.AttackRange))
                 {

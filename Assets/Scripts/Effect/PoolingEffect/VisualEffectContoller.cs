@@ -85,6 +85,7 @@ public class VisualEffectContoller : EffectBase
 
         return true;
 
+        #region 修正前(旧繕いなので後でこっちを改修します)
         // 原因対策4：再生直後の最初のフレームは、カウントが0でも強制的に生存（true）を返す
         //if (_isStarting)
         //{
@@ -107,6 +108,7 @@ public class VisualEffectContoller : EffectBase
 
         // すべてのパーティクルが消えたら死亡（false）を返し、外側のシステムに回収させる
         //return false;
+        #endregion
     }
 
     protected override void OnStopInternal()

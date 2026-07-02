@@ -95,7 +95,6 @@ public class CameraManager : MonoBehaviour
         _lockOnCamera.Priority = _normalPriority - 1;
         _isLockOnBlending = false;
 
-        Debug.Log("はい");
         OnLockOnTargetChanged?.Invoke(null);
     }
 

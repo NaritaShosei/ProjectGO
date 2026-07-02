@@ -219,47 +219,6 @@ public class LockOnTargetSelector
                 bestAngle = angle;
                 best = candidate;
             }
-
-            #region 修正前
-            //    if (candidate is not Component comp)
-            //        continue;
-
-            //    Collider collider =
-            //        comp.GetComponent<Collider>();
-
-            //    Bounds bounds = collider != null
-            //        ? collider.bounds
-            //        : new Bounds(
-            //            candidate.GetTargetCenter().position,
-            //            Vector3.one);
-
-            //    // 画面内に映っていない敵は除外
-            //    if (!GeometryUtility.TestPlanesAABB(
-            //            frustumPlanes,
-            //            bounds))
-            //    {
-            //        continue;
-            //    }
-
-            //    // プレイヤー正面との角度を計算
-            //    Vector3 dirToCandidate =
-            //        (candidate.GetTargetCenter().position
-            //        - _playerTransform.position).normalized;
-
-            //    float angle =
-            //        Vector3.Angle(
-            //            _playerTransform.forward,
-            //            dirToCandidate);
-
-            //    if (angle < bestAngle)
-            //    {
-            //        bestAngle = angle;
-            //        best = candidate;
-            //    }
-            //}
-
-            //Debug.Log(best.GetTargetCenter());
-            #endregion
         }
         return best;
     }
