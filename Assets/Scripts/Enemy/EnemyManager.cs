@@ -164,13 +164,15 @@ public class EnemyManager : MonoBehaviour
         List<ILockOnTarget> targets = new List<ILockOnTarget>();
         foreach (var target in _lockOnTargets)
         {
-            float distance = Vector3.Distance(target.GetTargetCenter().position, position);
+            if (target == null || !target.IsLockable) continue;
+
+            Transform center = target.GetTargetCenter();
+            if (center == null) continue;
+
+            float distance = Vector3.Distance(center.position, position);
             if (distance <= radius)
             {
-                if (target.IsLockable)
-                {
-                    targets.Add(target);
-                }
+                targets.Add(target);
             }
         }
         return targets;
@@ -333,7 +335,7 @@ public class EnemyManager : MonoBehaviour
         {
             foreach (var target in newTargets)
             {
-                _lockOnTargets.Add(target);
+                if (target != null && !_lockOnTargets.Contains(target)) _lockOnTargets.Add(target);
             }
         }
     }

@@ -76,7 +76,7 @@ public class VisualEffectContoller : EffectBase
 
     protected override bool IsAliveInternal()
     {
-        _currentAliveTime += Time.deltaTime;
+        _currentAliveTime += Time.deltaTime * TimeScale;
 
         if(_currentAliveTime > _despawnTime)
         {

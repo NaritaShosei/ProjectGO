@@ -89,6 +89,7 @@ namespace BossEnemy.View
             if(!ServiceLocator.TryGet(out _cameraManager))
             {
                 Debug.Log("取得失敗");
+                return;
             }
 
             foreach (var parts in _activeBossEnemyPartsView)
@@ -297,7 +298,7 @@ namespace BossEnemy.View
                         newTarget.SetLockable(true);
                     }
 
-                    OnChangeLockOnParts.Invoke(lockOnNewTargets, lockOnOldTargets);
+                    OnChangeLockOnParts?.Invoke(lockOnNewTargets, lockOnOldTargets);
                     return;
                 }
             }

@@ -98,7 +98,6 @@ MonoBehaviour:
     _amplitude: 2.2
     _frequency: 1.8
     _duration: 0.18
-  _cameraManager: {fileID: 0}
   _attackIntervalFlame: 100
   _attackAreaCircleGeneratePosY: 0.2
   _maxAttackCount: 4
@@ -194,7 +193,6 @@ MonoBehaviour:
     _amplitude: 2.5
     _frequency: 2.5
     _duration: 0.4
-  _cameraManager: {fileID: 0}
   _startMoveTime: 1
   _endMoveTime: 1.5
 --- !u!1101 &-7487135078225682260
@@ -813,7 +811,6 @@ MonoBehaviour:
     _amplitude: 4
     _frequency: 1.2
     _duration: 0.45
-  _cameraManager: {fileID: 0}
   _consecutiveAttackInterval: 0.3
   _maxAttackCount: 15
   _attackAreaEffectPosY: 0.2
@@ -1551,7 +1548,6 @@ MonoBehaviour:
     _amplitude: 3.5
     _frequency: 1.5
     _duration: 0.25
-  _cameraManager: {fileID: 0}
 --- !u!1101 &1468476537347392496
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1744,7 +1740,6 @@ MonoBehaviour:
     _amplitude: 5
     _frequency: 1
     _duration: 0.35
-  _cameraManager: {fileID: 0}
 --- !u!1101 &3704275777977854933
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1998,7 +1993,6 @@ MonoBehaviour:
     _amplitude: 2
     _frequency: 2
     _duration: 0.18
-  _cameraManager: {fileID: 0}
 --- !u!1101 &7233389824067996467
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2158,7 +2152,6 @@ MonoBehaviour:
     _amplitude: 3.5
     _frequency: 1.5
     _duration: 0.25
-  _cameraManager: {fileID: 0}
 --- !u!206 &8379833654317876881
 BlendTree:
   m_ObjectHideFlags: 1

@@ -79,6 +79,7 @@ public class LockOnTargetSelector
 
         foreach (var candidate in candidates)
         {
+            // ToDo:非Componentの使用を可能にする
             if (candidate is not Component comp) continue;
 
             Bounds bounds = comp.GetComponent<Collider>()?.bounds
