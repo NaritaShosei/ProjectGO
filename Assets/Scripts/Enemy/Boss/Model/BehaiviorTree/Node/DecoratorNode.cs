@@ -198,17 +198,32 @@ namespace BossEnemy.Model.BehaviorTree
 
         public override NodeCondition TryEntry()
         {
-            if (_canEntry)
+            if (!_canEntry || _childNode == null) return NodeCondition.Failure;
+
+            NodeCondition condition = _childNode.TryEntry();
+
+            if (condition != NodeCondition.Running && condition != NodeCondition.Success)
             {
-                _canEntry = false;
-                return NodeCondition.Success;
+                return NodeCondition.Failure;
             }
 
-            return NodeCondition.Failure;
+            _canEntry = false;
+            _hasEntryChild = true;
+            return NodeCondition.Success;
+        }
+
+        public override NodeCondition TryGetNextNode(ref ITreeNode nextNode)
+        {
+            if (!_hasEntryChild) return NodeCondition.Failure;
+
+            _hasEntryChild = false;
+            nextNode = _childNode;
+            return NodeCondition.Success;
         }
 
         private int _currentPhase = 0;
         private bool _canEntry = false;
+        private bool _hasEntryChild = false;
     }
     #endregion
 
