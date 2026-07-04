@@ -260,6 +260,7 @@ GameObject:
   - component: {fileID: 8631267147205945289}
   - component: {fileID: 8591203655818275640}
   - component: {fileID: 5058918164880723876}
+  - component: {fileID: -8417341200168587889}
   m_Layer: 8
   m_Name: Mob_Armor_Heavy1
   m_TagString: Untagged
@@ -326,6 +327,8 @@ MonoBehaviour:
   _turnProfile: {fileID: 11400000, guid: 362aa867931ba5444ae43e73f8223e3e, type: 2}
   _distanceProfile: {fileID: 11400000, guid: 28f4a609b4f245e4e8ec74a84e56b62b, type: 2}
   _animationEventReceiver: {fileID: 5066381532912538675}
+  _soundHandler: {fileID: -8417341200168587889}
+  _enemyType: 0
   _armor: {fileID: 1485412999280485276}
 --- !u!114 &5058918164880723876
 MonoBehaviour:
@@ -372,6 +375,18 @@ MonoBehaviour:
     _effectKeys:
     - "\u30C6\u30B9\u30C8\u706B\u82B1"
     - "\u30C6\u30B9\u30C8\u5CA9"
+--- !u!114 &-8417341200168587889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8905585298173456059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3228565db4b453e42b723817d49cbe9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySoundHandler
 --- !u!1001 &4043773516894423765
 PrefabInstance:
   m_ObjectHideFlags: 0

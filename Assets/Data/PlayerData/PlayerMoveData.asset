@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c5c8a10daa056d42bd3aa7c5ca6c09a, type: 3}
   m_Name: PlayerMoveData
   m_EditorClassIdentifier: Assembly-CSharp::MoveData
-  _rotateSpeed: 8.63
+  _rotateSpeed: 8
   _modeDodgeData:
   - Mode: 0
     Data:
-      Speed: 10
-      Duration: 0.5
+      Speed: 7
+      Duration: 0.7
       InvincibleDuration: 0.3
   - Mode: 1
     Data:
-      Speed: 10
-      Duration: 0.5
+      Speed: 9
+      Duration: 0.55
       InvincibleDuration: 0.3
   _defaultDodge:
     Speed: 10

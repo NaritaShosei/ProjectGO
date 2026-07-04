@@ -16,6 +16,8 @@ MonoBehaviour:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Medium
       SpawnCount: 2
+    - EnemyTypeKey: Enemy_Light
+      SpawnCount: 2
     ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 2
