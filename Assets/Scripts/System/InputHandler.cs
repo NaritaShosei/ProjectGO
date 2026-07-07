@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 public class InputHandler : MonoBehaviour
 {
     public Vector2 MoveInput { get; private set; }
+    public Vector2 CameraMoveInput { get; private set; }
 
     // イベント
     public event Action OnDodge;
@@ -31,6 +32,8 @@ public class InputHandler : MonoBehaviour
         else
         {
             _isDisablingInput = true;
+            MoveInput = Vector2.zero;
+            CameraMoveInput = Vector2.zero;
             _input.Player.Disable();
         }
     }
@@ -50,6 +53,9 @@ public class InputHandler : MonoBehaviour
         // 移動
         _input.Player.Move.performed += ctx => MoveInput = ctx.ReadValue<Vector2>();
         _input.Player.Move.canceled += _ => MoveInput = Vector2.zero;
+
+        _input.Player.CameraMove.performed += OnCameraMovePerformed;
+        _input.Player.CameraMove.canceled += OnCameraMoveCanceled;
 
         // 回避
         _input.Player.Dodge.started += _ => OnDodge?.Invoke();
@@ -87,6 +93,9 @@ public class InputHandler : MonoBehaviour
     private void OnDisable()
     {
         EnableInput(false);
+
+        _input.Player.CameraMove.performed -= OnCameraMovePerformed;
+        _input.Player.CameraMove.canceled -= OnCameraMoveCanceled;
     }
 
     private void OnDestroy()
@@ -95,5 +104,15 @@ public class InputHandler : MonoBehaviour
         {
             ServiceLocator.Unregister<InputHandler>();
         }
+    }
+
+    private void OnCameraMovePerformed(InputAction.CallbackContext context)
+    {
+        CameraMoveInput = context.ReadValue<Vector2>();
+    }
+
+    private void OnCameraMoveCanceled(InputAction.CallbackContext _)
+    {
+        CameraMoveInput = Vector2.zero;
     }
 }

@@ -163,6 +163,15 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""CameraMove"",
+                    ""type"": ""Value"",
+                    ""id"": ""94015e16-3a8b-44c5-8018-03a1176872f7"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -550,6 +559,39 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                     ""action"": ""LockOnChange"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""983a713d-f5bf-40a7-8f56-1f2f9812dd37"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraMove"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c1f763e4-925b-4ce4-a144-0c73e9a02c7a"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraMove"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c506375-7c54-48d1-94c3-a84d1dc9cd8e"",
+                    ""path"": ""<XInputController>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraMove"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -1082,6 +1124,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_LockOn = m_Player.FindAction("LockOn", throwIfNotFound: true);
         m_Player_LockOnChange = m_Player.FindAction("LockOnChange", throwIfNotFound: true);
+        m_Player_CameraMove = m_Player.FindAction("CameraMove", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1183,6 +1226,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_LockOn;
     private readonly InputAction m_Player_LockOnChange;
+    private readonly InputAction m_Player_CameraMove;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1226,6 +1270,10 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/LockOnChange".
         /// </summary>
         public InputAction @LockOnChange => m_Wrapper.m_Player_LockOnChange;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/CameraMove".
+        /// </summary>
+        public InputAction @CameraMove => m_Wrapper.m_Player_CameraMove;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1276,6 +1324,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @LockOnChange.started += instance.OnLockOnChange;
             @LockOnChange.performed += instance.OnLockOnChange;
             @LockOnChange.canceled += instance.OnLockOnChange;
+            @CameraMove.started += instance.OnCameraMove;
+            @CameraMove.performed += instance.OnCameraMove;
+            @CameraMove.canceled += instance.OnCameraMove;
         }
 
         /// <summary>
@@ -1311,6 +1362,9 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
             @LockOnChange.started -= instance.OnLockOnChange;
             @LockOnChange.performed -= instance.OnLockOnChange;
             @LockOnChange.canceled -= instance.OnLockOnChange;
+            @CameraMove.started -= instance.OnCameraMove;
+            @CameraMove.performed -= instance.OnCameraMove;
+            @CameraMove.canceled -= instance.OnCameraMove;
         }
 
         /// <summary>
@@ -1602,6 +1656,13 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLockOnChange(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CameraMove" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCameraMove(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
