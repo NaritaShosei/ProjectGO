@@ -6,7 +6,7 @@ using UnityEngine.VFX;
 
 public class LevelUpEffectView : MonoBehaviour, ISpeedChange
 {
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     /// <summary>
     /// プレイヤーのステータスアップに応じたエフェクトを再生する
@@ -33,7 +33,7 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
-        TimeScale = scale;
+        _timeScale = scale;
 
         if (_vfx == null) return;
 
@@ -49,6 +49,8 @@ public class LevelUpEffectView : MonoBehaviour, ISpeedChange
 
     [SerializeField]
     private float _effectDuration = 1.5f;
+
+    private float _timeScale = 1f;
 
     private Dictionary<StatSkillType, LevelUpEffectData> _effectMap;
 

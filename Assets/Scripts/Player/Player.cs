@@ -16,7 +16,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     public float CurrentThunderGauge => _playerStats.CurrentThunderGauge;
     public float BaseMaxThunderGauge => _playerStats.InitialMaxThunderGauge;
 
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     public float BaseAttackPower => _playerData.AttackPower;
 
@@ -85,7 +85,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             this);
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
             hitStopManager.Register(this, HitStopTargetGroup.Player);
+            hitStopManager.Register(_thunderGaugeSpeedTarget, HitStopTargetGroup.ThunderGauge);
+        }
 
         _interactor?.SearchLoop(destroyCancellationToken).Forget();
     }
@@ -193,7 +196,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public void OnSpeedChange(float timeScale)
     {
-        TimeScale = timeScale;
+        _timeScale = timeScale;
         _playerAnimationController.SetAnimSpeed(timeScale);
         _move.SetTimeScale(timeScale);
     }
@@ -216,16 +219,20 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
+    private float _thunderGaugeTimeScale = 1f;
+    private ThunderGaugeSpeedTarget _thunderGaugeSpeedTarget;
 
     private List<IDamageReactionModifier> _damageReactionModifiers = new List<IDamageReactionModifier>();
     private List<IDamageModifier> _damageModifiers = new List<IDamageModifier>();
 
     private CancellationTokenSource _damageInvincibilityCts;
 
+    private float _timeScale = 1f;
     private void Awake()
     {
         _playerStateManager = new PlayerStateManager();
         _playerStats = new PlayerStats(_playerData);
+        _thunderGaugeSpeedTarget = new ThunderGaugeSpeedTarget(this);
     }
 
     private void Update()
@@ -239,7 +246,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             cameraManager.OnLockOnTargetChanged -= SetLockOnTarget;
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
             hitStopManager.Unregister(this, HitStopTargetGroup.Player);
+            hitStopManager.Unregister(_thunderGaugeSpeedTarget, HitStopTargetGroup.ThunderGauge);
+        }
 
         if (_playerStats != null)
         {
@@ -286,7 +296,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         bool isThunderMode = _modeController != null
             && _modeController.CurrentMode == PlayerMode.Thunder
             && _playerStateManager.CurrentState != PlayerState.ModeChanging;
-        _playerStats.TickThunderGauge(Time.deltaTime * TimeScale, isThunderMode);
+        _playerStats.TickThunderGauge(Time.deltaTime * TimeScale * _thunderGaugeTimeScale, isThunderMode);
     }
 
     /// <summary>
@@ -366,5 +376,24 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();
+    }
+
+    private sealed class ThunderGaugeSpeedTarget : ISpeedChange
+    {
+        public ThunderGaugeSpeedTarget(Player player)
+        {
+            _player = player;
+        }
+
+        public float TimeScale => _timeScale;
+
+        public void OnSpeedChange(float scale)
+        {
+            _timeScale = scale;
+            _player._thunderGaugeTimeScale = scale;
+        }
+
+        private readonly Player _player;
+        private float _timeScale = 1f;
     }
 }

@@ -99,4 +99,5 @@ public enum HitStopTargetGroup
     AllEnemies = 1 << 2,  // 全敵（クリティカル用）
     Effects = 1 << 3,  // 戦闘エフェクト（環境VFX除く）
     Camera = 1 << 4,
+    ThunderGauge = 1 << 5,
 }

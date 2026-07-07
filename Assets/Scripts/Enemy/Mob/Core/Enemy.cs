@@ -40,7 +40,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     public virtual bool IsBoss => false;
 
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     public bool IsDead => _isDead;
 
@@ -57,7 +57,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     /// </summary>
     public void OnSpeedChange(float scale)
     {
-        TimeScale = scale;
+        _timeScale = scale;
         // HitStop中はアニメーション再生も停止させる
         _enemyAnimator?.SetAnimSpeed(scale);
     }
@@ -241,6 +241,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     [SerializeField]private EnemyType _enemyType;
 
+    private float _timeScale = 1f;
+
     protected EnemyDefenseContext _defenceContext;
     protected EnemyStats _stats;
     protected Transform _playerTransform;
@@ -423,7 +425,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         transform.position = spawnPosition;
         _isDead = false;
         _deadAnimationEnded = false;
-        TimeScale = 1f;
+        _timeScale = 1f;
 
         _stats.ResetHP(_data.MaxHP);
 

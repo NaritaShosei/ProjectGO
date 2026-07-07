@@ -89,6 +89,7 @@ public class MobAndSkillState : ISequenceState
 
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
+        ReleaseSkillSelectHitStop();
 
         _mobBattleTimerPresenter?.Dispose();
         _mobBattleTimerPresenter = null;
@@ -122,6 +123,9 @@ public class MobAndSkillState : ISequenceState
     [SerializeField] private SkillSelectView _skillSelectView;
     [SerializeField] private float _skillSelectTimeLimit = 10f;
     [SerializeField] private int _skillSelectCount = 3;
+    [SerializeField] private HitStopTargetGroup _skillSelectStopTargetGroup =
+        HitStopTargetGroup.Camera |
+        HitStopTargetGroup.ThunderGauge;
 
     [Header("シークエンス設定")]
     [SerializeField] private SequenceStateType _nextSequence = SequenceStateType.BossIntroMovie;
@@ -143,6 +147,7 @@ public class MobAndSkillState : ISequenceState
     private CountDownTimerPresenter _mobBattleTimerPresenter;
     private CountDownTimerPresenter _skillSelectTimerPresenter;
     private SequenceStatusPresenter _sequenceStatusPresenter;
+    private IDisposable _skillSelectHitStopHandle;
 
     private bool _waveCleared;
     private bool _timeUpFlag;
@@ -300,8 +305,9 @@ public class MobAndSkillState : ISequenceState
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
 
-        // 世界を止める
+        // フリーカメラと雷神ゲージだけを止める
         _mobBattleTimer.PauseTimer();
+        BeginSkillSelectHitStop();
         context.InputHandler?.EnableInput(false);
         ShowCursor();
 
@@ -344,8 +350,9 @@ public class MobAndSkillState : ISequenceState
 
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
+        ReleaseSkillSelectHitStop();
 
-        // 世界を再開
+        // フリーカメラと雷神ゲージを再開
         _mobBattleTimer.ResumeTimer();
         context.InputHandler?.EnableInput(true);
         HideCursor();
@@ -360,6 +367,24 @@ public class MobAndSkillState : ISequenceState
     {
         _skillSelectPresenter?.AutoSelect();
         EndSkillSelect(context);
+    }
+
+    private void BeginSkillSelectHitStop()
+    {
+        ReleaseSkillSelectHitStop();
+
+        if (!ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            return;
+        }
+
+        _skillSelectHitStopHandle = hitStopManager.BeginManualStop(_skillSelectStopTargetGroup);
+    }
+
+    private void ReleaseSkillSelectHitStop()
+    {
+        _skillSelectHitStopHandle?.Dispose();
+        _skillSelectHitStopHandle = null;
     }
 
     private static void HideCursor()

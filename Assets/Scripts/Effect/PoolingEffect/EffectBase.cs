@@ -8,7 +8,7 @@ using UnityEngine;
 public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
 {
     // ── プロパティ ─────────────────────────────────────────────
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     // ── 公開 API ──────────────────────────────────────────────
 
@@ -45,7 +45,7 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
     public virtual void OnRelease()
     {
         Stop();
-        TimeScale = 1f;
+        _timeScale = 1f;
         ApplyTimeScaleInternal(TimeScale);
         ApplyScaleInternal(Vector3.one);
     }
@@ -54,7 +54,7 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
 
     public void OnSpeedChange(float scale)
     {
-        TimeScale = scale;
+        _timeScale = scale;
         ApplyTimeScaleInternal(TimeScale);
     }
 
@@ -81,4 +81,6 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
     // ── Unity ライフサイクルフック (任意でオーバーライド可) ───
 
     protected virtual void Awake() { }
+
+    protected float _timeScale = 1f;
 }

@@ -4,7 +4,7 @@ using UnityEngine.VFX;
 public class ThunderEffectView : MonoBehaviour, ISpeedChange
 {
     // ヒットストップ等で利用するタイムスケール
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     /// <summary> プレイヤーのモードに応じたエフェクトの表示切り替え </summary>
     public void Play(PlayerMode mode)
@@ -22,7 +22,7 @@ public class ThunderEffectView : MonoBehaviour, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
-        TimeScale = scale;
+        _timeScale = scale;
         if (_vfx == null) return;
 
         // VFXの再生速度を直接更新する
@@ -31,6 +31,7 @@ public class ThunderEffectView : MonoBehaviour, ISpeedChange
 
     [SerializeField] private VisualEffect _vfx;
 
+    private float _timeScale = 1f;
     private void Awake()
     {
         if (_vfx == null) _vfx = GetComponent<VisualEffect>();
