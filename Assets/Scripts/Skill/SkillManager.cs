@@ -68,7 +68,8 @@ public class SkillManager : MonoBehaviour
 
         _ownedSkillIDs.Add(id);
 
-        _exhaustedSkillIDs.Add(id);
+        if (!skill.CanReselection)
+            _exhaustedSkillIDs.Add(id);
 
         // Passive登録
         if (skill.Timing == SkillTiming.Passive &&
