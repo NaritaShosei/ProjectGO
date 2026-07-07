@@ -295,7 +295,11 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         float deltaTime = Time.fixedDeltaTime * TimeScale;
         _normalOrbitalFollow.HorizontalAxis.Value += rotationDelta.x * deltaTime;
-        _normalOrbitalFollow.VerticalAxis.Value += rotationDelta.y * deltaTime;
+        _normalOrbitalFollow.VerticalAxis.Value =
+            Mathf.Clamp(
+                _normalOrbitalFollow.VerticalAxis.Value + rotationDelta.y * deltaTime,
+                _normalOrbitalFollow.VerticalAxis.Range.x,
+                _normalOrbitalFollow.VerticalAxis.Range.y);
     }
 
     #endregion
