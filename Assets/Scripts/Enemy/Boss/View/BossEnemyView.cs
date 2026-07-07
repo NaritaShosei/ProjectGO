@@ -60,11 +60,7 @@ namespace BossEnemy.View
         public bool IsBoss => true;
 
         /// <summary>HitStop等で使用するタイムスケール（DeadCondition の物理スケーリングに使用）</summary>
-        public float TimeScale
-        {
-            get { return _timeScale.Value; }
-            set { _timeScale.Value = value; }
-        }
+        public float TimeScale => _timeScale.Value;
 
         public IReadOnlyReactiveProperty<float> TimeScaleProperty => _timeScale;
 

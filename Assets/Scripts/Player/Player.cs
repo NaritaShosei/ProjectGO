@@ -16,7 +16,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     public float CurrentThunderGauge => _playerStats.CurrentThunderGauge;
     public float BaseMaxThunderGauge => _playerStats.InitialMaxThunderGauge;
 
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     public float BaseAttackPower => _playerData.AttackPower;
 
@@ -196,7 +196,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public void OnSpeedChange(float timeScale)
     {
-        TimeScale = timeScale;
+        _timeScale = timeScale;
         _playerAnimationController.SetAnimSpeed(timeScale);
         _move.SetTimeScale(timeScale);
     }
@@ -227,6 +227,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private CancellationTokenSource _damageInvincibilityCts;
 
+    private float _timeScale = 1f;
     private void Awake()
     {
         _playerStateManager = new PlayerStateManager();
@@ -384,14 +385,15 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _player = player;
         }
 
-        public float TimeScale { get; set; } = 1f;
+        public float TimeScale => _timeScale;
 
         public void OnSpeedChange(float scale)
         {
-            TimeScale = scale;
+            _timeScale = scale;
             _player._thunderGaugeTimeScale = scale;
         }
 
         private readonly Player _player;
+        private float _timeScale = 1f;
     }
 }

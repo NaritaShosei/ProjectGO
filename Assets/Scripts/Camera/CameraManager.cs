@@ -21,7 +21,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     /// <summary>現在ロックオン中かどうか</summary>
     public bool IsLockedOn => _currentTarget != null;
 
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     /// <summary>ロックオンエリアの半径（px）</summary>
     public float LockOnAreaRadius => _lockOnAreaRadius;
@@ -190,6 +190,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private Vector3 _blendStartPosition;
     private Quaternion _blendStartRotation;
 
+    private float _timeScale = 1f;
     #endregion
 
     #region イージング関数
@@ -260,7 +261,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
-        TimeScale = scale;
+        _timeScale = scale;
     }
 
     #endregion

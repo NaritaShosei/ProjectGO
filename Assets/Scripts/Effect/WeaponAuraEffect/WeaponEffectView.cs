@@ -7,21 +7,13 @@ using UnityEngine.VFX;
 public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 {
     // プロパティ実装
-    public float TimeScale
-    {
-        get => _timeScale;
-        set
-        {
-            _timeScale = value;
-            OnSpeedChange(_timeScale);
-        }
-    }
+    public float TimeScale => _timeScale;
 
     //開始時の処理
     public void Play()
     {
         gameObject.SetActive(true);
-        OnSpeedChange(_timeScale);
+        ApplySpeed();
     }
 
     // エフェクト停止時の処理
@@ -32,9 +24,15 @@ public class WeaponEffectView : MonoBehaviour, IWeaponEffect, ISpeedChange
 
     public void OnSpeedChange(float scale)
     {
+        _timeScale = scale;
+        ApplySpeed();
+    }
+
+    private void ApplySpeed()
+    {
         if (_vfx == null) return;
 
-        _vfx.playRate = scale;
+        _vfx.playRate = _timeScale;
     }
 
     private float _timeScale = 1f;
