@@ -85,7 +85,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             this);
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
             hitStopManager.Register(this, HitStopTargetGroup.Player);
+            hitStopManager.Register(_thunderGaugeSpeedTarget, HitStopTargetGroup.ThunderGauge);
+        }
 
         _interactor?.SearchLoop(destroyCancellationToken).Forget();
     }
@@ -216,6 +219,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private PlayerStateManager _playerStateManager;
     private PlayerStats _playerStats;
+    private float _thunderGaugeTimeScale = 1f;
+    private ThunderGaugeSpeedTarget _thunderGaugeSpeedTarget;
 
     private List<IDamageReactionModifier> _damageReactionModifiers = new List<IDamageReactionModifier>();
     private List<IDamageModifier> _damageModifiers = new List<IDamageModifier>();
@@ -226,6 +231,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStateManager = new PlayerStateManager();
         _playerStats = new PlayerStats(_playerData);
+        _thunderGaugeSpeedTarget = new ThunderGaugeSpeedTarget(this);
     }
 
     private void Update()
@@ -239,7 +245,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             cameraManager.OnLockOnTargetChanged -= SetLockOnTarget;
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
             hitStopManager.Unregister(this, HitStopTargetGroup.Player);
+            hitStopManager.Unregister(_thunderGaugeSpeedTarget, HitStopTargetGroup.ThunderGauge);
+        }
 
         if (_playerStats != null)
         {
@@ -286,7 +295,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         bool isThunderMode = _modeController != null
             && _modeController.CurrentMode == PlayerMode.Thunder
             && _playerStateManager.CurrentState != PlayerState.ModeChanging;
-        _playerStats.TickThunderGauge(Time.deltaTime * TimeScale, isThunderMode);
+        _playerStats.TickThunderGauge(Time.deltaTime * TimeScale * _thunderGaugeTimeScale, isThunderMode);
     }
 
     /// <summary>
@@ -366,5 +375,23 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();
+    }
+
+    private sealed class ThunderGaugeSpeedTarget : ISpeedChange
+    {
+        public ThunderGaugeSpeedTarget(Player player)
+        {
+            _player = player;
+        }
+
+        public float TimeScale { get; set; } = 1f;
+
+        public void OnSpeedChange(float scale)
+        {
+            TimeScale = scale;
+            _player._thunderGaugeTimeScale = scale;
+        }
+
+        private readonly Player _player;
     }
 }
