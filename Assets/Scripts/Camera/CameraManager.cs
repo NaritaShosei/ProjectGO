@@ -224,7 +224,10 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         {
             _normalInputAxisController.enabled = false;
         }
+    }
 
+    private void Start()
+    {
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
         {
             hitStopManager.Register(this, HitStopTargetGroup.Camera);
