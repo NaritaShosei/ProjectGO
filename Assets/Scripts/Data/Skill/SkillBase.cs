@@ -10,7 +10,6 @@ public class SkillBase : ScriptableObject, ISkill
     public SkillTiming Timing => _timing;
     public SkillBase UnlockedSkill => _unlockedSkill;
     public bool DefaultUnlocked => _defaultUnlocked;
-    public bool CanReselection => _canReselection;
 
     /// <summary>
     /// 攻撃時スキルが実装する。
@@ -50,6 +49,4 @@ public class SkillBase : ScriptableObject, ISkill
     [SerializeField] private SkillBase _unlockedSkill;
     [Tooltip("ゲーム開始時にこのスキルがアンロックされているかどうか。")]
     [SerializeField] private bool _defaultUnlocked;
-    [Tooltip("このスキルを再選択できるようにするか")]
-    [SerializeField] private bool _canReselection;
 }
