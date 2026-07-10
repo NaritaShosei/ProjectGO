@@ -21,12 +21,29 @@ MonoBehaviour:
   _variants:
   - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C91"
     _requiredCharge: 0
-    _damageMultiplier: 1
-    _attackRange: 1
-    _attackRadius: 1
-    _enableKnockback: 1
-    _knockbackPower: 6
-    _knockbackUpward: 0
+    _hits:
+    - DamageMultiplier: 1
+      AttackRange: 1
+      AttackRadius: 1
+      EnableKnockback: 1
+      KnockbackPower: 6
+      KnockbackUpward: 0
+      HitStopData:
+        _baseDuration: 0.15
+        _timeScale: 0
+        _targetGroup: 9
+        _priority: 999
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages:
+      - _lightningDamageMultiplier: 0.2
+        _lightningDamageDelay: 0.2
+      CameraShakeData:
+        _amplitude: 0
+        _frequency: 0
+        _duration: 0
     _enableHoming: 1
     _homingRadius: 10
     _homingAngle: 45
@@ -70,18 +87,7 @@ MonoBehaviour:
     _moveDuration: 1.5
     _stopOnHit: 1
     _isPhantom: 0
-    _hitStopData:
-      _baseDuration: 0.15
-      _timeScale: 0
-      _targetGroup: 9
-      _weakPointMultiplier: 1.2
-      _breakOrKillMultiplier: 1.2
-      _weakAndBreakOrKillMultiplier: 1.4
     _animationStateName: Thunder_Combo_1
     _transitionDuration: -1
     _chargeAnimationStateName: 
     _chargeTransitionDuration: -1
-    _playGroundHitSE: 0
-    _additionalLightningDamages:
-    - _lightningDamageMultiplier: 0.2
-      _lightningDamageDelay: 0.2
