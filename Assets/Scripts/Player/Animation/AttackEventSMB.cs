@@ -5,8 +5,8 @@ public class AttackEventSMB : StateMachineBehaviour
     public override void OnStateEnter(
        Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        // 毎回リセット
-        _attackExecuted = false;
+        _attackExecuteTimes ??= new float[0];
+        _attackExecuted = new bool[_attackExecuteTimes.Length];
         _comboStarted = false;
         _comboEnded = false;
         _attackCompleted = false;
@@ -22,10 +22,12 @@ public class AttackEventSMB : StateMachineBehaviour
 
         float currentTime = stateInfo.normalizedTime * stateInfo.length;
 
-        if (!_attackExecuted && currentTime >= _attackExecuteTime)
+        for (int i = 0; i < _attackExecuteTimes.Length; i++)
         {
-            _attackExecuted = true;
-            _controller.AnimEvent_AttackExecute();
+            if (_attackExecuted[i] || currentTime < _attackExecuteTimes[i]) continue;
+
+            _attackExecuted[i] = true;
+            _controller.AnimEvent_AttackExecute(i);
         }
 
         if (!_comboStarted && currentTime >= _comboWindowStartTime)
@@ -38,8 +40,6 @@ public class AttackEventSMB : StateMachineBehaviour
         {
             _comboEnded = true;
             _controller.AnimEvent_ComboWindowEnd();
-
-            // バッファがあれば即コンボ遷移
             _controller.AnimEvent_ComboTransition();
         }
 
@@ -59,14 +59,14 @@ public class AttackEventSMB : StateMachineBehaviour
     }
 
     [Header("Timings (seconds)")]
-    [SerializeField] private float _attackExecuteTime = 0.2f;
+    [SerializeField] private float[] _attackExecuteTimes;
     [SerializeField] private float _comboWindowStartTime = 0.35f;
     [SerializeField] private float _comboWindowEndTime = 0.55f;
     [SerializeField] private float _attackCompleteTime = 999f;
 
     private IAnimationController _controller;
 
-    private bool _attackExecuted;
+    private bool[] _attackExecuted;
     private bool _comboStarted;
     private bool _comboEnded;
     private bool _attackCompleted;

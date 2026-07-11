@@ -8,7 +8,7 @@ using UnityEngine;
 /// 通常時の追従遅延およびロックオン時のターゲット追従を制御します。
 /// ターゲット選定はLockOnControllerに委譲しています。
 /// </summary>
-public class CameraManager : MonoBehaviour
+public class CameraManager : MonoBehaviour, ISpeedChange
 {
     #region パブリックプロパティ・イベント
 
@@ -20,6 +20,8 @@ public class CameraManager : MonoBehaviour
 
     /// <summary>現在ロックオン中かどうか</summary>
     public bool IsLockedOn => _currentTarget != null;
+
+    public float TimeScale => _timeScale;
 
     /// <summary>ロックオンエリアの半径（px）</summary>
     public float LockOnAreaRadius => _lockOnAreaRadius;
@@ -53,8 +55,14 @@ public class CameraManager : MonoBehaviour
         _cameraFollowTarget.position = _playerTransform.position;
         _normalCamera.Follow = _cameraFollowTarget;
 
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            hitStopManager.Register(this, HitStopTargetGroup.Camera);
+        }
+
         if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
+            _inputHandler = inputHandler;
             _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform);
         }
         else
@@ -136,6 +144,10 @@ public class CameraManager : MonoBehaviour
     [Tooltip("通常時のカメラ位置追従の遅延時間（秒）。大きいほど追従がゆっくりになる")]
     [SerializeField] private float _posSmoothTime = 0.2f;
 
+    [Header("フリーカメラ入力")]
+    [SerializeField] private Vector2 _cameraRotationSpeed = new(120f, 80f);
+    [SerializeField] private Vector2 _cameraInputDirection = new(1f, -1f);
+
     [Header("ロックオン設定")]
     [Tooltip("ターゲットがこの半径（px）内に収まっている間はカメラが回転しないデッドゾーン")]
     [SerializeField] private float _lockOnAreaRadius = 100f;
@@ -167,7 +179,9 @@ public class CameraManager : MonoBehaviour
     private Transform _playerTransform;
     private ILockOnTarget _currentTarget;
     private CinemachineOrbitalFollow _normalOrbitalFollow;
+    private CinemachineInputAxisController _normalInputAxisController;
     private Transform _cameraFollowTarget;
+    private InputHandler _inputHandler;
     private Vector3 _normalFollowVelocity;
     private CameraShake _cameraShake;
 
@@ -176,6 +190,7 @@ public class CameraManager : MonoBehaviour
     private Vector3 _blendStartPosition;
     private Quaternion _blendStartRotation;
 
+    private float _timeScale = 1f;
     #endregion
 
     #region イージング関数
@@ -205,21 +220,48 @@ public class CameraManager : MonoBehaviour
         _lockOnCamera.Priority = _normalPriority - 1;
 
         _normalOrbitalFollow = _normalCamera.GetComponent<CinemachineOrbitalFollow>();
+        _normalInputAxisController = _normalCamera.GetComponent<CinemachineInputAxisController>();
+        if (_normalInputAxisController != null)
+        {
+            _normalInputAxisController.enabled = false;
+        }
+    }
+
+    private void Start()
+    {
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            hitStopManager.Register(this, HitStopTargetGroup.Camera);
+        }
     }
 
     private void FixedUpdate()
     {
         if (_playerTransform == null) return;
+        if (Mathf.Approximately(TimeScale, 0f)) return;
 
         if (IsLockedOn)
             UpdateLockOnCamera();
         else
+        {
+            UpdateFreeCameraRotation();
             UpdateNormalCameraPosition();
+        }
     }
 
     private void OnDestroy()
     {
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            hitStopManager.Unregister(this, HitStopTargetGroup.Camera);
+        }
+
         ServiceLocator.Unregister<CameraManager>();
+    }
+
+    public void OnSpeedChange(float scale)
+    {
+        _timeScale = scale;
     }
 
     #endregion
@@ -238,6 +280,27 @@ public class CameraManager : MonoBehaviour
             ref _normalFollowVelocity,
             _posSmoothTime
         );
+    }
+
+    private void UpdateFreeCameraRotation()
+    {
+        if (_normalOrbitalFollow == null || _inputHandler == null) return;
+
+        Vector2 input = _inputHandler.CameraMoveInput;
+        if (input.sqrMagnitude <= 0.0001f) return;
+
+        Vector2 rotationDelta = new(
+            input.x * _cameraInputDirection.x * _cameraRotationSpeed.x,
+            input.y * _cameraInputDirection.y * _cameraRotationSpeed.y
+        );
+
+        float deltaTime = Time.fixedDeltaTime * TimeScale;
+        _normalOrbitalFollow.HorizontalAxis.Value += rotationDelta.x * deltaTime;
+        _normalOrbitalFollow.VerticalAxis.Value =
+            Mathf.Clamp(
+                _normalOrbitalFollow.VerticalAxis.Value + rotationDelta.y * deltaTime,
+                _normalOrbitalFollow.VerticalAxis.Range.x,
+                _normalOrbitalFollow.VerticalAxis.Range.y);
     }
 
     #endregion

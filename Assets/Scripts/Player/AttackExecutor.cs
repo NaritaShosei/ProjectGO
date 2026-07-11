@@ -19,7 +19,7 @@ public class AttackExecutor : MonoBehaviour
         _skillManager = manager;
     }
 
-    public void Execute(AttackData attackData, AttackInput attackInput, ModeData modeData)
+    public void Execute(AttackData attackData, AttackInput attackInput, ModeData modeData, int hitIndex = 0)
     {
         var variantData = attackData.GetVariant(attackInput.ChargeLevel);
 
@@ -40,23 +40,24 @@ public class AttackExecutor : MonoBehaviour
 
         OnSwingReady?.Invoke(attackData.Mode);
 
-        var attackPos = transform.position + transform.forward * variantData.AttackRange;
-        var cols = Physics.OverlapSphere(attackPos, variantData.AttackRadius, _layer);
+        var hitData = variantData.GetHitData(hitIndex);
+        var attackPos = transform.position + transform.forward * hitData.AttackRange;
+        var cols = Physics.OverlapSphere(attackPos, hitData.AttackRadius, _layer);
 
         Debug.Log($"{attackData.Mode}：{variantData.AttackName}で攻撃");
 
         var context = new AttackContext(attackData.Mode, _playerStats, attackPos, transform)
         {
-            AttackPower = _playerStats.AttackPower * variantData.DamageMultiplier * modeData.AttackMultiplier,
+            AttackPower = _playerStats.AttackPower * hitData.DamageMultiplier * modeData.AttackMultiplier,
         };
 
-        if (variantData.EnableKnockback)
+        if (hitData.EnableKnockback)
         {
             context.Knockback = new KnockbackContext
             {
                 Direction = transform.forward,
-                Power = variantData.KnockbackPower,
-                Upward = variantData.KnockbackUpward
+                Power = hitData.KnockbackPower,
+                Upward = hitData.KnockbackUpward
             };
         }
 
@@ -94,11 +95,11 @@ public class AttackExecutor : MonoBehaviour
 
             enemy.TakeDamage(damageContext);
 
-            if (attackData.Mode == PlayerMode.Thunder && variantData.HasAdditionalLightningDamage)
+            if (attackData.Mode == PlayerMode.Thunder && hitData.HasAdditionalLightningDamage)
             {
                 var captured = enemy;
                 var lightningPower = perHitContext.AttackPower;
-                ExecuteLightningDamageAsync(captured, lightningPower, attackData.Mode, variantData.AdditionalLightningDamages).Forget();
+                ExecuteLightningDamageAsync(captured, lightningPower, attackData.Mode, hitData.AdditionalLightningDamages).Forget();
             }
         }
 
@@ -112,13 +113,13 @@ public class AttackExecutor : MonoBehaviour
             OnHitConfirmed?.Invoke();
 
             if (ServiceLocator.TryGet(out CameraManager cameraManager))
-                cameraManager.ExecutionCameraShake(variantData.CameraShakeData).Forget();
+                cameraManager.ExecutionCameraShake(hitData.CameraShakeData).Forget();
 
             // HitStop
             if (ServiceLocator.TryGet(out HitStopManager hitStop))
             {
                 hitStop.Trigger(
-                    data: variantData.HitStopData,
+                    data: hitData.HitStopData,
                     isWeakPoint: isWeakPoint,
                     isArmorBreak: isArmorBreak,
                     isKill: isKill,

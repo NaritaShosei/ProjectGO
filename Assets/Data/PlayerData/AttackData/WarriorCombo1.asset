@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -21,12 +21,26 @@ MonoBehaviour:
   _variants:
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C91-0"
     _requiredCharge: 0
-    _damageMultiplier: 1
-    _attackRange: 1
-    _attackRadius: 1
-    _enableKnockback: 1
-    _knockbackPower: 6
-    _knockbackUpward: 2
+    _hits:
+    - DamageMultiplier: 1
+      AttackRange: 1
+      AttackRadius: 1
+      EnableKnockback: 1
+      KnockbackPower: 6
+      KnockbackUpward: 2
+      HitStopData:
+        _baseDuration: 0.1
+        _timeScale: 0
+        _targetGroup: 9
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages: []
+      CameraShakeData:
+        _amplitude: 0
+        _frequency: 0
+        _duration: 0
     _enableHoming: 1
     _homingRadius: 10
     _homingAngle: 45
@@ -79,27 +93,32 @@ MonoBehaviour:
     _moveDuration: 2
     _stopOnHit: 1
     _isPhantom: 0
-    _hitStopData:
-      _baseDuration: 0.1
-      _timeScale: 0
-      _targetGroup: 9
-      _weakPointMultiplier: 1.2
-      _breakOrKillMultiplier: 1.2
-      _weakAndBreakOrKillMultiplier: 1.4
     _animationStateName: Warrior_Combo_1
     _transitionDuration: -1
     _chargeAnimationStateName: Warrior_Combo_1_set
     _chargeTransitionDuration: -1
-    _playGroundHitSE: 0
-    _additionalLightningDamages: []
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C91-1"
     _requiredCharge: 1
-    _damageMultiplier: 19.9
-    _attackRange: 2
-    _attackRadius: 2
-    _enableKnockback: 1
-    _knockbackPower: 4
-    _knockbackUpward: 2
+    _hits:
+    - DamageMultiplier: 19.9
+      AttackRange: 2
+      AttackRadius: 2
+      EnableKnockback: 1
+      KnockbackPower: 4
+      KnockbackUpward: 2
+      HitStopData:
+        _baseDuration: 0.15
+        _timeScale: 0
+        _targetGroup: 9
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages: []
+      CameraShakeData:
+        _amplitude: 0
+        _frequency: 0
+        _duration: 0
     _enableHoming: 1
     _homingRadius: 10
     _homingAngle: 45
@@ -152,27 +171,32 @@ MonoBehaviour:
     _moveDuration: 2
     _stopOnHit: 1
     _isPhantom: 0
-    _hitStopData:
-      _baseDuration: 0.15
-      _timeScale: 0
-      _targetGroup: 9
-      _weakPointMultiplier: 1.2
-      _breakOrKillMultiplier: 1.2
-      _weakAndBreakOrKillMultiplier: 1.4
     _animationStateName: Warrior_Combo_1
     _transitionDuration: -1
     _chargeAnimationStateName: Warrior_Combo_1_charge1
     _chargeTransitionDuration: -1
-    _playGroundHitSE: 0
-    _additionalLightningDamages: []
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C91-2"
     _requiredCharge: 2
-    _damageMultiplier: 1.4
-    _attackRange: 3
-    _attackRadius: 3
-    _enableKnockback: 1
-    _knockbackPower: 6
-    _knockbackUpward: 2
+    _hits:
+    - DamageMultiplier: 1.4
+      AttackRange: 3
+      AttackRadius: 3
+      EnableKnockback: 1
+      KnockbackPower: 6
+      KnockbackUpward: 2
+      HitStopData:
+        _baseDuration: 0.17
+        _timeScale: 0
+        _targetGroup: 9
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages: []
+      CameraShakeData:
+        _amplitude: 0
+        _frequency: 0
+        _duration: 0
     _enableHoming: 1
     _homingRadius: 10
     _homingAngle: 45
@@ -225,27 +249,32 @@ MonoBehaviour:
     _moveDuration: 2
     _stopOnHit: 1
     _isPhantom: 0
-    _hitStopData:
-      _baseDuration: 0.17
-      _timeScale: 0
-      _targetGroup: 9
-      _weakPointMultiplier: 1.2
-      _breakOrKillMultiplier: 1.2
-      _weakAndBreakOrKillMultiplier: 1.4
     _animationStateName: Warrior_Combo_1
     _transitionDuration: -1
     _chargeAnimationStateName: Warrior_Combo_1_charge2
     _chargeTransitionDuration: -1
-    _playGroundHitSE: 0
-    _additionalLightningDamages: []
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C91-3"
     _requiredCharge: 3
-    _damageMultiplier: 1.6
-    _attackRange: 4
-    _attackRadius: 4
-    _enableKnockback: 1
-    _knockbackPower: 4
-    _knockbackUpward: 2
+    _hits:
+    - DamageMultiplier: 1.6
+      AttackRange: 4
+      AttackRadius: 4
+      EnableKnockback: 1
+      KnockbackPower: 4
+      KnockbackUpward: 2
+      HitStopData:
+        _baseDuration: 0.2
+        _timeScale: 0
+        _targetGroup: 9
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages: []
+      CameraShakeData:
+        _amplitude: 0
+        _frequency: 0
+        _duration: 0
     _enableHoming: 1
     _homingRadius: 10
     _homingAngle: 45
@@ -298,16 +327,7 @@ MonoBehaviour:
     _moveDuration: 2
     _stopOnHit: 1
     _isPhantom: 0
-    _hitStopData:
-      _baseDuration: 0.2
-      _timeScale: 0
-      _targetGroup: 9
-      _weakPointMultiplier: 1.2
-      _breakOrKillMultiplier: 1.2
-      _weakAndBreakOrKillMultiplier: 1.4
     _animationStateName: Warrior_Combo_1
     _transitionDuration: -1
     _chargeAnimationStateName: Warrior_Combo_1_charge3
     _chargeTransitionDuration: -1
-    _playGroundHitSE: 0
-    _additionalLightningDamages: []

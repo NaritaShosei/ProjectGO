@@ -380,12 +380,12 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃アニメーションの攻撃判定フレームで呼ばれる。ここで実際に攻撃を実行する。
     /// </summary>
-    private void ExecutePendingAttack()
+    private void ExecutePendingAttack(int hitIndex)
     {
         if (_stateManager.CurrentState != PlayerState.Attacking) return;
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
 
-        _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData);
+        _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
     }
 
     /// <summary>
@@ -853,7 +853,7 @@ public class PlayerAttack : MonoBehaviour
     {
         if (_homingTarget == null) return 0f;
 
-        return Mathf.Max(0f, data.AttackRange);
+        return Mathf.Max(0f, data.GetHitData(0).AttackRange);
     }
 
     private void FaceAttackTarget()

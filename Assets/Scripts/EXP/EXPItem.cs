@@ -7,14 +7,14 @@ public class EXPItem : MonoBehaviour, ISpeedChange, IPoolable
 
     public event Action<EXPItem> OnReleased;
 
-    public float TimeScale { get; set; } = 1f;
+    public float TimeScale => _timeScale;
 
     // ── IPoolable ────────────────────────────────────────────
 
     /// <summary>プールから取り出された直後。TimeScale を初期化する。</summary>
     public void OnGet()
     {
-        TimeScale = 1f;
+        _timeScale = 1f;
         OnReleased = null;
     }
 
@@ -55,8 +55,9 @@ public class EXPItem : MonoBehaviour, ISpeedChange, IPoolable
 
     public void OnSpeedChange(float scale)
     {
-        TimeScale = scale;
+        _timeScale = scale;
     }
 
     [SerializeField] private float _expValue;
+    private float _timeScale = 1f;
 }

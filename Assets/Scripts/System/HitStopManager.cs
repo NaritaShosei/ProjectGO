@@ -123,13 +123,27 @@ public sealed class HitStopManager : IDisposable
         ).Forget();
     }
 
+    public IDisposable BeginManualStop(
+       HitStopTargetGroup targetGroup,
+       float timeScale = 0f,
+       int priority = int.MinValue,
+       IReadOnlyList<ISpeedChange> hitEnemyTargets = null)
+    {
+        var stop = new ManualStop(targetGroup, timeScale, priority, hitEnemyTargets);
+        _manualStops.Add(stop);
+        ApplyResolvedSpeedScale(targetGroup);
+
+        return new ManualStopHandle(this, stop);
+    }
+
     /// <summary>
     /// 現在発動中のヒットストップを即時キャンセルし、速度を元に戻す
     /// </summary>
     public void Cancel()
     {
         _hitStopCancellation?.Cancel();
-        ApplySpeedScale(1f, ~HitStopTargetGroup.None, null);
+        _manualStops.Clear();
+        ApplyTimedSpeedScale(1f, ~HitStopTargetGroup.None, null);
     }
 
     /// <summary>
@@ -146,6 +160,8 @@ public sealed class HitStopManager : IDisposable
             list.Clear();
         }
 
+        _manualStops.Clear();
+
         ServiceLocator.Unregister<HitStopManager>();
     }
 
@@ -160,6 +176,7 @@ public sealed class HitStopManager : IDisposable
             { HitStopTargetGroup.AllEnemies, new List<ISpeedChange>() },
             { HitStopTargetGroup.Effects,    new List<ISpeedChange>() },
             { HitStopTargetGroup.Camera,     new List<ISpeedChange>() },
+            { HitStopTargetGroup.ThunderGauge, new List<ISpeedChange>() },
         };
 
     /// <summary>
@@ -173,7 +190,21 @@ public sealed class HitStopManager : IDisposable
         { HitStopTargetGroup.AllEnemies, 1f },
         { HitStopTargetGroup.Effects,    1f },
         { HitStopTargetGroup.Camera,     1f },
+        { HitStopTargetGroup.ThunderGauge, 1f },
         };
+
+    private readonly Dictionary<HitStopTargetGroup, float> _timedScale =
+        new()
+        {
+        { HitStopTargetGroup.Player,     1f },
+        { HitStopTargetGroup.HitEnemy,   1f },
+        { HitStopTargetGroup.AllEnemies, 1f },
+        { HitStopTargetGroup.Effects,    1f },
+        { HitStopTargetGroup.Camera,     1f },
+        { HitStopTargetGroup.ThunderGauge, 1f },
+        };
+
+    private readonly List<ManualStop> _manualStops = new();
 
     /// <summary>
     /// 現在発動中のヒットストップ用キャンセルトークン
@@ -181,6 +212,7 @@ public sealed class HitStopManager : IDisposable
     private CancellationTokenSource _hitStopCancellation;
 
     private HashSet<ISpeedChange> _activeHitEnemyTargets;
+    private IReadOnlyList<ISpeedChange> _timedHitEnemyTargets;
 
     private int _currentPriority = int.MaxValue;
 
@@ -209,7 +241,7 @@ public sealed class HitStopManager : IDisposable
         var cancellation = new CancellationTokenSource();
         _hitStopCancellation = cancellation;
 
-        ApplySpeedScale(timeScale, targetGroups, hitEnemyTargets);
+        ApplyTimedSpeedScale(timeScale, targetGroups, hitEnemyTargets);
 
         try
         {
@@ -226,7 +258,7 @@ public sealed class HitStopManager : IDisposable
         {
             if (ReferenceEquals(_hitStopCancellation, cancellation))
             {
-                ApplySpeedScale(1f, targetGroups, hitEnemyTargets);
+                ApplyTimedSpeedScale(1f, targetGroups, hitEnemyTargets);
 
                 _currentPriority = int.MaxValue;
 
@@ -239,6 +271,137 @@ public sealed class HitStopManager : IDisposable
     /// <summary>
     /// 指定グループの ISpeedChange に速度変更を適用する
     /// </summary>
+    private void ApplyTimedSpeedScale(
+    float scale,
+    HitStopTargetGroup targetGroups,
+    IReadOnlyList<ISpeedChange> hitEnemyTargets)
+    {
+        foreach (var group in _groupTargets.Keys.ToArray())
+        {
+            if ((targetGroups & group) == 0) continue;
+
+            _timedScale[group] = scale;
+        }
+
+        if ((targetGroups & HitStopTargetGroup.HitEnemy) != 0)
+        {
+            _timedHitEnemyTargets = Mathf.Abs(scale - 1f) > 0.0001f
+                ? hitEnemyTargets
+                : null;
+        }
+
+        ApplyResolvedSpeedScale(targetGroups);
+    }
+
+    private void ApplyResolvedSpeedScale(HitStopTargetGroup targetGroups)
+    {
+        foreach (var (group, list) in _groupTargets)
+        {
+            if ((targetGroups & group) == 0) continue;
+
+            var manualStop = GetActiveManualStop(group);
+            float scale = manualStop?.TimeScale ?? _timedScale[group];
+
+            _currentScale[group] = scale;
+
+            if (group == HitStopTargetGroup.HitEnemy)
+            {
+                _activeHitEnemyTargets =
+                (Mathf.Abs(scale - 1f) > 0.0001f && manualStop?.HitEnemyTargets != null)
+                    ? new HashSet<ISpeedChange>(manualStop.HitEnemyTargets)
+                    : (Mathf.Abs(scale - 1f) > 0.0001f && _timedHitEnemyTargets != null)
+                    ? new HashSet<ISpeedChange>(_timedHitEnemyTargets)
+                    : null;
+            }
+
+            foreach (var target in list.ToArray())
+            {
+                if (group == HitStopTargetGroup.HitEnemy &&
+                    _activeHitEnemyTargets != null &&
+                    !_activeHitEnemyTargets.Contains(target))
+                {
+                    continue;
+                }
+
+                target.OnSpeedChange(scale);
+            }
+        }
+    }
+
+    private ManualStop GetActiveManualStop(HitStopTargetGroup group)
+    {
+        ManualStop activeStop = null;
+
+        foreach (var stop in _manualStops)
+        {
+            if ((stop.TargetGroup & group) == 0)
+            {
+                continue;
+            }
+
+            if (activeStop == null || stop.Priority < activeStop.Priority)
+            {
+                activeStop = stop;
+            }
+        }
+
+        return activeStop;
+    }
+
+    private void EndManualStop(ManualStop stop)
+    {
+        if (stop == null || !_manualStops.Remove(stop))
+        {
+            return;
+        }
+
+        ApplyResolvedSpeedScale(stop.TargetGroup);
+    }
+
+    private sealed class ManualStop
+    {
+        public ManualStop(
+            HitStopTargetGroup targetGroup,
+            float timeScale,
+            int priority,
+            IReadOnlyList<ISpeedChange> hitEnemyTargets)
+        {
+            TargetGroup = targetGroup;
+            TimeScale = timeScale;
+            Priority = priority;
+            HitEnemyTargets = hitEnemyTargets;
+        }
+
+        public HitStopTargetGroup TargetGroup { get; }
+        public float TimeScale { get; }
+        public int Priority { get; }
+        public IReadOnlyList<ISpeedChange> HitEnemyTargets { get; }
+    }
+
+    private sealed class ManualStopHandle : IDisposable
+    {
+        public ManualStopHandle(HitStopManager owner, ManualStop stop)
+        {
+            _owner = owner;
+            _stop = stop;
+        }
+
+        public void Dispose()
+        {
+            if (_owner == null)
+            {
+                return;
+            }
+
+            _owner.EndManualStop(_stop);
+            _owner = null;
+            _stop = null;
+        }
+
+        private HitStopManager _owner;
+        private ManualStop _stop;
+    }
+
     private void ApplySpeedScale(
     float scale,
     HitStopTargetGroup targetGroups,
