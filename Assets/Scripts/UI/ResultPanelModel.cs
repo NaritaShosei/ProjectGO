@@ -1,35 +1,25 @@
-﻿public class ResultPanelModel
+using UnityEngine;
+
+public class ResultPanelModel
 {
-    /// <summary>
-    /// 未実装: ゲームロジックからリザルトデータを取得する
-    /// </summary>
-    /// <returns></returns>
-    public ResultData GetResultData()
+    public float BossClearTime => _result.BossClearTime;
+    public int Level => _result.Level;
+    public int Score { get; }
+
+    public ResultPanelModel(
+        ResultData result,
+        int baseScore,
+        float timeScorePerSecond,
+        int levelScoreMultiplier)
     {
-        // 未実装のためテスト用データを返す
-        return GetTestResultData();
+        _result = result;
+
+        float remainingTime = Mathf.Max(0f, result.BossBattleTimeLimit - result.BossClearTime);
+        int timeScore = Mathf.RoundToInt(remainingTime * timeScorePerSecond);
+        int levelScore = Mathf.Max(0, result.Level - 1) * levelScoreMultiplier;
+
+        Score = Mathf.Max(0, baseScore + timeScore + levelScore);
     }
 
-    /// <summary>
-    /// テスト用のリザルトデータを生成する
-    /// </summary>
-    /// <returns></returns>
-    public ResultData GetTestResultData()
-    {
-        UnityEngine.Debug.LogWarning("未実装: ゲームロジックからリザルトデータを取得する");
-        ResultData resultData = new ResultData(
-            true
-            , 10
-            , 150
-            , 25
-            , 12000
-            , 3000
-            , 5000
-            , "ビルドバランス: 雷神"
-            , "スキルリスト:\n- ファイアボール\n- アイススパイク\n- ライトニングストーム"
-            , "最終ステータス:\n- 攻撃力: 1\n- 防御力: 2\n- 速度: 3"
-            );
-
-        return resultData;
-    }
+    private readonly ResultData _result;
 }
