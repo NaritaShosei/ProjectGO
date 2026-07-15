@@ -25,6 +25,54 @@ MonoBehaviour:
     - DamageMultiplier: 1
       AttackRange: 1
       AttackRadius: 1
+      _enableMovement: 1
+      _moveCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 0
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
+        - serializedVersion: 3
+          time: 0.08089294
+          value: 0.28918743
+          inSlope: -0.009944205
+          outSlope: -0.009944205
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 1
+          outWeight: 0.84305596
+        - serializedVersion: 3
+          time: 0.30767205
+          value: 1.0000215
+          inSlope: 0.0016005561
+          outSlope: 0.0016005561
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 1
+          outWeight: 0.1636276
+        - serializedVersion: 3
+          time: 1
+          value: 0.99809647
+          inSlope: -0.03058453
+          outSlope: -0.03058453
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.5404034
+          outWeight: 0
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      _moveDistance: 4
+      _moveSpeed: 6
+      _moveDuration: 4
+      _stopOnHit: 1
+      _isPhantom: 0
       EnableKnockback: 1
       KnockbackPower: 6
       KnockbackUpward: 0
@@ -52,54 +100,6 @@ MonoBehaviour:
     _homingRadius: 10
     _homingAngle: 45
     _homingStrength: 30
-    _enableMovement: 1
-    _moveCurve:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 0.08089294
-        value: 0.28918743
-        inSlope: -0.009944205
-        outSlope: -0.009944205
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 1
-        outWeight: 0.84305596
-      - serializedVersion: 3
-        time: 0.30767205
-        value: 1.0000215
-        inSlope: 0.0016005561
-        outSlope: 0.0016005561
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 1
-        outWeight: 0.1636276
-      - serializedVersion: 3
-        time: 1
-        value: 0.99809647
-        inSlope: -0.03058453
-        outSlope: -0.03058453
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0.5404034
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    _moveDistance: 4
-    _moveSpeed: 6
-    _moveDuration: 4
-    _stopOnHit: 1
-    _isPhantom: 0
     _animationStateName: Thunder_Combo_5
     _transitionDuration: -1
     _chargeAnimationStateName: 
