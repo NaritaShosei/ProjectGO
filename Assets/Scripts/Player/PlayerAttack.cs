@@ -146,6 +146,7 @@ public class PlayerAttack : MonoBehaviour
     private bool _isHomingLocked;
     private AttackVariantData _activeAttackVariant;
     private bool _attackMoveStoppedOnHit;
+    private int _currentHitIndex = -1;
 
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
@@ -387,12 +388,8 @@ public class PlayerAttack : MonoBehaviour
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
 
         _attackMoveStoppedOnHit = false;
+        _currentHitIndex = hitIndex;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
-
-        if (_attackMoveStoppedOnHit &&
-            _activeAttackVariant != null &&
-            hitIndex + 1 < _activeAttackVariant.HitCount)
-            RequestAttackMove(_activeAttackVariant, hitIndex + 1, true);
     }
 
     /// <summary>
@@ -547,6 +544,7 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = null;
         _pendingAttackInput = null;
         _activeAttackVariant = null;
+        _currentHitIndex = -1;
         _bufferedComboInput = null;
 
         _isInComboWindow = false;
@@ -910,8 +908,14 @@ _currentLockOnTarget.GetTargetCenter() == null)
     private void HandleAttackHitConfirmed()
     {
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
+        if (_attackMoveStoppedOnHit) return;
+
         _attackMoveStoppedOnHit = true;
         OnAttackMoveStopRequested?.Invoke();
+
+        int nextHitIndex = _currentHitIndex + 1;
+        if (_currentHitIndex >= 0 && nextHitIndex < _activeAttackVariant.HitCount)
+            RequestAttackMove(_activeAttackVariant, nextHitIndex, true);
     }
     #endregion
 }
