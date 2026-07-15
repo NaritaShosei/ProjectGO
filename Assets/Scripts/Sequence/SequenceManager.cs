@@ -72,7 +72,7 @@ public class SequenceManager : MonoBehaviour
         new BossIntroMovieState(),
         new BossBattleState(),
         new EndingMovieState(),
-        new ResultSequence(),
+        new ResultState(),
         new GameOverState(),
     };
 
@@ -98,7 +98,7 @@ public class SequenceManager : MonoBehaviour
             new BossIntroMovieState(),
             new BossBattleState(),
             new EndingMovieState(),
-            new ResultSequence(),
+            new ResultState(),
             new GameOverState(),
         };
     }
