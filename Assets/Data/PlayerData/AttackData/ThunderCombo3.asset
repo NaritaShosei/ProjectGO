@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -26,33 +26,54 @@ MonoBehaviour:
       AttackRange: 1
       AttackRadius: 1
       EnableKnockback: 1
-      KnockbackPower: 6
+      KnockbackPower: 4
       KnockbackUpward: 0
       HitStopData:
-        _baseDuration: 0.15
+        _baseDuration: 0.1
         _timeScale: 0
-        _targetGroup: 9
-        _weakPointMultiplier: 1.2
-        _breakOrKillMultiplier: 1.2
-        _weakAndBreakOrKillMultiplier: 1.4
+        _targetGroup: 1
+        _priority: 999
+        _weakPointMultiplier: 1.4
+        _breakOrKillMultiplier: 1.6
+        _weakAndBreakOrKillMultiplier: 2
       PlayGroundHitSE: 0
       AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.08
         _lightningDamageDelay: 0.2
       - _lightningDamageMultiplier: 0.08
         _lightningDamageDelay: 0.25
+      CameraShakeData:
+        _amplitude: 1
+        _frequency: 2
+        _duration: 0.1
+    - DamageMultiplier: 1.2
+      AttackRange: 1
+      AttackRadius: 1
+      EnableKnockback: 1
+      KnockbackPower: 4
+      KnockbackUpward: 0
+      HitStopData:
+        _baseDuration: 0.1
+        _timeScale: 0
+        _targetGroup: 1
+        _priority: 999
+        _weakPointMultiplier: 1.4
+        _breakOrKillMultiplier: 1.6
+        _weakAndBreakOrKillMultiplier: 2
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.08
-        _lightningDamageDelay: 0.3
-      - _lightningDamageMultiplier: 0.1
-        _lightningDamageDelay: 0.35
+        _lightningDamageDelay: 0.2
+      - _lightningDamageMultiplier: 0.08
+        _lightningDamageDelay: 0.25
       CameraShakeData:
         _amplitude: 0
         _frequency: 0
         _duration: 0
     _enableHoming: 1
-    _homingRadius: 10
-    _homingAngle: 45
-    _homingStrength: 30
+    _homingRadius: 5
+    _homingAngle: 40
+    _homingStrength: 100
     _enableMovement: 1
     _moveCurve:
       serializedVersion: 2
@@ -67,32 +88,23 @@ MonoBehaviour:
         inWeight: 0
         outWeight: 0.90518934
       - serializedVersion: 3
-        time: 0.1090861
-        value: 0.0004564193
-        inSlope: 0.008567515
-        outSlope: 0.008567515
+        time: 0.10111192
+        value: 0.45059896
+        inSlope: -0.0065564374
+        outSlope: -0.0065564374
         tangentMode: 0
         weightedMode: 0
         inWeight: 1
-        outWeight: 0.33333334
+        outWeight: 1
       - serializedVersion: 3
-        time: 0.20169513
-        value: 0.35209444
-        inSlope: -0.015754884
-        outSlope: -0.015754884
+        time: 0.2018857
+        value: 1.0013032
+        inSlope: -0.013495746
+        outSlope: -0.013495746
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 1
-      - serializedVersion: 3
-        time: 0.32951692
-        value: 0.99994206
-        inSlope: 0.009356805
-        outSlope: 0.009356805
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 1
-        outWeight: 0.33333334
+        outWeight: 0.3896835
       - serializedVersion: 3
         time: 1
         value: 1
@@ -105,9 +117,9 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    _moveDistance: 2
-    _moveSpeed: 5
-    _moveDuration: 2
+    _moveDistance: 5
+    _moveSpeed: 8
+    _moveDuration: 5
     _stopOnHit: 1
     _isPhantom: 0
     _animationStateName: Thunder_Combo_3
