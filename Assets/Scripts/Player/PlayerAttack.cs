@@ -145,6 +145,7 @@ public class PlayerAttack : MonoBehaviour
     private Transform _lockedHomingTarget;
     private bool _isHomingLocked;
     private AttackVariantData _activeAttackVariant;
+    private bool _attackMoveStoppedOnHit;
 
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
@@ -371,7 +372,7 @@ public class PlayerAttack : MonoBehaviour
         _activeAttackVariant = variant;
 
         FaceAttackTarget();
-        RequestAttackMove(variant);
+        RequestAttackMove(variant, 0, false);
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
@@ -385,7 +386,13 @@ public class PlayerAttack : MonoBehaviour
         if (_stateManager.CurrentState != PlayerState.Attacking) return;
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
 
+        _attackMoveStoppedOnHit = false;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
+
+        if (_attackMoveStoppedOnHit &&
+            _activeAttackVariant != null &&
+            hitIndex + 1 < _activeAttackVariant.HitCount)
+            RequestAttackMove(_activeAttackVariant, hitIndex + 1, true);
     }
 
     /// <summary>
@@ -414,7 +421,7 @@ public class PlayerAttack : MonoBehaviour
         _activeAttackVariant = variant;
 
         FaceAttackTarget();
-        RequestAttackMove(variant);
+        RequestAttackMove(variant, 0, false);
 
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
@@ -828,7 +835,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の移動要求を発行する。攻撃データに移動が有効な場合に、攻撃の移動要求イベントを発行する。イベントには移動のカーブや距離、速度、対象などの情報が含まれる。
     /// </summary>
-    private void RequestAttackMove(AttackVariantData data)
+    private void RequestAttackMove(AttackVariantData data, int hitIndex, bool resume)
     {
         if (!data.EnableMovement) return;
 
@@ -842,18 +849,19 @@ public class PlayerAttack : MonoBehaviour
             Distance = data.MoveDistance,
             Speed = data.MoveSpeed,
             Duration = data.MoveDuration,
+            Resume = resume,
             Direction = moveDirection,
             Target = _homingTarget,
-            StopDistance = CalculateAttackMoveStopDistance(data),
+            StopDistance = CalculateAttackMoveStopDistance(data, hitIndex),
             IsPhantom = data.IsPhantom
         });
     }
 
-    private float CalculateAttackMoveStopDistance(AttackVariantData data)
+    private float CalculateAttackMoveStopDistance(AttackVariantData data, int hitIndex)
     {
         if (_homingTarget == null) return 0f;
 
-        return Mathf.Max(0f, data.GetHitData(0).AttackRange);
+        return Mathf.Max(0f, data.GetHitData(hitIndex).AttackRange);
     }
 
     private void FaceAttackTarget()
@@ -902,6 +910,7 @@ _currentLockOnTarget.GetTargetCenter() == null)
     private void HandleAttackHitConfirmed()
     {
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
+        _attackMoveStoppedOnHit = true;
         OnAttackMoveStopRequested?.Invoke();
     }
     #endregion
@@ -929,6 +938,7 @@ public struct AttackMoveRequest
     public float Distance;
     public float Speed;
     public float Duration;
+    public bool Resume; // 停止前の経過時間とカーブ位置から再開するか
     public Vector3 Direction;
     public Transform Target; // 攻撃時の一番近い敵
     public float StopDistance; // 敵がいるときに攻撃を止める距離
