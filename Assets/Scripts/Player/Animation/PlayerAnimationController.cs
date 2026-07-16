@@ -16,7 +16,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnAttackComplete;
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
-    public event Action<int> OnAttackExecute;
+    public event Action<int, int> OnAttackExecute;
     public event Action OnModeChangeComplete;
     public event Action OnComboTransition;
     public event Action OnDodgeInvincibilityStart;
@@ -28,8 +28,9 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnDamagedEnd;
 
     // ── IAnimationController ──────────────────────────────────
-    public void AnimEvent_AttackExecute() => AnimEvent_AttackExecute(0);
-    public void AnimEvent_AttackExecute(int hitIndex) => OnAttackExecute?.Invoke(hitIndex);
+    public void AnimEvent_AttackExecute() => AnimEvent_AttackExecute(0, 1);
+    public void AnimEvent_AttackExecute(int hitIndex) => AnimEvent_AttackExecute(hitIndex, hitIndex + 1);
+    public void AnimEvent_AttackExecute(int hitIndex, int hitCount) => OnAttackExecute?.Invoke(hitIndex, hitCount);
     public void AnimEvent_AttackComplete() => OnAttackComplete?.Invoke();
     public void AnimEvent_ComboWindowStart() => OnComboWindowStart?.Invoke();
     public void AnimEvent_ComboWindowEnd() => OnComboWindowEnd?.Invoke();

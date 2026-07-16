@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -145,8 +146,9 @@ public class PlayerAttack : MonoBehaviour
     private Transform _lockedHomingTarget;
     private bool _isHomingLocked;
     private AttackVariantData _activeAttackVariant;
-    private bool _attackMoveStoppedOnHit;
     private int _currentHitIndex = -1;
+    private int _currentMotionHitCount;
+    private readonly HashSet<int> _stoppedHitIndices = new();
 
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
@@ -371,6 +373,9 @@ public class PlayerAttack : MonoBehaviour
 
         SetupHoming(variant);
         _activeAttackVariant = variant;
+        _currentHitIndex = -1;
+        _currentMotionHitCount = 0;
+        _stoppedHitIndices.Clear();
 
         FaceAttackTarget();
         RequestAttackMove(variant, 0, false);
@@ -382,19 +387,19 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃アニメーションの攻撃判定フレームで呼ばれる。ここで実際に攻撃を実行する。
     /// </summary>
-    private void ExecutePendingAttack(int hitIndex)
+    private void ExecutePendingAttack(int hitIndex, int hitCount)
     {
         if (_stateManager.CurrentState != PlayerState.Attacking) return;
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
 
-        _attackMoveStoppedOnHit = false;
         _currentHitIndex = hitIndex;
+        _currentMotionHitCount = hitCount;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
 
         // 未命中時はOnHitConfirmedが発火しないため、次ヒットに向けた移動をここで継続する。
         // 同期的にヒット済みの場合は、HandleAttackHitConfirmed側ですでに再開されているため重複させない。
-        if (!_attackMoveStoppedOnHit)
-            RequestNextHitAttackMove();
+        if (!_stoppedHitIndices.Contains(hitIndex))
+            RequestNextHitAttackMove(hitIndex);
     }
 
     /// <summary>
@@ -421,6 +426,9 @@ public class PlayerAttack : MonoBehaviour
 
         SetupHoming(variant);
         _activeAttackVariant = variant;
+        _currentHitIndex = -1;
+        _currentMotionHitCount = 0;
+        _stoppedHitIndices.Clear();
 
         FaceAttackTarget();
         RequestAttackMove(variant, 0, false);
@@ -550,6 +558,8 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = null;
         _activeAttackVariant = null;
         _currentHitIndex = -1;
+        _currentMotionHitCount = 0;
+        _stoppedHitIndices.Clear();
         _bufferedComboInput = null;
 
         _isInComboWindow = false;
@@ -910,23 +920,22 @@ _currentLockOnTarget.GetTargetCenter() == null)
         return _currentLockOnTarget.GetTargetCenter();
     }
 
-    private void HandleAttackHitConfirmed()
+    private void HandleAttackHitConfirmed(int hitIndex)
     {
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
-        if (_attackMoveStoppedOnHit) return;
+        if (!_stoppedHitIndices.Add(hitIndex)) return;
 
-        _attackMoveStoppedOnHit = true;
         OnAttackMoveStopRequested?.Invoke();
 
-        RequestNextHitAttackMove();
+        RequestNextHitAttackMove(hitIndex);
     }
 
-    private void RequestNextHitAttackMove()
+    private void RequestNextHitAttackMove(int hitIndex)
     {
-        if (_activeAttackVariant == null || _currentHitIndex < 0) return;
+        if (_activeAttackVariant == null || hitIndex < 0) return;
 
-        int nextHitIndex = _currentHitIndex + 1;
-        if (nextHitIndex < _activeAttackVariant.HitCount)
+        int nextHitIndex = hitIndex + 1;
+        if (nextHitIndex < _currentMotionHitCount)
             RequestAttackMove(_activeAttackVariant, nextHitIndex, true);
     }
     #endregion
