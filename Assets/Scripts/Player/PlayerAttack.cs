@@ -390,6 +390,11 @@ public class PlayerAttack : MonoBehaviour
         _attackMoveStoppedOnHit = false;
         _currentHitIndex = hitIndex;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
+
+        // 未命中時はOnHitConfirmedが発火しないため、次ヒットに向けた移動をここで継続する。
+        // 同期的にヒット済みの場合は、HandleAttackHitConfirmed側ですでに再開されているため重複させない。
+        if (!_attackMoveStoppedOnHit)
+            RequestNextHitAttackMove();
     }
 
     /// <summary>
@@ -913,8 +918,15 @@ _currentLockOnTarget.GetTargetCenter() == null)
         _attackMoveStoppedOnHit = true;
         OnAttackMoveStopRequested?.Invoke();
 
+        RequestNextHitAttackMove();
+    }
+
+    private void RequestNextHitAttackMove()
+    {
+        if (_activeAttackVariant == null || _currentHitIndex < 0) return;
+
         int nextHitIndex = _currentHitIndex + 1;
-        if (_currentHitIndex >= 0 && nextHitIndex < _activeAttackVariant.HitCount)
+        if (nextHitIndex < _activeAttackVariant.HitCount)
             RequestAttackMove(_activeAttackVariant, nextHitIndex, true);
     }
     #endregion
