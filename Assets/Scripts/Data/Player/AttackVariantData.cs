@@ -6,8 +6,6 @@ public class AttackVariantData
 {
     public string AttackName => _attackName;
     public ChargeLevel RequiredCharge => _requiredCharge;
-    public int HitCount => _hits?.Length ?? 0;
-
     public AttackHitData GetHitData(int hitIndex)
     {
         if (_hits == null || _hits.Length == 0)
