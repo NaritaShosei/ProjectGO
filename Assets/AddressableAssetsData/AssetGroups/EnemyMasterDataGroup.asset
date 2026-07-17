@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: EnemyMasterDataGroup
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: EnemyMasterDataGroup
+  m_GUID: dfb41fdb43de26742b2d26628d42d0be
+  m_SerializeEntries:
+  - m_GUID: 114f382548e818e46b0acf5225ac2e89
+    m_Address: Assets/Data/BossEnemy/Repositry/BossEnemyAttackMasterDataRepository.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab3ebdd455797a14c976dfb52ed2a029
+    m_Address: Assets/Data/BossEnemy/Repositry/BossEnemyMasterDataRepository.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 1fcda5c23a31f374885089bf0cfcf5b7, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 2435e380e51593b4abd8da5e7368b587, type: 2}
+    - {fileID: 11400000, guid: 73dd960e38980db4d943194c768d7e54, type: 2}
