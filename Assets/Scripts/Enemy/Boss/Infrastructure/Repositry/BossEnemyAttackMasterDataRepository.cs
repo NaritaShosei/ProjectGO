@@ -1,69 +1,53 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 // BossEnemy関連
 using BossEnemy.Data;
 using BossEnemy.Model.Interface;
+using System.Threading.Tasks;
+using Infrastructure;
+
 
 namespace BossEnemy.Infrastructure.Repository
 {
-    public class BossEnemyAttackDataRepository : IBossEnemyAttackDataRepository
+    [CreateAssetMenu(fileName = "BossEnemyAttackMasterDataRepository", menuName = "Repositry/BossEnemyMasterData")]
+    public class BossEnemyAttackMasterDataRepository : ScriptableObject, IBossEnemyAttackDataRepository
     {
-        public void Init(string textAsset)
+        public void Init()
         {
-            _attackDataDict.Clear();
+            _bossMasterData = CSVDateLoader.ParseCsv(_bossEnemyCsvTextAsset.text);
 
-            if (textAsset == null || string.IsNullOrEmpty(textAsset))
+            for(int row = 0; row < _bossMasterData.GetLength(0); row++)
             {
-                Debug.LogError("Boss attack CSV is not set.");
-                _bossMasterData = new string[0, 0];
-                _attackDataArrayStartNum = -1;
-                return;
-            }
-
-            _bossMasterData = CSVDateLoader.ParseCsv(textAsset);
-            _attackDataArrayStartNum = -1;
-
-
-            for(int y = 0; y < _bossMasterData.GetLength(0); y++)
-            {
-                if (_bossMasterData[y,0] == _attackDataArrayStartKey)
+                if(_bossMasterData[row, 0] == _attackDataRowStartKeyWord)
                 {
-                    _attackDataArrayStartNum = y;
+                    _attackDataArrayStartNum = row;
                     return;
                 }
             }
-
-            Debug.LogError("AttackData section was not found in boss CSV.");
         }
 
         public BossEnemyAttackData GetData(int id)
         {
             if (_attackDataDict.TryGetValue(id, out BossEnemyAttackData cachedData)) return cachedData;
 
-            if (_attackDataArrayStartNum < 0)
+            if (_attackDataArrayStartNum < 0 || _bossMasterData.GetLength(1) < _csvAttackDataLength)
             {
-                Debug.LogError($"Boss attack data section is invalid. ID:{id}");
-                return default;
-            }
-
-            if (_bossMasterData.GetLength(1) < _attackDataStringLength)
-            {
-                Debug.LogError($"Boss attack CSV columns are not enough. Required:{_attackDataStringLength}, Actual:{_bossMasterData.GetLength(1)}");
                 return default;
             }
 
             int commentLineNum = 2;
 
-            for (int x = _attackDataArrayStartNum + commentLineNum; x < _bossMasterData.GetLength(0); x++)
+            for (int row = _attackDataArrayStartNum + commentLineNum; row < _bossMasterData.GetLength(0); row++)
             {
-                if (int.TryParse(_bossMasterData[x, 0], out int dataID) && dataID == id)
+                if (int.TryParse(_bossMasterData[row, 0], out int dataID) && dataID == id)
                 {
-                    string[] attackDataStrings = new string[_attackDataStringLength];
-                    for (int i = 0; i < _attackDataStringLength; i++)
+                    string[] attackDataStrings = new string[_csvAttackDataLength];
+                    for (int i = 0; i < _csvAttackDataLength; i++)
                     {
-                        attackDataStrings[i] = _bossMasterData[x, i];
+                        attackDataStrings[i] = _bossMasterData[row, i];
                     }
 
                     try
@@ -74,16 +58,19 @@ namespace BossEnemy.Infrastructure.Repository
                     }
                     catch (Exception exception)
                     {
-                        Debug.LogError($"Failed to build boss attack data. ID:{id}, Row:{x}");
+                        Debug.LogError($"攻撃データの生成に失敗しました ID:{id}, 失敗した列:{row}");
                         Debug.LogException(exception);
                         return default;
                     }
                 }
             }
 
-            Debug.LogError($"Boss attack data was not found. ID:{id}");
+            Debug.LogError($"指定されたIDのデータが見つかりませんでした ID:{id}");
             return default;
         }
+
+        [SerializeField, Header("BossEnemyのCSV形式のマスターデータ")]
+        private TextAsset _bossEnemyCsvTextAsset = null;
 
         private Dictionary<int, BossEnemyAttackData> _attackDataDict = new();
 
@@ -91,9 +78,9 @@ namespace BossEnemy.Infrastructure.Repository
 
         private int _attackDataArrayStartNum;
 
-        private const string _attackDataArrayStartKey = "AttackData";
+        private const string _attackDataRowStartKeyWord = "AttackData";
 
-        private const int _attackDataStringLength = 13;
+        private const int _csvAttackDataLength = 13;
 
         private BossEnemyAttackData BuildAttackData(string[] attackDataStrings)
         {
@@ -113,7 +100,6 @@ namespace BossEnemy.Infrastructure.Repository
                 float.Parse(attackDataStrings[11]),
                 attackDataStrings[12]
             );
-
         }
     }
 }

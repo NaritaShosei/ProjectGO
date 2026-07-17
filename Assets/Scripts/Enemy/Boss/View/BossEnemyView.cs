@@ -99,7 +99,7 @@ namespace BossEnemy.View
                     _cameraManager, _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
             }
 
-            _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
+            _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver).Forget();
         }
 
         /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>

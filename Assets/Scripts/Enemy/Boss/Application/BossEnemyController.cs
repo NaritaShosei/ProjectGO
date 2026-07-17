@@ -12,6 +12,7 @@ using BossEnemy.Model.System;
 using BossEnemy.Model.System.Logic;
 using BossEnemy.Model.BehaviorTree;
 using BossEnemy.Infrastructure.Repository;
+using Infrastructure;
 # endregion
 
 namespace BossEnemy.Application
@@ -24,7 +25,7 @@ namespace BossEnemy.Application
         /// <summary> 初期化 </summary>
         /// <param name="bossEnemyView"> BossのViewClass </param>
         /// <param name="enemyServices"> Enemy共通のServicesClass </param>
-        public void Init(EnemyServices enemyServices, IAnimationEventReceiver bossEnemyAnimationEventReceiver)
+        public async UniTask Init(EnemyServices enemyServices, IAnimationEventReceiver bossEnemyAnimationEventReceiver)
         {
             if (_bossEnemyView == null || _bossEnemyUIView == null)
             {
@@ -32,21 +33,27 @@ namespace BossEnemy.Application
                 return;
             }
 
+            // 各種Repositryを取得
+            _attackDataRepositry = await AssetsLoader.LoadAssetAsync<BossEnemyAttackMasterDataRepository>(_attackDataRepositryAssetLoadPath);
+            _bossEnemyMasterDataRepository = await AssetsLoader.LoadAssetAsync<BossEnemyMasterDataRepository>(_bossEnemyMasterDataRepositoryAssetLoadPath);
+            _attackDataRepositry.Init();
+            _bossEnemyMasterDataRepository.Init();
+
+            // Disposableの初期化
             _phaseChangeEventDisposables = new();
             _deadEventDisposables = new();
-
-            // Animationによるイベントの通知クラスを取得
-            _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
-
-            // BossEnemyのマスターデータを取得
-            _bossEnemyMasterDataRepository.Init(_csvBossEnemyMasterData.text);
-            _bossEnemyMasterData = _bossEnemyMasterDataRepository.GetData(_id);
 
             // 各種ロジックを初期化
             _takeDamage = new();
             _bossMove = new();
             _bossAttack = new(enemyServices.PlayerInformationService, _attackCoolTimer);
             _bossDown = new();
+
+            // Animationによるイベントの通知クラスを取得
+            _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
+
+            // BossEnemyのマスターデータを取得
+            _bossEnemyMasterData = _bossEnemyMasterDataRepository.GetData(_id);
 
             // BossMoveにTimeScaleを反映
             _bossEnemyView.TimeScaleProperty.Subscribe(timeScale =>
@@ -67,9 +74,6 @@ namespace BossEnemy.Application
             _phaseChange.OnFinishAllPhase += _deadEventDisposables.Dispose;
             _phaseChange.OnFinishAllPhase += () => HandleDead(_bossEnemyView);
             _phaseChange.OnFinishAllPhase += _bossEnemyBehaviorTree.HandleDead;
-
-            // 攻撃データのリポジトリの初期化
-            _attackDataRepositry.Init(_csvBossEnemyMasterData.text);
 
             RegisterPhaseChangeEventAction();
             RegisterBossDataChangeEventAction();
@@ -96,7 +100,7 @@ namespace BossEnemy.Application
 
         [Header("BossEnemy全体のMasterData")]
         [SerializeField, Tooltip("BossEnemy全体のMasterData")]
-        private TextAsset _csvBossEnemyMasterData = null;
+        private string _csvBossEnemyMasterDataTextAssetPath = "Assets/Data/CSV/BossEnemyMasterDataCSV.csv";
 
         [Header("BossEnemyのAIBehaviorTree")]
         [SerializeField, Tooltip("BossEnemyのAI")]
@@ -106,13 +110,11 @@ namespace BossEnemy.Application
         [SerializeField, Tooltip("生成するBossのID")]
         private int _id = 1;
 
-        [Header("各種リポジトリインターフェース")]
+        private const string _bossEnemyMasterDataRepositoryAssetLoadPath = "Assets/Data/BossEnemy/Repositry/BossEnemyMasterDataRepository.asset";
+        private const string _attackDataRepositryAssetLoadPath = "Assets/Data/BossEnemy/Repositry/BossEnemyAttackMasterDataRepository.asset";
 
-        [SerializeReference, SubclassSelector]
-        private IBossEnemyAttackDataRepository _attackDataRepositry;
-
-        [SerializeReference, SubclassSelector]
-        private IBossEnemyMasterDataRepository _bossEnemyMasterDataRepository;
+        private IBossEnemyAttackDataRepository _attackDataRepositry = null;
+        private IBossEnemyDataRepository _bossEnemyMasterDataRepository = null;
 
         private BossEnemyMasterData _bossEnemyMasterData = null;
 
