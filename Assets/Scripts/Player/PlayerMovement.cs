@@ -80,10 +80,16 @@ public class PlayerMovement : MonoBehaviour
     private bool _currentIsPhantom;
     private float _attackMoveElapsed;
     private int _attackMoveVersion;
+    private int _enemyLayerMask;
 
     private DodgeData _currentDodgeData;
 
     private List<IStatModifier> _modifiers = new List<IStatModifier>();
+
+    private void Awake()
+    {
+        _enemyLayerMask = LayerMask.GetMask("Enemy");
+    }
 
     private float InvincibleDuration
     {
@@ -453,8 +459,6 @@ public class PlayerMovement : MonoBehaviour
 
         float elapsed = Mathf.Clamp(_attackMoveElapsed, 0f, request.Duration);
 
-        Vector3 startPos = transform.position;
-
         Vector3 dir = request.Direction;
         dir.y = 0f;
         if (dir.sqrMagnitude <= 0.001f)
@@ -464,47 +468,35 @@ public class PlayerMovement : MonoBehaviour
         }
         dir = dir.normalized;
 
-        float startCurveValue = curve.Evaluate(elapsed / request.Duration);
-        Vector3 targetPos = startPos + dir * request.Distance * (1f - startCurveValue);
-
-        bool stoppedEarly = false;
+        float previousCurveValue = curve.Evaluate(elapsed / request.Duration);
 
         while (elapsed < request.Duration)
         {
-            float t = elapsed / request.Duration;
-            float curveValue = curve.Evaluate(t);
-            float remainingCurveRange = 1f - startCurveValue;
-            float resumedCurveValue = remainingCurveRange > Mathf.Epsilon
-                ? (curveValue - startCurveValue) / remainingCurveRange
-                : 1f;
+            float nextElapsed = Mathf.Min(
+                elapsed + Time.fixedDeltaTime * _timeScale,
+                request.Duration);
+            float curveValue = curve.Evaluate(nextElapsed / request.Duration);
+            float curveDelta = curveValue - previousCurveValue;
+            Vector3 newPos = transform.position + dir * request.Distance * curveDelta;
 
-            Vector3 newPos = Vector3.LerpUnclamped(startPos, targetPos, resumedCurveValue);
-            if (TryClampAttackMoveStopPosition(transform.position, newPos, request.Target, request.StopDistance, out var stoppedPos))
+            if (TryClampAttackMoveToEnemyCollider(transform.position, newPos, out var stoppedPos))
             {
                 MoveAttackPosition(stoppedPos, request.Target);
-                stoppedEarly = true;
-                break;
             }
-
-            if (MoveAttackPosition(newPos, request.Target))
+            else if (MoveAttackPosition(newPos, request.Target))
             {
-                stoppedEarly = true;
                 break;
             }
 
-            elapsed += Time.fixedDeltaTime * _timeScale;
+            // 停止距離内でも時間とカーブは進める。
+            // 停止中の移動量は後から取り戻さず、アニメーションとの同期を維持する。
+            elapsed = nextElapsed;
             _attackMoveElapsed = elapsed;
+            previousCurveValue = curveValue;
 
             await UniTask.Yield(
                 PlayerLoopTiming.FixedUpdate,
                 cancellationToken);
-        }
-        if (!stoppedEarly)
-        {
-            if (TryClampAttackMoveStopPosition(transform.position, targetPos, request.Target, request.StopDistance, out var stoppedPos))
-                MoveAttackPosition(stoppedPos, request.Target);
-            else
-                MoveAttackPosition(targetPos, request.Target);
         }
     }
 
@@ -573,46 +565,35 @@ public class PlayerMovement : MonoBehaviour
                target.IsChildOf(hitTransform);
     }
 
-    private bool TryClampAttackMoveStopPosition(
+    private bool TryClampAttackMoveToEnemyCollider(
         Vector3 currentPos,
         Vector3 candidatePos,
-        Transform target,
-        float stopDistance,
         out Vector3 stoppedPos)
     {
         stoppedPos = candidatePos;
 
-        if (!target || stopDistance <= 0f) return false;
+        Vector3 delta = candidatePos - currentPos;
+        float distance = delta.magnitude;
+        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE)
+            return false;
 
-        Vector3 targetPos = target.position;
-        float currentDistance = HorizontalDistance(currentPos, targetPos);
-        if (currentDistance <= stopDistance)
+        Vector3 direction = delta / distance;
+        if (!Physics.Raycast(
+                currentPos,
+                direction,
+                out RaycastHit hit,
+                distance + ATTACK_MOVE_CAST_SKIN,
+                _enemyLayerMask,
+                QueryTriggerInteraction.Collide))
         {
-            stoppedPos = currentPos;
-            return true;
+            return false;
         }
 
-        float candidateDistance = HorizontalDistance(candidatePos, targetPos);
-        if (candidateDistance > stopDistance) return false;
-
-        Vector3 fromTarget = currentPos - targetPos;
-        fromTarget.y = 0f;
-        if (fromTarget.sqrMagnitude <= 0.001f)
-        {
-            stoppedPos = currentPos;
-            return true;
-        }
-
-        stoppedPos = targetPos + fromTarget.normalized * stopDistance;
+        // Enemyレイヤーのコライダー表面より少し手前で止め、敵を貫通しないようにする。
+        float safeDistance = Mathf.Max(0f, hit.distance - ATTACK_MOVE_CAST_SKIN);
+        stoppedPos = currentPos + direction * Mathf.Min(safeDistance, distance);
         stoppedPos.y = candidatePos.y;
         return true;
-    }
-
-    private static float HorizontalDistance(Vector3 a, Vector3 b)
-    {
-        a.y = 0f;
-        b.y = 0f;
-        return Vector3.Distance(a, b);
     }
 
     /// <summary>

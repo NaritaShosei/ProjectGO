@@ -378,7 +378,7 @@ public class PlayerAttack : MonoBehaviour
         _stoppedHitIndices.Clear();
 
         FaceAttackTarget();
-        RequestAttackMove(variant, 0, false);
+        RequestAttackMove(variant, false);
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
@@ -431,7 +431,7 @@ public class PlayerAttack : MonoBehaviour
         _stoppedHitIndices.Clear();
 
         FaceAttackTarget();
-        RequestAttackMove(variant, 0, false);
+        RequestAttackMove(variant, false);
 
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
@@ -848,7 +848,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の移動要求を発行する。攻撃データに移動が有効な場合に、攻撃の移動要求イベントを発行する。イベントには移動のカーブや距離、速度、対象などの情報が含まれる。
     /// </summary>
-    private void RequestAttackMove(AttackVariantData data, int hitIndex, bool resume)
+    private void RequestAttackMove(AttackVariantData data, bool resume)
     {
         if (!data.EnableMovement) return;
 
@@ -865,16 +865,8 @@ public class PlayerAttack : MonoBehaviour
             Resume = resume,
             Direction = moveDirection,
             Target = _homingTarget,
-            StopDistance = CalculateAttackMoveStopDistance(data, hitIndex),
             IsPhantom = data.IsPhantom
         });
-    }
-
-    private float CalculateAttackMoveStopDistance(AttackVariantData data, int hitIndex)
-    {
-        if (_homingTarget == null) return 0f;
-
-        return Mathf.Max(0f, data.GetHitData(hitIndex).AttackRange);
     }
 
     private void FaceAttackTarget()
@@ -936,7 +928,7 @@ _currentLockOnTarget.GetTargetCenter() == null)
 
         int nextHitIndex = hitIndex + 1;
         if (nextHitIndex < _currentMotionHitCount)
-            RequestAttackMove(_activeAttackVariant, nextHitIndex, true);
+            RequestAttackMove(_activeAttackVariant, true);
     }
     #endregion
 }
@@ -966,6 +958,5 @@ public struct AttackMoveRequest
     public bool Resume; // 停止前の経過時間とカーブ位置から再開するか
     public Vector3 Direction;
     public Transform Target; // 攻撃時の一番近い敵
-    public float StopDistance; // 敵がいるときに攻撃を止める距離
     public bool IsPhantom; // 攻撃がファントムかどうか
 }
