@@ -479,7 +479,7 @@ public class PlayerMovement : MonoBehaviour
             float curveDelta = curveValue - previousCurveValue;
             Vector3 newPos = transform.position + dir * request.Distance * curveDelta;
 
-            if (TryClampAttackMoveToEnemyCollider(transform.position, newPos, out var stoppedPos))
+            if (!request.IsPhantom && TryClampAttackMoveToEnemyCollider(transform.position, newPos, out var stoppedPos))
             {
                 MoveAttackPosition(stoppedPos, request.Target);
             }
