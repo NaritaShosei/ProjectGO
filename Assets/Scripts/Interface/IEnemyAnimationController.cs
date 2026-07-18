@@ -41,4 +41,7 @@ public interface IEnemyAnimationController
 
     /// <summary>武器スイングSEタイミング</summary>
     public void AnimEvent_WeaponSwing();
+
+    /// <summary>エネミーの出現開始タイミング</summary>
+    public void AnimEvent_SpawnEffect();
 }

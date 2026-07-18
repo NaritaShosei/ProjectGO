@@ -41,6 +41,8 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public event Action OnAttackStart;
     /// <summary>武器スイングSEイベント</summary>
     public event Action OnWeaponSwing;
+    /// <summary>エネミーのスポーンエフェクトイベント</summary>
+    public event Action OnSpawnEffect;
 
     /// <summary>EnemyAttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
@@ -108,5 +110,10 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public void AnimEvent_WeaponSwing()
     {
         OnWeaponSwing?.Invoke();
+    }
+
+    public void AnimEvent_SpawnEffect()
+    {
+        OnSpawnEffect?.Invoke();
     }
 }
