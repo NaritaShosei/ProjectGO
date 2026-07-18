@@ -431,7 +431,7 @@ namespace BossEnemy.View
 
         private void Update()
         {
-            if (_bossEnemyController == null) return;
+            if (_bossEnemyController == null || !_bossEnemyController.IsInit) return;
 
             if (!_isDead) _bossEnemyController.OnUpdate();
         }

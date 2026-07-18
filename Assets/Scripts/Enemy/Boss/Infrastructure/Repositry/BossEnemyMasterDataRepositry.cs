@@ -19,6 +19,12 @@ namespace BossEnemy.Infrastructure.Repository
         /// </summary>
         public void Init()
         {
+            if(_bossEnemyCsvTextAsset == null)
+            {
+                Debug.LogError("_bossEnemyCsvTextAssetがNullです");
+                return;
+            }
+
             _masterData.Clear();
 
             if (string.IsNullOrEmpty(_bossEnemyCsvTextAsset.text))

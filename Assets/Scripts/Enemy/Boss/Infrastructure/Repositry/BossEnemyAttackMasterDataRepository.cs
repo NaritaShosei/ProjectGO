@@ -17,9 +17,16 @@ namespace BossEnemy.Infrastructure.Repository
     {
         public void Init()
         {
+            _attackDataDict.Clear();
             _bossMasterData = CSVDateLoader.ParseCsv(_bossEnemyCsvTextAsset.text);
 
-            for(int row = 0; row < _bossMasterData.GetLength(0); row++)
+            if (_bossEnemyCsvTextAsset == null || string.IsNullOrEmpty(_bossEnemyCsvTextAsset.text))    
+            {
+                Debug.LogError("BossEnemyの攻撃CSVが設定されていません");
+                return;
+            }
+
+            for (int row = 0; row < _bossMasterData.GetLength(0); row++)
             {
                 if(_bossMasterData[row, 0] == _attackDataRowStartKeyWord)
                 {
@@ -27,6 +34,8 @@ namespace BossEnemy.Infrastructure.Repository
                     return;
                 }
             }
+
+            Debug.LogError("AttackDataを記載しているセクションが見つかりません");
         }
 
         public BossEnemyAttackData GetData(int id)
@@ -76,7 +85,7 @@ namespace BossEnemy.Infrastructure.Repository
 
         private string[,] _bossMasterData;
 
-        private int _attackDataArrayStartNum;
+        private int _attackDataArrayStartNum = 0;
 
         private const string _attackDataRowStartKeyWord = "AttackData";
 

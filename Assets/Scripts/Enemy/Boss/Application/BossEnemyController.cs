@@ -20,6 +20,7 @@ namespace BossEnemy.Application
     [Serializable]
     public class BossEnemyController
     {
+        public bool IsInit => _isInit;
         public BossEnemyData CurrentBossData => _currentPhaseBossEnemyData.Value;
 
         /// <summary> 初期化 </summary>
@@ -83,6 +84,8 @@ namespace BossEnemy.Application
 
             // 最初のPhaseを開始
             _phaseChange.StartFirstPhase();
+
+            _isInit = true;
         }
 
         /// <summary> Viewを設定する </summary>
@@ -109,6 +112,8 @@ namespace BossEnemy.Application
         [Header("生成するBossのID")]
         [SerializeField, Tooltip("生成するBossのID")]
         private int _id = 1;
+
+        private bool _isInit = false;
 
         private const string _bossEnemyMasterDataRepositoryAssetLoadPath = "Assets/Data/BossEnemy/Repositry/BossEnemyMasterDataRepository.asset";
         private const string _attackDataRepositryAssetLoadPath = "Assets/Data/BossEnemy/Repositry/BossEnemyAttackMasterDataRepository.asset";
@@ -167,6 +172,8 @@ namespace BossEnemy.Application
             _enemyAnimationEventReceiver.OnColliderIsTriggerIsEnabled -= _bossMove.ColliderIsTrigger;
             _enemyAnimationEventReceiver.OnMove -= _bossMove.MoveTargetPositionRightOnTime;
             _enemyAnimationEventReceiver.OnAttackHit -= _bossAttack.Hit;
+
+            _isInit = false;
         }
 
         private void RegisterBossDownEventAction()
