@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: EnemyMasterDataGroup
+  m_Name: BossEnemyGroup
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
-  m_GroupName: EnemyMasterDataGroup
+  m_GroupName: BossEnemyGroup
   m_GUID: dfb41fdb43de26742b2d26628d42d0be
   m_SerializeEntries:
   - m_GUID: 114f382548e818e46b0acf5225ac2e89
@@ -22,6 +22,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ab3ebdd455797a14c976dfb52ed2a029
     m_Address: Assets/Data/BossEnemy/Repositry/BossEnemyMasterDataRepository.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e399fdc048f9faa45a32193411b37d9b
+    m_Address: Assets/Data/BossEnemy/BehaviorTree/ID1_BossEnemyBehaviorTree.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

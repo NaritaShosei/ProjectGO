@@ -35,8 +35,8 @@ namespace BossEnemy.Application
             }
 
             // 各種Repositryを取得
-            _attackDataRepositry = await AssetsLoader.LoadAssetAsync<BossEnemyAttackMasterDataRepository>(_attackDataRepositryAssetLoadPath);
-            _bossEnemyMasterDataRepository = await AssetsLoader.LoadAssetAsync<BossEnemyMasterDataRepository>(_bossEnemyMasterDataRepositoryAssetLoadPath);
+            _attackDataRepositry = await AssetsLoader.LoadAssetAsync<BossEnemyAttackMasterDataRepository>(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossEnemyAttackMasterDataRepository);
+            _bossEnemyMasterDataRepository = await AssetsLoader.LoadAssetAsync<BossEnemyMasterDataRepository>(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossEnemyMasterDataRepository);
             _attackDataRepositry.Init();
             _bossEnemyMasterDataRepository.Init();
 
@@ -62,7 +62,8 @@ namespace BossEnemy.Application
                 _bossMove.SetTimeScale(timeScale);
             }).AddTo(_deadEventDisposables);
 
-            // BehaviorTreeの初期化
+            // BehaviorTreeの取得と初期化
+            _bossEnemyBehaviorTree = await AssetsLoader.LoadAssetAsync<BossEnemyBehaviorTree>(AAGBossEnemyGroup.kAssets_Data_BossEnemy_BehaviorTree_ID1_BossEnemyBehaviorTree);
             _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove, _bossDown, _attackCoolTimer);
 
             // Enemyがうけられるサービス一覧
@@ -101,25 +102,16 @@ namespace BossEnemy.Application
             _bossEnemyBehaviorTree.OnUpdate();
         }
 
-        [Header("BossEnemy全体のMasterData")]
-        [SerializeField, Tooltip("BossEnemy全体のMasterData")]
-        private string _csvBossEnemyMasterDataTextAssetPath = "Assets/Data/CSV/BossEnemyMasterDataCSV.csv";
-
-        [Header("BossEnemyのAIBehaviorTree")]
-        [SerializeField, Tooltip("BossEnemyのAI")]
-        private BossEnemyBehaviorTree _bossEnemyBehaviorTree = null;
-
         [Header("生成するBossのID")]
         [SerializeField, Tooltip("生成するBossのID")]
         private int _id = 1;
 
         private bool _isInit = false;
 
-        private const string _bossEnemyMasterDataRepositoryAssetLoadPath = "Assets/Data/BossEnemy/Repositry/BossEnemyMasterDataRepository.asset";
-        private const string _attackDataRepositryAssetLoadPath = "Assets/Data/BossEnemy/Repositry/BossEnemyAttackMasterDataRepository.asset";
-
         private IBossEnemyAttackDataRepository _attackDataRepositry = null;
         private IBossEnemyDataRepository _bossEnemyMasterDataRepository = null;
+
+        private BossEnemyBehaviorTree _bossEnemyBehaviorTree = null;
 
         private BossEnemyMasterData _bossEnemyMasterData = null;
 
