@@ -26,28 +26,28 @@ MonoBehaviour:
       AttackRange: 1
       AttackRadius: 1
       EnableKnockback: 1
-      KnockbackPower: 6
+      KnockbackPower: 5
       KnockbackUpward: 0
       HitStopData:
-        _baseDuration: 0.15
+        _baseDuration: 0.1
         _timeScale: 0
-        _targetGroup: 9
+        _targetGroup: 1
         _priority: 999
-        _weakPointMultiplier: 1.2
-        _breakOrKillMultiplier: 1.2
-        _weakAndBreakOrKillMultiplier: 1.4
+        _weakPointMultiplier: 1.4
+        _breakOrKillMultiplier: 1.6
+        _weakAndBreakOrKillMultiplier: 2
       PlayGroundHitSE: 0
       AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.2
         _lightningDamageDelay: 0.2
       CameraShakeData:
-        _amplitude: 0
-        _frequency: 0
-        _duration: 0
+        _amplitude: 1
+        _frequency: 2
+        _duration: 0.1
     _enableHoming: 1
-    _homingRadius: 10
-    _homingAngle: 45
-    _homingStrength: 30
+    _homingRadius: 5
+    _homingAngle: 40
+    _homingStrength: 100
     _enableMovement: 1
     _moveCurve:
       serializedVersion: 2
@@ -62,29 +62,29 @@ MonoBehaviour:
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 0.13311574
-        value: 0.99457693
-        inSlope: 1
-        outSlope: 1
+        time: 0.120727256
+        value: 1.0000484
+        inSlope: -0.0012637407
+        outSlope: -0.0012637407
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.33333334
+        outWeight: 0.06367211
       - serializedVersion: 3
         time: 1
         value: 1
-        inSlope: -0.23732758
-        outSlope: -0.23732758
+        inSlope: -0.012280752
+        outSlope: -0.012280752
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.5767783
+        inWeight: 0.19353887
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    _moveDistance: 1.5
-    _moveSpeed: 3
-    _moveDuration: 1.5
+    _moveDistance: 2
+    _moveSpeed: 3.5
+    _moveDuration: 2
     _stopOnHit: 1
     _isPhantom: 0
     _animationStateName: Thunder_Combo_1

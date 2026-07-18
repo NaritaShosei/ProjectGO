@@ -108,7 +108,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         if (_playerStateManager.IsDead()) return;
 
-        if (_justDodgeSystem != null && _justDodgeSystem.TryJustDodge())
+        if (CurrentMode == PlayerMode.Thunder
+            && _justDodgeSystem != null
+            && _justDodgeSystem.TryJustDodge())
         {
             Debug.Log("ジャスト回避成功");
             return;
