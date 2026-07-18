@@ -240,6 +240,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     [SerializeField]private EnemySoundHandler _soundHandler;
 
     [SerializeField]private EnemyType _enemyType;
+    //スポーンエフェクトを適応するかのBool
+    [SerializeField,Tooltip("スポーンエフェクトを適応の可否")]private bool _useSpawnEffect = true;
+    [SerializeField,Tooltip("スポーンエフェクトのKey")] private string _spawnEffectKey = "スポーンエフェクト";
 
     private float _timeScale = 1f;
 
@@ -293,6 +296,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _enemyAnimator = new EnemyAnimator(_animator, _animationEventReceiver);
         // 死亡アニメーション終了イベントを購読する
         _enemyAnimator.OnDeadEnd += HandleDeadEnd;
+        _enemyAnimator.OnSpawnEffect += HandleSpawnEffect;
 
         if (_animationEventReceiver != null)
         {
@@ -389,6 +393,16 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     protected void InvokeOnDownSE()
     {
         OnDownSE?.Invoke();
+    }
+
+    protected virtual void HandleSpawnEffect()
+    {
+        if (!_useSpawnEffect) return;
+        if (!ServiceLocator.TryGet(out EffectManager effectManager)) return;
+
+        effectManager.PlayEffect(
+            _spawnEffectKey,
+            transform.position);
     }
 
     /// <summary>

@@ -1,12 +1,12 @@
 using UnityEngine;
 
-public class EnemySpawnSMB : MonoBehaviour
+public class EnemySpawnSMB : StateMachineBehaviour
 {
     public override void OnStateEnter(Animator animator,AnimatorStateInfo stateInfo,int layerIndex)
     {
         if (animator.TryGetComponent(out IEnemyAnimationController controller))
         {
-            controller.AnimEvent_SpawnStart();
+            controller.AnimEvent_SpawnEffect();
         }
     }
 }

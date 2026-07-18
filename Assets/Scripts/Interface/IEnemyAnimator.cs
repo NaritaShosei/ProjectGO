@@ -31,6 +31,8 @@ public interface IEnemyAnimator
     event Action OnAttackStart;
     /// <summary>武器スイングSEイベント</summary>
     public event Action OnWeaponSwing;
+    /// <summary>エネミーのスポーンエフェクト</summary>
+    public event Action OnSpawnEffect;
 
     /// <summary>移動速度を設定する（Idle / Move の切り替えに使用）</summary>
     public void SetSpeed(float speed);
@@ -74,6 +76,7 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public event Action OnBarkStart;
     public event Action OnAttackStart;
     public event Action OnWeaponSwing;
+    public event Action OnSpawnEffect;
 #pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }
