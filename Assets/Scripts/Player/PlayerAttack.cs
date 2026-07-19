@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -145,6 +146,9 @@ public class PlayerAttack : MonoBehaviour
     private Transform _lockedHomingTarget;
     private bool _isHomingLocked;
     private AttackVariantData _activeAttackVariant;
+    private int _currentHitIndex = -1;
+    private int _currentMotionHitCount;
+    private readonly HashSet<int> _stoppedHitIndices = new();
 
     private AttackData _pendingAttackData;
     private AttackInput? _pendingAttackInput;
@@ -369,9 +373,12 @@ public class PlayerAttack : MonoBehaviour
 
         SetupHoming(variant);
         _activeAttackVariant = variant;
+        _currentHitIndex = -1;
+        _currentMotionHitCount = 0;
+        _stoppedHitIndices.Clear();
 
         FaceAttackTarget();
-        RequestAttackMove(variant);
+        RequestAttackMove(variant, false);
 
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
@@ -380,12 +387,19 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃アニメーションの攻撃判定フレームで呼ばれる。ここで実際に攻撃を実行する。
     /// </summary>
-    private void ExecutePendingAttack(int hitIndex)
+    private void ExecutePendingAttack(int hitIndex, int hitCount)
     {
         if (_stateManager.CurrentState != PlayerState.Attacking) return;
         if (_pendingAttackData == null || _pendingAttackInput == null) return;
 
+        _currentHitIndex = hitIndex;
+        _currentMotionHitCount = hitCount;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
+
+        // 未命中時はOnHitConfirmedが発火しないため、次ヒットに向けた移動をここで継続する。
+        // 同期的にヒット済みの場合は、HandleAttackHitConfirmed側ですでに再開されているため重複させない。
+        if (!_stoppedHitIndices.Contains(hitIndex))
+            RequestNextHitAttackMove(hitIndex);
     }
 
     /// <summary>
@@ -412,9 +426,12 @@ public class PlayerAttack : MonoBehaviour
 
         SetupHoming(variant);
         _activeAttackVariant = variant;
+        _currentHitIndex = -1;
+        _currentMotionHitCount = 0;
+        _stoppedHitIndices.Clear();
 
         FaceAttackTarget();
-        RequestAttackMove(variant);
+        RequestAttackMove(variant, false);
 
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
@@ -540,6 +557,9 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = null;
         _pendingAttackInput = null;
         _activeAttackVariant = null;
+        _currentHitIndex = -1;
+        _currentMotionHitCount = 0;
+        _stoppedHitIndices.Clear();
         _bufferedComboInput = null;
 
         _isInComboWindow = false;
@@ -828,7 +848,7 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃の移動要求を発行する。攻撃データに移動が有効な場合に、攻撃の移動要求イベントを発行する。イベントには移動のカーブや距離、速度、対象などの情報が含まれる。
     /// </summary>
-    private void RequestAttackMove(AttackVariantData data)
+    private void RequestAttackMove(AttackVariantData data, bool resume)
     {
         if (!data.EnableMovement) return;
 
@@ -842,18 +862,11 @@ public class PlayerAttack : MonoBehaviour
             Distance = data.MoveDistance,
             Speed = data.MoveSpeed,
             Duration = data.MoveDuration,
+            Resume = resume,
             Direction = moveDirection,
             Target = _homingTarget,
-            StopDistance = CalculateAttackMoveStopDistance(data),
             IsPhantom = data.IsPhantom
         });
-    }
-
-    private float CalculateAttackMoveStopDistance(AttackVariantData data)
-    {
-        if (_homingTarget == null) return 0f;
-
-        return Mathf.Max(0f, data.GetHitData(0).AttackRange);
     }
 
     private void FaceAttackTarget()
@@ -899,10 +912,23 @@ _currentLockOnTarget.GetTargetCenter() == null)
         return _currentLockOnTarget.GetTargetCenter();
     }
 
-    private void HandleAttackHitConfirmed()
+    private void HandleAttackHitConfirmed(int hitIndex)
     {
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
+        if (!_stoppedHitIndices.Add(hitIndex)) return;
+
         OnAttackMoveStopRequested?.Invoke();
+
+        RequestNextHitAttackMove(hitIndex);
+    }
+
+    private void RequestNextHitAttackMove(int hitIndex)
+    {
+        if (_activeAttackVariant == null || hitIndex < 0) return;
+
+        int nextHitIndex = hitIndex + 1;
+        if (nextHitIndex < _currentMotionHitCount)
+            RequestAttackMove(_activeAttackVariant, true);
     }
     #endregion
 }
@@ -929,8 +955,8 @@ public struct AttackMoveRequest
     public float Distance;
     public float Speed;
     public float Duration;
+    public bool Resume; // 停止前の経過時間とカーブ位置から再開するか
     public Vector3 Direction;
     public Transform Target; // 攻撃時の一番近い敵
-    public float StopDistance; // 敵がいるときに攻撃を止める距離
     public bool IsPhantom; // 攻撃がファントムかどうか
 }
