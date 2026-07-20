@@ -49,9 +49,16 @@ public class AddressableGroupDetectorWindow : EditorWindow
     {
         try
         {
-            // StreamWriterを使用して、ファイルを確実に閉じる
-            using (StreamWriter writer = new StreamWriter(path, false, System.Text.Encoding.UTF8))
+            // PathのFolderがなければ作る
+            if (!Directory.Exists(SAVE_FOLDER))
             {
+                Directory.CreateDirectory(SAVE_FOLDER);
+            }
+
+            // StreamWriterを使用して、ファイルを確実に閉じる
+            using (StreamWriter writer = new StreamWriter(path, false, new UTF8Encoding(false)))
+            {
+
                 foreach (var line in content)
                 {
                     writer.Write(line);

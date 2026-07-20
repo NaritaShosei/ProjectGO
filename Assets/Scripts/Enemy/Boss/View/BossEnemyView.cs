@@ -189,11 +189,11 @@ namespace BossEnemy.View
             _bossEnemyAnimator.SetAttacking(false);
         }
 
-        public void Down(bool isBreakLeftLeg, bool isBreakrightLeg)
+        public void Down((bool isBreakLeftLeg, bool isBreakRightLeg) armorBreakData)
         {
-            _bossEnemyAnimator.SetBreakingArmor(isBreakLeftLeg, isBreakrightLeg);
+            _bossEnemyAnimator.SetBreakingArmor(armorBreakData.isBreakLeftLeg, armorBreakData.isBreakRightLeg);
 
-            if (isBreakLeftLeg && isBreakrightLeg)
+            if (armorBreakData.isBreakLeftLeg && armorBreakData.isBreakRightLeg)
             {
                 PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownVoice);
                 PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownImpact);
@@ -201,7 +201,7 @@ namespace BossEnemy.View
                 return;
             }
 
-            if (isBreakLeftLeg || isBreakrightLeg)
+            if (armorBreakData.isBreakLeftLeg || armorBreakData.isBreakRightLeg)
             {
                 PlayBossSE(SoundCueNames.Boss.OneLegBreakVoice);
                 PlayBossSE(SoundCueNames.Boss.OneLegBreakDownImpact);

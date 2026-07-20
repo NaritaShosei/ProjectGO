@@ -320,7 +320,7 @@ namespace BossEnemy.Model.System.Logic
     #region BossDown処理
     public class BossDown
     {
-        public event Action<bool, bool> OnDown;
+        public event Action<(bool isBreakLeftLeg, bool isBreakRightLeg)> OnDown;
 
         public event Action OnRiseUp;
 
@@ -331,7 +331,7 @@ namespace BossEnemy.Model.System.Logic
 
         public void Down()
         {
-            OnDown?.Invoke(_bossEnemyData.LeftLegArmer.IsArmorBreak, _bossEnemyData.RightLegArmer.IsArmorBreak);
+            OnDown?.Invoke((_bossEnemyData.LeftLegArmer.IsArmorBreak, _bossEnemyData.RightLegArmer.IsArmorBreak));
         }
 
         public void RiseUp()
