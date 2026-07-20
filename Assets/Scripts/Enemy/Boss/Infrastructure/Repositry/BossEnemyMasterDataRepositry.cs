@@ -58,6 +58,36 @@ namespace BossEnemy.Infrastructure.Repository
             return masterData;
         }
 
+        [SerializeField, Header("BossEnemyのCSV形式のマスターデータ")]
+        private TextAsset _bossEnemyCsvTextAsset = null;
+
+        // ボスのマスターデータをキャッシュする辞書 (Key: ボスID, Value: 生成されたMasterData)
+        private readonly Dictionary<int, BossEnemyMasterData> _masterData = new Dictionary<int, BossEnemyMasterData>();
+
+        // リフレクション用リファレンス（実機ビルドでDataConstructが消えていても、非パブリックフィールドへ直接注入可能にする）
+        private static readonly FieldInfo MasterDatasField = typeof(BossEnemyMasterData).GetField("_bossEnemyDatas", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo BossNameField = typeof(BossEnemyMasterData).GetField("_bossName", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo TotalPhaseCountField = typeof(BossEnemyMasterData).GetField("_totalPhaseCount", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly FieldInfo MaxHPField = typeof(BossEnemyData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo WalkSpeedField = typeof(BossEnemyData).GetField("_walkSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo HardSpotsDefenseField = typeof(BossEnemyData).GetField("_hardSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo NormalSpotsDefenseField = typeof(BossEnemyData).GetField("_normalSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo WeekPointDefenseField = typeof(BossEnemyData).GetField("_weekPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo VitalPointDefenseField = typeof(BossEnemyData).GetField("_vitalPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo RightArmArmorField = typeof(BossEnemyData).GetField("_rightArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo LeftArmArmorField = typeof(BossEnemyData).GetField("_leftArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo RightLegArmorField = typeof(BossEnemyData).GetField("_rightLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo LeftLegArmorField = typeof(BossEnemyData).GetField("_leftLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo CloseRangeNormalField = typeof(BossEnemyData).GetField("_closeRangeNormalAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo CloseRangeFinishField = typeof(BossEnemyData).GetField("_closeRangeFinishCountAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo LongRangeField = typeof(BossEnemyData).GetField("_longRangeAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly FieldInfo ArmorMaxHPField = typeof(BossArmorData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo ArmorDefenseField = typeof(BossArmorData).GetField("_defense", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly FieldInfo AttackFieldField = typeof(AttackDataSelectionPool).GetField("_attackField", BindingFlags.NonPublic | BindingFlags.Instance);
+
         #region CSV Parser Logic
 
         private void ParseAndCacheBossData(List<string[]> rows)
@@ -263,35 +293,5 @@ namespace BossEnemy.Infrastructure.Repository
         }
 
         #endregion
-
-        [SerializeField, Header("BossEnemyのCSV形式のマスターデータ")] 
-        private TextAsset _bossEnemyCsvTextAsset = null;
-
-        // ボスのマスターデータをキャッシュする辞書 (Key: ボスID, Value: 生成されたMasterData)
-        private readonly Dictionary<int, BossEnemyMasterData> _masterData = new Dictionary<int, BossEnemyMasterData>();
-
-        // リフレクション用リファレンス（実機ビルドでDataConstructが消えていても、非パブリックフィールドへ直接注入可能にする）
-        private static readonly FieldInfo MasterDatasField = typeof(BossEnemyMasterData).GetField("_bossEnemyDatas", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo BossNameField = typeof(BossEnemyMasterData).GetField("_bossName", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo TotalPhaseCountField = typeof(BossEnemyMasterData).GetField("_totalPhaseCount", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private static readonly FieldInfo MaxHPField = typeof(BossEnemyData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo WalkSpeedField = typeof(BossEnemyData).GetField("_walkSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo HardSpotsDefenseField = typeof(BossEnemyData).GetField("_hardSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo NormalSpotsDefenseField = typeof(BossEnemyData).GetField("_normalSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo WeekPointDefenseField = typeof(BossEnemyData).GetField("_weekPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo VitalPointDefenseField = typeof(BossEnemyData).GetField("_vitalPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo RightArmArmorField = typeof(BossEnemyData).GetField("_rightArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo LeftArmArmorField = typeof(BossEnemyData).GetField("_leftArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo RightLegArmorField = typeof(BossEnemyData).GetField("_rightLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo LeftLegArmorField = typeof(BossEnemyData).GetField("_leftLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo CloseRangeNormalField = typeof(BossEnemyData).GetField("_closeRangeNormalAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo CloseRangeFinishField = typeof(BossEnemyData).GetField("_closeRangeFinishCountAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo LongRangeField = typeof(BossEnemyData).GetField("_longRangeAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private static readonly FieldInfo ArmorMaxHPField = typeof(BossArmorData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo ArmorDefenseField = typeof(BossArmorData).GetField("_defense", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        private static readonly FieldInfo AttackFieldField = typeof(AttackDataSelectionPool).GetField("_attackField", BindingFlags.NonPublic | BindingFlags.Instance);
     }
 }

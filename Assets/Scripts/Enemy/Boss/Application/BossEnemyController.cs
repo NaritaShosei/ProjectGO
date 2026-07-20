@@ -245,7 +245,7 @@ namespace BossEnemy.Application
             { _bossEnemyView.SetVelocity(velocity); }).AddTo(_phaseChangeEventDisposables);
         }
 
-        public void RegisterBossAttackEventAction()
+        private void RegisterBossAttackEventAction()
         {
             // 攻撃開始時
             _bossAttack.OnAttackStart += _bossEnemyView.Attack;
@@ -264,7 +264,7 @@ namespace BossEnemy.Application
             _enemyAnimationEventReceiver.OnAttackEnd += _bossAttack.Finish;
         }
 
-        public void RegisterTakeDamageEventAction()
+        private void RegisterTakeDamageEventAction()
         {
             _bossEnemyView.OnTakeDamage += _takeDamage.TakeDamage;
         }
@@ -310,5 +310,4 @@ namespace BossEnemy.Application
             }
         }
     }
-
 }

@@ -18,7 +18,6 @@ namespace BossEnemy.Infrastructure.Repository
         public void Init()
         {
             _attackDataDict.Clear();
-            _bossMasterData = CSVDateLoader.ParseCsv(_bossEnemyCsvTextAsset.text);
 
             if (_bossEnemyCsvTextAsset == null || string.IsNullOrEmpty(_bossEnemyCsvTextAsset.text))    
             {
@@ -26,9 +25,11 @@ namespace BossEnemy.Infrastructure.Repository
                 return;
             }
 
+            _bossMasterData = CSVDateLoader.ParseCsv(_bossEnemyCsvTextAsset.text);
+
             for (int row = 0; row < _bossMasterData.GetLength(0); row++)
             {
-                if(_bossMasterData[row, 0] == _attackDataRowStartKeyWord)
+                if(_bossMasterData[row, 0] == ATTACKDATA_START_SEARCH_KEYWORD)
                 {
                     _attackDataArrayStartNum = row;
                     return;
@@ -42,7 +43,7 @@ namespace BossEnemy.Infrastructure.Repository
         {
             if (_attackDataDict.TryGetValue(id, out BossEnemyAttackData cachedData)) return cachedData;
 
-            if (_attackDataArrayStartNum < 0 || _bossMasterData.GetLength(1) < _csvAttackDataLength)
+            if (_attackDataArrayStartNum < 0 || _bossMasterData.GetLength(1) < CSV_ATTACKDATA_LENGTH)
             {
                 return default;
             }
@@ -53,8 +54,8 @@ namespace BossEnemy.Infrastructure.Repository
             {
                 if (int.TryParse(_bossMasterData[row, 0], out int dataID) && dataID == id)
                 {
-                    string[] attackDataStrings = new string[_csvAttackDataLength];
-                    for (int i = 0; i < _csvAttackDataLength; i++)
+                    string[] attackDataStrings = new string[CSV_ATTACKDATA_LENGTH];
+                    for (int i = 0; i < CSV_ATTACKDATA_LENGTH; i++)
                     {
                         attackDataStrings[i] = _bossMasterData[row, i];
                     }
@@ -78,6 +79,10 @@ namespace BossEnemy.Infrastructure.Repository
             return default;
         }
 
+        private const string ATTACKDATA_START_SEARCH_KEYWORD = "AttackData";
+
+        private const int CSV_ATTACKDATA_LENGTH = 13;
+
         [SerializeField, Header("BossEnemyのCSV形式のマスターデータ")]
         private TextAsset _bossEnemyCsvTextAsset = null;
 
@@ -86,10 +91,6 @@ namespace BossEnemy.Infrastructure.Repository
         private string[,] _bossMasterData;
 
         private int _attackDataArrayStartNum = 0;
-
-        private const string _attackDataRowStartKeyWord = "AttackData";
-
-        private const int _csvAttackDataLength = 13;
 
         private BossEnemyAttackData BuildAttackData(string[] attackDataStrings)
         {

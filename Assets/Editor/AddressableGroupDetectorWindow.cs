@@ -11,8 +11,9 @@ using UnityEngine;
 /// </summary>
 public class AddressableGroupDetectorWindow : EditorWindow
 {
+    private const string SAVE_FOLDER = "Assets/Scripts/AddressableAssetPath";
+
     private AddressableAssetGroup _targetGroup;
-    private const string _saveFolder = "Assets/Scripts/AddressableAssetPath";
 
     [MenuItem("Tools/AddressableGroupDetectorWindow")]
     private static void Init()
@@ -25,15 +26,10 @@ public class AddressableGroupDetectorWindow : EditorWindow
         _targetGroup = (AddressableAssetGroup)EditorGUILayout.ObjectField(_targetGroup, typeof(AddressableAssetGroup), false);
 
         if (_targetGroup == null) return;
-        var path = _saveFolder + $"/AAG{_targetGroup.name.Replace(" ", "")}.cs";
+        var path = SAVE_FOLDER + $"/AAG{_targetGroup.name.Replace(" ", "")}.cs";
 
         if (GUILayout.Button("Generate"))
         {
-            if (!File.Exists(path))
-            {
-                File.Create(path);
-            }
-
             List<string> content = new List<string>();
             content.Add("// 自動生成のソースコードです\n");
             content.Add($"public class AAG{_targetGroup.name.Replace(" ", "")}" + "\n{\n");
