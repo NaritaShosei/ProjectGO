@@ -106,13 +106,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyView
   _bossEnemyController:
-    _csvBossEnemyMasterData: {fileID: 4900000, guid: dcac7d650206e3440918e090e5b30480, type: 3}
+    _csvBossEnemyMasterDataTextAssetPath: Assets/Data/CSV/BossEnemyMasterDataCSV.csv
     _bossEnemyBehaviorTree: {fileID: 11400000, guid: e399fdc048f9faa45a32193411b37d9b, type: 2}
     _id: 1
-    _attackDataRepositry:
-      rid: 8435113032726348265
-    _bossEnemyMasterDataRepository:
-      rid: 8435113032726348266
   _collisionDetections:
   - _postureType: 1
     _center: {x: 0, y: 2.8, z: 0}
@@ -171,12 +167,6 @@ MonoBehaviour:
     RefIds:
     - rid: 8435113030945079715
       type: {class: AnimationEventReceiver, ns: BossEnemy.Infrastructure, asm: Assembly-CSharp}
-      data: 
-    - rid: 8435113032726348265
-      type: {class: BossEnemyAttackDataRepository, ns: BossEnemy.Infrastructure.Repository, asm: Assembly-CSharp}
-      data: 
-    - rid: 8435113032726348266
-      type: {class: BossEnemyMasterDataRepository, ns: BossEnemy.Infrastructure.Repository, asm: Assembly-CSharp}
       data: 
 --- !u!65 &5926199642172762860
 BoxCollider:

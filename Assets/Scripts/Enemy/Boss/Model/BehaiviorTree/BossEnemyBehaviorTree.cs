@@ -14,6 +14,11 @@ namespace BossEnemy.Model.BehaviorTree
     [CreateAssetMenu(fileName = "BossEnemyBehaviorTree", menuName = "BossEnemy/BehaviorTree")]
     public class BossEnemyBehaviorTree : ScriptableObject
     {
+        /// <summary> BehaviorTreeの初期化 </summary>
+        /// <param name="attack">  </param>
+        /// <param name="move"></param>
+        /// <param name="bossDown"></param>
+        /// <param name="attackCoolTimer"></param>
         public void Init(BossAttack attack, BossMove move, BossDown bossDown, AttackCoolTimer attackCoolTimer)
         {
             _isInit = true;

@@ -12,6 +12,7 @@ using BossEnemy.Model.System;
 using BossEnemy.Model.System.Logic;
 using BossEnemy.Model.BehaviorTree;
 using BossEnemy.Infrastructure.Repository;
+using Infrastructure;
 # endregion
 
 namespace BossEnemy.Application
@@ -19,12 +20,13 @@ namespace BossEnemy.Application
     [Serializable]
     public class BossEnemyController
     {
+        public bool IsInit => _isInit;
         public BossEnemyData CurrentBossData => _currentPhaseBossEnemyData.Value;
 
         /// <summary> 初期化 </summary>
         /// <param name="bossEnemyView"> BossのViewClass </param>
         /// <param name="enemyServices"> Enemy共通のServicesClass </param>
-        public void Init(EnemyServices enemyServices, IAnimationEventReceiver bossEnemyAnimationEventReceiver)
+        public async UniTask Init(EnemyServices enemyServices, IAnimationEventReceiver bossEnemyAnimationEventReceiver)
         {
             if (_bossEnemyView == null || _bossEnemyUIView == null)
             {
@@ -32,15 +34,15 @@ namespace BossEnemy.Application
                 return;
             }
 
+            // 各種Repositryを取得
+            _attackDataRepositry = await AssetsLoader.LoadAssetAsync<BossEnemyAttackMasterDataRepository>(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossEnemyAttackMasterDataRepository);
+            _bossEnemyMasterDataRepository = await AssetsLoader.LoadAssetAsync<BossEnemyMasterDataRepository>(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossEnemyMasterDataRepository);
+            _attackDataRepositry.Init();
+            _bossEnemyMasterDataRepository.Init();
+
+            // Disposableの初期化
             _phaseChangeEventDisposables = new();
             _deadEventDisposables = new();
-
-            // Animationによるイベントの通知クラスを取得
-            _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
-
-            // BossEnemyのマスターデータを取得
-            _bossEnemyMasterDataRepository.Init(_csvBossEnemyMasterData.text);
-            _bossEnemyMasterData = _bossEnemyMasterDataRepository.GetData(_id);
 
             // 各種ロジックを初期化
             _takeDamage = new();
@@ -48,13 +50,20 @@ namespace BossEnemy.Application
             _bossAttack = new(enemyServices.PlayerInformationService, _attackCoolTimer);
             _bossDown = new();
 
+            // Animationによるイベントの通知クラスを取得
+            _enemyAnimationEventReceiver = bossEnemyAnimationEventReceiver;
+
+            // BossEnemyのマスターデータを取得
+            _bossEnemyMasterData = _bossEnemyMasterDataRepository.GetData(_id);
+
             // BossMoveにTimeScaleを反映
             _bossEnemyView.TimeScaleProperty.Subscribe(timeScale =>
             {
                 _bossMove.SetTimeScale(timeScale);
             }).AddTo(_deadEventDisposables);
 
-            // BehaviorTreeの初期化
+            // BehaviorTreeの取得と初期化
+            _bossEnemyBehaviorTree = await AssetsLoader.LoadAssetAsync<BossEnemyBehaviorTree>(AAGBossEnemyGroup.kAssets_Data_BossEnemy_BehaviorTree_ID1_BossEnemyBehaviorTree);
             _bossEnemyBehaviorTree.Init(_bossAttack, _bossMove, _bossDown, _attackCoolTimer);
 
             // Enemyがうけられるサービス一覧
@@ -68,9 +77,6 @@ namespace BossEnemy.Application
             _phaseChange.OnFinishAllPhase += () => HandleDead(_bossEnemyView);
             _phaseChange.OnFinishAllPhase += _bossEnemyBehaviorTree.HandleDead;
 
-            // 攻撃データのリポジトリの初期化
-            _attackDataRepositry.Init(_csvBossEnemyMasterData.text);
-
             RegisterPhaseChangeEventAction();
             RegisterBossDataChangeEventAction();
             RegisterBossAttackEventAction();
@@ -79,6 +85,8 @@ namespace BossEnemy.Application
 
             // 最初のPhaseを開始
             _phaseChange.StartFirstPhase();
+
+            _isInit = true;
         }
 
         /// <summary> Viewを設定する </summary>
@@ -94,25 +102,16 @@ namespace BossEnemy.Application
             _bossEnemyBehaviorTree.OnUpdate();
         }
 
-        [Header("BossEnemy全体のMasterData")]
-        [SerializeField, Tooltip("BossEnemy全体のMasterData")]
-        private TextAsset _csvBossEnemyMasterData = null;
-
-        [Header("BossEnemyのAIBehaviorTree")]
-        [SerializeField, Tooltip("BossEnemyのAI")]
-        private BossEnemyBehaviorTree _bossEnemyBehaviorTree = null;
-
         [Header("生成するBossのID")]
         [SerializeField, Tooltip("生成するBossのID")]
         private int _id = 1;
 
-        [Header("各種リポジトリインターフェース")]
+        private bool _isInit = false;
 
-        [SerializeReference, SubclassSelector]
-        private IBossEnemyAttackDataRepository _attackDataRepositry;
+        private IBossEnemyAttackDataRepository _attackDataRepositry = null;
+        private IBossEnemyDataRepository _bossEnemyMasterDataRepository = null;
 
-        [SerializeReference, SubclassSelector]
-        private IBossEnemyMasterDataRepository _bossEnemyMasterDataRepository;
+        private BossEnemyBehaviorTree _bossEnemyBehaviorTree = null;
 
         private BossEnemyMasterData _bossEnemyMasterData = null;
 
@@ -165,6 +164,8 @@ namespace BossEnemy.Application
             _enemyAnimationEventReceiver.OnColliderIsTriggerIsEnabled -= _bossMove.ColliderIsTrigger;
             _enemyAnimationEventReceiver.OnMove -= _bossMove.MoveTargetPositionRightOnTime;
             _enemyAnimationEventReceiver.OnAttackHit -= _bossAttack.Hit;
+
+            _isInit = false;
         }
 
         private void RegisterBossDownEventAction()
@@ -244,7 +245,7 @@ namespace BossEnemy.Application
             { _bossEnemyView.SetVelocity(velocity); }).AddTo(_phaseChangeEventDisposables);
         }
 
-        public void RegisterBossAttackEventAction()
+        private void RegisterBossAttackEventAction()
         {
             // 攻撃開始時
             _bossAttack.OnAttackStart += _bossEnemyView.Attack;
@@ -263,7 +264,7 @@ namespace BossEnemy.Application
             _enemyAnimationEventReceiver.OnAttackEnd += _bossAttack.Finish;
         }
 
-        public void RegisterTakeDamageEventAction()
+        private void RegisterTakeDamageEventAction()
         {
             _bossEnemyView.OnTakeDamage += _takeDamage.TakeDamage;
         }
@@ -309,5 +310,4 @@ namespace BossEnemy.Application
             }
         }
     }
-
 }
