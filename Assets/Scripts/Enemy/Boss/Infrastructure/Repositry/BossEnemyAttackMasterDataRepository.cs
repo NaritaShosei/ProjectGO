@@ -29,11 +29,11 @@ namespace BossEnemy.Infrastructure.Repository
                 return;
             }
 
-            _bossMasterData = CSVDateLoader.ParseCsv(_bossEnemyCsvTextAsset.text);
+            _bossMasterDataStringTable = CSVDateLoader.ParseCsv(_bossEnemyCsvTextAsset.text);
 
-            for (int row = 0; row < _bossMasterData.GetLength(0); row++)
+            for (int row = 0; row < _bossMasterDataStringTable.GetLength(0); row++)
             {
-                if(_bossMasterData[row, 0] == ATTACK_DATA_START_SEARCH_KEYWORD)
+                if(_bossMasterDataStringTable[row, 0] == ATTACK_DATA_START_SEARCH_KEYWORD)
                 {
                     _attackDataArrayStartNum = row;
                     return;
@@ -47,21 +47,21 @@ namespace BossEnemy.Infrastructure.Repository
         {
             if (_attackDataDict.TryGetValue(id, out BossEnemyAttackData cachedData)) return cachedData;
 
-            if (_bossMasterData == null || _attackDataArrayStartNum < 0 || _bossMasterData.GetLength(1) < CSV_ATTACK_DATA_LENGTH)
+            if (_bossMasterDataStringTable == null)
             {
                 return default;
             }
 
             int commentLineNum = 2;
 
-            for (int row = _attackDataArrayStartNum + commentLineNum; row < _bossMasterData.GetLength(0); row++)
+            for (int row = _attackDataArrayStartNum + commentLineNum; row < _bossMasterDataStringTable.GetLength(0); row++)
             {
-                if (int.TryParse(_bossMasterData[row, 0], out int dataID) && dataID == id)
+                if (int.TryParse(_bossMasterDataStringTable[row, 0], out int dataID) && dataID == id)
                 {
                     string[] attackDataStrings = new string[CSV_ATTACK_DATA_LENGTH];
                     for (int i = 0; i < CSV_ATTACK_DATA_LENGTH; i++)
                     {
-                        attackDataStrings[i] = _bossMasterData[row, i];
+                        attackDataStrings[i] = _bossMasterDataStringTable[row, i];
                     }
 
                     try
@@ -88,7 +88,7 @@ namespace BossEnemy.Infrastructure.Repository
 
         private Dictionary<int, BossEnemyAttackData> _attackDataDict = new();
 
-        private string[,] _bossMasterData;
+        private string[,] _bossMasterDataStringTable;
 
         private int _attackDataArrayStartNum = 0;
 
