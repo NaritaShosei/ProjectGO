@@ -27,7 +27,7 @@ public class AttackEventSMB : StateMachineBehaviour
             if (_attackExecuted[i] || currentTime < _attackExecuteTimes[i]) continue;
 
             _attackExecuted[i] = true;
-            _controller.AnimEvent_AttackExecute(i);
+            _controller.AnimEvent_AttackExecute(i, _attackExecuteTimes.Length);
         }
 
         if (!_comboStarted && currentTime >= _comboWindowStartTime)

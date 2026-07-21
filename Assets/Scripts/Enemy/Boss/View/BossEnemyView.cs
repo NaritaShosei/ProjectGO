@@ -99,7 +99,7 @@ namespace BossEnemy.View
                     _cameraManager, _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
             }
 
-            _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver);
+            _bossEnemyController.Init(_services, _bossEnemyAnimationEventReceiver).Forget();
         }
 
         /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
@@ -189,11 +189,11 @@ namespace BossEnemy.View
             _bossEnemyAnimator.SetAttacking(false);
         }
 
-        public void Down(bool isBreakLeftLeg, bool isBreakrightLeg)
+        public void Down((bool isBreakLeftLeg, bool isBreakRightLeg) armorBreakData)
         {
-            _bossEnemyAnimator.SetBreakingArmor(isBreakLeftLeg, isBreakrightLeg);
+            _bossEnemyAnimator.SetBreakingArmor(armorBreakData.isBreakLeftLeg, armorBreakData.isBreakRightLeg);
 
-            if (isBreakLeftLeg && isBreakrightLeg)
+            if (armorBreakData.isBreakLeftLeg && armorBreakData.isBreakRightLeg)
             {
                 PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownVoice);
                 PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownImpact);
@@ -201,7 +201,7 @@ namespace BossEnemy.View
                 return;
             }
 
-            if (isBreakLeftLeg || isBreakrightLeg)
+            if (armorBreakData.isBreakLeftLeg || armorBreakData.isBreakRightLeg)
             {
                 PlayBossSE(SoundCueNames.Boss.OneLegBreakVoice);
                 PlayBossSE(SoundCueNames.Boss.OneLegBreakDownImpact);
@@ -431,7 +431,7 @@ namespace BossEnemy.View
 
         private void Update()
         {
-            if (_bossEnemyController == null) return;
+            if (_bossEnemyController == null || !_bossEnemyController.IsInit) return;
 
             if (!_isDead) _bossEnemyController.OnUpdate();
         }

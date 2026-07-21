@@ -1,18 +1,68 @@
+using BossEnemy.Data;
+using BossEnemy.Model.Interface;
+using Cysharp.Threading.Tasks;
+using Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using BossEnemy.Data;
-using BossEnemy.Model.Interface;
 
 
 namespace BossEnemy.Infrastructure.Repository
 {
-    public class BossEnemyMasterDataRepository : IBossEnemyMasterDataRepository
+    [CreateAssetMenu(fileName = "BossEnemyMasterDataRepository", menuName = "Repositry/BossEnemyMasterData")]
+    public class BossEnemyMasterDataRepository : ScriptableObject, IBossEnemyDataRepository
     {
+        /// <summary>
+        /// CSVのテキストデータをもとにリポジトリを初期化し、すべてのボスデータをメモリにキャッシュします。
+        /// </summary>
+        public void Init()
+        {
+            if(_bossEnemyCsvTextAsset == null)
+            {
+                Debug.LogError("_bossEnemyCsvTextAssetがNullです");
+                return;
+            }
+
+            _masterData.Clear();
+
+            if (string.IsNullOrEmpty(_bossEnemyCsvTextAsset.text))
+            {
+                Debug.LogError("TextデータがNullです");
+                return;
+            }
+
+            try
+            {
+                List<string[]> rows = ParseCsv(_bossEnemyCsvTextAsset.text);
+                ParseAndCacheBossData(rows);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"文字データの生成に失敗しました");
+                Debug.LogException(ex);
+            }
+        }
+
+        /// <summary>
+        /// 指定されたボスIDに対応する BossEnemyMasterData クラスのインスタンスを取得します。
+        /// </summary>
+        public BossEnemyMasterData GetData(int id)
+        {
+            if (!_masterData.TryGetValue(id, out var masterData))
+            {
+                Debug.LogError($"ID：{id} のデータが見つかりませんでした");
+                return null;
+            }
+            return masterData;
+        }
+
+        [SerializeField, Header("BossEnemyのCSV形式のマスターデータ")]
+        private TextAsset _bossEnemyCsvTextAsset = null;
+
         // ボスのマスターデータをキャッシュする辞書 (Key: ボスID, Value: 生成されたMasterData)
-        private readonly Dictionary<int, BossEnemyMasterData> _masterDataCache = new Dictionary<int, BossEnemyMasterData>();
+        private readonly Dictionary<int, BossEnemyMasterData> _masterData = new Dictionary<int, BossEnemyMasterData>();
 
         // リフレクション用リファレンス（実機ビルドでDataConstructが消えていても、非パブリックフィールドへ直接注入可能にする）
         private static readonly FieldInfo MasterDatasField = typeof(BossEnemyMasterData).GetField("_bossEnemyDatas", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -37,46 +87,6 @@ namespace BossEnemy.Infrastructure.Repository
         private static readonly FieldInfo ArmorDefenseField = typeof(BossArmorData).GetField("_defense", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static readonly FieldInfo AttackFieldField = typeof(AttackDataSelectionPool).GetField("_attackField", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        /// <summary>
-        /// CSVのテキストデータをもとにリポジトリを初期化し、すべてのボスデータをメモリにキャッシュします。
-        /// </summary>
-        public void Init(string csvText)
-        {
-            if (csvText == null) return;
-
-            _masterDataCache.Clear();
-
-            if (string.IsNullOrEmpty(csvText))
-            {
-                Debug.LogError("[Repository] CSV text is null or empty.");
-                return;
-            }
-
-            try
-            {
-                List<string[]> rows = ParseCsv(csvText);
-                ParseAndCacheBossData(rows);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Repository] Failed to initialize repository: {ex.Message}");
-                Debug.LogException(ex);
-            }
-        }
-
-        /// <summary>
-        /// 指定されたボスIDに対応する BossEnemyMasterData クラスのインスタンスを取得します。
-        /// </summary>
-        public BossEnemyMasterData GetData(int id)
-        {
-            if (!_masterDataCache.TryGetValue(id, out var masterData))
-            {
-                Debug.LogError($"[Repository] Boss ID {id} was not found in the repository.");
-                return null;
-            }
-            return masterData;
-        }
 
         #region CSV Parser Logic
 
@@ -133,7 +143,7 @@ namespace BossEnemy.Infrastructure.Repository
                         BossNameField.SetValue(masterData, bossName);
                         TotalPhaseCountField.SetValue(masterData, phaseList.Count);
 
-                        _masterDataCache[bossId] = masterData;
+                        _masterData[bossId] = masterData;
                     }
 
                     i = index - 1;

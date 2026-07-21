@@ -1,5 +1,5 @@
 using BossEnemy.Data;
-using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace BossEnemy.Model.Interface
 {
@@ -10,11 +10,11 @@ namespace BossEnemy.Model.Interface
 
     public interface IBossEnemyAttackDataRepository : IRepository<BossEnemyAttackData>
     {
-        public void Init(string textAsset);
+        public void Init();
     }
 
-    public interface IBossEnemyMasterDataRepository : IRepository<BossEnemyMasterData>
+    public interface IBossEnemyDataRepository : IRepository<BossEnemyMasterData>
     {
-        public void Init(string csvText);
+        public void Init();
     }
 }

@@ -28,7 +28,7 @@ public class CSVDataCreator : EditorWindow
     {
         //生成するDataの名前
         EditorGUILayout.Space(_spaceSize);
-        EditorGUILayout.LabelField("生成するDataの名前");
+        EditorGUILayout.LabelField("生成するCSVDataの名前");
         _scriptableObjectName = EditorGUILayout.TextField("CSVName", _scriptableObjectName);
 
         //生成するDataを選択
