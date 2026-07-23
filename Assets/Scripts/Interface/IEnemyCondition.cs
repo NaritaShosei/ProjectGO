@@ -41,5 +41,6 @@ public enum ConditionType : int
     Electrified = 2,
     Down = 3,
     Dead = 4,
+    Spawn = 5,
     // 拡張できるようにEnum
 }

@@ -240,7 +240,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     [SerializeField]private EnemySoundHandler _soundHandler;
 
     [SerializeField]private EnemyType _enemyType;
-    //スポーンエフェクトを適応するかのBool
+
+    [Header("演出関係")]
     [SerializeField,Tooltip("スポーンエフェクトを適応の可否")]private bool _useSpawnEffect = true;
     [SerializeField,Tooltip("スポーンエフェクトのKey")] private string _spawnEffectKey = "スポーンエフェクト";
 
@@ -260,6 +261,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     // 死亡アニメーション終了フラグ
     private bool _deadAnimationEnded;
 
+    //スポーンのアニメーション
+    private bool _useSpawnAnimation = true;
+
     // 最後に受けたダメージの方向（死亡ノックバック用）
     protected Vector3 _lastHitDirection;
 
@@ -271,6 +275,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     //Poolの所属を識別するためのキー
     private string _poolKey;
+
 
     protected virtual void Awake()
     {
@@ -400,6 +405,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         if (!_useSpawnEffect) return;
         if (!ServiceLocator.TryGet(out EffectManager effectManager)) return;
 
+        Debug.Log("スポーンエフェクト発火");
         effectManager.PlayEffect(
             _spawnEffectKey,
             transform.position);
@@ -448,7 +454,18 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _animator.Play("Idle", 0, 0f);
         _animator.Update(0f);
 
+        _useSpawnAnimation = true;
+
         // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+    }
+
+    public virtual void PlaySpawnAnimation()
+    {
+        if (_useSpawnAnimation)
+        {
+            _animator.Play("Spawn", 0, 0f);
+        }
+        _useSpawnAnimation = false;
     }
 
     /// <summary>
