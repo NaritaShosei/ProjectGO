@@ -129,18 +129,13 @@ public class AttackEffectLayoutWindow : EditorWindow
         _scroll = EditorGUILayout.BeginScrollView(_scroll);
         EditorGUILayout.PropertyField(effect.FindPropertyRelative("_localPosition"), new GUIContent("Local Position"));
         EditorGUILayout.PropertyField(effect.FindPropertyRelative("_localEulerAngles"), new GUIContent("Local Rotation"));
-        EditorGUILayout.PropertyField(effect.FindPropertyRelative("_localScale"), new GUIContent("Additional Scale"));
-
-        EditorGUILayout.Space(7);
-        EditorGUILayout.LabelField("Automatic Size", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(effect.FindPropertyRelative("_fitToAttackArea"), new GUIContent("Fit To Attack Area"));
-        EditorGUILayout.PropertyField(effect.FindPropertyRelative("_baseSize"), new GUIContent("VFX Base Size"));
+        EditorGUILayout.PropertyField(effect.FindPropertyRelative("_localScale"), new GUIContent("Local Scale"));
 
         float range = hit.FindPropertyRelative("AttackRange").floatValue;
         float radius = hit.FindPropertyRelative("AttackRadius").floatValue;
         Vector3 finalScale = CalculateScale(hit, effect);
         EditorGUILayout.HelpBox(
-            $"Attack Range: {range:F2}  Radius: {radius:F2}\nFinal Scale: {finalScale.x:F3}, {finalScale.y:F3}, {finalScale.z:F3}",
+            $"Attack Range: {range:F2}  Radius: {radius:F2}\nEffect Scale: {finalScale.x:F3}, {finalScale.y:F3}, {finalScale.z:F3}\n赤い攻撃判定を目安に手動でサイズを調整してください。",
             MessageType.None);
 
         EditorGUILayout.Space(7);
@@ -328,15 +323,7 @@ public class AttackEffectLayoutWindow : EditorWindow
 
     private static Vector3 CalculateScale(SerializedProperty hit, SerializedProperty effect)
     {
-        Vector3 scale = effect.FindPropertyRelative("_localScale").vector3Value;
-        if (!effect.FindPropertyRelative("_fitToAttackArea").boolValue) return scale;
-        float range = hit.FindPropertyRelative("AttackRange").floatValue;
-        float radius = hit.FindPropertyRelative("AttackRadius").floatValue;
-        Vector3 size = effect.FindPropertyRelative("_baseSize").vector3Value;
-        return Vector3.Scale(new Vector3(
-            (range + radius) / Mathf.Max(0.01f, size.x),
-            (radius * 2f) / Mathf.Max(0.01f, size.y),
-            (radius * 2f) / Mathf.Max(0.01f, size.z)), scale);
+        return effect.FindPropertyRelative("_localScale").vector3Value;
     }
 
     private static void DrawAttackArea(Vector3 pivot, Vector3 forward, SerializedProperty hit)

@@ -476,17 +476,7 @@ public class AttackDataEditor : Editor
 
     private static Vector3 CalculatePreviewScale(SerializedProperty hit, SerializedProperty effect)
     {
-        Vector3 scale = effect.FindPropertyRelative("_localScale").vector3Value;
-        if (!effect.FindPropertyRelative("_fitToAttackArea").boolValue) return scale;
-
-        float range = hit.FindPropertyRelative("AttackRange").floatValue;
-        float radius = hit.FindPropertyRelative("AttackRadius").floatValue;
-        Vector3 baseSize = effect.FindPropertyRelative("_baseSize").vector3Value;
-        Vector3 fit = new(
-            (range + radius) / Mathf.Max(0.01f, baseSize.x),
-            (radius * 2f) / Mathf.Max(0.01f, baseSize.y),
-            (radius * 2f) / Mathf.Max(0.01f, baseSize.z));
-        return Vector3.Scale(fit, scale);
+        return effect.FindPropertyRelative("_localScale").vector3Value;
     }
 
     private static SerializedProperty GetFirstHit(SerializedProperty variant)
