@@ -139,6 +139,16 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     }
 
     /// <summary>
+    /// 攻撃終了後、Idleへ戻るための遷移モーションを再生する。
+    /// 遷移モーションのステートにはIdle/MoveへのExit Time遷移を設定しておく。
+    /// </summary>
+    public void PlayAttackIdleTransition(string stateName, float transitionDuration = 0.1f)
+    {
+        if (string.IsNullOrEmpty(stateName)) return;
+        _animator.CrossFadeInFixedTime(stateName, transitionDuration, AnimParams.BaseLayer);
+    }
+
+    /// <summary>
     /// チャージアニメーションを再生する。
     /// 各チャージ段階のAttackDataが持つChargeAnimationStateNameで直接遷移。
     /// </summary>

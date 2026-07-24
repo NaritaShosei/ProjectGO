@@ -32,6 +32,8 @@ public class AttackVariantData
 
     public string AnimationStateName => _animationStateName;
     public float TransitionDuration => _transitionDuration;
+    public string IdleTransitionAnimationStateName => _idleTransitionAnimationStateName;
+    public float IdleTransitionDuration => _idleTransitionDuration;
     public string ChargeAnimationStateName => _chargeAnimationStateName;
     public float ChargeTransitionDuration => _chargeTransitionDuration;
 
@@ -40,6 +42,7 @@ public class AttackVariantData
         _hits = new[] { AttackHitData.Default };
         _moveCurve = AnimationCurve.Linear(0, 0, 1, 1);
         _transitionDuration = -1f;
+        _idleTransitionDuration = -1f;
         _chargeTransitionDuration = -1f;
     }
 
@@ -70,6 +73,10 @@ public class AttackVariantData
     [Header("アニメーション")]
     [SerializeField] private string _animationStateName;
     [SerializeField] private float _transitionDuration = -1f;
+    [Tooltip("攻撃終了後、Idleへ戻る前に再生するAnimatorステート名。空欄の場合は従来どおり直接Idleへ戻ります。")]
+    [SerializeField] private string _idleTransitionAnimationStateName;
+    [Tooltip("Idle遷移モーションへのクロスフェード時間。負数の場合は0.1秒です。")]
+    [SerializeField] private float _idleTransitionDuration = -1f;
     [SerializeField] private string _chargeAnimationStateName;
     [SerializeField] private float _chargeTransitionDuration = -1f;
 }

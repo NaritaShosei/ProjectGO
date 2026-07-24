@@ -196,6 +196,12 @@ public class AttackDataEditor : Editor
         EditorGUILayout.LabelField("Animation", EditorStyles.miniBoldLabel);
         EditorGUILayout.PropertyField(variant.FindPropertyRelative("_animationStateName"), new GUIContent("State Name"));
         EditorGUILayout.PropertyField(variant.FindPropertyRelative("_transitionDuration"), new GUIContent("Transition Duration"));
+        EditorGUILayout.PropertyField(
+            variant.FindPropertyRelative("_idleTransitionAnimationStateName"),
+            new GUIContent("Idle Transition State Name"));
+        EditorGUILayout.PropertyField(
+            variant.FindPropertyRelative("_idleTransitionDuration"),
+            new GUIContent("Idle Transition Duration"));
         EditorGUILayout.PropertyField(variant.FindPropertyRelative("_chargeAnimationStateName"), new GUIContent("Charge State Name"));
         EditorGUILayout.PropertyField(variant.FindPropertyRelative("_chargeTransitionDuration"), new GUIContent("Charge Transition Duration"));
     }

@@ -455,6 +455,7 @@ public class PlayerAttack : MonoBehaviour
 
         OnAttackEnded?.Invoke();
 
+        AttackVariantData finishedVariant = _activeAttackVariant;
         _pendingAttackData = null;
         _pendingAttackInput = null;
         _activeAttackVariant = null;
@@ -474,8 +475,27 @@ public class PlayerAttack : MonoBehaviour
             return; // PrepareAttack後はIdleに戻さない
         }
 
+        PlayIdleTransitionAnimation(finishedVariant);
         _stateManager.ChangeState(PlayerState.Idle);
         ResetCombo();
+    }
+
+    /// <summary>
+    /// コンボやチャージへ派生しない攻撃終了時に、Idleへの遷移モーションを再生する。
+    /// ステート名が未設定なら従来どおりAnimator Controllerの遷移に任せる。
+    /// </summary>
+    private void PlayIdleTransitionAnimation(AttackVariantData finishedVariant)
+    {
+        if (finishedVariant == null) return;
+
+        string stateName = finishedVariant.IdleTransitionAnimationStateName;
+        if (string.IsNullOrEmpty(stateName)) return;
+
+        float transition = finishedVariant.IdleTransitionDuration < 0f
+            ? 0.1f
+            : finishedVariant.IdleTransitionDuration;
+
+        _animationController.PlayAttackIdleTransition(stateName, transition);
     }
 
     /// <summary>
