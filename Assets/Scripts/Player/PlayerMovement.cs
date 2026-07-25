@@ -60,19 +60,42 @@ public class PlayerMovement : MonoBehaviour
             _modifiers.Add(modifier);
     }
 
+    /// <summary>
+    /// リアクション強度に応じた被弾移動を開始する。
+    /// </summary>
+    public void PlayDamageReaction(DamageReactionType reactionType)
+    {
+        _damageReactionMoveCts?.Cancel();
+        _damageReactionMoveCts?.Dispose();
+        _damageReactionMoveCts = new CancellationTokenSource();
+
+        if (reactionType == DamageReactionType.Small) return;
+
+        bool isMedium = reactionType == DamageReactionType.Medium;
+        PerformDamageReactionMove(
+            reactionType,
+            isMedium ? _mediumReactionDistance : _largeReactionDistance,
+            isMedium ? _mediumReactionDuration : _largeReactionDuration,
+            isMedium ? _mediumReactionMoveCurve : _largeReactionMoveCurve,
+            _damageReactionMoveCts.Token).Forget();
+    }
+
     [SerializeField] private Rigidbody _rb;
 
     [Header("Damage Reaction")]
     [SerializeField, Min(0f)] private float _mediumReactionDistance = 1.5f;
     [SerializeField, Min(0.01f)] private float _mediumReactionDuration = 0.35f;
-    [SerializeField] private AnimationCurve _mediumReactionMoveCurve =
+    [SerializeField]
+    private AnimationCurve _mediumReactionMoveCurve =
         AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     [SerializeField, Min(0f)] private float _largeReactionDistance = 1.2f;
     [SerializeField, Min(0f)] private float _largeReactionHeight = 1.5f;
     [SerializeField, Min(0.01f)] private float _largeReactionDuration = 0.6f;
-    [SerializeField] private AnimationCurve _largeReactionMoveCurve =
+    [SerializeField]
+    private AnimationCurve _largeReactionMoveCurve =
         AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-    [SerializeField] private AnimationCurve _largeReactionHeightCurve =
+    [SerializeField]
+    private AnimationCurve _largeReactionHeightCurve =
         new AnimationCurve(
             new Keyframe(0f, 0f, 0f, 4f),
             new Keyframe(0.5f, 1f, 0f, 0f),
@@ -399,23 +422,12 @@ public class PlayerMovement : MonoBehaviour
     // ── 被弾 ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 被弾アニメーション終了イベントのハンドラー。PlayerStateManagerがDamaged状態ならIdleに遷移させる。
+    /// 被弾アニメーション終了時にDamaged状態を解除する。
     /// </summary>
-    public void PlayDamageReaction(DamageReactionType reactionType)
+    private void HandleDamagedEnd()
     {
-        _damageReactionMoveCts?.Cancel();
-        _damageReactionMoveCts?.Dispose();
-        _damageReactionMoveCts = new CancellationTokenSource();
-
-        if (reactionType == DamageReactionType.Small) return;
-
-        bool isMedium = reactionType == DamageReactionType.Medium;
-        PerformDamageReactionMove(
-            reactionType,
-            isMedium ? _mediumReactionDistance : _largeReactionDistance,
-            isMedium ? _mediumReactionDuration : _largeReactionDuration,
-            isMedium ? _mediumReactionMoveCurve : _largeReactionMoveCurve,
-            _damageReactionMoveCts.Token).Forget();
+        if (_playerStateManager.IsDamaged())
+            _playerStateManager.ChangeState(PlayerState.Idle);
     }
 
     private async UniTaskVoid PerformDamageReactionMove(
@@ -502,12 +514,6 @@ public class PlayerMovement : MonoBehaviour
             + horizontalDelta.normalized * Mathf.Min(safeDistance, distance);
         resolved.y = candidatePosition.y;
         return resolved;
-    }
-
-    private void HandleDamagedEnd()
-    {
-        if (_playerStateManager.IsDamaged())
-            _playerStateManager.ChangeState(PlayerState.Idle);
     }
 
     // ── 攻撃移動 ─────────────────────────────────────────────
