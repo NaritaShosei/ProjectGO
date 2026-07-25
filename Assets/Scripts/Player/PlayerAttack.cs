@@ -215,6 +215,11 @@ public class PlayerAttack : MonoBehaviour
             if (_bufferedComboInput.HasValue)
                 return;
 
+            // コンボ終端では入力をバッファしない。
+            // 終端入力が残ると、Attacking または Charging 状態から復帰できなくなる。
+            if (GetNextComboAttack() == null)
+                return;
+
             // 闘神
             if (_modeController.CurrentMode == PlayerMode.Warrior)
             {
@@ -396,6 +401,10 @@ public class PlayerAttack : MonoBehaviour
         _currentMotionHitCount = hitCount;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
 
+        // 攻撃判定の発火後は向き追従だけを停止する。
+        // 座標追従で使用するターゲット情報は、モーション終了まで保持する。
+        _isHomingActive = false;
+
         // 未命中時はOnHitConfirmedが発火しないため、次ヒットに向けた移動をここで継続する。
         // 同期的にヒット済みの場合は、HandleAttackHitConfirmed側ですでに再開されているため重複させない。
         if (!_stoppedHitIndices.Contains(hitIndex))
@@ -470,8 +479,14 @@ public class PlayerAttack : MonoBehaviour
         {
             var bufferedInput = _bufferedComboInput.Value;
             _bufferedComboInput = null;
-            PrepareAttack(bufferedInput, allowCombo: true);
-            return; // PrepareAttack後はIdleに戻さない
+
+            // 入力のバッファ後にスキルの所持状態などが変わり、次段がなくなる場合がある。
+            // その場合は次段へ遷移せず、通常どおり攻撃を終了する。
+            if (GetNextComboAttack() != null)
+            {
+                PrepareAttack(bufferedInput, allowCombo: true);
+                return;
+            }
         }
 
         _stateManager.ChangeState(PlayerState.Idle);
@@ -509,6 +524,14 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private bool CanAttack() => _stateManager.CanAttack();
 
+    private AttackData GetNextComboAttack()
+    {
+        if (_currentAttackId == -1) return null;
+
+        var unlockedIds = _skillManager.GetOwnedSkillIDs();
+        return _attackRepository.GetNextComboAttack(_currentAttackId, unlockedIds);
+    }
+
     /// <summary>
     /// コンボが途切れる条件をチェックし、必要に応じてコンボをリセットする。ここでは、最後の攻撃から一定時間が経過しているかどうかを確認する。
     /// </summary>
@@ -527,6 +550,9 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void OnComboWindowEnd()
     {
+        // チャージへ分岐する場合も、現在の攻撃のコンボ受付期間は必ず終了する。
+        _isInComboWindow = false;
+
         if (_isCharging && _modeController.CurrentMode == PlayerMode.Warrior)
         {
             _pendingWarriorCharge = true;
@@ -542,7 +568,6 @@ public class PlayerAttack : MonoBehaviour
         }
 
         // コンボウィンドウ終了時にチャージ攻撃の準備ができている場合は、コンボ継続ではなくチャージ攻撃に遷移する
-        _isInComboWindow = false;
     }
 
     #endregion
