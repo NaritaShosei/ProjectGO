@@ -2,12 +2,11 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
-using static EnemyServices;
 
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEnemySpawnState
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnDamaged;
@@ -45,6 +44,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     public bool IsDead => _isDead;
 
     public bool IsLockable => !IsDead;
+
+    public bool CanTakeDamage { get; private set; } = true;
+    public bool CanReceiveCondition { get; private set; } = true;
 
     /// <summary>
     /// 所属Poolのキー_返却の参照に使用
@@ -85,7 +87,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     public virtual void TakeDamage(DamageContext context)
     {
-        if (_isDead) { return; }
+        if (_isDead || !CanTakeDamage) { return; }
 
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
 
@@ -221,6 +223,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     public void SetPoolKey(string key)
     {
         _poolKey = key;
+    }
+
+    public void SetSpawnState(bool active)
+    {
+        CanTakeDamage = !active;
+        CanReceiveCondition = !active;
     }
 
     [SerializeField] protected EnemyData _data;

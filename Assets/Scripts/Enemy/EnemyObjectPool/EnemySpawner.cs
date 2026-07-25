@@ -71,6 +71,7 @@ public class EnemySpawner : MonoBehaviour
         enemy.SetPoolKey(poolKey);
         enemy.InjectServices(_services);
         enemy.ReInitialize(position);
+        enemy.PlaySpawnAnimation();
 
 
         enemy.OnReleaseRequested += HandleEnemyDeath;

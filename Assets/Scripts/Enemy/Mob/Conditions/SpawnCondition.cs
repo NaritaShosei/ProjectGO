@@ -1,28 +1,34 @@
-using UnityEngine;
 
 public class SpawnCondition : IEnemyCondition
 {
     public ConditionType Type => ConditionType.Spawn;
 
     public bool BlocksAction => true;
-    public bool IsFinished => _time <= 0f;
 
-    public SpawnCondition(float time)
+    public bool IsFinished => _finished;
+
+    public void OnEnter(IEnemy enemy)
     {
-        _time = time;
+        if (enemy is IEnemySpawnState receiver)
+        {
+            receiver.SetSpawnState(true);
+        }
     }
 
     public void OnExit(IEnemy enemy)
     {
+        if (enemy is IEnemySpawnState receiver)
+        {
+            receiver.SetSpawnState(false);
+        }
     }
 
-    public void OnEnter(IEnemy enemy)
+    public void Finish()
     {
-
+        _finished = true;
     }
-    public void Tick(IEnemy enemy,float dt)
-    {
+    public void Tick(IEnemy enemy, float dt) { }
 
-    }
-    private float _time;
+
+    private bool _finished;
 }

@@ -392,13 +392,15 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// </summary>
     protected void ApplyElectricShock(DamageContext context)
     {
+        if (!CanReceiveCondition) return;
+
         if (!CheckProbability(context.ElectricShock.GrantEffectProbability))
         {
             return;
         }
 
         _conditionController.ApplyCondition(
-            new ElectrifiedCondition(context.ElectricShock.DurationEffect,enemyIsBoss: false));
+            new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
 
         this.ActivateShockDebuff().Forget();
     }
