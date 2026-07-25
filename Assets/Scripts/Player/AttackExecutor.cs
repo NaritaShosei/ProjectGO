@@ -158,6 +158,17 @@ public class AttackExecutor : MonoBehaviour
         if (!ServiceLocator.TryGet(out EffectManager effectManager)) return;
 
         Vector3 scale = effect.LocalScale;
+        if (effect.FitToAttackArea)
+        {
+            float length = Mathf.Max(0.01f, hitData.AttackRange + hitData.AttackRadius);
+            float width = Mathf.Max(0.01f, hitData.AttackRadius * 2f);
+            Vector3 baseSize = effect.BaseSize;
+            Vector3 fitScale = new(
+                length / Mathf.Max(0.01f, baseSize.x),
+                width / Mathf.Max(0.01f, baseSize.y),
+                width / Mathf.Max(0.01f, baseSize.z));
+            scale = Vector3.Scale(fitScale, scale);
+        }
 
         Vector3 position = transform.TransformPoint(effect.LocalPosition);
         Quaternion rotation = Quaternion.LookRotation(transform.forward, Vector3.up)
