@@ -169,6 +169,32 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
     /// <summary>
+    /// ダメージ計算・無敵・ジャスト回避を通さず、リアクションだけを確認する。
+    /// エディターまたはDevelopment BuildのテストUIから使用する。
+    /// </summary>
+    public bool DebugPlayDamageReaction(DamageReactionType reactionType)
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (_playerStateManager == null
+            || _playerAnimationController == null
+            || _move == null
+            || _playerStateManager.IsDead()
+            || _playerStateManager.IsDamaged())
+        {
+            return false;
+        }
+
+        _attack?.InterruptByDamage();
+        _playerAnimationController.SetDamageReaction(reactionType);
+        _move.PlayDamageReaction(reactionType);
+        _playerStateManager.ChangeState(PlayerState.Damaged);
+        return true;
+#else
+        return false;
+#endif
+    }
+
+    /// <summary>
     /// ステータスに修正を加える。バフ・デバフの適用などに使用。
     /// </summary>
     public void AddModifier(IStatModifier modifier)

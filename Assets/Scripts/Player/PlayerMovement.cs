@@ -429,6 +429,15 @@ public class PlayerMovement : MonoBehaviour
         Vector3 backward = -transform.forward;
         backward.y = 0f;
         backward.Normalize();
+        bool isLarge = reactionType == DamageReactionType.Large;
+        RigidbodyConstraints originalConstraints = _rb.constraints;
+
+        if (isLarge)
+        {
+            // 通常移動ではY位置を固定しているため、打ち上げ中だけ解除する。
+            // 上下位置そのものは物理速度ではなくAnimationCurveで決定する。
+            _rb.constraints = originalConstraints & ~RigidbodyConstraints.FreezePositionY;
+        }
 
         float elapsed = 0f;
         try
@@ -441,7 +450,7 @@ public class PlayerMovement : MonoBehaviour
                 Vector3 candidate = startPosition + backward * horizontalDistance;
 
                 candidate = ResolveDamageReactionWall(_rb.position, candidate);
-                candidate.y = reactionType == DamageReactionType.Large
+                candidate.y = isLarge
                     ? startPosition.y
                       + _largeReactionHeightCurve.Evaluate(normalizedTime) * _largeReactionHeight
                     : startPosition.y;
@@ -453,6 +462,17 @@ public class PlayerMovement : MonoBehaviour
         catch (OperationCanceledException)
         {
             // 新しいリアクションまたは破棄による中断。
+        }
+        finally
+        {
+            if (isLarge && _rb)
+            {
+                // 中断された場合も地面の高さへ戻し、元の移動制約を復元する。
+                Vector3 landedPosition = _rb.position;
+                landedPosition.y = startPosition.y;
+                _rb.position = landedPosition;
+                _rb.constraints = originalConstraints;
+            }
         }
     }
 
