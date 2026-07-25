@@ -25,4 +25,8 @@ public interface IPlayerInformationService
     /// <summary> Playerに対してDamageを与える処理 </summary>
     /// <param name="damage"> Damage量 </param>
     public void TakeDamage(float damage);
+    public void TakeDamage(float damage, DamageReactionType reactionType)
+    {
+        Player.TakeDamage(damage, reactionType);
+    }
 }
