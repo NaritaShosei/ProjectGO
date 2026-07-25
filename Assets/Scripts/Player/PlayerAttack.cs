@@ -401,6 +401,10 @@ public class PlayerAttack : MonoBehaviour
         _currentMotionHitCount = hitCount;
         _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
 
+        // 攻撃判定の発火後は向き追従だけを停止する。
+        // 座標追従で使用するターゲット情報は、モーション終了まで保持する。
+        _isHomingActive = false;
+
         // 未命中時はOnHitConfirmedが発火しないため、次ヒットに向けた移動をここで継続する。
         // 同期的にヒット済みの場合は、HandleAttackHitConfirmed側ですでに再開されているため重複させない。
         if (!_stoppedHitIndices.Contains(hitIndex))
