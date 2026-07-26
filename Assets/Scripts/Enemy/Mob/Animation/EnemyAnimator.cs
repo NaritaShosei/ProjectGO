@@ -22,6 +22,7 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnAttackStart;
     public event Action OnWeaponSwing;
     public event Action OnSpawnEffect;
+    public event Action OnSpawnEnd;
 
     /// <summary>
     /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
@@ -47,6 +48,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnAttackStart += HandleAttackStart;
         _receiver.OnWeaponSwing += HandleWeaponSwing;
         _receiver.OnSpawnEffect += HandleSpawnEffect;
+        _receiver.OnSpawnEnd += HandleSpawnEnd;
     }
 
     /// <summary>
@@ -143,6 +145,7 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnAttackStart -= HandleAttackStart;
         _receiver.OnWeaponSwing -= HandleWeaponSwing;
         _receiver.OnSpawnEffect -= HandleSpawnEffect;
+        _receiver.OnSpawnEnd -= HandleSpawnEnd;
     }
 
     public void SetDown(bool value)
@@ -188,4 +191,5 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleAttackStart() => OnAttackStart?.Invoke();
     private void HandleWeaponSwing() => OnWeaponSwing?.Invoke();
     private void HandleSpawnEffect() => OnSpawnEffect?.Invoke();
+    private void HandleSpawnEnd() => OnSpawnEnd?.Invoke();
 }

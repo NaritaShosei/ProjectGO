@@ -160,6 +160,8 @@ public sealed class KnockbackCondition : IEnemyCondition
         enemy.EnemyAnimator?.SetKnockback(false);
     }
 
+    public void RequestFinish() { }
+
     // 水平速度（XZ平面、減速制御）
     private Vector3 _velocityH;
     // 垂直速度（Y軸、重力制御）

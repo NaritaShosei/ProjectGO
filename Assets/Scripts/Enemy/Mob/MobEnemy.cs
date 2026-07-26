@@ -49,6 +49,8 @@ public class MobEnemy : Enemy, IFormationParticipant
         {
             _defenceContext.EnemyType = EnemyDefenceType.Flesh;
         }
+
+        _conditionController.ApplyImmediate(new SpawnCondition());
     }
 
     /// <summary>
@@ -76,6 +78,8 @@ public class MobEnemy : Enemy, IFormationParticipant
 
         // BehaviourRunnerを初期状態に戻す
         _runner?.Reset();
+
+        _conditionController.ApplyImmediate(new SpawnCondition());
 
         // TODO: _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
         // TODO: 鎧のリセット（ArmorStats）
@@ -148,6 +152,12 @@ public class MobEnemy : Enemy, IFormationParticipant
     public override void OnConditionInterrupt()
     {
         _runner.ForceExitAction();
+    }
+
+    /// <summary>スポーン終了</summary>
+    public override void HandleSpawnEnd()
+    {
+        _conditionController.FinishCondition(ConditionType.Spawn);
     }
 
     /// <summary>

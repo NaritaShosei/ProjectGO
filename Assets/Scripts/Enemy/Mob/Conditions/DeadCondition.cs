@@ -112,4 +112,6 @@ public sealed class DeadCondition : IEnemyCondition
                 break;
         }
     }
+
+    public void RequestFinish() { }
 }

@@ -315,6 +315,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         {
             _animationEventReceiver.OnAttackEffect += HandleAttackEffect;
         }
+
+        _enemyAnimator.OnSpawnEnd += HandleSpawnEnd;
         _soundHandler?.Init(this);
     }
 
@@ -463,7 +465,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         _animator.Update(0f);
 
         _useSpawnAnimation = true;
-
         // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
     }
 
@@ -474,6 +475,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
             _animator.Play("Spawn", 0, 0f);
         }
         _useSpawnAnimation = false;
+    }
+
+    public virtual void HandleSpawnEnd()
+    {
     }
 
     /// <summary>

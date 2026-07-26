@@ -44,4 +44,7 @@ public interface IEnemyAnimationController
 
     /// <summary>エネミーの出現開始タイミング</summary>
     public void AnimEvent_SpawnEffect();
+
+    /// <summary>エネミーの終了タイミング</summary>
+    public void AnimEvent_SpawnEnd();
 }

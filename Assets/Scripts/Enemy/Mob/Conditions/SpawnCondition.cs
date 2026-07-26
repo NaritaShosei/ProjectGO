@@ -23,12 +23,12 @@ public class SpawnCondition : IEnemyCondition
         }
     }
 
-    public void Finish()
+    public void RequestFinish()
     {
         _finished = true;
     }
-    public void Tick(IEnemy enemy, float dt) { }
 
+    public void Tick(IEnemy enemy, float dt) { }
 
     private bool _finished;
 }
