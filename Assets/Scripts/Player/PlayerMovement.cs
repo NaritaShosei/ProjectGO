@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     private const float INPUT_THRESHOLD = 0.001f;
     private const float ATTACK_MOVE_CAST_SKIN = 0.02f;
     private const float ATTACK_MOVE_MIN_CAST_DISTANCE = 0.001f;
+    private const float DAMAGE_MOVE_CAST_SKIN = 0.02f;
 
     public event Action OnStartDodgeInvincible;
     public event Action OnEndDodge;
@@ -59,7 +60,46 @@ public class PlayerMovement : MonoBehaviour
             _modifiers.Add(modifier);
     }
 
+    /// <summary>
+    /// リアクション強度に応じた被弾移動を開始する。
+    /// </summary>
+    public void PlayDamageReaction(DamageReactionType reactionType)
+    {
+        _damageReactionMoveCts?.Cancel();
+        _damageReactionMoveCts?.Dispose();
+        _damageReactionMoveCts = new CancellationTokenSource();
+
+        if (reactionType == DamageReactionType.Small) return;
+
+        bool isMedium = reactionType == DamageReactionType.Medium;
+        PerformDamageReactionMove(
+            reactionType,
+            isMedium ? _mediumReactionDistance : _largeReactionDistance,
+            isMedium ? _mediumReactionDuration : _largeReactionDuration,
+            isMedium ? _mediumReactionMoveCurve : _largeReactionMoveCurve,
+            _damageReactionMoveCts.Token).Forget();
+    }
+
     [SerializeField] private Rigidbody _rb;
+
+    [Header("Damage Reaction")]
+    [SerializeField, Min(0f)] private float _mediumReactionDistance = 1.5f;
+    [SerializeField, Min(0.01f)] private float _mediumReactionDuration = 0.35f;
+    [SerializeField]
+    private AnimationCurve _mediumReactionMoveCurve =
+        AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField, Min(0f)] private float _largeReactionDistance = 1.2f;
+    [SerializeField, Min(0f)] private float _largeReactionHeight = 1.5f;
+    [SerializeField, Min(0.01f)] private float _largeReactionDuration = 0.6f;
+    [SerializeField]
+    private AnimationCurve _largeReactionMoveCurve =
+        AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField]
+    private AnimationCurve _largeReactionHeightCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f, 0f, 4f),
+            new Keyframe(0.5f, 1f, 0f, 0f),
+            new Keyframe(1f, 0f, -4f, 0f));
 
     private PlayerStateManager _playerStateManager;
     private InputHandler _input;
@@ -76,6 +116,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _isDodging;
     private CancellationTokenSource _dodgeMoveCts;
     private CancellationTokenSource _attackMoveCts;
+    private CancellationTokenSource _damageReactionMoveCts;
     private bool _isAttackMoving;
     private bool _currentIsPhantom;
     private float _attackMoveElapsed;
@@ -142,6 +183,8 @@ public class PlayerMovement : MonoBehaviour
         _dodgeMoveCts?.Dispose();
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
+        _damageReactionMoveCts?.Cancel();
+        _damageReactionMoveCts?.Dispose();
     }
 
     // ── 移動 ─────────────────────────────────────────────────
@@ -379,12 +422,98 @@ public class PlayerMovement : MonoBehaviour
     // ── 被弾 ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 被弾アニメーション終了イベントのハンドラー。PlayerStateManagerがDamaged状態ならIdleに遷移させる。
+    /// 被弾アニメーション終了時にDamaged状態を解除する。
     /// </summary>
     private void HandleDamagedEnd()
     {
         if (_playerStateManager.IsDamaged())
             _playerStateManager.ChangeState(PlayerState.Idle);
+    }
+
+    private async UniTaskVoid PerformDamageReactionMove(
+        DamageReactionType reactionType,
+        float distance,
+        float duration,
+        AnimationCurve moveCurve,
+        CancellationToken cancellationToken)
+    {
+        Vector3 startPosition = _rb.position;
+        Vector3 backward = -transform.forward;
+        backward.y = 0f;
+        backward.Normalize();
+        bool isLarge = reactionType == DamageReactionType.Large;
+        RigidbodyConstraints originalConstraints = _rb.constraints;
+
+        if (isLarge)
+        {
+            // 通常移動ではY位置を固定しているため、打ち上げ中だけ解除する。
+            // 上下位置そのものは物理速度ではなくAnimationCurveで決定する。
+            _rb.constraints = originalConstraints & ~RigidbodyConstraints.FreezePositionY;
+        }
+
+        float elapsed = 0f;
+        try
+        {
+            while (elapsed < duration)
+            {
+                elapsed += Time.fixedDeltaTime * _timeScale;
+                float normalizedTime = Mathf.Clamp01(elapsed / duration);
+                float horizontalDistance = moveCurve.Evaluate(normalizedTime) * distance;
+                Vector3 candidate = startPosition + backward * horizontalDistance;
+
+                candidate = ResolveDamageReactionWall(_rb.position, candidate);
+                candidate.y = isLarge
+                    ? startPosition.y
+                      + _largeReactionHeightCurve.Evaluate(normalizedTime) * _largeReactionHeight
+                    : startPosition.y;
+
+                _rb.MovePosition(candidate);
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // 新しいリアクションまたは破棄による中断。
+        }
+        finally
+        {
+            if (isLarge && _rb)
+            {
+                // 中断された場合も地面の高さへ戻し、元の移動制約を復元する。
+                Vector3 landedPosition = _rb.position;
+                landedPosition.y = startPosition.y;
+                _rb.position = landedPosition;
+                _rb.constraints = originalConstraints;
+            }
+        }
+    }
+
+    private Vector3 ResolveDamageReactionWall(Vector3 currentPosition, Vector3 candidatePosition)
+    {
+        Vector3 horizontalDelta = candidatePosition - currentPosition;
+        horizontalDelta.y = 0f;
+        float distance = horizontalDelta.magnitude;
+        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE) return candidatePosition;
+
+        RaycastHit[] hits = _rb.SweepTestAll(
+            horizontalDelta / distance,
+            distance + DAMAGE_MOVE_CAST_SKIN,
+            QueryTriggerInteraction.Ignore);
+
+        float nearestDistance = float.MaxValue;
+        foreach (RaycastHit hit in hits)
+        {
+            if (!hit.collider || hit.normal.y > 0.5f) continue;
+            nearestDistance = Mathf.Min(nearestDistance, hit.distance);
+        }
+
+        if (nearestDistance == float.MaxValue) return candidatePosition;
+
+        float safeDistance = Mathf.Max(0f, nearestDistance - DAMAGE_MOVE_CAST_SKIN);
+        Vector3 resolved = currentPosition
+            + horizontalDelta.normalized * Mathf.Min(safeDistance, distance);
+        resolved.y = candidatePosition.y;
+        return resolved;
     }
 
     // ── 攻撃移動 ─────────────────────────────────────────────

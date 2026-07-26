@@ -40,6 +40,11 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     /// <summary>被弾アニメーション終了をSMBから受け取る</summary>
     public void AnimEvent_DamagedEnd() => OnDamagedEnd?.Invoke();
 
+    public void SetDamageReaction(DamageReactionType reactionType)
+    {
+        _animator.SetInteger(AnimParams.DamageReaction, (int)reactionType);
+    }
+
     public void AnimEvent_DodgeInvincibilityStart() => OnDodgeInvincibilityStart?.Invoke();
     public void AnimEvent_DodgeEnd() => OnDodgeEnd?.Invoke();
 
@@ -250,6 +255,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         // Int
         public static readonly int AttackId = Animator.StringToHash("AttackId");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+        public static readonly int DamageReaction = Animator.StringToHash("DamageReaction");
 
         // Bool
         public static readonly int IsCharging = Animator.StringToHash("IsCharging");

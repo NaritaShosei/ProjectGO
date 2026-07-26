@@ -106,6 +106,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     /// </summary>
     public void TakeDamage(float damage)
     {
+        TakeDamage(damage, DamageReactionType.Small);
+    }
+
+    public void TakeDamage(float damage, DamageReactionType reactionType)
+    {
         if (_playerStateManager.IsDead()) return;
 
         if (CurrentMode == PlayerMode.Thunder
@@ -157,6 +162,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         if (canInterrupt && !_playerStateManager.IsDead())
         {
             _attack?.InterruptByDamage(); // 攻撃内部状態を全てクリア
+            _playerAnimationController.SetDamageReaction(reactionType);
+            _move?.PlayDamageReaction(reactionType);
             _playerStateManager.ChangeState(PlayerState.Damaged);
         }
     }
