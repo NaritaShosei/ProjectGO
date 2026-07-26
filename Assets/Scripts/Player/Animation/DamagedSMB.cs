@@ -8,7 +8,8 @@ public class DamagedSMB : StateMachineBehaviour
 {
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (animator.TryGetComponent(out PlayerAnimationController controller))
+        PlayerAnimationController controller = animator.GetComponentInParent<PlayerAnimationController>();
+        if (controller != null)
             controller.AnimEvent_DamagedEnd();
     }
 }

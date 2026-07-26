@@ -65,6 +65,8 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public void PlayDamageReaction(DamageReactionType reactionType)
     {
+        CancelDodgeByDamage();
+
         _damageReactionMoveCts?.Cancel();
         _damageReactionMoveCts?.Dispose();
         _damageReactionMoveCts = new CancellationTokenSource();
@@ -420,6 +422,21 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ── 被弾 ─────────────────────────────────────────────────
+
+    /// <summary>
+    /// 被弾によって回避を中断し、遅れて届く回避終了通知でDamaged状態が解除されるのを防ぐ。
+    /// </summary>
+    private void CancelDodgeByDamage()
+    {
+        if (!_isDodging) return;
+
+        _isDodging = false;
+        _dodgeMoveCts?.Cancel();
+        _dodgeMoveCts?.Dispose();
+        _dodgeMoveCts = null;
+        _rb.linearVelocity = Vector3.zero;
+        OnEndDodge?.Invoke();
+    }
 
     /// <summary>
     /// 被弾アニメーション終了時にDamaged状態を解除する。
