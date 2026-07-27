@@ -133,7 +133,7 @@ public class EnemyManager : MonoBehaviour
 
         OnEnemySpawned?.Invoke(enemy);
 
-        enemy.Init();
+        //enemy.Init();
 
         _spatialHashGrid.Register(enemy, pos);
         _enemies.Add(enemy);

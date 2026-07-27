@@ -50,7 +50,7 @@ public class MobEnemy : Enemy, IFormationParticipant
             _defenceContext.EnemyType = EnemyDefenceType.Flesh;
         }
 
-        _conditionController.ApplyImmediate(new SpawnCondition());
+        //一回だけで大丈夫な初期化処理と、スポーン毎に初期化が必要な処理が混ざってる？
     }
 
     /// <summary>

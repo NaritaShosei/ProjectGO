@@ -70,12 +70,14 @@ public class EnemySpawner : MonoBehaviour
         //返却時に使用するため、PoolKeyを保存
         enemy.SetPoolKey(poolKey);
         enemy.InjectServices(_services);
+        enemy.Init();
         enemy.ReInitialize(position);
         enemy.PlaySpawnAnimation();
 
-
         enemy.OnReleaseRequested += HandleEnemyDeath;
         return enemy;
+
+        //Init()が複数回呼ばれる設計になってる
     }
 
     /// <summary> Enemyの破棄 </summary>
