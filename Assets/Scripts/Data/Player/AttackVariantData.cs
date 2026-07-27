@@ -87,6 +87,7 @@ public class AttackHitData
         KnockbackUpward = 0f,
         PlayGroundHitSE = false,
         AdditionalLightningDamages = Array.Empty<AdditionalLightningDamageData>(),
+        AttackEffect = new AttackEffectData(),
     };
 
     public bool HasAdditionalLightningDamage =>
@@ -115,4 +116,37 @@ public class AttackHitData
 
     [Header("カメラシェイク")]
     public CameraShakeData CameraShakeData;
+
+    [Header("Attack Effect")]
+    public AttackEffectData AttackEffect = new();
+}
+
+[Serializable]
+public class AttackEffectData
+{
+    public bool Enabled => _enabled;
+    public string EffectKey => _effectKey;
+    public bool FitToAttackArea => _fitToAttackArea;
+    public Vector3 BaseSize => _baseSize;
+    public Vector3 LocalPosition => _localPosition;
+    public Vector3 LocalEulerAngles => _localEulerAngles;
+    public Vector3 LocalScale => _localScale;
+
+    [SerializeField] private bool _enabled = true;
+    [SerializeField] private string _effectKey = "WarriorPiercingEarth";
+    [Tooltip("Fit the effect length and width to AttackRange and AttackRadius.")]
+    [SerializeField] private bool _fitToAttackArea = true;
+    [Tooltip("Original VFX size. X is length; Y and Z are width.")]
+    [SerializeField] private Vector3 _baseSize = new(10f, 2f, 2f);
+    [Tooltip("Local position relative to the reference object.")]
+    [SerializeField] private Vector3 _localPosition = new(0f, 0.05f, 0f);
+    [Tooltip("Local Euler rotation relative to the reference object.")]
+    [SerializeField] private Vector3 _localEulerAngles = new(0f, 90f, 0f);
+    [Tooltip("Additional scale applied after automatic fitting.")]
+    [SerializeField] private Vector3 _localScale = Vector3.one;
+
+#if UNITY_EDITOR
+    [Tooltip("Target prefab displayed by AttackDataEditor. Runtime playback uses Effect Key.")]
+    [SerializeField] private GameObject _previewPrefab;
+#endif
 }
