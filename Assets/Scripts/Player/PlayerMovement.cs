@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     private const float INPUT_THRESHOLD = 0.001f;
     private const float ATTACK_MOVE_CAST_SKIN = 0.02f;
     private const float ATTACK_MOVE_MIN_CAST_DISTANCE = 0.001f;
+    private const float DAMAGE_MOVE_CAST_SKIN = 0.02f;
 
     public event Action OnStartDodgeInvincible;
     public event Action OnEndDodge;
@@ -59,7 +60,48 @@ public class PlayerMovement : MonoBehaviour
             _modifiers.Add(modifier);
     }
 
+    /// <summary>
+    /// リアクション強度に応じた被弾移動を開始する。
+    /// </summary>
+    public void PlayDamageReaction(DamageReactionType reactionType)
+    {
+        CancelDodgeByDamage();
+
+        _damageReactionMoveCts?.Cancel();
+        _damageReactionMoveCts?.Dispose();
+        _damageReactionMoveCts = new CancellationTokenSource();
+
+        if (reactionType == DamageReactionType.Small) return;
+
+        bool isMedium = reactionType == DamageReactionType.Medium;
+        PerformDamageReactionMove(
+            reactionType,
+            isMedium ? _mediumReactionDistance : _largeReactionDistance,
+            isMedium ? _mediumReactionDuration : _largeReactionDuration,
+            isMedium ? _mediumReactionMoveCurve : _largeReactionMoveCurve,
+            _damageReactionMoveCts.Token).Forget();
+    }
+
     [SerializeField] private Rigidbody _rb;
+
+    [Header("Damage Reaction")]
+    [SerializeField, Min(0f)] private float _mediumReactionDistance = 1.5f;
+    [SerializeField, Min(0.01f)] private float _mediumReactionDuration = 0.35f;
+    [SerializeField]
+    private AnimationCurve _mediumReactionMoveCurve =
+        AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField, Min(0f)] private float _largeReactionDistance = 1.2f;
+    [SerializeField, Min(0f)] private float _largeReactionHeight = 1.5f;
+    [SerializeField, Min(0.01f)] private float _largeReactionDuration = 0.6f;
+    [SerializeField]
+    private AnimationCurve _largeReactionMoveCurve =
+        AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField]
+    private AnimationCurve _largeReactionHeightCurve =
+        new AnimationCurve(
+            new Keyframe(0f, 0f, 0f, 4f),
+            new Keyframe(0.5f, 1f, 0f, 0f),
+            new Keyframe(1f, 0f, -4f, 0f));
 
     private PlayerStateManager _playerStateManager;
     private InputHandler _input;
@@ -76,12 +118,21 @@ public class PlayerMovement : MonoBehaviour
     private bool _isDodging;
     private CancellationTokenSource _dodgeMoveCts;
     private CancellationTokenSource _attackMoveCts;
+    private CancellationTokenSource _damageReactionMoveCts;
     private bool _isAttackMoving;
     private bool _currentIsPhantom;
+    private float _attackMoveElapsed;
+    private int _attackMoveVersion;
+    private int _enemyLayerMask;
 
     private DodgeData _currentDodgeData;
 
     private List<IStatModifier> _modifiers = new List<IStatModifier>();
+
+    private void Awake()
+    {
+        _enemyLayerMask = LayerMask.GetMask("Enemy");
+    }
 
     private float InvincibleDuration
     {
@@ -134,6 +185,8 @@ public class PlayerMovement : MonoBehaviour
         _dodgeMoveCts?.Dispose();
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
+        _damageReactionMoveCts?.Cancel();
+        _damageReactionMoveCts?.Dispose();
     }
 
     // ── 移動 ─────────────────────────────────────────────────
@@ -371,12 +424,113 @@ public class PlayerMovement : MonoBehaviour
     // ── 被弾 ─────────────────────────────────────────────────
 
     /// <summary>
-    /// 被弾アニメーション終了イベントのハンドラー。PlayerStateManagerがDamaged状態ならIdleに遷移させる。
+    /// 被弾によって回避を中断し、遅れて届く回避終了通知でDamaged状態が解除されるのを防ぐ。
+    /// </summary>
+    private void CancelDodgeByDamage()
+    {
+        if (!_isDodging) return;
+
+        _isDodging = false;
+        _dodgeMoveCts?.Cancel();
+        _dodgeMoveCts?.Dispose();
+        _dodgeMoveCts = null;
+        _rb.linearVelocity = Vector3.zero;
+        OnEndDodge?.Invoke();
+    }
+
+    /// <summary>
+    /// 被弾アニメーション終了時にDamaged状態を解除する。
     /// </summary>
     private void HandleDamagedEnd()
     {
         if (_playerStateManager.IsDamaged())
             _playerStateManager.ChangeState(PlayerState.Idle);
+    }
+
+    private async UniTaskVoid PerformDamageReactionMove(
+        DamageReactionType reactionType,
+        float distance,
+        float duration,
+        AnimationCurve moveCurve,
+        CancellationToken cancellationToken)
+    {
+        Vector3 startPosition = _rb.position;
+        Vector3 backward = -transform.forward;
+        backward.y = 0f;
+        backward.Normalize();
+        bool isLarge = reactionType == DamageReactionType.Large;
+        RigidbodyConstraints originalConstraints = _rb.constraints;
+
+        if (isLarge)
+        {
+            // 通常移動ではY位置を固定しているため、打ち上げ中だけ解除する。
+            // 上下位置そのものは物理速度ではなくAnimationCurveで決定する。
+            _rb.constraints = originalConstraints & ~RigidbodyConstraints.FreezePositionY;
+        }
+
+        float elapsed = 0f;
+        try
+        {
+            while (elapsed < duration)
+            {
+                elapsed += Time.fixedDeltaTime * _timeScale;
+                float normalizedTime = Mathf.Clamp01(elapsed / duration);
+                float horizontalDistance = moveCurve.Evaluate(normalizedTime) * distance;
+                Vector3 candidate = startPosition + backward * horizontalDistance;
+
+                candidate = ResolveDamageReactionWall(_rb.position, candidate);
+                candidate.y = isLarge
+                    ? startPosition.y
+                      + _largeReactionHeightCurve.Evaluate(normalizedTime) * _largeReactionHeight
+                    : startPosition.y;
+
+                _rb.MovePosition(candidate);
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // 新しいリアクションまたは破棄による中断。
+        }
+        finally
+        {
+            if (isLarge && _rb)
+            {
+                // 中断された場合も地面の高さへ戻し、元の移動制約を復元する。
+                Vector3 landedPosition = _rb.position;
+                landedPosition.y = startPosition.y;
+                _rb.position = landedPosition;
+                _rb.constraints = originalConstraints;
+            }
+        }
+    }
+
+    private Vector3 ResolveDamageReactionWall(Vector3 currentPosition, Vector3 candidatePosition)
+    {
+        Vector3 horizontalDelta = candidatePosition - currentPosition;
+        horizontalDelta.y = 0f;
+        float distance = horizontalDelta.magnitude;
+        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE) return candidatePosition;
+
+        RaycastHit[] hits = _rb.SweepTestAll(
+            horizontalDelta / distance,
+            distance + DAMAGE_MOVE_CAST_SKIN,
+            QueryTriggerInteraction.Ignore);
+
+        float nearestDistance = float.MaxValue;
+        foreach (RaycastHit hit in hits)
+        {
+            if (!hit.collider || hit.normal.y > 0.5f) continue;
+            nearestDistance = Mathf.Min(nearestDistance, hit.distance);
+        }
+
+        if (nearestDistance == float.MaxValue) return candidatePosition;
+
+        float safeDistance = Mathf.Max(0f, nearestDistance - DAMAGE_MOVE_CAST_SKIN);
+        Vector3 resolved = currentPosition
+            + horizontalDelta.normalized * Mathf.Min(safeDistance, distance);
+        resolved.y = candidatePosition.y;
+        return resolved;
     }
 
     // ── 攻撃移動 ─────────────────────────────────────────────
@@ -389,6 +543,10 @@ public class PlayerMovement : MonoBehaviour
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = new CancellationTokenSource();
+        if (!request.Resume)
+            _attackMoveElapsed = 0f;
+
+        int moveVersion = ++_attackMoveVersion;
 
         if (_currentIsPhantom)
         {
@@ -396,13 +554,16 @@ public class PlayerMovement : MonoBehaviour
             _currentIsPhantom = false;
         }
 
-        PerformAttackMove(request).Forget();
+        PerformAttackMove(request, moveVersion, _attackMoveCts.Token).Forget();
     }
 
     /// <summary>
     /// 攻撃移動の実行。リクエストの内容に応じて、ダッシュ移動・ステップ移動・カーブ移動などを行う。
     /// </summary>
-    private async UniTaskVoid PerformAttackMove(AttackMoveRequest request)
+    private async UniTaskVoid PerformAttackMove(
+        AttackMoveRequest request,
+        int moveVersion,
+        CancellationToken cancellationToken)
     {
         _isAttackMoving = true;
 
@@ -414,17 +575,20 @@ public class PlayerMovement : MonoBehaviour
 
         try
         {
-            await DashMove(request);
+            await DashMove(request, cancellationToken);
         }
         catch (OperationCanceledException) { }
         finally
         {
-            _isAttackMoving = false;
-            if (_rb) _rb.linearVelocity = Vector3.zero;
-            if (_currentIsPhantom)
+            if (moveVersion == _attackMoveVersion)
             {
-                Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
-                _currentIsPhantom = false;
+                _isAttackMoving = false;
+                if (_rb) _rb.linearVelocity = Vector3.zero;
+                if (_currentIsPhantom)
+                {
+                    Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
+                    _currentIsPhantom = false;
+                }
             }
         }
     }
@@ -432,16 +596,14 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// ダッシュ移動の実装。
     /// </summary>
-    private async UniTask DashMove(AttackMoveRequest request)
+    private async UniTask DashMove(AttackMoveRequest request, CancellationToken cancellationToken)
     {
         if (request.Duration <= 0f)
             return;
 
         AnimationCurve curve = request.MoveCurve;
 
-        float elapsed = 0f;
-
-        Vector3 startPos = transform.position;
+        float elapsed = Mathf.Clamp(_attackMoveElapsed, 0f, request.Duration);
 
         Vector3 dir = request.Direction;
         dir.y = 0f;
@@ -452,41 +614,35 @@ public class PlayerMovement : MonoBehaviour
         }
         dir = dir.normalized;
 
-        Vector3 targetPos = startPos + dir * request.Distance;
-
-        bool stoppedEarly = false;
+        float previousCurveValue = curve.Evaluate(elapsed / request.Duration);
 
         while (elapsed < request.Duration)
         {
-            float t = elapsed / request.Duration;
-            float curveValue = curve.Evaluate(t);
+            float nextElapsed = Mathf.Min(
+                elapsed + Time.fixedDeltaTime * _timeScale,
+                request.Duration);
+            float curveValue = curve.Evaluate(nextElapsed / request.Duration);
+            float curveDelta = curveValue - previousCurveValue;
+            Vector3 newPos = transform.position + dir * request.Distance * curveDelta;
 
-            Vector3 newPos = Vector3.Lerp(startPos, targetPos, curveValue);
-            if (TryClampAttackMoveStopPosition(transform.position, newPos, request.Target, request.StopDistance, out var stoppedPos))
+            if (!request.IsPhantom && TryClampAttackMoveToEnemyCollider(transform.position, newPos, out var stoppedPos))
             {
                 MoveAttackPosition(stoppedPos, request.Target);
-                stoppedEarly = true;
-                break;
             }
-
-            if (MoveAttackPosition(newPos, request.Target))
+            else if (MoveAttackPosition(newPos, request.Target))
             {
-                stoppedEarly = true;
                 break;
             }
 
-            elapsed += Time.fixedDeltaTime * _timeScale;
+            // 停止距離内でも時間とカーブは進める。
+            // 停止中の移動量は後から取り戻さず、アニメーションとの同期を維持する。
+            elapsed = nextElapsed;
+            _attackMoveElapsed = elapsed;
+            previousCurveValue = curveValue;
 
             await UniTask.Yield(
                 PlayerLoopTiming.FixedUpdate,
-                _attackMoveCts.Token);
-        }
-        if (!stoppedEarly)
-        {
-            if (TryClampAttackMoveStopPosition(transform.position, targetPos, request.Target, request.StopDistance, out var stoppedPos))
-                MoveAttackPosition(stoppedPos, request.Target);
-            else
-                MoveAttackPosition(targetPos, request.Target);
+                cancellationToken);
         }
     }
 
@@ -555,46 +711,35 @@ public class PlayerMovement : MonoBehaviour
                target.IsChildOf(hitTransform);
     }
 
-    private bool TryClampAttackMoveStopPosition(
+    private bool TryClampAttackMoveToEnemyCollider(
         Vector3 currentPos,
         Vector3 candidatePos,
-        Transform target,
-        float stopDistance,
         out Vector3 stoppedPos)
     {
         stoppedPos = candidatePos;
 
-        if (!target || stopDistance <= 0f) return false;
+        Vector3 delta = candidatePos - currentPos;
+        float distance = delta.magnitude;
+        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE)
+            return false;
 
-        Vector3 targetPos = target.position;
-        float currentDistance = HorizontalDistance(currentPos, targetPos);
-        if (currentDistance <= stopDistance)
+        Vector3 direction = delta / distance;
+        if (!Physics.Raycast(
+                currentPos,
+                direction,
+                out RaycastHit hit,
+                distance + ATTACK_MOVE_CAST_SKIN,
+                _enemyLayerMask,
+                QueryTriggerInteraction.Collide))
         {
-            stoppedPos = currentPos;
-            return true;
+            return false;
         }
 
-        float candidateDistance = HorizontalDistance(candidatePos, targetPos);
-        if (candidateDistance > stopDistance) return false;
-
-        Vector3 fromTarget = currentPos - targetPos;
-        fromTarget.y = 0f;
-        if (fromTarget.sqrMagnitude <= 0.001f)
-        {
-            stoppedPos = currentPos;
-            return true;
-        }
-
-        stoppedPos = targetPos + fromTarget.normalized * stopDistance;
+        // Enemyレイヤーのコライダー表面より少し手前で止め、敵を貫通しないようにする。
+        float safeDistance = Mathf.Max(0f, hit.distance - ATTACK_MOVE_CAST_SKIN);
+        stoppedPos = currentPos + direction * Mathf.Min(safeDistance, distance);
         stoppedPos.y = candidatePos.y;
         return true;
-    }
-
-    private static float HorizontalDistance(Vector3 a, Vector3 b)
-    {
-        a.y = 0f;
-        b.y = 0f;
-        return Vector3.Distance(a, b);
     }
 
     /// <summary>
@@ -602,18 +747,32 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void HandleAttackEnd()
     {
+        _attackMoveVersion++;
+        _attackMoveElapsed = 0f;
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = null;
+        EndAttackMoveState();
     }
 
     private void HandleAttackMoveStop()
     {
+        _attackMoveVersion++;
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _attackMoveCts = null;
+        EndAttackMoveState();
+    }
+
+    private void EndAttackMoveState()
+    {
         _isAttackMoving = false;
         if (_rb) _rb.linearVelocity = Vector3.zero;
+        if (_currentIsPhantom)
+        {
+            Physics.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false);
+            _currentIsPhantom = false;
+        }
     }
 
     /// <summary>

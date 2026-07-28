@@ -16,7 +16,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnAttackComplete;
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
-    public event Action<int> OnAttackExecute;
+    public event Action<int, int> OnAttackExecute;
     public event Action OnModeChangeComplete;
     public event Action OnComboTransition;
     public event Action OnDodgeInvincibilityStart;
@@ -28,8 +28,9 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnDamagedEnd;
 
     // ── IAnimationController ──────────────────────────────────
-    public void AnimEvent_AttackExecute() => AnimEvent_AttackExecute(0);
-    public void AnimEvent_AttackExecute(int hitIndex) => OnAttackExecute?.Invoke(hitIndex);
+    public void AnimEvent_AttackExecute() => AnimEvent_AttackExecute(0, 1);
+    public void AnimEvent_AttackExecute(int hitIndex) => AnimEvent_AttackExecute(hitIndex, hitIndex + 1);
+    public void AnimEvent_AttackExecute(int hitIndex, int hitCount) => OnAttackExecute?.Invoke(hitIndex, hitCount);
     public void AnimEvent_AttackComplete() => OnAttackComplete?.Invoke();
     public void AnimEvent_ComboWindowStart() => OnComboWindowStart?.Invoke();
     public void AnimEvent_ComboWindowEnd() => OnComboWindowEnd?.Invoke();
@@ -38,6 +39,11 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     /// <summary>被弾アニメーション終了をSMBから受け取る</summary>
     public void AnimEvent_DamagedEnd() => OnDamagedEnd?.Invoke();
+
+    public void SetDamageReaction(DamageReactionType reactionType)
+    {
+        _animator.SetInteger(AnimParams.DamageReaction, (int)reactionType);
+    }
 
     public void AnimEvent_DodgeInvincibilityStart() => OnDodgeInvincibilityStart?.Invoke();
     public void AnimEvent_DodgeEnd() => OnDodgeEnd?.Invoke();
@@ -249,6 +255,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         // Int
         public static readonly int AttackId = Animator.StringToHash("AttackId");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
+        public static readonly int DamageReaction = Animator.StringToHash("DamageReaction");
 
         // Bool
         public static readonly int IsCharging = Animator.StringToHash("IsCharging");

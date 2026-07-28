@@ -42,6 +42,13 @@ MonoBehaviour:
         _amplitude: 1.5
         _frequency: 2.5
         _duration: 0.15
+      AttackEffect:
+        _enabled: 0
+        _effectKey: WarriorPiercingEarth
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 0, z: 0}
+        _localScale: {x: -4.32, y: 1, z: 1}
+        _previewPrefab: {fileID: 6100000000000000001, guid: 78da2ac1686b4c58a0bb91038f4e1402, type: 3}
     _enableHoming: 1
     _homingRadius: 5
     _homingAngle: 40
@@ -121,6 +128,15 @@ MonoBehaviour:
         _amplitude: 2
         _frequency: 3
         _duration: 0.2
+      AttackEffect:
+        _enabled: 1
+        _effectKey: WarriorPiercingEarth
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 0, z: 0}
+        _fitToAttackArea: 1
+        _baseSize: {x: 10, y: 2, z: 2}
+        _localScale: {x: 4.47, y: 1, z: 0.28}
+        _previewPrefab: {fileID: 6100000000000000001, guid: 78da2ac1686b4c58a0bb91038f4e1402, type: 3}
     _enableHoming: 1
     _homingRadius: 5
     _homingAngle: 40
@@ -200,6 +216,15 @@ MonoBehaviour:
         _amplitude: 2.8
         _frequency: 3.5
         _duration: 0.24
+      AttackEffect:
+        _enabled: 1
+        _effectKey: WarriorPiercingEarth
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 0, z: 0}
+        _fitToAttackArea: 1
+        _baseSize: {x: 10, y: 2, z: 2}
+        _localScale: {x: 5.89, y: 1, z: 0.28}
+        _previewPrefab: {fileID: 6100000000000000001, guid: 78da2ac1686b4c58a0bb91038f4e1402, type: 3}
     _enableHoming: 1
     _homingRadius: 5
     _homingAngle: 40
@@ -279,6 +304,15 @@ MonoBehaviour:
         _amplitude: 3.2
         _frequency: 3.8
         _duration: 0.3
+      AttackEffect:
+        _enabled: 1
+        _effectKey: WarriorPiercingEarth
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 0, z: 0}
+        _fitToAttackArea: 1
+        _baseSize: {x: 10, y: 2, z: 2}
+        _localScale: {x: 6.89, y: 1, z: 0.27}
+        _previewPrefab: {fileID: 6100000000000000001, guid: 78da2ac1686b4c58a0bb91038f4e1402, type: 3}
     _enableHoming: 1
     _homingRadius: 5
     _homingAngle: 40

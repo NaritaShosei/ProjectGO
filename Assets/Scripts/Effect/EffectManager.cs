@@ -12,12 +12,21 @@ public class EffectManager : MonoBehaviour
 {
     public void PlayEffect(string key, Vector3 position)
     {
-        PlayEffect(key, position, Vector3.one);
+        PlayEffect(key, position, Quaternion.identity, Vector3.one);
     }
 
     public void PlayEffect(
         string key,
         Vector3 position,
+        Vector3 scale)
+    {
+        PlayEffect(key, position, Quaternion.identity, scale);
+    }
+
+    public void PlayEffect(
+        string key,
+        Vector3 position,
+        Quaternion rotation,
         Vector3 scale)
     {
         if (!_pools.TryGetValue(key, out var pool))
@@ -34,7 +43,7 @@ public class EffectManager : MonoBehaviour
 
         presenter.PlayAsync(
             position,
-            Quaternion.identity,
+            rotation,
             _cts.Token).Forget();
     }
 

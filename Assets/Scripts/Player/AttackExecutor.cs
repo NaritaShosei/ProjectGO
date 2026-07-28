@@ -11,7 +11,7 @@ public class AttackExecutor : MonoBehaviour
 
     /// <summary> スイング音通知用。攻撃判定が出る瞬間に発火する </summary>
     public event Action<PlayerMode> OnSwingReady;
-    public event Action OnHitConfirmed;
+    public event Action<int> OnHitConfirmed;
 
     public void Init(IPlayerStats stats, SkillManager manager)
     {
@@ -43,6 +43,9 @@ public class AttackExecutor : MonoBehaviour
         var hitData = variantData.GetHitData(hitIndex);
         var attackPos = transform.position + transform.forward * hitData.AttackRange;
         var cols = Physics.OverlapSphere(attackPos, hitData.AttackRadius, _layer);
+
+        if (attackData.Mode == PlayerMode.Warrior && attackInput.ChargeLevel > ChargeLevel.None)
+            PlayWarriorAttackEffect(hitData);
 
         Debug.Log($"{attackData.Mode}：{variantData.AttackName}で攻撃");
 
@@ -110,7 +113,7 @@ public class AttackExecutor : MonoBehaviour
 
         if (hasHitResult)
         {
-            OnHitConfirmed?.Invoke();
+            OnHitConfirmed?.Invoke(hitIndex);
 
             if (ServiceLocator.TryGet(out CameraManager cameraManager))
                 cameraManager.ExecutionCameraShake(hitData.CameraShakeData).Forget();
@@ -147,6 +150,36 @@ public class AttackExecutor : MonoBehaviour
     [SerializeField] private Color _lightningDamagePopupColor = DamagePopupColorScope.LightningColor;
     private IPlayerStats _playerStats;
     private SkillManager _skillManager;
+
+    private void PlayWarriorAttackEffect(AttackHitData hitData)
+    {
+        AttackEffectData effect = hitData.AttackEffect;
+        if (effect == null || !effect.Enabled || string.IsNullOrEmpty(effect.EffectKey)) return;
+        if (!ServiceLocator.TryGet(out EffectManager effectManager)) return;
+
+        Vector3 scale = effect.LocalScale;
+        if (effect.FitToAttackArea)
+        {
+            float length = Mathf.Max(0.01f, hitData.AttackRange + hitData.AttackRadius);
+            float width = Mathf.Max(0.01f, hitData.AttackRadius * 2f);
+            Vector3 baseSize = effect.BaseSize;
+            Vector3 fitScale = new(
+                length / Mathf.Max(0.01f, baseSize.x),
+                width / Mathf.Max(0.01f, baseSize.y),
+                width / Mathf.Max(0.01f, baseSize.z));
+            scale = Vector3.Scale(fitScale, scale);
+        }
+
+        Vector3 position = transform.TransformPoint(effect.LocalPosition);
+        Quaternion rotation = Quaternion.LookRotation(transform.forward, Vector3.up)
+                              * Quaternion.Euler(effect.LocalEulerAngles);
+
+        effectManager.PlayEffect(
+            effect.EffectKey,
+            position,
+            rotation,
+            scale);
+    }
 
     private List<SkillBase> GetApplicableSkills(AttackContext context, AttackData data)
     {
