@@ -88,7 +88,7 @@ public class MobEnemy : Enemy, IFormationParticipant
 
     public override void TakeDamage(DamageContext context)
     {
-        if (_isDead) { return; }
+        if (_isDead || !CanTakeDamage) { return; }
 
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
 

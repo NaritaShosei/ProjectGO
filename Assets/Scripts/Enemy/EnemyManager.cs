@@ -89,7 +89,7 @@ public class EnemyManager : MonoBehaviour
 
             OnEnemySpawned?.Invoke(enemy);
 
-            enemy.Init();
+            //enemy.Init();
 
             // SpatialHashGridに初期位置を登録する
             _spatialHashGrid.Register(enemy, pos);
