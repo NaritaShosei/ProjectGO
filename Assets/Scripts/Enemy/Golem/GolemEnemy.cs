@@ -38,7 +38,7 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     {
         bool isDown = ConditionController.HasCondition(ConditionType.Down);
 
-        if (_isDead)
+        if (_isDead || !CanTakeDamage)
         {
             return;
         }
