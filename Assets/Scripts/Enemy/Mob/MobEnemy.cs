@@ -381,7 +381,7 @@ public class MobEnemy : Enemy, IFormationParticipant
     /// </summary>
     protected void ApplyKnockback(DamageContext context)
     {
-        if (context.Knockback == null) return;
+        if (!CanReceiveCondition || context.Knockback == null) return;
 
         KnockbackContext temp = (KnockbackContext)context.Knockback;
 
