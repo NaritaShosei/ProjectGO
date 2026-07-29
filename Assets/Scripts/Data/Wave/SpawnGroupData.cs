@@ -23,7 +23,7 @@ public class SpawnGroupData
     [SerializeField, Min(1)]
     private int _spawnSetSize = 3;
 
-    [Tooltip("何体ずつ同時出現させるか")]
+    [Tooltip("出現間隔（秒）")]
     [SerializeField, Min(1)]
     private float _spawnSetInterval = 0.5f;
 

@@ -170,9 +170,6 @@ public class WaveController
     SpawnPoint spawnPoint,
         float baseTime)
     {
-        _pendingSpawns.Clear();
-
-        // Group側の設定を使う。0以下が来てもゼロ除算しないよう防御的にMaxを噛ませる
         int setSize = Mathf.Max(1, group.SpawnSetSize);
         float setInterval = Mathf.Max(0f, group.SpawnSetInterval);
 
@@ -189,7 +186,7 @@ public class WaveController
                 Vector3 position = spawnPoint.GetSlotPosition(slotIndex);
 
                 _pendingSpawns.Enqueue(
-                new SpawnRequest(entry.EnemyTypeKey, position, spawnTime));
+                               new SpawnRequest(entry.EnemyTypeKey, position, spawnTime));
 
                 slotIndex++;
                 flatIndex++;
@@ -202,12 +199,11 @@ public class WaveController
     /// </summary>
     private void ProcessPendingSpawns()
     {
-
-        while (_pendingSpawns.Count > 0 && _pendingSpawns.Peek().SpawnTime <= Time.time)
+        while (_pendingSpawns.Count > 0 &&
+                  _pendingSpawns.Peek().SpawnTime <= Time.time)
         {
             var request = _pendingSpawns.Dequeue();
-
-            _enemyManager.Spawn(request.EnemyTypeKey,request.Position);
+            _enemyManager.Spawn(request.EnemyTypeKey, request.Position);
         }
     }
 
@@ -216,6 +212,9 @@ public class WaveController
     /// </summary>
     private void CheckNextGroup()
     {
+        // 時間差スポーン中は次Groupへ進めない
+        if (_pendingSpawns.Count > 0) return;
+
         var group =
             _currentWave.SpawnGroups[_currentGroupIndex];
 
@@ -256,9 +255,7 @@ public class WaveController
 
             case WaveConditionType.AllDefeated:
                 {
-                    //予約済みのスポーンが全て消化され、かつそのGroupの敵をすべて撃破した場合
-                    bool isAllSpawned = _pendingSpawns.Count == 0;
-                    bool isAllDefeated = isAllSpawned && _groupKillCount >= _groupSpawnCount;
+                    bool isAllDefeated = _groupKillCount >= _groupSpawnCount;
 
                     return isAllDefeated;
                 }
@@ -294,6 +291,7 @@ public class WaveController
         _groupKillCount = 0;
         _groupSpawnCount = 0;
         _waveKillCount = 0;
+        _groupStartTime = 0f;
         IsComplete = false;
         _pendingSpawns.Clear();
     }
