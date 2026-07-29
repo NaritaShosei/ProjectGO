@@ -22,6 +22,8 @@ public class AttackDataEditor : Editor
     private bool _isAutoTarget = true;
     private Vector3 _previewDirection = Vector3.forward;
     private float _previewAngle;
+    private GameObject _effectPreviewInstance;
+    private EffectTransformTool _effectTransformTool = EffectTransformTool.Move;
 
     private static readonly Color AttackSphereColor = new(1f, 0.3f, 0.3f, 0.25f);
     private static readonly Color AttackSphereOutline = new(1f, 0.2f, 0.2f, 0.9f);
@@ -48,6 +50,7 @@ public class AttackDataEditor : Editor
     private void OnDisable()
     {
         SceneView.duringSceneGui -= HandleSceneGUI;
+        DestroyEffectPreview();
     }
 
     public override void OnInspectorGUI()
@@ -217,6 +220,7 @@ public class AttackDataEditor : Editor
             }
 
             DrawPreviewTargetField();
+            DrawEffectPreviewControls();
 
             if (_previewTarget == null)
             {
@@ -233,7 +237,7 @@ public class AttackDataEditor : Editor
     {
         EditorGUILayout.BeginHorizontal();
         EditorGUI.BeginChangeCheck();
-        _previewTarget = (GameObject)EditorGUILayout.ObjectField("Target", _previewTarget, typeof(GameObject), true);
+        _previewTarget = (GameObject)EditorGUILayout.ObjectField("Reference Object", _previewTarget, typeof(GameObject), true);
         if (EditorGUI.EndChangeCheck())
             _isAutoTarget = false;
 
@@ -243,6 +247,18 @@ public class AttackDataEditor : Editor
             TryAutoFindTarget();
         }
         EditorGUILayout.EndHorizontal();
+    }
+
+    private void DrawEffectPreviewControls()
+    {
+        var effect = GetSelectedEffect();
+        if (effect == null) return;
+
+        EditorGUILayout.Space(3);
+        EditorGUILayout.LabelField("Effect Preview", EditorStyles.miniBoldLabel);
+        EditorGUILayout.PropertyField(effect.FindPropertyRelative("_previewPrefab"), new GUIContent("Target Object"));
+        if (GUILayout.Button("Open Attack Effect Layout Editor", GUILayout.Height(26)))
+            AttackEffectLayoutWindow.Open((AttackData)target, _selectedVariantIndex);
     }
 
     private void DrawLegend()
@@ -293,6 +309,8 @@ public class AttackDataEditor : Editor
             int index = Mathf.Clamp(_selectedVariantIndex, 0, variants.arraySize - 1);
             DrawVariantPreview(pivot, dir, variants.GetArrayElementAtIndex(index));
         }
+
+        DrawEffectTransformHandle(pivot, dir);
     }
 
     private static void DrawVariantPreview(Vector3 pivot, Vector3 dir, SerializedProperty variant)
@@ -380,6 +398,95 @@ public class AttackDataEditor : Editor
     {
         if (_variants == null || _variants.arraySize == 0) return null;
         return _variants.GetArrayElementAtIndex(Mathf.Clamp(_selectedVariantIndex, 0, _variants.arraySize - 1));
+    }
+
+    private SerializedProperty GetSelectedEffect()
+    {
+        var variant = GetSelectedVariant();
+        var hit = variant == null ? null : GetFirstHit(variant);
+        return hit?.FindPropertyRelative("AttackEffect");
+    }
+
+    private void CreateEffectPreview(SerializedProperty effect)
+    {
+        DestroyEffectPreview();
+        var prefab = effect.FindPropertyRelative("_previewPrefab").objectReferenceValue as GameObject;
+        if (prefab == null) return;
+
+        _effectPreviewInstance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+        if (_effectPreviewInstance == null)
+            _effectPreviewInstance = Instantiate(prefab);
+
+        _effectPreviewInstance.hideFlags = HideFlags.HideAndDontSave;
+        SceneView.RepaintAll();
+    }
+
+    private void DestroyEffectPreview()
+    {
+        if (_effectPreviewInstance == null) return;
+        DestroyImmediate(_effectPreviewInstance);
+        _effectPreviewInstance = null;
+    }
+
+    private void DrawEffectTransformHandle(Vector3 pivot, Vector3 dir)
+    {
+        var effect = GetSelectedEffect();
+        if (effect == null || _effectPreviewInstance == null) return;
+
+        var localPosition = effect.FindPropertyRelative("_localPosition");
+        var localEuler = effect.FindPropertyRelative("_localEulerAngles");
+        var localScale = effect.FindPropertyRelative("_localScale");
+        Quaternion referenceRotation = Quaternion.LookRotation(dir, Vector3.up);
+        Vector3 worldPosition = pivot + referenceRotation * localPosition.vector3Value;
+        Quaternion worldRotation = referenceRotation * Quaternion.Euler(localEuler.vector3Value);
+        Vector3 fittedScale = CalculatePreviewScale(GetFirstHit(GetSelectedVariant()), effect);
+
+        _effectPreviewInstance.transform.SetPositionAndRotation(worldPosition, worldRotation);
+        _effectPreviewInstance.transform.localScale = fittedScale;
+
+        EditorGUI.BeginChangeCheck();
+        switch (_effectTransformTool)
+        {
+            case EffectTransformTool.Move:
+                worldPosition = Handles.PositionHandle(worldPosition, worldRotation);
+                break;
+            case EffectTransformTool.Rotate:
+                worldRotation = Handles.RotationHandle(worldRotation, worldPosition);
+                break;
+            case EffectTransformTool.Scale:
+                localScale.vector3Value = Handles.ScaleHandle(
+                    localScale.vector3Value,
+                    worldPosition,
+                    worldRotation,
+                    HandleUtility.GetHandleSize(worldPosition));
+                break;
+        }
+
+        if (!EditorGUI.EndChangeCheck()) return;
+
+        Undo.RecordObjects(targets, "Edit Attack Effect Transform");
+        if (_effectTransformTool == EffectTransformTool.Move)
+            localPosition.vector3Value = Quaternion.Inverse(referenceRotation) * (worldPosition - pivot);
+        else if (_effectTransformTool == EffectTransformTool.Rotate)
+            localEuler.vector3Value = (Quaternion.Inverse(referenceRotation) * worldRotation).eulerAngles;
+
+        serializedObject.ApplyModifiedProperties();
+        SceneView.RepaintAll();
+    }
+
+    private static Vector3 CalculatePreviewScale(SerializedProperty hit, SerializedProperty effect)
+    {
+        Vector3 scale = effect.FindPropertyRelative("_localScale").vector3Value;
+        if (!effect.FindPropertyRelative("_fitToAttackArea").boolValue) return scale;
+
+        float range = hit.FindPropertyRelative("AttackRange").floatValue;
+        float radius = hit.FindPropertyRelative("AttackRadius").floatValue;
+        Vector3 baseSize = effect.FindPropertyRelative("_baseSize").vector3Value;
+        Vector3 fit = new(
+            (range + radius) / Mathf.Max(0.01f, baseSize.x),
+            (radius * 2f) / Mathf.Max(0.01f, baseSize.y),
+            (radius * 2f) / Mathf.Max(0.01f, baseSize.z));
+        return Vector3.Scale(fit, scale);
     }
 
     private static SerializedProperty GetFirstHit(SerializedProperty variant)
@@ -491,6 +598,13 @@ public class AttackDataEditor : Editor
         texture.SetPixels(pixels);
         texture.Apply();
         return texture;
+    }
+
+    private enum EffectTransformTool
+    {
+        Move,
+        Rotate,
+        Scale,
     }
 }
 #endif

@@ -48,6 +48,15 @@ MonoBehaviour:
         _amplitude: 1
         _frequency: 2
         _duration: 0.15
+      AttackEffect:
+        _enabled: 0
+        _effectKey: WarriorPiercingEarth
+        _fitToAttackArea: 1
+        _baseSize: {x: 10, y: 2, z: 2}
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 90, z: 0}
+        _localScale: {x: 1, y: 1, z: 1}
+        _previewPrefab: {fileID: 0}
     _enableHoming: 1
     _homingRadius: 10
     _homingAngle: 45
