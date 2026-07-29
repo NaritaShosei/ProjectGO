@@ -31,6 +31,7 @@ public class WaveController
         if (_currentWave == null)
             return;
 
+        // 出現時刻になった予約済みEnemyをスポーンする
         ProcessPendingSpawns();
 
         // 全Group終了後に残敵が全滅したらWave完了
@@ -170,6 +171,7 @@ public class WaveController
     SpawnPoint spawnPoint,
         float baseTime)
     {
+        // 不正値による0除算や負の待機時間を防ぐ
         int setSize = Mathf.Max(1, group.SpawnSetSize);
         float setInterval = Mathf.Max(0f, group.SpawnSetInterval);
 
