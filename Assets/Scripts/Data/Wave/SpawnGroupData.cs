@@ -18,4 +18,15 @@ public class SpawnGroupData
 
     [Tooltip("使用するSpawnPointのKey。空文字の場合は自動選択")]
     public string SpawnPointKey = "";
+
+    [Tooltip("何体ずつ同時出現させるか")]
+    [SerializeField, Min(1)]
+    private int _spawnSetSize = 3;
+
+    [Tooltip("何体ずつ同時出現させるか")]
+    [SerializeField, Min(1)]
+    private float _spawnSetInterval = 0.5f;
+
+    public int SpawnSetSize => _spawnSetSize;
+    public float SpawnSetInterval => _spawnSetInterval;
 }

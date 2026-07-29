@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -29,6 +30,8 @@ public class WaveController
         // Wave未開始
         if (_currentWave == null)
             return;
+
+        ProcessPendingSpawns();
 
         // 全Group終了後に残敵が全滅したらWave完了
         if (_currentGroupIndex >= _currentWave.SpawnGroups.Count)
@@ -97,6 +100,23 @@ public class WaveController
 
     private int _groupSpawnCount;
 
+    private readonly Queue<SpawnRequest> _pendingSpawns = new Queue<SpawnRequest>();
+
+
+    private readonly struct SpawnRequest
+    {
+        public readonly string EnemyTypeKey;
+        public readonly Vector3 Position;
+        public readonly float SpawnTime;
+
+        public SpawnRequest(string enemyTypeKey, Vector3 position, float spawnTime)
+        {
+            EnemyTypeKey = enemyTypeKey;
+            Position = position;
+            SpawnTime = spawnTime;
+        }
+    }
+
     /// <summary>
     /// 現在のSpawnGroupを実行する
     /// スポーンポイントの選択と敵のスポーンを行う
@@ -115,6 +135,8 @@ public class WaveController
             return false;
         }
 
+        float now = Time.time;
+
         var group = _currentWave.SpawnGroups[_currentGroupIndex];
 
         SpawnPoint spawnPoint =
@@ -128,9 +150,9 @@ public class WaveController
             return false;
         }
 
-        SpawnGroup(group, spawnPoint);
+        ScheduleSpawnGroup(group, spawnPoint, now);
 
-        _groupStartTime = Time.time;
+        _groupStartTime = now;
 
         _groupKillCount = 0;
         _groupSpawnCount = GetTotalSpawnCount(group);
@@ -139,29 +161,53 @@ public class WaveController
     }
 
     /// <summary>
-    /// SpawnGroup内の敵をスポーン実行する
+    /// SpawnGroup内の敵のスポーンを予約する
     /// </summary>
     /// <param name="group"></param>
     /// <param name="spawnPoint"></param>
-    private void SpawnGroup(
+    private void ScheduleSpawnGroup(
     SpawnGroupData group,
-    SpawnPoint spawnPoint)
+    SpawnPoint spawnPoint,
+        float baseTime)
     {
+        _pendingSpawns.Clear();
+
+        // Group側の設定を使う。0以下が来てもゼロ除算しないよう防御的にMaxを噛ませる
+        int setSize = Mathf.Max(1, group.SpawnSetSize);
+        float setInterval = Mathf.Max(0f, group.SpawnSetInterval);
+
         int slotIndex = 0;
+        int flatIndex = 0;
 
         foreach (var entry in group.SpawnEntries)
         {
             for (int i = 0; i < entry.SpawnCount; i++)
             {
-                Vector3 position =
-                    spawnPoint.GetSlotPosition(slotIndex);
+                int setIndex = flatIndex / setSize;
+                float spawnTime = baseTime + setIndex * setInterval;
 
-                _enemyManager.Spawn(
-                    entry.EnemyTypeKey,
-                    position);
+                Vector3 position = spawnPoint.GetSlotPosition(slotIndex);
+
+                _pendingSpawns.Enqueue(
+                new SpawnRequest(entry.EnemyTypeKey, position, spawnTime));
 
                 slotIndex++;
+                flatIndex++;
             }
+        }
+    }
+
+    /// <summary>
+    /// 予約済みスポーンのうち、時刻が来たものを消化する
+    /// </summary>
+    private void ProcessPendingSpawns()
+    {
+
+        while (_pendingSpawns.Count > 0 && _pendingSpawns.Peek().SpawnTime <= Time.time)
+        {
+            var request = _pendingSpawns.Dequeue();
+
+            _enemyManager.Spawn(request.EnemyTypeKey,request.Position);
         }
     }
 
@@ -210,7 +256,9 @@ public class WaveController
 
             case WaveConditionType.AllDefeated:
                 {
-                    bool isAllDefeated = _groupKillCount >= _groupSpawnCount;
+                    //予約済みのスポーンが全て消化され、かつそのGroupの敵をすべて撃破した場合
+                    bool isAllSpawned = _pendingSpawns.Count == 0;
+                    bool isAllDefeated = isAllSpawned && _groupKillCount >= _groupSpawnCount;
 
                     return isAllDefeated;
                 }
@@ -247,6 +295,7 @@ public class WaveController
         _groupSpawnCount = 0;
         _waveKillCount = 0;
         IsComplete = false;
+        _pendingSpawns.Clear();
     }
 
     /// <summary>
