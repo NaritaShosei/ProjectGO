@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class ResultUIManager : MonoBehaviour
 {
-    public static ResultPanelView GetOrCreateView(ResultPanelView configuredView)
-    {
-        return configuredView != null ? configuredView : ResultPanelView.CreateRuntime();
-    }
+    public ResultPanelView View => _view;
+
+    [SerializeField] private ResultPanelView _view;
 }

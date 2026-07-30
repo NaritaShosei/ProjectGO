@@ -12,13 +12,18 @@ public class ResultState : ISequenceState
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        _viewInstance = ResultUIManager.GetOrCreateView(_view);
+        if (_view == null)
+        {
+            Debug.LogError("[ResultState] ResultPanelView is not assigned.");
+            return;
+        }
+
         _model = new ResultPanelModel(
             context.Result,
             _baseScore,
             _timeScorePerSecond,
             _levelScoreMultiplier);
-        _presenter = new ResultPanelPresenter(_viewInstance, _model);
+        _presenter = new ResultPanelPresenter(_view, _model);
         _presenter.Show();
 
         context.SequenceManager?.NotifyAllSequencesComplete();
@@ -28,10 +33,7 @@ public class ResultState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
-        if (_view == null && _viewInstance != null)
-            UnityEngine.Object.Destroy(_viewInstance.gameObject);
-
-        _viewInstance = null;
+        _view?.Hide();
         _model = null;
         _presenter = null;
     }
@@ -44,7 +46,6 @@ public class ResultState : ISequenceState
     [SerializeField, Min(0f)] private float _timeScorePerSecond = 100f;
     [SerializeField, Min(0)] private int _levelScoreMultiplier = 1000;
 
-    private ResultPanelView _viewInstance;
     private ResultPanelModel _model;
     private ResultPanelPresenter _presenter;
 }
