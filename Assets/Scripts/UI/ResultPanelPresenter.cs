@@ -1,72 +1,26 @@
-﻿using System;
+using UnityEngine;
 
-public class ResultPanelPresenter
+public sealed class ResultPanelPresenter
 {
-    public event Action OnShowOverview;
-    public event Action OnShowRecord;
-    public event Action OnShowBuild;
-    public event Action OnTransitionToTitle;
-
     public ResultPanelPresenter(ResultPanelView view, ResultPanelModel model)
     {
-        this._resultPanelView = view;
-        this._resultPanelModel = model;
-        // イベント登録
-        view.OnShowOverview += HandleShowOverview;
-        view.OnShowRecord += HandleShowRecord;
-        view.OnShowBuild += HandleShowBuild;
-        view.OnTransitionToTitle += HandleTransitionToTitle;
-        InitializeResultPanel();
+        _view = view;
+        _model = model;
     }
 
-    private ResultPanelView _resultPanelView;
-    private ResultPanelModel _resultPanelModel;
-
-    private const string TitleClearedText = "ゲームクリア";
-    private const string TitleGameOverText = "ゲームオーバー";
-
-    private void InitializeResultPanel()
+    public void Show()
     {
-        // Modelから結果データを取得してUIに反映
-        var resultData = _resultPanelModel.GetResultData();
+        int totalCentiseconds = Mathf.RoundToInt(_model.BossClearTime * 100f);
+        int minutes = totalCentiseconds / 6000;
+        int seconds = totalCentiseconds / 100 % 60;
+        int centiseconds = totalCentiseconds % 100;
 
-        // クリアしたか否か
-        _resultPanelView.SetTitleText(resultData.IsCleared ? TitleClearedText : TitleGameOverText);
-        _resultPanelView.SetClearWaveCount($"突破ウェーブ数: {resultData.ClearWaveCount.ToString()}");
-        // 戦績
-        _resultPanelView.SetKillCount($"撃破数: {resultData.KillCount.ToString()}");
-        _resultPanelView.SetComboCount($"最大コンボ数: {resultData.ComboCount.ToString()}");
-        _resultPanelView.SetDamageCount($"累計与ダメージ: {resultData.DamageCount.ToString()}");
-        _resultPanelView.SetTakeDamageCount($"累計被ダメージ: {resultData.TakeDamageCount.ToString()}");
-        _resultPanelView.SetHealingCount($"累計回復量: {resultData.HealingCount.ToString()}");
-        // ビルド構成
-        _resultPanelView.SetBuildBalance(resultData.BuildBalanceText);
-        _resultPanelView.SetSkillList(resultData.SkillListText);
-        _resultPanelView.SetFinalStats(resultData.FinalStatsText);
-
-        _resultPanelView.ShowOverviewPanel();
+        _view.SetBossClearTime($"{minutes:00}:{seconds:00}.{centiseconds:00}");
+        _view.SetScore(_model.Score.ToString("N0"));
+        _view.SetLevel($"Lv. {_model.Level}");
+        _view.Show();
     }
 
-    private void HandleShowOverview()
-    {
-        _resultPanelView.ShowOverviewPanel();
-        OnShowOverview?.Invoke();
-    }
-
-    private void HandleShowRecord()
-    {
-        _resultPanelView.ShowRecordPanel();
-        OnShowRecord?.Invoke();
-    }
-
-    private void HandleShowBuild()
-    {
-        _resultPanelView.ShowBuildPanel();
-        OnShowBuild?.Invoke();
-    }
-
-    private void HandleTransitionToTitle()
-    {
-        OnTransitionToTitle?.Invoke();
-    }
+    private readonly ResultPanelView _view;
+    private readonly ResultPanelModel _model;
 }

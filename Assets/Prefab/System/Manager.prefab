@@ -807,7 +807,11 @@ MonoBehaviour:
         _nextSequence: 5
     - rid: 6731506274227978452
       type: {class: ResultState, ns: , asm: Assembly-CSharp}
-      data: 
+      data:
+        _view: {fileID: 0}
+        _baseScore: 10000
+        _timeScorePerSecond: 100
+        _levelScoreMultiplier: 1000
     - rid: 6731506274227978453
       type: {class: GameOverState, ns: , asm: Assembly-CSharp}
       data:

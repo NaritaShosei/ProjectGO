@@ -70,11 +70,12 @@ public class BossBattleState : ISequenceState
         Cursor.visible = true;
 
         // 結果の保存（仮実装。実際はスコア計算などを入れる）
-        int killCount = 0;
-        int level = 0;
-        float clearTime = _bossBattleTimeLimit - _bossBattleTimer.CurrentTime;
-
-        context.Result = new SequenceStateContext.ResultData(killCount, level, clearTime);
+        if (context.IsBossDefeated)
+        {
+            int level = context.EXPManager != null ? context.EXPManager.CurrentLevel : 1;
+            float clearTime = Mathf.Max(0f, _bossBattleTimeLimit - _bossBattleTimer.CurrentTime);
+            context.Result = new ResultData(clearTime, _bossBattleTimeLimit, level);
+        }
 
         _context = null;
     }

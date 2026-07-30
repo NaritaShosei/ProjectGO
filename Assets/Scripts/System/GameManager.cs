@@ -13,12 +13,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerEffectInitializer _playerEffectInitializer;
     [SerializeField] private EXPItemManager _expManager;
 
-    private SceneTransitionManager _sceneTransitionManager;
     private HitStopManager _hitStopManager;
 
     private void Awake()
     {
-        // ヒットストップマネージャーを初期化してサービスロケーターに登録
         _hitStopManager = new HitStopManager();
     }
 
@@ -36,16 +34,6 @@ public class GameManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_sequenceManager != null)
-        {
-            _sequenceManager.OnAllSequencesComplete -= HandleGameComplete;
-        }
-
-        if (_player != null)
-        {
-            _player.OnDead -= HandleGameComplete;
-        }
-
         _hitStopManager?.Dispose();
     }
 
@@ -78,8 +66,6 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("[GameManager] IModeController is missing on Player.", this);
         }
-
-        _player.OnDead += HandleGameComplete;
     }
 
     private void InitCameraManager()
@@ -87,13 +73,9 @@ public class GameManager : MonoBehaviour
         if (!CheckReference(_player, nameof(_player))) return;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
-        {
             cameraManager.Init(_player);
-        }
         else
-        {
             Debug.LogError("[GameManager] CameraManager is missing.", this);
-        }
     }
 
     private void InitEnemyManager()
@@ -118,18 +100,6 @@ public class GameManager : MonoBehaviour
         }
 
         _sequenceManager.Init(_enemyManager, _skillManager, input, _player);
-
-        if (ServiceLocator.TryGet(out SceneTransitionManager sceneTransitionManager))
-        {
-            _sceneTransitionManager = sceneTransitionManager;
-        }
-        else
-        {
-            Debug.LogError("[GameManager] SceneTransitionManager is missing.", this);
-        }
-
-        // SequenceManagerのイベントを購読
-        _sequenceManager.OnAllSequencesComplete += HandleGameComplete;
     }
 
     private void InitUI()
@@ -169,27 +139,8 @@ public class GameManager : MonoBehaviour
     private void StartGame()
     {
         if (_sequenceManager != null)
-        {
             _sequenceManager.StartSequence();
-        }
         else
-        {
             Debug.LogError("[GameManager] SequenceManager is missing.", this);
-        }
-    }
-
-    private async void HandleGameComplete()
-    {
-        Debug.Log("ゲーム完了。リザルトへ遷移します");
-
-        // リザルトデータの準備などを行う場合はここで
-
-        if (_sceneTransitionManager == null)
-        {
-            Debug.LogError("[GameManager] SceneTransitionManager is missing.", this);
-            return;
-        }
-
-        await _sceneTransitionManager.TransitionToResult();
     }
 }
