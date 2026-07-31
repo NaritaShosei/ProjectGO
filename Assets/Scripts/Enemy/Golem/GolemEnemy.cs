@@ -13,6 +13,8 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     /// </summary>
     public override void Init()
     {
+        if (IsInitialized) return;
+
         base.Init();
 
         _blinkEffect = new BlinkEffect(_bodyRenderer,_blinkSpeed);
