@@ -38,6 +38,7 @@ public sealed class DownCondition : IEnemyCondition
             golem.RecoverArmor();
         }
     }
+    public void RequestFinish() { }
 
     private float _time;
 }

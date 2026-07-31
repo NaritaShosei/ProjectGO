@@ -62,6 +62,20 @@ public sealed class EnemyConditionQueue
     }
 
     /// <summary>
+    /// 指定したConditionを終了状態にする
+    /// 実際のOnExit()と削除は次回Tickで行う
+    /// </summary>
+    public void Finish(ConditionType type)
+    {
+        if (!_active.TryGetValue(type, out var condition))
+        {
+            return;
+        }
+
+        condition.RequestFinish();
+    }
+
+    /// <summary>
     /// アクティブなConditionを毎フレーム進め、終了したものを解除する
     /// 先頭でpendingを処理し、OnEnterと初回Tickを同一フレームで実行する
     /// </summary>

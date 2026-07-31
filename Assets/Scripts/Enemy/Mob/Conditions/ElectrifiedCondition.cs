@@ -66,6 +66,8 @@ public sealed class ElectrifiedCondition : IEnemyCondition
 #endif
     }
 
+    public void RequestFinish() { }
+
     private readonly float _duration;
     private readonly bool _enemyIsBoss;
 

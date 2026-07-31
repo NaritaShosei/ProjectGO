@@ -2,12 +2,11 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
-using static EnemyServices;
 
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEnemySpawnState
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnDamaged;
@@ -46,6 +45,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     public bool IsLockable => !IsDead;
 
+    public bool CanTakeDamage { get; private set; } = true;
+    public bool CanReceiveCondition { get; private set; } = true;
+
+    public bool IsInitialized { get; private set; }
+
     /// <summary>
     /// 所属Poolのキー_返却の参照に使用
     /// </summary>
@@ -65,7 +69,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     /// <summary>
     /// 初期化する
     /// </summary>
-    public virtual void Init() { }
+    public virtual void Init()
+    {
+        
+        if (IsInitialized) return;
+
+        IsInitialized = true;
+    }
 
     /// <summary>
     /// ノックバックの力を方向ベクトルとして直接座標に加算する
@@ -85,7 +95,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     public virtual void TakeDamage(DamageContext context)
     {
-        if (_isDead) { return; }
+        if (_isDead || !CanTakeDamage) { return; }
 
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
 
@@ -223,6 +233,12 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _poolKey = key;
     }
 
+    public void SetSpawnState(bool active)
+    {
+        CanTakeDamage = !active;
+        CanReceiveCondition = !active;
+    }
+
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] protected Animator _animator;
@@ -241,6 +257,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     [SerializeField]private EnemyType _enemyType;
 
+    [Header("演出関係")]
+    [SerializeField,Tooltip("スポーンエフェクトを適応の可否")]private bool _useSpawnEffect = true;
+    [SerializeField,Tooltip("スポーンエフェクトのKey")] private string _spawnEffectKey = "スポーンエフェクト";
+
     private float _timeScale = 1f;
 
     protected EnemyDefenseContext _defenceContext;
@@ -257,6 +277,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
     // 死亡アニメーション終了フラグ
     private bool _deadAnimationEnded;
 
+    //スポーンのアニメーション
+    private bool _useSpawnAnimation = true;
+
     // 最後に受けたダメージの方向（死亡ノックバック用）
     protected Vector3 _lastHitDirection;
 
@@ -268,6 +291,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
 
     //Poolの所属を識別するためのキー
     private string _poolKey;
+
 
     protected virtual void Awake()
     {
@@ -293,11 +317,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _enemyAnimator = new EnemyAnimator(_animator, _animationEventReceiver);
         // 死亡アニメーション終了イベントを購読する
         _enemyAnimator.OnDeadEnd += HandleDeadEnd;
+        _enemyAnimator.OnSpawnEffect += HandleSpawnEffect;
 
         if (_animationEventReceiver != null)
         {
             _animationEventReceiver.OnAttackEffect += HandleAttackEffect;
         }
+
+        _enemyAnimator.OnSpawnEnd += HandleSpawnEnd;
         _soundHandler?.Init(this);
     }
 
@@ -391,6 +418,17 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         OnDownSE?.Invoke();
     }
 
+    protected virtual void HandleSpawnEffect()
+    {
+        if (!_useSpawnEffect) return;
+        if (!ServiceLocator.TryGet(out EffectManager effectManager)) return;
+
+        Debug.Log("スポーンエフェクト発火");
+        effectManager.PlayEffect(
+            _spawnEffectKey,
+            transform.position);
+    }
+
     /// <summary>
     /// スロット解放通知を受けてスロットの再取得を試みる
     /// すでに取得済みの場合は何もしない
@@ -434,7 +472,21 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable
         _animator.Play("Idle", 0, 0f);
         _animator.Update(0f);
 
+        _useSpawnAnimation = true;
         // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+    }
+
+    public virtual void PlaySpawnAnimation()
+    {
+        if (_useSpawnAnimation)
+        {
+            _animator.Play("Spawn", 0, 0f);
+        }
+        _useSpawnAnimation = false;
+    }
+
+    public virtual void HandleSpawnEnd()
+    {
     }
 
     /// <summary>

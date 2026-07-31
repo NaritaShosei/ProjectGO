@@ -44,6 +44,14 @@ public sealed class EnemyConditionController : IEnemyConditionController
         => _active.Has(type);
 
     /// <summary>
+    /// 指定したConditionを終了する
+    /// </summary>
+    public void FinishCondition(ConditionType type)
+    {
+        _active.Finish(type);
+    }
+
+    /// <summary>
     /// ObjectPoolから再利用する際にすべてのConditionを強制終了してクリアする
     /// </summary>
     public void Clear()

@@ -33,6 +33,11 @@ public interface IEnemyCondition
     /// 終了したかの判定
     /// </summary>
     bool IsFinished { get; }
+
+    /// <summary>
+    /// Conditionに終了要求を出す
+    /// </summary>
+    void RequestFinish();
 }
 
 public enum ConditionType : int
@@ -41,5 +46,6 @@ public enum ConditionType : int
     Electrified = 2,
     Down = 3,
     Dead = 4,
+    Spawn = 5,
     // 拡張できるようにEnum
 }
