@@ -24,19 +24,14 @@ public class MobEnemy : Enemy, IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
-    public bool IsInitialized { get; private set; }
+ 
 
     public override void Init()
     {
+        //Init()が毎回呼ばれる形になっているので一回初期化したらリターン
         if (IsInitialized) return;
 
-        if (_services.AttackerSlot == null)
-        {
-            Debug.LogError($"{nameof(MobEnemy)}.Init: _services が未注入です。InjectServices() を先に呼んでください。");
-            return; // IsInitialized はtrueにしない
-        }
-
-        IsInitialized = true;
+        base.Init();
 
         _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);

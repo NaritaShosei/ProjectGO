@@ -48,6 +48,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     public bool CanTakeDamage { get; private set; } = true;
     public bool CanReceiveCondition { get; private set; } = true;
 
+    public bool IsInitialized { get; private set; }
+
     /// <summary>
     /// 所属Poolのキー_返却の参照に使用
     /// </summary>
@@ -67,7 +69,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// <summary>
     /// 初期化する
     /// </summary>
-    public virtual void Init() { }
+    public virtual void Init()
+    {
+        
+        if (IsInitialized) return;
+
+        IsInitialized = true;
+    }
 
     /// <summary>
     /// ノックバックの力を方向ベクトルとして直接座標に加算する
