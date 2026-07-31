@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class EXPManager : MonoBehaviour
 {
+    public int CurrentLevel => _currentLevel;
+
     /// <summary>
     /// レベルアップイベント。レベルが上がるたびに、現在のレベルを引数として発火する。
     /// </summary>
