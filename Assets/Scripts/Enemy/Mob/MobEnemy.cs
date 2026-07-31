@@ -24,8 +24,20 @@ public class MobEnemy : Enemy, IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
+    public bool IsInitialized { get; private set; }
+
     public override void Init()
     {
+        if (IsInitialized) return;
+
+        if (_services.AttackerSlot == null)
+        {
+            Debug.LogError($"{nameof(MobEnemy)}.Init: _services が未注入です。InjectServices() を先に呼んでください。");
+            return; // IsInitialized はtrueにしない
+        }
+
+        IsInitialized = true;
+
         _context = new EnemyRuntimeContext();
         _runner = new EnemyBehaviourRunner(this);
         _state = new EnemyStateContext();
@@ -39,17 +51,11 @@ public class MobEnemy : Enemy, IFormationParticipant
         // 鎧登録　データがなければ裸
         if (_armor != null)
         {
-            _defenceContext.EnemyType = EnemyDefenceType.Armor;
             _armor.Init(this);
             _armor.OnBroken += BreakArmor;
             // Init()後に発火することで購読者がOnHealthChangedを安全に受け取れる
-            InvokeArmorRegistered();
-        }
-        else
-        {
-            _defenceContext.EnemyType = EnemyDefenceType.Flesh;
-        }
 
+        }
         //一回だけで大丈夫な初期化処理と、スポーン毎に初期化が必要な処理が混ざってる？
     }
 
@@ -60,24 +66,9 @@ public class MobEnemy : Enemy, IFormationParticipant
     {
         base.ReInitialize(spawnPosition);
 
-        //鎧の初期化
-        if (_armor != null)
-        {
-            _armor.gameObject.SetActive(true);
-            _defenceContext.EnemyType = EnemyDefenceType.Armor;
+        ResetArmor();
 
-            _armor.OnBroken -= BreakArmor;
-            _armor.OnBroken += BreakArmor;
-        }
-
-        // RuntimeContextをリセットする
-        _context?.Reset();
-
-        // Conditionをすべてクリアする
-        _conditionController?.Clear();
-
-        // BehaviourRunnerを初期状態に戻す
-        _runner?.Reset();
+        ResetRuntime();
 
         _conditionController.ApplyImmediate(new SpawnCondition());
 
@@ -287,10 +278,6 @@ public class MobEnemy : Enemy, IFormationParticipant
             _attack.Init(initCtx);
             _runner.Register(_attack);
 
-            // スポーン時にスロット取得を試みる
-            // 満杯の場合は OnSlotReleased イベントで再試行される
-            _services.AttackerSlot.TryAcquire(Id, 1);
-
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
             // distanceProfileがない場合はBarkも登録しない
             if (_distanceProfile != null)
@@ -324,6 +311,47 @@ public class MobEnemy : Enemy, IFormationParticipant
         var idle = new IdleBehaviour();
         idle.Init(initCtx);
         _runner.Register(idle);
+    }
+
+    /// <summary>
+    /// アーマーの初期化
+    /// </summary>
+    private void ResetArmor()
+    {
+        //鎧の初期化
+        if (_armor != null)
+        {
+            _armor.gameObject.SetActive(true);
+            _defenceContext.EnemyType = EnemyDefenceType.Armor;
+
+            _armor.OnBroken -= BreakArmor;
+            _armor.OnBroken += BreakArmor;
+            InvokeArmorRegistered();
+        }
+        else
+        {
+            _defenceContext.EnemyType = EnemyDefenceType.Flesh;
+        }
+    }
+
+    private void ResetRuntime()
+    {
+        // RuntimeContextをリセットする
+        _context?.Reset();
+
+        // Conditionをすべてクリアする
+        _conditionController?.Clear();
+
+        // BehaviourRunnerを初期状態に戻す
+        _runner?.Reset();
+
+        // スロット取得はスポーン毎に必要（Init時ではなくReInitialize毎に試行する）
+        if (_attack != null && _services.AttackerSlot != null)
+        {
+            // スポーン時にスロット取得を試みる
+            // 満杯の場合は OnSlotReleased イベントで再試行される
+            _services.AttackerSlot.TryAcquire(Id, 1);
+        }
     }
 
     /// <summary>
