@@ -80,6 +80,8 @@ public class EnemyManager : MonoBehaviour
                 _playerInformationService
             ));
 
+            // Instantiateによる直接生成はReInitializeを通らないため、ここで壁との重なりを解消する。
+            // 補正後の座標は下のSpatialHashGrid登録にも使用される。
             if (enemy is Enemy movableEnemy)
                 movableEnemy.ResolveSpawnPosition();
 
@@ -95,6 +97,7 @@ public class EnemyManager : MonoBehaviour
             enemy.Init();
 
             // SpatialHashGridに初期位置を登録する
+            // 指定されたposではなく、壁から押し戻された後の実座標を登録する。
             _spatialHashGrid.Register(enemy, enemy.Self.position);
 
             _enemies.Add(enemy);

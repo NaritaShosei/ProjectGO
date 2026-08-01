@@ -82,6 +82,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// </summary>
     public void AddKnockbackForce(Vector3 direction)
     {
+        // ノックバックも通常移動と同じ入口を通し、高速で壁を越えるのを防ぐ。
         Move(direction);
     }
 
@@ -92,21 +93,27 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     {
         if (_movementCollider != null && _services.WallAvoidanceService != null)
         {
+            // 前フレームの数値誤差などですでに壁へ食い込んでいると、
+            // BoxCastが正しいヒット距離を返せないため、先に壁の外へ戻す。
             transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
                 _movementCollider,
                 transform.position
             );
 
+            // このフレームで進みたい距離を、壁の直前までに制限する。
+            // 上下方向はノックバックの放物線に必要なので、水平移動だけが制限される。
             displacement = _services.WallAvoidanceService.ClampMovement(
                 _movementCollider.bounds,
                 displacement
             );
         }
 
+        // 壁判定後に確定した安全な移動量を適用する。
         transform.position += displacement;
 
         if (_movementCollider != null && _services.WallAvoidanceService != null)
         {
+            // 薄い壁や角、浮動小数点誤差によって移動後に重なりが残った場合の最終防御。
             transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
                 _movementCollider,
                 transform.position
@@ -493,6 +500,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// </summary>
     public virtual void ReInitialize(Vector3 spawnPosition)
     {
+        // まず指定された座標へ配置し、直後に壁との重なりを解消する。
+        // CircleSpawnなどが壁の内側を指定しても、そのまま行動を開始させない。
         transform.position = spawnPosition;
         ResolveSpawnPosition();
         _isDead = false;
@@ -510,6 +519,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
     }
 
+    /// <summary>
+    /// 現在位置がWallレイヤーのコライダーと重なっていれば、壁の外へ押し戻す。
+    /// スポーン直後と、移動前後の貫通補正から使用する。
+    /// </summary>
     public void ResolveSpawnPosition()
     {
         if (_movementCollider == null || _services.WallAvoidanceService == null)
