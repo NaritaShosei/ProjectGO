@@ -35,5 +35,45 @@ public sealed class WallAvoidanceService : IWallAvoidanceService
         return Vector3.zero;
     }
 
+    /// <summary>
+    /// 移動先までコライダーをキャストし、壁を越えない移動量に制限する。
+    /// 壁回避ベクトルだけでは防げない高速移動やノックバックの壁抜けにも適用する。
+    /// </summary>
+    public Vector3 ClampMovement(Bounds bounds, Vector3 displacement)
+    {
+        Vector3 horizontalDisplacement = new Vector3(displacement.x, 0f, displacement.z);
+        if (_wallMask == 0 || horizontalDisplacement.sqrMagnitude <= Mathf.Epsilon)
+            return displacement;
+
+        float distance = horizontalDisplacement.magnitude;
+        Vector3 halfExtents = bounds.extents - Vector3.one * _skinWidth;
+        halfExtents.x = Mathf.Max(halfExtents.x, _minimumExtent);
+        halfExtents.y = Mathf.Max(halfExtents.y, _minimumExtent);
+        halfExtents.z = Mathf.Max(halfExtents.z, _minimumExtent);
+
+        if (!Physics.BoxCast(
+                bounds.center,
+                halfExtents,
+                horizontalDisplacement / distance,
+                out RaycastHit hit,
+                Quaternion.identity,
+                distance + _skinWidth,
+                _wallMask,
+                QueryTriggerInteraction.Ignore))
+        {
+            return displacement;
+        }
+
+        float allowedDistance = Mathf.Max(0f, hit.distance - _skinWidth);
+        float movementRatio = allowedDistance / distance;
+        return new Vector3(
+            horizontalDisplacement.x * movementRatio,
+            displacement.y,
+            horizontalDisplacement.z * movementRatio
+        );
+    }
+
     private readonly LayerMask _wallMask;
+    private const float _skinWidth = 0.02f;
+    private const float _minimumExtent = 0.01f;
 }

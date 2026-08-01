@@ -82,7 +82,23 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// </summary>
     public void AddKnockbackForce(Vector3 direction)
     {
-        transform.position += direction;
+        Move(direction);
+    }
+
+    /// <summary>
+    /// 壁との衝突を考慮して敵を移動させる。
+    /// </summary>
+    public void Move(Vector3 displacement)
+    {
+        if (_movementCollider != null && _services.WallAvoidanceService != null)
+        {
+            displacement = _services.WallAvoidanceService.ClampMovement(
+                _movementCollider.bounds,
+                displacement
+            );
+        }
+
+        transform.position += displacement;
     }
 
     /// <summary>
@@ -241,6 +257,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
+    [SerializeField] private Collider _movementCollider;
     [SerializeField] protected Animator _animator;
 
     // Turn用プロファイル（派生クラスのInspectorから設定する）
@@ -295,6 +312,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
     protected virtual void Awake()
     {
+        if (_movementCollider == null)
+            _movementCollider = GetComponent<Collider>();
+
         // OnDead時の登録
         OnDead += HandleDead;
 

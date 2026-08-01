@@ -138,8 +138,12 @@ public class RoamBehaviour : IEnemyBehaviour
             _onRoamDirection?.Invoke(dir.normalized);
         }
 
-        Vector3 newPos = _self.position + dir.normalized * _data.RoamSpeed * deltaTime;
-        _self.position = newPos;
+        Vector3 displacement = dir.normalized * _data.RoamSpeed * deltaTime;
+        if (_enemy is Enemy movableEnemy)
+            movableEnemy.Move(displacement);
+        else
+            _self.position += displacement;
+        Vector3 newPos = _self.position;
 
         if (_spatialHashGrid != null)
         {
