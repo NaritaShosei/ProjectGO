@@ -92,6 +92,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     {
         if (_movementCollider != null && _services.WallAvoidanceService != null)
         {
+            transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
+                _movementCollider,
+                transform.position
+            );
+
             displacement = _services.WallAvoidanceService.ClampMovement(
                 _movementCollider.bounds,
                 displacement
@@ -99,6 +104,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         }
 
         transform.position += displacement;
+
+        if (_movementCollider != null && _services.WallAvoidanceService != null)
+        {
+            transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
+                _movementCollider,
+                transform.position
+            );
+        }
     }
 
     /// <summary>
@@ -481,6 +494,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     public virtual void ReInitialize(Vector3 spawnPosition)
     {
         transform.position = spawnPosition;
+        ResolveSpawnPosition();
         _isDead = false;
         _deadAnimationEnded = false;
         _timeScale = 1f;
@@ -494,6 +508,17 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
         _useSpawnAnimation = true;
         // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+    }
+
+    public void ResolveSpawnPosition()
+    {
+        if (_movementCollider == null || _services.WallAvoidanceService == null)
+            return;
+
+        transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
+            _movementCollider,
+            transform.position
+        );
     }
 
     public virtual void PlaySpawnAnimation()

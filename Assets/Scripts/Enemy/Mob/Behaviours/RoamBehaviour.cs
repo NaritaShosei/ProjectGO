@@ -145,9 +145,17 @@ public class RoamBehaviour : IEnemyBehaviour
             _self.position += displacement;
         Vector3 newPos = _self.position;
 
+        Vector3 actualMovement = newPos - oldPos;
+        actualMovement.y = 0f;
+
         if (_spatialHashGrid != null)
         {
             _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
+        }
+
+        if (actualMovement.sqrMagnitude < displacement.sqrMagnitude * _blockedMovementRatioSqr)
+        {
+            PickTarget();
         }
     }
 
@@ -170,6 +178,7 @@ public class RoamBehaviour : IEnemyBehaviour
 
     // 目標地点への到達判定しきい値
     private const float _arrivalThreshold = 0.3f;
+    private const float _blockedMovementRatioSqr = 0.01f;
     // 初期待機のランダム上限（スポーン同期ずらし用）
     private const float _initialDelayMax = 0.5f;
 

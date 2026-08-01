@@ -80,6 +80,9 @@ public class EnemyManager : MonoBehaviour
                 _playerInformationService
             ));
 
+            if (enemy is Enemy movableEnemy)
+                movableEnemy.ResolveSpawnPosition();
+
             // FormationSystemへの登録はInit前に行う
             // Init内のTryAcquireが呼ばれる時点でIsVanguardが確定している必要があるため
             if (_formationSystem != null && obj.TryGetComponent(out IFormationParticipant participant))
@@ -92,7 +95,7 @@ public class EnemyManager : MonoBehaviour
             enemy.Init();
 
             // SpatialHashGridに初期位置を登録する
-            _spatialHashGrid.Register(enemy, pos);
+            _spatialHashGrid.Register(enemy, enemy.Self.position);
 
             _enemies.Add(enemy);
             _lockOnTargets.Add(enemy);

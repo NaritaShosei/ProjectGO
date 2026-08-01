@@ -73,7 +73,60 @@ public sealed class WallAvoidanceService : IWallAvoidanceService
         );
     }
 
+    /// <summary>
+    /// スポーン位置で壁と重なっている場合、最短方向へ押し戻して貫通を解消する。
+    /// </summary>
+    public Vector3 ResolveSpawnPosition(Collider collider, Vector3 position)
+    {
+        if (_wallMask == 0 || collider == null)
+            return position;
+
+        Bounds bounds = collider.bounds;
+        Vector3 colliderPosition = collider.transform.position;
+
+        for (int iteration = 0; iteration < _maxSpawnResolveIterations; iteration++)
+        {
+            Vector3 offset = position - colliderPosition;
+            int overlapCount = Physics.OverlapBoxNonAlloc(
+                bounds.center + offset,
+                bounds.extents,
+                _overlapBuffer,
+                Quaternion.identity,
+                _wallMask,
+                QueryTriggerInteraction.Ignore
+            );
+
+            bool resolvedAny = false;
+            for (int i = 0; i < overlapCount; i++)
+            {
+                Collider wall = _overlapBuffer[i];
+                if (!Physics.ComputePenetration(
+                        collider,
+                        colliderPosition + offset,
+                        collider.transform.rotation,
+                        wall,
+                        wall.transform.position,
+                        wall.transform.rotation,
+                        out Vector3 direction,
+                        out float distance))
+                {
+                    continue;
+                }
+
+                position += direction * (distance + _skinWidth);
+                resolvedAny = true;
+            }
+
+            if (!resolvedAny)
+                break;
+        }
+
+        return position;
+    }
+
     private readonly LayerMask _wallMask;
+    private readonly Collider[] _overlapBuffer = new Collider[32];
     private const float _skinWidth = 0.02f;
     private const float _minimumExtent = 0.01f;
+    private const int _maxSpawnResolveIterations = 8;
 }

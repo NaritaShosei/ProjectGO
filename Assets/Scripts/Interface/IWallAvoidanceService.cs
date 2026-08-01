@@ -18,4 +18,6 @@ public interface IWallAvoidanceService
     );
 
     Vector3 ClampMovement(Bounds bounds, Vector3 displacement);
+
+    Vector3 ResolveSpawnPosition(Collider collider, Vector3 position);
 }
