@@ -16,4 +16,6 @@ public interface IWallAvoidanceService
         float detectDistance,
         float strength
     );
+
+    Vector3 ClampMovement(Bounds bounds, Vector3 displacement);
 }
