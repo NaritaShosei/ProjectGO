@@ -10,16 +10,12 @@ public sealed class GameOverView : MonoBehaviour, IGameOverView
     public event Action OnHidden;
     public event Action TitleRequested;
 
-    [SerializeField] private CanvasGroup _canvasGroup;
-    [SerializeField] private TMP_Text _messageText;
-    [SerializeField] private Button _titleButton;
-
     public void Show(string message, GameOverReason reason)
     {
         if (_messageText != null) _messageText.text = message;
         SetVisible(true);
 
-        // Connect death animation and camera direction to these reason-specific hooks.
+        // 死亡アニメーションやカメラ演出は、ゲームオーバー理由別のイベント購読側で再生する。
         switch (reason)
         {
             case GameOverReason.PlayerHealthDepleted:
@@ -36,6 +32,10 @@ public sealed class GameOverView : MonoBehaviour, IGameOverView
         SetVisible(false);
         OnHidden?.Invoke();
     }
+
+    [SerializeField] private CanvasGroup _canvasGroup;
+    [SerializeField] private TMP_Text _messageText;
+    [SerializeField] private Button _titleButton;
 
     private void Awake()
     {
@@ -65,5 +65,4 @@ public sealed class GameOverView : MonoBehaviour, IGameOverView
         _canvasGroup.interactable = visible;
         _canvasGroup.blocksRaycasts = visible;
     }
-
 }

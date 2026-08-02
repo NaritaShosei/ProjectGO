@@ -17,9 +17,9 @@ public sealed class GameOverPresenter : IDisposable
         _view.Hide();
     }
 
-    private void HandleTitleRequested() => _onTitleRequested.Invoke();
-
     private readonly GameOverModel _model;
     private readonly IGameOverView _view;
     private readonly Action _onTitleRequested;
+
+    private void HandleTitleRequested() => _onTitleRequested.Invoke();
 }
