@@ -26,6 +26,9 @@ public class SequenceStateContext
     /// <summary>制限時間が切れたか</summary>
     public bool IsTimeUp;
 
+    /// <summary>ゲームオーバーになった原因。</summary>
+    public GameOverReason GameOverReason;
+
     /// <summary>ボスが撃破されたか</summary>
     public bool IsBossDefeated;
 
