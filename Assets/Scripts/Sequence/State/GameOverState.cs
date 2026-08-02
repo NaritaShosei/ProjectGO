@@ -17,6 +17,7 @@ public class GameOverState : ISequenceState
     {
         context.InputHandler?.EnableInput(false);
 
+        _isCleanedUp = false;
         _isDisplayTimeEnded = false;
         var reason = context.GameOverReason == GameOverReason.None
             ? GameOverReason.PlayerHealthDepleted
@@ -60,10 +61,12 @@ public class GameOverState : ISequenceState
 
         if (context.IsTitleRequested || _isDisplayTimeEnded)
         {
+            if (!TransitionToTitleScene())
+                return null;
+
             context.IsTitleRequested = false;
             _isDisplayTimeEnded = false;
-
-            TransitionToTitleScene();
+            Cleanup(context);
             return null;
         }
 
@@ -72,15 +75,7 @@ public class GameOverState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
-        _gameOverTimer.StopTimer();
-        _gameOverTimer.OnTimeEnded -= OnGameOverTimeUp;
-
-        _gameOverTimerPresenter?.Dispose();
-        _gameOverTimerPresenter = null;
-
-        _gameOverPresenter?.Dispose();
-        _gameOverPresenter = null;
-        context.GameOverReason = GameOverReason.None;
+        Cleanup(context);
     }
 
     [Header("ゲームオーバー設定")]
@@ -96,24 +91,47 @@ public class GameOverState : ISequenceState
     private CountDownTimerPresenter _gameOverTimerPresenter;
     private GameOverPresenter _gameOverPresenter;
     private bool _isDisplayTimeEnded;
+    private bool _isCleanedUp;
 
     private void OnGameOverTimeUp() => _isDisplayTimeEnded = true;
 
-    private void TransitionToTitleScene()
+    private bool TransitionToTitleScene()
     {
         if (string.IsNullOrWhiteSpace(_titleSceneName))
         {
             Debug.LogError("[GameOverState] 遷移先シーン名が設定されていません。");
-            return;
+            return false;
         }
 
         if (!ServiceLocator.TryGet(out SceneTransitionManager transitionManager))
         {
             Debug.LogError("[GameOverState] SceneTransitionManagerが見つかりません。");
-            return;
+            return false;
         }
 
         transitionManager.TransitionToScene(_titleSceneName).Forget();
+        return true;
+    }
+
+    private void Cleanup(SequenceStateContext context)
+    {
+        if (_isCleanedUp)
+            return;
+
+        _isCleanedUp = true;
+
+        if (_gameOverTimer != null)
+        {
+            _gameOverTimer.StopTimer();
+            _gameOverTimer.OnTimeEnded -= OnGameOverTimeUp;
+        }
+
+        _gameOverTimerPresenter?.Dispose();
+        _gameOverTimerPresenter = null;
+
+        _gameOverPresenter?.Dispose();
+        _gameOverPresenter = null;
+        context.GameOverReason = GameOverReason.None;
     }
 
     private void RestartGame(SequenceStateContext context)
