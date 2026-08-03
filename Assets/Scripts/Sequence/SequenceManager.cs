@@ -141,6 +141,7 @@ public class SequenceManager : MonoBehaviour
     {
         // プレイヤー死亡 → ゲームオーバーへ強制遷移
         _context.IsPlayerDead = true;
+        _context.GameOverReason = GameOverReason.PlayerHealthDepleted;
         _stateMachine?.ForceTransition(SequenceStateType.GameOver);
     }
 

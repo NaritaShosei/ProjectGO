@@ -121,7 +121,11 @@ public class BossBattleState : ISequenceState
     #region イベントハンドラー
 
     private void HandleBossDefeated() => _context.IsBossDefeated = true;
-    private void HandleTimeUp() => _context.IsTimeUp = true;
+    private void HandleTimeUp()
+    {
+        _context.GameOverReason = GameOverReason.TimeExpired;
+        _context.IsTimeUp = true;
+    }
 
     #endregion
 }

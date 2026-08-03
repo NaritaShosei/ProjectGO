@@ -1658,6 +1658,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 288517074}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _firstSequence
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978453]._gameOverView
+      value: 
+      objectReference: {fileID: 2100000002}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978448]._skillSelectView
       value: 
       objectReference: {fileID: 1504407408}
@@ -1677,6 +1685,10 @@ PrefabInstance:
       propertyPath: managedReferences[6731506274227978450]._sequenceStatusView
       value: 
       objectReference: {fileID: 177643964}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978450]._bossBattleTimeLimit
+      value: 120
+      objectReference: {fileID: 0}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978450]._bossBattleTimerView
       value: 
@@ -11298,6 +11310,7 @@ RectTransform:
   - {fileID: 1700981380}
   - {fileID: 1839641875}
   - {fileID: 4083503}
+  - {fileID: 2100000001}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -25034,6 +25047,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3607903212245882555, guid: aa0e64cbf9d7df14a9b80910cc436be3, type: 3}
   m_PrefabInstance: {fileID: 1978176785}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2100000000
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 728091136}
+    m_Modifications:
+    - target: {fileID: 100000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_Name
+      value: GameOverView
+      objectReference: {fileID: 0}
+    - target: {fileID: 114002, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+    - target: {fileID: 114005, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+    - target: {fileID: 114005, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_ActiveFontFeatures.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+--- !u!224 &2100000001 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 224000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+  m_PrefabInstance: {fileID: 2100000000}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2100000002 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+  m_PrefabInstance: {fileID: 2100000000}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17c8c94490c4d428e98d9bc94a61d01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameOverView
 --- !u!1001 &2124929838
 PrefabInstance:
   m_ObjectHideFlags: 0
