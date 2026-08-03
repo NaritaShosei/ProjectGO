@@ -117,8 +117,12 @@ public class ApproachBehaviour : IEnemyBehaviour
         // 方向ベクトルが極端に小さい場合はスキップ
         if (dir.sqrMagnitude < 0.001f) return;
 
-        Vector3 newPos = _self.position + dir.normalized * _data.ApproachSpeed * deltaTime;
-        _self.position = newPos;
+        Vector3 displacement = dir.normalized * _data.ApproachSpeed * deltaTime;
+        if (_enemy is Enemy movableEnemy)
+            movableEnemy.Move(displacement);
+        else
+            _self.position += displacement;
+        Vector3 newPos = _self.position;
 
         // SpatialHashGridの位置を更新する
         if (_spatialHashGrid != null)

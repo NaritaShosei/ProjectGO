@@ -10,6 +10,7 @@ public class SequenceStateContext
 
     public EnemyManager EnemyManager;
     public SkillManager SkillManager;
+    public EXPManager EXPManager;
     public InputHandler InputHandler;
     public IPlayer Player;
     public SequenceManager SequenceManager;
@@ -24,6 +25,9 @@ public class SequenceStateContext
 
     /// <summary>制限時間が切れたか</summary>
     public bool IsTimeUp;
+
+    /// <summary>ゲームオーバーになった原因。</summary>
+    public GameOverReason GameOverReason;
 
     /// <summary>ボスが撃破されたか</summary>
     public bool IsBossDefeated;
@@ -43,19 +47,6 @@ public class SequenceStateContext
     #endregion
 
     #region リザルト
-    public readonly struct ResultData
-    {
-        public readonly int Kills;
-        public readonly int Level;
-        public readonly float ClearTime;
-        public ResultData(int kills, int level, float clearTime)
-        {
-            Kills = kills;
-            Level = level;
-            ClearTime = clearTime;
-        }
-    }
-
     public ResultData Result;
 
     #endregion

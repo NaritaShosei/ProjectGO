@@ -16,4 +16,14 @@ public interface IWallAvoidanceService
         float detectDistance,
         float strength
     );
+
+    /// <summary>
+    /// 移動経路上の壁を検出し、壁の手前で止まる安全な移動量を返す。
+    /// </summary>
+    Vector3 ClampMovement(Bounds bounds, Vector3 displacement);
+
+    /// <summary>
+    /// 指定位置で壁と重なっているコライダーを、最短方向へ押し戻した座標を返す。
+    /// </summary>
+    Vector3 ResolveSpawnPosition(Collider collider, Vector3 position);
 }

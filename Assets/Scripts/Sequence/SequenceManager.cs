@@ -23,6 +23,7 @@ public class SequenceManager : MonoBehaviour
         {
             EnemyManager = enemyManager,
             SkillManager = skillManager,
+            EXPManager = ServiceLocator.TryGet(out EXPManager expManager) ? expManager : null,
             InputHandler = inputHandler,
             Player = player,
             SequenceManager = this,
@@ -44,7 +45,7 @@ public class SequenceManager : MonoBehaviour
         _stateMachine?.Start(_firstSequence);
     }
 
-    /// <summary>ResultStateから呼ばれる</summary>
+    /// <summary>ResultSequenceから呼ばれる</summary>
     public void NotifyAllSequencesComplete()
     {
         OnAllSequencesComplete?.Invoke();
@@ -140,6 +141,7 @@ public class SequenceManager : MonoBehaviour
     {
         // プレイヤー死亡 → ゲームオーバーへ強制遷移
         _context.IsPlayerDead = true;
+        _context.GameOverReason = GameOverReason.PlayerHealthDepleted;
         _stateMachine?.ForceTransition(SequenceStateType.GameOver);
     }
 
