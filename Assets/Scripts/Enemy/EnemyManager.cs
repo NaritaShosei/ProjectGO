@@ -131,6 +131,8 @@ public class EnemyManager : MonoBehaviour
             _formationSystem.Register(enemy, participant);
         }
 
+        enemy.OnRegisteredToFormation();
+
         OnEnemySpawned?.Invoke(enemy);
 
         _spatialHashGrid.Register(enemy, pos);
