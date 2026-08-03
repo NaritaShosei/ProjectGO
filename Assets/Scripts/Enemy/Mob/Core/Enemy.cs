@@ -78,6 +78,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     /// <summary>
+    /// FormationSystemへの登録完了後に呼ばれる。
+    /// フォーメーション登録後に必要な初期化処理を行うためのフック。
+    /// </summary>
+    public virtual void OnRegisteredToFormation()
+    {
+    }
+
+    /// <summary>
     /// ノックバックの力を方向ベクトルとして直接座標に加算する
     /// </summary>
     public void AddKnockbackForce(Vector3 direction)
