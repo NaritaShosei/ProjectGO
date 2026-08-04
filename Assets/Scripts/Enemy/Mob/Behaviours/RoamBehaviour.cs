@@ -138,12 +138,30 @@ public class RoamBehaviour : IEnemyBehaviour
             _onRoamDirection?.Invoke(dir.normalized);
         }
 
-        Vector3 newPos = _self.position + dir.normalized * _data.RoamSpeed * deltaTime;
-        _self.position = newPos;
+        // このフレームで本来進みたい移動量を保存する。
+        // Move後の実移動量と比較し、壁で止められたかを判定するために使用する。
+        Vector3 displacement = dir.normalized * _data.RoamSpeed * deltaTime;
+        if (_enemy is Enemy movableEnemy)
+            movableEnemy.Move(displacement);
+        else
+            _self.position += displacement;
+        Vector3 newPos = _self.position;
 
+        // 壁判定後に実際に動いた距離を求める。徘徊判定では高さの変化を無視する。
+        Vector3 actualMovement = newPos - oldPos;
+        actualMovement.y = 0f;
+
+        // 壁直前までの部分移動も反映できるよう、目標再選択より先にグリッドを更新する。
         if (_spatialHashGrid != null)
         {
             _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
+        }
+
+        // 要求量の10%未満しか進めなかった場合は、現在の目標が壁の向こう側にあると判断する。
+        // 同じ到達不能目標へ歩き続けないよう、次の徘徊目標をその場で選び直す。
+        if (actualMovement.sqrMagnitude < displacement.sqrMagnitude * _blockedMovementRatioSqr)
+        {
+            PickTarget();
         }
     }
 
@@ -166,6 +184,7 @@ public class RoamBehaviour : IEnemyBehaviour
 
     // 目標地点への到達判定しきい値
     private const float _arrivalThreshold = 0.3f;
+    private const float _blockedMovementRatioSqr = 0.01f;
     // 初期待機のランダム上限（スポーン同期ずらし用）
     private const float _initialDelayMax = 0.5f;
 

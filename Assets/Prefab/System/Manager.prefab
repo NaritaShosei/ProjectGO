@@ -533,7 +533,7 @@ MonoBehaviour:
   _spatialHashGridCellSize: 2
   _wallLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
   _enemySpawner: {fileID: 4380269281932468535}
   _bossEnemySpawner: {fileID: 7246669613523359550}
 --- !u!1 &3721311690304933274
@@ -817,6 +817,8 @@ MonoBehaviour:
       data:
         _gameOverDuration: 10
         _gameOverTimerView: {fileID: 0}
+        _gameOverView: {fileID: 0}
+        _titleSceneName: GOTestScene
         _restartSequence: 1
 --- !u!1 &5368403579476760681
 GameObject:

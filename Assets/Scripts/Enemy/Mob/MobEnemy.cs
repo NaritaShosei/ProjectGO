@@ -72,6 +72,14 @@ public class MobEnemy : Enemy, IFormationParticipant
         // TODO: アタッカースロットの再取得
     }
 
+    public override void OnRegisteredToFormation()
+    {
+        if (_attack != null)
+        {
+            _services.AttackerSlot.TryAcquire(Id, 1);
+        }
+    }
+
     public override void TakeDamage(DamageContext context)
     {
         if (_isDead || !CanTakeDamage) { return; }
