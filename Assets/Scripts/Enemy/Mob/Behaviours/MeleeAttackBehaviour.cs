@@ -58,10 +58,11 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         // クールダウン判定（0以下で攻撃可能）
         if (_context.AttackCooldownRemaining > 0f) return false;
 
-        // 射程チェック（AttackTriggerRatioでトリガー距離を調整）
-        _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
+        // 射程チェック（XZ平面の二乗距離で比較）
+        float sqrDist = CalcXZSqrDist();
+
         float triggerRange = _context.SelectedPattern.AttackRange * _context.SelectedPattern.AttackTriggerRatio;
-        if (_context.DistanceToPlayer > triggerRange) return false;
+        if (sqrDist > triggerRange * triggerRange) return false;
 
         if (_enemyServices.PlayerInformationService.IsBehaindPlayer(_self))
         {
@@ -281,5 +282,16 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         if (!_isAttacking) return;
         _attackEndFired = true;
         Exit(notifyAttackFinished: true);
+    }
+
+    /// <summary>
+    /// プレイヤーとのXZ平面距離の二乗を返す。
+    /// 高低差の影響を受けず、距離比較を高速に行うため平方根は計算しない。
+    /// </summary>
+    private float CalcXZSqrDist()
+    {
+        float dx = _self.position.x - _player.position.x;
+        float dz = _self.position.z - _player.position.z;
+        return dx * dx + dz * dz;
     }
 }
