@@ -96,6 +96,11 @@ public class EnemyManager : MonoBehaviour
 
             enemy.Init();
 
+            if (enemy is Enemy enemyComponent)
+            {
+                enemyComponent.OnRegisteredToFormation();
+            }
+
             // SpatialHashGridに初期位置を登録する
             // 指定されたposではなく、壁から押し戻された後の実座標を登録する。
             _spatialHashGrid.Register(enemy, enemy.Self.position);
