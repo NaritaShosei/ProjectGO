@@ -1,11 +1,9 @@
-using BossEnemy.Interface;
-using BossEnemy.UI;
-using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using UnityEngine;
+
+using BossEnemy.View;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -35,12 +33,12 @@ public class EnemyManager : MonoBehaviour
         _playerInformationService = new PlayerInformationService(_player, this);
 
         _enemyServices = new EnemyServices(
-        _spatialHashGrid,
-        _separationService,
-        _wallAvoidanceService,
-        _formationSystem,
-        _playerInformationService
-        );
+       _spatialHashGrid,
+       _separationService,
+       _wallAvoidanceService,
+       _formationSystem,
+       _playerInformationService
+   );
 
         // 中ボス生成時にプレイヤーレベルを参照するためEXPManagerを取得
         if (!ServiceLocator.TryGet(out _expManager))
@@ -97,6 +95,8 @@ public class EnemyManager : MonoBehaviour
             }
 
             OnEnemySpawned?.Invoke(enemy);
+
+            enemy.Init();
 
             if (enemy is Enemy enemyComponent)
             {
@@ -291,7 +291,7 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary> ボスを生成 </summary>
-    public async UniTask SpawnBoss(string poolKey, Vector3 pos)
+    public void SpawnBoss(string poolKey, Vector3 pos)
     {
         if (_player == null)
         {
@@ -299,8 +299,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        BossEnemyHPView bossEnemyUIView = null;
-        IBossEnemyCharacterView enemy = await _bossEnemySpawner.Spawn(pos, bossEnemyUIView);
+        BossEnemyView enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
@@ -312,10 +311,10 @@ public class EnemyManager : MonoBehaviour
 
         OnEnemySpawned?.Invoke(enemy);
 
+        enemy.Init();
+
         _spatialHashGrid.Register(enemy, pos);
         _enemies.Add(enemy);
-
-        enemy.StartAction();
     }
 
     /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
@@ -429,26 +428,26 @@ public class EnemyManager : MonoBehaviour
                 OnEnemyDefeated?.Invoke();
             }
 
-            if (enemy is not IBossEnemyCharacterView bossEnemy) return;
+            if (enemy is not BossEnemyView bossEnemy) return;
 
             bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
-            HandleChangeBossEnemyLockOnParts((null, bossEnemy.ActiveBossEnemyPartsView));
+            HandleChangeBossEnemyLockOnParts(null, bossEnemy.ActiveBossEnemyPartsView);
         }
     }
 
-    private void HandleChangeBossEnemyLockOnParts((IReadOnlyList<ILockOnTarget> newTargets, IReadOnlyList<ILockOnTarget> oldTargets) changedLockOnTargets)
+    private void HandleChangeBossEnemyLockOnParts(IReadOnlyList<ILockOnTarget> newTargets, IReadOnlyList<ILockOnTarget> oldTargets)
     {
-        if (changedLockOnTargets.oldTargets != null)
+        if (oldTargets != null)
         {
-            foreach (var target in changedLockOnTargets.oldTargets)
+            foreach (var target in oldTargets)
             {
                 if (_lockOnTargets.Contains(target)) _lockOnTargets.Remove(target);
             }
         }
 
-        if (changedLockOnTargets.newTargets != null)
+        if (newTargets != null)
         {
-            foreach (var target in changedLockOnTargets.newTargets)
+            foreach (var target in newTargets)
             {
                 if (target != null && !_lockOnTargets.Contains(target)) _lockOnTargets.Add(target);
             }
