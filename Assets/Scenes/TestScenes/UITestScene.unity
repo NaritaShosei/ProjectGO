@@ -199,6 +199,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 207396568}
     - target: {fileID: 4380269281932468535, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _preloadCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4380269281932468535, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _enemyData.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -213,11 +217,11 @@ PrefabInstance:
     - target: {fileID: 4380269281932468535, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _enemyData.Array.data[0]._prefab
       value: 
-      objectReference: {fileID: -8330086056522255198, guid: a808228ca30613a499745543a6651dec, type: 3}
+      objectReference: {fileID: 1206832562766312324, guid: e573a990531ed4a449ffd9b70907ba1e, type: 3}
     - target: {fileID: 4380269281932468535, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _enemyData.Array.data[1]._prefab
       value: 
-      objectReference: {fileID: -8330086056522255198, guid: a808228ca30613a499745543a6651dec, type: 3}
+      objectReference: {fileID: 6126379261252166902, guid: bc493d451208dad4e81e0e56498bfdfd, type: 3}
     - target: {fileID: 4773163649764372864, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _playerModeView
       value: 
@@ -252,7 +256,7 @@ PrefabInstance:
       objectReference: {fileID: 245819970}
     - target: {fileID: 5320311474982235821, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _wallLayerMask.m_Bits
-      value: 256
+      value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 7036861525032570302, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_LocalPosition.x
