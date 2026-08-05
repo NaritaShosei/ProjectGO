@@ -2,7 +2,9 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.View.Effect
+using BossEnemy.Enum;
+
+namespace BossEnemy.Effect
 {
     public class CircleHitAreaView : HitAreaViewBase
     {

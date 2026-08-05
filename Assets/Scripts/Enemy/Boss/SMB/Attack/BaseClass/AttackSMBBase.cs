@@ -37,7 +37,6 @@ namespace BossEnemy.SMB
             _isChargeCompleted = false;
             _attackHitFired = false;
             _isAttackAreaActive = false;
-            _stateLength = stateInfo.length;
             PlayBossSE(AttackStartVoiceCueName);
             Debug.Log("アニメーション合計時間：" + stateInfo.length);
         }
@@ -49,13 +48,13 @@ namespace BossEnemy.SMB
             if (animator.IsInTransition(layerIndex) && stateInfo.normalizedTime >= 0.5f) return;
 
             // アニメーション開始からの経過秒数計測
-            _elapsedSeconds = stateInfo.normalizedTime * _stateLength;
+            _elapsedSeconds = stateInfo.normalizedTime * stateInfo.length;
 
             AttackSequence(animator, stateInfo, layerIndex);
 
             if (_isAnimRunning)
             {
-                if (_stateLength <= _elapsedSeconds)
+                if (stateInfo.length <= _elapsedSeconds)
                 {
                     _bossAnimator.SetAttacking(false);
                     _isAnimRunning = false;
@@ -136,8 +135,6 @@ namespace BossEnemy.SMB
         protected bool _isAttackAreaActive = false;
 
         protected float _elapsedSeconds = 0;
-
-        protected float _stateLength = 0;
 
         protected Transform _bossEnemyTransform;
 
