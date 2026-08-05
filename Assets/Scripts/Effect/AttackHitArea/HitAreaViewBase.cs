@@ -2,7 +2,9 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System;
 
-namespace BossEnemy.View.Effect
+using BossEnemy.Enum;
+
+namespace BossEnemy.Effect
 {
     public abstract class HitAreaViewBase : MonoBehaviour
     {
