@@ -1,14 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-// BossEnemy関連
-using BossEnemy.Data;
-using BossEnemy.Model.Interface;
-using System.Threading.Tasks;
-using Infrastructure;
-
+using BossEnemy.Interface;
+using BossEnemy.Character;
 
 namespace BossEnemy.Infrastructure.Repository
 {

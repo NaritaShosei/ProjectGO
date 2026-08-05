@@ -1,12 +1,11 @@
-using BossEnemy.Data;
-using BossEnemy.Model.Interface;
-using Cysharp.Threading.Tasks;
-using Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+
+using BossEnemy.Interface;
+using BossEnemy.Character;
 
 
 namespace BossEnemy.Infrastructure.Repository
@@ -69,19 +68,19 @@ namespace BossEnemy.Infrastructure.Repository
         private static readonly FieldInfo BossNameField = typeof(BossEnemyMasterData).GetField("_bossName", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo TotalPhaseCountField = typeof(BossEnemyMasterData).GetField("_totalPhaseCount", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private static readonly FieldInfo MaxHPField = typeof(BossEnemyData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo WalkSpeedField = typeof(BossEnemyData).GetField("_walkSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo HardSpotsDefenseField = typeof(BossEnemyData).GetField("_hardSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo NormalSpotsDefenseField = typeof(BossEnemyData).GetField("_normalSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo WeekPointDefenseField = typeof(BossEnemyData).GetField("_weekPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo VitalPointDefenseField = typeof(BossEnemyData).GetField("_vitalPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo RightArmArmorField = typeof(BossEnemyData).GetField("_rightArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo LeftArmArmorField = typeof(BossEnemyData).GetField("_leftArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo RightLegArmorField = typeof(BossEnemyData).GetField("_rightLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo LeftLegArmorField = typeof(BossEnemyData).GetField("_leftLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo CloseRangeNormalField = typeof(BossEnemyData).GetField("_closeRangeNormalAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo CloseRangeFinishField = typeof(BossEnemyData).GetField("_closeRangeFinishCountAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
-        private static readonly FieldInfo LongRangeField = typeof(BossEnemyData).GetField("_longRangeAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo MaxHPField = typeof(Status).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo WalkSpeedField = typeof(Status).GetField("_walkSpeed", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo HardSpotsDefenseField = typeof(Status).GetField("_hardSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo NormalSpotsDefenseField = typeof(Status).GetField("_normalSpotsDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo WeekPointDefenseField = typeof(Status).GetField("_weekPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo VitalPointDefenseField = typeof(Status).GetField("_vitalPointDefense", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo RightArmArmorField = typeof(Status).GetField("_rightArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo LeftArmArmorField = typeof(Status).GetField("_leftArmArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo RightLegArmorField = typeof(Status).GetField("_rightLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo LeftLegArmorField = typeof(Status).GetField("_leftLegArmer", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo CloseRangeNormalField = typeof(Status).GetField("_closeRangeNormalAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo CloseRangeFinishField = typeof(Status).GetField("_closeRangeFinishCountAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly FieldInfo LongRangeField = typeof(Status).GetField("_longRangeAttackDataHolder", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static readonly FieldInfo ArmorMaxHPField = typeof(BossArmorData).GetField("_maxHP", BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly FieldInfo ArmorDefenseField = typeof(BossArmorData).GetField("_defense", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -104,7 +103,7 @@ namespace BossEnemy.Infrastructure.Repository
                 if (int.TryParse(GetCell(rows[i], 0), out int bossId) && !string.IsNullOrWhiteSpace(GetCell(rows[i], 1)))
                 {
                     string bossName = GetCell(rows[i], 1);
-                    List<BossEnemyData> phaseList = new List<BossEnemyData>();
+                    List<Status> phaseList = new List<Status>();
 
                     int index = i + 1;
 
@@ -126,7 +125,7 @@ namespace BossEnemy.Infrastructure.Repository
                                 throw new InvalidOperationException($"行 {index + 1}: ボスID {bossId} のフェーズブロックが9行に満ちていません。");
                             }
 
-                            BossEnemyData phaseData = CreatePhaseData(rows, index);
+                            Status phaseData = CreatePhaseData(rows, index);
                             phaseList.Add(phaseData);
                             index += 9;
                             continue;
@@ -151,7 +150,7 @@ namespace BossEnemy.Infrastructure.Repository
             }
         }
 
-        private static BossEnemyData CreatePhaseData(List<string[]> rows, int statusRowIndex)
+        private static Status CreatePhaseData(List<string[]> rows, int statusRowIndex)
         {
             string[] statusRow = rows[statusRowIndex];
             string[] rArmRow = rows[statusRowIndex + 1];
@@ -164,7 +163,7 @@ namespace BossEnemy.Infrastructure.Repository
             string[] finishCountRateRow = rows[statusRowIndex + 7];
             string[] longRangeRateRow = rows[statusRowIndex + 8];
 
-            BossEnemyData phaseData = new BossEnemyData();
+            Status phaseData = new Status();
 
             MaxHPField.SetValue(phaseData, ParseInt(statusRow, 2, statusRowIndex, "最大HP"));
             WalkSpeedField.SetValue(phaseData, ParseFloat(statusRow, 7, statusRowIndex, "移動速度"));

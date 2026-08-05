@@ -302,9 +302,7 @@ public struct AttackContext
     }
 }
 
-/// <summary>
-/// Enemyが攻撃を受ける際に扱う情報
-/// </summary>
+/// <summary> 攻撃を受ける際の被ダメージ状況 </summary>
 public struct DamageContext
 {
     public float AttackPower;

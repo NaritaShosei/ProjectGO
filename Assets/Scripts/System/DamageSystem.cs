@@ -2,7 +2,7 @@ using UnityEngine;
 
 // Boss関連
 using BossEnemy.Enum;
-using BossEnemy.Data;
+using BossEnemy.Character;
 
 public class DamageSystem
 {
@@ -82,7 +82,7 @@ public class DamageSystem
     /// <param name="partsType"> 被弾場所 </param>
     /// <param name="bossEnemyData"> 被弾したBossEnemyのData </param>
     /// <returns> 被弾場所の硬度(肉質) </returns>
-    public static int GetHitPartsDefense(BodysDefensesType partsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsDefense(BodysDefensesType partsType, Status bossEnemyData)
     {
         switch (partsType)
         {
@@ -103,20 +103,20 @@ public class DamageSystem
     }
 
     /// <summary> BossEnemyの被弾場所の鎧の硬度(肉質)を割り出す </summary>
-    public static int GetHitPartsArmorDefense(ArmorAttachmentPointType attachmentPointsType, BossEnemyData bossEnemyData)
+    public static int GetHitPartsArmorDefense(ArmorAttachmentType attachmentPointsType, Status bossEnemyData)
     {
         switch (attachmentPointsType)
         {
-            case ArmorAttachmentPointType.None:
+            case ArmorAttachmentType.None:
                 Debug.LogError("PartsNone");
                 break;
-            case ArmorAttachmentPointType.LeftArm:
+            case ArmorAttachmentType.LeftArm:
                 return bossEnemyData.LeftArmArmer.Defense;
-            case ArmorAttachmentPointType.RightArm:
+            case ArmorAttachmentType.RightArm:
                 return bossEnemyData.RightArmArmer.Defense;
-            case ArmorAttachmentPointType.LeftLeg:
+            case ArmorAttachmentType.LeftLeg:
                 return bossEnemyData.LeftLegArmer.Defense;
-            case ArmorAttachmentPointType.RightLeg:
+            case ArmorAttachmentType.RightLeg:
                 return bossEnemyData.RightLegArmer.Defense;
         }
 

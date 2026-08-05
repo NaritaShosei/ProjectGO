@@ -1,5 +1,7 @@
 using UnityEngine;
 
+using BossEnemy.Enum;
+
 public interface IAttackHitAreaSpawner
 {
     /// <summary> 攻撃範囲エフェクトの生成 </summary>
