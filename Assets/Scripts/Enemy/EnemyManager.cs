@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
-
-using BossEnemy.View;
+using BossEnemy.Interface;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -299,7 +298,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        BossEnemyView enemy =　_bossEnemySpawner.Spawn(pos, out BossEnemyUIView bossEnemyUIView);
+        IBossEnemyCharacterView enemy =　_bossEnemySpawner.Spawn(pos, out IBossHPView bossEnemyUIView);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
@@ -428,26 +427,26 @@ public class EnemyManager : MonoBehaviour
                 OnEnemyDefeated?.Invoke();
             }
 
-            if (enemy is not BossEnemyView bossEnemy) return;
+            if (enemy is not IBossEnemyCharacterView bossEnemy) return;
 
             bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
-            HandleChangeBossEnemyLockOnParts(null, bossEnemy.ActiveBossEnemyPartsView);
+            HandleChangeBossEnemyLockOnParts((null, bossEnemy.ActiveBossEnemyPartsView));
         }
     }
 
-    private void HandleChangeBossEnemyLockOnParts(IReadOnlyList<ILockOnTarget> newTargets, IReadOnlyList<ILockOnTarget> oldTargets)
+    private void HandleChangeBossEnemyLockOnParts((IReadOnlyList<ILockOnTarget> newTargets, IReadOnlyList<ILockOnTarget> oldTargets) changedLockOnTargets)
     {
-        if (oldTargets != null)
+        if (changedLockOnTargets.oldTargets != null)
         {
-            foreach (var target in oldTargets)
+            foreach (var target in changedLockOnTargets.oldTargets)
             {
                 if (_lockOnTargets.Contains(target)) _lockOnTargets.Remove(target);
             }
         }
 
-        if (newTargets != null)
+        if (changedLockOnTargets.newTargets != null)
         {
-            foreach (var target in newTargets)
+            foreach (var target in changedLockOnTargets.newTargets)
             {
                 if (target != null && !_lockOnTargets.Contains(target)) _lockOnTargets.Add(target);
             }

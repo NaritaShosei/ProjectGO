@@ -2,7 +2,8 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.View.Effect;
+using BossEnemy.Enum;
+using BossEnemy.Effect;
 
 namespace BossEnemy.Infrastructure
 {

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.View;
+using BossEnemy.Character;
 using BossEnemy.Infrastructure;
+using BossEnemy.Interface;
+using BossEnemy.UI;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -24,18 +26,16 @@ public class BossEnemySpawner : MonoBehaviour
     /// <param name="poolKey">Enemyのキー</param>
     /// <param name="position">生成位置</param>
     /// <returns>生成されたEnemy</returns>
-    public BossEnemyView Spawn(Vector3 position, out BossEnemyUIView bossEnemyUIView)
+    public IBossEnemyCharacterView Spawn(Vector3 position, out IBossHPView bossEnemyHPUI)
     {
-        BossEnemyView enemy = _bossEnemyObjectPool.Get();
-        bossEnemyUIView = _enemyUIObjectPool.Get();
+        BossEnemyCharacterView enemyView = _bossEnemyObjectPool.Get();
+        bossEnemyHPUI = _enemyUIObjectPool.Get();
 
-        enemy.InjectServices(_services);
-        enemy.SetPosition(position);
-        enemy.SetSpawner(_attackHitAreaSpawner);
+        enemyView.InjectServices(_services);
+        enemyView.SetPosition(position);
+        enemyView.SetSpawner(_attackHitAreaSpawner);
 
-        enemy.BossEnemyController.SetView(enemy, bossEnemyUIView);
-
-        return enemy;
+        return enemyView;
     }
 
     [Header("プール生成するためのエネミーのデータ")]
@@ -53,8 +53,8 @@ public class BossEnemySpawner : MonoBehaviour
     [SerializeField] private AttackHitAreaSpawner _attackHitAreaSpawner;
 
     private EnemyServices _services;
-    private GenericObjectPool<BossEnemyView> _bossEnemyObjectPool;
-    private GenericObjectPool<BossEnemyUIView> _enemyUIObjectPool;
+    private GenericObjectPool<BossEnemyCharacterView> _bossEnemyObjectPool;
+    private GenericObjectPool<BossEnemyHPView> _enemyUIObjectPool;
 
     /// <summary>
     /// Enemyプールの辞書
@@ -76,14 +76,14 @@ public class BossEnemySpawner : MonoBehaviour
     public struct BossPoolData
     {
         public string Key => _key;
-        public BossEnemyView BossPrefab => _bossPrefab;
-        public BossEnemyUIView BossUIPrefab => _enemyUIPrefab;
+        public BossEnemyCharacterView BossPrefab => _bossPrefab;
+        public BossEnemyHPView BossUIPrefab => _enemyUIPrefab;
 
         [Header("BossEnemyを呼び出すための名前")]
         [SerializeField] private string _key;
 
         [Header("BossEnemyのPrefab")]
-        [SerializeField] private BossEnemyView _bossPrefab;
-        [SerializeField] private BossEnemyUIView _enemyUIPrefab;
+        [SerializeField] private BossEnemyCharacterView _bossPrefab;
+        [SerializeField] private BossEnemyHPView _enemyUIPrefab;
     }
 }
