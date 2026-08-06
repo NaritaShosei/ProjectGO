@@ -40,6 +40,12 @@ public class EnemyManager : MonoBehaviour
        _playerInformationService
    );
 
+        if (!ServiceLocator.TryGet(out _expManager))
+        {
+            Debug.LogError("EnemyManager.Init: EXPManager が ServiceLocator に未登録です");
+        }
+
+
         if (_enemySpawner == null)
         {
             Debug.LogError("EnemyManager.Init: _enemySpawner が未設定です");
@@ -116,11 +122,19 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Spawn(string, Vector3)がSpawn(string, Vector3, null)に委譲する形
+    /// </summary>
+    /// <param name="poolKey"></param>
+    /// <param name="pos"></param>
+    public void Spawn(string poolKey, Vector3 pos) => Spawn(poolKey, pos, null);
+
+    /// <summary>
     /// オブジェクトプールを使用したエネミーの生成
     /// </summary>
     /// <param name="poolKey">取得するEnemyのPool識別キー</param>
     /// <param name="pos">出現座標</param>
-    public void Spawn(string poolKey, Vector3 pos)
+    /// <param name="overrideData">上書きするEnemyData（nullなら通常のSpawnと同じ挙動）</param>
+    public void Spawn(string poolKey, Vector3 pos, EnemyData overrideData)
     {
         if (_player == null)
         {
@@ -128,7 +142,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        Enemy enemy = _enemySpawner.Spawn(poolKey, pos);
+        Enemy enemy = _enemySpawner.Spawn(poolKey, pos, overrideData);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
@@ -199,6 +213,32 @@ public class EnemyManager : MonoBehaviour
             var strategy = spawnData.CreateStrategy(this);
             strategy.Spawn();
         }
+    }
+
+    public void SpawnMidBoss(string poolKey, Vector3 pos, MidBossLevelTable midBossLevelTable)
+    {
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
+        if (midBossLevelTable == null)
+        {
+            Debug.LogError($"MidBossLevelTable が未設定です（poolKey: {poolKey}）");
+            return;
+        }
+
+        int playerLevel = _expManager.CurrentLevel;
+        EnemyData enemyData = MidBossLevelSystem.SelectEnemyData(midBossLevelTable, playerLevel);
+
+        if (enemyData == null)
+        {
+            Debug.LogError($"中ボスのEnemyData選択に失敗しました（poolKey: {poolKey}）");
+            return;
+        }
+
+        Spawn(poolKey, pos, enemyData);
     }
 
     /// <summary> ボスを生成 </summary>
@@ -281,6 +321,8 @@ public class EnemyManager : MonoBehaviour
 
     // Enemyに提供するサービスをまとめたクラス
     private EnemyServices _enemyServices;
+
+    private EXPManager _expManager;
 
     private void Awake()
     {
