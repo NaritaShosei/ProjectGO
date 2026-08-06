@@ -82,7 +82,7 @@ namespace BossEnemy.UI
         }
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
-        public void PhaseChange(Status bossEnemyData, int currentPhase)
+        public void PhaseChange(CharacterStatus bossEnemyData, int currentPhase)
         {
             if (currentPhase >= _bossEnemyAllPhaseHPBarArray.Length)
             {

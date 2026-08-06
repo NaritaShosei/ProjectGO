@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static BossEnemy.Character.BossEnemyCharacterView;
+using BossEnemy.Character;
 
 namespace BossEnemy.Interface
 {
