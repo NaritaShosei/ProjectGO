@@ -199,6 +199,26 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     /// <summary>
+    /// EnemyDataを外部から上書きする。
+    /// Init()より前に呼ぶこと。
+    /// </summary>
+    public void SetData(EnemyData data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning($"{name}: SetData に null が渡されました");
+            return;
+        }
+
+        if (IsInitialized)
+        {
+            Debug.LogWarning($"{name}: Init済みインスタンスへの SetData は反映されない可能性があります");
+        }
+
+        _data = data;
+    }
+
+    /// <summary>
     /// OnArmorBroken を派生クラスから発火するためのラッパー
     /// </summary>
     protected void InvokeOnArmorBroken() => OnArmorBroken?.Invoke(this);

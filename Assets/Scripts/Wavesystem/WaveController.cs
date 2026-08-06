@@ -109,12 +109,16 @@ public class WaveController
         public readonly string EnemyTypeKey;
         public readonly Vector3 Position;
         public readonly float SpawnTime;
+        public readonly MidBossLevelTable MidBossLevelTable;
 
-        public SpawnRequest(string enemyTypeKey, Vector3 position, float spawnTime)
+        public bool IsMidBoss => MidBossLevelTable != null;
+
+        public SpawnRequest(string enemyTypeKey, Vector3 position, float spawnTime, MidBossLevelTable midBossLevelTable)
         {
             EnemyTypeKey = enemyTypeKey;
             Position = position;
             SpawnTime = spawnTime;
+            MidBossLevelTable = midBossLevelTable;
         }
     }
 
@@ -188,7 +192,7 @@ public class WaveController
                 Vector3 position = spawnPoint.GetSlotPosition(slotIndex);
 
                 _pendingSpawns.Enqueue(
-                               new SpawnRequest(entry.EnemyTypeKey, position, spawnTime));
+                               new SpawnRequest(entry.EnemyTypeKey, position, spawnTime, entry.MidBossLevelTable));
 
                 slotIndex++;
                 flatIndex++;
@@ -205,7 +209,20 @@ public class WaveController
                   _pendingSpawns.Peek().SpawnTime <= Time.time)
         {
             var request = _pendingSpawns.Dequeue();
-            _enemyManager.Spawn(request.EnemyTypeKey, request.Position);
+
+            if (request.IsMidBoss)
+            {
+                _enemyManager.SpawnMidBoss(
+                    request.EnemyTypeKey,
+                    request.Position,
+                    request.MidBossLevelTable);
+            }
+            else
+            {
+                _enemyManager.Spawn(
+                    request.EnemyTypeKey,
+                    request.Position);
+            }
         }
     }
 
