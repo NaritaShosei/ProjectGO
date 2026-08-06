@@ -11,6 +11,41 @@ public class SoundManager
     {
         _defaultBGMCueSheet = defaultBGM;
         Initialize(bgmPlayer);
+
+        if (ServiceLocator.TryGet(out GameSettingService settingsService))
+        {
+            ApplySettings(settingsService.CurrentSettings);
+        }
+    }
+
+    public void ApplySettings(GameSetting settings)
+    {
+        if (settings == null) return;
+
+        _bgmVolume = settings.BGMVolume;
+        _seVolume = settings.SEVolume;
+        _voiceVolume = settings.VoiceVolume;
+
+        if (_bgmSource != null)
+        {
+            _bgmSource.volume = _bgmVolume;
+        }
+
+        foreach (var sources in _seSourcesDict.Values)
+        {
+            foreach (var source in sources)
+            {
+                source.volume = _voiceSources.Contains(source) ? _voiceVolume : _seVolume;
+            }
+        }
+
+        foreach (var sources in _loopSourcesDict.Values)
+        {
+            foreach (var source in sources.Values)
+            {
+                source.volume = _seVolume;
+            }
+        }
     }
 
     // ── BGM ──────────────────────────────────────────────
@@ -58,6 +93,7 @@ public class SoundManager
                     source.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
 
                 source.cueName = cueName;
+                ApplySEVolume(source, cueName);
                 source.Play();
                 return;
             }
@@ -66,6 +102,7 @@ public class SoundManager
         // 全てのソースが再生中の場合、新しいソースを作成して再生
         var newSource = CreateNewSESource(seObj, sheetType);
         newSource.cueName = cueName;
+        ApplySEVolume(newSource, cueName);
         newSource.Play();
     }
 
@@ -138,6 +175,7 @@ public class SoundManager
         source.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
         source.cueName = cueName;
         source.loop = true;
+        source.volume = _seVolume;
         source.Play();
 
         _loopSourcesDict[seObj][cueName] = source;
@@ -196,6 +234,11 @@ public class SoundManager
     private Dictionary<GameObject, Dictionary<string, CriAtomSource>> _loopSourcesDict
         = new Dictionary<GameObject, Dictionary<string, CriAtomSource>>();
 
+    private readonly HashSet<CriAtomSource> _voiceSources = new();
+    private float _bgmVolume = 0.5f;
+    private float _seVolume = 0.5f;
+    private float _voiceVolume = 0.5f;
+
     /// <summary> 初期化 </summary>
     private void Initialize(GameObject bgmPlayer)
     {
@@ -215,5 +258,28 @@ public class SoundManager
         _seSourcesDict[seObj].Add(newSource);
 
         return newSource;
+    }
+
+    private void ApplySEVolume(CriAtomSource source, string cueName)
+    {
+        if (IsVoiceCue(cueName))
+        {
+            _voiceSources.Add(source);
+            source.volume = _voiceVolume;
+        }
+        else
+        {
+            _voiceSources.Remove(source);
+            source.volume = _seVolume;
+        }
+    }
+
+    private static bool IsVoiceCue(string cueName)
+    {
+        if (string.IsNullOrEmpty(cueName)) return false;
+
+        return cueName.Contains("Voice")
+            || cueName.Contains("Bark")
+            || cueName == SoundCueNames.Player.Damage;
     }
 }
