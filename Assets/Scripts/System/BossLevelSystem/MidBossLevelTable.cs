@@ -13,13 +13,13 @@ public class MidBossLevelTable : ScriptableObject
         {
             if (Levels[i].RequiredPlayerLevel < Levels[i - 1].RequiredPlayerLevel)
             {
-                Debug.LogWarning($"{name}: Levels[{i}] の RequiredPlayerLevel が前の要素より小さいです。昇順で並べてください。");
+                Debug.LogWarning($"{name}: Levels[{i}] の RequiredPlayerLevel が前の要素より小さいです。動作に影響はありませんが、視認性のため昇順で並べることを推奨します。");
             }
         }
 
         if (Levels.Count > 0 && Levels[0].RequiredPlayerLevel != 0)
         {
-            Debug.LogWarning($"{name}: 先頭要素の RequiredPlayerLevel が0ではありません。想定外のレベルでフォールバックが発生する可能性があります。");
+            Debug.LogWarning($"{name}: 先頭要素の RequiredPlayerLevel が0ではありません。0未満のレベルでは対応するEnemyDataが存在しない可能性があります。");
         }
     }
 #endif

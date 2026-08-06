@@ -229,6 +229,12 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
+        if (_expManager == null)
+        {
+            Debug.LogError($"EXPManager が未登録のため中ボスを生成できません（poolKey: {poolKey}）");
+            return;
+        }
+
         int playerLevel = _expManager.CurrentLevel;
         EnemyData enemyData = MidBossLevelSystem.SelectEnemyData(midBossLevelTable, playerLevel);
 

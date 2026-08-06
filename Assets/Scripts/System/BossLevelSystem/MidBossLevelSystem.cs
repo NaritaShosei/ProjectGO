@@ -15,13 +15,16 @@ public class MidBossLevelSystem
         }
 
         EnemyData selected = table.Levels[0].EnemyData; // 最低保証（最序盤フォールバック）
+        int selectedRequiredPlayerLevel = int.MinValue;
 
         foreach (var entry in table.Levels)
         {
-            if (playerLevel >= entry.RequiredPlayerLevel)
+            if (playerLevel >= entry.RequiredPlayerLevel &&
+                               entry.RequiredPlayerLevel > selectedRequiredPlayerLevel)
+            {
                 selected = entry.EnemyData;
-            else
-                break; // Levelsが昇順ソート済み前提
+                selectedRequiredPlayerLevel = entry.RequiredPlayerLevel;
+            }
         }
 
         return selected;
