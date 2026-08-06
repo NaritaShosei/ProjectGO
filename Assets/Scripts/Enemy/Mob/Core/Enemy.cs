@@ -204,18 +204,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// </summary>
     public void SetData(EnemyData data)
     {
-        if (data == null)
+        EnemyData target = data != null ? data : _defaultData;
+
+        if (target == null)
         {
-            Debug.LogWarning($"{name}: SetData に null が渡されました");
+            Debug.LogError($"{name}: 有効なEnemyDataが設定されていません（overrideDataもdefaultDataもnull）");
             return;
         }
 
-        if (IsInitialized)
-        {
-            Debug.LogWarning($"{name}: Init済みインスタンスへの SetData は反映されない可能性があります");
-        }
-
-        _data = data;
+        _data = target;
     }
 
     /// <summary>
@@ -304,6 +301,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     [SerializeField] protected EnemyData _data;
+    private EnemyData _defaultData;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] private Collider _movementCollider;
     [SerializeField] protected Animator _animator;
@@ -362,6 +360,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     {
         if (_movementCollider == null)
             _movementCollider = GetComponent<Collider>();
+
+        // プレハブにアサインされた既定のEnemyDataを保持しておく
+        // プール再利用時、overrideDataが無い場合はここへ復元する
+        _defaultData = _data;
 
         // OnDead時の登録
         OnDead += HandleDead;

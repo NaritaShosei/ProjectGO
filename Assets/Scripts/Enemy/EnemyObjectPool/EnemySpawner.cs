@@ -72,11 +72,8 @@ public class EnemySpawner : MonoBehaviour
         enemy.SetPoolKey(poolKey);
         enemy.InjectServices(_services);
 
-        if (overrideData != null)
-        {
-            // Init()より前にセットする必要がある.s
-            enemy.SetData(overrideData);
-        }
+        // Init()より前にセットする必要がある.
+        enemy.SetData(overrideData);
 
         // Init()は内部でガード済み。初回生成時のみ初期化されるため、
         // プール再利用時はここで何もしないため毎回呼んでよい
