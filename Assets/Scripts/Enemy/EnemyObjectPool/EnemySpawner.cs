@@ -72,7 +72,8 @@ public class EnemySpawner : MonoBehaviour
         enemy.SetPoolKey(poolKey);
         enemy.InjectServices(_services);
 
-        // Init()より前にセットする必要がある.
+        // 使用するEnemyDataを設定する。
+        // Init()より前に設定し、初期化時に正しいEnemyDataを参照できるようにする。
         enemy.SetData(overrideData);
 
         // Init()は内部でガード済み。初回生成時のみ初期化されるため、

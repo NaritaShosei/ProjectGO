@@ -111,6 +111,7 @@ public class WaveController
         public readonly float SpawnTime;
         public readonly MidBossLevelTable MidBossLevelTable;
 
+        // MidBossLevelTableが設定されている場合は中ボスとして扱う
         public bool IsMidBoss => MidBossLevelTable != null;
 
         public SpawnRequest(string enemyTypeKey, Vector3 position, float spawnTime, MidBossLevelTable midBossLevelTable)
@@ -118,7 +119,7 @@ public class WaveController
             EnemyTypeKey = enemyTypeKey;
             Position = position;
             SpawnTime = spawnTime;
-            MidBossLevelTable = midBossLevelTable;
+            MidBossLevelTable = midBossLevelTable;// 中ボスの場合のみLevelTableを保持
         }
     }
 
@@ -212,6 +213,7 @@ public class WaveController
 
             if (request.IsMidBoss)
             {
+                // 中ボスはプレイヤーレベルに応じてEnemyDataを切り替えて生成する
                 _enemyManager.SpawnMidBoss(
                     request.EnemyTypeKey,
                     request.Position,
@@ -219,6 +221,7 @@ public class WaveController
             }
             else
             {
+                // 通常Enemyは登録済みデータで生成
                 _enemyManager.Spawn(
                     request.EnemyTypeKey,
                     request.Position);
