@@ -203,6 +203,10 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void HandleAttackPressed()
     {
+        // 長押し中に started が再通知されても、新しい攻撃入力として扱わない。
+        // 特に雷神モードでは再通知時点でコンボが終了していると、初段が再生されてしまう。
+        if (_isAttackButtonHeld) return;
+
         // すでにチャージ中なら無視
         if (_isCharging) return;
 
