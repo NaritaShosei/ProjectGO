@@ -7,12 +7,12 @@ namespace BossEnemy.Interface
         public T GetData(int id);
     }
 
-    public interface IBossEnemyAttackDataRepository : IRepository<BossEnemyAttackData>
+    public interface IBossEnemyAttackDataRepository : IRepository<Attack.AttackData>
     {
         public void Init();
     }
 
-    public interface IBossEnemyDataRepository : IRepository<BossEnemyMasterData>
+    public interface IBossEnemyDataRepository : IRepository<BossCharacterEntity>
     {
         public void Init();
     }

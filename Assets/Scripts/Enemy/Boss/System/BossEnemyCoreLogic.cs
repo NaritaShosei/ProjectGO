@@ -1,144 +1,140 @@
-using UniRx;
-using UnityEngine;
-using System;
-using Cysharp.Threading.Tasks;
-
-using BossEnemy.Enum;
-using BossEnemy.Character;
+using BossEnemy.Armor;
 using BossEnemy.Attack;
+using BossEnemy.Character;
+using BossEnemy.Enum;
+using Cysharp.Threading.Tasks;
+using System;
+using UnityEngine;
 
 namespace BossEnemy.System 
 { 
 
     #region 攻撃処理
-    public class BossAttack
+    /// <summary>  </summary>
+    public class Attack
     {
-        public event Action<BossEnemyAttackData> OnAttackStart;
-
-        public event Action OnAttackFinish;
-
-        public BossAttack(IPlayerInformationService playerInformationService, AttackCoolTimer attackCoolTimer)
+        public static void AttackActionStart()
         {
-            _playerInformationService = playerInformationService;
-            _attackCoolTimer = attackCoolTimer;
+            
         }
 
-        public void AttackActionStart(BossEnemyAttackData attackData)
+        public static void Hit(IHealth target)
         {
-            Debug.Log("攻撃開始");
-            _currentAttackData = attackData;
-            OnAttackStart?.Invoke(attackData);
+
         }
 
-        public void Hit()
+        public static void Finish()
         {
-            _playerInformationService.TakeDamage(_currentAttackData.Damage);
+
         }
-
-        public void Finish()
-        {
-            Debug.Log("攻撃終了");
-            _attackCoolTimer.StartCoolTime(_currentAttackData.ID, _currentAttackData.CoolTime).Forget();
-            OnAttackFinish?.Invoke();
-        }
-
-        private IPlayerInformationService _playerInformationService;
-        private AttackCoolTimer _attackCoolTimer;
-
-        private BossEnemyAttackData _currentAttackData;
     }
     #endregion
 
-    #region 移動処理
-    public class BossMove
+    #region 移動ロジック
+    /// <summary> IMoveTarget継承オブジェクト用の移動ロジック </summary>
+    public class Movement
     {
-        public void SetBossEnemy(Status bossEnemyData)
-        {
-            Debug.Log("Bossのデータが設定されました");
-            _bossEnemyData = bossEnemyData;
-        }
-
-        public void SetTimeScale(float timeScale)
-        {
-            _timeScale = timeScale;
-        }
-
-        public void MoveTargetPosition(Transform target, float chaseSpeed)
+        /// <summary> 最終移動目標地点までの1フレーム内での移動距離を算出し移動対象を動かす処理 </summary>
+        /// <param name="moveTarget"> 移動対象 </param>
+        /// <param name="targetPos"> 最終移動目標地点 </param>
+        /// <param name="moveSpeed"> 移動速度 </param>
+        /// <param name="timeScale"> タイムスケール </param>
+        public static void MoveTargetPosition(
+            IMoveTarget moveTarget, Vector3 targetPos, float moveSpeed, float timeScale = 1)
         {
             // speed * Time.deltaTime で「1フレームあたりの移動量」にする
-            float oneFrameSpeed = chaseSpeed * Time.deltaTime;
-            oneFrameSpeed *= _timeScale;
+            float oneFrameSpeed = moveSpeed * Time.deltaTime;
+            oneFrameSpeed *= timeScale;
 
-            float savePosY = _bossEnemyData.Position.Value.y;
-            Vector3 movePosition = Vector3.MoveTowards(_bossEnemyData.Position.Value, target.position, oneFrameSpeed);
+            // Y座標を動かさずに移動距離を算出
+            float savePosY = moveTarget.Position.Value.y;
+            Vector3 movePosition = Vector3.MoveTowards(moveTarget.Position.Value, targetPos, oneFrameSpeed);
             movePosition.y = savePosY;
 
-            // 移動速度を割り出す
-            float powerAdjustment = 1000; // 1000フレーム分の力の補正
-            float velocityX = Mathf.Abs(_bossEnemyData.Position.Value.x - movePosition.x) * powerAdjustment;
-            float velocityZ = Mathf.Abs(_bossEnemyData.Position.Value.z - movePosition.z) * powerAdjustment;
+            // 移動速度を算出
+            const float powerAdjustment = 1000; // 移動速度の力の補正をする
+            float velocityX = Mathf.Abs(moveTarget.Position.Value.x - movePosition.x) * powerAdjustment;
+            float velocityZ = Mathf.Abs(moveTarget.Position.Value.z - movePosition.z) * powerAdjustment;
 
             // speed * Time.deltaTime で「1フレームあたりの移動量」にする
-            _bossEnemyData.SetPosition(movePosition);
+            moveTarget.SetPosition(movePosition);
 
-            // ターゲット方向へ向きを向かせる
-            Vector3 direction = target.position - _bossEnemyData.Position.Value;
-            direction.y = 0; // 高度差を無視して水平な向きにする
+            // ターゲット方向への向きを算出
+            Vector3 direction = targetPos - moveTarget.Position.Value;
 
+            // 高度差を無視して水平な向きにする
+            direction.y = 0;
+
+            // ターゲット方向へターゲットの向いている方向を変更
             if (direction != Vector3.zero)
             {
                 Quaternion rotation = Quaternion.LookRotation(direction);
-                _bossEnemyData.SetRotation(rotation);
+                moveTarget.SetRotation(rotation);
             }
 
             // 移動速度設定
             Vector3 moveVelocity = new Vector3(velocityX, 0, velocityZ);
-            _bossEnemyData.SetVelocity(moveVelocity);
+            moveTarget.SetVelocity(moveVelocity);
         }
 
-        public void MoveTargetPositionRightOnTime(Vector3 target, float time)
+        /// <summary> 最終移動目標地点まで移動目標時間ちょうどにつくための1フレーム内での移動距離を算出し移動対象を動かす処理 </summary>
+        /// <param name="moveTarget"> 移動対象 </param>
+        /// <param name="targetPos"> 最終移動目標地点 </param>
+        /// <param name="time"> 移動目標時間 </param>
+        /// <param name="timeScale"> タイムスケール </param>
+        public static void MoveTargetPositionRightOnTime(
+            IMoveTarget moveTarget, Vector3 targetPos, float time, float timeScale = 1)
         {
             // 既に目標にいる場合は処理を終了する
             if (time <= 0f) return;
 
             // 残りの距離と方向（ベクトル）を計算
-            Vector3 remainingDirection = target - _bossEnemyData.Position.Value;
+            Vector3 remainingDirection = targetPos - moveTarget.Position.Value;
 
             //「残りの距離 ÷ 残りの時間」で、今出すべき速度（秒速ベクトル）を逆算
             Vector3 requiredVelocity = remainingDirection / time;
 
             // 速度に1フレームの時間をかけて、このフレームの移動量を計算
-            Vector3 frameMovement = requiredVelocity * Time.deltaTime * _timeScale;
+            Vector3 frameMovement = requiredVelocity * Time.deltaTime * timeScale;
 
             // 現在の座標に移動量を足した「到達すべき座標」を返す
-            _bossEnemyData.SetPosition(_bossEnemyData.Position.Value + frameMovement);
+            moveTarget.SetPosition(moveTarget.Position.Value + frameMovement);
 
-            // ターゲット方向へ向きを向かせる
-            Vector3 direction = target - _bossEnemyData.Position.Value;
-            direction.y = 0; // 高度差を無視して水平な向きにする
+            // ターゲット方向への向きを算出
+            Vector3 direction = targetPos - moveTarget.Position.Value;
 
+            // 高度差を無視して水平な向きにする
+            direction.y = 0;
+
+            // ターゲット方向へターゲットの向いている方向を変更
             if (direction != Vector3.zero)
             {
                 Quaternion rotation = Quaternion.LookRotation(direction);
-                _bossEnemyData.SetRotation(rotation);
+                moveTarget.SetRotation(rotation);
             }
         }
 
-        public void LookAtTarget(Transform target, float lookSpeed, float finishAngleThreshold, out bool isLookingAtTarget)
+        /// <summary> 対象の方角を一定の速度で </summary>
+        /// <param name="moveTarget"> 移動対象 </param>
+        /// <param name="targetPos"> 振り向き対象 </param>
+        /// <param name="lookSpeed"> 振り向き速度 </param>
+        /// <param name="finishAngleThreshold"> 振り向き対象の方角を向いていると判定できる角度の最低誤差 </param>
+        /// <param name="isLookingAtTarget"> 振り向き対象の方角を向いているフラグ </param>
+        /// <param name="timeScale"> タイムスケール </param>
+        public static void LookAtTarget(
+            IMoveTarget moveTarget, 
+            Vector3 targetPos, 
+            float lookSpeed, 
+            float finishAngleThreshold, 
+            out bool isLookingAtTarget,
+            float timeScale = 1)
         {
-            isLookingAtTarget = false;
-
-            if (target == null)
-            {
-                return;
-            }
-
             // ターゲットへの方向ベクトルを計算（自身の位置からターゲットの位置を引く）
-            Vector3 direction = target.position - _bossEnemyData.Position.Value;
+            Vector3 direction = targetPos - moveTarget.Position.Value;
 
             // 移動速度設定
             Vector3 moveVelocity = new Vector3(Mathf.Abs(direction.x), 0, Mathf.Abs(direction.z));
-            _bossEnemyData.SetVelocity(moveVelocity);
+            moveTarget.SetVelocity(moveVelocity);
 
             // 上下の傾き（Y成分）を無視して、水平方向の回転のみにする
             direction.y = 0f;
@@ -150,8 +146,8 @@ namespace BossEnemy.System
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
 
                 // 現在の回転から目標の回転へ、Time.deltaTimeをかけてゆっくり補間
-                _bossEnemyData.SetRotation(Quaternion.Slerp(_bossEnemyData.Rotation.Value, targetRotation, lookSpeed * Time.deltaTime * _timeScale));
-                float angleDiff = Quaternion.Angle(_bossEnemyData.Rotation.Value, targetRotation);
+                moveTarget.SetRotation(Quaternion.Slerp(moveTarget.Rotation.Value, targetRotation, lookSpeed * Time.deltaTime * timeScale));
+                float angleDiff = Quaternion.Angle(moveTarget.Rotation.Value, targetRotation);
 
                 // 角度の差がしきい値以下になったかチェック
                 if (angleDiff <= finishAngleThreshold)
@@ -160,197 +156,76 @@ namespace BossEnemy.System
                     return;
                 }
             }
+
+            // ここに到達した場合角度の差がしきい値以下になってないのでisLookingAtTargetをFalseにする
+            isLookingAtTarget = false;
         }
-
-        public void StopMove()
-        {
-            _bossEnemyData.SetVelocity(Vector3.zero);
-        }
-
-        public void ColliderIsTrigger(bool isTrigger)
-        {
-            _bossEnemyData.SetColliderIsTrigger(isTrigger);
-        }
-
-        private Status _bossEnemyData;
-        private float _timeScale;
-    }
-    #endregion
-
-    #region フェーズ切り替え処理
-    [Serializable]
-    public class PhaseChange
-    {
-        // Phaseの切り替え通知<現在のPhaseのBossData, 現在のPhase数>
-        public event Action OnPhaseChanged;
-
-        // 全てのPhase終了通知
-        public event Action OnFinishAllPhase;
-
-        public PhaseChange(BossEnemyMasterData bossEnemyDataHolder)
-        {
-            _bossEnemyMasterData = bossEnemyDataHolder;
-        }
-
-        public Status CurrentPhaseBossData => _currentPhaseBossData;
-        public int CurrentPhase => _currentPhase;
-
-        /// <summary> 最初のPhaseを開始 </summary>
-        public void StartFirstPhase()
-        {
-            if (_bossEnemyMasterData == null)
-                Debug.LogError("Bossのデータがnullです");
-
-            _currentPhase = 0;
-            ChangeNextPhase();
-            _isFirstChangePhase = false;
-        }
-
-        /// <summary> BossのPhaseを次のPhaseに移行する処理 </summary>
-        public void ChangeNextPhase()
-        {
-            if(!_isFirstChangePhase) _currentPhase++;
-            Debug.Log("現在のフェーズ：" + _currentPhase);
-
-            // 全Phase終了時の処理
-            if (_bossEnemyMasterData.BossEnemyDatas.Length <= _currentPhase)
-            {
-                FinishAllPhase();
-                return;
-            }
-
-            _disposables?.Dispose();
-            _disposables = new();
-
-            _currentPhaseBossData = _bossEnemyMasterData.GetData(_currentPhase);
-
-            OnPhaseChanged?.Invoke();
-        }
-
-        public void FinishAllPhase()
-        {
-            _isFirstChangePhase = true;
-            OnFinishAllPhase?.Invoke();
-            _disposables?.Dispose();
-        }
-
-        private BossEnemyMasterData _bossEnemyMasterData = null;
-
-        private Status _currentPhaseBossData = null;
-
-        private CompositeDisposable _disposables = new CompositeDisposable();
-
-        private int _currentPhase = 0;
-        private bool _isFirstChangePhase = true;
     }
     #endregion
 
     #region ダメージ計算処理
+    /// <summary> BossCharacterへのダメージロジック </summary>
     public class Damage
     {
-        public void Init(Status bossEnemyData) 
-        {
-            _currentBossEnemyData = bossEnemyData;
-            _isInit = true;
-        }
-
         /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
-        public void TakeDamage(DamageContext damageContext, BodysDefensesType hitPartsType, bool isHitArmor,
-            ArmorAttachmentType attachmentPoints = ArmorAttachmentType.None)
+        public static void TakeDamage(
+            BossCharacterEntity target, 
+            DamageContext damageContext, 
+            TakeDamageType hitDefenseType, 
+            ArmorAttachmentType attachmentArmor)
         {
-            if(isHitArmor && attachmentPoints == ArmorAttachmentType.None)
+            if (attachmentArmor == ArmorAttachmentType.None)
             {
-                Debug.LogError("Armorの装備箇所がわかりません");
-                return;
-            }
-
-            int defense = 0;
-            int damage = 0;
-
-            if (_currentBossEnemyData == null) Debug.LogError("BossEnemyDataが設定されていません");
-
-            if (!isHitArmor)
-            {
-                // 受けて個所によって防御力(肉質)を取得
-                defense = DamageSystem.GetHitPartsDefense(hitPartsType, _currentBossEnemyData);
-
-                // Damageを計算
-                if (hitPartsType == BodysDefensesType.VitalPoint
-                    || hitPartsType == BodysDefensesType.WeekPoint)
-                {
-                    // 弱点への攻撃ならPlayerもModeによるダメージの減増を行う
-                    damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Flesh);
-                }
-                else damage = DamageSystem.CalculateDamage(defense, damageContext);
-
-                Debug.Log("本体にダメージ！：" + damage);
-                _currentBossEnemyData.TakeDamage(damage);
+                TakeDamageInBody(target, damageContext, hitDefenseType);
             }
             else
             {
-                defense = DamageSystem.GetHitPartsArmorDefense(attachmentPoints, _currentBossEnemyData);
-
-                damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Armor);
-
-                switch (attachmentPoints)
-                {
-                    case ArmorAttachmentType.LeftArm:
-                        _currentBossEnemyData.LeftArmArmer.Damage(damage);
-                        break;
-                    case ArmorAttachmentType.RightArm:
-                        _currentBossEnemyData.RightArmArmer.Damage(damage);
-                        break;
-                    case ArmorAttachmentType.LeftLeg:
-                        _currentBossEnemyData.LeftLegArmer.Damage(damage);
-                        break;
-                    case ArmorAttachmentType.RightLeg:
-                        _currentBossEnemyData.RightLegArmer.Damage(damage);
-                        break;
-                }
-
-                Debug.Log("鎧にダメージ！：" + damage);
+                TakeDamageInAttachmentArmor(target, damageContext, attachmentArmor);
             }
         }
 
-        private Status _currentBossEnemyData;
-        private bool _isInit = false;
-    }
-    #endregion
-
-    #region BossDown処理
-    public class BossDown
-    {
-        public event Action<(bool isBreakLeftLeg, bool isBreakRightLeg)> OnDown;
-
-        public event Action OnRiseUp;
-
-        public void Init(Status bossEnemyData)
+        /// <summary> Boss本体へのダメージ処理 </summary>
+        private static void TakeDamageInBody(
+            BossCharacterEntity target,
+            DamageContext damageContext,
+            TakeDamageType damageType)
         {
-            _bossEnemyData = bossEnemyData;
-        }
+            int defense = 0;
+            int damage = 0;
 
-        public void Down()
-        {
-            OnDown?.Invoke((_bossEnemyData.LeftLegArmer.IsArmorBreak, _bossEnemyData.RightLegArmer.IsArmorBreak));
-        }
+            // 受けて個所によって防御力(肉質)を取得
+            defense = target.GetBodyDefense(damageType);
 
-        public void RiseUp()
-        {
-            if(_bossEnemyData.LeftLegArmer.IsArmorBreak && _bossEnemyData.RightLegArmer.IsArmorBreak)
+            // Damageを計算
+            if (damageType == TakeDamageType.VitalPoint
+                || damageType == TakeDamageType.WeekPoint)
             {
-                _bossEnemyData.LeftLegArmer.Repair();
-                _bossEnemyData.RightLegArmer.Repair();
+                // 弱点への攻撃ならPlayerもModeによるダメージの減増を行う
+                damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Flesh);
             }
+            else damage = DamageSystem.CalculateDamage(defense, damageContext);
 
-            OnRiseUp?.Invoke();
+            Debug.Log("本体にダメージ！：" + damage);
+            target.TakeDamage(damage);
         }
 
-        Status _bossEnemyData;
+        private static void TakeDamageInAttachmentArmor(
+            BossCharacterEntity target,
+            DamageContext damageContext,
+            ArmorAttachmentType attachmentType)
+        {
+            int defense = 0;
+            int damage = 0;
+
+            // 防御力を取得
+            defense = target.GetArmorStats(attachmentType).Defense;
+
+            // ダメージの総量を計算
+            damage = DamageSystem.CalculateDamage(defense, damageContext, true, EnemyDefenceType.Armor);
+
+            // ターゲットにダメージを与える
+            target.TakeDamage(damage, attachmentType);
+        }
     }
     #endregion
-
-    public class BossDead
-    {
-
-    }
 }

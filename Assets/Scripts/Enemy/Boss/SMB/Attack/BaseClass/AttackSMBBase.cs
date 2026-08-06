@@ -114,7 +114,7 @@ namespace BossEnemy.SMB
 
         protected AttackInformationHolder _informationHolder;
 
-        protected BossEnemyAttackData _attackData;
+        protected Attack.AttackData _attackData;
 
         protected IAnimationEventReceiver _animationEventReceiver = null;
 

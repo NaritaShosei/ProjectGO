@@ -16,7 +16,7 @@ namespace BossEnemy.Character
     /// <summary>
     /// ボス本体のViewClass
     /// </summary>
-    public class BossEnemyCharacterView : MonoBehaviour, IBossEnemyCharacterView
+    public class BossCharacterView : MonoBehaviour, IBossEnemyCharacterView
     {
         // --- Events ---
 
@@ -30,7 +30,7 @@ namespace BossEnemy.Character
         public event Action<IEnemy> OnDamaged;
 
         /// <summary>ダメージを受けたときに発火するイベント</summary>
-        public event Action<DamageContext, BodysDefensesType, ArmorAttachmentType> OnTakeDamage;
+        public event Action<DamageContext, TakeDamageType, ArmorAttachmentType> OnTakeDamage;
 
         /// <summary>死亡時に発火するイベント</summary>
         public event Action<IEnemy> OnDead;
@@ -137,18 +137,18 @@ namespace BossEnemy.Character
 
                     switch (bossParts.PartsType)
                     {
-                        case BodysDefensesType.None:
+                        case TakeDamageType.None:
                             break;
-                        case BodysDefensesType.Normal:
+                        case TakeDamageType.Normal:
                             isWeekPoint = false;
                             break;
-                        case BodysDefensesType.Hard:
+                        case TakeDamageType.Hard:
                             isWeekPoint = false;
                             break;
-                        case BodysDefensesType.WeekPoint:
+                        case TakeDamageType.WeekPoint:
                             isWeekPoint = true;
                             break;
-                        case BodysDefensesType.VitalPoint:
+                        case TakeDamageType.VitalPoint:
                             isWeekPoint = true;
                             break;
                     }
@@ -176,7 +176,7 @@ namespace BossEnemy.Character
             else _effectManager.PlayEffect(_takeDamageEffectKey, hitPos);
         }
 
-        public void Attack(BossEnemyAttackData bossEnemyAttackData)
+        public void Attack(Attack.AttackData bossEnemyAttackData)
         {
             _attackInformationHolder.SetData(bossEnemyAttackData);
             _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
@@ -468,62 +468,62 @@ namespace BossEnemy.Character
             [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
         }
         #endregion
-
-        #region ボスエネミーの各部位
-        [Serializable]
-        public class BossEnemyPartsView : ILockOnTarget
-        {
-            /// <summary>
-            /// ロックオンなどの中心のTransformを取得する
-            /// </summary>
-            public Transform GetTargetCenter()
-            {
-                return _partsTransform;
-            }
-
-            /// <summary>
-            /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
-            /// </summary>
-            public bool IsLockable => _isLockable;
-
-            /// <summary>
-            /// パーツの座標
-            /// </summary>
-            public Vector3 PartsPosition => _partsTransform.position;
-
-            /// <summary>
-            /// このパーツにつけるアーマー
-            /// </summary>
-            public BossArmorView Armor => _thisPartsArmer;
-
-            /// <summary>
-            /// このパーツの硬さ(肉質)
-            /// </summary>
-            public BodysDefensesType PartsType => _bossEnemyPartsType;
-
-            public void Init(BossEnemyCharacterView bossEnemyView)
-            {
-                _bossEnemyView = bossEnemyView;
-
-                if (_thisPartsArmer != null) _thisPartsArmer.Init();
-            }
-
-            public void SetLockable (bool lockable) => _isLockable = lockable;
-
-            [Header("このPartsのTransform")]
-            [SerializeField] private Transform _partsTransform;
-
-            [Header("このパーツに装備するアーマー(なければNullにする)")]
-            [SerializeField] private BossArmorView _thisPartsArmer = null;
-
-            [Header("このPartsの硬さ(肉質)")]
-            [SerializeField] private BodysDefensesType _bossEnemyPartsType;
-
-            private bool _isLockable = false;
-
-            private BossEnemyCharacterView _bossEnemyView = null;
-        }
-        #endregion
     }
 
+
+    #region ボスエネミーの各部位
+    [Serializable]
+    public class BossEnemyPartsView : ILockOnTarget
+    {
+        /// <summary>
+        /// ロックオンなどの中心のTransformを取得する
+        /// </summary>
+        public Transform GetTargetCenter()
+        {
+            return _partsTransform;
+        }
+
+        /// <summary>
+        /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
+        /// </summary>
+        public bool IsLockable => _isLockable;
+
+        /// <summary>
+        /// パーツの座標
+        /// </summary>
+        public Vector3 PartsPosition => _partsTransform.position;
+
+        /// <summary>
+        /// このパーツにつけるアーマー
+        /// </summary>
+        public BossArmorView Armor => _thisPartsArmer;
+
+        /// <summary>
+        /// このパーツの硬さ(肉質)
+        /// </summary>
+        public TakeDamageType PartsType => _bossEnemyPartsType;
+
+        public void Init(BossCharacterView bossEnemyView)
+        {
+            _bossEnemyView = bossEnemyView;
+
+            if (_thisPartsArmer != null) _thisPartsArmer.Init();
+        }
+
+        public void SetLockable(bool lockable) => _isLockable = lockable;
+
+        [Header("このPartsのTransform")]
+        [SerializeField] private Transform _partsTransform;
+
+        [Header("このパーツに装備するアーマー(なければNullにする)")]
+        [SerializeField] private BossArmorView _thisPartsArmer = null;
+
+        [Header("このPartsの硬さ(肉質)")]
+        [SerializeField] private TakeDamageType _bossEnemyPartsType;
+
+        private bool _isLockable = false;
+
+        private BossCharacterView _bossEnemyView = null;
+    }
+    #endregion
 }

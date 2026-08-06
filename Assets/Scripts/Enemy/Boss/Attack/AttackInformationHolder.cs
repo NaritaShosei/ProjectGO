@@ -4,13 +4,13 @@ namespace BossEnemy.Attack
 {
     public class AttackInformationHolder
     {
-        public BossEnemyAttackData AttackData => _attackData;
+        public AttackData AttackData => _attackData;
 
-        public void SetData(BossEnemyAttackData attackData)
+        public void SetData(AttackData attackData)
         {
             _attackData = attackData;
         }
 
-        private BossEnemyAttackData _attackData;
+        private AttackData _attackData;
     }
 }

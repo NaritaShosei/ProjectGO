@@ -1,6 +1,6 @@
-using Cysharp.Threading.Tasks;
 using System;
 using UniRx;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace BossEnemy.BehaviorTree
@@ -14,13 +14,12 @@ namespace BossEnemy.BehaviorTree
     }
 
     /// <summary> BehaviorTreeのもととなるインターフェース </summary>
-    public interface IBehaviorTree
+    public class BehaviorTreeGraph : GraphView
     {
         
     }
 
-
-    #region 実行中の実行終了時に実行終了を通知するクラス
+    #region 実行中のノードの実行が終了した際に実行終了Controllerに通知するクラス
     public class NodeRunningEndNotifier
     {
         public event Action OnRunningEnd;
@@ -118,7 +117,7 @@ namespace BossEnemy.BehaviorTree
     }
     #endregion
 
-    #region 各NodeのベースとなるClassとInterface
+    #region 各Nodeの基底ClassとInterface
     /// <summary> TreeNodeのInterface </summary>
     public interface ITreeNode
     {
@@ -153,7 +152,7 @@ namespace BossEnemy.BehaviorTree
     }
 
     /// <summary> BehaviorTreeのNodeの基底クラス </summary>
-    public abstract class TreeNodeBase : ITreeNode
+    public abstract class TreeNodeBase : Node, ITreeNode
     {
         public bool IsInit => _isInit;
 

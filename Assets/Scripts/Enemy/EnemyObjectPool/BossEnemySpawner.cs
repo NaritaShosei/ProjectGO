@@ -28,7 +28,7 @@ public class BossEnemySpawner : MonoBehaviour
     /// <returns>生成されたEnemy</returns>
     public IBossEnemyCharacterView Spawn(Vector3 position, out IBossHPView bossEnemyHPUI)
     {
-        BossEnemyCharacterView enemyView = _bossEnemyObjectPool.Get();
+        BossCharacterView enemyView = _bossEnemyObjectPool.Get();
         bossEnemyHPUI = _enemyUIObjectPool.Get();
 
         enemyView.InjectServices(_services);
@@ -53,7 +53,7 @@ public class BossEnemySpawner : MonoBehaviour
     [SerializeField] private AttackHitAreaSpawner _attackHitAreaSpawner;
 
     private EnemyServices _services;
-    private GenericObjectPool<BossEnemyCharacterView> _bossEnemyObjectPool;
+    private GenericObjectPool<BossCharacterView> _bossEnemyObjectPool;
     private GenericObjectPool<BossEnemyHPView> _enemyUIObjectPool;
 
     /// <summary>
@@ -76,14 +76,14 @@ public class BossEnemySpawner : MonoBehaviour
     public struct BossPoolData
     {
         public string Key => _key;
-        public BossEnemyCharacterView BossPrefab => _bossPrefab;
+        public BossCharacterView BossPrefab => _bossPrefab;
         public BossEnemyHPView BossUIPrefab => _enemyUIPrefab;
 
         [Header("BossEnemyを呼び出すための名前")]
         [SerializeField] private string _key;
 
         [Header("BossEnemyのPrefab")]
-        [SerializeField] private BossEnemyCharacterView _bossPrefab;
+        [SerializeField] private BossCharacterView _bossPrefab;
         [SerializeField] private BossEnemyHPView _enemyUIPrefab;
     }
 }
