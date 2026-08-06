@@ -110,14 +110,22 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
         var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
-
-        await _cameraShake.StartCameraShake(camera, data);
+        ControllerVibration.Play(0.25f, 0.5f);
+        try
+        {
+            await _cameraShake.StartCameraShake(camera, data);
+        }
+        finally
+        {
+            ControllerVibration.Stop();
+        }
     }
 
     /// <summary>カメラシェイクを強制停止します。</summary>
     public void ExecutionForceStopCameraShake()
     {
         _cameraShake.ForceStopCameraShake();
+        ControllerVibration.Stop();
     }
 
     #endregion
@@ -191,6 +199,9 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private Quaternion _blendStartRotation;
 
     private float _timeScale = 1f;
+    private float _basePositionSmoothTime;
+    private Vector2 _baseRotationSpeed;
+    private GameSettingService _gameSettingService;
     #endregion
 
     #region イージング関数
@@ -206,6 +217,14 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
+
+        _basePositionSmoothTime = _posSmoothTime;
+        _baseRotationSpeed = _cameraRotationSpeed;
+        if (ServiceLocator.TryGet(out _gameSettingService))
+        {
+            ApplyGameSettings(_gameSettingService.CurrentSettings);
+            _gameSettingService.OnSettingsChanged += ApplyGameSettings;
+        }
 
         _cameraShake = new CameraShake();
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
@@ -251,12 +270,26 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private void OnDestroy()
     {
+        if (_gameSettingService != null)
+        {
+            _gameSettingService.OnSettingsChanged -= ApplyGameSettings;
+        }
+
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
         {
             hitStopManager.Unregister(this, HitStopTargetGroup.Camera);
         }
 
         ServiceLocator.Unregister<CameraManager>();
+    }
+
+    private void ApplyGameSettings(GameSetting settings)
+    {
+        // 値0で低速、値1で高速になるよう、Inspector値を中央値として補正する。
+        _posSmoothTime = _basePositionSmoothTime
+            * Mathf.Lerp(2f, 0.5f, settings.CameraMoveSpeed);
+        _cameraRotationSpeed = _baseRotationSpeed
+            * Mathf.Lerp(0.25f, 2f, settings.CameraRotationSensitivity);
     }
 
     public void OnSpeedChange(float scale)
