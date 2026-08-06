@@ -14,7 +14,9 @@ public class MidBossLevelSystem
             return null;
         }
 
-        EnemyData selected = table.Levels[0].EnemyData; // 最低保証（最序盤フォールバック）
+        // どの条件にも一致しない場合のフォールバックとして先頭のEnemyDataを採用する
+        EnemyData selected = table.Levels[0].EnemyData;
+        // 現在選択中の条件レベル（より高い条件が見つかれば更新する）
         int selectedRequiredPlayerLevel = int.MinValue;
 
         foreach (var entry in table.Levels)

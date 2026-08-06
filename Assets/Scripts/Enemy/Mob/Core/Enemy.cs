@@ -200,6 +200,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
     /// <summary>
     /// EnemyDataを外部から上書きする。
+    /// nullの場合はプレハブに設定された既定のEnemyDataを使用する。
     /// Init()より前に呼ぶこと。
     /// </summary>
     public void SetData(EnemyData data)
@@ -300,8 +301,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         CanReceiveCondition = !active;
     }
 
-    [SerializeField] protected EnemyData _data;
+    // overrideData未指定時に復元するため保持する。
     private EnemyData _defaultData;
+    [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] private Collider _movementCollider;
     [SerializeField] protected Animator _animator;
@@ -634,6 +636,4 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
-
 }
-
