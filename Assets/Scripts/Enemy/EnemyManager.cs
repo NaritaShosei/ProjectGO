@@ -157,7 +157,7 @@ public class EnemyManager : MonoBehaviour
 
         OnEnemySpawned?.Invoke(enemy);
 
-        _spatialHashGrid.Register(enemy, pos);
+        _spatialHashGrid.Register(enemy, enemy.Self.position);
         _enemies.Add(enemy);
         _lockOnTargets.Add(enemy);
     }
