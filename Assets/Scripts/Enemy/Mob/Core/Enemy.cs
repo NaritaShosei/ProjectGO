@@ -90,7 +90,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         ResolveSpawnPosition();
         _isDead = false;
         _deadAnimationEnded = false;
-        _timeScale = 1f;
+        OnSpeedChange(1f);
 
         RefreshDataDependents();
 

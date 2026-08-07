@@ -87,11 +87,6 @@ public class EnemyManager : MonoBehaviour
                 _playerInformationService
             ));
 
-            // Instantiateによる直接生成はReInitializeを通らないため、ここで壁との重なりを解消する。
-            // 補正後の座標は下のSpatialHashGrid登録にも使用される。
-            if (enemy is Enemy movableEnemy)
-                movableEnemy.ResolveSpawnPosition();
-
             // FormationSystemへの登録はInit前に行う
             // Init内のTryAcquireが呼ばれる時点でIsVanguardが確定している必要があるため
             if (_formationSystem != null && obj.TryGetComponent(out IFormationParticipant participant))
@@ -105,6 +100,8 @@ public class EnemyManager : MonoBehaviour
 
             if (enemy is Enemy enemyComponent)
             {
+                enemyComponent.ReInitialize(pos);
+                enemyComponent.PlaySpawnAnimation();
                 enemyComponent.OnRegisteredToFormation();
             }
 
