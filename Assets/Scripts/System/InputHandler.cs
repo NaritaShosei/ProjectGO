@@ -31,6 +31,9 @@ public class InputHandler : MonoBehaviour
         }
         else
         {
+            // Disable() による canceled は停止中の入力として無視されるため、
+            // 先に解放を通知して攻撃側の押下状態を同期する。
+            OnLightAttackReleased?.Invoke();
             _isDisablingInput = true;
             MoveInput = Vector2.zero;
             CameraMoveInput = Vector2.zero;
