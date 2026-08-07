@@ -4,7 +4,7 @@ using UnityEngine;
 /// 攻撃のためプレイヤーへ接近するBehaviour
 /// SeparationServiceとWallAvoidanceServiceで移動方向を補正する
 /// </summary>
-public class ApproachBehaviour : IEnemyBehaviour
+public class ApproachBehaviour : IEnemyBehaviour,IEnemyDataRefreshable
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Approach; }
 
@@ -136,6 +136,8 @@ public class ApproachBehaviour : IEnemyBehaviour
             _player.position
         );
     }
+
+    public void RefreshData(EnemyData data) => _data = data;
 
     private Transform _self;
     private IEnemy _enemy;

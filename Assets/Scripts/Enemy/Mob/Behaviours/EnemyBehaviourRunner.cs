@@ -123,6 +123,25 @@ public class EnemyBehaviourRunner
         _current = null;
     }
 
+    /// <summary>
+    /// 登録済みの全Behaviourに対し、EnemyData差し替えを通知する。
+    /// </summary>
+    public void RefreshData(EnemyData data)
+    {
+        for (int i = 0; i < _behaviours.Count; i++)
+        {
+            if (_behaviours[i] is IEnemyDataRefreshable refreshable)
+            {
+                refreshable.RefreshData(data);
+            }
+        }
+
+        if (_turnBehaviour is IEnemyDataRefreshable turnRefreshable)
+        {
+            turnRefreshable.RefreshData(data);
+        }
+    }
+
     private readonly IEnemy _owner;
 
     private readonly List<IEnemyBehaviour> _behaviours
