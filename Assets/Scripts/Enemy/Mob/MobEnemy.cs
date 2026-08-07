@@ -168,6 +168,12 @@ public class MobEnemy : Enemy, IFormationParticipant
         _armor.OnBroken += BreakArmor;
     }
 
+    protected override void RefreshDataDependents()
+    {
+        base.RefreshDataDependents();
+        _runner.RefreshData(_data);
+    }
+
     protected void InvokeArmorRegistered()
     {
         if (_armor == null)
