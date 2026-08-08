@@ -40,6 +40,13 @@ public class EnemyManager : MonoBehaviour
        _playerInformationService
    );
 
+        // 中ボス生成時にプレイヤーレベルを参照するためEXPManagerを取得
+        if (!ServiceLocator.TryGet(out _expManager))
+        {
+            Debug.LogError("EnemyManager.Init: EXPManager が ServiceLocator に未登録です");
+        }
+
+
         if (_enemySpawner == null)
         {
             Debug.LogError("EnemyManager.Init: _enemySpawner が未設定です");
@@ -80,11 +87,6 @@ public class EnemyManager : MonoBehaviour
                 _playerInformationService
             ));
 
-            // Instantiateによる直接生成はReInitializeを通らないため、ここで壁との重なりを解消する。
-            // 補正後の座標は下のSpatialHashGrid登録にも使用される。
-            if (enemy is Enemy movableEnemy)
-                movableEnemy.ResolveSpawnPosition();
-
             // FormationSystemへの登録はInit前に行う
             // Init内のTryAcquireが呼ばれる時点でIsVanguardが確定している必要があるため
             if (_formationSystem != null && obj.TryGetComponent(out IFormationParticipant participant))
@@ -98,6 +100,8 @@ public class EnemyManager : MonoBehaviour
 
             if (enemy is Enemy enemyComponent)
             {
+                enemyComponent.ReInitialize(pos);
+                enemyComponent.PlaySpawnAnimation();
                 enemyComponent.OnRegisteredToFormation();
             }
 
@@ -116,11 +120,18 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 通常Enemy生成用のオーバーロード。
+    /// EnemyDataを上書きせずデフォルトデータで生成する。
+    /// </summary>
+    public void Spawn(string poolKey, Vector3 pos) => Spawn(poolKey, pos, null);
+
+    /// <summary>
     /// オブジェクトプールを使用したエネミーの生成
     /// </summary>
     /// <param name="poolKey">取得するEnemyのPool識別キー</param>
     /// <param name="pos">出現座標</param>
-    public void Spawn(string poolKey, Vector3 pos)
+    /// <param name="overrideData">上書きするEnemyData（nullなら通常のSpawnと同じ挙動）</param>
+    public void Spawn(string poolKey, Vector3 pos, EnemyData overrideData)
     {
         if (_player == null)
         {
@@ -128,7 +139,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        Enemy enemy = _enemySpawner.Spawn(poolKey, pos);
+        Enemy enemy = _enemySpawner.Spawn(poolKey, pos, overrideData);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
@@ -146,7 +157,7 @@ public class EnemyManager : MonoBehaviour
 
         OnEnemySpawned?.Invoke(enemy);
 
-        _spatialHashGrid.Register(enemy, pos);
+        _spatialHashGrid.Register(enemy, enemy.Self.position);
         _enemies.Add(enemy);
         _lockOnTargets.Add(enemy);
     }
@@ -199,6 +210,46 @@ public class EnemyManager : MonoBehaviour
             var strategy = spawnData.CreateStrategy(this);
             strategy.Spawn();
         }
+    }
+
+    /// <summary>
+    /// プレイヤーレベルに応じたEnemyDataを選択して中ボスを生成する
+    /// </summary>
+    /// <param name="poolKey"></param>
+    /// <param name="pos"></param>
+    /// <param name="midBossLevelTable"></param>
+    public void SpawnMidBoss(string poolKey, Vector3 pos, MidBossLevelTable midBossLevelTable)
+    {
+        if (_player == null)
+        {
+            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
+            return;
+        }
+
+        if (midBossLevelTable == null)
+        {
+            Debug.LogError($"MidBossLevelTable が未設定です（poolKey: {poolKey}）");
+            return;
+        }
+
+        if (_expManager == null)
+        {
+            Debug.LogError($"EXPManager が未登録のため中ボスを生成できません（poolKey: {poolKey}）");
+            return;
+        }
+
+        // プレイヤーレベルに応じたEnemyDataを選択
+        int playerLevel = _expManager.CurrentLevel;
+        EnemyData enemyData = MidBossLevelSystem.SelectEnemyData(midBossLevelTable, playerLevel);
+
+        if (enemyData == null)
+        {
+            Debug.LogError($"中ボスのEnemyData選択に失敗しました（poolKey: {poolKey}）");
+            return;
+        }
+
+        // 選択したEnemyDataで中ボスを生成
+        Spawn(poolKey, pos, enemyData);
     }
 
     /// <summary> ボスを生成 </summary>
@@ -281,6 +332,8 @@ public class EnemyManager : MonoBehaviour
 
     // Enemyに提供するサービスをまとめたクラス
     private EnemyServices _enemyServices;
+
+    private EXPManager _expManager;
 
     private void Awake()
     {

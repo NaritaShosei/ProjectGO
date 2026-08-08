@@ -74,7 +74,8 @@ public class MobEnemy : Enemy, IFormationParticipant
 
     public override void OnRegisteredToFormation()
     {
-        if (_attack != null)
+        bool hasAttackPatterns = _data.AttackPatterns != null && _data.AttackPatterns.Count > 0;
+        if (_attack != null && hasAttackPatterns)
         {
             _services.AttackerSlot.TryAcquire(Id, 1);
         }
@@ -166,6 +167,12 @@ public class MobEnemy : Enemy, IFormationParticipant
         }
         _armor.OnBroken -= BreakArmor;
         _armor.OnBroken += BreakArmor;
+    }
+
+    protected override void RefreshDataDependents()
+    {
+        base.RefreshDataDependents();
+        _runner.RefreshData(_data);
     }
 
     protected void InvokeArmorRegistered()
@@ -271,10 +278,6 @@ public class MobEnemy : Enemy, IFormationParticipant
         {
             Debug.LogWarning($"{nameof(MobEnemy)}: AttackerSlotが未注入です。Attackは無効になります。");
         }
-        else if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0)
-        {
-            Debug.LogWarning($"{nameof(MobEnemy)}: AttackPatternsが空です。Attack・スロット取得をスキップします。");
-        }
         else
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
@@ -348,8 +351,10 @@ public class MobEnemy : Enemy, IFormationParticipant
         // BehaviourRunnerを初期状態に戻す
         _runner?.Reset();
 
+        bool hasAttackPatterns = _data.AttackPatterns != null && _data.AttackPatterns.Count > 0;
+
         // スロット取得はスポーン毎に必要（Init時ではなくReInitialize毎に試行する）
-        if (_attack != null && _services.AttackerSlot != null)
+        if (_attack != null && _services.AttackerSlot != null && hasAttackPatterns)
         {
             // スポーン時にスロット取得を試みる
             // 満杯の場合は OnSlotReleased イベントで再試行される
