@@ -5,7 +5,7 @@ using UnityEngine;
 /// 他のBehaviourが選択できないときのフォールバックとしてランダム方向へ徘徊するBehaviour
 /// ランダムな目標地点に向かって移動し、到達したら新しい目標を設定する
 /// </summary>
-public class RoamBehaviour : IEnemyBehaviour
+public class RoamBehaviour : IEnemyBehaviour,IEnemyDataRefreshable
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Roam; }
 
@@ -38,6 +38,8 @@ public class RoamBehaviour : IEnemyBehaviour
         _data = ctx.Data;
         _state = ctx.StateContext;
     }
+
+    public void RefreshData(EnemyData data) => _data = data;
 
     public bool CanEnter()
     {

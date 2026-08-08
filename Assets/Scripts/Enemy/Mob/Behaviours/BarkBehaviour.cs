@@ -4,7 +4,7 @@ using UnityEngine;
 /// 攻撃距離内にいるがスロットが埋まっているときに威嚇するBehaviour
 /// BarkDurationの時間が経過したら終了する
 /// </summary>
-public class BarkBehaviour : IEnemyBehaviour
+public class BarkBehaviour : IEnemyBehaviour, IEnemyDataRefreshable
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Bark; }
 
@@ -34,6 +34,12 @@ public class BarkBehaviour : IEnemyBehaviour
         {
             _enemyAnimator.OnBarkEnd += HandleBarkEnd;
         }
+    }
+
+    public void RefreshData(EnemyData data)
+    {
+        _data = data;
+        _barkChance = data.BarkChance;
     }
 
     public bool CanEnter()
@@ -117,7 +123,7 @@ public class BarkBehaviour : IEnemyBehaviour
     private readonly bool _forceOnly;
 
     private readonly DistanceProfile _profile;
-    private readonly float _barkChance;
+    private float _barkChance;
 
     private readonly IEnemyAttackerSlot _attackerSlot;
     private float _timer;

@@ -11,4 +11,9 @@ public class WaveSpawnEnemy
 
     [Min(1)]
     public int SpawnCount;
+
+    [Tooltip("中ボスの場合のみ設定。プレイヤーレベルに応じたEnemyDataの切り替えテーブル")]
+    public MidBossLevelTable MidBossLevelTable;
+
+    public bool IsMidBoss => MidBossLevelTable != null;
 }

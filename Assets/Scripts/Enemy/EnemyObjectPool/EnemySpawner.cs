@@ -56,8 +56,9 @@ public class EnemySpawner : MonoBehaviour
     /// </summary>
     /// <param name="poolKey">Enemyのキー</param>
     /// <param name="position">生成位置</param>
+    /// <param name="overrideData">上書きするEnemyData（nullなら上書きしない）</param>
     /// <returns>生成されたEnemy</returns>
-    public Enemy Spawn(string poolKey, Vector3 position)
+    public Enemy Spawn(string poolKey, Vector3 position, EnemyData overrideData)
     {
         if (!_pools.TryGetValue(poolKey, out EnemyObjectPool pool))
         {
@@ -70,6 +71,11 @@ public class EnemySpawner : MonoBehaviour
         //返却時に使用するため、PoolKeyを保存
         enemy.SetPoolKey(poolKey);
         enemy.InjectServices(_services);
+
+        // 使用するEnemyDataを設定する。
+        // Init()より前に設定し、初期化時に正しいEnemyDataを参照できるようにする。
+        enemy.SetData(overrideData);
+
         // Init()は内部でガード済み。初回生成時のみ初期化されるため、
         // プール再利用時はここで何もしないため毎回呼んでよい
         enemy.Init();

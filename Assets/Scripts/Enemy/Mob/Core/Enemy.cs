@@ -77,6 +77,34 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         IsInitialized = true;
     }
 
+
+    /// <summary>
+    /// スポーン位置を指定して敵をプールから再利用するための初期化を行う。
+    /// (済み)ObjectPoolからSetActive(true)した直後に呼ぶこと。
+    /// </summary>
+    public virtual void ReInitialize(Vector3 spawnPosition)
+    {
+        // まず指定された座標へ配置し、直後に壁との重なりを解消する。
+        // CircleSpawnなどが壁の内側を指定しても、そのまま行動を開始させない。
+        transform.position = spawnPosition;
+        ResolveSpawnPosition();
+        _isDead = false;
+        _deadAnimationEnded = false;
+        OnSpeedChange(1f);
+
+        RefreshDataDependents();
+
+        _stats.ResetHP(_data.MaxHP);
+
+        // Animatorを初期状態（Idle）に戻す
+        // Dead→Exit遷移が再活性化時に誤発火しないよう即時反映する
+        _animator.Play("Idle", 0, 0f);
+        _animator.Update(0f);
+
+        _useSpawnAnimation = true;
+        // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+    }
+
     /// <summary>
     /// FormationSystemへの登録完了後に呼ばれる。
     /// フォーメーション登録後に必要な初期化処理を行うためのフック。
@@ -199,6 +227,24 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     /// <summary>
+    /// EnemyDataを外部から上書きする。
+    /// nullの場合はプレハブに設定された既定のEnemyDataを使用する。
+    /// Init()より前に呼ぶこと。
+    /// </summary>
+    public void SetData(EnemyData data)
+    {
+        EnemyData target = data != null ? data : _defaultData;
+
+        if (target == null)
+        {
+            Debug.LogError($"{name}: 有効なEnemyDataが設定されていません（overrideDataもdefaultDataもnull）");
+            return;
+        }
+
+        _data = target;
+    }
+
+    /// <summary>
     /// OnArmorBroken を派生クラスから発火するためのラッパー
     /// </summary>
     protected void InvokeOnArmorBroken() => OnArmorBroken?.Invoke(this);
@@ -283,6 +329,38 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         CanReceiveCondition = !active;
     }
 
+    /// <summary>
+    /// 現在位置がWallレイヤーのコライダーと重なっていれば、壁の外へ押し戻す。
+    /// スポーン直後と、移動前後の貫通補正から使用する。
+    /// </summary>
+    public void ResolveSpawnPosition()
+    {
+        if (_movementCollider == null || _services.WallAvoidanceService == null)
+            return;
+
+        transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
+            _movementCollider,
+            transform.position
+        );
+    }
+
+    public virtual void PlaySpawnAnimation()
+    {
+        if (_useSpawnAnimation)
+        {
+            _animator.Play("Spawn", 0, 0f);
+        }
+        _useSpawnAnimation = false;
+    }
+
+    public virtual void HandleSpawnEnd()
+    {
+    }
+
+ 
+
+    // overrideData未指定時に復元するため保持する。
+    private EnemyData _defaultData;
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] private Collider _movementCollider;
@@ -342,6 +420,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     {
         if (_movementCollider == null)
             _movementCollider = GetComponent<Collider>();
+
+        // プレハブにアサインされた既定のEnemyDataを保持しておく
+        // プール再利用時、overrideDataが無い場合はここへ復元する
+        _defaultData = _data;
 
         // OnDead時の登録
         OnDead += HandleDead;
@@ -478,6 +560,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     /// <summary>
+    /// EnemyData差し替え後に、データへ依存する内部状態を最新化するためのフック。
+    /// Behaviourを保持する派生クラス（MobEnemy等）でoverrideすること。
+    /// </summary>
+    protected virtual void RefreshDataDependents()
+    {
+    }
+
+    /// <summary>
     /// スロット解放通知を受けてスロットの再取得を試みる
     /// すでに取得済みの場合は何もしない
     /// </summary>
@@ -502,58 +592,6 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
         _deadAnimationEnded = true;
     }
 
-    /// <summary>
-    /// スポーン位置を指定して敵をプールから再利用するための初期化を行う。
-    /// (済み)ObjectPoolからSetActive(true)した直後に呼ぶこと。
-    /// </summary>
-    public virtual void ReInitialize(Vector3 spawnPosition)
-    {
-        // まず指定された座標へ配置し、直後に壁との重なりを解消する。
-        // CircleSpawnなどが壁の内側を指定しても、そのまま行動を開始させない。
-        transform.position = spawnPosition;
-        ResolveSpawnPosition();
-        _isDead = false;
-        _deadAnimationEnded = false;
-        _timeScale = 1f;
-
-        _stats.ResetHP(_data.MaxHP);
-
-        // Animatorを初期状態（Idle）に戻す
-        // Dead→Exit遷移が再活性化時に誤発火しないよう即時反映する
-        _animator.Play("Idle", 0, 0f);
-        _animator.Update(0f);
-
-        _useSpawnAnimation = true;
-        // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
-    }
-
-    /// <summary>
-    /// 現在位置がWallレイヤーのコライダーと重なっていれば、壁の外へ押し戻す。
-    /// スポーン直後と、移動前後の貫通補正から使用する。
-    /// </summary>
-    public void ResolveSpawnPosition()
-    {
-        if (_movementCollider == null || _services.WallAvoidanceService == null)
-            return;
-
-        transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
-            _movementCollider,
-            transform.position
-        );
-    }
-
-    public virtual void PlaySpawnAnimation()
-    {
-        if (_useSpawnAnimation)
-        {
-            _animator.Play("Spawn", 0, 0f);
-        }
-        _useSpawnAnimation = false;
-    }
-
-    public virtual void HandleSpawnEnd()
-    {
-    }
 
     /// <summary>
     /// 死亡アニメーション完了を待ってからGameObjectを破棄する。
@@ -612,6 +650,4 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     }
 
     protected abstract void UpdateEnemy(float deltaTime);
-
 }
-
