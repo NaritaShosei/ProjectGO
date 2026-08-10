@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cb34987cf848c24694fe22c210dc41c, type: 3}
+  m_Name: ElectricDodgeSkill
+  m_EditorClassIdentifier: Assembly-CSharp::ElectricDodgeSkill
+  _id: 56486
+  _priority: 0
+  _name: "\u96F7\u8EAB\u56DE\u907F"
+  _explanation: 
+  _icon: {fileID: 0}
+  _timing: 1
+  _unlockedSkill: {fileID: 0}
+  _defaultUnlocked: 1
+  _isPlayerMode: 1
+  _playerPosition: {x: 0, y: 0, z: 0}
+  _attackPower: 100
+  _damageMultiplier: 0.8
+  _grantEffectProbability: 0.5
+  _durationEffect: 3
+  _upDamagePercentage: 0.8
+  _attackRadius: 3
