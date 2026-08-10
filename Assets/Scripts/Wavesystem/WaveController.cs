@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static SpawnGroupData;
 
 /// <summary>
 /// 1Wave内のSpawnGroup進行を管理するクラス
@@ -110,16 +111,30 @@ public class WaveController
         public readonly Vector3 Position;
         public readonly float SpawnTime;
         public readonly MidBossLevelTable MidBossLevelTable;
+        public readonly EnemyGroup Group;
+        public readonly bool IsGroupLeader;
+        public readonly bool IsLastGroupMember;
 
         // MidBossLevelTableが設定されている場合は中ボスとして扱う
         public bool IsMidBoss => MidBossLevelTable != null;
 
-        public SpawnRequest(string enemyTypeKey, Vector3 position, float spawnTime, MidBossLevelTable midBossLevelTable)
+        public SpawnRequest(
+            string enemyTypeKey,
+            Vector3 position,
+            float spawnTime,
+            MidBossLevelTable midBossLevelTable,
+            EnemyGroup group,
+            bool isGroupLeader,
+            bool isLastGroupMember)
         {
             EnemyTypeKey = enemyTypeKey;
             Position = position;
             SpawnTime = spawnTime;
-            MidBossLevelTable = midBossLevelTable;// 中ボスの場合のみLevelTableを保持
+            MidBossLevelTable = midBossLevelTable;
+
+            Group = group;
+            IsGroupLeader = isGroupLeader;
+            IsLastGroupMember = isLastGroupMember;
         }
     }
 
@@ -172,33 +187,167 @@ public class WaveController
     /// <param name="group"></param>
     /// <param name="spawnPoint"></param>
     private void ScheduleSpawnGroup(
-    SpawnGroupData group,
-    SpawnPoint spawnPoint,
+        SpawnGroupData group,
+        SpawnPoint spawnPoint,
         float baseTime)
     {
-        // 不正値による0除算や負の待機時間を防ぐ
-        int setSize = Mathf.Max(1, group.SpawnSetSize);
-        float setInterval = Mathf.Max(0f, group.SpawnSetInterval);
+        int setSize =
+            Mathf.Max(
+                1,
+                group.SpawnSetSize);
 
-        int slotIndex = 0;
+        float setInterval =
+            Mathf.Max(
+                0f,
+                group.SpawnSetInterval);
+
+        int totalCount =
+            GetTotalSpawnCount(group);
+
+        // Cluster配置をグループ生成として扱う
+        EnemyGroup enemyGroup = null;
+
+        if (group.PlacementMode ==
+            SpawnPlacementMode.Cluster)
+        {
+            enemyGroup =
+                new EnemyGroup(
+                    group.ClusterRadius);
+        }
+
         int flatIndex = 0;
 
         foreach (var entry in group.SpawnEntries)
         {
-            for (int i = 0; i < entry.SpawnCount; i++)
+            for (int i = 0;
+                 i < entry.SpawnCount;
+                 i++)
             {
-                int setIndex = flatIndex / setSize;
-                float spawnTime = baseTime + setIndex * setInterval;
+                int setIndex =
+                    flatIndex / setSize;
 
-                Vector3 position = spawnPoint.GetSlotPosition(slotIndex);
+                float spawnTime =
+                    baseTime +
+                    setIndex * setInterval;
+
+                Vector3 position =
+                    CalculateSpawnPosition(
+                        group,
+                        spawnPoint,
+                        flatIndex,
+                        totalCount);
+
+                bool isGroupLeader =
+                    enemyGroup != null &&
+                    flatIndex == 0;
+
+                bool isLastGroupMember =
+                    enemyGroup != null &&
+                    flatIndex == totalCount - 1;
 
                 _pendingSpawns.Enqueue(
-                               new SpawnRequest(entry.EnemyTypeKey, position, spawnTime, entry.MidBossLevelTable));
+                    new SpawnRequest(
+                        entry.EnemyTypeKey,
+                        position,
+                        spawnTime,
+                        entry.MidBossLevelTable,
+                        enemyGroup,
+                        isGroupLeader,
+                        isLastGroupMember));
 
-                slotIndex++;
                 flatIndex++;
             }
         }
+    }
+
+    /// <summary>
+    /// 生成された敵をグループへ登録する。
+    /// </summary>
+    private void RegisterGroupMember(
+        Enemy spawnedEnemy,
+        SpawnRequest request)
+    {
+        if (spawnedEnemy == null)
+            return;
+
+        if (request.Group == null)
+            return;
+
+        if (spawnedEnemy is not
+            IEnemyGroupMember groupMember)
+        {
+            Debug.LogWarning(
+                $"{spawnedEnemy.name}は" +
+                $"{nameof(IEnemyGroupMember)}を" +
+                "実装していません。");
+
+            return;
+        }
+
+        request.Group.AddMember(
+            spawnedEnemy,
+            groupMember,
+            request.IsGroupLeader);
+
+        // 最後の1体を登録したら、
+        // 全員を待機グループとして登録する
+        if (request.IsLastGroupMember)
+        {
+            _enemyManager.RegisterWaitingGroup(
+                request.Group);
+
+            Debug.Log(
+                $"グループ生成完了: " +
+                $"{request.Group.Members.Count}体");
+        }
+    }
+
+
+
+    /// <summary>
+    /// SpawnGroup内の敵のスポーン位置を計算する
+    /// </summary>
+    /// <param name="group"></param>
+    /// <param name="spawnPoint"></param>
+    /// <param name="index"></param>
+    /// <param name="totalCount"></param>
+    /// <returns></returns>
+    private Vector3 CalculateSpawnPosition(
+    SpawnGroupData group,
+    SpawnPoint spawnPoint,
+    int index,
+    int totalCount)
+    {
+        if (group.PlacementMode ==
+            SpawnPlacementMode.SpawnPointSlots)
+        {
+            return spawnPoint.GetSlotPosition(index);
+        }
+
+        Vector3 center =
+            spawnPoint.GetSlotPosition(0);
+
+        // 1体目は中心
+        if (index == 0)
+            return center;
+
+        int childCount = totalCount - 1;
+
+        if (childCount <= 0)
+            return center;
+
+        int childIndex = index - 1;
+
+        float angle =
+            childIndex * Mathf.PI * 2f / childCount;
+
+        Vector3 offset = new Vector3(
+            Mathf.Cos(angle),
+            0f,
+            Mathf.Sin(angle)
+        ) * group.ClusterRadius;
+
+        return center + offset;
     }
 
     /// <summary>
@@ -207,25 +356,30 @@ public class WaveController
     private void ProcessPendingSpawns()
     {
         while (_pendingSpawns.Count > 0 &&
-                  _pendingSpawns.Peek().SpawnTime <= Time.time)
+               _pendingSpawns.Peek().SpawnTime <=
+               Time.time)
         {
-            var request = _pendingSpawns.Dequeue();
+            SpawnRequest request =
+                _pendingSpawns.Dequeue();
 
             if (request.IsMidBoss)
             {
-                // 中ボスはプレイヤーレベルに応じてEnemyDataを切り替えて生成する
                 _enemyManager.SpawnMidBoss(
                     request.EnemyTypeKey,
                     request.Position,
                     request.MidBossLevelTable);
+
+                continue;
             }
-            else
-            {
-                // 通常Enemyは登録済みデータで生成
+
+            Enemy spawnedEnemy =
                 _enemyManager.Spawn(
                     request.EnemyTypeKey,
                     request.Position);
-            }
+
+            RegisterGroupMember(
+                spawnedEnemy,
+                request);
         }
     }
 
