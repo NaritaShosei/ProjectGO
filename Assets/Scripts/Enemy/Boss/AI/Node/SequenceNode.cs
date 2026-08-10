@@ -13,13 +13,13 @@ namespace BossEnemy.AI
             _sequenceChildNodeRunningEndNotifier.OnRunningEnd += ProceedSequence;
         }
 
-        public override void Init(BossCharacterEntity bossCharacterEntity, RunningConditionNotifier nodeRunningEndNotifier)
+        public override void Init(RunningConditionNotifier nodeRunningEndNotifier)
         {
-            base.Init(bossCharacterEntity, nodeRunningEndNotifier);
+            base.Init(nodeRunningEndNotifier);
 
             foreach (var child in _childrenNode)
             {
-                child.Init(bossCharacterEntity, _sequenceChildNodeRunningEndNotifier);
+                child.Init(_sequenceChildNodeRunningEndNotifier);
             }
         }
 
@@ -28,8 +28,9 @@ namespace BossEnemy.AI
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
         {
+            nextNode = this;
             return NodeCondition.Running;
         }
 

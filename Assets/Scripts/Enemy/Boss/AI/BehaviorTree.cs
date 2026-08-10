@@ -59,7 +59,7 @@ namespace BossEnemy.AI
             int count = 0;
             while (runningCondition != NodeCondition.Running)
             {
-                runningCondition = _runningNode.TryEntryNextNode(_runningNode);
+                runningCondition = _runningNode.TryEntryNextNode(out _runningNode);
                 count++;
 
                 if (runningCondition == NodeCondition.Failure)
@@ -100,7 +100,7 @@ namespace BossEnemy.AI
             if(_runningNode != null) _runningNode.OnExit();
 
             if (nextAction == null) return;
-            if (!nextAction.IsInit) nextAction.Init(_bossCharacterEntity, _nodeRunningEndNotifier);
+            if (!nextAction.IsInit) nextAction.Init(_nodeRunningEndNotifier);
 
             _runningNode = nextAction;
             _runningNode.OnEnter();
@@ -116,7 +116,7 @@ namespace BossEnemy.AI
         public bool IsInit { get; }
 
         /// <summary> BehaviourTreeをSetする </summary>
-        void Init(BossCharacterEntity bossCharacterEntity, RunningConditionNotifier nodeRunningEndNotifier);
+        void Init(RunningConditionNotifier nodeRunningEndNotifier);
 
         /// <summary> このNodeへの遷移条件を確認して結果を返す </summary>
         NodeCondition TryEntry();
@@ -127,7 +127,7 @@ namespace BossEnemy.AI
         /// 次のNodeへの遷移結果フラグ
         /// このフラグがFalseなら現在のNodeをゴールとする
         /// </returns>
-        NodeCondition TryEntryNextNode(ITreeNode nextNode);
+        NodeCondition TryEntryNextNode(out ITreeNode nextNode);
 
         /// <summary> このNodeへの遷移が成功した際の処理 </summary>
         void OnEnter();
@@ -147,7 +147,6 @@ namespace BossEnemy.AI
         public bool IsInit => _isInit;
 
         public virtual void Init(
-            BossCharacterEntity bossCharacterEntity,
             RunningConditionNotifier nodeRunningEndNotifier)
         {
             _isInit = true;
@@ -155,13 +154,10 @@ namespace BossEnemy.AI
         }
 
         public abstract NodeCondition TryEntry();
-        public abstract NodeCondition TryEntryNextNode(ITreeNode nextNode);
+        public abstract NodeCondition TryEntryNextNode(out ITreeNode nextNode);
         public virtual void OnEnter() { return; }
         public virtual void OnUpdate() { return; }
         public virtual void OnExit() { return; }
-
-        // 操作するボスのEntity
-        protected BossCharacterEntity _bossCharacterEntity;
 
         private RunningConditionNotifier _nodeRunningEndNotifier = null;
 
@@ -193,7 +189,7 @@ namespace BossEnemy.AI
         protected BehaviourTreeGraphPresenter _behaviourTreeGraphPresenter;
     }
 
-    /// <summary>  </summary>
+    /// <summary> GraphViewによって変更されたBehaviourTreeの変更内容をRepositryに反映するクラス </summary>
     public class BehaviourTreeGraphPresenter
     {
 

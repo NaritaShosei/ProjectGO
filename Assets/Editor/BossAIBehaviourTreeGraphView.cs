@@ -5,13 +5,21 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace BossEnemy.AI.Editor.Window
+namespace BossEnemy.AI.Editor.GraphView
 {
     public class BossAIBehaviourTreeGraphView : BehaviourTreeGraphView
     {
         public BossAIBehaviourTreeGraphView(EditorWindow editorWindow) : base(editorWindow)
         {
+            // 右クリックメニューを追加
+            var menuWindowProvider = ScriptableObject.CreateInstance<SearchMenuWindowProvider>();
 
+            menuWindowProvider.Init(this, editorWindow);
+
+            nodeCreationRequest += context =>
+            {
+                SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), menuWindowProvider);
+            };
         }
     }
         
@@ -35,14 +43,18 @@ namespace BossEnemy.AI.Editor.Window
             var entries = new List<SearchTreeEntry>();
             entries.Add(new SearchTreeGroupEntry(new GUIContent("Create Node")));
 
-            // 各Nodeのグループを追加
+            // ActionNodeのグループを追加
             entries.Add(new SearchTreeGroupEntry(new GUIContent("Action")) { level = 1 });
-            entries.Add(new SearchTreeGroupEntry(new GUIContent("Decorator")) { level = 2 });
-            entries.Add(new SearchTreeGroupEntry(new GUIContent("Selector")) { level = 3 });
-            entries.Add(new SearchTreeGroupEntry(new GUIContent("Sequence")) { level = 4 });
 
-            // グループの下に各ノードを作るためのメニューを追加
+            // DecoratorNodeのグループを追加
+            entries.Add(new SearchTreeGroupEntry(new GUIContent("Decorator")) { level = 1 });
 
+            // SelectorNodeのグループを追加
+            entries.Add(new SearchTreeGroupEntry(new GUIContent("Selector")) { level = 1 });
+            entries.Add(new SearchTreeEntry(new GUIContent(nameof(SelectorNode))) { level = 2, userData = typeof(SelectorNode) });
+
+            // SequenceNodeのグループを追加
+            entries.Add(new SearchTreeGroupEntry(new GUIContent("Sequence")) { level = 1 });
 
             return entries;
         }

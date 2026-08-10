@@ -12,14 +12,14 @@ namespace BossEnemy.AI
         {
             title = "SelectorNode";
 
-            // 入力用のポートを作成
-            var inputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(float)); // 第三引数をPort.Capacity.Multipleにすると複数のポートへの接続が可能になる
-            inputPort.portName = "Input";
+            // 親ノードからの入力用ポート
+            var inputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(ITreeNode)); // 第三引数をPort.Capacity.Multipleにすると複数のポートへの接続が可能になる
+            inputPort.portName = "EntryPort";
             inputContainer.Add(inputPort); // 入力用ポートはinputContainerに追加する
 
-            // 出力用のポートを作る
-            var outputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(float));
-            outputPort.portName = "Value";
+            // 子ノードへの出力用ポート
+            var outputPort = Port.Create<Edge>(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(ITreeNode));
+            outputPort.portName = "Child";
             outputContainer.Add(outputPort); // 出力用ポートはoutputContainerに追加する
         }
 
@@ -28,7 +28,7 @@ namespace BossEnemy.AI
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
         {
             foreach (var child in _childrenNode)
             {
@@ -47,12 +47,8 @@ namespace BossEnemy.AI
                 }
             }
 
-            Debug.LogError("すべてのノードに入れませんでした");
-
-            foreach (var child in _childrenNode)
-            {
-                Debug.Log(child.GetType().Name);
-            }
+            Debug.LogError("ノードの選択に失敗しました");
+            nextNode = null;
             return NodeCondition.Failure;
         }
 
