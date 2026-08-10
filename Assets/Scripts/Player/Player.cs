@@ -43,11 +43,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
 
-    public event Func<bool> OnJustDodgeSuccess
-    {
-        add => _playerStats.OnJustDodgeSuccess += value;
-        remove => _playerStats.OnJustDodgeSuccess -= value;
-    }
+    public event Func<bool> OnJustDodgeSuccess;
 
     public event Action<float, float, float> OnHealthChanged
     {
@@ -308,6 +304,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         if (_move != null)
             _move.OnEndDodge += RelayEndDodge;
 
+        if (_justDodgeSystem != null)
+            _justDodgeSystem.OnJustDodgeSuccess += RelayJustDodgeSuccess;
+
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             cameraManager.OnLockOnTargetChanged += SetLockOnTarget;
     }
@@ -405,6 +404,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     private void RelayEndDodge()
     {
         OnEndDodge?.Invoke(transform);
+    }
+
+    private void RelayJustDodgeSuccess()
+    {
+        OnJustDodgeSuccess?.Invoke();
     }
 
     private sealed class ThunderGaugeSpeedTarget : ISpeedChange
