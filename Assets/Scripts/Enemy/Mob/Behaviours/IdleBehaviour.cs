@@ -2,7 +2,7 @@
 /// Roam・Barkが選択されなかったときのフォールバックとして一定時間静止するBehaviour
 /// SelectBehaviourのskip-previousルールにより Roam → Idle → Roam のサイクルが成立する
 /// </summary>
-public class IdleBehaviour : IEnemyBehaviour
+public class IdleBehaviour : IEnemyBehaviour,IEnemyDataRefreshable
 {
     public int Priority { get => (int)EnemyBehaviourPriority.Idle; }
 
@@ -14,6 +14,8 @@ public class IdleBehaviour : IEnemyBehaviour
         _enemyAnimator = ctx.EnemyAnimator;
         _state = ctx.StateContext;
     }
+
+    public void RefreshData(EnemyData data) => _data = data;
 
     public bool CanEnter()
     {
