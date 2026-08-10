@@ -12,7 +12,7 @@ public class ElectricDodgeSkill : SkillBase
 
     public void ActivationElectrickDodge(Transform playerTransform)
     {
-        if (!_isCan) return;
+        if (_isCan) return;
 
         Collider[] hitEnemies = Physics.OverlapSphere(playerTransform.position, _attackRadius);
         foreach (Collider hitEnemy in hitEnemies)
@@ -30,7 +30,6 @@ public class ElectricDodgeSkill : SkillBase
                     UpDamagePercentage = _upDamagePercentage
                 }
             });
-            Debug.Log("雷身回避スキルを使用!!!");
         }
         _isCan = false;
     }
