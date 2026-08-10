@@ -12,6 +12,8 @@ public class ElectricDodgeSkill : SkillBase
 
     public void ActivationElectrickDodge(Transform playerTransform)
     {
+        if (!_isCan) return;
+
         Collider[] hitEnemies = Physics.OverlapSphere(playerTransform.position, _attackRadius);
         foreach (Collider hitEnemy in hitEnemies)
         {
