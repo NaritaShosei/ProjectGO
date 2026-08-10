@@ -14,7 +14,7 @@ namespace BossEnemy.SMB
         public void Init(
             IAnimationEventReceiver bossEnemyAnimationEventReceiver,
             BossEnemyAnimator bossAnimator,
-            AttackInformationHolder attackInformation,
+            BossAttackPresenter attackInformation,
             CameraManager cameraManager,
             IAttackHitAreaSpawner attackHitAreaSpawner,
             Transform bossEnemyTransform, IPlayer player)
@@ -112,7 +112,7 @@ namespace BossEnemy.SMB
 
         protected CameraManager _cameraManager = null;
 
-        protected AttackInformationHolder _informationHolder;
+        protected BossAttackPresenter _informationHolder;
 
         protected Attack.AttackData _attackData;
 
