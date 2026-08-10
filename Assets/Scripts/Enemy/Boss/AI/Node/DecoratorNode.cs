@@ -17,11 +17,12 @@ namespace BossEnemy.AI
             _childNode = childNode;
         }
 
-        public override NodeCondition TryEntryNextNode(ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
         {
             if(_childNode == null)
             {
                 Debug.LogError("子ノードがNullです");
+                nextNode = null;
                 return NodeCondition.Failure;
             }
 
@@ -33,6 +34,7 @@ namespace BossEnemy.AI
                 return NodeCondition.Success;
             }
 
+            nextNode = null;
             return NodeCondition.Failure;
         }
 

@@ -13,8 +13,9 @@ namespace BossEnemy.AI
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
         {
+            nextNode = this;
             return NodeCondition.Running;
         }
     }
