@@ -93,7 +93,7 @@ namespace BossEnemy.Character
 
             foreach (var behaviour in _animator.GetBehaviours<AttackSMBBase>())
             {
-                behaviour.Init(_bossEnemyAnimationEventReceiver, _bossEnemyAnimator, _attackInformationHolder,
+                behaviour.Init(_bossEnemyAnimationEventReceiver, _bossEnemyAnimator, _attackPresenter,
                     _cameraManager, _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
             }
 
@@ -178,7 +178,7 @@ namespace BossEnemy.Character
 
         public void Attack(Attack.AttackData bossEnemyAttackData)
         {
-            _attackInformationHolder.SetData(bossEnemyAttackData);
+            _attackPresenter.HnadleAttackStart(bossEnemyAttackData);
             _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
             Debug.Log(bossEnemyAttackData.AnimParamName);
         }
@@ -403,7 +403,7 @@ namespace BossEnemy.Character
         // ボスエネミーのAnimator
         private BossEnemyAnimator _bossEnemyAnimator;
 
-        private AttackInformationHolder _attackInformationHolder = new();
+        private BossAttackPresenter _attackPresenter = new();
 
         // 各種マネージャー
         private EffectManager _effectManager;

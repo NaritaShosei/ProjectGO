@@ -11,7 +11,7 @@ using BossEnemy.Character;
 namespace BossEnemy.Infrastructure.Repository
 {
     [CreateAssetMenu(fileName = "BossEnemyMasterDataRepository", menuName = "Repositry/BossEnemyMasterData")]
-    public class BossEnemyMasterDataRepository : ScriptableObject, IBossEnemyDataRepository
+    public class BossEnemyEntityRepository : ScriptableObject, IBossEnemyEntityRepository
     {
         public void Init()
         {

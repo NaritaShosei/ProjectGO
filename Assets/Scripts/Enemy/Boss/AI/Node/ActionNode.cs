@@ -3,7 +3,7 @@ using UnityEngine;
 using BossEnemy.Character;
 using BossEnemy.System;
 
-namespace BossEnemy.BehaviorTree
+namespace BossEnemy.AI
 {
     /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部) </summary>
     public abstract class ActionNode : TreeNodeBase
@@ -13,7 +13,7 @@ namespace BossEnemy.BehaviorTree
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryGetNextNode(ref ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(ITreeNode nextNode)
         {
             return NodeCondition.Running;
         }

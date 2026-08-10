@@ -7,7 +7,7 @@ using BossEnemy.Attack;
 using BossEnemy.Character;
 using BossEnemy.Interface;
 
-namespace BossEnemy.BehaviorTree
+namespace BossEnemy.AI
 {
     /// <summary> 通ったら子Nodeを実行して、通らなければFailureを返すNode </summary>
     public abstract class DecoratorNode : TreeNodeBase
@@ -17,7 +17,7 @@ namespace BossEnemy.BehaviorTree
             _childNode = childNode;
         }
 
-        public override NodeCondition TryGetNextNode(ref ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(ITreeNode nextNode)
         {
             if(_childNode == null)
             {
