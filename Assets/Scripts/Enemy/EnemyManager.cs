@@ -123,7 +123,7 @@ public class EnemyManager : MonoBehaviour
     /// 通常Enemy生成用のオーバーロード。
     /// EnemyDataを上書きせずデフォルトデータで生成する。
     /// </summary>
-    public void Spawn(string poolKey, Vector3 pos) => Spawn(poolKey, pos, null);
+    public Enemy Spawn(string poolKey, Vector3 pos) => Spawn(poolKey, pos, null);
 
     /// <summary>
     /// オブジェクトプールを使用したエネミーの生成
@@ -131,16 +131,25 @@ public class EnemyManager : MonoBehaviour
     /// <param name="poolKey">取得するEnemyのPool識別キー</param>
     /// <param name="pos">出現座標</param>
     /// <param name="overrideData">上書きするEnemyData（nullなら通常のSpawnと同じ挙動）</param>
-    public void Spawn(string poolKey, Vector3 pos, EnemyData overrideData)
+    public Enemy Spawn(string poolKey,
+        Vector3 pos,
+        EnemyData overrideData)
     {
         if (_player == null)
         {
-            Debug.LogError("EnemyManagerが未初期化のままSpawnされました");
-            return;
+            Debug.LogError(
+                "EnemyManagerが未初期化のままSpawnされました");
+
+            return null;
         }
 
-        Enemy enemy = _enemySpawner.Spawn(poolKey, pos, overrideData);
-        if (enemy == null) return;
+        Enemy enemy = _enemySpawner.Spawn(
+            poolKey,
+            pos,
+            overrideData);
+
+        if (enemy == null)
+            return null;
 
         // Enemy死亡時と被弾時のイベント登録
         enemy.OnDead += HandleEnemyDead;
@@ -148,23 +157,52 @@ public class EnemyManager : MonoBehaviour
 
         _enemiesTransformList.Add(enemy.transform);
 
-        if (_formationSystem != null && enemy.TryGetComponent(out IFormationParticipant participant))
+        if (_formationSystem != null &&
+            enemy.TryGetComponent(
+                out IFormationParticipant participant))
         {
-            _formationSystem.Register(enemy, participant);
+            _formationSystem.Register(
+                enemy,
+                participant);
         }
 
         enemy.OnRegisteredToFormation();
 
         OnEnemySpawned?.Invoke(enemy);
 
-        _spatialHashGrid.Register(enemy, enemy.Self.position);
+        _spatialHashGrid.Register(
+            enemy,
+            enemy.Self.position);
+
         _enemies.Add(enemy);
         _lockOnTargets.Add(enemy);
-    }
 
+        return enemy;
+    }
 
     /// <summary>現在生存しているEnemyの数を返す</summary>
     public int GetEnemyCount() => _enemies.Count;
+
+    /// <summary>
+    /// 敵グループを待機状態として登録する。
+    /// </summary>
+    public void RegisterWaitingGroup(
+        EnemyGroup group)
+    {
+        _formationSystem?.RegisterWaitingGroup(
+            group);
+    }
+
+    /// <summary>
+    /// 条件を満たしていればグループを前衛化する。
+    /// </summary>
+    public bool TryPromoteGroup(
+        EnemyGroup group)
+    {
+        return _formationSystem != null &&
+               _formationSystem.TryPromoteGroup(
+                   group);
+    }
 
     public IReadOnlyList<IEnemy> GetEnemiesInRange(Vector3 position, float radius)
     {
@@ -422,6 +460,7 @@ public class EnemyManager : MonoBehaviour
             Debug.LogError("このインターフェースの実体はUnityのComponentではありません。");
         }
     }
+
 
 #if UNITY_EDITOR
     // デバッグ用
