@@ -210,6 +210,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _mainCamera = Camera.main;
         ServiceLocator.Register(this);
 
+        // 設定変更を繰り返しても倍率が累積しないようInspector値を基準値として保持する。
         _basePositionSmoothTime = _posSmoothTime;
         _baseRotationSpeed = _cameraRotationSpeed;
         if (ServiceLocator.TryGet(out _gameSettingService))
@@ -264,6 +265,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         if (_gameSettingService != null)
         {
+            // シーン破棄後に設定変更イベントから呼ばれないよう購読を解除する。
             _gameSettingService.OnSettingsChanged -= ApplyGameSettings;
         }
 

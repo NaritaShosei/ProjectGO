@@ -26,6 +26,8 @@ public class SoundManager
     {
         if (settings == null) return;
 
+        // Atom Craft側で各キューに設定されたカテゴリへ一括反映する。
+        // 再生中の音と、以降に再生する音の両方へ同じ音量が適用される。
         ApplyCategoryVolume(BGMCategoryName, settings.BGMVolume);
         ApplyCategoryVolume(SECategoryName, settings.SEVolume);
         ApplyCategoryVolume(VoiceCategoryName, settings.VoiceVolume);
@@ -237,6 +239,7 @@ public class SoundManager
 
     private static void ApplyCategoryVolume(string categoryName, float volume)
     {
+        // ACFの取り込み漏れやカテゴリ名の不一致を実行時に検出する。
         if (!CriAtomExAcf.GetCategoryInfoByName(categoryName, out _))
         {
             Debug.LogWarning($"[SoundManager] CRIカテゴリが見つかりません: {categoryName}");

@@ -26,6 +26,7 @@ public static class SaveLoadService
 
         if (!File.Exists(path))
         {
+            // 初回起動時は型の初期値をそのままゲーム設定として使用する。
             Debug.LogWarning($"[SaveLoadService] セーブデータが見つかりません: {path} → 新規生成");
             return new T();
         }
@@ -38,6 +39,7 @@ public static class SaveLoadService
         }
         catch (Exception exception)
         {
+            // 破損データで起動不能にならないよう、読込失敗時も初期値へフォールバックする。
             Debug.LogWarning($"[SaveLoadService] 読込に失敗しました: {path} → 新規生成\n{exception.Message}");
             return new T();
         }
@@ -55,6 +57,7 @@ public static class SaveLoadService
 
     private static string GetPath<T>()
     {
+        // 型ごとにファイルを分けるため、型名をそのままファイル名として使用する。
         return Path.Combine(Application.persistentDataPath, typeof(T).Name + Extension);
     }
 }
