@@ -111,21 +111,13 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
 
-        try
-        {
-            await _cameraShake.StartCameraShake(camera, data);
-        }
-        finally
-        {
-            ControllerVibration.Stop();
-        }
+        await _cameraShake.StartCameraShake(camera, data);
     }
 
     /// <summary>カメラシェイクを強制停止します。</summary>
     public void ExecutionForceStopCameraShake()
     {
         _cameraShake.ForceStopCameraShake();
-        ControllerVibration.Stop();
     }
 
     #endregion
