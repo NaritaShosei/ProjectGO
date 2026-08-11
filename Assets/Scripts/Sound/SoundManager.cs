@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public class SoundManager
 {
+    private const string BGMCategoryName = "BGM";
+    private const string SECategoryName = "SE";
+    private const string VoiceCategoryName = "Voice";
+
     /// <summary> コンストラクタ </summary>
     /// <param name="bgmPlayer"> BGM用のPlayerObject </param>
     /// <param name="defaultBGM"> BGMの音源データが入ったCueSheetの名前(あとで再生時に変更可能) </param>
@@ -209,10 +213,6 @@ public class SoundManager
     // ループSE用のソースを管理するDictionary（GameObject → (cueName → Source)）
     private Dictionary<GameObject, Dictionary<string, CriAtomSource>> _loopSourcesDict
         = new Dictionary<GameObject, Dictionary<string, CriAtomSource>>();
-
-    private const string BGMCategoryName = "BGM";
-    private const string SECategoryName = "SE";
-    private const string VoiceCategoryName = "Voice";
 
     /// <summary> 初期化 </summary>
     private void Initialize(GameObject bgmPlayer)
