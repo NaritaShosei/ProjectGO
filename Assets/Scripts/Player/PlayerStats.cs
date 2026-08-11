@@ -53,8 +53,6 @@ public class PlayerStats
     public event Action<float, float, float> OnThunderGaugeChanged;
     public event Action OnThunderGaugeDepleted;
     public event Action OnStatsChanged;
-    public event Action OnJustDodgeSuccess;
-    public event Action OnEndDodge;
 
     public PlayerStats(PlayerData data)
     {
