@@ -47,13 +47,13 @@ public class PlayerStats
     /// 死亡直前イベント。true を返すと死亡をキャンセルする。
     /// </summary>
     public event Func<bool> OnBeforeDead;
-    public event Func<bool> OnJustDodgeSuccess;
 
     public event Action<float, float, float> OnHealthChanged;
     /// <summary> (current, max, initialMax) — スタミナと同じ形式 </summary>
     public event Action<float, float, float> OnThunderGaugeChanged;
     public event Action OnThunderGaugeDepleted;
     public event Action OnStatsChanged;
+    public event Action OnJustDodgeSuccess;
     public event Action OnEndDodge;
 
     public PlayerStats(PlayerData data)

@@ -43,7 +43,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
 
-    public event Func<bool> OnJustDodgeSuccess;
+    public event Action OnJustDodgeSuccess;
 
     public event Action<float, float, float> OnHealthChanged
     {
