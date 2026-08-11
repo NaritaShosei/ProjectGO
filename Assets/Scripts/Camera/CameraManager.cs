@@ -110,7 +110,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
         var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
-        ControllerVibration.Play(0.25f, 0.5f);
+
         try
         {
             await _cameraShake.StartCameraShake(camera, data);
