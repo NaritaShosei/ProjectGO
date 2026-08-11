@@ -22,6 +22,7 @@ public static class ControllerVibration
 
     private static bool IsEnabled()
     {
+        // 設定サービス生成前や単体テストシーンでは振動を許可する。
         return !ServiceLocator.TryGet(out GameSettingService settingsService)
             || settingsService.CurrentSettings.IsControllerVibrations;
     }

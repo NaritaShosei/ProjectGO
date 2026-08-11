@@ -9,10 +9,12 @@ public sealed class GameSettingService
 {
     public event Action<GameSetting> OnSettingsChanged;
 
+    // 呼び出し側から保持中の設定を直接書き換えられないようコピーを返す。
     public GameSetting CurrentSettings => _currentSettings.Clone();
 
     public GameSettingService()
     {
+        // 起動時にディスクから復元し、利用可能なシステムへ初期値を反映する。
         _currentSettings = SaveLoadService.Load<GameSetting>();
         ApplyRuntimeSettings();
     }
@@ -24,6 +26,7 @@ public sealed class GameSettingService
             throw new ArgumentNullException(nameof(settings));
         }
 
+        // 保持・永続化・ゲームへの反映をこのサービス経由に統一する。
         _currentSettings = settings.Clone();
         SaveLoadService.Save(_currentSettings);
         ApplyRuntimeSettings();
@@ -41,6 +44,7 @@ public sealed class GameSettingService
 
     private void ApplyRuntimeSettings()
     {
+        // SoundManagerがまだ生成されていない場合は、生成時に現在値を取得して反映する。
         if (ServiceLocator.TryGet(out SoundManager soundManager))
         {
             soundManager.ApplySettings(_currentSettings);
@@ -58,6 +62,7 @@ public sealed class GameSettingService
 /// </summary>
 public static class GameSettingServiceBootstrap
 {
+    // 最初のシーンのAwakeより前に登録し、すべてのシーンから同じ設定を参照可能にする。
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Register()
     {
