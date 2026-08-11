@@ -308,6 +308,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         if (_move != null)
             _move.OnEndDodge -= RelayEndDodge;
+
+        if (_justDodgeSystem != null)
+            _justDodgeSystem.OnJustDodgeSuccess -= RelayJustDodgeSuccess;
     }
 
     private void BindEvents()
