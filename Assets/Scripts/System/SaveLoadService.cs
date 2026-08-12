@@ -15,8 +15,30 @@ public static class SaveLoadService
         }
 
         var path = GetPath<T>();
+        var temporaryPath = path + ".tmp";
         var json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(path, json);
+
+        try
+        {
+            File.WriteAllText(temporaryPath, json);
+
+            if (File.Exists(path))
+            {
+                File.Replace(temporaryPath, path, null);
+            }
+            else
+            {
+                File.Move(temporaryPath, path);
+            }
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+            {
+                File.Delete(temporaryPath);
+            }
+        }
+
         Debug.Log($"[SaveLoadService] 保存完了: {path}");
     }
 

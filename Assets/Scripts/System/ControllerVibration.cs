@@ -5,19 +5,30 @@ using UnityEngine.InputSystem;
 /// </summary>
 public static class ControllerVibration
 {
+    private static Gamepad _activeGamepad;
+
     public static void Play(float lowFrequency, float highFrequency)
     {
-        if (!IsEnabled() || Gamepad.current == null)
+        var gamepad = Gamepad.current;
+        if (!IsEnabled() || gamepad == null)
         {
             return;
         }
 
-        Gamepad.current.SetMotorSpeeds(lowFrequency, highFrequency);
+        Stop();
+        _activeGamepad = gamepad;
+        _activeGamepad.SetMotorSpeeds(lowFrequency, highFrequency);
     }
 
     public static void Stop()
     {
-        Gamepad.current?.ResetHaptics();
+        if (_activeGamepad == null)
+        {
+            return;
+        }
+
+        _activeGamepad.ResetHaptics();
+        _activeGamepad = null;
     }
 
     private static bool IsEnabled()

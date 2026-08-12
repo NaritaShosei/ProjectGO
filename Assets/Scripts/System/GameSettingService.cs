@@ -27,8 +27,9 @@ public sealed class GameSettingService
         }
 
         // 保持・永続化・ゲームへの反映をこのサービス経由に統一する。
-        _currentSettings = settings.Clone();
-        SaveLoadService.Save(_currentSettings);
+        var newSettings = settings.Clone();
+        SaveLoadService.Save(newSettings);
+        _currentSettings = newSettings;
         ApplyRuntimeSettings();
         OnSettingsChanged?.Invoke(CurrentSettings);
     }

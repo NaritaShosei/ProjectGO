@@ -76,7 +76,7 @@ public sealed class ControllerVibrationTestUI : MonoBehaviour
 
     private IEnumerator VibrateForDuration()
     {
-        Gamepad.current?.SetMotorSpeeds(_lowFrequency, _highFrequency);
+        ControllerVibration.Play(_lowFrequency, _highFrequency);
         yield return new WaitForSecondsRealtime(_duration);
         StopVibration();
     }
@@ -89,7 +89,7 @@ public sealed class ControllerVibrationTestUI : MonoBehaviour
             _vibrationCoroutine = null;
         }
 
-        Gamepad.current?.ResetHaptics();
+        ControllerVibration.Stop();
     }
 
     private void OnDisable()
