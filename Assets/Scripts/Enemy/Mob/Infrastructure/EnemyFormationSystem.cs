@@ -84,6 +84,12 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     {
         if (group == null) return;
 
+        if (_registeredGroups.Add(group))
+        {
+            group.OnAttackerPromoted +=
+                HandleGroupAttackerPromoted;
+        }
+
         foreach (IEnemy enemy in group.Members)
         {
             if (enemy == null) continue;
@@ -94,6 +100,33 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         }
 
         ReevaluateFormation();
+    }
+
+    /// <summary>
+    /// 攻撃役が死亡したとき、追従役から選ばれた補充メンバーを前衛化する。
+    /// </summary>
+    private void HandleGroupAttackerPromoted(IEnemy enemy)
+    {
+        if (enemy == null || enemy.IsDead)
+            return;
+
+        if (!_entries.TryGetValue(
+                enemy.Id,
+                out FormationEntry entry))
+        {
+            return;
+        }
+
+        _waitingGroupIds.Remove(enemy.Id);
+        _forcedVanguardIds.Add(enemy.Id);
+
+        ReevaluateFormation();
+
+        _innerSlot.TryAcquire(
+            enemy.Id,
+            entry.SlotCost);
+
+        OnSlotReleased?.Invoke();
     }
 
     /// <summary>
@@ -303,6 +336,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     /// </summary>
     private readonly HashSet<int> _waitingGroupIds = new();
     private readonly HashSet<int> _forcedVanguardIds = new();
+    private readonly HashSet<EnemyGroup> _registeredGroups = new();
 
     // EnemyId → FormationEntry
     private readonly Dictionary<int, FormationEntry> _entries = new();

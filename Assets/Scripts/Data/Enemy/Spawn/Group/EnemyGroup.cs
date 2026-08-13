@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public sealed class EnemyGroup
 {
+    public event Action<IEnemy> OnAttackerPromoted;
+
     public IEnemy Leader { get; private set; }
 
     public IReadOnlyList<IEnemy> Members =>
@@ -114,9 +117,16 @@ public sealed class EnemyGroup
     {
         enemy.OnDead -= HandleMemberDead;
 
+        bool wasAttacker = _attackerIds.Contains(enemy.Id);
+
         _members.Remove(enemy);
         _attackerIds.Remove(enemy.Id);
         _attackers.Remove(enemy);
+
+        if (wasAttacker && Phase == EnemyGroupPhase.Released)
+        {
+            PromoteReplacementAttacker();
+        }
 
         if (_groupMembers.TryGetValue(
                 enemy,
@@ -135,6 +145,30 @@ public sealed class EnemyGroup
             _members.Count > 0)
         {
             SetLeader(_members[0]);
+        }
+    }
+
+    /// <summary>
+    /// 死亡した攻撃役の代わりに、生存中の追従役を昇格させる。
+    /// </summary>
+    private void PromoteReplacementAttacker()
+    {
+        if (_attackers.Count >= MaxAttackers)
+            return;
+
+        foreach (IEnemy member in _members)
+        {
+            if (member == null ||
+                member.IsDead ||
+                IsAttacker(member.Id))
+            {
+                continue;
+            }
+
+            _attackerIds.Add(member.Id);
+            _attackers.Add(member);
+            OnAttackerPromoted?.Invoke(member);
+            return;
         }
     }
 
