@@ -75,6 +75,28 @@ public class AttackVariantData
 }
 
 [Serializable]
+public sealed class ControllerVibrationData
+{
+    public float Low => _low;
+    public float High => _high;
+    public float Duration => _duration;
+
+    public ControllerVibrationData(float low, float high, float duration)
+    {
+        _low = low;
+        _high = high;
+        _duration = duration;
+    }
+
+    [Range(0f, 1f)]
+    [SerializeField] private float _low;
+    [Range(0f, 1f)]
+    [SerializeField] private float _high;
+    [Min(0f)]
+    [SerializeField] private float _duration = 0.1f;
+}
+
+[Serializable]
 public class AttackHitData
 {
     public static AttackHitData Default => new()
@@ -88,6 +110,7 @@ public class AttackHitData
         PlayGroundHitSE = false,
         AdditionalLightningDamages = Array.Empty<AdditionalLightningDamageData>(),
         AttackEffect = new AttackEffectData(),
+        ControllerVibration = new ControllerVibrationData(0.2f, 0.3f, 0.1f),
     };
 
     public bool HasAdditionalLightningDamage =>
@@ -107,6 +130,9 @@ public class AttackHitData
 
     [Header("ヒットストップ")]
     public HitStopData HitStopData;
+
+    [Header("コントローラーの振動")]
+    public ControllerVibrationData ControllerVibration;
 
     [Header("サウンド")]
     public bool PlayGroundHitSE = false;
