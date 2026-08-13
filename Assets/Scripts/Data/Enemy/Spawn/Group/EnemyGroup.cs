@@ -13,13 +13,18 @@ public sealed class EnemyGroup
 
     public float MemberMoveRadius { get; }
 
+    public int MaxAttackers { get; }
+
+    public IReadOnlyList<IEnemy> Attackers => _attackers;
+
     public EnemyGroupPhase Phase { get; private set; }
         = EnemyGroupPhase.Waiting;
 
-    public EnemyGroup(float memberMoveRadius)
+    public EnemyGroup(float memberMoveRadius, int maxAttackers = 2)
     {
         MemberMoveRadius =
             Mathf.Max(0f, memberMoveRadius);
+        MaxAttackers = Mathf.Max(1, maxAttackers);
     }
 
     /// <summary>
@@ -59,6 +64,49 @@ public sealed class EnemyGroup
         Phase = EnemyGroupPhase.Released;
     }
 
+    public void SetAttackers(IReadOnlyList<IEnemy> attackers)
+    {
+        _attackers.Clear();
+        _attackerIds.Clear();
+
+        if (attackers == null) return;
+
+        foreach (IEnemy attacker in attackers)
+        {
+            if (attacker == null || attacker.IsDead) continue;
+
+            if (_attackerIds.Add(attacker.Id))
+                _attackers.Add(attacker);
+        }
+    }
+
+    public bool IsAttacker(int enemyId) =>
+        _attackerIds.Contains(enemyId);
+
+    public bool TryGetFollowerIndex(
+        IEnemy follower,
+        out int followerIndex)
+    {
+        followerIndex = 0;
+
+        if (follower == null || follower.IsDead ||
+            IsAttacker(follower.Id) || _attackers.Count == 0)
+            return false;
+
+        foreach (IEnemy member in _members)
+        {
+            if (member == null || member.IsDead || IsAttacker(member.Id))
+                continue;
+
+            if (member.Id == follower.Id)
+                return true;
+
+            followerIndex++;
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// グループメンバーが死亡したときの処理。
     /// </summary>
@@ -67,6 +115,8 @@ public sealed class EnemyGroup
         enemy.OnDead -= HandleMemberDead;
 
         _members.Remove(enemy);
+        _attackerIds.Remove(enemy.Id);
+        _attackers.Remove(enemy);
 
         if (_groupMembers.TryGetValue(
                 enemy,
@@ -115,4 +165,7 @@ public sealed class EnemyGroup
 
     private readonly Dictionary<IEnemy, IEnemyGroupMember>
         _groupMembers = new();
+
+    private readonly List<IEnemy> _attackers = new();
+    private readonly HashSet<int> _attackerIds = new();
 }
