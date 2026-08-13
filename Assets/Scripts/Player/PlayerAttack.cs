@@ -663,7 +663,11 @@ public class PlayerAttack : MonoBehaviour
 
             if (newLevel != ChargeLevel.None)
             {
-                PlayChargeVibration(newLevel);
+                if (IsMaxChargeLevelReached(newLevel))
+                    ControllerVibration.Stop();
+                else
+                    PlayChargeVibrationForNextLevel(newLevel);
+
                 // チャージ段階に対応したAttackDataのチャージアニメーションを再生
                 var chargeData = GetChargeAttackData().GetVariant(newLevel);
 
@@ -729,12 +733,18 @@ public class PlayerAttack : MonoBehaviour
         _chargeStartTime = Time.time;
 
         _pendingWarriorCharge = false;
+        PlayChargeVibrationForNextLevel(ChargeLevel.None);
     }
 
-    private void PlayChargeVibration(ChargeLevel level)
+    /// <summary>
+    /// 現在の到達レベルから次のレベルへ溜めている間の振動を再生する。
+    /// None中はLv1、Lv1中はLv2、Lv2中はLv3の設定を使用する。
+    /// </summary>
+    private void PlayChargeVibrationForNextLevel(ChargeLevel currentLevel)
     {
+        ChargeLevel nextLevel = (ChargeLevel)((int)currentLevel + 1);
         ControllerVibrationData vibration = _chargeThresholds
-            .FirstOrDefault(x => x.Level == level)
+            .FirstOrDefault(x => x.Level == nextLevel)
             .Vibration;
         if (vibration != null)
         {
@@ -742,7 +752,7 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        switch (level)
+        switch (nextLevel)
         {
             case ChargeLevel.Level1:
                 ControllerVibration.PlayContinuous(0.10f, 0.05f);
