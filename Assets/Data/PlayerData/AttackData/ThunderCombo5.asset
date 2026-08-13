@@ -28,6 +28,10 @@ MonoBehaviour:
       EnableKnockback: 1
       KnockbackPower: 6
       KnockbackUpward: 0
+      ControllerVibration:
+        _low: 0.35
+        _high: 0.45
+        _duration: 0.1
       HitStopData:
         _baseDuration: 0.15
         _timeScale: 0

@@ -28,6 +28,92 @@ MonoBehaviour:
       EnableKnockback: 1
       KnockbackPower: 6
       KnockbackUpward: 0
+      ControllerVibration:
+        _low: 0.1
+        _high: 0.2
+        _duration: 0.1
+      HitStopData:
+        _baseDuration: 0.15
+        _timeScale: 0
+        _targetGroup: 9
+        _priority: 999
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages:
+      - _lightningDamageMultiplier: 0.05
+        _lightningDamageDelay: 0.1
+      - _lightningDamageMultiplier: 0.1
+        _lightningDamageDelay: 0.1
+      - _lightningDamageMultiplier: 0.15
+        _lightningDamageDelay: 0.1
+      - _lightningDamageMultiplier: 0.15
+        _lightningDamageDelay: 0.1
+      CameraShakeData:
+        _amplitude: 1.5
+        _frequency: 2.5
+        _duration: 0.15
+      AttackEffect:
+        _enabled: 0
+        _effectKey: WarriorPiercingEarth
+        _fitToAttackArea: 1
+        _baseSize: {x: 10, y: 2, z: 2}
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 90, z: 0}
+        _localScale: {x: 1, y: 1, z: 1}
+        _previewPrefab: {fileID: 0}
+    - DamageMultiplier: 1
+      AttackRange: 1
+      AttackRadius: 1
+      EnableKnockback: 1
+      KnockbackPower: 6
+      KnockbackUpward: 0
+      ControllerVibration:
+        _low: 0.1
+        _high: 0.2
+        _duration: 0.1
+      HitStopData:
+        _baseDuration: 0.15
+        _timeScale: 0
+        _targetGroup: 9
+        _priority: 999
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
+      PlayGroundHitSE: 0
+      AdditionalLightningDamages:
+      - _lightningDamageMultiplier: 0.05
+        _lightningDamageDelay: 0.1
+      - _lightningDamageMultiplier: 0.1
+        _lightningDamageDelay: 0.1
+      - _lightningDamageMultiplier: 0.15
+        _lightningDamageDelay: 0.1
+      - _lightningDamageMultiplier: 0.15
+        _lightningDamageDelay: 0.1
+      CameraShakeData:
+        _amplitude: 1.5
+        _frequency: 2.5
+        _duration: 0.15
+      AttackEffect:
+        _enabled: 0
+        _effectKey: WarriorPiercingEarth
+        _fitToAttackArea: 1
+        _baseSize: {x: 10, y: 2, z: 2}
+        _localPosition: {x: 0, y: 0.05, z: 0}
+        _localEulerAngles: {x: 0, y: 90, z: 0}
+        _localScale: {x: 1, y: 1, z: 1}
+        _previewPrefab: {fileID: 0}
+    - DamageMultiplier: 1
+      AttackRange: 1
+      AttackRadius: 1
+      EnableKnockback: 1
+      KnockbackPower: 6
+      KnockbackUpward: 0
+      ControllerVibration:
+        _low: 0.5
+        _high: 0.6
+        _duration: 0.1
       HitStopData:
         _baseDuration: 0.15
         _timeScale: 0
