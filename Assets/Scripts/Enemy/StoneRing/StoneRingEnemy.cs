@@ -4,7 +4,7 @@ using UnityEngine;
 /// ストーンリングのクラス。
 /// 硬直とシールド破壊時の死亡処理を持つ
 /// </summary>
-public sealed class StoneRingEnemy : MobEnemy, IEnemyGroupMember
+public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
 {
     public EnemyGroup Group => _group;
     public bool IsGroupLeader => _isGroupLeader;
@@ -56,6 +56,18 @@ public sealed class StoneRingEnemy : MobEnemy, IEnemyGroupMember
         BehaviourInitContext initCtx)
     {
         base.RegisterBehaviours(initCtx);
+
+        _groupFollowBehaviour =
+            new GroupFollowBehaviour(
+                this,
+                _services,
+                _groupFollowDistance,
+                _groupFormationHalfWidth,
+                _groupRearDistance,
+                _groupFollowStopDistance);
+
+        _groupFollowBehaviour.Init(initCtx);
+        _runner.Register(_groupFollowBehaviour);
 
         _postAttackStun =
             new PostAttackStunBehaviour(
@@ -125,7 +137,25 @@ public sealed class StoneRingEnemy : MobEnemy, IEnemyGroupMember
     [SerializeField, Min(0f)]
     private float _groupMoveRadius = 3f;
 
+    [Header("Group Follow")]
+    [Tooltip("攻撃役の後ろへ並ぶ間隔")]
+    [SerializeField, Min(0.1f)]
+    private float _groupFollowDistance = 0.8f;
+
+    [Tooltip("五角形の中心から左右頂点までの幅")]
+    [SerializeField, Min(0.1f)]
+    private float _groupFormationHalfWidth = 0.8f;
+
+    [Tooltip("攻撃役の中心から後端までの距離")]
+    [SerializeField, Min(0.1f)]
+    private float _groupRearDistance = 1.5f;
+
+    [Tooltip("追従位置で停止する距離")]
+    [SerializeField, Min(0.01f)]
+    private float _groupFollowStopDistance = 0.15f;
+
     private PostAttackStunBehaviour _postAttackStun;
+    private GroupFollowBehaviour _groupFollowBehaviour;
     private EnemyGroup _group;
     private GroupPromotionBehaviour
     _groupPromotion;

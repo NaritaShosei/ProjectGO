@@ -153,9 +153,11 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         if (!CanPromoteGroup(group))
             return false;
 
+        var selectedAttackers = new List<IEnemy>();
+
         foreach (IEnemy enemy in group.Members)
         {
-            if (enemy == null)
+            if (enemy == null || enemy.IsDead)
                 continue;
 
             if (!_entries.TryGetValue(
@@ -165,16 +167,27 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
                 continue;
             }
 
-            _waitingGroupIds.Remove(enemy.Id);
-            _forcedVanguardIds.Add(enemy.Id);
+            if (selectedAttackers.Count < group.MaxAttackers)
+            {
+                selectedAttackers.Add(enemy);
+                _waitingGroupIds.Remove(enemy.Id);
+                _forcedVanguardIds.Add(enemy.Id);
+            }
+            else
+            {
+                _forcedVanguardIds.Remove(enemy.Id);
+                _waitingGroupIds.Add(enemy.Id);
+                DemoteIfAcquired(entry);
+            }
         }
 
+        group.SetAttackers(selectedAttackers);
         group.ReleaseFormation();
 
         ReevaluateFormation();
 
-        // 5体全員にスロットを直接取得させる
-        foreach (IEnemy enemy in group.Members)
+        // 選ばれた攻撃役だけにスロットを取得させる。
+        foreach (IEnemy enemy in selectedAttackers)
         {
             if (enemy == null)
                 continue;
@@ -193,7 +206,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
 
         OnSlotReleased?.Invoke();
 
-        return true;
+        return selectedAttackers.Count > 0;
     }
 
     /// <summary>
