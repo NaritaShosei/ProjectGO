@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// カメラの挙動を管理するクラス。
@@ -13,7 +14,18 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     #region パブリックプロパティ・イベント
 
     /// <summary>メインカメラの参照</summary>
-    public Camera MainCamera => _mainCamera;
+    public Camera MainCamera
+    {
+        get
+        {
+            if (_mainCamera == null)
+            {
+                RefreshMainCamera(SceneManager.GetActiveScene());
+            }
+
+            return _mainCamera;
+        }
+    }
 
     /// <summary>現在ロックオンしている対象</summary>
     public ILockOnTarget CurrentTarget => _currentTarget;
@@ -207,7 +219,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private void Awake()
     {
-        _mainCamera = Camera.main;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        RefreshMainCamera(SceneManager.GetActiveScene());
         ServiceLocator.Register(this);
 
         // 設定変更を繰り返しても倍率が累積しないようInspector値を基準値として保持する。
@@ -263,6 +276,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private void OnDestroy()
     {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+
         if (_gameSettingService != null)
         {
             // シーン破棄後に設定変更イベントから呼ばれないよう購読を解除する。
@@ -275,6 +290,31 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         }
 
         ServiceLocator.Unregister<CameraManager>();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
+    {
+        RefreshMainCamera(scene);
+    }
+
+    private void RefreshMainCamera(Scene scene)
+    {
+        if (scene.IsValid() && scene.isLoaded)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var camera in root.GetComponentsInChildren<Camera>(true))
+                {
+                    if (camera.CompareTag("MainCamera"))
+                    {
+                        _mainCamera = camera;
+                        return;
+                    }
+                }
+            }
+        }
+
+        _mainCamera = Camera.main;
     }
 
     private void ApplyGameSettings(GameSetting settings)
