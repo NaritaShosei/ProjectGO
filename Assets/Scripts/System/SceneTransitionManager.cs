@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 
 public class SceneTransitionManager : MonoBehaviour
 {
+    private const string SystemSceneName = "SystemScene";
+
     /// <summary>
     /// 任意シーンへ遷移する
     /// </summary>
@@ -31,11 +33,6 @@ public class SceneTransitionManager : MonoBehaviour
         if (!ServiceLocator.IsRegistered<SceneTransitionManager>())
         {
             ServiceLocator.Register(this);
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
         }
     }
 
@@ -54,6 +51,26 @@ public class SceneTransitionManager : MonoBehaviour
     private async UniTask LoadSceneAsync(string sceneName)
     {
         Debug.Log($"{sceneName}：へ遷移する");
-        await SceneManager.LoadSceneAsync(sceneName);
+
+        var destinationScene = SceneManager.GetSceneByName(sceneName);
+        if (!destinationScene.isLoaded)
+        {
+            await SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            destinationScene = SceneManager.GetSceneByName(sceneName);
+        }
+
+        SceneManager.SetActiveScene(destinationScene);
+
+        // SystemSceneと遷移先を残し、それ以外のゲームシーンをアンロードする。
+        for (var i = SceneManager.sceneCount - 1; i >= 0; i--)
+        {
+            var loadedScene = SceneManager.GetSceneAt(i);
+            if (loadedScene.name == SystemSceneName || loadedScene == destinationScene)
+            {
+                continue;
+            }
+
+            await SceneManager.UnloadSceneAsync(loadedScene);
+        }
     }
 }
