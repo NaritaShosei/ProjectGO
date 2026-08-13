@@ -115,6 +115,15 @@ public class AttackExecutor : MonoBehaviour
         {
             OnHitConfirmed?.Invoke(hitIndex);
 
+            PlayHitVibration(
+                hitData,
+                attackData.Mode,
+                attackData.AttackId,
+                attackInput.ChargeLevel,
+                hitIndex,
+                isWeakPoint,
+                isArmorBreak);
+
             if (ServiceLocator.TryGet(out CameraManager cameraManager))
                 cameraManager.ExecutionCameraShake(hitData.CameraShakeData).Forget();
 
@@ -150,6 +159,91 @@ public class AttackExecutor : MonoBehaviour
     [SerializeField] private Color _lightningDamagePopupColor = DamagePopupColorScope.LightningColor;
     private IPlayerStats _playerStats;
     private SkillManager _skillManager;
+
+    private static void PlayHitVibration(
+        AttackHitData hitData,
+        PlayerMode mode,
+        int attackId,
+        ChargeLevel chargeLevel,
+        int hitIndex,
+        bool isWeakPoint,
+        bool isArmorBreak)
+    {
+        ControllerVibrationData vibration = hitData.ControllerVibration;
+        float low;
+        float high;
+        float duration;
+        if (vibration != null)
+        {
+            low = vibration.Low;
+            high = vibration.High;
+            duration = vibration.Duration;
+        }
+        else
+        {
+            GetDefaultAttackVibration(mode, attackId, chargeLevel, hitIndex,
+                out low, out high, out duration);
+        }
+
+        if (isWeakPoint)
+        {
+            low = Mathf.Clamp01(low * 1.3f);
+            high = Mathf.Clamp01(high * 1.3f);
+        }
+
+        const float armorLow = 0.70f;
+        const float armorHigh = 0.40f;
+        if (isArmorBreak && armorLow + armorHigh > low + high)
+        {
+            low = armorLow;
+            high = armorHigh;
+            duration = 0.2f;
+        }
+
+        ControllerVibration.PlayTimed(low, high, duration);
+    }
+
+    private static void GetDefaultAttackVibration(
+        PlayerMode mode,
+        int attackId,
+        ChargeLevel chargeLevel,
+        int hitIndex,
+        out float low,
+        out float high,
+        out float duration)
+    {
+        if (mode == PlayerMode.Warrior)
+        {
+            int combo = Mathf.Clamp(attackId, 1, 3);
+            float chargeRatio = Mathf.Clamp01((int)chargeLevel / 3f);
+            low = 0.2f + combo * 0.1f + chargeRatio * 0.2f;
+            high = 0.1f + combo * 0.05f + chargeRatio * 0.1f;
+            duration = combo == 3 ? 0.2f : 0.1f;
+            return;
+        }
+
+        int thunderCombo = Mathf.Clamp(attackId / 1000, 1, 6);
+        low = 0.20f;
+        high = 0.30f;
+        duration = 0.1f;
+
+        if (thunderCombo == 4)
+        {
+            low = 0.25f;
+            high = 0.35f;
+        }
+        else if (thunderCombo == 5)
+        {
+            low = 0.35f;
+            high = 0.45f;
+        }
+        else if (thunderCombo == 6)
+        {
+            bool isFinisher = hitIndex >= 2;
+            low = isFinisher ? 0.50f : 0.10f;
+            high = isFinisher ? 0.60f : 0.20f;
+        }
+    }
 
     private void PlayWarriorAttackEffect(AttackHitData hitData)
     {
