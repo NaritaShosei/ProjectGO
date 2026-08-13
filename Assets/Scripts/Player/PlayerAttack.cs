@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -105,24 +106,9 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private ChargeThreshold[] _chargeThresholdSettings = new ChargeThreshold[]
     {
-        new ChargeThreshold
-        {
-            TimeThreshold = 1.2f,
-            Level = ChargeLevel.Level3,
-            Vibration = new ControllerVibrationData(0.35f, 0.15f, 0f)
-        },
-        new ChargeThreshold
-        {
-            TimeThreshold = 0.8f,
-            Level = ChargeLevel.Level2,
-            Vibration = new ControllerVibrationData(0.20f, 0.10f, 0f)
-        },
-        new ChargeThreshold
-        {
-            TimeThreshold = 0.3f,
-            Level = ChargeLevel.Level1,
-            Vibration = new ControllerVibrationData(0.10f, 0.05f, 0f)
-        },
+        new(1.2f, ChargeLevel.Level3, new ControllerVibrationData(0.35f, 0.15f, 0f)),
+        new(0.8f, ChargeLevel.Level2, new ControllerVibrationData(0.20f, 0.10f, 0f)),
+        new(0.3f, ChargeLevel.Level1, new ControllerVibrationData(0.10f, 0.05f, 0f)),
     };
     [SerializeField] private LayerMask _homingLayer;
 
@@ -1010,12 +996,29 @@ _currentLockOnTarget.GetTargetCenter() == null)
 [Serializable]
 public struct ChargeThreshold
 {
+    public float TimeThreshold => _timeThreshold;
+    public ChargeLevel Level => _level;
+    public ControllerVibrationData Vibration => _vibration;
+
+    public ChargeThreshold(
+        float timeThreshold,
+        ChargeLevel level,
+        ControllerVibrationData vibration)
+    {
+        _timeThreshold = timeThreshold;
+        _level = level;
+        _vibration = vibration;
+    }
+
+    [FormerlySerializedAs("TimeThreshold")]
     [InspectorName("チャージ時間")]
-    public float TimeThreshold;
+    [SerializeField] private float _timeThreshold;
+    [FormerlySerializedAs("Level")]
     [InspectorName("チャージ段階")]
-    public ChargeLevel Level;
+    [SerializeField] private ChargeLevel _level;
+    [FormerlySerializedAs("Vibration")]
     [InspectorName("コントローラーの振動")]
-    public ControllerVibrationData Vibration;
+    [SerializeField] private ControllerVibrationData _vibration;
 }
 
 public struct AttackInput
