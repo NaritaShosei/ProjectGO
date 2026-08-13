@@ -105,9 +105,24 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private ChargeThreshold[] _chargeThresholdSettings = new ChargeThreshold[]
     {
-        new ChargeThreshold { TimeThreshold = 1.2f, Level = ChargeLevel.Level3 },
-        new ChargeThreshold { TimeThreshold = 0.8f, Level = ChargeLevel.Level2 },
-        new ChargeThreshold { TimeThreshold = 0.3f, Level = ChargeLevel.Level1 },
+        new ChargeThreshold
+        {
+            TimeThreshold = 1.2f,
+            Level = ChargeLevel.Level3,
+            Vibration = new ControllerVibrationData(0.35f, 0.15f, 0f)
+        },
+        new ChargeThreshold
+        {
+            TimeThreshold = 0.8f,
+            Level = ChargeLevel.Level2,
+            Vibration = new ControllerVibrationData(0.20f, 0.10f, 0f)
+        },
+        new ChargeThreshold
+        {
+            TimeThreshold = 0.3f,
+            Level = ChargeLevel.Level1,
+            Vibration = new ControllerVibrationData(0.10f, 0.05f, 0f)
+        },
     };
     [SerializeField] private LayerMask _homingLayer;
 
@@ -162,6 +177,8 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDestroy()
     {
+        ControllerVibration.Stop();
+
         if (_modeController != null) _modeController.OnModeChanged -= OnModeChanged;
 
         if (_input != null)
@@ -314,6 +331,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FireWarriorAttack(ChargeLevel level)
     {
+        ControllerVibration.Stop();
         _isChargeComboFollowUp = _currentAttackId != -1; // コンボの途中でチャージ攻撃が入るかどうか
 
         _canStartCharge = false;
@@ -606,6 +624,7 @@ public class PlayerAttack : MonoBehaviour
     private void CancelCharge()
     {
         if (!_isCharging) return;
+        ControllerVibration.Stop();
         _canStartCharge = false;
         _isCharging = false;
         _pendingWarriorCharge = false;
@@ -658,6 +677,7 @@ public class PlayerAttack : MonoBehaviour
 
             if (newLevel != ChargeLevel.None)
             {
+                PlayChargeVibration(newLevel);
                 // チャージ段階に対応したAttackDataのチャージアニメーションを再生
                 var chargeData = GetChargeAttackData().GetVariant(newLevel);
 
@@ -723,6 +743,31 @@ public class PlayerAttack : MonoBehaviour
         _chargeStartTime = Time.time;
 
         _pendingWarriorCharge = false;
+    }
+
+    private void PlayChargeVibration(ChargeLevel level)
+    {
+        ControllerVibrationData vibration = _chargeThresholds
+            .FirstOrDefault(x => x.Level == level)
+            .Vibration;
+        if (vibration != null)
+        {
+            ControllerVibration.PlayContinuous(vibration.Low, vibration.High);
+            return;
+        }
+
+        switch (level)
+        {
+            case ChargeLevel.Level1:
+                ControllerVibration.PlayContinuous(0.10f, 0.05f);
+                break;
+            case ChargeLevel.Level2:
+                ControllerVibration.PlayContinuous(0.20f, 0.10f);
+                break;
+            case ChargeLevel.Level3:
+                ControllerVibration.PlayContinuous(0.35f, 0.15f);
+                break;
+        }
     }
     #endregion
 
@@ -965,8 +1010,12 @@ _currentLockOnTarget.GetTargetCenter() == null)
 [Serializable]
 public struct ChargeThreshold
 {
+    [InspectorName("チャージ時間")]
     public float TimeThreshold;
+    [InspectorName("チャージ段階")]
     public ChargeLevel Level;
+    [InspectorName("コントローラーの振動")]
+    public ControllerVibrationData Vibration;
 }
 
 public struct AttackInput
