@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -105,9 +106,9 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField]
     private ChargeThreshold[] _chargeThresholdSettings = new ChargeThreshold[]
     {
-        new ChargeThreshold { TimeThreshold = 1.2f, Level = ChargeLevel.Level3 },
-        new ChargeThreshold { TimeThreshold = 0.8f, Level = ChargeLevel.Level2 },
-        new ChargeThreshold { TimeThreshold = 0.3f, Level = ChargeLevel.Level1 },
+        new(1.2f, ChargeLevel.Level3, new ControllerVibrationData(0.35f, 0.15f, 0f)),
+        new(0.8f, ChargeLevel.Level2, new ControllerVibrationData(0.20f, 0.10f, 0f)),
+        new(0.3f, ChargeLevel.Level1, new ControllerVibrationData(0.10f, 0.05f, 0f)),
     };
     [SerializeField] private LayerMask _homingLayer;
 
@@ -162,6 +163,8 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnDestroy()
     {
+        ControllerVibration.Stop();
+
         if (_modeController != null) _modeController.OnModeChanged -= OnModeChanged;
 
         if (_input != null)
@@ -314,6 +317,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FireWarriorAttack(ChargeLevel level)
     {
+        ControllerVibration.Stop();
         _isChargeComboFollowUp = _currentAttackId != -1; // コンボの途中でチャージ攻撃が入るかどうか
 
         _canStartCharge = false;
@@ -606,6 +610,7 @@ public class PlayerAttack : MonoBehaviour
     private void CancelCharge()
     {
         if (!_isCharging) return;
+        ControllerVibration.Stop();
         _canStartCharge = false;
         _isCharging = false;
         _pendingWarriorCharge = false;
@@ -658,6 +663,11 @@ public class PlayerAttack : MonoBehaviour
 
             if (newLevel != ChargeLevel.None)
             {
+                if (IsMaxChargeLevelReached(newLevel))
+                    ControllerVibration.Stop();
+                else
+                    PlayChargeVibrationForNextLevel(newLevel);
+
                 // チャージ段階に対応したAttackDataのチャージアニメーションを再生
                 var chargeData = GetChargeAttackData().GetVariant(newLevel);
 
@@ -723,6 +733,37 @@ public class PlayerAttack : MonoBehaviour
         _chargeStartTime = Time.time;
 
         _pendingWarriorCharge = false;
+        PlayChargeVibrationForNextLevel(ChargeLevel.None);
+    }
+
+    /// <summary>
+    /// 現在の到達レベルから次のレベルへ溜めている間の振動を再生する。
+    /// None中はLv1、Lv1中はLv2、Lv2中はLv3の設定を使用する。
+    /// </summary>
+    private void PlayChargeVibrationForNextLevel(ChargeLevel currentLevel)
+    {
+        ChargeLevel nextLevel = (ChargeLevel)((int)currentLevel + 1);
+        ControllerVibrationData vibration = _chargeThresholds
+            .FirstOrDefault(x => x.Level == nextLevel)
+            .Vibration;
+        if (vibration != null)
+        {
+            ControllerVibration.PlayContinuous(vibration.Low, vibration.High);
+            return;
+        }
+
+        switch (nextLevel)
+        {
+            case ChargeLevel.Level1:
+                ControllerVibration.PlayContinuous(0.10f, 0.05f);
+                break;
+            case ChargeLevel.Level2:
+                ControllerVibration.PlayContinuous(0.20f, 0.10f);
+                break;
+            case ChargeLevel.Level3:
+                ControllerVibration.PlayContinuous(0.35f, 0.15f);
+                break;
+        }
     }
     #endregion
 
@@ -965,8 +1006,29 @@ _currentLockOnTarget.GetTargetCenter() == null)
 [Serializable]
 public struct ChargeThreshold
 {
-    public float TimeThreshold;
-    public ChargeLevel Level;
+    public float TimeThreshold => _timeThreshold;
+    public ChargeLevel Level => _level;
+    public ControllerVibrationData Vibration => _vibration;
+
+    public ChargeThreshold(
+        float timeThreshold,
+        ChargeLevel level,
+        ControllerVibrationData vibration)
+    {
+        _timeThreshold = timeThreshold;
+        _level = level;
+        _vibration = vibration;
+    }
+
+    [FormerlySerializedAs("TimeThreshold")]
+    [InspectorName("チャージ時間")]
+    [SerializeField] private float _timeThreshold;
+    [FormerlySerializedAs("Level")]
+    [InspectorName("チャージ段階")]
+    [SerializeField] private ChargeLevel _level;
+    [FormerlySerializedAs("Vibration")]
+    [InspectorName("コントローラーの振動")]
+    [SerializeField] private ControllerVibrationData _vibration;
 }
 
 public struct AttackInput
