@@ -132,6 +132,21 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         int reductDamage = DamageSystem.ApplyDamageReduction(damage, DefensePower);
         _playerStats.TakeDamage(reductDamage);
 
+        ControllerVibrationData vibration;
+        switch (reactionType)
+        {
+            case DamageReactionType.Large:
+                vibration = _largeDamageVibration;
+                break;
+            case DamageReactionType.Medium:
+                vibration = _mediumDamageVibration;
+                break;
+            default:
+                vibration = _smallDamageVibration;
+                break;
+        }
+        ControllerVibration.PlayTimed(vibration.Low, vibration.High, vibration.Duration);
+
         //ダメージエフェクトの通知
         OnDamagedEffect?.Invoke(
             new PlayerDamageEffectContext
@@ -213,6 +228,14 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     [Header("Data")]
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
+
+    [Header("被弾時のコントローラーの振動")]
+    [SerializeField] private ControllerVibrationData _smallDamageVibration =
+        new(0.20f, 0.15f, 0.1f);
+    [SerializeField] private ControllerVibrationData _mediumDamageVibration =
+        new(0.40f, 0.25f, 0.2f);
+    [SerializeField] private ControllerVibrationData _largeDamageVibration =
+        new(1.00f, 0.70f, 0.3f);
 
     [Header("参照")]
     [SerializeField] private PlayerMovement _move;

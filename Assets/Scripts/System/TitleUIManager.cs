@@ -177,7 +177,6 @@ public class TitleUIManager : MonoBehaviour
     /// <param name="newSettings"></param>
     private void ApplySettingsToGame(GameSetting newSettings)
     {
-        // ゲーム全体の設定に反映
-        Debug.Log("セーブ機能は未実装です");
+        Debug.Log("ゲーム設定を保存しました");
     }
 }

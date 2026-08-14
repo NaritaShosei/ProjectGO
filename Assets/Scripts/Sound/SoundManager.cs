@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 public class SoundManager
 {
+    private const string BGMCategoryName = "BGM";
+    private const string SECategoryName = "SE";
+    private const string VoiceCategoryName = "Voice";
+
     /// <summary> コンストラクタ </summary>
     /// <param name="bgmPlayer"> BGM用のPlayerObject </param>
     /// <param name="defaultBGM"> BGMの音源データが入ったCueSheetの名前(あとで再生時に変更可能) </param>
@@ -11,6 +15,22 @@ public class SoundManager
     {
         _defaultBGMCueSheet = defaultBGM;
         Initialize(bgmPlayer);
+
+        if (ServiceLocator.TryGet(out GameSettingService settingsService))
+        {
+            ApplySettings(settingsService.CurrentSettings);
+        }
+    }
+
+    public void ApplySettings(GameSetting settings)
+    {
+        if (settings == null) return;
+
+        // Atom Craft側で各キューに設定されたカテゴリへ一括反映する。
+        // 再生中の音と、以降に再生する音の両方へ同じ音量が適用される。
+        ApplyCategoryVolume(BGMCategoryName, settings.BGMVolume);
+        ApplyCategoryVolume(SECategoryName, settings.SEVolume);
+        ApplyCategoryVolume(VoiceCategoryName, settings.VoiceVolume);
     }
 
     // ── BGM ──────────────────────────────────────────────
@@ -215,5 +235,17 @@ public class SoundManager
         _seSourcesDict[seObj].Add(newSource);
 
         return newSource;
+    }
+
+    private static void ApplyCategoryVolume(string categoryName, float volume)
+    {
+        // ACFの取り込み漏れやカテゴリ名の不一致を実行時に検出する。
+        if (!CriAtomExAcf.GetCategoryInfoByName(categoryName, out _))
+        {
+            Debug.LogWarning($"[SoundManager] CRIカテゴリが見つかりません: {categoryName}");
+            return;
+        }
+
+        CriAtomExCategory.SetVolume(categoryName, Mathf.Clamp01(volume));
     }
 }
