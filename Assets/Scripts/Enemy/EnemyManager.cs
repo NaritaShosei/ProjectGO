@@ -37,6 +37,7 @@ public class EnemyManager : MonoBehaviour
        _separationService,
        _wallAvoidanceService,
        _formationSystem,
+       _formationSystem,
        _playerInformationService
    );
 
@@ -83,6 +84,7 @@ public class EnemyManager : MonoBehaviour
                 _spatialHashGrid,
                 _separationService,
                 _wallAvoidanceService,
+                _formationSystem,
                 _formationSystem,
                 _playerInformationService
             ));
@@ -325,6 +327,18 @@ public class EnemyManager : MonoBehaviour
             if (enemy != null && !enemy.IsBoss && !enemy.IsDead)
             {
                 RemoveDeadEnemyTransform(enemy);
+
+                if (enemy is IEnemyGroupMember groupMember)
+                {
+                    EnemyGroup group = groupMember.Group;
+
+                    if (group != null)
+                        group.RemoveMember(enemy, false);
+                    else
+                        groupMember.ClearGroup();
+                }
+
+                _formationSystem?.Unregister(enemy);
 
                 enemy.OnDead -= HandleEnemyDead;
                 enemy.OnDamaged -= HandleEnemyDamaged;

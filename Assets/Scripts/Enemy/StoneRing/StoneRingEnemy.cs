@@ -28,6 +28,12 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
         _isGroupLeader = isLeader;
     }
 
+    public override void ReInitialize(Vector3 spawnPosition)
+    {
+        base.ReInitialize(spawnPosition);
+        ClearGroup();
+    }
+
     /// <summary>
     /// ストーンリングの初期化
     /// </summary>
@@ -75,26 +81,13 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
 
         _postAttackStun.Init(initCtx);
 
-        if (_services.AttackerSlot is
-            IEnemyFormationSystem formationSystem)
-        {
-            _groupPromotion =
-                new GroupPromotionBehaviour(
-                    this,
-                    formationSystem);
+        _groupPromotion =
+            new GroupPromotionBehaviour(
+                this,
+                _services.FormationSystem);
 
-            _runner.Register(
-                _groupPromotion);
-
-            _groupPromotion.Init(
-                initCtx);
-        }
-        else
-        {
-            Debug.LogWarning(
-                $"{nameof(StoneRingEnemy)}: " +
-                "FormationSystemを取得できません。");
-        }
+        _groupPromotion.Init(initCtx);
+        _runner.Register(_groupPromotion);
     }
 
     /// <summary>
@@ -132,10 +125,6 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
     [Header("Attack Recovery")]
     [SerializeField, Min(0f)]
     private float _postAttackRecoveryDuration = 1.5f;
-
-    [Header("グループ設定")]
-    [SerializeField, Min(0f)]
-    private float _groupMoveRadius = 3f;
 
     [Header("Group Follow")]
     [Tooltip("攻撃役の後ろへ並ぶ間隔")]

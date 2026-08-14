@@ -8,6 +8,7 @@ using UnityEngine;
 public sealed class EnemyGroup
 {
     public event Action<IEnemy> OnAttackerPromoted;
+    public event Action<EnemyGroup> OnEmpty;
 
     public IEnemy Leader { get; private set; }
 
@@ -83,6 +84,59 @@ public sealed class EnemyGroup
         }
     }
 
+    /// <summary>
+    /// グループからメンバーを明示的に解除する。
+    /// プールへ強制返却する場合は、代替攻撃役の昇格を抑止する。
+    /// </summary>
+    public bool RemoveMember(
+        IEnemy enemy,
+        bool promoteReplacement = true)
+    {
+        if (enemy == null)
+            return false;
+
+        enemy.OnDead -= HandleMemberDead;
+
+        bool wasAttacker = _attackerIds.Remove(enemy.Id);
+        bool wasMember = _members.Remove(enemy);
+
+        _attackers.Remove(enemy);
+
+        if (_groupMembers.TryGetValue(
+                enemy,
+                out IEnemyGroupMember groupMember))
+        {
+            groupMember.ClearGroup();
+            _groupMembers.Remove(enemy);
+        }
+
+        if (!wasMember)
+            return false;
+
+        if (Leader == enemy)
+        {
+            Leader = null;
+
+            if (Phase == EnemyGroupPhase.Waiting &&
+                _members.Count > 0)
+            {
+                SetLeader(_members[0]);
+            }
+        }
+
+        if (wasAttacker &&
+            promoteReplacement &&
+            Phase == EnemyGroupPhase.Released)
+        {
+            PromoteReplacementAttacker();
+        }
+
+        if (_members.Count == 0)
+            OnEmpty?.Invoke(this);
+
+        return true;
+    }
+
     public bool IsAttacker(int enemyId) =>
         _attackerIds.Contains(enemyId);
 
@@ -115,37 +169,7 @@ public sealed class EnemyGroup
     /// </summary>
     private void HandleMemberDead(IEnemy enemy)
     {
-        enemy.OnDead -= HandleMemberDead;
-
-        bool wasAttacker = _attackerIds.Contains(enemy.Id);
-
-        _members.Remove(enemy);
-        _attackerIds.Remove(enemy.Id);
-        _attackers.Remove(enemy);
-
-        if (wasAttacker && Phase == EnemyGroupPhase.Released)
-        {
-            PromoteReplacementAttacker();
-        }
-
-        if (_groupMembers.TryGetValue(
-                enemy,
-                out IEnemyGroupMember groupMember))
-        {
-            groupMember.ClearGroup();
-            _groupMembers.Remove(enemy);
-        }
-
-        if (Leader != enemy)
-            return;
-
-        Leader = null;
-
-        if (Phase == EnemyGroupPhase.Waiting &&
-            _members.Count > 0)
-        {
-            SetLeader(_members[0]);
-        }
+        RemoveMember(enemy);
     }
 
     /// <summary>

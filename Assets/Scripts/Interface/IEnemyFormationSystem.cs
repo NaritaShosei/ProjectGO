@@ -15,6 +15,12 @@ public interface IEnemyFormationSystem : IEnemyAttackerSlot
     void Register(IEnemy enemy, IFormationParticipant participant);
 
     /// <summary>
+    /// EnemyをFormationSystemから登録解除する。
+    /// プールへの強制返却時にも呼び出す。
+    /// </summary>
+    void Unregister(IEnemy enemy);
+
+    /// <summary>
     /// 後衛Enemyが被弾したことを通知する
     /// CP同等以下の前衛と入れ替えてスロットを再配分する
     /// </summary>

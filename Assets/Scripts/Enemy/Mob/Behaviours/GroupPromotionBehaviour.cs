@@ -53,9 +53,11 @@ public sealed class GroupPromotionBehaviour
         if (_formationSystem.TryPromoteGroup(
                 group))
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             UnityEngine.Debug.Log(
                 $"ストーンリンググループを前衛化: " +
                 $"{group.Members.Count}体");
+#endif
         }
     }
 
