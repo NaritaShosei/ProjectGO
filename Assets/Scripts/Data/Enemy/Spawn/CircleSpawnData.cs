@@ -126,6 +126,8 @@ public struct CircleSpawnStrategy : ISpawnStrategy
         }
 
         int count = _spawnData.Enemies.Length;
+        var enemyGroup = new EnemyGroup(
+            _spawnData.GroupMoveRadius);
 
         for (int i = 0; i < count; i++)
         {
@@ -137,34 +139,39 @@ public struct CircleSpawnStrategy : ISpawnStrategy
                     i - 1,
                     count - 1);
 
-            _enemyManager.Spawn(
+            Enemy spawnedEnemy = _enemyManager.Spawn(
                 _spawnData.Enemies[i],
                 position);
+
+            if (spawnedEnemy is IEnemyGroupMember groupMember)
+            {
+                bool isActualLeader =
+                    enemyGroup.Leader == null;
+
+                enemyGroup.AddMember(
+                    spawnedEnemy,
+                    groupMember,
+                    isActualLeader);
+            }
         }
 
-        Debug.Log($"{count}体をグループ用に生成しました。");
+        if (enemyGroup.Members.Count > 0)
+            _enemyManager.RegisterWaitingGroup(enemyGroup);
     }
 
     /// <summary>
     /// リーダー周囲のメンバー生成位置を計算する。
     /// </summary>
     private Vector3 CalculateGroupMemberPosition(
-    int index,
-    int memberCount)
+        int index,
+        int memberCount)
     {
         if (memberCount <= 0)
             return _spawnData.Center;
 
-        float angle =
-            index * Mathf.PI * 2f / memberCount;
-
-        Vector3 offset = new Vector3(
-            Mathf.Cos(angle),
-            0f,
-            Mathf.Sin(angle)
-        ) * _spawnData.Radius;
-
-        return _spawnData.Center + offset;
+        return CalculatePositionOnCircle(
+            index,
+            memberCount);
     }
 
     /// <summary>
@@ -174,8 +181,19 @@ public struct CircleSpawnStrategy : ISpawnStrategy
         int index,
         int count)
     {
-        float angle =
-            index * Mathf.PI * 2f / count;
+        return CalculatePositionOnCircle(
+            index,
+            count);
+    }
+
+    private Vector3 CalculatePositionOnCircle(
+        int index,
+        int count)
+    {
+        if (count <= 0)
+            return _spawnData.Center;
+
+        float angle = index * Mathf.PI * 2f / count;
 
         Vector3 offset = new Vector3(
             Mathf.Cos(angle),

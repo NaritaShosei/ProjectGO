@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 /// <summary>
 /// 前衛・後衛を管理するフォーメーションシステム
@@ -77,6 +76,31 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         ReevaluateFormation();
     }
 
+    public void Unregister(IEnemy enemy)
+    {
+        if (enemy == null)
+            return;
+
+        int id = enemy.Id;
+
+        _waitingGroupIds.Remove(id);
+        _forcedVanguardIds.Remove(id);
+
+        if (!_entries.TryGetValue(
+                id,
+                out FormationEntry entry))
+        {
+            return;
+        }
+
+        if (entry.DeadHandler != null)
+            entry.Enemy.OnDead -= entry.DeadHandler;
+
+        DemoteIfAcquired(entry);
+        _entries.Remove(id);
+        ReevaluateFormation();
+    }
+
     /// <summary>
     /// EnemyGroupを登録してフォーメーションを再度決める
     /// </summary>
@@ -88,6 +112,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         {
             group.OnAttackerPromoted +=
                 HandleGroupAttackerPromoted;
+            group.OnEmpty += HandleGroupEmpty;
         }
 
         foreach (IEnemy enemy in group.Members)
@@ -127,6 +152,16 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
             entry.SlotCost);
 
         OnSlotReleased?.Invoke();
+    }
+
+    private void HandleGroupEmpty(EnemyGroup group)
+    {
+        if (group == null || !_registeredGroups.Remove(group))
+            return;
+
+        group.OnAttackerPromoted -=
+            HandleGroupAttackerPromoted;
+        group.OnEmpty -= HandleGroupEmpty;
     }
 
     /// <summary>
@@ -186,7 +221,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         if (!CanPromoteGroup(group))
             return false;
 
-        var selectedAttackers = new List<IEnemy>();
+        var eligibleEntries = new List<FormationEntry>();
 
         foreach (IEnemy enemy in group.Members)
         {
@@ -200,7 +235,21 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
                 continue;
             }
 
-            if (selectedAttackers.Count < group.MaxAttackers)
+            eligibleEntries.Add(entry);
+        }
+
+        eligibleEntries.Sort(
+            (a, b) =>
+                b.CombatPower.CompareTo(a.CombatPower));
+
+        var selectedAttackers = new List<IEnemy>();
+
+        for (int i = 0; i < eligibleEntries.Count; i++)
+        {
+            FormationEntry entry = eligibleEntries[i];
+            IEnemy enemy = entry.Enemy;
+
+            if (i < group.MaxAttackers)
             {
                 selectedAttackers.Add(enemy);
                 _waitingGroupIds.Remove(enemy.Id);
@@ -316,12 +365,25 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
     public void Reset()
     {
         _innerSlot.Reset();
+
         foreach (var kvp in _entries)
         {
             var entry = kvp.Value;
             if (entry.DeadHandler != null)
                 entry.Enemy.OnDead -= entry.DeadHandler;
         }
+
+        foreach (EnemyGroup group in _registeredGroups)
+        {
+            if (group == null)
+                continue;
+
+            group.OnAttackerPromoted -=
+                HandleGroupAttackerPromoted;
+            group.OnEmpty -= HandleGroupEmpty;
+        }
+
+        _registeredGroups.Clear();
         _waitingGroupIds.Clear();
         _forcedVanguardIds.Clear();
         _entries.Clear();
@@ -357,101 +419,101 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         OnSlotReleased?.Invoke();
     }
 
-private void ReevaluateFormation()
-{
-    int total = _entries.Count;
-
-    if (total == 0)
+    private void ReevaluateFormation()
     {
-        _innerSlot.UpdateMaxSlots(0);
-        return;
-    }
+        int total = _entries.Count;
 
-    int normalVanguardCount =
-        Mathf.Min(
-            total,
-            Mathf.Max(
-                2,
-                Mathf.CeilToInt(total * 0.3f)));
-
-    var allEntries =
-        new List<FormationEntry>(_entries.Values);
-
-    allEntries.Sort(
-        (a, b) =>
-            b.CombatPower.CompareTo(a.CombatPower));
-
-    // 最初に全員を後衛に戻す
-    foreach (FormationEntry entry in allEntries)
-    {
-        entry.IsVanguard = false;
-    }
-
-    int forcedCount = 0;
-
-    // 強制前衛を先に選ぶ
-    foreach (FormationEntry entry in allEntries)
-    {
-        int id = entry.Participant.EnemyId;
-
-        if (_forcedVanguardIds.Contains(id))
+        if (total == 0)
         {
-            entry.IsVanguard = true;
-            forcedCount++;
+            _innerSlot.UpdateMaxSlots(0);
+            return;
         }
-    }
+
+        int normalVanguardCount =
+            Mathf.Min(
+                total,
+                Mathf.Max(
+                    2,
+                    Mathf.CeilToInt(total * 0.3f)));
+
+        var allEntries =
+            new List<FormationEntry>(_entries.Values);
+
+        allEntries.Sort(
+            (a, b) =>
+                b.CombatPower.CompareTo(a.CombatPower));
+
+        // 最初に全員を後衛に戻す
+        foreach (FormationEntry entry in allEntries)
+        {
+            entry.IsVanguard = false;
+        }
+
+        int forcedCount = 0;
+
+        // 強制前衛を先に選ぶ
+        foreach (FormationEntry entry in allEntries)
+        {
+            int id = entry.Participant.EnemyId;
+
+            if (_forcedVanguardIds.Contains(id))
+            {
+                entry.IsVanguard = true;
+                forcedCount++;
+            }
+        }
 
         // 強制前衛に合わせて前衛数を決定する
         int targetVanguardCount =
-        Mathf.Max(
-            normalVanguardCount,
-            forcedCount);
+            Mathf.Max(
+                normalVanguardCount,
+                forcedCount);
 
-    int selectedCount = forcedCount;
+        int selectedCount = forcedCount;
 
-    // 残りの枠を通常の戦闘力順で選ぶ
-    foreach (FormationEntry entry in allEntries)
-    {
-        if (selectedCount >= targetVanguardCount)
-            break;
-
-        int id = entry.Participant.EnemyId;
-
-        // 待機グループは前衛にしない
-        if (_waitingGroupIds.Contains(id))
-            continue;
-
-        // すでに強制前衛として選択済み
-        if (entry.IsVanguard)
-            continue;
-
-        entry.IsVanguard = true;
-        selectedCount++;
-    }
-
-    // 前衛全員が取得できるだけのスロット数
-    int requiredSlots = 0;
-
-    foreach (FormationEntry entry in allEntries)
-    {
-        if (entry.IsVanguard)
+        // 残りの枠を通常の戦闘力順で選ぶ
+        foreach (FormationEntry entry in allEntries)
         {
-            requiredSlots +=
-                Mathf.Max(1, entry.SlotCost);
+            if (selectedCount >= targetVanguardCount)
+                break;
+
+            int id = entry.Participant.EnemyId;
+
+            // 待機グループは前衛にしない
+            if (_waitingGroupIds.Contains(id))
+                continue;
+
+            // すでに強制前衛として選択済み
+            if (entry.IsVanguard)
+                continue;
+
+            entry.IsVanguard = true;
+            selectedCount++;
+        }
+
+        // 前衛全員が取得できるだけのスロット数
+        int requiredSlots = 0;
+
+        foreach (FormationEntry entry in allEntries)
+        {
+            if (entry.IsVanguard)
+            {
+                requiredSlots +=
+                    Mathf.Max(1, entry.SlotCost);
+            }
+        }
+
+        _innerSlot.UpdateMaxSlots(requiredSlots);
+
+        // 後衛になった敵が持っているスロットを解放
+        foreach (FormationEntry entry in allEntries)
+        {
+            if (!entry.IsVanguard)
+            {
+                DemoteIfAcquired(entry);
+            }
         }
     }
-
-    _innerSlot.UpdateMaxSlots(requiredSlots);
-
-    // 後衛になった敵が持っているスロットを解放
-    foreach (FormationEntry entry in allEntries)
-    {
-        if (!entry.IsVanguard)
-        {
-            DemoteIfAcquired(entry);
-        }
-    }
-}
 
     /// <summary>
     /// スロットを保有している場合に強制解放する

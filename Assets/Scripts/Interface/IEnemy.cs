@@ -73,6 +73,7 @@ public readonly struct EnemyServices
     public readonly ISeparationService SeparationService;
     public readonly IWallAvoidanceService WallAvoidanceService;
     public readonly IEnemyAttackerSlot AttackerSlot;
+    public readonly IEnemyFormationSystem FormationSystem;
     public readonly IPlayerInformationService PlayerInformationService;
 
     public EnemyServices(
@@ -80,12 +81,14 @@ public readonly struct EnemyServices
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
         IEnemyAttackerSlot attackerSlot,
+        IEnemyFormationSystem formationSystem,
         IPlayerInformationService playerInformationService)
     {
         SpatialHashGrid = spatialHashGrid;
         SeparationService = separationService;
         WallAvoidanceService = wallAvoidanceService;
         AttackerSlot = attackerSlot;
+        FormationSystem = formationSystem;
         PlayerInformationService = playerInformationService;
     }
 }

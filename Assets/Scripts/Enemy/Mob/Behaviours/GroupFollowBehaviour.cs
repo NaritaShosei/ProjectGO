@@ -135,10 +135,19 @@ public sealed class GroupFollowBehaviour
         forward = Vector3.zero;
         right = Vector3.zero;
         int count = 0;
+        Vector3 fallbackForward = Vector3.zero;
 
         foreach (IEnemy attacker in group.Attackers)
         {
-            if (attacker == null || attacker.IsDead) continue;
+            if (attacker == null ||
+                attacker.IsDead ||
+                attacker.Self == null)
+            {
+                continue;
+            }
+
+            if (fallbackForward.sqrMagnitude < 0.001f)
+                fallbackForward = attacker.Self.forward;
 
             center += attacker.Self.position;
             forward += attacker.Self.forward;
@@ -151,7 +160,7 @@ public sealed class GroupFollowBehaviour
         forward.y = 0f;
 
         if (forward.sqrMagnitude < 0.001f)
-            forward = group.Attackers[0].Self.forward;
+            forward = fallbackForward;
 
         forward.y = 0f;
         if (forward.sqrMagnitude < 0.001f) return false;
@@ -188,7 +197,8 @@ public sealed class GroupFollowBehaviour
 
             // 6体以上になった場合は後端からさらに後ろへ並べる
             default:
-                int extraRow = followerIndex - 1;
+                int extraRow =
+                    (followerIndex - 3) / 2 + 1;
                 float sideSign = followerIndex % 2 == 0 ? -1f : 1f;
                 return center
                     - forward * (_rearDistance + _followDistance * extraRow)

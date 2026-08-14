@@ -103,6 +103,8 @@ public class WaveController
     private int _groupSpawnCount;
 
     private readonly Queue<SpawnRequest> _pendingSpawns = new Queue<SpawnRequest>();
+    private readonly Dictionary<EnemyGroup, int>
+        _pendingGroupCounts = new();
 
 
     private readonly struct SpawnRequest
@@ -113,7 +115,6 @@ public class WaveController
         public readonly MidBossLevelTable MidBossLevelTable;
         public readonly EnemyGroup Group;
         public readonly bool IsGroupLeader;
-        public readonly bool IsLastGroupMember;
 
         // MidBossLevelTableが設定されている場合は中ボスとして扱う
         public bool IsMidBoss => MidBossLevelTable != null;
@@ -124,8 +125,7 @@ public class WaveController
             float spawnTime,
             MidBossLevelTable midBossLevelTable,
             EnemyGroup group,
-            bool isGroupLeader,
-            bool isLastGroupMember)
+            bool isGroupLeader)
         {
             EnemyTypeKey = enemyTypeKey;
             Position = position;
@@ -134,7 +134,6 @@ public class WaveController
 
             Group = group;
             IsGroupLeader = isGroupLeader;
-            IsLastGroupMember = isLastGroupMember;
         }
     }
 
@@ -204,6 +203,9 @@ public class WaveController
         int totalCount =
             GetTotalSpawnCount(group);
 
+        if (totalCount <= 0)
+            return;
+
         // Cluster配置をグループ生成として扱う
         EnemyGroup enemyGroup = null;
 
@@ -213,6 +215,9 @@ public class WaveController
             enemyGroup =
                 new EnemyGroup(
                     group.ClusterRadius);
+
+            _pendingGroupCounts[enemyGroup] =
+                totalCount;
         }
 
         int flatIndex = 0;
@@ -241,10 +246,6 @@ public class WaveController
                     enemyGroup != null &&
                     flatIndex == 0;
 
-                bool isLastGroupMember =
-                    enemyGroup != null &&
-                    flatIndex == totalCount - 1;
-
                 _pendingSpawns.Enqueue(
                     new SpawnRequest(
                         entry.EnemyTypeKey,
@@ -252,8 +253,7 @@ public class WaveController
                         spawnTime,
                         entry.MidBossLevelTable,
                         enemyGroup,
-                        isGroupLeader,
-                        isLastGroupMember));
+                        isGroupLeader));
 
                 flatIndex++;
             }
@@ -267,39 +267,52 @@ public class WaveController
         Enemy spawnedEnemy,
         SpawnRequest request)
     {
-        if (spawnedEnemy == null)
-            return;
-
         if (request.Group == null)
             return;
 
-        if (spawnedEnemy is not
+        if (spawnedEnemy is
             IEnemyGroupMember groupMember)
+        {
+            bool isLeader =
+                request.IsGroupLeader ||
+                request.Group.Leader == null;
+
+            request.Group.AddMember(
+                spawnedEnemy,
+                groupMember,
+                isLeader);
+        }
+        else if (spawnedEnemy != null)
         {
             Debug.LogWarning(
                 $"{spawnedEnemy.name}は" +
                 $"{nameof(IEnemyGroupMember)}を" +
                 "実装していません。");
+        }
+
+        if (!_pendingGroupCounts.TryGetValue(
+                request.Group,
+                out int remaining))
+        {
+            return;
+        }
+
+        remaining--;
+
+        if (remaining <= 0)
+        {
+            _pendingGroupCounts.Remove(request.Group);
+
+            if (request.Group.Members.Count > 0)
+            {
+                _enemyManager.RegisterWaitingGroup(
+                    request.Group);
+            }
 
             return;
         }
 
-        request.Group.AddMember(
-            spawnedEnemy,
-            groupMember,
-            request.IsGroupLeader);
-
-        // 最後の1体を登録したら、
-        // 全員を待機グループとして登録する
-        if (request.IsLastGroupMember)
-        {
-            _enemyManager.RegisterWaitingGroup(
-                request.Group);
-
-            Debug.Log(
-                $"グループ生成完了: " +
-                $"{request.Group.Members.Count}体");
-        }
+        _pendingGroupCounts[request.Group] = remaining;
     }
 
 
@@ -369,6 +382,7 @@ public class WaveController
                     request.Position,
                     request.MidBossLevelTable);
 
+                RegisterGroupMember(null, request);
                 continue;
             }
 
@@ -470,6 +484,7 @@ public class WaveController
         _groupStartTime = 0f;
         IsComplete = false;
         _pendingSpawns.Clear();
+        _pendingGroupCounts.Clear();
     }
 
     /// <summary>
