@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// カメラの挙動を管理するクラス。
@@ -13,7 +14,18 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     #region パブリックプロパティ・イベント
 
     /// <summary>メインカメラの参照</summary>
-    public Camera MainCamera => _mainCamera;
+    public Camera MainCamera
+    {
+        get
+        {
+            if (_mainCamera == null)
+            {
+                RefreshMainCamera(SceneManager.GetActiveScene());
+            }
+
+            return _mainCamera;
+        }
+    }
 
     /// <summary>現在ロックオンしている対象</summary>
     public ILockOnTarget CurrentTarget => _currentTarget;
@@ -191,6 +203,9 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private Quaternion _blendStartRotation;
 
     private float _timeScale = 1f;
+    private float _basePositionSmoothTime;
+    private Vector2 _baseRotationSpeed;
+    private GameSettingService _gameSettingService;
     #endregion
 
     #region イージング関数
@@ -204,8 +219,18 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private void Awake()
     {
-        _mainCamera = Camera.main;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+        RefreshMainCamera(SceneManager.GetActiveScene());
         ServiceLocator.Register(this);
+
+        // 設定変更を繰り返しても倍率が累積しないようInspector値を基準値として保持する。
+        _basePositionSmoothTime = _posSmoothTime;
+        _baseRotationSpeed = _cameraRotationSpeed;
+        if (ServiceLocator.TryGet(out _gameSettingService))
+        {
+            ApplyGameSettings(_gameSettingService.CurrentSettings);
+            _gameSettingService.OnSettingsChanged += ApplyGameSettings;
+        }
 
         _cameraShake = new CameraShake();
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
@@ -251,12 +276,54 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private void OnDestroy()
     {
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+
+        if (_gameSettingService != null)
+        {
+            // シーン破棄後に設定変更イベントから呼ばれないよう購読を解除する。
+            _gameSettingService.OnSettingsChanged -= ApplyGameSettings;
+        }
+
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
         {
             hitStopManager.Unregister(this, HitStopTargetGroup.Camera);
         }
 
         ServiceLocator.Unregister<CameraManager>();
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
+    {
+        RefreshMainCamera(scene);
+    }
+
+    private void RefreshMainCamera(Scene scene)
+    {
+        if (scene.IsValid() && scene.isLoaded)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                foreach (var camera in root.GetComponentsInChildren<Camera>(true))
+                {
+                    if (camera.CompareTag("MainCamera"))
+                    {
+                        _mainCamera = camera;
+                        return;
+                    }
+                }
+            }
+        }
+
+        _mainCamera = Camera.main;
+    }
+
+    private void ApplyGameSettings(GameSetting settings)
+    {
+        // 値0で低速、値1で高速になるよう、Inspector値を中央値として補正する。
+        _posSmoothTime = _basePositionSmoothTime
+            * Mathf.Lerp(2f, 0.5f, settings.CameraMoveSpeed);
+        _cameraRotationSpeed = _baseRotationSpeed
+            * Mathf.Lerp(0.25f, 2f, settings.CameraRotationSensitivity);
     }
 
     public void OnSpeedChange(float scale)
