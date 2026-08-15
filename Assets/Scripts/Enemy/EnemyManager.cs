@@ -37,7 +37,6 @@ public class EnemyManager : MonoBehaviour
        _separationService,
        _wallAvoidanceService,
        _formationSystem,
-       _formationSystem,
        _playerInformationService
    );
 
@@ -84,7 +83,6 @@ public class EnemyManager : MonoBehaviour
                 _spatialHashGrid,
                 _separationService,
                 _wallAvoidanceService,
-                _formationSystem,
                 _formationSystem,
                 _playerInformationService
             ));

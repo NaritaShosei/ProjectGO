@@ -52,7 +52,9 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
             Enemy = enemy,
             Participant = participant,
             CombatPower = participant.CombatPower,
-            SlotCost = participant.FormationSlotCost,
+            SlotCost = Mathf.Max(
+                1,
+                participant.FormationSlotCost),
             IsVanguard = false
         };
 
@@ -237,6 +239,9 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
 
             eligibleEntries.Add(entry);
         }
+
+        if (eligibleEntries.Count == 0)
+            return false;
 
         eligibleEntries.Sort(
             (a, b) =>
@@ -498,8 +503,7 @@ public sealed class EnemyFormationSystem : IEnemyFormationSystem
         {
             if (entry.IsVanguard)
             {
-                requiredSlots +=
-                    Mathf.Max(1, entry.SlotCost);
+                requiredSlots += entry.SlotCost;
             }
         }
 

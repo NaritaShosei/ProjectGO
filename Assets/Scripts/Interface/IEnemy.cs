@@ -80,15 +80,14 @@ public readonly struct EnemyServices
         ISpatialHashGrid spatialHashGrid,
         ISeparationService separationService,
         IWallAvoidanceService wallAvoidanceService,
-        IEnemyAttackerSlot attackerSlot,
         IEnemyFormationSystem formationSystem,
         IPlayerInformationService playerInformationService)
     {
         SpatialHashGrid = spatialHashGrid;
         SeparationService = separationService;
         WallAvoidanceService = wallAvoidanceService;
-        AttackerSlot = attackerSlot;
         FormationSystem = formationSystem;
+        AttackerSlot = formationSystem;
         PlayerInformationService = playerInformationService;
     }
 }
