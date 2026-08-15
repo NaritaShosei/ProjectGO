@@ -171,7 +171,8 @@ public struct CircleSpawnStrategy : ISpawnStrategy
 
         return CalculatePositionOnCircle(
             index,
-            memberCount);
+            memberCount,
+            _spawnData.GroupMoveRadius);
     }
 
     /// <summary>
@@ -183,12 +184,14 @@ public struct CircleSpawnStrategy : ISpawnStrategy
     {
         return CalculatePositionOnCircle(
             index,
-            count);
+            count,
+            _spawnData.Radius);
     }
 
     private Vector3 CalculatePositionOnCircle(
         int index,
-        int count)
+        int count,
+        float radius)
     {
         if (count <= 0)
             return _spawnData.Center;
@@ -199,7 +202,7 @@ public struct CircleSpawnStrategy : ISpawnStrategy
             Mathf.Cos(angle),
             0f,
             Mathf.Sin(angle)
-        ) * _spawnData.Radius;
+        ) * Mathf.Max(0f, radius);
 
         return _spawnData.Center + offset;
     }

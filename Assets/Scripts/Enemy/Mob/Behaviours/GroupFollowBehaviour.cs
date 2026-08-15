@@ -70,6 +70,11 @@ public sealed class GroupFollowBehaviour
             attackerForward,
             attackerRight);
 
+        targetPosition = ClampToMemberMoveRadius(
+            targetPosition,
+            attackerCenter,
+            group.MemberMoveRadius);
+
         Vector3 direction = targetPosition - _self.position;
         direction.y = 0f;
 
@@ -204,6 +209,22 @@ public sealed class GroupFollowBehaviour
                     - forward * (_rearDistance + _followDistance * extraRow)
                     + right * _formationHalfWidth * sideSign;
         }
+    }
+
+    /// <summary>
+    /// 追従位置をグループに設定されたメンバー移動半径内へ収める。
+    /// </summary>
+    private static Vector3 ClampToMemberMoveRadius(
+        Vector3 targetPosition,
+        Vector3 center,
+        float memberMoveRadius)
+    {
+        Vector3 offset = targetPosition - center;
+        offset.y = 0f;
+
+        return center + Vector3.ClampMagnitude(
+            offset,
+            Mathf.Max(0f, memberMoveRadius));
     }
 
     private bool CanFollow()
