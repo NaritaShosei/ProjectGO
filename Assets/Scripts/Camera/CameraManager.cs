@@ -11,6 +11,12 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class CameraManager : MonoBehaviour, ISpeedChange
 {
+    private const float SettingMidpoint = 0.5f;
+    private const float PositionSmoothTimeMinFactor = 0.5f;
+    private const float PositionSmoothTimeMaxFactor = 2f;
+    private const float RotationSpeedMinFactor = 0.25f;
+    private const float RotationSpeedMaxFactor = 2f;
+
     #region パブリックプロパティ・イベント
 
     /// <summary>メインカメラの参照</summary>
@@ -130,6 +136,11 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     public void ExecutionForceStopCameraShake()
     {
         _cameraShake.ForceStopCameraShake();
+    }
+
+    public void OnSpeedChange(float scale)
+    {
+        _timeScale = scale;
     }
 
     #endregion
@@ -320,15 +331,19 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private void ApplyGameSettings(GameSetting settings)
     {
         // 値0で低速、値1で高速になるよう、Inspector値を中央値として補正する。
-        _posSmoothTime = _basePositionSmoothTime
-            * Mathf.Lerp(2f, 0.5f, settings.CameraMoveSpeed);
-        _cameraRotationSpeed = _baseRotationSpeed
-            * Mathf.Lerp(0.25f, 2f, settings.CameraRotationSensitivity);
-    }
+        float moveFactor = settings.CameraMoveSpeed <= SettingMidpoint
+            ? Mathf.Lerp(PositionSmoothTimeMaxFactor, 1f, settings.CameraMoveSpeed / SettingMidpoint)
+            : Mathf.Lerp(1f, PositionSmoothTimeMinFactor,
+                (settings.CameraMoveSpeed - SettingMidpoint) / SettingMidpoint);
+        float rotationFactor = settings.CameraRotationSensitivity <= SettingMidpoint
+            ? Mathf.Lerp(RotationSpeedMinFactor, 1f, settings.CameraRotationSensitivity / SettingMidpoint)
+            : Mathf.Lerp(1f, RotationSpeedMaxFactor,
+                (settings.CameraRotationSensitivity - SettingMidpoint) / SettingMidpoint);
 
-    public void OnSpeedChange(float scale)
-    {
-        _timeScale = scale;
+        _posSmoothTime = _basePositionSmoothTime
+            * moveFactor;
+        _cameraRotationSpeed = _baseRotationSpeed
+            * rotationFactor;
     }
 
     #endregion
