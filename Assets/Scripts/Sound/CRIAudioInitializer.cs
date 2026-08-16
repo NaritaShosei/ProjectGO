@@ -9,15 +9,22 @@ public class CRIAudioInitializer : MonoBehaviour
     [SerializeField, Header("デフォルトのBGMシート名")] 
     private string _deaultBGMCueSheet = "BGM";
 
+    private SoundManager _soundManager;
+
     private void Awake()
     {
         // SoundManagerをServiceLocatorに登録
-        ServiceLocator.Register(new SoundManager(_bgmPlayer, _deaultBGMCueSheet));
+        _soundManager = new SoundManager(_bgmPlayer, _deaultBGMCueSheet);
+        ServiceLocator.Register(_soundManager);
     }
 
     private void OnDestroy()
     {
         // SoundManagerをServiceLocatorから削除
-        ServiceLocator.Unregister<SoundManager>();
+        if (ServiceLocator.TryGet(out SoundManager current) &&
+            ReferenceEquals(current, _soundManager))
+        {
+            ServiceLocator.Unregister<SoundManager>();
+        }
     }
 }
