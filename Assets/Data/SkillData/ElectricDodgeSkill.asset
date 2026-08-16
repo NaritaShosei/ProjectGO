@@ -21,10 +21,12 @@ MonoBehaviour:
   _unlockedSkill: {fileID: 0}
   _defaultUnlocked: 1
   _isPlayerMode: 1
-  _playerPosition: {x: 0, y: 0, z: 0}
-  _attackPower: 100
   _damageMultiplier: 0.8
   _grantEffectProbability: 0.5
   _durationEffect: 3
   _upDamagePercentage: 0.8
   _attackRadius: 3
+  _delay: 0
+  _duration: 3
+  _scale: {x: 1, y: 1, z: 1}
+  _effect: {fileID: 2571726821104770411, guid: 76d3fb576ec099945911e87d1a2b3c7f, type: 3}
