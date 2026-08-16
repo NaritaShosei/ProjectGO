@@ -36,6 +36,7 @@ public class ElectricDodgeSkill : SkillBase
     private void ActivateElectricDodge(Transform playerTransform)
     {
         if (!_isCan) return;
+        _isCan = false;
 
         UniTask.Delay(_delay);
 
@@ -59,7 +60,6 @@ public class ElectricDodgeSkill : SkillBase
                 }
             });
         }
-        _isCan = false;
     }
 
     private async UniTask SpawnEffect(Vector3 pos, int durationTime, Vector3 scale)
