@@ -9,7 +9,7 @@ using System;
 // ※鎧が残っているかはEnemyTypeで判定
 // ※鎧持ちでも感電する
 
-public class MobEnemy : Enemy, IFormationParticipant
+public class MobEnemy : Enemy,IFormationParticipant
 {
     public override IEnemyConditionController ConditionController { get => _conditionController; }
 
