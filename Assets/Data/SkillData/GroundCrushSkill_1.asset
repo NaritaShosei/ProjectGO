@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a16cbcc21f41b4b4c89749317af081c6, type: 3}
+  m_Script: {fileID: 11500000, guid: 2c07dde74d4e1f841b3c3a8efd9a3008, type: 3}
   m_Name: GroundCrushSkill_1
-  m_EditorClassIdentifier: Assembly-CSharp::ConditionalAttackBoostSkill
+  m_EditorClassIdentifier: Assembly-CSharp::GroundCrush
   _id: 4079
   _priority: 0
   _name: "\u5927\u5730\u7C89\u7815\u2160"
-  _explanation: "\u30B3\u30F3\u30DC\u306E\u6700\u5F8C\u306E\u4E00\u6483\u306E\u5A01\u529B\u304C20\uFF05\u30A2\u30C3\u30D7\u3057\u3001\u3055\u3089\u306B\u7BC4\u56F2\u653B\u6483\u304C\u4ED8\u4E0E\u3055\u308C\u308B\u3002"
+  _explanation: "\u30B3\u30F3\u30DC1\u6BB5\u76EE\u306E\u5F8C\u3001\u5468\u56F2\u306E\u6575\u3092\u5DFB\u304D\u8FBC\u3080\u885D\u6483\u6CE2\u304C\u767A\u751F\u3059\u308B\u3002"
   _icon: {fileID: 21300000, guid: 5ddacc3d750793a4abc3053a706d07b8, type: 3}
   _timing: 0
   _unlockedSkill: {fileID: 11400000, guid: 558a011b8cb78cd4eab0e3c8484f5066, type: 2}
@@ -23,10 +23,9 @@ MonoBehaviour:
   _attackRadius: 0.5
   _damageMultiplier: 1.5
   _isPlayerMode: 0
-  _comboStage: 3
+  _comboStage: 1
   _delay: 0
-  _range: 1
+  _range: 0
   _knockBackPower: 0
   _knockBackUpward: 0
   _effectKey: "\u5927\u5730\u7C89\u7815"
-  _boostAmount: 0.2
