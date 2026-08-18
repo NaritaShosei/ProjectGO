@@ -82,6 +82,7 @@ public class PlayerAttack : MonoBehaviour
     public void ResetCombo()
     {
         _currentAttackId = -1;
+        _currentComboStage = 0;
         _bufferedComboInput = null;
         ClearHomingLock();
     }
@@ -95,6 +96,7 @@ public class PlayerAttack : MonoBehaviour
         ClearAttackState();
         OnAttackEnded?.Invoke();
         _currentAttackId = -1;
+        _currentComboStage = 0;
     }
 
     #endregion
@@ -122,6 +124,7 @@ public class PlayerAttack : MonoBehaviour
     private ChargeThreshold[] _chargeThresholds;
 
     private int _currentAttackId = -1;
+    private int _currentComboStage;
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private bool _isCharging;
@@ -362,6 +365,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>  
     private void PrepareAttack(AttackInput input, bool allowCombo = false)
     {
+        bool isComboContinuation = _currentAttackId != -1;
         AttackData attackData = GetNextAttack(input, allowCombo);
 
         if (attackData == null)
@@ -383,6 +387,10 @@ public class PlayerAttack : MonoBehaviour
             Debug.LogWarning($"バリアントデータが見つかりませんでした。AttackId: {_currentAttackId}, ChargeLevel: {input.ChargeLevel}");
             return;
         }
+
+        _currentComboStage = isComboContinuation
+            ? _currentComboStage + 1
+            : 1;
 
         SetupHoming(variant);
         _activeAttackVariant = variant;
@@ -407,7 +415,12 @@ public class PlayerAttack : MonoBehaviour
 
         _currentHitIndex = hitIndex;
         _currentMotionHitCount = hitCount;
-        _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
+        _attackExecutor.Execute(
+            _pendingAttackData,
+            _pendingAttackInput.Value,
+            _modeController.ModeData,
+            _currentComboStage,
+            hitIndex);
 
         // 攻撃判定の発火後は向き追従だけを停止する。
         // 座標追従で使用するターゲット情報は、モーション終了まで保持する。
@@ -440,6 +453,8 @@ public class PlayerAttack : MonoBehaviour
         var variant = nextAttack.GetVariant(bufferedInput.ChargeLevel);
 
         if (variant == null) { return; }
+
+        _currentComboStage++;
 
         SetupHoming(variant);
         _activeAttackVariant = variant;

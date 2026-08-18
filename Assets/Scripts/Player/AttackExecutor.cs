@@ -19,7 +19,7 @@ public class AttackExecutor : MonoBehaviour
         _skillManager = manager;
     }
 
-    public void Execute(AttackData attackData, AttackInput attackInput, ModeData modeData, int hitIndex = 0)
+    public void Execute(AttackData attackData, AttackInput attackInput, ModeData modeData, int comboStage, int hitIndex = 0)
     {
         var variantData = attackData.GetVariant(attackInput.ChargeLevel);
 
@@ -49,7 +49,7 @@ public class AttackExecutor : MonoBehaviour
 
         Debug.Log($"{attackData.Mode}：{variantData.AttackName}で攻撃");
 
-        var context = new AttackContext(attackData.Mode, _playerStats, attackPos, transform)
+        var context = new AttackContext(attackData.Mode, _playerStats, attackPos, transform, comboStage)
         {
             AttackPower = _playerStats.AttackPower * hitData.DamageMultiplier * modeData.AttackMultiplier,
         };
@@ -356,6 +356,7 @@ public struct AttackContext
     public float AttackPower;
     public readonly PlayerMode PlayerMode;
     public readonly IPlayerStats PlayerStats;
+    public readonly int ComboStage;
 
     // 攻撃の座標
     public readonly Vector3 AttackPosition;
@@ -378,10 +379,11 @@ public struct AttackContext
     /// <summary>感電</summary>
     public ElectricShock ElectricShock;
 
-    public AttackContext(PlayerMode mode, IPlayerStats playerStats, Vector3 attackPos, Transform playerTransform)
+    public AttackContext(PlayerMode mode, IPlayerStats playerStats, Vector3 attackPos, Transform playerTransform, int comboStage)
     {
         PlayerMode = mode;
         PlayerStats = playerStats;
+        ComboStage = comboStage;
         AttackPosition = attackPos;
         PlayerTransform = playerTransform;
 
