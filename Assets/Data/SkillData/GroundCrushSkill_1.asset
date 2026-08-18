@@ -20,10 +20,13 @@ MonoBehaviour:
   _timing: 0
   _unlockedSkill: {fileID: 11400000, guid: 558a011b8cb78cd4eab0e3c8484f5066, type: 2}
   _defaultUnlocked: 1
-  _boostAmount: 0.2
-  _effectKey: "\u5927\u5730\u7C89\u7815"
-  _damageRadius: 2
+  _attackRadius: 0.5
   _damageMultiplier: 1.5
-  _enemyLayer:
-    serializedVersion: 2
-    m_Bits: 256
+  _isPlayerMode: 0
+  _comboStage: 3
+  _delay: 0
+  _range: 1
+  _knockBackPower: 0
+  _knockBackUpward: 0
+  _effectKey: "\u5927\u5730\u7C89\u7815"
+  _boostAmount: 0.2
