@@ -13,7 +13,7 @@ public class GroundCrush : SkillBase
         Transform playerTransform = context.PlayerTransform;
 
         Vector3 center =
-            playerTransform.position +
+            context.AttackPosition +
             playerTransform.forward * _range;
 
         Vector3 forward = playerTransform.forward;
