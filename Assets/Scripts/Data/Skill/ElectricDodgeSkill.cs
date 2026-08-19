@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ElectricDodgeSkill", menuName = "GameData/Skill/ElectricDodgeSkill")]
@@ -23,12 +24,12 @@ public class ElectricDodgeSkill : SkillBase
     [SerializeField] private int _delay = 0;                                   //エフェクト生成タイミング
     [SerializeField] private int _duration = 3;                                //エフェクト持続時間
     [SerializeField] private Vector3 _scale = new(1, 1, 1);                    //エフェクトサイズ
-    [SerializeField] private GameObject _effect;                               //スキルのエフェクト
+    [SerializeField] private string _effectKey;                                //スキルのエフェクト
 
     private float _attackPower;                                                //攻撃力
     private bool _isCan;
 
-    private void SaveApproveStatus()    
+    private void SaveApproveStatus()
     {
         _isCan = true;
     }
@@ -38,37 +39,49 @@ public class ElectricDodgeSkill : SkillBase
         if (!_isCan) return;
         _isCan = false;
 
-        UniTask.Delay(_delay);
+        ActivateElectricDodgeAsync(playerTransform);
+    }
 
-        SpawnEffect(playerTransform.position, _duration, _scale);
+    private async Task ActivateElectricDodgeAsync(Transform playerTransform)
+    {
+        await UniTask.Delay(_delay);
 
-        EnemyManager enemyManager = ServiceLocator.Get<EnemyManager>();
+        SpawnEffect(playerTransform.position, _scale);
 
-        IReadOnlyList<IEnemy> enemies = enemyManager.GetEnemiesInRange(playerTransform.position, _attackRadius);
+        HashSet<IEnemy> hittedEnemies = new HashSet<IEnemy>();
+        float elapsed = 0;
 
-        foreach (IEnemy hitEnemy in enemies)
+        while (elapsed < _duration)
         {
-            hitEnemy.TakeDamage(new DamageContext
+            EnemyManager enemyManager = ServiceLocator.Get<EnemyManager>();
+            IReadOnlyList<IEnemy> enemies = enemyManager.GetEnemiesInRange(playerTransform.position, _attackRadius);
+
+            foreach (IEnemy hitEnemy in enemies)
             {
-                AttackPower = _attackPower * _damageMultiplier,
-                PlayerMode = _isPlayerMode,
-                ElectricShock = new ElectricShock
+                if (!hittedEnemies.Add(hitEnemy)) continue;
+
+                hitEnemy.TakeDamage(new DamageContext
                 {
-                    GrantEffectProbability = _grantEffectProbability,
-                    DurationEffect = _durationEffect,
-                    UpDamagePercentage = _upDamagePercentage
-                }
-            });
+                    AttackPower = _attackPower * _damageMultiplier,
+                    PlayerMode = _isPlayerMode,
+                    ElectricShock = new ElectricShock
+                    {
+                        GrantEffectProbability = _grantEffectProbability,
+                        DurationEffect = _durationEffect,
+                        UpDamagePercentage = _upDamagePercentage
+                    }
+                });
+            }
+
+            elapsed += Time.deltaTime;
         }
     }
 
-    private async UniTask SpawnEffect(Vector3 pos, int durationTime, Vector3 scale)
+    private void SpawnEffect(Vector3 pos, Vector3 scale)
     {
-        GameObject effect = Instantiate(_effect, pos, Quaternion.identity);
-        effect.transform.localScale = scale;
-
-        await UniTask.Delay(durationTime);
-
-        Destroy(effect);
+        if (ServiceLocator.TryGet(out EffectManager effectManager))
+        {
+            effectManager.PlayEffect(_effectKey, pos, scale);
+        }
     }
 }
