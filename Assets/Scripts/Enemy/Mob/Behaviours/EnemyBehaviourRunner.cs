@@ -198,5 +198,7 @@ public enum EnemyBehaviourPriority : int
     Roam = 2,
     Bark = 3,
     Approach = 4,
-    Attack = 5
+    GroupFollow = 5,
+    Attack = 6,
+    GroupWaiting = 7,
 }

@@ -7,6 +7,12 @@ using UnityEngine;
 [System.Serializable]
 public class SpawnGroupData
 {
+    public enum SpawnPlacementMode
+    {
+        SpawnPointSlots,
+        Cluster
+    }
+
     [Tooltip("出現させるエネミーのリスト")]
     public List<WaveSpawnEnemy> SpawnEntries = new();
 
@@ -26,6 +32,20 @@ public class SpawnGroupData
     [Tooltip("出現間隔（秒）")]
     [SerializeField, Min(0f)]
     private float _spawnSetInterval = 0.5f;
+
+    [Header("スポーン配置")]
+    [SerializeField]
+    private SpawnPlacementMode _placementMode =
+    SpawnPlacementMode.SpawnPointSlots;
+
+    [SerializeField, Min(0f)]
+    private float _clusterRadius = 2f;
+
+    public SpawnPlacementMode PlacementMode =>
+        _placementMode;
+
+    public float ClusterRadius =>
+        _clusterRadius;
 
     public int SpawnSetSize => _spawnSetSize;
     public float SpawnSetInterval => _spawnSetInterval;
