@@ -266,7 +266,7 @@ public class PlayerAttack : MonoBehaviour
             var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
-                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                float t = idleChargeData.ChargeTransitionDuration < 0 ? 0.1f : idleChargeData.ChargeTransitionDuration;
                 _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
             }
         }
@@ -583,7 +583,7 @@ public class PlayerAttack : MonoBehaviour
             var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
-                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                float t = idleChargeData.ChargeTransitionDuration < 0 ? 0.1f : idleChargeData.ChargeTransitionDuration;
                 _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
             }
 
@@ -688,7 +688,7 @@ public class PlayerAttack : MonoBehaviour
 
                 if (chargeData != null && !string.IsNullOrEmpty(chargeData.ChargeAnimationStateName))
                 {
-                    float transition = chargeData.TransitionDuration < 0 ? 0.1f : chargeData.TransitionDuration;
+                    float transition = chargeData.ChargeTransitionDuration < 0 ? 0.1f : chargeData.ChargeTransitionDuration;
                     _animationController.PlayChargeAnimation(chargeData.ChargeAnimationStateName, transition);
                 }
 
