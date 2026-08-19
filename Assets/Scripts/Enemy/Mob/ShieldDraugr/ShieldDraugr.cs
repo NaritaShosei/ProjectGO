@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 
 public class ShieldDraugr : MobEnemy
@@ -19,9 +20,15 @@ public class ShieldDraugr : MobEnemy
     [SerializeField, Tooltip("盾破壊時のエフェクト")] private string _shieldBrokenEffect = "shieldBrokenEffect";
     [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale;
 
-   private ShieldState _shieldState = ShieldState.Guarding;
+    private ShieldState _shieldState = ShieldState.Guarding;
     //現在の盾の耐久値
     private float _currentShieldDurability;
+    private const int ShieldLayerIndex = 1;
+
+    [SerializeField, Tooltip("盾構え解除にかかる時間")]
+    private float _shieldAnimationBlendDuration = 0.3f;
+
+    private Tween _shieldAnimationTween;
 
     private EffectManager _effectManager;
 
@@ -37,6 +44,9 @@ public class ShieldDraugr : MobEnemy
         base.ReInitialize(spawnPosition);
         _currentShieldDurability = _shieldDurability;
         _shieldState = ShieldState.Guarding;
+
+        _shieldObject.SetActive(true);
+        ResetShieldAnimation();
     }
 
     public override void TakeDamage(DamageContext context)
@@ -49,8 +59,9 @@ public class ShieldDraugr : MobEnemy
 
         bool appliedToHp = false;
         bool appliedToShield = false;
-        //現在使用なし正面ガード時に使用
+        bool didBreakThisHit = false;
         bool wasBlocked = false;
+        //現在使用なし正面ガード時に使用
 
         if (_shieldState == ShieldState.Broken)
         {
@@ -66,6 +77,7 @@ public class ShieldDraugr : MobEnemy
                 Debug.Log("盾にダメージ");
                 ApplyShieldDamage(damage);
                 appliedToShield = true;
+                didBreakThisHit = _shieldState == ShieldState.Broken;
             }
             else
             {
@@ -89,14 +101,18 @@ public class ShieldDraugr : MobEnemy
         context.OnHitResult?.Invoke(new HitResult
         {
             IsKill = willKill,
-            IsArmorBreak = false, // 盾破壊は別イベントで通知
+            IsArmorBreak = didBreakThisHit,
             IsWeakPoint = isBattleGod && appliedToShield,
             IsArmorHit = appliedToShield,
         });
 
         if (appliedToHp && !willKill) InvokeOnDamaged();
 
-        ApplyAdditionalEffects(context); // ノックバック・感電はそのまま流用
+        // 完全ガードされた攻撃には追加効果を適用しない
+        if (!wasBlocked && !appliedToShield)
+        {
+            ApplyAdditionalEffects(context);
+        }
     }
 
     private bool IsFrontalHit()
@@ -123,20 +139,42 @@ public class ShieldDraugr : MobEnemy
     /// </summary>
     private void BreakShield()
     {
+        if (_shieldState == ShieldState.Broken)
+            return;
+
         _shieldState = ShieldState.Broken;
-        InvokeOnArmorBroken(); // HUD等への通知に既存イベントを流用
-        _effectManager.PlayEffect(_shieldBrokenEffect, _shieldEffectPoint.position ,_shieldBrokenEffectScale);
-        HeidShield();
-        //アニメーションを盾なし状態に変更
-        // TODO: 盾破壊エフェクト、アバターマスクWeight 1→0のブレンド開始
-        // TODO: 攻撃Behaviourの無効化、KeepDistanceBehaviourへの切り替え
+        //盾破壊通知
+        InvokeOnArmorBroken();
+        //盾は破壊エフェクト
+        _effectManager.PlayEffect(_shieldBrokenEffect, _shieldEffectPoint.position, _shieldBrokenEffectScale);
+        //盾のモデル非表示
+        HideShield();
+        //上半身盾構え解除
+        SetShieldAnimation(false);
+        // 現在のBehaviourを終了
+        _runner.ForceExitAction();
     }
 
     /// <summary>
     /// 盾非表示
     /// </summary>
-    private void HeidShield()
+    private void HideShield()
     {
         _shieldObject.SetActive(false);
+    }
+
+    private void SetShieldAnimation(bool enabled)
+    {
+        float targetWeight = enabled ? 1f : 0f;
+
+        _shieldAnimationTween?.Kill();
+
+        _shieldAnimationTween = DOTween.To(() => _animator.GetLayerWeight(ShieldLayerIndex), weight => _animator.SetLayerWeight(ShieldLayerIndex, weight), targetWeight, _shieldAnimationBlendDuration);
+    }
+
+    private void ResetShieldAnimation()
+    {
+        _shieldAnimationTween?.Kill();
+        _animator.SetLayerWeight(ShieldLayerIndex, 1f);
     }
 }
