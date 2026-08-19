@@ -13,7 +13,7 @@ public class GroundCrush : SkillBase
         Transform playerTransform = context.PlayerTransform;
 
         Vector3 center =
-            playerTransform.position +
+            context.AttackPosition +
             playerTransform.forward * _range;
 
         Vector3 forward = playerTransform.forward;
@@ -32,15 +32,17 @@ public class GroundCrush : SkillBase
     {
         bool isWarrior = context.PlayerMode == _isPlayerMode;
 
-        bool isLastCombo = data.NextComboAttackId == -1;
+        bool isTargetComboStage = context.ComboStage == _comboStage;
 
         return isWarrior
-            && isLastCombo;
+            && isTargetComboStage;
     }
 
     [SerializeField] private float _attackRadius = 2.5f;                                   //攻撃範囲
     [SerializeField] private float _damageMultiplier = 1.8f;                               //与えるダメージ
     [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Warrior;                //プレイヤーが闘神モードかどうか
+    [Min(1)]
+    [SerializeField] private int _comboStage = 1;                                          //発動するコンボ段数
     [SerializeField] private float _delay = 1.0f;                                          //ヒットから発動までの待機時間
     [SerializeField] private float _range = 1;                                          // 攻撃の中心とPlayerとの距離
     [SerializeField] private float _knockBackPower;                                        //ノックバックの強さ
