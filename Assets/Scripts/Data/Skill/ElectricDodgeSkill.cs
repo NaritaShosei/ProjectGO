@@ -1,6 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Threading;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ElectricDodgeSkill", menuName = "GameData/Skill/ElectricDodgeSkill")]
@@ -38,14 +38,16 @@ public class ElectricDodgeSkill : SkillBase
         if (!_isCan) return;
         _isCan = false;
 
-        ActivateElectricDodgeAsync(playerTransform);
+        ActivateElectricDodgeAsync(playerTransform).Forget();
     }
 
     private async UniTask ActivateElectricDodgeAsync(Transform playerTransform)
     {
+        CancellationToken token = playerTransform.GetCancellationTokenOnDestroy();
+
         Vector3 effectPos = playerTransform.position;
 
-        await UniTask.Delay(_delay);
+        await UniTask.Delay(_delay, cancellationToken: token);
 
         SpawnEffect(effectPos, _scale);
 
@@ -74,7 +76,7 @@ public class ElectricDodgeSkill : SkillBase
             }
 
             elapsed += Time.deltaTime;
-            await UniTask.Yield();
+            await UniTask.Yield(token);
         }
     }
 
