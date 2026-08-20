@@ -12,10 +12,9 @@ public class ElectricDodgeSkill : SkillBase
         stats.OnJustDodgeSuccess += SaveApproveStatus;
         stats.OnEndDodge += ActivateElectricDodge;
 
-        _attackPower = stats.AttackPower;
+        _playerStats = stats;
     }
 
-    [SerializeField] private PlayerMode _isPlayerMode = PlayerMode.Thunder;    //雷神モードかどうか
     [SerializeField] private float _damageMultiplier = 0.8f;                   //ダメージ倍率
     [SerializeField] private float _grantEffectProbability = 0.5f;             //感電付与確率
     [SerializeField] private float _durationEffect = 3f;                       //感電持続時間
@@ -26,7 +25,7 @@ public class ElectricDodgeSkill : SkillBase
     [SerializeField] private Vector3 _scale = new(1, 1, 1);                    //エフェクトサイズ
     [SerializeField] private string _effectKey;                                //スキルのエフェクト
 
-    private float _attackPower;                                                //攻撃力
+    private IPlayerStats _playerStats;
     private bool _isCan;
 
     private void SaveApproveStatus()
@@ -46,7 +45,9 @@ public class ElectricDodgeSkill : SkillBase
     {
         await UniTask.Delay(_delay);
 
-        SpawnEffect(playerTransform.position, _scale);
+        Vector3 effectPos = playerTransform.position;
+
+        SpawnEffect(effectPos, _scale);
 
         HashSet<IEnemy> hittedEnemies = new HashSet<IEnemy>();
         float elapsed = 0;
@@ -54,7 +55,7 @@ public class ElectricDodgeSkill : SkillBase
         while (elapsed < _duration)
         {
             EnemyManager enemyManager = ServiceLocator.Get<EnemyManager>();
-            IReadOnlyList<IEnemy> enemies = enemyManager.GetEnemiesInRange(playerTransform.position, _attackRadius);
+            IReadOnlyList<IEnemy> enemies = enemyManager.GetEnemiesInRange(effectPos, _attackRadius);
 
             foreach (IEnemy hitEnemy in enemies)
             {
@@ -62,8 +63,7 @@ public class ElectricDodgeSkill : SkillBase
 
                 hitEnemy.TakeDamage(new DamageContext
                 {
-                    AttackPower = _attackPower * _damageMultiplier,
-                    PlayerMode = _isPlayerMode,
+                    AttackPower = _playerStats.AttackPower * _damageMultiplier,
                     ElectricShock = new ElectricShock
                     {
                         GrantEffectProbability = _grantEffectProbability,
