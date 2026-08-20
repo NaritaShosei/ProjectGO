@@ -41,11 +41,11 @@ public class ElectricDodgeSkill : SkillBase
         ActivateElectricDodgeAsync(playerTransform);
     }
 
-    private async Task ActivateElectricDodgeAsync(Transform playerTransform)
+    private async UniTask ActivateElectricDodgeAsync(Transform playerTransform)
     {
-        await UniTask.Delay(_delay);
-
         Vector3 effectPos = playerTransform.position;
+
+        await UniTask.Delay(_delay);
 
         SpawnEffect(effectPos, _scale);
 
@@ -74,6 +74,7 @@ public class ElectricDodgeSkill : SkillBase
             }
 
             elapsed += Time.deltaTime;
+            await UniTask.Yield();
         }
     }
 
