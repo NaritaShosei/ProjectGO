@@ -23,6 +23,7 @@ public class ElectricDodgeSkill : SkillBase
     [SerializeField] private int _delay = 0;                                   //エフェクト生成タイミング
     [SerializeField] private int _duration = 3;                                //エフェクト持続時間
     [SerializeField] private Vector3 _scale = new(1, 1, 1);                    //エフェクトサイズ
+    [SerializeField] private Vector3 _effectOffset = Vector3.zero;             //エフェクトの生成位置オフセット
     [SerializeField] private string _effectKey;                                //スキルのエフェクト
 
     private IPlayerStats _playerStats;
@@ -45,7 +46,7 @@ public class ElectricDodgeSkill : SkillBase
     {
         CancellationToken token = playerTransform.GetCancellationTokenOnDestroy();
 
-        Vector3 effectPos = playerTransform.position;
+        Vector3 effectPos = playerTransform.position + _effectOffset;
 
         await UniTask.Delay(_delay, cancellationToken: token);
 
