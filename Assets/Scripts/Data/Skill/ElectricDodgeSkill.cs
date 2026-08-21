@@ -67,6 +67,7 @@ public class ElectricDodgeSkill : SkillBase
                 hitEnemy.TakeDamage(new DamageContext
                 {
                     AttackPower = _playerStats.AttackPower * _damageMultiplier,
+                    PlayerMode = PlayerMode.Thunder,
                     ElectricShock = new ElectricShock
                     {
                         GrantEffectProbability = _grantEffectProbability,
