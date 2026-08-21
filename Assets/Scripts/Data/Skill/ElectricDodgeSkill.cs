@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -20,7 +21,7 @@ public class ElectricDodgeSkill : SkillBase
     [SerializeField] private float _durationEffect = 3f;                       //感電持続時間
     [SerializeField] private float _upDamagePercentage = 0.8f;                 //感電中のダメージ上昇率                      
     [SerializeField] private float _attackRadius = 3f;                         //攻撃半径
-    [SerializeField] private int _delay = 0;                                   //エフェクト生成タイミング
+    [SerializeField] private float _delaySeconds = 0f;                         //エフェクト生成までの秒数
     [SerializeField] private int _duration = 3;                                //エフェクト持続時間
     [SerializeField] private Vector3 _scale = new(1, 1, 1);                    //エフェクトサイズ
     [SerializeField] private Vector3 _effectOffset = Vector3.zero;             //エフェクトの生成位置オフセット
@@ -48,7 +49,7 @@ public class ElectricDodgeSkill : SkillBase
 
         Vector3 effectPos = playerTransform.position + _effectOffset;
 
-        await UniTask.Delay(_delay, cancellationToken: token);
+        await UniTask.Delay(TimeSpan.FromSeconds(_delaySeconds), cancellationToken: token);
 
         SpawnEffect(effectPos, _scale);
 
