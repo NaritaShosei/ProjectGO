@@ -42,6 +42,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         remove => _playerStats.OnBeforeDead -= value;
     }
 
+
+    public event Action OnJustDodgeSuccess;
+
     public event Action<float, float, float> OnHealthChanged
     {
         add => _playerStats.OnHealthChanged += value;
@@ -55,6 +58,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
     public event Action OnDead;
+
+    public event Action<Transform> OnEndDodge;
 
     public void Init(SkillManager skillManager, InputHandler input)
     {
@@ -300,6 +305,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _move.OnStartDodgeInvincible -= _justDodgeSystem.JustDodgeWindowStart;
             _justDodgeSystem.OnJustDodgeSuccess -= HandleJustDodgeSuccess;
         }
+
+        if (_move != null)
+            _move.OnEndDodge -= RelayEndDodge;
+
+        if (_justDodgeSystem != null)
+            _justDodgeSystem.OnJustDodgeSuccess -= RelayJustDodgeSuccess;
     }
 
     private void BindEvents()
@@ -315,6 +326,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _move.OnStartDodgeInvincible += _justDodgeSystem.JustDodgeWindowStart;
             _justDodgeSystem.OnJustDodgeSuccess += HandleJustDodgeSuccess;
         }
+
+        if (_move != null)
+            _move.OnEndDodge += RelayEndDodge;
+
+        if (_justDodgeSystem != null)
+            _justDodgeSystem.OnJustDodgeSuccess += RelayJustDodgeSuccess;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
             cameraManager.OnLockOnTargetChanged += SetLockOnTarget;
@@ -408,6 +425,16 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();
+    }
+
+    private void RelayEndDodge()
+    {
+        OnEndDodge?.Invoke(transform);
+    }
+
+    private void RelayJustDodgeSuccess()
+    {
+        OnJustDodgeSuccess?.Invoke();
     }
 
     private sealed class ThunderGaugeSpeedTarget : ISpeedChange
