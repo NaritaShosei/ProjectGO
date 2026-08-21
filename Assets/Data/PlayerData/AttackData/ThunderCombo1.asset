@@ -22,16 +22,12 @@ MonoBehaviour:
   - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C91"
     _requiredCharge: 0
     _hits:
-    - DamageMultiplier: 1
+    - DamageMultiplier: 0.6
       AttackRange: 1
       AttackRadius: 1
       EnableKnockback: 1
       KnockbackPower: 5
       KnockbackUpward: 0
-      ControllerVibration:
-        _low: 0.2
-        _high: 0.3
-        _duration: 0.1
       HitStopData:
         _baseDuration: 0.1
         _timeScale: 0
@@ -40,6 +36,10 @@ MonoBehaviour:
         _weakPointMultiplier: 1.4
         _breakOrKillMultiplier: 1.6
         _weakAndBreakOrKillMultiplier: 2
+      ControllerVibration:
+        _low: 0.2
+        _high: 0.3
+        _duration: 0.1
       PlayGroundHitSE: 0
       AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.2
@@ -59,7 +59,7 @@ MonoBehaviour:
         _previewPrefab: {fileID: 0}
     _enableHoming: 1
     _homingRadius: 5
-    _homingAngle: 40
+    _homingAngle: 90
     _homingStrength: 100
     _enableMovement: 1
     _moveCurve:
