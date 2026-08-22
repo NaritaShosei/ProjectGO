@@ -11,6 +11,7 @@ public class EnemyAttackSMB : StateMachineBehaviour
     {
         _attackHitFired = false;
         _weaponSwingFired = false;
+        _stateLength = stateInfo.length;
 
         if (animator.TryGetComponent(out IEnemyAnimationController controller))
         {
@@ -21,7 +22,7 @@ public class EnemyAttackSMB : StateMachineBehaviour
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (animator.speed == 0f) return;
-        float currentTime = stateInfo.normalizedTime * stateInfo.length;
+        float currentTime = stateInfo.normalizedTime * _stateLength;
 
         // 武器スイングSE
         if (!_weaponSwingFired && currentTime >= _weaponSwingTime)
@@ -59,4 +60,5 @@ public class EnemyAttackSMB : StateMachineBehaviour
 
     private bool _attackHitFired;
     private bool _weaponSwingFired;
+    private float _stateLength;
 }
