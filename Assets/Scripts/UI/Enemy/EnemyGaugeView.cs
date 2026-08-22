@@ -70,7 +70,6 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
     [SerializeField] private float _animationDuration = 0.4f;
     [SerializeField] private float _animationDelay = 0.4f;
     [SerializeField] private Ease _animationEase = Ease.Linear;
-    [SerializeField] private float _verticalOffset = 50f;
 
     private Sequence _delaySequence;
     private Transform _linkEnemy;
@@ -108,7 +107,6 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
             if (_linkEnemy == null || _mainCamera == null) continue;
 
             var screenPos = _mainCamera.WorldToScreenPoint(_linkEnemy.position);
-            screenPos.y += _verticalOffset;
             bool isBehind = screenPos.z < 0;
 
             if (_isBehindCamera != isBehind)
