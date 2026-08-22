@@ -17,6 +17,16 @@ public class MobEnemy : Enemy,IFormationParticipant
     // 購読者はIArmorHealth越しにHP変化・破壊を受け取る
     public event Action<IArmorHealth> OnArmorRegistered;
 
+    /// <summary>
+    /// 現在有効な鎧を取得する。
+    /// UIなどがOnArmorRegisteredの発火後に購読した場合の同期に使用する。
+    /// </summary>
+    public bool TryGetActiveArmor(out IArmorHealth armor)
+    {
+        armor = _armor;
+        return _armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor;
+    }
+
     // ─── IFormationParticipant ───────────────────────────────────────────
     public int EnemyId => GetInstanceID();
     public float CombatPower => _data != null ? _data.CombatPower : 0f;
