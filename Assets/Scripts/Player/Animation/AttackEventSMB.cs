@@ -9,6 +9,7 @@ public class AttackEventSMB : StateMachineBehaviour
         _attackExecuted = new bool[_attackExecuteTimes.Length];
         _comboStarted = false;
         _comboEnded = false;
+        _modeChangeReady = false;
         _attackCompleted = false;
         _stateLength = stateInfo.length;
 
@@ -44,6 +45,12 @@ public class AttackEventSMB : StateMachineBehaviour
             _controller.AnimEvent_ComboTransition();
         }
 
+        if (!_modeChangeReady && currentTime >= _modeChangeTime)
+        {
+            _modeChangeReady = true;
+            _controller.AnimEvent_ModeChangeReady();
+        }
+
         if (!_attackCompleted && currentTime >= _attackCompleteTime)
         {
             _attackCompleted = true;
@@ -63,6 +70,8 @@ public class AttackEventSMB : StateMachineBehaviour
     [SerializeField] private float[] _attackExecuteTimes;
     [SerializeField] private float _comboWindowStartTime = 0.35f;
     [SerializeField] private float _comboWindowEndTime = 0.55f;
+    [Tooltip("攻撃中にモードチェンジ入力を受け付け始める時刻（秒）")]
+    [SerializeField] private float _modeChangeTime = 0.7f;
     [SerializeField] private float _attackCompleteTime = 999f;
 
     private IAnimationController _controller;
@@ -70,6 +79,7 @@ public class AttackEventSMB : StateMachineBehaviour
     private bool[] _attackExecuted;
     private bool _comboStarted;
     private bool _comboEnded;
+    private bool _modeChangeReady;
     private bool _attackCompleted;
     private float _stateLength;
 }
