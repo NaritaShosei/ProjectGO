@@ -911,7 +911,12 @@ public class PlayerAttack : MonoBehaviour
     /// モード変更時の処理。モードが変更されたときにコンボをリセットする。これにより、モード変更後の攻撃が新しいコンボとして始まるようになる。
     /// </summary>
     /// <param name="_">イベントに合わせるためのものなので使用しないが引数を付けている</param>
-    private void OnModeChanged(PlayerMode _) => ResetCombo();
+    private void OnModeChanged(PlayerMode _)
+    {
+        // コンボ中に準備した旧モードのチャージ状態を、モード変更後へ持ち越さない。
+        CancelCharge();
+        ResetCombo();
+    }
 
     /// <summary>
     /// モード変更の入力処理。モード変更が可能な状態であれば、現在のモードに応じて新しいモードに切り替える。雷神モードへの切り替えは即時に行い、闘神モードへの切り替えは状態遷移を伴う。
