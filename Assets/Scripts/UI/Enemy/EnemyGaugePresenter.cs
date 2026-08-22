@@ -81,6 +81,7 @@ public class ArmorGaugePresenter : IDisposable
     public ArmorGaugePresenter(
         IArmorHealth armor,
         EnemyGaugeView view,
+        Transform gaugeTarget,
         Transform playerTransform,
         float detectionRange,
         float damagedDisplayDuration)
@@ -88,12 +89,14 @@ public class ArmorGaugePresenter : IDisposable
         _armor = armor;
         _playerTransform = playerTransform;
         _detectionRange = detectionRange;
-        _armorTransform = armor.GetTargetCenter();
+        // HPゲージと同じEnemy基準位置を使い、2本のゲージを重ねて表示する。
+        _gaugeTarget = gaugeTarget;
 
         _visibility = new EnemyGaugeVisibilityState(damagedDisplayDuration);
 
         View = view;
-        View.Initialize(_armorTransform, isBehind => _visibility.SetBehindCamera(isBehind));
+        View.Initialize(_gaugeTarget, isBehind => _visibility.SetBehindCamera(isBehind));
+        View.UpdateGauge(_armor.CurrentHealth, _armor.MaxHealth);
 
         _visibility.OnVisibilityChanged += View.SetVisible;
         _armor.OnHealthChanged += HandleHealthChanged;
@@ -102,8 +105,8 @@ public class ArmorGaugePresenter : IDisposable
 
     public void UpdateRangeCheck()
     {
-        if (_playerTransform == null || _armorTransform == null) return;
-        float sqrDist = (_playerTransform.position - _armorTransform.position).sqrMagnitude;
+        if (_playerTransform == null || _gaugeTarget == null) return;
+        float sqrDist = (_playerTransform.position - _gaugeTarget.position).sqrMagnitude;
         _visibility.SetInRange(sqrDist <= _detectionRange * _detectionRange);
     }
 
@@ -119,7 +122,7 @@ public class ArmorGaugePresenter : IDisposable
 
     private readonly IArmorHealth _armor;
     private readonly Transform _playerTransform;
-    private readonly Transform _armorTransform;
+    private readonly Transform _gaugeTarget;
     private readonly float _detectionRange;
     private readonly EnemyGaugeVisibilityState _visibility;
 
