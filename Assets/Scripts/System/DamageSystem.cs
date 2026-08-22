@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 // Boss関連
 using BossEnemy.Enum;
@@ -6,13 +8,12 @@ using BossEnemy.Data;
 
 public class DamageSystem
 {
-    const float DAMAGE_REDUCTION_RATE_BASE = 0.01f;
-
-    const int DEFENSE_CONSTANT = 100;
-    const int MIN_DAMAGE = 1;
-
-    const float WEEK_POINT_DAMAGE = 1.5f;
-    const float DECREASE_DAMAGE = 0.8f;
+    private const float DAMAGE_REDUCTION_RATE_BASE = 0.01f;
+    private const int DEFENSE_CONSTANT = 100;
+    private const int MIN_DAMAGE = 1;
+    private const float DEFAULT_ARMOR_DAMAGE_MULTIPLIER = 1.5f;
+    private const float DEFAULT_FLESH_DAMAGE_MULTIPLIER = 0.8f;
+    private const string SETTINGS_ADDRESS = "DamageSystemSettings";
 
     public static int CalculateDamage(
         DamageContext attack,
@@ -123,28 +124,69 @@ public class DamageSystem
         return 0;
     }
 
+    private static DamageSystemSettings _settings;
+    private static bool _loadFailed;
+
+    /// <summary>
+    /// シーン読み込み前にAddressablesからダメージ設定を読み込む。
+    /// Domain Reloadを無効にしたEditor再生でも前回の状態を引き継がないよう、
+    /// キャッシュと失敗状態を初期化してからロードする。
+    /// </summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Initialize()
+    {
+        _settings = null;
+        _loadFailed = false;
+        LoadSettings();
+    }
+
+    /// <summary>
+    /// Addressable設定から、プレイヤーモードと防御種別に対応するダメージ倍率を取得する。
+    /// 設定を読み込めない環境では変更前の固定値を返す。
+    /// </summary>
     private static float GetEnemyDefenseTypeMultiplier(PlayerMode mode, EnemyDefenceType type)
     {
+        DamageSystemSettings settings = LoadSettings();
+        if (settings != null)
+        {
+            return settings.GetMultiplier(mode, type);
+        }
+
+        // Addressableを利用できない単体テストなどでは、変更前と同じ固定値で計算を継続する。
         switch (mode)
         {
             case PlayerMode.Warrior:
-                switch (type)
-                {
-                    case EnemyDefenceType.Armor: return WEEK_POINT_DAMAGE;
-                    case EnemyDefenceType.Flesh: return DECREASE_DAMAGE;
-                }
-                break;
-
             case PlayerMode.Thunder:
                 switch (type)
                 {
-                    case EnemyDefenceType.Armor: return WEEK_POINT_DAMAGE;
-                    case EnemyDefenceType.Flesh: return DECREASE_DAMAGE;
+                    case EnemyDefenceType.Armor: return DEFAULT_ARMOR_DAMAGE_MULTIPLIER;
+                    case EnemyDefenceType.Flesh: return DEFAULT_FLESH_DAMAGE_MULTIPLIER;
                 }
                 break;
         }
 
         return 1.0f; // 保険
+    }
+
+    /// <summary>
+    /// ダメージ設定をAddressablesから同期的に読み込み、以降の計算で再利用する。
+    /// 既存のダメージ計算APIを同期処理のまま維持するため、初回のみ完了を待機する。
+    /// </summary>
+    private static DamageSystemSettings LoadSettings()
+    {
+        if (_settings != null || _loadFailed) return _settings;
+
+        AsyncOperationHandle<DamageSystemSettings> handle =
+            Addressables.LoadAssetAsync<DamageSystemSettings>(SETTINGS_ADDRESS);
+        _settings = handle.WaitForCompletion();
+
+        if (_settings == null)
+        {
+            _loadFailed = true;
+            Debug.LogError($"Addressable '{SETTINGS_ADDRESS}' のロードに失敗しました。従来値で計算します。");
+        }
+
+        return _settings;
     }
 
     /// <summary> 攻撃がCriticalの際の攻撃力を渡すメソッド </summary>
