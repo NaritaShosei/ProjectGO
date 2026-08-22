@@ -107,8 +107,8 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
             await UniTask.Yield(PlayerLoopTiming.PostLateUpdate, ct);
             if (_linkEnemy == null || _mainCamera == null) continue;
 
-            var worldPos = _linkEnemy.position + Vector3.up * _verticalOffset;
-            var screenPos = _mainCamera.WorldToScreenPoint(worldPos);
+            var screenPos = _mainCamera.WorldToScreenPoint(_linkEnemy.position);
+            screenPos.y += _verticalOffset;
             bool isBehind = screenPos.z < 0;
 
             if (_isBehindCamera != isBehind)
