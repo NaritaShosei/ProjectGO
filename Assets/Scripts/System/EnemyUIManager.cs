@@ -91,6 +91,7 @@ public class EnemyUIManager : MonoBehaviour
             enemy,
             view,
             gaugeTarget,
+            enemy.GetTargetCenter(),
             _playerTransform,
             _detectionRange,
             _damagedDisplayDuration
@@ -160,6 +161,7 @@ public class EnemyUIManager : MonoBehaviour
             armor,
             view,
             enemy is MobEnemy mob ? mob.GetUIAnchor() : enemy.GetTargetCenter(),
+            enemy.GetTargetCenter(),
             _playerTransform,
             _detectionRange,
             _damagedDisplayDuration
