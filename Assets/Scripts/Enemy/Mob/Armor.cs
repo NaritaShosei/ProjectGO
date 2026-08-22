@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public abstract class Armor : MonoBehaviour, IArmor
 {
+    public float CurrentHealth => _stats?.CurrentHealth ?? 0f;
+    public float MaxHealth => _stats?.MaxHealth ?? 0f;
+
     /// <summary>
     /// アーマーが破壊されたときに発火するイベント
     /// MobEnemy・UI等が購読する

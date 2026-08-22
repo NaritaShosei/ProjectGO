@@ -6,6 +6,12 @@ using UnityEngine;
 /// </summary>
 public interface IArmorHealth
 {
+    /// <summary>現在HP</summary>
+    float CurrentHealth { get; }
+
+    /// <summary>最大HP</summary>
+    float MaxHealth { get; }
+
     /// <summary>HP変化時に発火するイベント（current, max）</summary>
     event Action<float, float> OnHealthChanged;
 

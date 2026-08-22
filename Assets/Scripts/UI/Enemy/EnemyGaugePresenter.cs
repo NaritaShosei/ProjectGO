@@ -96,6 +96,7 @@ public class ArmorGaugePresenter : IDisposable
 
         View = view;
         View.Initialize(_gaugeTarget, isBehind => _visibility.SetBehindCamera(isBehind));
+        View.UpdateGauge(_armor.CurrentHealth, _armor.MaxHealth);
 
         _visibility.OnVisibilityChanged += View.SetVisible;
         _armor.OnHealthChanged += HandleHealthChanged;

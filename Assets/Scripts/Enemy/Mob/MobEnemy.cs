@@ -337,7 +337,8 @@ public class MobEnemy : Enemy,IFormationParticipant
         //鎧の初期化
         if (_armor != null)
         {
-            _armor.gameObject.SetActive(true);
+            // プール返却前のHP・破壊状態を残さず、実体を先に完全復元する。
+            _armor.Restore();
             _defenceContext.EnemyType = EnemyDefenceType.Armor;
 
             _armor.OnBroken -= BreakArmor;
