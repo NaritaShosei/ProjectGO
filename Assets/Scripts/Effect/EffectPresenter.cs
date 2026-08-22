@@ -18,7 +18,10 @@ public class EffectPresenter
             _view.transform.SetParent(null, false);
             _view.transform.position = position;
             _view.transform.rotation = rotation;
-            _hitStopManager?.Register(_view, HitStopTargetGroup.Effects);
+            if (_view.IsSpeedChangeEnabled)
+            {
+                _hitStopManager?.Register(_view, HitStopTargetGroup.Effects);
+            }
 
             _view.Play();
 

@@ -25,6 +25,11 @@ public interface IPlayerStats :
     /// <summary> 雷ゲージ変化通知 (current, max, initialMax) </summary>
     event Action<float, float, float> OnThunderGaugeChanged;
 
+    event Action<Transform> OnEndDodge;
+
+    /// <summary> ジャスト回避成立通知/// </summary>
+    event Action OnJustDodgeSuccess;
+
     /// <summary> 死亡直前イベント。true を返すと死亡をキャンセルする。 /// </summary>
     event Func<bool> OnBeforeDead;
 }

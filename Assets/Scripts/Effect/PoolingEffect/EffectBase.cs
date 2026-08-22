@@ -9,6 +9,7 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
 {
     // ── プロパティ ─────────────────────────────────────────────
     public float TimeScale => _timeScale;
+    public bool IsSpeedChangeEnabled => _isSpeedChangeEnabled;
 
     // ── 公開 API ──────────────────────────────────────────────
 
@@ -58,6 +59,10 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
         ApplyTimeScaleInternal(TimeScale);
     }
 
+    [SerializeField] private bool _isSpeedChangeEnabled = true;
+
+    protected float _timeScale = 1f;
+
     // ── 派生クラスへの委譲 (abstract) ─────────────────────────
 
     /// <summary>再生開始の具体的な処理。</summary>
@@ -81,6 +86,4 @@ public abstract class EffectBase : MonoBehaviour, ISpeedChange, IPoolable
     // ── Unity ライフサイクルフック (任意でオーバーライド可) ───
 
     protected virtual void Awake() { }
-
-    protected float _timeScale = 1f;
 }
