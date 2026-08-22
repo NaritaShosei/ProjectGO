@@ -8,6 +8,7 @@ public class ModeChangeSMB : StateMachineBehaviour
         _slowApplied = false;
         _modeChangeEnded = false;
         _modeChangeAnimController = null;
+        _stateLength = stateInfo.length;
 
         ServiceLocator.TryGet(out _hitStopManager);
 
@@ -19,7 +20,7 @@ public class ModeChangeSMB : StateMachineBehaviour
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float currentTime = stateInfo.normalizedTime * stateInfo.length;
+        float currentTime = stateInfo.normalizedTime * _stateLength;
 
         if (!_slowApplied && currentTime >= _slowStartTime)
         {
@@ -51,4 +52,5 @@ public class ModeChangeSMB : StateMachineBehaviour
     private IModeChangeAnimationController _modeChangeAnimController;
     private bool _slowApplied;
     private bool _modeChangeEnded;
+    private float _stateLength;
 }
