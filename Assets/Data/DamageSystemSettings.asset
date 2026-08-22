@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74126e873cde42e79870463294b8be13, type: 3}
+  m_Name: DamageSystemSettings
+  m_EditorClassIdentifier: Assembly-CSharp::DamageSystemSettings
+  _warrior:
+    Armor: 2
+    Flesh: 1
+  _thunder:
+    Armor: 0.65
+    Flesh: 1.7
