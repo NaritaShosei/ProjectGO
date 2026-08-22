@@ -22,24 +22,24 @@ MonoBehaviour:
   - _attackName: "\u96F7\u795E\u30E2\u30FC\u30C96"
     _requiredCharge: 0
     _hits:
-    - DamageMultiplier: 1
+    - DamageMultiplier: 2
       AttackRange: 1
       AttackRadius: 1
       EnableKnockback: 1
       KnockbackPower: 6
       KnockbackUpward: 0
-      ControllerVibration:
-        _low: 0.1
-        _high: 0.2
-        _duration: 0.1
       HitStopData:
         _baseDuration: 0.15
         _timeScale: 0
-        _targetGroup: 9
+        _targetGroup: 1
         _priority: 999
         _weakPointMultiplier: 1.2
         _breakOrKillMultiplier: 1.2
         _weakAndBreakOrKillMultiplier: 1.4
+      ControllerVibration:
+        _low: 0.1
+        _high: 0.2
+        _duration: 0.1
       PlayGroundHitSE: 0
       AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.05
@@ -69,10 +69,6 @@ MonoBehaviour:
       EnableKnockback: 1
       KnockbackPower: 6
       KnockbackUpward: 0
-      ControllerVibration:
-        _low: 0.1
-        _high: 0.2
-        _duration: 0.1
       HitStopData:
         _baseDuration: 0.15
         _timeScale: 0
@@ -81,6 +77,10 @@ MonoBehaviour:
         _weakPointMultiplier: 1.2
         _breakOrKillMultiplier: 1.2
         _weakAndBreakOrKillMultiplier: 1.4
+      ControllerVibration:
+        _low: 0.1
+        _high: 0.2
+        _duration: 0.1
       PlayGroundHitSE: 0
       AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.05
@@ -110,18 +110,18 @@ MonoBehaviour:
       EnableKnockback: 1
       KnockbackPower: 6
       KnockbackUpward: 0
+      HitStopData:
+        _baseDuration: 0.15
+        _timeScale: 0
+        _targetGroup: 9
+        _priority: 999
+        _weakPointMultiplier: 1.2
+        _breakOrKillMultiplier: 1.2
+        _weakAndBreakOrKillMultiplier: 1.4
       ControllerVibration:
         _low: 0.5
         _high: 0.6
         _duration: 0.1
-      HitStopData:
-        _baseDuration: 0.15
-        _timeScale: 0
-        _targetGroup: 9
-        _priority: 999
-        _weakPointMultiplier: 1.2
-        _breakOrKillMultiplier: 1.2
-        _weakAndBreakOrKillMultiplier: 1.4
       PlayGroundHitSE: 0
       AdditionalLightningDamages:
       - _lightningDamageMultiplier: 0.05
@@ -146,9 +146,9 @@ MonoBehaviour:
         _localScale: {x: 1, y: 1, z: 1}
         _previewPrefab: {fileID: 0}
     _enableHoming: 1
-    _homingRadius: 10
-    _homingAngle: 45
-    _homingStrength: 30
+    _homingRadius: 5
+    _homingAngle: 90
+    _homingStrength: 100
     _enableMovement: 1
     _moveCurve:
       serializedVersion: 2
