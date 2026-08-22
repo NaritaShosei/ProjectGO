@@ -8,6 +8,7 @@ public class EnemyGaugePresenter : IDisposable
     public EnemyGaugePresenter(
         IEnemy enemy,
         EnemyGaugeView view,
+        Transform gaugeTarget,
         Transform playerTransform,
         float detectionRange,
         float damagedDisplayDuration)
@@ -15,7 +16,7 @@ public class EnemyGaugePresenter : IDisposable
         _enemy = enemy;
         _playerTransform = playerTransform;
         _detectionRange = detectionRange;
-        _enemyTransform = enemy.GetTargetCenter();
+        _enemyTransform = gaugeTarget;
 
         _visibility = new EnemyGaugeVisibilityState(damagedDisplayDuration);
 
