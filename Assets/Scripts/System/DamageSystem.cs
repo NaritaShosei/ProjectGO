@@ -1,6 +1,7 @@
+using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using Infrastructure;
 
 // Boss関連
 using BossEnemy.Enum;
@@ -125,19 +126,17 @@ public class DamageSystem
     }
 
     private static DamageSystemSettings _settings;
-    private static bool _loadFailed;
 
     /// <summary>
-    /// シーン読み込み前にAddressablesからダメージ設定を読み込む。
+    /// シーン読み込み前に共通のAssetsLoaderを使用してダメージ設定の読み込みを開始する。
     /// Domain Reloadを無効にしたEditor再生でも前回の状態を引き継がないよう、
-    /// キャッシュと失敗状態を初期化してからロードする。
+    /// キャッシュを初期化してからロードする。
     /// </summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
         _settings = null;
-        _loadFailed = false;
-        LoadSettings();
+        LoadSettingsAsync().Forget();
     }
 
     /// <summary>
@@ -146,10 +145,9 @@ public class DamageSystem
     /// </summary>
     private static float GetEnemyDefenseTypeMultiplier(PlayerMode mode, EnemyDefenceType type)
     {
-        DamageSystemSettings settings = LoadSettings();
-        if (settings != null)
+        if (_settings != null)
         {
-            return settings.GetMultiplier(mode, type);
+            return _settings.GetMultiplier(mode, type);
         }
 
         // Addressableを利用できない単体テストなどでは、変更前と同じ固定値で計算を継続する。
@@ -169,24 +167,20 @@ public class DamageSystem
     }
 
     /// <summary>
-    /// ダメージ設定をAddressablesから同期的に読み込み、以降の計算で再利用する。
-    /// 既存のダメージ計算APIを同期処理のまま維持するため、初回のみ完了を待機する。
+    /// ダメージ設定を共通のAssetsLoader経由で非同期に読み込み、以降の計算で再利用する。
+    /// 読み込みに失敗した場合は例外を記録し、ダメージ計算では変更前の固定値を使用する。
     /// </summary>
-    private static DamageSystemSettings LoadSettings()
+    private static async UniTask LoadSettingsAsync()
     {
-        if (_settings != null || _loadFailed) return _settings;
-
-        AsyncOperationHandle<DamageSystemSettings> handle =
-            Addressables.LoadAssetAsync<DamageSystemSettings>(SETTINGS_ADDRESS);
-        _settings = handle.WaitForCompletion();
-
-        if (_settings == null)
+        try
         {
-            _loadFailed = true;
-            Debug.LogError($"Addressable '{SETTINGS_ADDRESS}' のロードに失敗しました。従来値で計算します。");
+            _settings = await AssetsLoader.LoadAssetAsync<DamageSystemSettings>(SETTINGS_ADDRESS);
         }
-
-        return _settings;
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                $"Addressable '{SETTINGS_ADDRESS}' のロードに失敗しました。従来値で計算します。\n{exception}");
+        }
     }
 
     /// <summary> 攻撃がCriticalの際の攻撃力を渡すメソッド </summary>
