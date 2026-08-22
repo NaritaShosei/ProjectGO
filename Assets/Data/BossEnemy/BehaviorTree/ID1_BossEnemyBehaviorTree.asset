@@ -14,15 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemyBehaviorTree
   _firstPhaseFirstAttackSelectionPool:
     _attackField:
-    - ID: 6
-      ActivationRate: 100
+    - ID: 1
+      ActivationRate: 25
+    - ID: 2
+      ActivationRate: 25
+    - ID: 3
+      ActivationRate: 25
+    - ID: 4
+      ActivationRate: 25
   _secondPhaseFirstAttackSelectionPool:
     _attackField:
     - ID: 7
       ActivationRate: 100
-  _oneLegBreakDownTime: 10
-  _allLegBreakDownTime: 15
-  _normalAttackCount: 3
-  _bossTerritoryDistance: 5
-  _lookSpeed: 1.05
-  _finishAngleThreshold: 2
+  _oneLegBreakDownTime: 7
+  _allLegBreakDownTime: 10
+  _normalAttackCount: 2
+  _bossTerritoryDistance: 3
+  _lookSpeed: 3
+  _finishAngleThreshold: 10
