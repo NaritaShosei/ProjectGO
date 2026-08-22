@@ -27,6 +27,18 @@ public class MobEnemy : Enemy,IFormationParticipant
         return _armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor;
     }
 
+    /// <summary>
+    /// Mobのroot直下に固定されたゲージ表示用Transformを返す。
+    /// 初期位置だけTargetCenterに合わせ、Animator配下のモーションには追従させない。
+    /// </summary>
+    public Transform GetUIAnchor()
+    {
+        if (_uiAnchor != null) return _uiAnchor;
+
+        Debug.LogWarning($"{name}: UIAnchorが未設定です。TargetCenterを使用します。", this);
+        return GetTargetCenter();
+    }
+
     // ─── IFormationParticipant ───────────────────────────────────────────
     public int EnemyId => GetInstanceID();
     public float CombatPower => _data != null ? _data.CombatPower : 0f;
@@ -197,6 +209,9 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     // Armorの登録
     [SerializeField] protected MobArmor _armor;
+
+    [SerializeField, Tooltip("root直下に配置するゲージUI用の固定Transform")]
+    private Transform _uiAnchor;
 
     protected EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;
