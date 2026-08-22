@@ -10,6 +10,7 @@ public class AttackEventSMB : StateMachineBehaviour
         _comboStarted = false;
         _comboEnded = false;
         _attackCompleted = false;
+        _stateLength = stateInfo.length;
 
         animator.TryGetComponent(out _controller);
     }
@@ -20,7 +21,7 @@ public class AttackEventSMB : StateMachineBehaviour
         if (animator.speed == 0f) { return; }
         if (_controller == null) { return; }
 
-        float currentTime = stateInfo.normalizedTime * stateInfo.length;
+        float currentTime = stateInfo.normalizedTime * _stateLength;
 
         for (int i = 0; i < _attackExecuteTimes.Length; i++)
         {
@@ -70,4 +71,5 @@ public class AttackEventSMB : StateMachineBehaviour
     private bool _comboStarted;
     private bool _comboEnded;
     private bool _attackCompleted;
+    private float _stateLength;
 }
