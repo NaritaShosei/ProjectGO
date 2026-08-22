@@ -79,5 +79,6 @@ public static class SoundCueNames
 
     public static class BGM
     {
+        public const string Title = "OutGameIntro";
     }
 }
