@@ -2989,6 +2989,10 @@ PrefabInstance:
       propertyPath: _normalCamera
       value: 
       objectReference: {fileID: 269304734}
+    - target: {fileID: 8440135078367233537, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _occlusionManager
+      value: 
+      objectReference: {fileID: 6837170418680516862}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _firstSequence
       value: 0
@@ -3036,8 +3040,40 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7749162525453086863, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 6837170418680516862}
   m_SourcePrefab: {fileID: 100100000, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+--- !u!1 &6837170418680516861 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7749162525453086863, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+  m_PrefabInstance: {fileID: 6837170418680516860}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6837170418680516862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6837170418680516861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1771623fe295abd428b8652a446a5498, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OcclusionManager
+  _occlusionLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _ignoreTags:
+  - Player
+  - Enemy
+  _minDistanceThreshold: 1
+  _maxDistanceThreshold: 5
+  _minAlpha: 0.2
+  _maxAlpha: 1
+  _fadeSpeed: 3
+  _transparentMaterialTemplate: {fileID: 2100000, guid: 1a2666752f8856a49b7dc61c62a757da, type: 2}
 --- !u!1001 &7257887957543716051
 PrefabInstance:
   m_ObjectHideFlags: 0

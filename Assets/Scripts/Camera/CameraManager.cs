@@ -81,6 +81,11 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         {
             Debug.LogError("[CameraManager] InputHandler or EnemyManager is missing. LockOn is disabled.", this);
         }
+
+        if (_occlusionManager != null)
+        {
+            _occlusionManager.Init(_playerTransform);
+        }
     }
 
     /// <summary>
@@ -141,6 +146,9 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private CinemachineCamera _normalCamera;
     [Tooltip("ロックオン時に使用するCinemachineカメラ")]
     [SerializeField] private CinemachineCamera _lockOnCamera;
+
+    [Header("カメラの遮蔽判定")]
+    [SerializeField] private OcclusionManager _occlusionManager;
 
     [Header("優先度設定")]
     [Tooltip("通常カメラのPriority。ロックオンカメラはこれより低い値で待機する")]
