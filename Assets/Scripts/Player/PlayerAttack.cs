@@ -58,6 +58,7 @@ public class PlayerAttack : MonoBehaviour
         _animationController.OnAttackComplete += FinishAttack;
         _animationController.OnComboWindowStart += OnComboWindowStart;
         _animationController.OnComboWindowEnd += OnComboWindowEnd;
+        _animationController.OnModeChangeReady += OnModeChangeReady;
         _animationController.OnComboTransition += TryComboTransition;
         _animationController.OnChargeReady += OnChargeReady;
 
@@ -82,6 +83,7 @@ public class PlayerAttack : MonoBehaviour
     public void ResetCombo()
     {
         _currentAttackId = -1;
+        _currentComboStage = 0;
         _bufferedComboInput = null;
         ClearHomingLock();
     }
@@ -95,6 +97,7 @@ public class PlayerAttack : MonoBehaviour
         ClearAttackState();
         OnAttackEnded?.Invoke();
         _currentAttackId = -1;
+        _currentComboStage = 0;
     }
 
     #endregion
@@ -122,6 +125,7 @@ public class PlayerAttack : MonoBehaviour
     private ChargeThreshold[] _chargeThresholds;
 
     private int _currentAttackId = -1;
+    private int _currentComboStage;
     private float _lastAttackTime = -999f;
     private float _chargeStartTime = -999f;
     private bool _isCharging;
@@ -137,6 +141,7 @@ public class PlayerAttack : MonoBehaviour
     private bool _autoFireTriggered = false;
 
     private bool _isInComboWindow;
+    private bool _canModeChangeDuringAttack;
     private bool _isComboTransitioned;
 
     private bool _isHomingActive;
@@ -183,6 +188,7 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnAttackComplete -= FinishAttack;
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
+            _animationController.OnModeChangeReady -= OnModeChangeReady;
             _animationController.OnComboTransition -= TryComboTransition;
             _animationController.OnChargeReady -= OnChargeReady;
         }
@@ -263,7 +269,7 @@ public class PlayerAttack : MonoBehaviour
             var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
-                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                float t = idleChargeData.ChargeTransitionDuration < 0 ? 0.1f : idleChargeData.ChargeTransitionDuration;
                 _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
             }
         }
@@ -362,6 +368,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>  
     private void PrepareAttack(AttackInput input, bool allowCombo = false)
     {
+        bool isComboContinuation = _currentAttackId != -1;
         AttackData attackData = GetNextAttack(input, allowCombo);
 
         if (attackData == null)
@@ -384,6 +391,10 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        _currentComboStage = isComboContinuation
+            ? _currentComboStage + 1
+            : 1;
+
         SetupHoming(variant);
         _activeAttackVariant = variant;
         _currentHitIndex = -1;
@@ -393,6 +404,7 @@ public class PlayerAttack : MonoBehaviour
         FaceAttackTarget();
         RequestAttackMove(variant, false);
 
+        _canModeChangeDuringAttack = false;
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
     }
@@ -407,7 +419,12 @@ public class PlayerAttack : MonoBehaviour
 
         _currentHitIndex = hitIndex;
         _currentMotionHitCount = hitCount;
-        _attackExecutor.Execute(_pendingAttackData, _pendingAttackInput.Value, _modeController.ModeData, hitIndex);
+        _attackExecutor.Execute(
+            _pendingAttackData,
+            _pendingAttackInput.Value,
+            _modeController.ModeData,
+            _currentComboStage,
+            hitIndex);
 
         // 攻撃判定の発火後は向き追従だけを停止する。
         // 座標追従で使用するターゲット情報は、モーション終了まで保持する。
@@ -441,6 +458,8 @@ public class PlayerAttack : MonoBehaviour
 
         if (variant == null) { return; }
 
+        _currentComboStage++;
+
         SetupHoming(variant);
         _activeAttackVariant = variant;
         _currentHitIndex = -1;
@@ -450,6 +469,7 @@ public class PlayerAttack : MonoBehaviour
         FaceAttackTarget();
         RequestAttackMove(variant, false);
 
+        _canModeChangeDuringAttack = false;
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
@@ -475,6 +495,15 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = null;
         _pendingAttackInput = null;
         _activeAttackVariant = null;
+        _canModeChangeDuringAttack = false;
+
+        // モードチェンジによって攻撃アニメーションを抜けた場合は、
+        // モードチェンジ完了通知まで ModeChanging を維持する。
+        if (_stateManager.CurrentState == PlayerState.ModeChanging)
+        {
+            ResetCombo();
+            return;
+        }
 
         if (_pendingWarriorCharge)
         {
@@ -553,6 +582,9 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void OnComboWindowStart() => _isInComboWindow = true;
 
+    /// <summary>攻撃中のモードチェンジ受付を開始する。</summary>
+    private void OnModeChangeReady() => _canModeChangeDuringAttack = true;
+
     /// <summary>
     /// コンボウィンドウの終了を管理する。コンボウィンドウが終了すると、次の攻撃への入力は受け付けなくなる。
     /// </summary>
@@ -568,7 +600,7 @@ public class PlayerAttack : MonoBehaviour
             var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
-                float t = idleChargeData.TransitionDuration < 0 ? 0.1f : idleChargeData.TransitionDuration;
+                float t = idleChargeData.ChargeTransitionDuration < 0 ? 0.1f : idleChargeData.ChargeTransitionDuration;
                 _animationController.PlayChargeAnimation(idleChargeData.ChargeAnimationStateName, t);
             }
 
@@ -673,7 +705,7 @@ public class PlayerAttack : MonoBehaviour
 
                 if (chargeData != null && !string.IsNullOrEmpty(chargeData.ChargeAnimationStateName))
                 {
-                    float transition = chargeData.TransitionDuration < 0 ? 0.1f : chargeData.TransitionDuration;
+                    float transition = chargeData.ChargeTransitionDuration < 0 ? 0.1f : chargeData.ChargeTransitionDuration;
                     _animationController.PlayChargeAnimation(chargeData.ChargeAnimationStateName, transition);
                 }
 
@@ -879,22 +911,23 @@ public class PlayerAttack : MonoBehaviour
     /// モード変更時の処理。モードが変更されたときにコンボをリセットする。これにより、モード変更後の攻撃が新しいコンボとして始まるようになる。
     /// </summary>
     /// <param name="_">イベントに合わせるためのものなので使用しないが引数を付けている</param>
-    private void OnModeChanged(PlayerMode _) => ResetCombo();
+    private void OnModeChanged(PlayerMode _)
+    {
+        // コンボ中に準備した旧モードのチャージ状態を、モード変更後へ持ち越さない。
+        CancelCharge();
+        ResetCombo();
+    }
 
     /// <summary>
     /// モード変更の入力処理。モード変更が可能な状態であれば、現在のモードに応じて新しいモードに切り替える。雷神モードへの切り替えは即時に行い、闘神モードへの切り替えは状態遷移を伴う。
     /// </summary>
     private void ChangeMode()
     {
-        if (!_stateManager.CanModeChange()) { return; }
+        bool canChange = _stateManager.CanModeChange()
+            || (_stateManager.CurrentState == PlayerState.Attacking && _canModeChangeDuringAttack);
+        if (!canChange) { return; }
 
         var newMode = _modeController.CurrentMode == PlayerMode.Warrior ? PlayerMode.Thunder : PlayerMode.Warrior;
-
-        if (newMode == PlayerMode.Warrior)
-        {
-            _modeController.SwitchMode(newMode);
-            return;
-        }
 
         _stateManager.ChangeState(PlayerState.ModeChanging);
         _modeController.SwitchMode(newMode);

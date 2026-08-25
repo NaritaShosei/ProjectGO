@@ -10,6 +10,7 @@ public class DodgeSMB : StateMachineBehaviour
     {
         _invincibilityStarted = false;
         _isDodgeEnded = false;
+        _stateLength = stateInfo.length;
 
         if (animator.TryGetComponent(out PlayerAnimationController controller))
             _playerAnimationController = controller;
@@ -18,7 +19,7 @@ public class DodgeSMB : StateMachineBehaviour
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (_playerAnimationController == null) { return; }
-        float currentTime = stateInfo.normalizedTime * stateInfo.length;
+        float currentTime = stateInfo.normalizedTime * _stateLength;
 
         if (!_invincibilityStarted &&
             currentTime >= _invincibleStartTime)
@@ -51,4 +52,5 @@ public class DodgeSMB : StateMachineBehaviour
     private PlayerAnimationController _playerAnimationController;
     private bool _invincibilityStarted;
     private bool _isDodgeEnded;
+    private float _stateLength;
 }
