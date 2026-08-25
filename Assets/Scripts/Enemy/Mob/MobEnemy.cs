@@ -401,7 +401,7 @@ public class MobEnemy : Enemy,IFormationParticipant
     /// <summary>
     /// AttackPatternsリストからランダムに1つ選択する
     /// </summary>
-    private EnemyAttackPattern SelectPattern()
+    protected virtual EnemyAttackPattern SelectPattern()
     {
         if (_data.AttackPatterns == null || _data.AttackPatterns.Count == 0) return null;
         return _data.AttackPatterns[UnityEngine.Random.Range(0, _data.AttackPatterns.Count)];
@@ -475,6 +475,12 @@ public class MobEnemy : Enemy,IFormationParticipant
             new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
 
         this.ActivateShockDebuff().Forget();
+    }
+
+    protected float AttackCooldownRemaining
+    {
+        get => _context.AttackCooldownRemaining;
+        set => _context.AttackCooldownRemaining = value;
     }
 
 #if UNITY_EDITOR
