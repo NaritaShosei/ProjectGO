@@ -19,6 +19,12 @@ public class ShieldDraugr : MobEnemy
     [SerializeField] private GameObject _shieldObject;
     [SerializeField, Tooltip("盾破壊時のエフェクト")] private string _shieldBrokenEffect = "shieldBrokenEffect";
     [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale;
+    [SerializeField, Tooltip("こぶし攻撃の確率"),Range(0f,1f)] private float _fistAttackChance = 0.1f;
+    [SerializeField, Tooltip("こぶし攻撃の抽選間隔（秒）")] private float _fistRerollInterval = 2f;
+    [SerializeField, Tooltip("攻撃後硬直の時間")] private float _postAttackRecoveryDuration = 5f;
+    [SerializeField] private EnemyAttackPattern _fistAttackPattern;
+
+    private float _fistRerollTimer = 0f;
 
     private ShieldState _shieldState = ShieldState.Guarding;
     //現在の盾の耐久値
@@ -29,6 +35,7 @@ public class ShieldDraugr : MobEnemy
     private float _shieldAnimationBlendDuration = 0.3f;
 
     private Tween _shieldAnimationTween;
+    private PostAttackStunBehaviour _postAttackStun;
 
     private EffectManager _effectManager;
 
@@ -44,9 +51,19 @@ public class ShieldDraugr : MobEnemy
         base.ReInitialize(spawnPosition);
         _currentShieldDurability = _shieldDurability;
         _shieldState = ShieldState.Guarding;
+        _fistRerollTimer = 0f;
 
         _shieldObject.SetActive(true);
         ResetShieldAnimation();
+    }
+
+    protected override void RegisterBehaviours(BehaviourInitContext initCtx)
+    {
+        base.RegisterBehaviours(initCtx);
+
+        _postAttackStun = new PostAttackStunBehaviour(_postAttackRecoveryDuration);
+        _postAttackStun.Init(initCtx);
+        _runner.Register(_postAttackStun);
     }
 
     public override void TakeDamage(DamageContext context)
@@ -113,6 +130,44 @@ public class ShieldDraugr : MobEnemy
         {
             ApplyAdditionalEffects(context);
         }
+
+        Debug.Log(
+    $"[ShieldDraugr] " +
+    $"State={_shieldState}, " +
+    $"Shield={_currentShieldDurability}/{_shieldDurability}, " +
+    $"HP={_stats.CurrentHealth}"
+);
+    }
+
+    protected override void UpdateEnemy(float deltaTime)
+    {
+        if (IsShieldBroken)
+        {
+            TickFistAttackGate(deltaTime);
+        }
+
+        base.UpdateEnemy(deltaTime);
+    }
+
+    private void TickFistAttackGate(float deltaTime)
+    {
+        _fistRerollTimer -= deltaTime;
+
+        if (_fistRerollTimer > 0f) return;
+
+        _fistRerollTimer = _fistRerollInterval;
+
+        if (Random.value < _fistAttackChance)
+        {
+            // 成功：既にクールダウン中でなければ即攻撃可能にする
+            if (AttackCooldownRemaining > 0f) AttackCooldownRemaining = 0f;
+        }
+        else
+        {
+            // 失敗：次のロールまで攻撃をブロックする
+            // （SelectedPattern自体は非nullのままなのでApproachは動き続ける）
+            AttackCooldownRemaining = _fistRerollInterval;
+        }
     }
 
     private bool IsFrontalHit()
@@ -153,6 +208,7 @@ public class ShieldDraugr : MobEnemy
         SetShieldAnimation(false);
         // 現在のBehaviourを終了
         _runner.ForceExitAction();
+        Debug.Log("[ShieldDraugr] Shield Broken!");
     }
 
     /// <summary>
@@ -176,5 +232,20 @@ public class ShieldDraugr : MobEnemy
     {
         _shieldAnimationTween?.Kill();
         _animator.SetLayerWeight(ShieldLayerIndex, 1f);
+    }
+
+    protected override EnemyAttackPattern SelectPattern()
+    {
+        if (!IsShieldBroken)
+        {
+            return base.SelectPattern();
+        }
+
+        return _fistAttackPattern;
+    }
+
+    private void OnDisable()
+    {
+        _shieldAnimationTween?.Kill();
     }
 }
