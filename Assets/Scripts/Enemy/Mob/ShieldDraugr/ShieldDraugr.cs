@@ -36,7 +36,6 @@ public class ShieldDraugr : MobEnemy
 
     private Tween _shieldAnimationTween;
     private PostAttackStunBehaviour _postAttackStun;
-
     private EffectManager _effectManager;
 
 
@@ -61,9 +60,10 @@ public class ShieldDraugr : MobEnemy
     {
         base.RegisterBehaviours(initCtx);
 
-        _postAttackStun = new PostAttackStunBehaviour(_postAttackRecoveryDuration);
+        _postAttackStun = new PostAttackStunBehaviour(_postAttackRecoveryDuration, HandlePostAttackStunExit);
         _postAttackStun.Init(initCtx);
         _runner.Register(_postAttackStun);
+        _attack.OnAttackFinished += HandleAttackFinished;
     }
 
     public override void TakeDamage(DamageContext context)
@@ -244,8 +244,27 @@ public class ShieldDraugr : MobEnemy
         return _fistAttackPattern;
     }
 
+    private void HandleAttackFinished()
+    {
+        if (IsShieldBroken) return;
+
+        _turn.SetOverrideDirection(transform.forward);
+
+        _runner.ForceBehaviour(_postAttackStun);
+    }
+
+    private void HandlePostAttackStunExit()
+    {
+        _turn.SetOverrideDirection(null);
+    }
+
     private void OnDisable()
     {
         _shieldAnimationTween?.Kill();
+
+        if (_attack != null)
+        {
+            _attack.OnAttackFinished -= HandleAttackFinished;
+        }
     }
 }
