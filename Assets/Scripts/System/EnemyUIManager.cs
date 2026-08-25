@@ -83,10 +83,15 @@ public class EnemyUIManager : MonoBehaviour
     {
         // Gauge
         var view = _gaugePool.Get();
+        Transform gaugeTarget = enemy is MobEnemy mobEnemy
+            ? mobEnemy.GetUIAnchor()
+            : enemy.GetTargetCenter();
 
         var presenter = new EnemyGaugePresenter(
             enemy,
             view,
+            gaugeTarget,
+            enemy.GetTargetCenter(),
             _playerTransform,
             _detectionRange,
             _damagedDisplayDuration
@@ -102,6 +107,13 @@ public class EnemyUIManager : MonoBehaviour
             Action<IArmorHealth> armorRegisteredHandler = armor => HandleArmorRegistered(enemy, armor);
             _armorRegisteredHandlers.Add(mob, armorRegisteredHandler);
             mob.OnArmorRegistered += armorRegisteredHandler;
+
+            // プール生成ではReInitialize中に鎧登録イベントが先に発火するため、
+            // 購読開始時点ですでに有効な鎧があればここで同期する。
+            if (mob.TryGetActiveArmor(out var armor))
+            {
+                HandleArmorRegistered(enemy, armor);
+            }
         }
 
         enemy.OnDead += HandleEnemyDead;
@@ -141,9 +153,18 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleArmorRegistered(IEnemy enemy, IArmorHealth armor)
     {
+        // イベント購読と現在値同期が同じ鎧を通知しても二重生成しない。
+        if (armor == null || _armorPresenters.ContainsKey(armor)) return;
+
         var view = _armerGaugePool.Get();
         var presenter = new ArmorGaugePresenter(
-            armor, view, _playerTransform, _detectionRange, _damagedDisplayDuration
+            armor,
+            view,
+            enemy is MobEnemy mob ? mob.GetUIAnchor() : enemy.GetTargetCenter(),
+            enemy.GetTargetCenter(),
+            _playerTransform,
+            _detectionRange,
+            _damagedDisplayDuration
         );
         _armorPresenters.Add(armor, presenter);
 

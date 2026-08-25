@@ -16,6 +16,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnAttackComplete;
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
+    public event Action OnModeChangeReady;
     public event Action<int, int> OnAttackExecute;
     public event Action OnModeChangeComplete;
     public event Action OnComboTransition;
@@ -34,6 +35,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public void AnimEvent_AttackComplete() => OnAttackComplete?.Invoke();
     public void AnimEvent_ComboWindowStart() => OnComboWindowStart?.Invoke();
     public void AnimEvent_ComboWindowEnd() => OnComboWindowEnd?.Invoke();
+    public void AnimEvent_ModeChangeReady() => OnModeChangeReady?.Invoke();
     public void AnimEvent_ModeChangeComplete() => OnModeChangeComplete?.Invoke();
     public void AnimEvent_ComboTransition() => OnComboTransition?.Invoke();
 

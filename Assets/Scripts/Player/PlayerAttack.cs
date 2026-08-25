@@ -58,6 +58,7 @@ public class PlayerAttack : MonoBehaviour
         _animationController.OnAttackComplete += FinishAttack;
         _animationController.OnComboWindowStart += OnComboWindowStart;
         _animationController.OnComboWindowEnd += OnComboWindowEnd;
+        _animationController.OnModeChangeReady += OnModeChangeReady;
         _animationController.OnComboTransition += TryComboTransition;
         _animationController.OnChargeReady += OnChargeReady;
 
@@ -140,6 +141,7 @@ public class PlayerAttack : MonoBehaviour
     private bool _autoFireTriggered = false;
 
     private bool _isInComboWindow;
+    private bool _canModeChangeDuringAttack;
     private bool _isComboTransitioned;
 
     private bool _isHomingActive;
@@ -186,6 +188,7 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnAttackComplete -= FinishAttack;
             _animationController.OnComboWindowStart -= OnComboWindowStart;
             _animationController.OnComboWindowEnd -= OnComboWindowEnd;
+            _animationController.OnModeChangeReady -= OnModeChangeReady;
             _animationController.OnComboTransition -= TryComboTransition;
             _animationController.OnChargeReady -= OnChargeReady;
         }
@@ -401,6 +404,7 @@ public class PlayerAttack : MonoBehaviour
         FaceAttackTarget();
         RequestAttackMove(variant, false);
 
+        _canModeChangeDuringAttack = false;
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
     }
@@ -465,6 +469,7 @@ public class PlayerAttack : MonoBehaviour
         FaceAttackTarget();
         RequestAttackMove(variant, false);
 
+        _canModeChangeDuringAttack = false;
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
@@ -490,6 +495,15 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackData = null;
         _pendingAttackInput = null;
         _activeAttackVariant = null;
+        _canModeChangeDuringAttack = false;
+
+        // モードチェンジによって攻撃アニメーションを抜けた場合は、
+        // モードチェンジ完了通知まで ModeChanging を維持する。
+        if (_stateManager.CurrentState == PlayerState.ModeChanging)
+        {
+            ResetCombo();
+            return;
+        }
 
         if (_pendingWarriorCharge)
         {
@@ -567,6 +581,9 @@ public class PlayerAttack : MonoBehaviour
     /// コンボウィンドウの開始と終了を管理する。コンボウィンドウ中は次の攻撃への入力を受け付ける状態になる。
     /// </summary>
     private void OnComboWindowStart() => _isInComboWindow = true;
+
+    /// <summary>攻撃中のモードチェンジ受付を開始する。</summary>
+    private void OnModeChangeReady() => _canModeChangeDuringAttack = true;
 
     /// <summary>
     /// コンボウィンドウの終了を管理する。コンボウィンドウが終了すると、次の攻撃への入力は受け付けなくなる。
@@ -894,22 +911,23 @@ public class PlayerAttack : MonoBehaviour
     /// モード変更時の処理。モードが変更されたときにコンボをリセットする。これにより、モード変更後の攻撃が新しいコンボとして始まるようになる。
     /// </summary>
     /// <param name="_">イベントに合わせるためのものなので使用しないが引数を付けている</param>
-    private void OnModeChanged(PlayerMode _) => ResetCombo();
+    private void OnModeChanged(PlayerMode _)
+    {
+        // コンボ中に準備した旧モードのチャージ状態を、モード変更後へ持ち越さない。
+        CancelCharge();
+        ResetCombo();
+    }
 
     /// <summary>
     /// モード変更の入力処理。モード変更が可能な状態であれば、現在のモードに応じて新しいモードに切り替える。雷神モードへの切り替えは即時に行い、闘神モードへの切り替えは状態遷移を伴う。
     /// </summary>
     private void ChangeMode()
     {
-        if (!_stateManager.CanModeChange()) { return; }
+        bool canChange = _stateManager.CanModeChange()
+            || (_stateManager.CurrentState == PlayerState.Attacking && _canModeChangeDuringAttack);
+        if (!canChange) { return; }
 
         var newMode = _modeController.CurrentMode == PlayerMode.Warrior ? PlayerMode.Thunder : PlayerMode.Warrior;
-
-        if (newMode == PlayerMode.Warrior)
-        {
-            _modeController.SwitchMode(newMode);
-            return;
-        }
 
         _stateManager.ChangeState(PlayerState.ModeChanging);
         _modeController.SwitchMode(newMode);

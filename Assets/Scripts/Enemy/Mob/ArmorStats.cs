@@ -14,6 +14,7 @@ public sealed class ArmorStats
     public event Action<float, float> OnHealthChanged;
 
     public float CurrentHealth => _currentHealth;
+    public float MaxHealth => _maxHealth;
 
     public ArmorStats(ArmorData data)
     {
