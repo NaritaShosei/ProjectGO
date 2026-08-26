@@ -16,10 +16,26 @@ MonoBehaviour:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Medium
       SpawnCount: 2
-    - EnemyTypeKey: Enemy_Light
-      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
     SpawnPointKey: 4
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 1
+    _clusterRadius: 2
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy_Medium
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    ExclusionRadius: 5
+    NextWaveConditions:
+    - WaveConditionType: 2
+      Threshold: 0
+    SpawnPointKey: 0
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 1
+    _clusterRadius: 2
