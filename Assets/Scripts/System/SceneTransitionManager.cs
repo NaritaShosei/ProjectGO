@@ -7,7 +7,7 @@ public class SceneTransitionManager : MonoBehaviour
     private const string SystemSceneName = "SystemScene";
 
     //読み込み時最低でも２秒間ロード画面を見せる
-    private const float MinimumLoadingDuration = 2f;
+    private const float MinimumLoadingDuration = 5f;
     private const float progressSpeed = 1f;
 
     /// <summary>

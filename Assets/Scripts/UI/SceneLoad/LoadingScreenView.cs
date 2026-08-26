@@ -8,14 +8,6 @@ using UnityEngine.UI;
 /// </summary>
 public class LoadingScreenView : MonoBehaviour
 {
-    [Header("ロード画面の設定")]
-    [SerializeField] private CanvasGroup _canvasGroup;
-    [SerializeField] private Image _progressBar;
-    [SerializeField] private TMP_Text _progressText;
-    [SerializeField] private float _fadeDuration = 0.25f;
-    [Header("回転するやつ")]
-    [SerializeField] private GameObject _loadingSpinner;
-
     /// <summary>
     /// ロード画面を表示する
     /// </summary>
@@ -39,7 +31,6 @@ public class LoadingScreenView : MonoBehaviour
     {
         progress = Mathf.Clamp01(progress);
         _progressBar.fillAmount = progress;
-        _progressText.text = $"{Mathf.RoundToInt(progress * 100f)}%";
     }
 
     /// <summary>
@@ -56,14 +47,17 @@ public class LoadingScreenView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    [Header("ロード画面の設定")]
+    [SerializeField] private CanvasGroup _canvasGroup;
+    [SerializeField] private Image _progressBar;
+    [SerializeField] private float _fadeDuration = 0.25f;
+
     /// <summary>
     /// 表示の切り替え
     /// </summary>
     private void SetProgressVisible(bool visible)
     {
         _progressBar.enabled = visible;
-        _progressText.enabled = visible;
-        _loadingSpinner.SetActive(visible);
     }
 
     /// <summary>
