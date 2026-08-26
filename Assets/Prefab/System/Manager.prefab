@@ -764,6 +764,7 @@ MonoBehaviour:
   - rid: 6731506274227978451
   - rid: 6731506274227978452
   - rid: 6731506274227978453
+  - rid: 6731506274227978454
   references:
     version: 2
     RefIds:
@@ -822,6 +823,49 @@ MonoBehaviour:
         _gameOverView: {fileID: 0}
         _titleSceneName: GOTestScene
         _restartSequence: 1
+    - rid: 6731506274227978454
+      type: {class: TutorialState, ns: , asm: Assembly-CSharp}
+      data:
+        _panelView: {fileID: 0}
+        _pages:
+        - _trigger: 0
+          _title: "基本操作・闘神モード"
+          _description: "移動してください"
+          _illustration: {fileID: 0}
+          _duration: 8
+        - _trigger: 1
+          _title: "モードチェンジ・雷神モード"
+          _description: "雷神モードへチェンジしてください"
+          _illustration: {fileID: 0}
+          _duration: 8
+        - _trigger: 2
+          _title: "ロックオン"
+          _description: "敵をロックオンしてください"
+          _illustration: {fileID: 0}
+          _duration: 8
+        - _trigger: 3
+          _title: "経験値と回復アイテム"
+          _description: "敵を倒すと経験値や回復アイテムを獲得できます。"
+          _illustration: {fileID: 0}
+          _duration: 6
+        - _trigger: 4
+          _title: "スキル獲得"
+          _description: "ウェーブクリア後にスキルを選択できます。"
+          _illustration: {fileID: 0}
+          _duration: 6
+        _spawnPointSelector: {fileID: 7793837620590366497}
+        _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
+        _moveDuration: 2
+        _dodgeRequiredCount: 1
+        _warriorNormalAttackRequiredCount: 1
+        _warriorChargeAttackRequiredCount: 1
+        _thunderAttackRequiredCount: 1
+        _lockOnRequiredCount: 1
+        _lockOnChangeRequiredCount: 1
+        _skillSelectView: {fileID: 0}
+        _skillSelectCount: 3
+        _nextSequence: 1
+        _pauseTargetGroup: 63
 --- !u!1 &5368403579476760681
 GameObject:
   m_ObjectHideFlags: 0

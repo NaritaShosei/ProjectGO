@@ -1138,7 +1138,7 @@ PrefabInstance:
       objectReference: {fileID: 288517074}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _firstSequence
-      value: 0
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978454]._panelView
@@ -1177,6 +1177,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 177643964}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978454]._dodgeRequiredCount
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978450]._bossBattleTimeLimit
       value: 120
       objectReference: {fileID: 0}
@@ -1188,6 +1192,18 @@ PrefabInstance:
       propertyPath: managedReferences[6731506274227978448]._skillSelectTimerView
       value: 
       objectReference: {fileID: 475182693}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978454]._thunderAttackRequiredCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978454]._warriorChargeAttackRequiredCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978454]._warriorNormalAttackRequiredCount
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 9221605787384030750, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _viewParent
       value: 
