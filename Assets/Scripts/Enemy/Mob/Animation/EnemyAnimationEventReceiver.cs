@@ -45,6 +45,9 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public event Action OnSpawnEffect;
     /// <summary>エネミーのスポーン終了イベント</summary>
     public event Action OnSpawnEnd;
+    /// <summary>盾破壊開始イベント</summary>
+    public event Action OnShieldBreakStart;
+    public event Action OnShieldBlockHitStart;
 
     /// <summary>EnemyAttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
     public void AnimEvent_AttackHit()
@@ -122,5 +125,13 @@ public class EnemyAnimationEventReceiver : MonoBehaviour, IEnemyAnimationControl
     public void AnimEvent_SpawnEnd()
     {
         OnSpawnEnd?.Invoke();
+    }
+    public void AnimEvent_ShieldBreakStart()
+    {
+        OnShieldBreakStart?.Invoke();
+    }
+    public void AnimEvent_ShieldBlockHitStart()
+    {
+        OnShieldBlockHitStart?.Invoke();
     }
 }

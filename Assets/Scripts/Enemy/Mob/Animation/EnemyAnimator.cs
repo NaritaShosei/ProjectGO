@@ -23,6 +23,8 @@ public class EnemyAnimator : IEnemyAnimator
     public event Action OnWeaponSwing;
     public event Action OnSpawnEffect;
     public event Action OnSpawnEnd;
+    public event Action OnShieldBreakStart;
+    public event Action OnShieldBlockHitStart;
 
     /// <summary>
     /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
@@ -49,6 +51,9 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnWeaponSwing += HandleWeaponSwing;
         _receiver.OnSpawnEffect += HandleSpawnEffect;
         _receiver.OnSpawnEnd += HandleSpawnEnd;
+        _receiver.OnShieldBreakStart += HandleShieldBreakStart;
+        _receiver.OnShieldBlockHitStart += HandleShieldBlockHitStart;
+        
     }
 
     /// <summary>
@@ -146,6 +151,8 @@ public class EnemyAnimator : IEnemyAnimator
         _receiver.OnWeaponSwing -= HandleWeaponSwing;
         _receiver.OnSpawnEffect -= HandleSpawnEffect;
         _receiver.OnSpawnEnd -= HandleSpawnEnd;
+        _receiver.OnShieldBreakStart -= HandleShieldBreakStart;
+        _receiver.OnShieldBlockHitStart -= HandleShieldBlockHitStart;
     }
 
     public void SetDown(bool value)
@@ -160,6 +167,18 @@ public class EnemyAnimator : IEnemyAnimator
         _animator.SetTrigger(_hashDownTrigger);
     }
 
+    public void ShieldBreakTrigger()
+    {
+        if (_animator == null) return;
+        _animator.SetTrigger(_hashShieldBreakTrigger);
+    }
+
+    public void ShieldBlockHitTrigger()
+    {
+        if (_animator == null) return;
+        _animator.SetTrigger(_hashShieldBlockitTrigger);
+    }
+
     // Animatorパラメータのハッシュ
     private static readonly int _hashSpeed = Animator.StringToHash("Speed");
     private static readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
@@ -171,6 +190,8 @@ public class EnemyAnimator : IEnemyAnimator
     private static readonly int _hashKnockbackLevel = Animator.StringToHash("KnockbackLevel");
     private static readonly int _hashIsDown = Animator.StringToHash("IsDown");
     private static readonly int _hashDownTrigger = Animator.StringToHash("DownTrigger");
+    private static readonly int _hashShieldBreakTrigger = Animator.StringToHash("ShieldBreakTrigger");
+    private static readonly int _hashShieldBlockitTrigger = Animator.StringToHash("ShieldBlockHitTrigger");
 
     private readonly Animator _animator;
 
@@ -192,4 +213,6 @@ public class EnemyAnimator : IEnemyAnimator
     private void HandleWeaponSwing() => OnWeaponSwing?.Invoke();
     private void HandleSpawnEffect() => OnSpawnEffect?.Invoke();
     private void HandleSpawnEnd() => OnSpawnEnd?.Invoke();
+    private void HandleShieldBreakStart() => OnShieldBreakStart?.Invoke();
+    private void HandleShieldBlockHitStart() => OnShieldBlockHitStart?.Invoke();
 }
