@@ -83,10 +83,15 @@ public class EnemyUIManager : MonoBehaviour
     {
         // Gauge
         var view = _gaugePool.Get();
+        Transform gaugeTarget = enemy is MobEnemy mobEnemy
+            ? mobEnemy.GetUIAnchor()
+            : enemy.GetTargetCenter();
 
         var presenter = new EnemyGaugePresenter(
             enemy,
             view,
+            gaugeTarget,
+            enemy.GetTargetCenter(),
             _playerTransform,
             _detectionRange,
             _damagedDisplayDuration
@@ -155,6 +160,7 @@ public class EnemyUIManager : MonoBehaviour
         var presenter = new ArmorGaugePresenter(
             armor,
             view,
+            enemy is MobEnemy mob ? mob.GetUIAnchor() : enemy.GetTargetCenter(),
             enemy.GetTargetCenter(),
             _playerTransform,
             _detectionRange,
