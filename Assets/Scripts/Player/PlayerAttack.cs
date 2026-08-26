@@ -18,6 +18,7 @@ public class PlayerAttack : MonoBehaviour
     public event Action OnChargingEnded;
     /// <summary> 溜め段階を通知 </summary>
     public event Action<ChargeLevel> OnChargeLevelReached; // チャージレベルに応じたSEやエフェクトの発動に使用
+    public event Action<PlayerMode, ChargeLevel> OnAttackHit;
 
     #endregion
 
@@ -1017,6 +1018,13 @@ _currentLockOnTarget.GetTargetCenter() == null)
 
     private void HandleAttackHitConfirmed(int hitIndex)
     {
+        if (_pendingAttackData != null && _pendingAttackInput.HasValue)
+        {
+            OnAttackHit?.Invoke(
+                _pendingAttackData.Mode,
+                _pendingAttackInput.Value.ChargeLevel);
+        }
+
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
         if (!_stoppedHitIndices.Add(hitIndex)) return;
 

@@ -6,6 +6,18 @@ using UnityEngine;
 
 public class Player : MonoBehaviour, IPlayer, ISpeedChange
 {
+    public event Action<PlayerMode, ChargeLevel> OnAttackHit
+    {
+        add => _attack.OnAttackHit += value;
+        remove => _attack.OnAttackHit -= value;
+    }
+
+    public event Action<PlayerMode> OnModeChanged
+    {
+        add => _modeController.OnModeChanged += value;
+        remove => _modeController.OnModeChanged -= value;
+    }
+
     // ---- IPlayerStats 実装 ----
     public float AttackPower => _playerStats.AttackPower;
     public float CriticalRate => _playerStats.CriticalRate;

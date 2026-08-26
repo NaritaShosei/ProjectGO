@@ -34,6 +34,12 @@ public sealed class TutorialPanelView : MonoBehaviour
 
     public void Hide() => SetVisible(false, false);
 
+    public void SetProgress(string progress)
+    {
+        if (_descriptionText != null)
+            _descriptionText.text = progress;
+    }
+
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private RectTransform _contentPanel;
     [SerializeField] private GameObject _backdrop;

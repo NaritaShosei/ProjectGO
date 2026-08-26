@@ -5,6 +5,8 @@ public interface IPlayer :
      IPlayerStats
 {
     public event Action OnDead;
+    event Action<PlayerMode, ChargeLevel> OnAttackHit;
+    event Action<PlayerMode> OnModeChanged;
 
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
