@@ -18,6 +18,7 @@ public class ShieldDraugr : MobEnemy
     [SerializeField] private Transform _shieldEffectPoint;
     [SerializeField] private GameObject _shieldObject;
     [SerializeField, Tooltip("盾破壊時のエフェクト")] private string _shieldBrokenEffect = "shieldBrokenEffect";
+    [SerializeField, Tooltip("盾被ダメージエフェクト")] private string _shieldDamageEffect = "shieldDamageEffect";
     [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale;
     [SerializeField, Tooltip("こぶし攻撃の確率"),Range(0f,1f)] private float _fistAttackChance = 0.1f;
     [SerializeField, Tooltip("こぶし攻撃の抽選間隔（秒）")] private float _fistRerollInterval = 2f;
@@ -95,11 +96,17 @@ public class ShieldDraugr : MobEnemy
                 ApplyShieldDamage(damage);
                 appliedToShield = true;
                 didBreakThisHit = _shieldState == ShieldState.Broken;
+
+                if (!didBreakThisHit)
+                {
+                    _enemyAnimator.ShieldBlockHitTrigger();
+                }
             }
             else
             {
                 Debug.Log("正面につきダメージ無効");
                 wasBlocked = true;
+                _enemyAnimator.ShieldBlockHitTrigger();
             }
             // 通常モード＋正面 → 無効（何もしない）
         }
@@ -181,12 +188,19 @@ public class ShieldDraugr : MobEnemy
     private void ApplyShieldDamage(int damage)
     {
         _currentShieldDurability = Mathf.Max(0f, _currentShieldDurability - damage);
-        // TODO: 岩を砕くエフェクト通知
-        //TODO:盾のダメージ演出
+
+        if(IsShieldBroken)
+        {
+            //岩を砕くエフェクト通知
+            _effectManager.PlayEffect(_shieldDamageEffect, _shieldEffectPoint.position, _shieldBrokenEffectScale);
+        }
+
         if (_currentShieldDurability <= 0f)
         {
             BreakShield();
         }
+
+       
     }
 
     /// <summary>
@@ -200,6 +214,9 @@ public class ShieldDraugr : MobEnemy
         _shieldState = ShieldState.Broken;
         //盾破壊通知
         InvokeOnArmorBroken();
+
+        //盾破壊アニメーション開始
+        _enemyAnimator.ShieldBreakTrigger();
         //盾は破壊エフェクト
         _effectManager.PlayEffect(_shieldBrokenEffect, _shieldEffectPoint.position, _shieldBrokenEffectScale);
         //盾のモデル非表示
@@ -261,6 +278,10 @@ public class ShieldDraugr : MobEnemy
     private void OnDisable()
     {
         _shieldAnimationTween?.Kill();
+    }
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
 
         if (_attack != null)
         {
