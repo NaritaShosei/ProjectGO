@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c6e6d9f9f15ce8145bd2fb9417a06aee, type: 3}
-  m_Name: TestMid Boss Level Table
+  m_Name: MidBossLevelTable
   m_EditorClassIdentifier: Assembly-CSharp::MidBossLevelTable
   Levels:
   - RequiredPlayerLevel: 1
     EnemyData: {fileID: 11400000, guid: f1fde0b1f9e2dfe4986d34790faa20e4, type: 2}
-  - RequiredPlayerLevel: 5
-    EnemyData: {fileID: 11400000, guid: 63da42899f3b8034b803e0b2ec5a78c6, type: 2}
   - RequiredPlayerLevel: 10
     EnemyData: {fileID: 11400000, guid: 63da42899f3b8034b803e0b2ec5a78c6, type: 2}
   - RequiredPlayerLevel: 20
-    EnemyData: {fileID: 11400000, guid: 63da42899f3b8034b803e0b2ec5a78c6, type: 2}
+    EnemyData: {fileID: 11400000, guid: a6c9b6b171e243041bb2e79a70bd66af, type: 2}
+  - RequiredPlayerLevel: 30
+    EnemyData: {fileID: 11400000, guid: 259bb81837f299f41a0008aca042f050, type: 2}

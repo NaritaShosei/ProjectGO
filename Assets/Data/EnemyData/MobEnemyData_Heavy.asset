@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba454a2f6d480e649bf6078092511ffe, type: 3}
-  m_Name: TestGolemEnemyData 1
+  m_Name: MobEnemyData_Heavy
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  _maxHP: 700
+  _maxHP: 400
   _roamSpeed: 1
-  _approachSpeed: 3
+  _approachSpeed: 2
   _attackPatterns:
-  - {fileID: 11400000, guid: 41f2680158eca684ba04463f4d51c239, type: 2}
-  _knockbackHitThreshold: 5
-  _knockbackLargeThreshold: 20
-  _knockbackStunDuration: 0.1
-  _knockbackDeceleration: 20
-  _combatPower: 3
+  - {fileID: 11400000, guid: 8671b94ae10e925428163ac979804ce8, type: 2}
+  _knockbackHitThreshold: 1
+  _knockbackLargeThreshold: 8
+  _knockbackStunDuration: 0.5
+  _knockbackDeceleration: 10
+  _combatPower: 2
   _barkDuration: 2
-  _barkChance: 0.5
+  _barkChance: 0.2
   _idleDuration: 1
   _deathKnockbackPower: 8
   _deathKnockbackUpward: 2
-  _healDropChance: 0.3
-  _expDropAmount: 20
+  _healDropChance: 0.2
+  _expDropAmount: 10
