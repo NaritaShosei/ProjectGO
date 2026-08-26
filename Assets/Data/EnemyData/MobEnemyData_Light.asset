@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba454a2f6d480e649bf6078092511ffe, type: 3}
-  m_Name: TestMobEnemyData
+  m_Name: MobEnemyData_Light
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  _maxHP: 500
+  _maxHP: 200
   _roamSpeed: 1
   _approachSpeed: 2
   _attackPatterns:
-  - {fileID: 11400000, guid: 47ea3464128699641bc0940e28688e35, type: 2}
-  _knockbackHitThreshold: 5
-  _knockbackLargeThreshold: 10
+  - {fileID: 11400000, guid: 7bb61ef4f0a8d514fa1178294386b575, type: 2}
+  _knockbackHitThreshold: 1
+  _knockbackLargeThreshold: 8
   _knockbackStunDuration: 0.5
   _knockbackDeceleration: 10
   _combatPower: 1
@@ -28,3 +28,4 @@ MonoBehaviour:
   _deathKnockbackPower: 8
   _deathKnockbackUpward: 2
   _healDropChance: 0.3
+  _expDropAmount: 5

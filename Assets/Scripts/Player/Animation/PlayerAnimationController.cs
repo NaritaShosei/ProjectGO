@@ -136,6 +136,19 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     {
         if (!string.IsNullOrEmpty(stateName))
         {
+            int stateHash = Animator.StringToHash(stateName);
+            AnimatorStateInfo currentState = _animator.GetCurrentAnimatorStateInfo(0);
+
+            // 同じ攻撃ステートへのCrossFadeは、旧・新ステートのSMBコールバックを
+            // 同時に走らせる。攻撃完了後すぐ同じ初段を再生する場合は直接再生し、
+            // 前回分のイベントが新しい攻撃へ混入するのを防ぐ。
+            if (currentState.shortNameHash == stateHash
+                || currentState.fullPathHash == stateHash)
+            {
+                _animator.Play(stateName, 0, 0f);
+                return;
+            }
+
             _animator.CrossFadeInFixedTime(stateName, transitionDuration, 0);
         }
         else
