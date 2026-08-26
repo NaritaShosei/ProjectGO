@@ -58,14 +58,6 @@ public class AttackEventSMB : StateMachineBehaviour
         }
     }
 
-    public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        if (_controller == null) { return; }
-
-        if (!_attackCompleted)
-            _controller.AnimEvent_AttackComplete();
-    }
-
     [Header("Timings (seconds)")]
     [SerializeField] private float[] _attackExecuteTimes;
     [SerializeField] private float _comboWindowStartTime = 0.35f;
