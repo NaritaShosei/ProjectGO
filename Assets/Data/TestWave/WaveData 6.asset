@@ -14,24 +14,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
-    - EnemyTypeKey: Enemy_Armor_Heavy
-      SpawnCount: 4
     - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 3
-    - EnemyTypeKey: Enemy_Armor_Light
-      SpawnCount: 3
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 0
     NextWaveConditions:
-    - WaveConditionType: 2
-      Threshold: 0
+    - WaveConditionType: 0
+      Threshold: 1
     SpawnPointKey: 
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 0
+    _clusterRadius: 2
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 4
-    - EnemyTypeKey: StoneGolem
-      SpawnCount: 1
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    - EnemyTypeKey: Enemy_Armor_Heavy
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    ExclusionRadius: 0
+    NextWaveConditions:
+    - WaveConditionType: 0
+      Threshold: 0
+    SpawnPointKey: 
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 0
+    _clusterRadius: 2
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    - EnemyTypeKey: Enemy_Armor_Heavy
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 0
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
     SpawnPointKey: 
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 0
+    _clusterRadius: 2
