@@ -942,6 +942,11 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!23 &449666068 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 6237758297517254405, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+  m_PrefabInstance: {fileID: 650177779}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &475182691
 GameObject:
   m_ObjectHideFlags: 0
@@ -2190,6 +2195,14 @@ PrefabInstance:
       propertyPath: _spawnDelay
       value: 0.35
       objectReference: {fileID: 0}
+    - target: {fileID: 3339426191168238841, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: _changeDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3339426191168238841, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: _hammerRenderer
+      value: 
+      objectReference: {fileID: 449666068}
     - target: {fileID: 3601723693034255349, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: m_LocalRotation.w
       value: -0.32541442
