@@ -1056,6 +1056,10 @@ PrefabInstance:
       propertyPath: _warriorEffectView
       value: 
       objectReference: {fileID: 1861598003}
+    - target: {fileID: 411399310545014901, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _modeChangeEffectPlayer
+      value: 
+      objectReference: {fileID: 650177781}
     - target: {fileID: 527146034796436045, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: Target
       value: 
@@ -2663,6 +2667,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4679827096331906539, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
   m_PrefabInstance: {fileID: 650177779}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &650177781 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3339426191168238841, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+  m_PrefabInstance: {fileID: 650177779}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 036cc4329416404989a0c5667105fc96, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ModeChangePostProcessEffectPlayer
 --- !u!114 &650177785 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7149429084609121715, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
