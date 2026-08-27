@@ -84,7 +84,19 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         // エフェクトの再生
         if (ServiceLocator.TryGet(out EffectManager effectManager))
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(_spawnDelay), cancellationToken: _effectCts.Token);
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(_spawnDelay), cancellationToken: _effectCts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[ModeChangePostProcessEffectPlayer] エフェクト再生の遅延中に例外が発生しました: {ex}", this);
+                return;
+            }
 
             var playerTransform = transform;
             var effectPosition = playerTransform.position + _effectOffset;
