@@ -14644,8 +14644,9 @@ GameObject:
   - component: {fileID: 7007450882206648635}
   - component: {fileID: 244528053472866814}
   - component: {fileID: 1026918542295297307}
+  - component: {fileID: -7979313638568558506}
   m_Layer: 0
-  m_Name: Modechange Lightning
+  m_Name: ModeChangeLightning
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19524,6 +19525,20 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &-7979313638568558506
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2831708835447267546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f83dae22c9ab10418f5ecb7a2520c16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParticleEffect
+  _isSpeedChangeEnabled: 0
+  _rootParticle: {fileID: 244528053472866814}
 --- !u!1 &2858211361498146380
 GameObject:
   m_ObjectHideFlags: 0
