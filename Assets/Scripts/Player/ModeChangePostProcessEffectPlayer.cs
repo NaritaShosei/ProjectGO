@@ -21,7 +21,7 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
         PlayEffect(_effectCts.Token, _effectPlayVersion).Forget();
 
-        // ポストプロセスのピークに合わせて、プレイヤー位置へモード変更エフェクトを生成する。
+        // モーションに合わせてプレイヤー位置へモード変更エフェクトを生成するため遅延を行う。
         if (ServiceLocator.TryGet(out EffectManager effectManager))
         {
             try
@@ -45,6 +45,8 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
     public void Stop()
     {
+        // キャンセルされた古い演出が finally でスナップショットを再適用しないよう、先に世代を無効化する。
+        _effectPlayVersion++;
         StopEffect(restore: true);
         StopEmissionChange();
     }
