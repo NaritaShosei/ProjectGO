@@ -177,6 +177,7 @@ public sealed class HitStopManager : IDisposable
             { HitStopTargetGroup.Effects,    new List<ISpeedChange>() },
             { HitStopTargetGroup.Camera,     new List<ISpeedChange>() },
             { HitStopTargetGroup.ThunderGauge, new List<ISpeedChange>() },
+            { HitStopTargetGroup.Time,       new List<ISpeedChange>() },
         };
 
     /// <summary>
@@ -191,6 +192,7 @@ public sealed class HitStopManager : IDisposable
         { HitStopTargetGroup.Effects,    1f },
         { HitStopTargetGroup.Camera,     1f },
         { HitStopTargetGroup.ThunderGauge, 1f },
+        { HitStopTargetGroup.Time,       1f },
         };
 
     private readonly Dictionary<HitStopTargetGroup, float> _timedScale =
@@ -202,6 +204,7 @@ public sealed class HitStopManager : IDisposable
         { HitStopTargetGroup.Effects,    1f },
         { HitStopTargetGroup.Camera,     1f },
         { HitStopTargetGroup.ThunderGauge, 1f },
+        { HitStopTargetGroup.Time,       1f },
         };
 
     private readonly List<ManualStop> _manualStops = new();
