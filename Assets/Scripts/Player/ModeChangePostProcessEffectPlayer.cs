@@ -6,13 +6,12 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 /// <summary>
-/// Warrior から Thunder へ切り替わる瞬間だけ、画面全体のポストプロセス演出を再生する。
-/// モード変更ロジックには触らず、PlayerModeController のイベントを購読して演出だけを担当する。
+/// 画面全体のモード切替ポストプロセス演出を再生するView。
+/// 再生条件とモード変更イベントの購読は ModeChangePostProcessEffectPresenter が担当する。
 /// </summary>
 public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] private PlayerModeController _modeController;
+    [Header("Volume")]
     [Tooltip("未設定の場合はシーン内の Volume を自動取得します。")]
     [SerializeField] private Volume _volume;
 
@@ -20,7 +19,8 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     [Tooltip("演出全体の再生時間")]
     [SerializeField, Min(0.01f)] private float _duration = 1.1f;
     [Tooltip("演出の強さの時間変化")]
-    [SerializeField] private AnimationCurve _impactCurve = new AnimationCurve(
+    [SerializeField]
+    private AnimationCurve _impactCurve = new AnimationCurve(
         new Keyframe(0f, 0f),
         new Keyframe(0.18f, 1f),
         new Keyframe(0.42f, 0.55f),
@@ -42,7 +42,12 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     [Tooltip("現在の彩度に加算する値")]
     [SerializeField] private float _saturationBoost = 35f;
 
-    private PlayerMode _previousMode = PlayerMode.Warrior;
+    [Header("エフェクト設定")]
+    [SerializeField] private string _effectName = "ModeChangeLightning";
+    [SerializeField] private Vector3 _effectOffset = new Vector3(0f, 2f, 0f);
+    [Tooltip("エフェクト再生までの遅延時間(秒)。演出のピークに合わせる")]
+    [SerializeField] private float _spawnDelay = 0.4f;
+
     private Vignette _vignette;
     private ChromaticAberration _chromaticAberration;
     private LensDistortion _lensDistortion;
@@ -55,42 +60,19 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
     private void Awake()
     {
-        if (_modeController == null)
-            _modeController = GetComponent<PlayerModeController>();
-
         if (_volume == null)
             _volume = FindAnyObjectByType<Volume>();
-
-        if (_modeController != null)
-            _previousMode = _modeController.CurrentMode;
 
         CacheVolumeComponents();
     }
 
-    private void OnEnable()
-    {
-        if (_modeController != null)
-            _modeController.OnModeChanged += HandleModeChanged;
-    }
-
     private void OnDisable()
     {
-        if (_modeController != null)
-            _modeController.OnModeChanged -= HandleModeChanged;
-
-        StopEffect(restore: true);
+        Stop();
     }
 
-    private void HandleModeChanged(PlayerMode newMode)
+    public async void Play()
     {
-        // OnModeChanged は遷移後のモードだけを通知するため、このクラス側で直前のモードを保持する。
-        bool isWarriorToThunder = _previousMode == PlayerMode.Warrior
-            && newMode == PlayerMode.Thunder;
-
-        _previousMode = newMode;
-
-        if (!isWarriorToThunder) return;
-
         // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
         StopEffect(restore: true);
 
@@ -98,6 +80,21 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         _effectPlayVersion++;
 
         PlayEffect(_effectCts.Token, _effectPlayVersion).Forget();
+
+        // エフェクトの再生
+        if (ServiceLocator.TryGet(out EffectManager effectManager))
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(_spawnDelay), cancellationToken: _effectCts.Token);
+
+            var playerTransform = transform;
+            var effectPosition = playerTransform.position + _effectOffset;
+            effectManager.PlayEffect(_effectName, effectPosition);
+        }
+    }
+
+    public void Stop()
+    {
+        StopEffect(restore: true);
     }
 
     private void CacheVolumeComponents()
