@@ -14,6 +14,7 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
         _previousMode = modeController.CurrentMode;
 
         _modeController.OnModeChanged += OnModeChanged;
+        _effectPlayer.ChangeHammerEmission(_previousMode, immediate: true);
     }
 
     public void Dispose()
@@ -22,6 +23,10 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
         _effectPlayer.Stop();
     }
 
+    private readonly ModeChangePostProcessEffectPlayer _effectPlayer;
+    private readonly IModeController _modeController;
+    private PlayerMode _previousMode;
+
     private void OnModeChanged(PlayerMode newMode)
     {
         bool shouldPlay = _previousMode == PlayerMode.Warrior
@@ -29,11 +34,10 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
 
         _previousMode = newMode;
 
+        _effectPlayer.ChangeHammerEmission(newMode);
+
         if (shouldPlay)
             _effectPlayer.Play();
     }
 
-    private readonly ModeChangePostProcessEffectPlayer _effectPlayer;
-    private readonly IModeController _modeController;
-    private PlayerMode _previousMode;
 }
