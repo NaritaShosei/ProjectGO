@@ -87,6 +87,9 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
             try
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(_spawnDelay), cancellationToken: _effectCts.Token);
+                var playerTransform = transform;
+                var effectPosition = playerTransform.position + _effectOffset;
+                effectManager.PlayEffect(_effectName, effectPosition);
             }
             catch (OperationCanceledException)
             {
@@ -96,11 +99,7 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
             {
                 Debug.LogError($"[ModeChangePostProcessEffectPlayer] エフェクト再生の遅延中に例外が発生しました: {ex}", this);
                 return;
-            }
-
-            var playerTransform = transform;
-            var effectPosition = playerTransform.position + _effectOffset;
-            effectManager.PlayEffect(_effectName, effectPosition);
+            }            
         }
     }
 
