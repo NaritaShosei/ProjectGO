@@ -11,6 +11,68 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 {
+    public async void Play()
+    {
+        // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
+        StopEffect(restore: true);
+
+        _effectCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        _effectPlayVersion++;
+
+        PlayEffect(_effectCts.Token, _effectPlayVersion).Forget();
+
+        // ポストプロセスのピークに合わせて、プレイヤー位置へモード変更エフェクトを生成する。
+        if (ServiceLocator.TryGet(out EffectManager effectManager))
+        {
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(_spawnDelay), cancellationToken: _effectCts.Token);
+                var playerTransform = transform;
+                var effectPosition = playerTransform.position + _effectOffset;
+                effectManager.PlayEffect(_effectName, effectPosition);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[ModeChangePostProcessEffectPlayer] エフェクト再生の遅延中に例外が発生しました: {ex}", this);
+                return;
+            }
+        }
+    }
+
+    public void Stop()
+    {
+        StopEffect(restore: true);
+        StopEmissionChange();
+    }
+
+    /// <summary>
+    /// ハンマーの Emission Map Intensity を対象モードの設定値へ遷移させる。
+    /// </summary>
+    public void ChangeHammerEmission(PlayerMode mode, bool immediate = false)
+    {
+        if (!InitializeHammerEmission()) return;
+
+        StopEmissionChange();
+
+        float targetIntensity = mode == PlayerMode.Thunder
+            ? _thunderEmissionIntensity
+            : _warriorEmissionIntensity;
+        Color targetColor = _hammerEmissionBaseColor * Mathf.Pow(2f, targetIntensity);
+
+        if (immediate || _changeDuration <= 0f)
+        {
+            ApplyHammerEmissionColor(targetColor);
+            return;
+        }
+
+        _emissionCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        ChangeHammerEmissionAsync(targetColor, _emissionCts.Token).Forget();
+    }
+
     [Header("Volume")]
     [Tooltip("未設定の場合はシーン内の Volume を自動取得します。")]
     [SerializeField] private Volume _volume;
@@ -48,15 +110,29 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     [Tooltip("エフェクト再生までの遅延時間(秒)。演出のピークに合わせる")]
     [SerializeField] private float _spawnDelay = 0.4f;
 
+    [Header("マテリアル設定")]
+    [SerializeField] private Renderer _hammerRenderer;
+    [SerializeField, Min(0f)] private float _changeDuration = 0.5f;
+    [Tooltip("闘神モード時の Emission Map Intensity")]
+    [SerializeField] private float _warriorEmissionIntensity = 1f;
+    [Tooltip("雷神モード時の Emission Map Intensity")]
+    [SerializeField] private float _thunderEmissionIntensity = 4f;
+
     private Vignette _vignette;
     private ChromaticAberration _chromaticAberration;
     private LensDistortion _lensDistortion;
     private Bloom _bloom;
     private ColorAdjustments _colorAdjustments;
     private CancellationTokenSource _effectCts;
+    private CancellationTokenSource _emissionCts;
+    private MaterialPropertyBlock _hammerPropertyBlock;
+    private Color _hammerEmissionBaseColor = Color.white;
+    private Color _currentHammerEmissionColor;
+    private bool _isHammerEmissionInitialized;
     private PostProcessSnapshot _activeSnapshot;
     private bool _hasActiveSnapshot;
     private int _effectPlayVersion;
+    private static readonly int _emissionColorId = Shader.PropertyToID("_EmissionColor");
 
     private void Awake()
     {
@@ -64,48 +140,12 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
             _volume = FindAnyObjectByType<Volume>();
 
         CacheVolumeComponents();
+        InitializeHammerEmission();
     }
 
     private void OnDisable()
     {
         Stop();
-    }
-
-    public async void Play()
-    {
-        // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
-        StopEffect(restore: true);
-
-        _effectCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-        _effectPlayVersion++;
-
-        PlayEffect(_effectCts.Token, _effectPlayVersion).Forget();
-
-        // エフェクトの再生
-        if (ServiceLocator.TryGet(out EffectManager effectManager))
-        {
-            try
-            {
-                await UniTask.Delay(TimeSpan.FromSeconds(_spawnDelay), cancellationToken: _effectCts.Token);
-                var playerTransform = transform;
-                var effectPosition = playerTransform.position + _effectOffset;
-                effectManager.PlayEffect(_effectName, effectPosition);
-            }
-            catch (OperationCanceledException)
-            {
-                return;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[ModeChangePostProcessEffectPlayer] エフェクト再生の遅延中に例外が発生しました: {ex}", this);
-                return;
-            }            
-        }
-    }
-
-    public void Stop()
-    {
-        StopEffect(restore: true);
     }
 
     private void CacheVolumeComponents()
@@ -297,6 +337,72 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
         if (restore && _hasActiveSnapshot)
             Restore(_activeSnapshot);
+    }
+
+    private bool InitializeHammerEmission()
+    {
+        if (_isHammerEmissionInitialized) return true;
+        if (_hammerRenderer == null) return false;
+
+        Material material = _hammerRenderer.sharedMaterial;
+        if (material == null || !material.HasProperty(_emissionColorId))
+        {
+            Debug.LogWarning(
+                "[ModeChangePostProcessEffectPlayer] ハンマーのマテリアルに _EmissionColor がありません。",
+                this);
+            return false;
+        }
+
+        _hammerPropertyBlock = new MaterialPropertyBlock();
+        Color emissionColor = material.GetColor(_emissionColorId);
+        float maxComponent = Mathf.Max(emissionColor.r, emissionColor.g, emissionColor.b);
+        float currentIntensity = maxComponent > 1f ? Mathf.Log(maxComponent, 2f) : 0f;
+
+        _hammerEmissionBaseColor = emissionColor / Mathf.Pow(2f, currentIntensity);
+        if (_hammerEmissionBaseColor.maxColorComponent <= 0f)
+            _hammerEmissionBaseColor = Color.white;
+
+        _currentHammerEmissionColor = emissionColor;
+        _isHammerEmissionInitialized = true;
+        return true;
+    }
+
+    private async UniTaskVoid ChangeHammerEmissionAsync(Color targetColor, CancellationToken token)
+    {
+        Color startColor = _currentHammerEmissionColor;
+        float elapsed = 0f;
+
+        try
+        {
+            while (elapsed < _changeDuration)
+            {
+                elapsed += Time.deltaTime;
+                ApplyHammerEmissionColor(Color.Lerp(startColor, targetColor,
+                    Mathf.Clamp01(elapsed / _changeDuration)));
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
+            }
+
+            ApplyHammerEmissionColor(targetColor);
+        }
+        catch (OperationCanceledException)
+        {
+            // 次のモード変更時は、その時点の色から新しい遷移を開始する。
+        }
+    }
+
+    private void ApplyHammerEmissionColor(Color color)
+    {
+        _hammerRenderer.GetPropertyBlock(_hammerPropertyBlock);
+        _hammerPropertyBlock.SetColor(_emissionColorId, color);
+        _hammerRenderer.SetPropertyBlock(_hammerPropertyBlock);
+        _currentHammerEmissionColor = color;
+    }
+
+    private void StopEmissionChange()
+    {
+        _emissionCts?.Cancel();
+        _emissionCts?.Dispose();
+        _emissionCts = null;
     }
 
     private struct PostProcessSnapshot
