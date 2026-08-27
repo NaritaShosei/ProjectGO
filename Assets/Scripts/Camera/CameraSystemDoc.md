@@ -36,7 +36,7 @@
 通常カメラとロックオンカメラのField of Viewをまとめて補間するズーム専用クラスです。`CameraManager` が生成し、通常のカメラ追従やロックオン判定とは独立して動作します。
 
 - `SetZoom(0f..1f)`: 通常視野から最大ズームまでを割合で指定
-- `SetZoomLevel(level, maxLevel)`: チャージ段階をズーム率へ変換して指定
+- `SetZoomLevel(level)`: チャージ段階をズーム率へ変換して指定（各段階の倍率はInspectorの「ズーム設定」で個別に調整可能）
 - `ZoomIn(amount)` / `ZoomOut(amount)`: 現在の目標ズーム率を増減
 - `ResetZoom()`: 通常視野へ戻す
 

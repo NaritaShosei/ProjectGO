@@ -104,6 +104,13 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         {
             Debug.LogError("[CameraManager] InputHandler or EnemyManager is missing. LockOn is disabled.", this);
         }
+
+        _playerAttack = player.GetComponent<PlayerAttack>();
+        if (_playerAttack != null)
+        {
+            _playerAttack.OnChargeLevelReached += HandleChargeLevelReached;
+            _playerAttack.OnChargingEnded += HandleChargingEnded;
+        }
     }
 
     /// <summary>
@@ -132,12 +139,18 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     /// <summary>
     /// チャージ段階をズーム率へ変換して設定します。
-    /// 例: Level2 / Level3なら最大ズームの2/3です。
+    /// 各段階のズーム率はInspectorの「ズーム設定」で個別に調整できます。
     /// </summary>
-    public void SetZoomLevel(ChargeLevel level, ChargeLevel maxLevel = ChargeLevel.Level3)
+    public void SetZoomLevel(ChargeLevel level)
     {
-        int max = Mathf.Max(1, (int)maxLevel);
-        SetZoom((float)Mathf.Clamp((int)level, 0, max) / max);
+        float zoom = level switch
+        {
+            ChargeLevel.Level1 => _chargeZoomLevel1,
+            ChargeLevel.Level2 => _chargeZoomLevel2,
+            ChargeLevel.Level3 => _chargeZoomLevel3,
+            _ => 0f,
+        };
+        SetZoom(zoom);
     }
 
     /// <summary>指定量だけズームインします。</summary>
@@ -156,6 +169,22 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     public void ResetZoom()
     {
         _cameraZoomController?.ResetZoom();
+    }
+
+    /// <summary>チャージ段階の通知を受けてズーム率を変更します。</summary>
+    private void HandleChargeLevelReached(ChargeLevel level)
+    {
+        Debug.Log($"[CameraManager] ChargeLevel : {level}");
+        SetZoomLevel(level);
+    }
+
+    /// <summary>
+    /// チャージ解放（攻撃発動 or キャンセル）を受けて、解放時点のズーム率から
+    /// Inspectorで指定したズーム率まで少しズームアウトします。
+    /// </summary>
+    private void HandleChargingEnded()
+    {
+        SetZoom(_chargeReleaseZoom);
     }
 
     /// <summary>カメラシェイクを実行します。</summary>
@@ -225,6 +254,14 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _minFieldOfView = 30f;
     [Tooltip("1秒あたりに変化するズーム率")]
     [SerializeField] private float _zoomSpeed = 3f;
+    [Tooltip("チャージ段階Level1時のズーム率（0で通常視野、1で最大ズーム）")]
+    [SerializeField, Range(0f, 1f)] private float _chargeZoomLevel1 = 1f / 3f;
+    [Tooltip("チャージ段階Level2時のズーム率（0で通常視野、1で最大ズーム）")]
+    [SerializeField, Range(0f, 1f)] private float _chargeZoomLevel2 = 2f / 3f;
+    [Tooltip("チャージ段階Level3時のズーム率（0で通常視野、1で最大ズーム）")]
+    [SerializeField, Range(0f, 1f)] private float _chargeZoomLevel3 = 1f;
+    [Tooltip("チャージ解放（攻撃発動 or キャンセル）時にズームアウトする先のズーム率（0で通常視野）")]
+    [SerializeField, Range(0f, 1f)] private float _chargeReleaseZoom = 0f;
 
     [SerializeField]
     private LockOnController _lockOnController;
@@ -241,6 +278,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private CinemachineInputAxisController _normalInputAxisController;
     private CameraMotionController _cameraMotionController;
     private CameraZoomController _cameraZoomController;
+    private PlayerAttack _playerAttack;
 
     private float _timeScale = 1f;
     private float _basePositionSmoothTime;
@@ -313,6 +351,12 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         if (_lockOnController != null)
         {
             _lockOnController.OnTargetChanged -= HandleTargetChanged;
+        }
+
+        if (_playerAttack != null)
+        {
+            _playerAttack.OnChargeLevelReached -= HandleChargeLevelReached;
+            _playerAttack.OnChargingEnded -= HandleChargingEnded;
         }
 
         if (_gameSettingService != null)

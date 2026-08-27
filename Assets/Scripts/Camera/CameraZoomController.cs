@@ -87,7 +87,7 @@ public sealed class CameraZoomController
 
     private float _currentZoom;
     private float _targetZoom;
-
+    
     private static void SetFieldOfView(CinemachineCamera camera, float fieldOfView)
     {
         LensSettings lens = camera.Lens;
