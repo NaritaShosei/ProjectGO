@@ -1,23 +1,28 @@
 # カメラシステム概要
 
 このフォルダには、通常時の追従カメラ、ロックオンカメラ、カメラシェイク、ロックオンUIを構成するクラスが含まれています。
-カメラの状態管理は `CameraManager` が担当し、カメラの位置・回転計算、ロックオン対象の選定、入力処理は専用クラスへ分離されています。
+ロックオン状態（通常/ロックオン中）の保持と対象の遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当し、`CameraManager` はカメラ参照の初期化、各サブコントローラーの生成・Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定は専用クラスへ分離されています。
+
+> **ドキュメント更新ルール**: クラス間で責務（状態の所有、遷移の実行主体、イベントの発行/購読の向きなど）を移動するリファクタリングを行った場合は、**同じ変更の中で**このドキュメントも更新してください。特に各クラスの担当箇所（`## クラス一覧`）と [参照関係と責務の境界](#参照関係と責務の境界) の表は実装との食い違いが起きやすい箇所です。実装だけ変更してドキュメントを古いまま残すと、後から読む人（人間・AI問わず）が誤った前提でコードを触ってしまいます。
 
 ## クラス一覧
 
 ### CameraManager
 
-カメラシステム全体の実行主体です。`MonoBehaviour` としてシーン上に配置され、次の処理を担当します。
+カメラシステムの初期化・更新統括を担当する`MonoBehaviour`です。シーン上に配置され、次の処理を担当します。
 
-- 通常カメラとロックオンカメラの参照およびPriorityの管理
-- ロックオン対象の保持、ロックオン開始、切り替え、解除
-- ターゲットが無効になった場合や一定距離を超えた場合の自動解除
+- 通常カメラとロックオンカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` によるロックオン時の切り替え
+- `CameraMotionController` / `CameraZoomController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し
+- 毎 `FixedUpdate` での `CameraZoomController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）
+- `CameraController.OnTargetChanged` を `OnLockOnTargetChanged` として中継
+- `PlayerAttack` のチャージ関連イベント（`OnChargeLevelReached` / `OnChargingEnded`）を購読し、`CameraZoomController` のズーム倍率に変換
 - `CameraShake` を使ったカメラシェイクの開始・強制停止
 - ゲーム設定によるカメラ移動速度・回転感度の反映
 - シーン切り替え後のMain Camera再取得
+- 外部から `LockOn` / `Unlock` を呼べる薄い委譲メソッドを提供（実行本体は `CameraController`）
 
 カメラの位置・回転計算と通常カメラへの角度引き継ぎは `CameraMotionController` に委譲します。
-ロックオン対象の「どれを選ぶか」は決めず、`LockOnController` から渡された対象を使って状態を変更します。
+ロックオン状態の保持・遷移、対象の自動解除判定は行わず、`CameraController` に委ねています。
 
 ### CameraMotionController
 
@@ -46,16 +51,17 @@
 
 ### CameraController / LockOnController
 
-`CameraController` はカメラ入力、敵イベント、状態遷移を担当するControllerです。既存Prefabの参照を維持するため、現在のシーン上のコンポーネント型は `LockOnController : CameraController` として残しています。
+`CameraController` は**ロックオン状態と対象の遷移を担当する実行主体**です。`_currentState`（`NormalCameraState` / `LockOnCameraState`）を自身で保持し、`LockOn` / `Unlock` の状態遷移そのものを実行します。既存Prefabの参照を維持するため、現在のシーン上のコンポーネント型は `LockOnController : CameraController` として残しています。
 
+- `_currentState` の保持と `NormalCameraState` / `LockOnCameraState` 間の遷移実行（`LockOn` / `Unlock`）
+- `Tick` 内でロックオン対象の有効性・距離超過を判定し、無効なら自動解除
 - ロックオンボタンによる開始・解除
 - 左右入力によるロックオン対象の切り替え
-- 敵撃破時・敵の強制削除時の次ターゲット選択
-- `LockOnTargetSelector` への対象選定依頼
-- 選定結果に基づく `NormalCameraState` / `LockOnCameraState` の切り替え
+- 敵撃破時・敵の強制削除時の次ターゲット自動選択（`LockOnTargetSelector` への対象選定依頼）
+- 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
 - `InputHandler` と `EnemyManager` のイベント購読・解除
 
-このクラス自身は画面上の位置や距離から候補を比較しません。状態クラスと `CameraMotionController` に処理を委譲し、`CameraManager` には状態変更イベントを通知します。
+このクラス自身は画面上の位置や距離から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。`CameraManager` には状態変更イベントを通知するのみで、逆に `CameraManager` から状態を指図されることはありません。
 
 ### LockOnTargetSelector
 
@@ -120,20 +126,20 @@ flowchart TD
 ## ロックオン開始から解除まで
 
 1. `InputHandler` がロックオン入力イベントを発行します。
-2. `LockOnController` が `LockOnTargetSelector.SelectInitialTarget` を呼び出します。
-3. 選ばれた対象を `CameraManager.LockOn` に渡します。
-4. `CameraManager` が対象を保持し、ロックオンカメラのPriorityを上げてブレンドを開始します。
+2. `LockOnController`（`CameraController`）が `LockOnTargetSelector.SelectInitialTarget` を呼び出します。
+3. `LockOnController` が自身の `LockOn`（`CameraController.LockOn`）を実行し、選ばれた対象を `_lockOnState` に設定して状態を `LockOnCameraState` へ遷移します。
+4. `CameraManager.SetLockOnCameraActive(true)` によりロックオンカメラのPriorityが上がり、ブレンドが開始します。
 5. ブレンド完了後、対象の画面位置に応じてカメラを回転し、プレイヤーを基準に位置を追従します。
-6. 対象の無効化、撃破・削除、または自動解除距離超過が起きると、次対象への切り替えまたは解除を行います。
-7. 解除時は現在のカメラ角度を通常カメラへ引き継ぎ、ロックオンカメラのPriorityを下げます。
+6. `CameraController.Tick` が対象の無効化・自動解除距離超過を検知するか、`EnemyManager` の撃破・強制削除イベントを受けると、次対象への切り替えまたは解除を行います。
+7. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
 
 ## 参照関係と責務の境界
 
 | クラス | 主な責務 | 主な依存先 |
 | --- | --- | --- |
-| `CameraManager` | カメラ状態、切り替え、ライフサイクル | Cinemachine、Player、InputHandler、LockOnController、CameraMotionController |
+| `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraZoomController、PlayerAttack |
 | `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド | Cinemachine、Player、InputHandler |
-| `CameraController` | 入力・敵イベントとカメラ状態の遷移 | InputHandler、EnemyManager、LockOnTargetSelector、CameraManager |
+| `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定 | InputHandler、EnemyManager、LockOnTargetSelector、CameraManager |
 | `LockOnController` | 既存Prefab向けの互換コンポーネント | CameraController |
 | `LockOnTargetSelector` | ロックオン候補の絞り込みと選定 | EnemyManager、Camera、Player |
 | `CameraShake` | Cinemachine Noiseの一時操作 | Cinemachine、UniTask |
