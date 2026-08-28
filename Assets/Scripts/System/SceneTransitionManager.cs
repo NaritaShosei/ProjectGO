@@ -6,7 +6,7 @@ public class SceneTransitionManager : MonoBehaviour
 {
     private const string SystemSceneName = "SystemScene";
 
-    //読み込み時最低でも２秒間ロード画面を見せる
+    //読み込み時最低でも5秒間ロード画面を見せる
     private const float MinimumLoadingDuration = 5f;
     private const float progressSpeed = 1f;
 
@@ -35,6 +35,11 @@ public class SceneTransitionManager : MonoBehaviour
     [SerializeField] private LoadingScreenView _loadingScreen;
     private bool _isTransitioning;
 
+    /// <summary>
+    /// ロード画面を含むシーン遷移処理中かどうか
+    /// </summary>
+    public bool IsTransitioning => _isTransitioning;
+
     private void Awake()
     {
         if (!ServiceLocator.IsRegistered<SceneTransitionManager>())
@@ -57,14 +62,6 @@ public class SceneTransitionManager : MonoBehaviour
     /// <param name="sceneName">遷移先</param>
     private async UniTask LoadSceneAsync(string sceneName)
     {
-        Scene managerScene = gameObject.scene;
-        Scene loadingScreenScene = _loadingScreen.gameObject.scene;
-
-        Debug.Log(
-            $"Manager: {managerScene.name}, " +
-            $"LoadingScreen: {loadingScreenScene.name}");
-
-
         if (_isTransitioning)
         {
             Debug.LogWarning("シーン遷移中に再度遷移が要求されました。");
@@ -77,17 +74,32 @@ public class SceneTransitionManager : MonoBehaviour
             return;
         }
 
+        Scene managerScene = gameObject.scene;
+        Scene loadingScreenScene = _loadingScreen.gameObject.scene;
+
+        Debug.Log(
+            $"Manager: {managerScene.name}, " +
+            $"LoadingScreen: {loadingScreenScene.name}");
+
+
         _isTransitioning = true;
 
         ServiceLocator.TryGet(out InputHandler inputHandler);
 
         bool loadingScreenShown = false;
+        bool gameTimePaused = false;
+        float previousTimeScale = Time.timeScale;
 
         try
         {
             Debug.Log($"{sceneName}へ遷移する");
 
             inputHandler?.EnableInput(false);
+
+            // 遷移先シーンがロードされても、ロード画面を閉じるまでは
+            // 敵・物理・Time.deltaTimeを使うタイマーを進行させない。
+            Time.timeScale = 0f;
+            gameTimePaused = true;
 
             float displayedProgress = 0f;
 
@@ -207,6 +219,11 @@ public class SceneTransitionManager : MonoBehaviour
             }
             finally
             {
+                if (gameTimePaused)
+                {
+                    Time.timeScale = previousTimeScale;
+                }
+
                 inputHandler?.EnableInput(true);
                 _isTransitioning = false;
             }
