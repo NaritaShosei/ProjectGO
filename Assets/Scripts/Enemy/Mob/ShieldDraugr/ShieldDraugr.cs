@@ -5,7 +5,7 @@ public class ShieldDraugr : MobEnemy
 {
     public float CurrentShieldDurability => _currentShieldDurability;
 
-    public float MaxShieldDurability => _shieldDurability;
+    public float MaxShieldDurability => _shieldData.ShieldDurability;
 
     public bool IsShieldBroken => _shieldState == ShieldState.Broken;
 
@@ -13,17 +13,12 @@ public class ShieldDraugr : MobEnemy
     private enum ShieldState { Guarding, Broken }
 
     [Header("盾持ちドラウグル専用パラメータ")]
-    [SerializeField, Tooltip("盾の耐久値")] private float _shieldDurability = 100f;
-    [SerializeField, Range(-1f, 1f), Tooltip("盾で受け止める範囲")] private float _frontalDotThreshold = 0.5f; // 前方約60度以内
+    [SerializeField] private ShieldDraugrData _shieldData;
+
     [SerializeField] private Transform _shieldEffectPoint;
     [SerializeField] private GameObject _shieldObject;
-    [SerializeField, Tooltip("盾破壊時のエフェクト")] private string _shieldBrokenEffect = "shieldBrokenEffect";
-    [SerializeField, Tooltip("盾被ダメージエフェクト")] private string _shieldDamageEffect = "shieldDamageEffect";
-    [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale;
-    [SerializeField, Tooltip("こぶし攻撃の確率"),Range(0f,1f)] private float _fistAttackChance = 0.1f;
-    [SerializeField, Tooltip("こぶし攻撃の抽選間隔（秒）")] private float _fistRerollInterval = 2f;
-    [SerializeField, Tooltip("攻撃後硬直の時間")] private float _postAttackRecoveryDuration = 5f;
-    [SerializeField] private EnemyAttackPattern _fistAttackPattern;
+
+    //[SerializeField] private EnemyAttackPattern _fistAttackPattern;
 
     private float _fistRerollTimer = 0f;
 
@@ -49,7 +44,7 @@ public class ShieldDraugr : MobEnemy
     public override void ReInitialize(Vector3 spawnPosition)
     {
         base.ReInitialize(spawnPosition);
-        _currentShieldDurability = _shieldDurability;
+        _currentShieldDurability = _shieldData.ShieldDurability;
         _shieldState = ShieldState.Guarding;
         _fistRerollTimer = 0f;
 
@@ -61,7 +56,7 @@ public class ShieldDraugr : MobEnemy
     {
         base.RegisterBehaviours(initCtx);
 
-        _postAttackStun = new PostAttackStunBehaviour(_postAttackRecoveryDuration, HandlePostAttackStunExit);
+        _postAttackStun = new PostAttackStunBehaviour(_shieldData.PostAttackRecoveryDuration, HandlePostAttackStunExit);
         _postAttackStun.Init(initCtx);
         _runner.Register(_postAttackStun);
         _attack.OnAttackFinished += HandleAttackFinished;
@@ -141,7 +136,7 @@ public class ShieldDraugr : MobEnemy
         Debug.Log(
     $"[ShieldDraugr] " +
     $"State={_shieldState}, " +
-    $"Shield={_currentShieldDurability}/{_shieldDurability}, " +
+    $"Shield={_currentShieldDurability}/{_shieldData.ShieldDurability}, " +
     $"HP={_stats.CurrentHealth}"
 );
     }
@@ -162,9 +157,9 @@ public class ShieldDraugr : MobEnemy
 
         if (_fistRerollTimer > 0f) return;
 
-        _fistRerollTimer = _fistRerollInterval;
+        _fistRerollTimer = _shieldData.FistRerollInterval;
 
-        if (Random.value < _fistAttackChance)
+        if (Random.value < _shieldData.FistAttackChance)
         {
             // 成功：既にクールダウン中でなければ即攻撃可能にする
             if (AttackCooldownRemaining > 0f) AttackCooldownRemaining = 0f;
@@ -173,7 +168,7 @@ public class ShieldDraugr : MobEnemy
         {
             // 失敗：次のロールまで攻撃をブロックする
             // （SelectedPattern自体は非nullのままなのでApproachは動き続ける）
-            AttackCooldownRemaining = _fistRerollInterval;
+            AttackCooldownRemaining = _shieldData.FistRerollInterval;
         }
     }
 
@@ -182,7 +177,7 @@ public class ShieldDraugr : MobEnemy
         Vector3 toPlayer = _playerTransform.position - transform.position;
         toPlayer.y = 0f;
         toPlayer = toPlayer.normalized;
-        return Vector3.Dot(transform.forward, toPlayer) >= _frontalDotThreshold;
+        return Vector3.Dot(transform.forward, toPlayer) >= _shieldData.FrontalDotThreshold;
     }
 
     private void ApplyShieldDamage(int damage)
@@ -192,7 +187,7 @@ public class ShieldDraugr : MobEnemy
         if(IsShieldBroken)
         {
             //岩を砕くエフェクト通知
-            _effectManager.PlayEffect(_shieldDamageEffect, _shieldEffectPoint.position, _shieldBrokenEffectScale);
+            _effectManager.PlayEffect(_shieldData.ShieldDamageEffect, _shieldEffectPoint.position, _shieldData.ShieldBrokenEffectScale);
         }
 
         if (_currentShieldDurability <= 0f)
@@ -218,7 +213,7 @@ public class ShieldDraugr : MobEnemy
         //盾破壊アニメーション開始
         _enemyAnimator.ShieldBreakTrigger();
         //盾は破壊エフェクト
-        _effectManager.PlayEffect(_shieldBrokenEffect, _shieldEffectPoint.position, _shieldBrokenEffectScale);
+        _effectManager.PlayEffect(_shieldData.ShieldBrokenEffect, _shieldEffectPoint.position, _shieldData.ShieldBrokenEffectScale);
         //盾のモデル非表示
         HideShield();
         //上半身盾構え解除
@@ -258,7 +253,7 @@ public class ShieldDraugr : MobEnemy
             return base.SelectPattern();
         }
 
-        return _fistAttackPattern;
+        return _shieldData.FistAttackPattern;
     }
 
     private void HandleAttackFinished()
