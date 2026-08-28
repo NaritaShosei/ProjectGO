@@ -11,7 +11,7 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 {
-    public async void Play()
+    public async UniTaskVoid Play()
     {
         // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
         StopEffect(restore: true);
