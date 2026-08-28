@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -29,7 +30,8 @@ public class GameManager : MonoBehaviour
         InitUI();
         InitEffect();
         InitEXPManager();
-        StartGame();
+
+        StartGameAfterTransitionAsync().Forget();
     }
 
     private void OnDestroy()
@@ -142,5 +144,41 @@ public class GameManager : MonoBehaviour
             _sequenceManager.StartSequence();
         else
             Debug.LogError("[GameManager] SequenceManager is missing.", this);
+    }
+
+    /// <summary>
+    /// ロード画面のフェードアウトが完了してからゲームを開始する。
+    /// インゲームシーンを直接再生した場合は、遷移中ではないため即座に開始する。
+    /// </summary>
+    private async UniTask StartGameAfterTransitionAsync()
+    {
+        if (!ServiceLocator.TryGet(out SceneTransitionManager transitionManager))
+        {
+            Debug.LogError(
+                "[GameManager] SceneTransitionManager is missing. " +
+                "ゲームの開始を中止します。",
+                this);
+            return;
+        }
+
+        var cancellationToken = this.GetCancellationTokenOnDestroy();
+
+        try
+        {
+            await UniTask.WaitUntil(
+                () => transitionManager == null || !transitionManager.IsTransitioning,
+                cancellationToken: cancellationToken);
+        }
+        catch (System.OperationCanceledException)
+        {
+            return;
+        }
+
+        if (transitionManager == null || cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        StartGame();
     }
 }
