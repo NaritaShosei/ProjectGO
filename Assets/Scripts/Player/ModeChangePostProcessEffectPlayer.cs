@@ -11,6 +11,8 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 {
+    public event Action OnEffectEnabled;
+
     public async UniTaskVoid Play()
     {
         // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
@@ -143,6 +145,12 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
         CacheVolumeComponents();
         InitializeHammerEmission();
+    }
+
+    private void OnEnable()
+    {
+        // Presenter側で、無効中に変更された現在モードへ見た目を同期する。
+        OnEffectEnabled?.Invoke();
     }
 
     private void OnDisable()

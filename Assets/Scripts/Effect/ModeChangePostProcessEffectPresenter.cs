@@ -14,12 +14,14 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
         _previousMode = modeController.CurrentMode;
 
         _modeController.OnModeChanged += OnModeChanged;
+        _effectPlayer.OnEffectEnabled += HandleEffectEnabled;
         _effectPlayer.ChangeHammerEmission(_previousMode, immediate: true);
     }
 
     public void Dispose()
     {
         _modeController.OnModeChanged -= OnModeChanged;
+        _effectPlayer.OnEffectEnabled -= HandleEffectEnabled;
         _effectPlayer.Stop();
     }
 
@@ -34,10 +36,19 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
 
         _previousMode = newMode;
 
+        // Playerが無効な間は状態だけ追跡し、演出の再生やマテリアル操作を行わない。
+        if (!_effectPlayer.isActiveAndEnabled) return;
+
         _effectPlayer.ChangeHammerEmission(newMode);
 
         if (shouldPlay)
             _effectPlayer.Play().Forget();
+    }
+
+    private void HandleEffectEnabled()
+    {
+        _previousMode = _modeController.CurrentMode;
+        _effectPlayer.ChangeHammerEmission(_previousMode, immediate: true);
     }
 
 }
