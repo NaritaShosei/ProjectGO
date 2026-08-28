@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,13 +13,18 @@ public class LoadingScreenView : MonoBehaviour
     /// <returns></returns>
     public async UniTask ShowAsync()
     {
-        SetProgressVisible(false);
         gameObject.SetActive(true);
+
+        _loadingSpinner.SetActive(true);
+
         _canvasGroup.blocksRaycasts = true;
+        SetProgressVisible(false);
 
         await FadeAsync(0f, 1f);
 
         SetProgressVisible(true);
+
+        await UniTask.NextFrame();
     }
 
     /// <summary>
@@ -43,6 +47,7 @@ public class LoadingScreenView : MonoBehaviour
 
         await FadeAsync(1f, 0f);
 
+        _loadingSpinner.SetActive(false);
         _canvasGroup.blocksRaycasts = false;
         gameObject.SetActive(false);
     }
@@ -51,6 +56,7 @@ public class LoadingScreenView : MonoBehaviour
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private Image _progressBar;
     [SerializeField] private float _fadeDuration = 0.25f;
+    [SerializeField] private GameObject _loadingSpinner;
 
     /// <summary>
     /// 表示の切り替え

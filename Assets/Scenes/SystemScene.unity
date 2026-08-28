@@ -320,8 +320,9 @@ GameObject:
   - component: {fileID: 567447116}
   - component: {fileID: 567447118}
   - component: {fileID: 567447117}
+  - component: {fileID: 567447119}
   m_Layer: 5
-  m_Name: Image
+  m_Name: loadingImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -384,6 +385,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 567447115}
   m_CullTransparentMesh: 1
+--- !u!114 &567447119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 567447115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a76dc33374e68734da73a0460a0b67da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LoadingSpinner
+  _image: {fileID: 567447117}
+  _minimumAlpha: 0
+  _maximumAlpha: 1
+  _cycleDuration: 1
 --- !u!1 &1411062484
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,8 +484,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 283554150}
-  - {fileID: 1796786490}
   - {fileID: 567447116}
+  - {fileID: 1796786490}
   m_Father: {fileID: 1797332951}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -491,6 +508,7 @@ MonoBehaviour:
   _canvasGroup: {fileID: 1411062485}
   _progressBar: {fileID: 1796786491}
   _fadeDuration: 1
+  _loadingSpinner: {fileID: 567447115}
 --- !u!1 &1796786489
 GameObject:
   m_ObjectHideFlags: 0
