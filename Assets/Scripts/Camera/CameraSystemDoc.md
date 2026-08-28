@@ -35,12 +35,14 @@
 
 通常カメラとロックオンカメラのField of Viewをまとめて補間するズーム専用クラスです。`CameraManager` が生成し、通常のカメラ追従やロックオン判定とは独立して動作します。
 
-- `SetZoom(0f..1f)`: 通常視野から最大ズームまでを割合で指定
-- `SetZoomLevel(level)`: チャージ段階をズーム率へ変換して指定（各段階の倍率はInspectorの「ズーム設定」で個別に調整可能）
-- `ZoomIn(amount)` / `ZoomOut(amount)`: 現在の目標ズーム率を増減
-- `ResetZoom()`: 通常視野へ戻す
+ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）を表し、FOVは`基準FOV × 倍率`で直接計算されます（補間の中間値は`Lerp`で求めますが、範囲を制限する`_minFieldOfView`のような概念は持ちません）。
 
-例えばチャージ段階の通知箇所では、`cameraManager.SetZoomLevel(level);` と呼び出せます。値の補間は `CameraManager.FixedUpdate` から自動的に実行されます。
+- `SetZoom(zoom, duration)`: FOV倍率を指定。現在値からの距離に関わらず、必ず`duration`秒かけて到達する（距離ベースではなく時間ベースの補間）
+- `SetZoomLevel(level)`: チャージ段階をFOV倍率へ変換して指定。Level2/Level3それぞれの倍率と到達時間はInspectorの「ズーム設定」（`ChargeZoomSetting`）で個別に調整可能。Level1はズームなし固定。実際に倍率を変更した場合`true`を返す
+- `ZoomIn(amount, duration)` / `ZoomOut(amount, duration)`: 現在の目標倍率を増減
+- `ResetZoom(duration = 0f)`: 通常視野（倍率1.0）へ戻す
+
+チャージ解放（攻撃発動 or キャンセル）時は、Level2以上へ実際にズームしていた場合のみ、その時点の倍率からInspectorの`_releaseZoom`（`ReleaseZoomSetting`: オーバーシュート倍率・到達時間・通常視野へ戻る時間）で指定した通り、一旦通常視野を超えてズームアウトしてから通常視野へ戻ります。単押しや未チャージの攻撃では発動しません。攻撃発動タイミングと常に同期するよう、待ちや強制スナップは行いません。値の補間は `CameraManager.FixedUpdate` から自動的に実行されます。
 
 ### CameraController / LockOnController
 
