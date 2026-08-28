@@ -3,10 +3,11 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-public class CountDownTimer : IDisposable
+public class CountDownTimer : IDisposable, ISpeedChange
 {
     public float CurrentTime => _currentTime;
     public float MaxTime => _maxTime;
+    public float TimeScale => _timeScale;
 
     /// <summary> 時間切れイベント</summary>
     public event Action OnTimeEnded;
@@ -16,6 +17,14 @@ public class CountDownTimer : IDisposable
 
     /// <summary>毎フレームの時間更新イベント。引数は（現在時間, 最大時間）</summary>
     public event Action<float, float> OnTimeChanged;
+
+    public CountDownTimer()
+    {
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            hitStopManager.Register(this, HitStopTargetGroup.Time);
+        }
+    }
 
     /// <summary> タイマーを開始</summary>
     public void StartTimer(float maxTime)
@@ -55,15 +64,26 @@ public class CountDownTimer : IDisposable
         _pauseCount = Mathf.Max(0, _pauseCount - 1);
     }
 
+    public void OnSpeedChange(float scale)
+    {
+        _timeScale = Mathf.Max(0f, scale);
+    }
+
     public void Dispose()
     {
         StopTimer();
+
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+        {
+            hitStopManager.Unregister(this, HitStopTargetGroup.Time);
+        }
     }
 
     private float _maxTime;
     private float _currentTime;
 
     private int _pauseCount;
+    private float _timeScale = 1f;
 
     private CancellationTokenSource _timerCts;
 
@@ -80,7 +100,7 @@ public class CountDownTimer : IDisposable
 
                 if (_pauseCount == 0)
                 {
-                    _currentTime = Mathf.Max(0f, _currentTime - Time.deltaTime);
+                    _currentTime = Mathf.Max(0f, _currentTime - Time.deltaTime * _timeScale);
                     OnTimeChanged?.Invoke(_currentTime, _maxTime);
                 }
             }
