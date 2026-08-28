@@ -2,6 +2,90 @@ using Unity.Cinemachine;
 using UnityEngine;
 
 /// <summary>
+/// `CameraMotionController` が依存するカメラ・コンポーネント参照の組。
+/// </summary>
+public readonly struct CameraReferences
+{
+    public readonly CinemachineCamera NormalCamera;
+    public readonly CinemachineCamera LockOnCamera;
+    public readonly CinemachineOrbitalFollow NormalOrbitalFollow;
+    public readonly CinemachineInputAxisController NormalInputAxisController;
+    public readonly Transform PlayerTransform;
+
+    public CameraReferences(
+        CinemachineCamera normalCamera,
+        CinemachineCamera lockOnCamera,
+        CinemachineOrbitalFollow normalOrbitalFollow,
+        CinemachineInputAxisController normalInputAxisController,
+        Transform playerTransform)
+    {
+        NormalCamera = normalCamera;
+        LockOnCamera = lockOnCamera;
+        NormalOrbitalFollow = normalOrbitalFollow;
+        NormalInputAxisController = normalInputAxisController;
+        PlayerTransform = playerTransform;
+    }
+}
+
+/// <summary>通常カメラの入力回転・追従に関する設定値。</summary>
+public readonly struct NormalCameraSettings
+{
+    public readonly Vector2 InputDirection;
+    public readonly float PositionSmoothTime;
+    public readonly Vector2 RotationSpeed;
+
+    public NormalCameraSettings(Vector2 inputDirection, float positionSmoothTime, Vector2 rotationSpeed)
+    {
+        InputDirection = inputDirection;
+        PositionSmoothTime = positionSmoothTime;
+        RotationSpeed = rotationSpeed;
+    }
+}
+
+/// <summary>ロックオンカメラの位置追従・回転追従に関する設定値。</summary>
+public readonly struct LockOnSettings
+{
+    public readonly float CameraDistance;
+    public readonly float CameraHeight;
+    public readonly float AreaRadius;
+    public readonly float PositionSpeed;
+    public readonly float FollowSpeedMin;
+    public readonly float FollowSpeedMax;
+    public readonly float Deadzone;
+
+    public LockOnSettings(
+        float cameraDistance,
+        float cameraHeight,
+        float areaRadius,
+        float positionSpeed,
+        float followSpeedMin,
+        float followSpeedMax,
+        float deadzone)
+    {
+        CameraDistance = cameraDistance;
+        CameraHeight = cameraHeight;
+        AreaRadius = areaRadius;
+        PositionSpeed = positionSpeed;
+        FollowSpeedMin = followSpeedMin;
+        FollowSpeedMax = followSpeedMax;
+        Deadzone = deadzone;
+    }
+}
+
+/// <summary>ロックオン開始時のブレンドに関する設定値。</summary>
+public readonly struct LockOnBlendSettings
+{
+    public readonly float Duration;
+    public readonly float Exponent;
+
+    public LockOnBlendSettings(float duration, float exponent)
+    {
+        Duration = duration;
+        Exponent = exponent;
+    }
+}
+
+/// <summary>
 /// 通常カメラとロックオンカメラの位置・回転更新を担当します。
 /// カメラの状態やロックオン対象の選定は保持しません。
 /// </summary>
@@ -11,41 +95,31 @@ public sealed class CameraMotionController
     /// 通常カメラとロックオンカメラの動作を初期化します。
     /// </summary>
     public CameraMotionController(
-        CinemachineCamera normalCamera,
-        CinemachineCamera lockOnCamera,
-        CinemachineOrbitalFollow normalOrbitalFollow,
-        CinemachineInputAxisController normalInputAxisController,
-        Transform playerTransform,
-        Vector2 cameraInputDirection,
-        float cameraDistance,
-        float cameraHeight,
-        float positionSmoothTime,
-        Vector2 rotationSpeed,
-        float lockOnAreaRadius,
-        float lockOnPositionSpeed,
-        float lockOnFollowSpeedMin,
-        float lockOnFollowSpeedMax,
-        float lockOnDeadzone,
-        float lockOnBlendDuration,
-        float lockOnBlendExponent)
+        CameraReferences references,
+        NormalCameraSettings normalSettings,
+        LockOnSettings lockOnSettings,
+        LockOnBlendSettings blendSettings)
     {
-        _normalCamera = normalCamera;
-        _lockOnCamera = lockOnCamera;
-        _normalOrbitalFollow = normalOrbitalFollow;
-        _normalInputAxisController = normalInputAxisController;
-        _playerTransform = playerTransform;
-        _cameraInputDirection = cameraInputDirection;
-        _cameraDistance = cameraDistance;
-        _cameraHeight = cameraHeight;
-        _positionSmoothTime = positionSmoothTime;
-        _rotationSpeed = rotationSpeed;
-        _lockOnAreaRadius = lockOnAreaRadius;
-        _lockOnPositionSpeed = lockOnPositionSpeed;
-        _lockOnFollowSpeedMin = lockOnFollowSpeedMin;
-        _lockOnFollowSpeedMax = lockOnFollowSpeedMax;
-        _lockOnDeadzone = lockOnDeadzone;
-        _lockOnBlendDuration = lockOnBlendDuration;
-        _lockOnBlendExponent = lockOnBlendExponent;
+        _normalCamera = references.NormalCamera;
+        _lockOnCamera = references.LockOnCamera;
+        _normalOrbitalFollow = references.NormalOrbitalFollow;
+        _normalInputAxisController = references.NormalInputAxisController;
+        _playerTransform = references.PlayerTransform;
+
+        _cameraInputDirection = normalSettings.InputDirection;
+        _positionSmoothTime = normalSettings.PositionSmoothTime;
+        _rotationSpeed = normalSettings.RotationSpeed;
+
+        _cameraDistance = lockOnSettings.CameraDistance;
+        _cameraHeight = lockOnSettings.CameraHeight;
+        _lockOnAreaRadius = lockOnSettings.AreaRadius;
+        _lockOnPositionSpeed = lockOnSettings.PositionSpeed;
+        _lockOnFollowSpeedMin = lockOnSettings.FollowSpeedMin;
+        _lockOnFollowSpeedMax = lockOnSettings.FollowSpeedMax;
+        _lockOnDeadzone = lockOnSettings.Deadzone;
+
+        _lockOnBlendDuration = blendSettings.Duration;
+        _lockOnBlendExponent = blendSettings.Exponent;
 
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
         _cameraFollowTarget.position = _playerTransform.position;
