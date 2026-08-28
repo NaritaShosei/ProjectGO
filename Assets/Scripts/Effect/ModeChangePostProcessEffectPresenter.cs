@@ -37,7 +37,7 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
         _effectPlayer.ChangeHammerEmission(newMode);
 
         if (shouldPlay)
-            _effectPlayer.Play();
+            _effectPlayer.Play().Forget();
     }
 
 }
