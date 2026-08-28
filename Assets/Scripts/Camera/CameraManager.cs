@@ -11,6 +11,31 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class CameraManager : MonoBehaviour, ISpeedChange
 {
+    /// <summary>チャージ段階到達時のFOV倍率と到達時間の組。</summary>
+    [Serializable]
+    private struct ChargeZoomSetting
+    {
+        [Tooltip("到達するFOVの倍率。1で変化なし、0.7なら通常視野の70%まで狭める（ズームイン）")]
+        public float Multiplier;
+        [Tooltip("到達するまでの時間（秒）")]
+        public float Duration;
+    }
+
+    /// <summary>
+    /// チャージ解放時、通常視野を超えて一瞬ズームアウト（オーバーシュート）してから
+    /// 通常視野へ戻るまでの設定。
+    /// </summary>
+    [Serializable]
+    private struct ReleaseZoomSetting
+    {
+        [Tooltip("解放時に一瞬広げるFOVの倍率。1より大きい値。例: 1.1なら通常視野の110%まで広げる")]
+        public float OvershootMultiplier;
+        [Tooltip("オーバーシュートに到達するまでの時間（秒）")]
+        public float OvershootDuration;
+        [Tooltip("オーバーシュート後、通常視野（1.0倍）へ戻るまでの時間（秒）")]
+        public float SettleDuration;
+    }
+
     #region パブリックプロパティ・イベント
 
     /// <summary>メインカメラの参照</summary>
@@ -41,8 +66,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     /// <summary>ロックオンを自動解除する距離を取得します。</summary>
     public float AutoUnlockRange => _autoUnlockRange;
 
-    /// <summary>現在のズーム率。0は通常視野、1は最大ズーム。</summary>
-    public float CurrentZoom => _cameraZoomController?.CurrentZoom ?? 0f;
+    /// <summary>現在のズームFOV倍率。1で通常視野、1未満でズームイン、1より大きい値でズームアウト。</summary>
+    public float CurrentZoom => _cameraZoomController?.CurrentZoom ?? 1f;
 
     /// <summary>ロックオン対象が変更された際の通知</summary>
     public event Action<ILockOnTarget> OnLockOnTargetChanged;
@@ -131,60 +156,76 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _lockOnController?.Unlock();
     }
 
-    /// <summary>ズーム率を設定します。0は通常視野、1は最大ズームです。</summary>
-    public void SetZoom(float zoom)
+    /// <summary>
+    /// ズームのFOV倍率を設定します。1は変化なし、1未満でズームイン、1より大きい値でズームアウトです。
+    /// 現在値からの移動距離に関わらず、必ずduration秒かけて到達します。
+    /// </summary>
+    public void SetZoom(float zoom, float duration)
     {
-        _cameraZoomController?.SetZoom(zoom);
+        _cameraZoomController?.SetZoom(zoom, duration);
     }
 
     /// <summary>
-    /// チャージ段階をズーム率へ変換して設定します。
-    /// 各段階のズーム率はInspectorの「ズーム設定」で個別に調整できます。
+    /// チャージ段階をFOV倍率へ変換して設定します。
+    /// 各段階の倍率・到達時間はInspectorの「ズーム設定」で個別に調整できます。
+    /// Level1はズームなしのため何もしません。
     /// </summary>
-    public void SetZoomLevel(ChargeLevel level)
+    /// <returns>実際にズーム値を変更した場合はtrue。</returns>
+    public bool SetZoomLevel(ChargeLevel level)
     {
-        float zoom = level switch
+        switch (level)
         {
-            ChargeLevel.Level1 => _chargeZoomLevel1,
-            ChargeLevel.Level2 => _chargeZoomLevel2,
-            ChargeLevel.Level3 => _chargeZoomLevel3,
-            _ => 0f,
-        };
-        SetZoom(zoom);
+            case ChargeLevel.Level2:
+                SetZoom(_level2Zoom.Multiplier, _level2Zoom.Duration);
+                return true;
+            case ChargeLevel.Level3:
+                SetZoom(_level3Zoom.Multiplier, _level3Zoom.Duration);
+                return true;
+            default:
+                return false;
+        }
     }
 
-    /// <summary>指定量だけズームインします。</summary>
-    public void ZoomIn(float amount)
+    /// <summary>指定量だけズームインします（倍率を下げます）。</summary>
+    public void ZoomIn(float amount, float duration)
     {
-        _cameraZoomController?.ZoomIn(amount);
+        _cameraZoomController?.ZoomIn(amount, duration);
     }
 
-    /// <summary>指定量だけズームアウトします。</summary>
-    public void ZoomOut(float amount)
+    /// <summary>指定量だけズームアウトします（倍率を上げます）。</summary>
+    public void ZoomOut(float amount, float duration)
     {
-        _cameraZoomController?.ZoomOut(amount);
+        _cameraZoomController?.ZoomOut(amount, duration);
     }
 
-    /// <summary>ズームを通常視野へ戻します。</summary>
-    public void ResetZoom()
+    /// <summary>ズームを通常視野（倍率1.0）へ戻します。</summary>
+    public void ResetZoom(float duration = 0f)
     {
-        _cameraZoomController?.ResetZoom();
+        _cameraZoomController?.ResetZoom(duration);
     }
 
-    /// <summary>チャージ段階の通知を受けてズーム率を変更します。</summary>
+    /// <summary>チャージ段階の通知を受けてズーム倍率を変更します。実際にズームした段階のみ解放時の演出対象とします。</summary>
     private void HandleChargeLevelReached(ChargeLevel level)
     {
         Debug.Log($"[CameraManager] ChargeLevel : {level}");
-        SetZoomLevel(level);
+        if (SetZoomLevel(level))
+            _hasChargedZoom = true;
     }
 
     /// <summary>
-    /// チャージ解放（攻撃発動 or キャンセル）を受けて、解放時点のズーム率から
-    /// Inspectorで指定したズーム率まで少しズームアウトします。
+    /// チャージ解放（攻撃発動 or キャンセル）を受けて、その時点のズーム倍率から
+    /// 一旦通常視野を超えてズームアウトし、その後通常視野へ戻ります。
+    /// 攻撃発動・アニメーションのタイミングと常に同期するよう、待ちや強制スナップは行いません。
+    /// 実際にLevel2以上へズームしていた場合のみ発動し、単押しや未チャージの攻撃では発動しません。
     /// </summary>
     private void HandleChargingEnded()
     {
-        SetZoom(_chargeReleaseZoom);
+        if (!_hasChargedZoom) return;
+        _hasChargedZoom = false;
+
+        _cameraZoomController?.SetZoomSequence(
+            _releaseZoom.OvershootMultiplier, _releaseZoom.OvershootDuration,
+            1f, _releaseZoom.SettleDuration);
     }
 
     /// <summary>カメラシェイクを実行します。</summary>
@@ -250,18 +291,12 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField, Range(1f, 8f)] private float _lockOnBlendExponent = 3f;
 
     [Header("ズーム設定")]
-    [Tooltip("ズーム率1のときに使用するField of View")]
-    [SerializeField] private float _minFieldOfView = 30f;
-    [Tooltip("1秒あたりに変化するズーム率")]
-    [SerializeField] private float _zoomSpeed = 3f;
-    [Tooltip("チャージ段階Level1時のズーム率（0で通常視野、1で最大ズーム）")]
-    [SerializeField, Range(0f, 1f)] private float _chargeZoomLevel1 = 1f / 3f;
-    [Tooltip("チャージ段階Level2時のズーム率（0で通常視野、1で最大ズーム）")]
-    [SerializeField, Range(0f, 1f)] private float _chargeZoomLevel2 = 2f / 3f;
-    [Tooltip("チャージ段階Level3時のズーム率（0で通常視野、1で最大ズーム）")]
-    [SerializeField, Range(0f, 1f)] private float _chargeZoomLevel3 = 1f;
-    [Tooltip("チャージ解放（攻撃発動 or キャンセル）時にズームアウトする先のズーム率（0で通常視野）")]
-    [SerializeField, Range(0f, 1f)] private float _chargeReleaseZoom = 0f;
+    [Tooltip("チャージ段階Level2時のFOV倍率と到達時間（Level1はズームなし固定）")]
+    [SerializeField] private ChargeZoomSetting _level2Zoom = new() { Multiplier = 0.85f, Duration = 0.3f };
+    [Tooltip("チャージ段階Level3時のFOV倍率と到達時間")]
+    [SerializeField] private ChargeZoomSetting _level3Zoom = new() { Multiplier = 0.7f, Duration = 0.25f };
+    [Tooltip("チャージ解放（攻撃発動 or キャンセル）時のオーバーシュート倍率・到達時間・通常視野へ戻るまでの時間")]
+    [SerializeField] private ReleaseZoomSetting _releaseZoom = new() { OvershootMultiplier = 1.1f, OvershootDuration = 0.15f, SettleDuration = 0.35f };
 
     [SerializeField]
     private LockOnController _lockOnController;
@@ -279,6 +314,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private CameraMotionController _cameraMotionController;
     private CameraZoomController _cameraZoomController;
     private PlayerAttack _playerAttack;
+    private bool _hasChargedZoom;
 
     private float _timeScale = 1f;
     private float _basePositionSmoothTime;
@@ -322,9 +358,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         _cameraZoomController = new CameraZoomController(
             _normalCamera,
-            _lockOnCamera,
-            _minFieldOfView,
-            _zoomSpeed);
+            _lockOnCamera);
     }
 
     private void Start()
