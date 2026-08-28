@@ -34,20 +34,22 @@
 - ロックオン解除時の角度を通常カメラへ引き継ぎ
 - ゲーム設定変更後の通常カメラ速度更新
 
+コンストラクタは用途別にまとめた4つの構造体（`CameraReferences` / `NormalCameraSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
+
 ロックオン対象の有効性、距離、現在のロックオン状態は保持せず、`CameraManager` から更新指示と対象Transformを受け取ります。
 
 ### CameraZoomController
 
 通常カメラとロックオンカメラのField of Viewをまとめて補間するズーム専用クラスです。`CameraManager` が生成し、通常のカメラ追従やロックオン判定とは独立して動作します。
 
-ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）を表し、FOVは`基準FOV × 倍率`で直接計算されます（補間の中間値は`Lerp`で求めますが、範囲を制限する`_minFieldOfView`のような概念は持ちません）。
+ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）を表し、FOVは`基準FOV × 倍率`で直接計算されます（補間の中間値のみ`Lerp`を使用）。
 
 - `SetZoom(zoom, duration)`: FOV倍率を指定。現在値からの距離に関わらず、必ず`duration`秒かけて到達する（距離ベースではなく時間ベースの補間）
 - `SetZoomLevel(level)`: チャージ段階をFOV倍率へ変換して指定。Level2/Level3それぞれの倍率と到達時間はInspectorの「ズーム設定」（`ChargeZoomSetting`）で個別に調整可能。Level1はズームなし固定。実際に倍率を変更した場合`true`を返す
 - `ZoomIn(amount, duration)` / `ZoomOut(amount, duration)`: 現在の目標倍率を増減
 - `ResetZoom(duration = 0f)`: 通常視野（倍率1.0）へ戻す
 
-チャージ解放（攻撃発動 or キャンセル）時は、Level2以上へ実際にズームしていた場合のみ、その時点の倍率からInspectorの`_releaseZoom`（`ReleaseZoomSetting`: オーバーシュート倍率・到達時間・通常視野へ戻る時間）で指定した通り、一旦通常視野を超えてズームアウトしてから通常視野へ戻ります。単押しや未チャージの攻撃では発動しません。攻撃発動タイミングと常に同期するよう、待ちや強制スナップは行いません。値の補間は `CameraManager.FixedUpdate` から自動的に実行されます。
+チャージ解放（攻撃発動 or キャンセル）時は、Level2以上へ実際にズームしていた場合のみ、その時点の倍率を起点にInspectorの`_releaseZoom`（`ReleaseZoomSetting`: オーバーシュート倍率・到達時間・通常視野へ戻る時間）で指定した通り、一旦通常視野を超えてズームアウトしてから通常視野へ戻ります。単押しや未チャージの攻撃では発動しません。遷移は常にその時点の実際のズーム倍率を起点に行われるため、攻撃発動タイミングと自然に同期します。値の補間は `CameraManager.FixedUpdate` から自動的に実行されます。
 
 ### CameraController / LockOnController
 
@@ -61,7 +63,7 @@
 - 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
 - `InputHandler` と `EnemyManager` のイベント購読・解除
 
-このクラス自身は画面上の位置や距離から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。`CameraManager` には状態変更イベントを通知するのみで、逆に `CameraManager` から状態を指図されることはありません。
+このクラス自身は画面上の位置や距離から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。状態変更は `CameraManager` へイベント通知のみで伝えます。
 
 ### LockOnTargetSelector
 
@@ -150,6 +152,6 @@ flowchart TD
 
 - シーン上の初期化順に依存するため、`CameraManager.Init(Player)` が呼ばれてからロックオン入力を扱える状態になります。
 - `CameraManager` は通常カメラ、ロックオンカメラ、ロックオンコントローラーの参照が不足すると初期化を中断します。
-- `LockOnController` は `EnemyManager` のイベントを購読するため、破棄時の購読解除が必要です。現在は `OnDestroy` で解除しています。
+- `LockOnController` は `EnemyManager` のイベントを購読するため、`OnDestroy` での購読解除が必要です。
 - `LockOnTargetSelector` は画面判定に `_camera` と `Screen.width` / `Screen.height` を使うため、カメラや画面状態が未準備の場合は正しく選定できません。
 - `LockOnController.cs` はクラス名とファイル名を一致させています。Unityスクリプトをリネームする場合は、既存のMetaファイルのGUIDを維持してください。

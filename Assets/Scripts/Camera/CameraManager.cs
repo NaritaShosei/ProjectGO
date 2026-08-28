@@ -116,23 +116,27 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         }
 
         _cameraMotionController = new CameraMotionController(
-            _normalCamera,
-            _lockOnCamera,
-            _normalOrbitalFollow,
-            _normalInputAxisController,
-            _playerTransform,
-            _cameraInputDirection,
-            _cameraDistance,
-            _cameraHeight,
-            _posSmoothTime,
-            _cameraRotationSpeed,
-            _lockOnAreaRadius,
-            _lockOnPositionSpeed,
-            _lockOnFollowSpeedMin,
-            _lockOnFollowSpeedMax,
-            _lockOnDeadzone,
-            _lockOnBlendDuration,
-            _lockOnBlendExponent);
+            new CameraReferences(
+                _normalCamera,
+                _lockOnCamera,
+                _normalOrbitalFollow,
+                _normalInputAxisController,
+                _playerTransform),
+            new NormalCameraSettings(
+                _cameraInputDirection,
+                _posSmoothTime,
+                _cameraRotationSpeed),
+            new LockOnSettings(
+                _cameraDistance,
+                _cameraHeight,
+                _lockOnAreaRadius,
+                _lockOnPositionSpeed,
+                _lockOnFollowSpeedMin,
+                _lockOnFollowSpeedMax,
+                _lockOnDeadzone),
+            new LockOnBlendSettings(
+                _lockOnBlendDuration,
+                _lockOnBlendExponent));
 
         if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
