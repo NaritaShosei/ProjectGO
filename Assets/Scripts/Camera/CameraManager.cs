@@ -36,6 +36,20 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         public float SettleDuration;
     }
 
+    /// <summary>カメラシェイクを実行します。</summary>
+    public async UniTask ExecutionCameraShake(CameraShakeData data)
+    {
+        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+
+        await _cameraShake.StartCameraShake(camera, data);
+    }
+
+    /// <summary>カメラシェイクを強制停止します。</summary>
+    public void ExecutionForceStopCameraShake()
+    {
+        _cameraShake.ForceStopCameraShake();
+    }
+
     #region パブリックプロパティ・イベント
 
     /// <summary>メインカメラの参照</summary>
@@ -204,14 +218,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraZoomController?.ResetZoom(duration);
     }
 
-    /// <summary>チャージ段階の通知を受けてズーム倍率を変更します。実際にズームした段階のみ解放時の演出対象とします。</summary>
-    private void HandleChargeLevelReached(ChargeLevel level)
-    {
-        Debug.Log($"[CameraManager] ChargeLevel : {level}");
-        if (SetZoomLevel(level))
-            _hasChargedZoom = true;
-    }
-
     /// <summary>
     /// チャージ解放（攻撃発動 or キャンセル）を受けて、その時点のズーム倍率から
     /// 一旦通常視野を超えてズームアウトし、その後通常視野へ戻ります。
@@ -226,20 +232,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraZoomController?.SetZoomSequence(
             _releaseZoom.OvershootMultiplier, _releaseZoom.OvershootDuration,
             1f, _releaseZoom.SettleDuration);
-    }
-
-    /// <summary>カメラシェイクを実行します。</summary>
-    public async UniTask ExecutionCameraShake(CameraShakeData data)
-    {
-        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
-
-        await _cameraShake.StartCameraShake(camera, data);
-    }
-
-    /// <summary>カメラシェイクを強制停止します。</summary>
-    public void ExecutionForceStopCameraShake()
-    {
-        _cameraShake.ForceStopCameraShake();
     }
 
     #endregion
@@ -461,5 +453,13 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private void HandleTargetChanged(ILockOnTarget target)
     {
         OnLockOnTargetChanged?.Invoke(target);
+    }
+
+    /// <summary>チャージ段階の通知を受けてズーム倍率を変更します。実際にズームした段階のみ解放時の演出対象とします。</summary>
+    private void HandleChargeLevelReached(ChargeLevel level)
+    {
+        Debug.Log($"[CameraManager] ChargeLevel : {level}");
+        if (SetZoomLevel(level))
+            _hasChargedZoom = true;
     }
 }
