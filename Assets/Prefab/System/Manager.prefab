@@ -121,6 +121,8 @@ MonoBehaviour:
     _prefab: {fileID: 6100000000000000003, guid: 78da2ac1686b4c58a0bb91038f4e1402, type: 3}
   - _key: "\u96F7\u8EAB\u56DE\u907F"
     _prefab: {fileID: 6943747920440103634, guid: e7853ed4403801b4ba464271b98dd0a0, type: 3}
+  - _key: ModeChangeLightning
+    _prefab: {fileID: 2910567319473781398, guid: e144ad8ee92500d4a8eac9e83de4b802, type: 3}
   _preloadCount: 5
 --- !u!1 &1357235700894819526
 GameObject:
@@ -237,6 +239,8 @@ MonoBehaviour:
     _prefab: {fileID: 8591203655818275640, guid: 4bc654e0962583e42a066d24fc430f90, type: 3}
   - _key: StoneGolem
     _prefab: {fileID: 7301585828367876861, guid: 20c756e0a0e558d4089be8514075d7ae, type: 3}
+  - _key: StoneRing
+    _prefab: {fileID: 6301454005566374680, guid: 9cd39ca24316e3c45945524c4208c5ac, type: 3}
   _enemyParent: {fileID: 7960862723501349768}
   _preloadCount: 10
 --- !u!114 &7246669613523359550
@@ -629,17 +633,19 @@ PlayableDirector:
   m_GameObject: {fileID: 3763728631446097578}
   m_Enabled: 1
   serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: e2ff503f367d73346be60652a30c4811, type: 2}
+  m_PlayableAsset: {fileID: 11400000, guid: 62d955cd5259a884c90cccd088622075, type: 2}
   m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
   m_SceneBindings:
-  - key: {fileID: -1794435989488617269, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+  - key: {fileID: 0}
     value: {fileID: 0}
-  - key: {fileID: -865530541497857565, guid: 3c44121e764069846855708757e33cb5, type: 2}
+  - key: {fileID: -924701566847018241, guid: e2ff503f367d73346be60652a30c4811, type: 2}
     value: {fileID: 0}
-  - key: {fileID: -589648875302120230, guid: e2ff503f367d73346be60652a30c4811, type: 2}
+  - key: {fileID: -2704721151511776627, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -4186302853481468111, guid: 62d955cd5259a884c90cccd088622075, type: 2}
     value: {fileID: 0}
   m_ExposedReferences:
     m_References: []
@@ -777,7 +783,7 @@ MonoBehaviour:
       data:
         _mobBattleTimerView: {fileID: 0}
         _skillSelectTimerView: {fileID: 0}
-        _mobBattleTimeLimit: 120
+        _mobBattleTimeLimit: 240
         _spawnPointSelector: {fileID: 7793837620590366497}
         _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
         _sequenceStatusView: {fileID: 0}
@@ -795,7 +801,7 @@ MonoBehaviour:
     - rid: 6731506274227978450
       type: {class: BossBattleState, ns: , asm: Assembly-CSharp}
       data:
-        _bossBattleTimeLimit: 120
+        _bossBattleTimeLimit: 180
         _bossBattleTimerView: {fileID: 0}
         _sequenceStatusView: {fileID: 0}
         _bossSequenceName: "\u30DC\u30B9\u6226"
@@ -978,6 +984,8 @@ MonoBehaviour:
   _initialSkills:
   - {fileID: 11400000, guid: 9db9e1bd70e031f41a5626e8f99a478b, type: 2}
   - {fileID: 11400000, guid: 17f0b54b73355ad42bb8bbf8cb9311c2, type: 2}
+  - {fileID: 11400000, guid: 2b30f24e3dffae94a800f2fa602e490f, type: 2}
+  - {fileID: 11400000, guid: 8dacb44f80b8e974eaa65be66a1cc336, type: 2}
 --- !u!1 &6966947227818494167
 GameObject:
   m_ObjectHideFlags: 0
@@ -1210,6 +1218,20 @@ MonoBehaviour:
   _autoUnlockRange: 25
   _lockOnBlendDuration: 0.4
   _lockOnBlendExponent: 3
+  _level2Zoom:
+    Multiplier: 0.85
+    Duration: 0.3
+  _level3Zoom:
+    Multiplier: 0.7
+    Duration: 0.25
+  _releaseZoom:
+    OvershootMultiplier: 1.1
+    OvershootDuration: 0.15
+    SettleDuration: 0.35
+  _thunderModeZoom:
+    Multiplier: 0.8
+    ZoomInDuration: 0.04
+    ZoomOutDuration: 0.1
   _lockOnController: {fileID: 7245693978089855125}
 --- !u!114 &1355759329580380758
 MonoBehaviour:
@@ -1290,6 +1312,7 @@ MonoBehaviour:
   _thunderEffectView: {fileID: 0}
   _warriorEffectView: {fileID: 0}
   _levelUpEffectView: {fileID: 700543547462622834}
+  _modeChangeEffectPlayer: {fileID: 0}
 --- !u!1 &8941395912492371511
 GameObject:
   m_ObjectHideFlags: 0
@@ -1417,7 +1440,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: 0
+      value: 0.022014791
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
@@ -1425,7 +1448,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 0
+      value: -0.0007241672
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
@@ -1570,7 +1593,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: -0.29603958
+      value: -0.27402478
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
@@ -1578,7 +1601,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 0.12065983
+      value: 0.11993566
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x

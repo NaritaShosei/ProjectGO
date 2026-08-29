@@ -51,6 +51,51 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         _effectPlayVersion++;
         StopEffect(restore: true);
         StopEmissionChange();
+        CancelColorTint(restoreImmediate: true);
+    }
+
+    /// <summary>
+    /// 通常色 → 演出ピーク色 → 常時色、の順に画面の色味を遷移させ、常時色でホールドする。
+    /// 雷神モードへ切り替わった瞬間に呼ばれる想定。
+    /// </summary>
+    public async UniTaskVoid PlayColorTint()
+    {
+        if (_colorAdjustments == null) return;
+
+        CancellationToken token = RenewTintCts();
+        _colorAdjustments.colorFilter.overrideState = true;
+        Color start = _colorAdjustments.colorFilter.value;
+
+        try
+        {
+            await LerpColorFilter(start, _colorFilterTransitionTint, _colorFilterTransitionDuration, token);
+            await LerpColorFilter(_colorFilterTransitionTint, _colorFilterSustainTint, _colorFilterSettleDuration, token);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    /// <summary>
+    /// 現在の色味から通常色へ戻す。雷神モードが終了した瞬間に呼ばれる想定。
+    /// </summary>
+    public async UniTaskVoid StopColorTint()
+    {
+        if (_colorAdjustments == null) return;
+
+        CancellationToken token = RenewTintCts();
+        Color start = _colorAdjustments.colorFilter.value;
+
+        try
+        {
+            await LerpColorFilter(start, _originalColorFilter, _colorFilterRevertDuration, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        _colorAdjustments.colorFilter.overrideState = _originalColorFilterOverride;
     }
 
     /// <summary>
@@ -114,6 +159,18 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     [Tooltip("エフェクト再生までの遅延時間(秒)。演出のピークに合わせる")]
     [SerializeField] private float _spawnDelay = 0.4f;
 
+    [Header("色味 (雷神モード)")]
+    [Tooltip("モード切替演出中に一瞬強くかける色")]
+    [SerializeField] private Color _colorFilterTransitionTint = new Color(0.6f, 0.85f, 1f);
+    [Tooltip("演出後、雷神モード中に常時うっすらかけ続ける色")]
+    [SerializeField] private Color _colorFilterSustainTint = new Color(0.9f, 0.97f, 1f);
+    [Tooltip("通常色から演出ピーク色へ到達するまでの時間（秒）")]
+    [SerializeField, Min(0.01f)] private float _colorFilterTransitionDuration = 0.3f;
+    [Tooltip("演出ピーク色から常時色へ落ち着くまでの時間（秒）")]
+    [SerializeField, Min(0.01f)] private float _colorFilterSettleDuration = 0.5f;
+    [Tooltip("雷神モード終了時、通常色へ戻るまでの時間（秒）")]
+    [SerializeField, Min(0.01f)] private float _colorFilterRevertDuration = 0.4f;
+
     [Header("マテリアル設定")]
     [SerializeField] private Renderer _hammerRenderer;
     [SerializeField, Min(0f)] private float _changeDuration = 0.5f;
@@ -129,6 +186,9 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     private ColorAdjustments _colorAdjustments;
     private CancellationTokenSource _effectCts;
     private CancellationTokenSource _emissionCts;
+    private CancellationTokenSource _tintCts;
+    private Color _originalColorFilter = Color.white;
+    private bool _originalColorFilterOverride;
     private MaterialPropertyBlock _hammerPropertyBlock;
     private Color _hammerEmissionBaseColor = Color.white;
     private Color _currentHammerEmissionColor;
@@ -178,6 +238,12 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         _volume.profile.TryGet(out _lensDistortion);
         _volume.profile.TryGet(out _bloom);
         _volume.profile.TryGet(out _colorAdjustments);
+
+        if (_colorAdjustments != null)
+        {
+            _originalColorFilter = _colorAdjustments.colorFilter.value;
+            _originalColorFilterOverride = _colorAdjustments.colorFilter.overrideState;
+        }
     }
 
     private async UniTask PlayEffect(CancellationToken token, int playVersion)
@@ -413,6 +479,45 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
         _emissionCts?.Cancel();
         _emissionCts?.Dispose();
         _emissionCts = null;
+    }
+
+    /// <summary>実行中の色味遷移を打ち切り、新しい遷移用のトークンを発行する。</summary>
+    private CancellationToken RenewTintCts()
+    {
+        _tintCts?.Cancel();
+        _tintCts?.Dispose();
+        _tintCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        return _tintCts.Token;
+    }
+
+    /// <summary>実行中の色味遷移を打ち切る。restoreImmediateがtrueなら通常色へ即座に戻す。</summary>
+    private void CancelColorTint(bool restoreImmediate)
+    {
+        _tintCts?.Cancel();
+        _tintCts?.Dispose();
+        _tintCts = null;
+
+        if (restoreImmediate && _colorAdjustments != null)
+        {
+            _colorAdjustments.colorFilter.value = _originalColorFilter;
+            _colorAdjustments.colorFilter.overrideState = _originalColorFilterOverride;
+        }
+    }
+
+    /// <summary>colorFilterをfromからtoへduration秒かけて補間する。</summary>
+    private async UniTask LerpColorFilter(Color from, Color to, float duration, CancellationToken token)
+    {
+        duration = Mathf.Max(0.0001f, duration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            _colorAdjustments.colorFilter.value = Color.Lerp(from, to, Mathf.Clamp01(elapsed / duration));
+            await UniTask.Yield(PlayerLoopTiming.Update, token);
+        }
+
+        _colorAdjustments.colorFilter.value = to;
     }
 
     private struct PostProcessSnapshot
