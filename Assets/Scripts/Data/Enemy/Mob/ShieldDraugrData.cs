@@ -18,7 +18,7 @@ public class ShieldDraugrData : ScriptableObject
     [SerializeField, Range(-1f, 1f), Tooltip("盾で受け止める範囲")] private float _frontalDotThreshold = 0.5f; // 前方約60度以内
     [SerializeField, Tooltip("盾破壊時のエフェクト")] private string _shieldBrokenEffect = "shieldBrokenEffect";
     [SerializeField, Tooltip("盾被ダメージエフェクト")] private string _shieldDamageEffect = "shieldDamageEffect";
-    [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale;
+    [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale = Vector3.one;
     [SerializeField, Tooltip("こぶし攻撃の確率"), Range(0f, 1f)] private float _fistAttackChance = 0.1f;
     [SerializeField, Tooltip("こぶし攻撃の抽選間隔（秒）")] private float _fistRerollInterval = 2f;
     [SerializeField, Tooltip("攻撃後硬直の時間")] private float _postAttackRecoveryDuration = 5f;

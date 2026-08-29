@@ -77,6 +77,16 @@ public class ShieldDraugr : MobEnemy
 
         InvokeOnDamageDealt(damage, isWeakPoint: isBattleGod && appliedToShield, context.IsCritical);
 
+        if (appliedToHp)
+        {
+            InvokeOnHitEffect(
+                new HitEffectContext
+                {
+                    Position = transform.position,
+                    PlayerMode = context.PlayerMode,
+                });
+        }
+
         context.OnHitResult?.Invoke(new HitResult
         {
             IsKill = willKill,
@@ -268,6 +278,7 @@ public class ShieldDraugr : MobEnemy
 
     private void HandlePostAttackStunExit()
     {
+        if (_turn == null) return;
         _turn.SetOverrideDirection(null);
     }
 
