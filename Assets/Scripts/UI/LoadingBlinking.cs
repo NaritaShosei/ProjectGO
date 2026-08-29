@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LoadingSpinner : MonoBehaviour
+public class LoadingBlinking : MonoBehaviour
 {
     [SerializeField]
     private Image _image;

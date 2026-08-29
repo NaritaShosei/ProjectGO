@@ -8,7 +8,12 @@ public class SceneTransitionManager : MonoBehaviour
 
     //読み込み時最低でも5秒間ロード画面を見せる
     private const float MinimumLoadingDuration = 5f;
-    private const float progressSpeed = 1f;
+    private const float ProgressSpeed = 1f;
+
+    /// <summary>
+    /// ロード画面を含むシーン遷移処理中かどうか
+    /// </summary>
+    public bool IsTransitioning => _isTransitioning;
 
     /// <summary>
     /// 任意シーンへ遷移する
@@ -34,11 +39,6 @@ public class SceneTransitionManager : MonoBehaviour
 
     [SerializeField] private LoadingScreenView _loadingScreen;
     private bool _isTransitioning;
-
-    /// <summary>
-    /// ロード画面を含むシーン遷移処理中かどうか
-    /// </summary>
-    public bool IsTransitioning => _isTransitioning;
 
     private void Awake()
     {
@@ -144,7 +144,7 @@ public class SceneTransitionManager : MonoBehaviour
                     displayedProgress = Mathf.MoveTowards(
                         displayedProgress,
                         targetProgress,
-                        progressSpeed * Time.unscaledDeltaTime);
+                        ProgressSpeed * Time.unscaledDeltaTime);
 
                     _loadingScreen.SetProgress(displayedProgress);
 
@@ -189,7 +189,7 @@ public class SceneTransitionManager : MonoBehaviour
                 displayedProgress = Mathf.MoveTowards(
                     displayedProgress,
                     1f,
-                    progressSpeed * Time.unscaledDeltaTime);
+                    ProgressSpeed * Time.unscaledDeltaTime);
 
                 _loadingScreen.SetProgress(displayedProgress);
 

@@ -10,38 +10,6 @@ public class SelectionHighlightController :
     IDeselectHandler,
     IPointerEnterHandler
 {
-    [SerializeField]
-    private GameObject _targetObject;
-
-    [Header("選択時の拡大倍率")]
-    [SerializeField]
-    private Vector2 _highlightScaleMultiplier =
-        new Vector2(1.1f, 1.1f);
-
-    private Vector3 _originalScale;
-    private Vector3 _highlightScale;
-
-    private void Awake()
-    {
-        _originalScale = transform.localScale;
-
-        _highlightScale = new Vector3(
-            _originalScale.x * _highlightScaleMultiplier.x,
-            _originalScale.y * _highlightScaleMultiplier.y,
-            _originalScale.z);
-
-        SetHighlight(false);
-    }
-
-    private void OnEnable()
-    {
-        bool isSelected =
-            EventSystem.current != null &&
-            EventSystem.current.currentSelectedGameObject == gameObject;
-
-        SetHighlight(isSelected);
-    }
-
     /// <summary>
     /// EventSystemでこのボタンが選択された
     /// </summary>
@@ -72,6 +40,38 @@ public class SelectionHighlightController :
         EventSystem.current.SetSelectedGameObject(
             gameObject,
             eventData);
+    }
+
+    [SerializeField]
+    private GameObject _targetObject;
+
+    [Header("選択時の拡大倍率")]
+    [SerializeField]
+    private Vector2 _highlightScaleMultiplier =
+        new Vector2(1.1f, 1.1f);
+
+    private Vector3 _originalScale;
+    private Vector3 _highlightScale;
+
+    private void Awake()
+    {
+        _originalScale = transform.localScale;
+
+        _highlightScale = new Vector3(
+            _originalScale.x * _highlightScaleMultiplier.x,
+            _originalScale.y * _highlightScaleMultiplier.y,
+            _originalScale.z);
+
+        SetHighlight(false);
+    }
+
+    private void OnEnable()
+    {
+        bool isSelected =
+            EventSystem.current != null &&
+            EventSystem.current.currentSelectedGameObject == gameObject;
+
+        SetHighlight(isSelected);
     }
 
     private void SetHighlight(bool isHighlighted)
