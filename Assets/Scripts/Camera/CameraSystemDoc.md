@@ -1,7 +1,7 @@
 # カメラシステム概要
 
 このフォルダには、通常時の追従カメラ、ロックオンカメラ、カメラシェイク、ロックオンUIを構成するクラスが含まれています。
-ロックオン状態（通常/ロックオン中）の保持と対象の遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当し、`CameraManager` はカメラ参照の初期化、各サブコントローラーの生成・Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定は専用クラスへ分離されています。
+ロックオン状態（通常/ロックオン中）の保持と対象の遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当します。`CameraManager` はカメラ参照の初期化、`CameraMotionController` と `CameraZoomController` の生成、シーン上の `LockOnController` の初期化、Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定は専用クラスへ分離されています。
 
 > **ドキュメント更新ルール**: クラス間で責務（状態の所有、遷移の実行主体、イベントの発行/購読の向きなど）を移動するリファクタリングを行った場合は、**同じ変更の中で**このドキュメントも更新してください。特に各クラスの担当箇所（`## クラス一覧`）と [参照関係と責務の境界](#参照関係と責務の境界) の表は実装との食い違いが起きやすい箇所です。実装だけ変更してドキュメントを古いまま残すと、後から読む人（人間・AI問わず）が誤った前提でコードを触ってしまいます。
 
@@ -12,7 +12,8 @@
 カメラシステムの初期化・更新統括を担当する`MonoBehaviour`です。シーン上に配置され、次の処理を担当します。
 
 - 通常カメラとロックオンカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` によるロックオン時の切り替え
-- `CameraMotionController` / `CameraZoomController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し
+- `CameraMotionController` と `CameraZoomController` の生成
+- シーン上で参照する `LockOnController`（`CameraController`）の検証と `Init(...)` による初期化引数の受け渡し
 - 毎 `FixedUpdate` での `CameraZoomController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）
 - `CameraController.OnTargetChanged` を `OnLockOnTargetChanged` として中継
 - `PlayerAttack` のチャージ関連イベント（`OnChargeLevelReached` / `OnChargingEnded`）を購読し、`CameraZoomController` のズーム倍率に変換
