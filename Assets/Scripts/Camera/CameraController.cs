@@ -79,6 +79,15 @@ public class CameraController : MonoBehaviour
         _currentState.Tick(timeScale, _inputHandler.CameraMoveInput);
     }
 
+    /// <summary>ロックオン処理で使用するメインカメラを更新します。</summary>
+    public void SetMainCamera(Camera mainCamera)
+    {
+        if (mainCamera == null) return;
+
+        _lockOnState?.SetMainCamera(mainCamera);
+        _selector?.SetMainCamera(mainCamera);
+    }
+
     /// <summary>指定した対象へロックオンします。</summary>
     public void LockOn(ILockOnTarget target)
     {
