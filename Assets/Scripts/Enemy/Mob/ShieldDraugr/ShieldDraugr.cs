@@ -195,6 +195,8 @@ public class ShieldDraugr : MobEnemy
 
         _shieldState = ShieldState.Broken;
 
+        ClearSelectedPattern();
+
         //盾破壊通知
         InvokeOnArmorBroken();
 

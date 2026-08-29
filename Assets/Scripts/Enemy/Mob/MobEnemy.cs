@@ -257,6 +257,14 @@ public class MobEnemy : Enemy,IFormationParticipant
     }
 
     /// <summary>
+    /// 現在選択されている攻撃パターンを解除する。
+    /// </summary>
+    protected void ClearSelectedPattern()
+    {
+        _context.SelectedPattern = null;
+    }
+
+    /// <summary>
     /// スロット解放・Behaviourの停止を行う。
     /// 死亡時と将来のプール返却時の両方から呼ぶ想定。
     /// </summary>
