@@ -34,6 +34,12 @@ public sealed class LockOnCameraState : ICameraState
         Target = target;
     }
 
+    /// <summary>画面座標の計算に使用するメインカメラを更新します。</summary>
+    public void SetMainCamera(Camera mainCamera)
+    {
+        _mainCamera = mainCamera;
+    }
+
     public void Enter()
     {
         _motionController.BeginLockOnBlend();
@@ -56,7 +62,7 @@ public sealed class LockOnCameraState : ICameraState
     }
 
     private readonly CameraMotionController _motionController;
-    private readonly Camera _mainCamera;
     private readonly Transform _playerTransform;
     private readonly float _autoUnlockRange;
+    private Camera _mainCamera;
 }
