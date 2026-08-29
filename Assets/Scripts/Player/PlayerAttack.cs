@@ -330,6 +330,9 @@ public class PlayerAttack : MonoBehaviour
         _isCharging = false;
         _currentChargeLevel = ChargeLevel.None;
 
+        // 通常チャージとコンボ中チャージのどちらでも、演出側へ終了を必ず通知する。
+        OnChargingEnded?.Invoke();
+
         var input = new AttackInput
         {
             AttackType = AttackType.LightAttack,
@@ -339,7 +342,6 @@ public class PlayerAttack : MonoBehaviour
         // Charging状態のときだけIdleを経由する（コンボ中はAttackingのまま）
         if (_stateManager.CurrentState == PlayerState.Charging)
         {
-            OnChargingEnded?.Invoke();
             _stateManager.ChangeState(PlayerState.Idle);
 
             if (!CanAttack()) return;
@@ -649,9 +651,11 @@ public class PlayerAttack : MonoBehaviour
         _currentChargeLevel = ChargeLevel.None;
         _autoFireTriggered = false;
 
+        // Attacking状態でキャンセルされた場合もチャージ演出を終了できるよう通知する。
+        OnChargingEnded?.Invoke();
+
         if (_stateManager.CurrentState == PlayerState.Charging)
         {
-            OnChargingEnded?.Invoke();
             _stateManager.ChangeState(PlayerState.Idle);
         }
     }

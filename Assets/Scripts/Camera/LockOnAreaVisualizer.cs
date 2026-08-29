@@ -7,6 +7,17 @@ using UnityEngine.UI;
 /// </summary>
 public class LockOnAreaVisualizer : MonoBehaviour
 {
+    /// <summary>
+    /// CameraManagerのロックオンエリア半径をUIの直径へ反映します。
+    /// </summary>
+    public void UpdateAreaSize()
+    {
+        if (_areaImage == null || _cameraManager == null) return;
+
+        float radius = _cameraManager.LockOnAreaRadius;
+        _areaImage.rectTransform.sizeDelta = new Vector2(radius * 2f, radius * 2f);
+    }
+
     [Header("表示設定")]
     [SerializeField] private bool _showArea = true;
     [SerializeField] private Color _normalColor = new Color(1f, 1f, 1f, 0.15f);
@@ -122,17 +133,6 @@ public class LockOnAreaVisualizer : MonoBehaviour
 
         _areaImage.sprite = _circleSprite;
         _lastRadius = -1f; // 強制更新フラグ
-    }
-
-    /// <summary>
-    /// エリアサイズをCameraManagerの値に合わせて更新します。
-    /// </summary>
-    public void UpdateAreaSize()
-    {
-        if (_areaImage == null || _cameraManager == null) return;
-
-        float radius = _cameraManager.LockOnAreaRadius;
-        _areaImage.rectTransform.sizeDelta = new Vector2(radius * 2f, radius * 2f);
     }
 
     private void SetupAreaImage()
