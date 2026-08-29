@@ -282,6 +282,27 @@ public class ShieldDraugr : MobEnemy
         _turn.SetOverrideDirection(null);
     }
 
+    private void SetShieldLayerWeight(float weight)
+    {
+        _shieldAnimationTween?.Kill();
+
+        _animator.SetLayerWeight(ShieldLayerIndex, weight);
+    }
+
+    protected override void HandleSpawnEffect()
+    {
+        base.HandleSpawnEffect();
+
+        SetShieldLayerWeight(0f);
+    }
+
+    public override void  HandleSpawnEnd()
+    {
+        base.HandleSpawnEnd();
+        SetShieldLayerWeight(1f);
+    }
+
+
     private void OnDisable()
     {
         _shieldAnimationTween?.Kill();
