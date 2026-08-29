@@ -1,7 +1,7 @@
 # カメラシステム概要
 
 このフォルダには、通常時の追従カメラ、ロックオンカメラ、カメラシェイク、ロックオンUIを構成するクラスが含まれています。
-ロックオン状態（通常/ロックオン中）の保持と対象の遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当します。`CameraManager` はカメラ参照の初期化、`CameraMotionController` と `CameraZoomController` の生成、シーン上の `LockOnController` の初期化、Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定は専用クラスへ分離されています。
+ロックオン状態（通常/ロックオン中）の保持と対象の遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当し、`CameraManager` はカメラ参照の初期化、各サブコントローラーの生成・Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定、ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火は、それぞれ専用クラスへ分離されています。
 
 > **ドキュメント更新ルール**: クラス間で責務（状態の所有、遷移の実行主体、イベントの発行/購読の向きなど）を移動するリファクタリングを行った場合は、**同じ変更の中で**このドキュメントも更新してください。特に各クラスの担当箇所（`## クラス一覧`）と [参照関係と責務の境界](#参照関係と責務の境界) の表は実装との食い違いが起きやすい箇所です。実装だけ変更してドキュメントを古いまま残すと、後から読む人（人間・AI問わず）が誤った前提でコードを触ってしまいます。
 
@@ -12,18 +12,26 @@
 カメラシステムの初期化・更新統括を担当する`MonoBehaviour`です。シーン上に配置され、次の処理を担当します。
 
 - 通常カメラとロックオンカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` によるロックオン時の切り替え
-- `CameraMotionController` と `CameraZoomController` の生成
-- シーン上で参照する `LockOnController`（`CameraController`）の検証と `Init(...)` による初期化引数の受け渡し
-- 毎 `FixedUpdate` での `CameraZoomController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）
+- `CameraMotionController` / `CameraPresentationController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し
+- 毎 `FixedUpdate` での `CameraPresentationController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）
 - `CameraController.OnTargetChanged` を `OnLockOnTargetChanged` として中継
-- `PlayerAttack` のチャージ関連イベント（`OnChargeLevelReached` / `OnChargingEnded`）を購読し、`CameraZoomController` のズーム倍率に変換
-- `CameraShake` を使ったカメラシェイクの開始・強制停止
 - ゲーム設定によるカメラ移動速度・回転感度の反映
 - シーン切り替え後のMain Camera再取得
-- 外部から `LockOn` / `Unlock` を呼べる薄い委譲メソッドを提供（実行本体は `CameraController`）
+- 外部から `LockOn` / `Unlock` / ズーム操作 / カメラシェイクを呼べる薄い委譲メソッドを提供（実行本体はそれぞれ `CameraController` / `CameraPresentationController`）
 
 カメラの位置・回転計算と通常カメラへの角度引き継ぎは `CameraMotionController` に委譲します。
-ロックオン状態の保持・遷移、対象の自動解除判定は行わず、`CameraController` に委ねています。
+ロックオン状態の保持・遷移、対象の自動解除判定は `CameraController` に、ゲームイベントを受けた演出の発火は `CameraPresentationController` に委ねています。
+
+### CameraPresentationController
+
+ゲームイベント（チャージ、モード変更など）を受けてカメラの演出（ズーム・カメラシェイク）を発火する専用クラスです。`MonoBehaviour` ではなく、プレイヤー初期化時に `CameraManager` が生成します。カメラの参照・Priority・ライフサイクル管理は行わず、演出の発火条件と内容だけを持ちます。
+
+- `PlayerAttack` のチャージ関連イベント（`OnChargeLevelReached` / `OnChargingEnded`）を購読し、`CameraZoomController` のズーム倍率に変換
+- `PlayerModeController.OnModeChanged` を購読し、雷神モードへの切替時に一瞬ズームインしてから戻る演出を発火
+- `CameraShake` を使ったカメラシェイクの開始・強制停止（対象カメラの選択は `CameraManager` が行い、引数として受け取る）
+- `CameraZoomController` を生成・保持し、毎フレームの補間（`Tick`）を実行
+
+`ChargeZoomSetting`（チャージ段階到達時の倍率と到達時間）、`ReleaseZoomSetting`（チャージ解放時のオーバーシュート設定）、`ModeChangeZoomSetting`（モード変更時のズーム設定）はいずれも`CameraPresentationController.cs`内で定義された`[Serializable]`構造体です。Inspector上の実体（`_level2Zoom`等）は`CameraManager`側にフィールドとして持ち、コンストラクタ引数として渡します。
 
 ### CameraMotionController
 
@@ -41,16 +49,17 @@
 
 ### CameraZoomController
 
-通常カメラとロックオンカメラのField of Viewをまとめて補間するズーム専用クラスです。`CameraManager` が生成し、通常のカメラ追従やロックオン判定とは独立して動作します。
+通常カメラとロックオンカメラのField of Viewをまとめて補間するズーム専用クラスです。`CameraPresentationController` が生成し、チャージ段階やモードといったゲーム側の意味は一切知りません。倍率と時間だけを扱う低レベルな補間エンジンです。
 
 ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）を表し、FOVは`基準FOV × 倍率`で直接計算されます（補間の中間値のみ`Lerp`を使用）。
 
 - `SetZoom(zoom, duration)`: FOV倍率を指定。現在値からの距離に関わらず、必ず`duration`秒かけて到達する（距離ベースではなく時間ベースの補間）
-- `SetZoomLevel(level)`: チャージ段階をFOV倍率へ変換して指定。Level2/Level3それぞれの倍率と到達時間はInspectorの「ズーム設定」（`ChargeZoomSetting`）で個別に調整可能。Level1はズームなし固定。実際に倍率を変更した場合`true`を返す
+- `SetZoomSequence(overshootZoom, overshootDuration, settleZoom, settleDuration)`: 目標値へ到達したら続けて次の目標値へ遷移する、2段階のズームを予約する
 - `ZoomIn(amount, duration)` / `ZoomOut(amount, duration)`: 現在の目標倍率を増減
 - `ResetZoom(duration = 0f)`: 通常視野（倍率1.0）へ戻す
+- `Tick(deltaTime)`: 目標倍率へ向けて補間し、カメラのFOVへ反映する。`CameraPresentationController.Tick`から毎フレーム呼ばれる
 
-チャージ解放（攻撃発動 or キャンセル）時は、Level2以上へ実際にズームしていた場合のみ、その時点の倍率を起点にInspectorの`_releaseZoom`（`ReleaseZoomSetting`: オーバーシュート倍率・到達時間・通常視野へ戻る時間）で指定した通り、一旦通常視野を超えてズームアウトしてから通常視野へ戻ります。単押しや未チャージの攻撃では発動しません。遷移は常にその時点の実際のズーム倍率を起点に行われるため、攻撃発動タイミングと自然に同期します。値の補間は `CameraManager.FixedUpdate` から自動的に実行されます。
+チャージ段階（`SetZoomLevel`）・チャージ解放・モード変更をFOV倍率へ変換する判断ロジックは `CameraPresentationController` 側が持ちます。
 
 ### CameraController / LockOnController
 
@@ -94,7 +103,7 @@
 - `ForceStopCameraShake`: 実行中のシェイクをキャンセルし、Noiseの値をゼロに戻す
 - 新しいシェイクを開始すると、実行中のシェイクを停止してから置き換えます
 
-処理時間の待機にはUniTaskとCancellationTokenを使います。`CameraManager` はロックオン状態に応じて通常カメラまたはロックオンカメラを渡します。
+処理時間の待機にはUniTaskとCancellationTokenを使います。`CameraManager` がロックオン状態に応じて通常カメラまたはロックオンカメラを選び、`CameraPresentationController` 経由で渡します。
 
 ### LockOnAreaVisualizer
 
@@ -121,7 +130,11 @@ flowchart TD
     Manager --> Motion[CameraMotionController]
     Motion --> Normal[Cinemachine通常カメラ]
     Motion --> Lock[Cinemachineロックオンカメラ]
-    Manager --> Shake[CameraShake]
+    Manager --> Presentation[CameraPresentationController]
+    PlayerAttack[PlayerAttack] --> Presentation
+    ModeController[PlayerModeController] --> Presentation
+    Presentation --> Zoom[CameraZoomController]
+    Presentation --> Shake[CameraShake]
     Manager --> Area[LockOnAreaVisualizer]
     Manager --> Marker[LockOnMarkerPresenter]
 ```
@@ -140,8 +153,10 @@ flowchart TD
 
 | クラス | 主な責務 | 主な依存先 |
 | --- | --- | --- |
-| `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraZoomController、PlayerAttack |
+| `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraPresentationController |
 | `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド | Cinemachine、Player、InputHandler |
+| `CameraPresentationController` | ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火 | CameraZoomController、CameraShake、PlayerAttack、PlayerModeController |
+| `CameraZoomController` | FOV倍率の時間ベース補間 | Cinemachine |
 | `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定 | InputHandler、EnemyManager、LockOnTargetSelector、CameraManager |
 | `LockOnController` | 既存Prefab向けの互換コンポーネント | CameraController |
 | `LockOnTargetSelector` | ロックオン候補の絞り込みと選定 | EnemyManager、Camera、Player |
