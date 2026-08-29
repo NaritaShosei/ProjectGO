@@ -585,8 +585,10 @@ MonoBehaviour:
   _key: 2
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
-  - {x: -1, y: 0, z: -1}
+  - {x: -2.5, y: 0, z: 2}
+  - {x: 2.5, y: 0, z: 2}
+  - {x: -4, y: 0, z: -1.5}
+  - {x: 4, y: 0, z: -1.5}
 --- !u!1 &3763728631446097578
 GameObject:
   m_ObjectHideFlags: 0
@@ -1290,6 +1292,7 @@ MonoBehaviour:
   _thunderEffectView: {fileID: 0}
   _warriorEffectView: {fileID: 0}
   _levelUpEffectView: {fileID: 700543547462622834}
+  _modeChangeEffectPlayer: {fileID: 0}
 --- !u!1 &8941395912492371511
 GameObject:
   m_ObjectHideFlags: 0

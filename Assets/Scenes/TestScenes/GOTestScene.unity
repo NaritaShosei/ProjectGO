@@ -1444,11 +1444,11 @@ PrefabInstance:
     - target: {fileID: 7793837620590366497, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: '_allSpawnPoints.Array.data[1]'
       value: 
-      objectReference: {fileID: 698462385}
+      objectReference: {fileID: 503124731}
     - target: {fileID: 7793837620590366497, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: '_allSpawnPoints.Array.data[4]'
       value: 
-      objectReference: {fileID: 674848998}
+      objectReference: {fileID: 503124730}
     - target: {fileID: 7822539410125592448, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_InitialState
       value: 0
@@ -1837,11 +1837,30 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 6508732559360190048, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3721311690304933274, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 698462385}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+--- !u!114 &503124730 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5423066343497906226, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+  m_PrefabInstance: {fileID: 503124729}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b548b39de4a40d4c81c88f81ed85d07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
+--- !u!114 &503124731 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1350980116522759186, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+  m_PrefabInstance: {fileID: 503124729}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b548b39de4a40d4c81c88f81ed85d07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
 --- !u!1 &511524225
 GameObject:
   m_ObjectHideFlags: 0
@@ -6628,41 +6647,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!114 &674848998 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5423066343497906226, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-  m_PrefabInstance: {fileID: 503124729}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b548b39de4a40d4c81c88f81ed85d07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
---- !u!1 &698462383 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3721311690304933274, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-  m_PrefabInstance: {fileID: 503124729}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &698462385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 698462383}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b548b39de4a40d4c81c88f81ed85d07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
-  _key: 2
-  _spawnSlots:
-  - {x: 0, y: 0, z: 0}
-  - {x: -2.5, y: 0, z: 2}
-  - {x: 2.5, y: 0, z: 2}
-  - {x: -4, y: 0, z: -1.5}
-  - {x: 4, y: 0, z: -1.5}
 --- !u!114 &712243126 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6505112899809786451, guid: 8f712953bc32d0c4a91a6c1208f06b66, type: 3}
