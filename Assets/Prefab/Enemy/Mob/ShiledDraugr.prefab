@@ -152,11 +152,6 @@ MonoBehaviour:
     _effectKeys:
     - "\u30C6\u30B9\u30C8\u96F7\u30D2\u30C3\u30C8\u30A8\u30D5\u30A7\u30AF\u30C8"
     - "\u30C6\u30B9\u30C8\u8840\u3057\u3076\u304D"
-  - _playerMode: 1
-    _id: "\u93A7\u30D2\u30C3\u30C8"
-    _effectKeys:
-    - "\u30C6\u30B9\u30C8\u706B\u82B1"
-    - "\u30C6\u30B9\u30C8\u5CA9"
 --- !u!114 &6388321239759012407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,6 +263,10 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: 4f833734e11a5224e8c78c997fd095b0, type: 2}
+    - target: {fileID: 5866666021909216657, guid: ade4b9d6de35d974097b2f5405af1ba5, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
