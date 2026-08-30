@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System;
 using UnityEngine.EventSystems;
@@ -20,8 +20,8 @@ public class ModeSelectView : MonoBehaviour
     private Button _inGameModeButton;
     [SerializeField]
     private Button _bossModeButton;
-    [SerializeField]
-    private Button _practiceModeButton;
+    //[SerializeField]
+    //private Button _practiceModeButton;
     [SerializeField]
     private Button _backButton;
 
@@ -29,7 +29,7 @@ public class ModeSelectView : MonoBehaviour
     {
         Debug.Assert(_inGameModeButton != null, "[ModeSelectView] _inGameModeButton が未設定です");
         Debug.Assert(_bossModeButton != null, "[ModeSelectView] _bossModeButton が未設定です");
-        Debug.Assert(_practiceModeButton != null, "[ModeSelectView] _practiceModeButton が未設定です");
+        //Debug.Assert(_practiceModeButton != null, "[ModeSelectView] _practiceModeButton が未設定です");
         Debug.Assert(_backButton != null, "[ModeSelectView] _backButton が未設定です");
     }
 
@@ -38,7 +38,7 @@ public class ModeSelectView : MonoBehaviour
         // ボタンのクリックイベントにリスナーを追加
         _inGameModeButton.onClick.AddListener(() => OnInGameModeButton?.Invoke());
         _bossModeButton.onClick.AddListener(() => OnBossModeButton?.Invoke());
-        _practiceModeButton.onClick.AddListener(() => OnPracticeModeButton?.Invoke());
+        //_practiceModeButton.onClick.AddListener(() => OnPracticeModeButton?.Invoke());
         _backButton.onClick.AddListener(() => OnBackButton?.Invoke());
 
         ShowThisPanel();
@@ -49,7 +49,7 @@ public class ModeSelectView : MonoBehaviour
         // ボタンのクリックイベントからリスナーを削除
         _inGameModeButton.onClick.RemoveAllListeners();
         _bossModeButton.onClick.RemoveAllListeners();
-        _practiceModeButton.onClick.RemoveAllListeners();
+        //_practiceModeButton.onClick.RemoveAllListeners();
         _backButton.onClick.RemoveAllListeners();
     }
 }
