@@ -35,6 +35,10 @@ public interface IEnemyAnimator
     public event Action OnSpawnEffect;
     /// <summary>スポーンアニメーション終了イベント</summary>
     public event Action OnSpawnEnd;
+    /// <summary>盾破壊開始イベント</summary>
+    public event Action OnShieldBreakStart;
+
+    public event Action OnShieldBlockHitStart;
 
     /// <summary>移動速度を設定する（Idle / Move の切り替えに使用）</summary>
     public void SetSpeed(float speed);
@@ -56,6 +60,8 @@ public interface IEnemyAnimator
     public void SetDown(bool value);
 
     public void DownTrigger();
+    public void ShieldBreakTrigger();
+    public void ShieldBlockHitTrigger();
 }
 
 /// <summary>
@@ -80,6 +86,8 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public event Action OnWeaponSwing;
     public event Action OnSpawnEffect;
     public event Action OnSpawnEnd;
+    public event Action OnShieldBreakStart;
+    public event Action OnShieldBlockHitStart;
 #pragma warning restore CS0067
 
     public void SetSpeed(float speed) { }
@@ -92,4 +100,6 @@ public sealed class NullEnemyAnimator : IEnemyAnimator
     public void Dispose() { }
     public void SetDown(bool value){ }
     public void DownTrigger() { }
+    public void ShieldBreakTrigger() { }
+    public void ShieldBlockHitTrigger() { }
 }
