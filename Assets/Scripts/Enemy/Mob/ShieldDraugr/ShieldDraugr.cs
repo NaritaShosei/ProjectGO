@@ -104,6 +104,12 @@ public class ShieldDraugr : MobEnemy
         }
     }
 
+    public override void HandleSpawnEnd()
+    {
+        base.HandleSpawnEnd();
+        SetShieldLayerWeight(1f);
+    }
+
     private enum ShieldState { Guarding, Broken }
 
     [Header("盾持ちドラウグル専用パラメータ")]
@@ -296,11 +302,7 @@ public class ShieldDraugr : MobEnemy
         SetShieldLayerWeight(0f);
     }
 
-    public override void  HandleSpawnEnd()
-    {
-        base.HandleSpawnEnd();
-        SetShieldLayerWeight(1f);
-    }
+
 
 
     private void OnDisable()
