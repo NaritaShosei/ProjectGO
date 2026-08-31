@@ -4,7 +4,7 @@ using System.Threading;
 using UnityEngine;
 
 // BossEnemy関連
-using BossEnemy.Model.System;
+using BossEnemy.Model.Attack;
 
 namespace BossEnemy.View.SMB
 {

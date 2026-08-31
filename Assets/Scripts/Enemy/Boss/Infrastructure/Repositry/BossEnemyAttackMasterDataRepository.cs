@@ -106,7 +106,7 @@ namespace BossEnemy.Infrastructure.Repository
                 float.Parse(attackDataStrings[7]),
                 float.Parse(attackDataStrings[8]),
                 float.Parse(attackDataStrings[9]),
-                float.Parse(attackDataStrings[10]),
+                int.Parse(attackDataStrings[10]),
                 float.Parse(attackDataStrings[11]),
                 attackDataStrings[12]
             );
