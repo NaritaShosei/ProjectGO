@@ -31,7 +31,9 @@ public class ShieldDraugr : MobEnemy
         if (_isDead || !CanTakeDamage) return;
 
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
-        bool isBattleGod = context.PlayerMode == PlayerMode.Warrior;
+        bool isWarrior = context.PlayerMode == PlayerMode.Warrior;
+        bool isThunder = context.PlayerMode == PlayerMode.Thunder;
+        bool canDamageShield = isWarrior || isThunder;
         bool isFrontal = IsFrontalHit();
 
         bool appliedToHp = false;
@@ -47,7 +49,7 @@ public class ShieldDraugr : MobEnemy
         }
         else if (isFrontal)
         {
-            if (isBattleGod)
+            if (canDamageShield)
             {
                 Debug.Log("盾にダメージ");
                 ApplyShieldDamage(damage);
@@ -75,7 +77,33 @@ public class ShieldDraugr : MobEnemy
 
         bool willKill = appliedToHp && _stats.CurrentHealth <= 0;
 
-        InvokeOnDamageDealt(damage, isWeakPoint: isBattleGod && appliedToShield, context.IsCritical);
+
+        if (appliedToShield)
+        {
+            if (isWarrior)
+            {
+                InvokeOnDamageDealt(
+               damage,
+               isWeakPoint: false,
+               context.IsCritical);
+            }
+            else if (isThunder)
+            {
+                InvokeOnDamageDealt(
+                    0,
+                    isWeakPoint: false,
+                    context.IsCritical);
+            }
+
+        }
+        else if(appliedToHp)
+        {
+            // 生身：通常通りダメージを表示
+            InvokeOnDamageDealt(
+                damage,
+                isWeakPoint: isWarrior || isThunder,
+                context.IsCritical);
+        }
 
         if (appliedToHp)
         {
@@ -87,13 +115,14 @@ public class ShieldDraugr : MobEnemy
                 });
         }
 
-        context.OnHitResult?.Invoke(new HitResult
-        {
-            IsKill = willKill,
-            IsArmorBreak = didBreakThisHit,
-            IsWeakPoint = isBattleGod && appliedToShield,
-            IsArmorHit = appliedToShield,
-        });
+            context.OnHitResult?.Invoke(new HitResult
+            {
+                IsKill = willKill,
+                IsArmorBreak = didBreakThisHit,
+                IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
+                IsArmorHit = appliedToShield,
+            });
+
 
         if (appliedToHp && !willKill) InvokeOnDamaged();
 
@@ -301,9 +330,6 @@ public class ShieldDraugr : MobEnemy
 
         SetShieldLayerWeight(0f);
     }
-
-
-
 
     private void OnDisable()
     {
