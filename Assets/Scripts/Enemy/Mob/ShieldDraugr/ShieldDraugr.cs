@@ -33,13 +33,13 @@ public class ShieldDraugr : MobEnemy
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
         bool isWarrior = context.PlayerMode == PlayerMode.Warrior;
         bool isThunder = context.PlayerMode == PlayerMode.Thunder;
-        bool canDamageShield = isWarrior;
         bool isFrontal = IsFrontalHit();
 
         bool appliedToHp = false;
         bool appliedToShield = false;
         bool didBreakThisHit = false;
         bool wasBlocked = false;
+        bool isThunderArmorHit = false;
 
         if (_shieldState == ShieldState.Broken)
         {
@@ -66,6 +66,11 @@ public class ShieldDraugr : MobEnemy
                 Debug.Log("正面につきダメージ無効");
                 wasBlocked = true;
                 _enemyAnimator.ShieldBlockHitTrigger();
+
+                if (isThunder)
+                {
+                    isThunderArmorHit = true;
+                }
             }
         }
         else
@@ -77,7 +82,7 @@ public class ShieldDraugr : MobEnemy
 
         bool willKill = appliedToHp && _stats.CurrentHealth <= 0;
 
-
+        //ダメージ表記
         if (appliedToShield)
         {
             // 闘神：盾への実ダメージを表示
@@ -86,7 +91,7 @@ public class ShieldDraugr : MobEnemy
                 isWeakPoint: false,
                 context.IsCritical);
         }
-        else if(appliedToHp)
+        else if (appliedToHp)
         {
             // 生身：通常通りダメージを表示
             InvokeOnDamageDealt(
@@ -113,13 +118,13 @@ public class ShieldDraugr : MobEnemy
                 });
         }
 
-            context.OnHitResult?.Invoke(new HitResult
-            {
-                IsKill = willKill,
-                IsArmorBreak = didBreakThisHit,
-                IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
-                IsArmorHit = appliedToShield && !didBreakThisHit,
-            });
+        context.OnHitResult?.Invoke(new HitResult
+        {
+            IsKill = willKill,
+            IsArmorBreak = didBreakThisHit,
+            IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
+            IsArmorHit = (appliedToShield && !didBreakThisHit) || isThunderArmorHit,
+        });
 
 
         if (appliedToHp && !willKill) InvokeOnDamaged();
@@ -155,11 +160,21 @@ public class ShieldDraugr : MobEnemy
     private float _shieldAnimationBlendDuration = 0.3f;
 
     private Tween _shieldAnimationTween;
+    private PostAttackStunBehaviour _postAttackStun;
     private EffectManager _effectManager;
 
     protected override void RegisterBehaviours(BehaviourInitContext initCtx)
     {
         base.RegisterBehaviours(initCtx);
+
+        _postAttackStun = new PostAttackStunBehaviour(_shieldData.PostAttackRecoveryDuration, HandlePostAttackStunExit);
+        _postAttackStun.Init(initCtx);
+        _runner.Register(_postAttackStun);
+
+        if (_attack != null)
+        {
+            _attack.OnAttackFinished += HandleAttackFinished;
+        }
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -204,7 +219,7 @@ public class ShieldDraugr : MobEnemy
     {
         _currentShieldDurability = Mathf.Max(0f, _currentShieldDurability - damage);
 
-        if(!IsShieldBroken)
+        if (!IsShieldBroken)
         {
             //岩を砕くエフェクト通知
             _effectManager.PlayEffect(_shieldData.ShieldDamageEffect, _shieldEffectPoint.position, _shieldData.ShieldBrokenEffectScale);
@@ -215,7 +230,7 @@ public class ShieldDraugr : MobEnemy
             BreakShield();
         }
 
-       
+
     }
 
     /// <summary>
@@ -247,6 +262,7 @@ public class ShieldDraugr : MobEnemy
 
         // 現在のBehaviourを終了
         _runner.ForceExitAction();
+        Debug.Log("[ShieldDraugr] Shield Broken!");
     }
 
     /// <summary>
@@ -282,8 +298,10 @@ public class ShieldDraugr : MobEnemy
         return _shieldData.FistAttackPattern;
     }
 
-    protected override void OnBeforePostAttackStun()
+    private void HandleAttackFinished()
     {
+        if (IsShieldBroken) return;
+
         if (_turn != null)
         {
             _turn.SetOverrideDirection(transform.forward);
@@ -292,16 +310,14 @@ public class ShieldDraugr : MobEnemy
         {
             Debug.LogWarning($"{nameof(ShieldDraugr)}: TurnBehaviourが未登録です");
         }
+
+        _runner.ForceBehaviour(_postAttackStun);
     }
 
-    protected override void OnPostAttackStunExit()
+    private void HandlePostAttackStunExit()
     {
-        base.OnPostAttackStunExit(); 
-
-        if (_turn != null)
-        {
-            _turn.SetOverrideDirection(null);
-        }
+        if (_turn == null) return;
+        _turn.SetOverrideDirection(null);
     }
 
     private void SetShieldLayerWeight(float weight)
@@ -325,5 +341,10 @@ public class ShieldDraugr : MobEnemy
     protected override void OnDestroy()
     {
         base.OnDestroy();
+
+        if (_attack != null)
+        {
+            _attack.OnAttackFinished -= HandleAttackFinished;
+        }
     }
 }
