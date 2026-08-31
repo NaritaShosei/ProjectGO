@@ -6,7 +6,7 @@ using UnityEngine;
 using BossEnemy.Model.Interface;
 using BossEnemy.Data;
 using BossEnemy.Enum;
-using BossEnemy.Model.System;
+using BossEnemy.Model.Attack;
 #endregion
 
 namespace BossEnemy.Model.BehaviorTree
