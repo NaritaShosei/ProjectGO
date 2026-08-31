@@ -4,7 +4,7 @@ using UniRx;
 using UnityEngine;
 
 #region BossEnemy関連
-using BossEnemy.Model.System;
+using BossEnemy.Model.Attack;
 using BossEnemy.Model.Interface;
 using BossEnemy.View.SMB;
 using BossEnemy.Application;

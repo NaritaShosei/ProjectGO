@@ -5,8 +5,8 @@ using UniRx;
 using BossEnemy.Data;
 using BossEnemy.Enum;
 using BossEnemy.Model.Interface;
-using BossEnemy.Model.System;
-using BossEnemy.Model.System.Logic;
+using BossEnemy.Model.Attack;
+using BossEnemy.Model.Logic;
 # endregion
 
 namespace BossEnemy.Model.BehaviorTree

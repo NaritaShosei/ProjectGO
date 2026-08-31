@@ -380,7 +380,7 @@ namespace BossEnemy.Data
     {
         public BossEnemyAttackData(
             int id, string name, float attackChargeTime, float attackDuration, float recoveryTime, float attackAreaEffectStartTime,
-            float damage, float attackRange, float attackHitAreaCenterDistance, float attackStartDistance, float nockBackPower, float coolTime, string animParam)
+            float damage, float attackRange, float attackHitAreaCenterDistance, float attackStartDistance, int knockBackPower, float coolTime, string animParam)
         {
             _attackID = id;
             _attackName = name;
@@ -392,7 +392,7 @@ namespace BossEnemy.Data
             _attackRange = attackRange;
             _attackHitAreaCenterDistance = attackHitAreaCenterDistance;
             _attackStartDistance = attackStartDistance;
-            _nockBackPower = nockBackPower;
+            _knockBackPower = knockBackPower;
             _coolTime = coolTime;
             _animParamName = animParam;
         }
@@ -418,7 +418,7 @@ namespace BossEnemy.Data
         /// <summary> 攻撃を開始する距離(どこからでも届く場合は0) </summary>
         public float AttackStartDistance => _attackStartDistance;
         /// <summary> ノックバックする力 </summary>
-        public float NockBackPower => _nockBackPower;
+        public int KnockBackPower => _knockBackPower;
         /// <summary> 攻撃のクールタイム </summary>
         public float CoolTime => _coolTime;
         /// <summary> アニメーションのパラメータ名 </summary>
@@ -455,7 +455,7 @@ namespace BossEnemy.Data
         private float _attackStartDistance;
 
         // ノックバックする力
-        private float _nockBackPower;
+        private int _knockBackPower;
 
         // スキルのクールタイム
         private float _coolTime;
