@@ -33,13 +33,13 @@ public class ShieldDraugr : MobEnemy
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
         bool isWarrior = context.PlayerMode == PlayerMode.Warrior;
         bool isThunder = context.PlayerMode == PlayerMode.Thunder;
-        bool canDamageShield = isWarrior;
         bool isFrontal = IsFrontalHit();
 
         bool appliedToHp = false;
         bool appliedToShield = false;
         bool didBreakThisHit = false;
         bool wasBlocked = false;
+        bool isThunderArmorHit = false;
 
         if (_shieldState == ShieldState.Broken)
         {
@@ -66,6 +66,11 @@ public class ShieldDraugr : MobEnemy
                 Debug.Log("正面につきダメージ無効");
                 wasBlocked = true;
                 _enemyAnimator.ShieldBlockHitTrigger();
+
+                if (isThunder)
+                {
+                    isThunderArmorHit = true;
+                }
             }
         }
         else
@@ -77,7 +82,7 @@ public class ShieldDraugr : MobEnemy
 
         bool willKill = appliedToHp && _stats.CurrentHealth <= 0;
 
-
+        //ダメージ表記
         if (appliedToShield)
         {
             // 闘神：盾への実ダメージを表示
@@ -86,7 +91,7 @@ public class ShieldDraugr : MobEnemy
                 isWeakPoint: false,
                 context.IsCritical);
         }
-        else if(appliedToHp)
+        else if (appliedToHp)
         {
             // 生身：通常通りダメージを表示
             InvokeOnDamageDealt(
@@ -113,13 +118,13 @@ public class ShieldDraugr : MobEnemy
                 });
         }
 
-            context.OnHitResult?.Invoke(new HitResult
-            {
-                IsKill = willKill,
-                IsArmorBreak = didBreakThisHit,
-                IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
-                IsArmorHit = appliedToShield && !didBreakThisHit,
-            });
+        context.OnHitResult?.Invoke(new HitResult
+        {
+            IsKill = willKill,
+            IsArmorBreak = didBreakThisHit,
+            IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
+            IsArmorHit = (appliedToShield && !didBreakThisHit) || isThunderArmorHit,
+        });
 
 
         if (appliedToHp && !willKill) InvokeOnDamaged();
@@ -214,7 +219,7 @@ public class ShieldDraugr : MobEnemy
     {
         _currentShieldDurability = Mathf.Max(0f, _currentShieldDurability - damage);
 
-        if(!IsShieldBroken)
+        if (!IsShieldBroken)
         {
             //岩を砕くエフェクト通知
             _effectManager.PlayEffect(_shieldData.ShieldDamageEffect, _shieldEffectPoint.position, _shieldData.ShieldBrokenEffectScale);
@@ -225,7 +230,7 @@ public class ShieldDraugr : MobEnemy
             BreakShield();
         }
 
-       
+
     }
 
     /// <summary>
@@ -297,7 +302,7 @@ public class ShieldDraugr : MobEnemy
     {
         if (IsShieldBroken) return;
 
-        if(_turn != null)
+        if (_turn != null)
         {
             _turn.SetOverrideDirection(transform.forward);
         }
