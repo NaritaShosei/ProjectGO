@@ -118,7 +118,7 @@ public class ShieldDraugr : MobEnemy
                 IsKill = willKill,
                 IsArmorBreak = didBreakThisHit,
                 IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
-                IsArmorHit = appliedToShield,
+                IsArmorHit = appliedToShield && !didBreakThisHit,
             });
 
 
