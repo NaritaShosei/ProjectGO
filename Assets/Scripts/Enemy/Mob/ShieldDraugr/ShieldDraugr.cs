@@ -33,7 +33,7 @@ public class ShieldDraugr : MobEnemy
         int damage = DamageSystem.CalculateDamage(context, _defenceContext);
         bool isWarrior = context.PlayerMode == PlayerMode.Warrior;
         bool isThunder = context.PlayerMode == PlayerMode.Thunder;
-        bool canDamageShield = isWarrior || isThunder;
+        bool canDamageShield = isWarrior;
         bool isFrontal = IsFrontalHit();
 
         bool appliedToHp = false;
@@ -49,7 +49,7 @@ public class ShieldDraugr : MobEnemy
         }
         else if (isFrontal)
         {
-            if (canDamageShield)
+            if (isWarrior)
             {
                 Debug.Log("盾にダメージ");
                 ApplyShieldDamage(damage);
@@ -80,21 +80,11 @@ public class ShieldDraugr : MobEnemy
 
         if (appliedToShield)
         {
-            if (isWarrior)
-            {
-                InvokeOnDamageDealt(
-               damage,
-               isWeakPoint: false,
-               context.IsCritical);
-            }
-            else if (isThunder)
-            {
-                InvokeOnDamageDealt(
-                    0,
-                    isWeakPoint: false,
-                    context.IsCritical);
-            }
-
+            // 闘神：盾への実ダメージを表示
+            InvokeOnDamageDealt(
+                damage,
+                isWeakPoint: false,
+                context.IsCritical);
         }
         else if(appliedToHp)
         {
@@ -102,6 +92,14 @@ public class ShieldDraugr : MobEnemy
             InvokeOnDamageDealt(
                 damage,
                 isWeakPoint: isWarrior || isThunder,
+                context.IsCritical);
+        }
+        else if (isThunder && isFrontal)
+        {
+            // 雷神：盾にはダメージを与えないが、0ダメージを表示
+            InvokeOnDamageDealt(
+                0,
+                isWeakPoint: false,
                 context.IsCritical);
         }
 
