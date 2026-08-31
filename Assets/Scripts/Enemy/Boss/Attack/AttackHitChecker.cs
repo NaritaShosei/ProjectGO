@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Model.System
+namespace BossEnemy.Model.Attack
 {
     public class AttackHitChecker
     {
