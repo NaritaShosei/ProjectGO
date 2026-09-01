@@ -29,12 +29,13 @@ public class SequenceStatusView : MonoBehaviour, ISequenceStatusView
         _waveText.text = $"{_progressLabel}{current}";
     }
 
-    public void ClearProgress()
+    public void ClearText()
     {
-        if (_waveText == null)
-            return;
+        if (_sequenceNameText != null)
+            _sequenceNameText.text = string.Empty;
 
-        _waveText.text = string.Empty;
+        if (_waveText != null)
+            _waveText.text = string.Empty;
     }
 
     [Header("Text References")]
