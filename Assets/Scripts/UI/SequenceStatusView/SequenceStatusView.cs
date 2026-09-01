@@ -15,32 +15,28 @@ public class SequenceStatusView : MonoBehaviour, ISequenceStatusView
 
     public void SetSequenceName(string sequenceName)
     {
-        if (_sequenceNameText == null)
+        if (_statusText == null)
             return;
 
-        _sequenceNameText.text = sequenceName;
+        _statusText.text = sequenceName;
     }
 
     public void SetProgress(int current)
     {
-        if (_waveText == null)
+        if (_statusText == null)
             return;
 
-        _waveText.text = $"{_progressLabel}{current}";
+        _statusText.text = $"{_progressLabel}{current}";
     }
 
     public void ClearText()
     {
-        if (_sequenceNameText != null)
-            _sequenceNameText.text = string.Empty;
-
-        if (_waveText != null)
-            _waveText.text = string.Empty;
+        if (_statusText != null)
+            _statusText.text = string.Empty;
     }
 
     [Header("Text References")]
-    [SerializeField] private TextMeshProUGUI _sequenceNameText;
-    [SerializeField] private TextMeshProUGUI _waveText;
+    [SerializeField] private TextMeshProUGUI _statusText;
 
     [Header("Display")]
     [SerializeField] private string _progressLabel = "Wave ";
