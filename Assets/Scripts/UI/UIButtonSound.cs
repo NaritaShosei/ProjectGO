@@ -24,7 +24,15 @@ public class UIButtonSound : MonoBehaviour, ISelectHandler, IPointerEnterHandler
         PlayCursorMoveSound();
     }
 
+    [SerializeField] private ButtonConfirmSoundType _buttonConfirmSoundType = ButtonConfirmSoundType.Confirm;
+
     private Button _button;
+
+    private enum ButtonConfirmSoundType
+    {
+        Confirm = 0,
+        SkillSelectAppear = 1
+    }
 
     private void Awake()
     {
@@ -50,6 +58,14 @@ public class UIButtonSound : MonoBehaviour, ISelectHandler, IPointerEnterHandler
 
     private void PlayConfirmSound()
     {
-        Sound.PlaySE(gameObject, SoundCueNames.UI.Confirm, CueSheetType.UI);
+        switch (_buttonConfirmSoundType)
+        {
+            case ButtonConfirmSoundType.Confirm:
+                Sound.PlaySE(gameObject, SoundCueNames.UI.Confirm, CueSheetType.UI);
+                break;
+            case ButtonConfirmSoundType.SkillSelectAppear:
+                Sound.PlaySE(gameObject, SoundCueNames.UI.SkillSelectAppear, CueSheetType.UI);
+                break;
+        }
     }
 }
