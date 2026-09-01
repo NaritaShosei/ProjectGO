@@ -2,7 +2,7 @@ using UnityEngine;
 
 #region BossEnemy関連のusing
 using BossEnemy.Data;
-using BossEnemy.Model.System.Logic;
+using BossEnemy.Model.Logic;
 #endregion
 
 namespace BossEnemy.Model.BehaviorTree

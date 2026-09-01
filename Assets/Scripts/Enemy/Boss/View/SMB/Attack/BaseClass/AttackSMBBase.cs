@@ -3,7 +3,7 @@ using UnityEngine;
 // BossEnemy関連
 using BossEnemy.Data;
 using BossEnemy.Model.Interface;
-using BossEnemy.Model.System;
+using BossEnemy.Model.Attack;
 using Cysharp.Threading.Tasks;
 
 namespace BossEnemy.View.SMB
