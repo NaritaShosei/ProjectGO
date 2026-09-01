@@ -32,7 +32,7 @@ public class MobAndSkillState : ISequenceState
             _skillSelectTimerPresenter = new CountDownTimerPresenter(_skillSelectTimer, _skillSelectTimerView);
 
         if (_sequenceStatusView != null)
-            _sequenceStatusPresenter = new SequenceStatusPresenter(_sequenceStatusView, _mobSequenceName);
+            _sequenceStatusPresenter = new SequenceStatusPresenter(_sequenceStatusView);
 
         ShowSequenceStatus();
 
@@ -117,7 +117,6 @@ public class MobAndSkillState : ISequenceState
     [SerializeField, Tooltip("スポーンポイントのセレクター")] private SpawnPointSelector _spawnPointSelector;
     [SerializeField, Tooltip("ウェーブデータ")] private WaveSequenceData _waveSequenceData;
     [SerializeField, Tooltip("モブ戦のWave数とシークエンス名を表示するUI")] private SequenceStatusView _sequenceStatusView;
-    [SerializeField, Tooltip("UIに表示するモブ戦のシークエンス名")] private string _mobSequenceName = "モブ戦";
 
     [Header("スキル選択")]
     [SerializeField] private SkillSelectView _skillSelectView;
@@ -231,7 +230,7 @@ public class MobAndSkillState : ISequenceState
 
         if (_waveController == null)
         {
-            _sequenceStatusPresenter.ClearProgress();
+            _sequenceStatusPresenter.ClearText();
             return;
         }
 
