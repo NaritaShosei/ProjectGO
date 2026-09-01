@@ -115,6 +115,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             _lockOnCamera,
             player.GetComponent<PlayerAttack>(),
             player.GetComponent<PlayerModeController>(),
+            player.AnimationController,
             _level2Zoom,
             _level3Zoom,
             _releaseZoom,
@@ -248,7 +249,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [Tooltip("チャージ解放（攻撃発動 or キャンセル）時のオーバーシュート倍率・到達時間・通常視野へ戻るまでの時間")]
     [SerializeField] private ReleaseZoomSetting _releaseZoom = new() { OvershootMultiplier = 1.1f, OvershootDuration = 0.15f, SettleDuration = 0.35f };
     [Tooltip("雷神モードへ切り替わった瞬間のズームイン倍率・到達時間・通常視野へ戻るまでの時間")]
-    [SerializeField] private ModeChangeZoomSetting _thunderModeZoom = new() { Multiplier = 0.8f, ZoomInDuration = 0.15f, ZoomOutDuration = 0.3f };
+    [SerializeField] private ModeChangeZoomSetting _thunderModeZoom = new() { Multiplier = 0.8f, ZoomInDuration = 0.15f, MidMultiplier = 0.8f, MidDuration = 0.1f, ZoomOutDuration = 0.3f };
 
     [SerializeField]
     private LockOnController _lockOnController;

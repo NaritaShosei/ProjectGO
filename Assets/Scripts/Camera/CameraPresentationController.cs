@@ -28,7 +28,10 @@ public struct ReleaseZoomSetting
     public float SettleDuration;
 }
 
-/// <summary>雷神モードへ切り替わった瞬間に一瞬ズームインしてから通常視野へ戻るまでの設定。</summary>
+/// <summary>
+/// 雷神モードへ切り替わった瞬間にズームインし、演出中はゆっくり別の倍率へ寄り、
+/// 演出終了で通常視野へ戻るまでの設定。
+/// </summary>
 [Serializable]
 public struct ModeChangeZoomSetting
 {
@@ -36,6 +39,10 @@ public struct ModeChangeZoomSetting
     public float Multiplier;
     [Tooltip("ズームインに到達するまでの時間（秒）")]
     public float ZoomInDuration;
+    [Tooltip("演出中に到達させるFOVの倍率。演出終了までに到達すればそこで停止する")]
+    public float MidMultiplier;
+    [Tooltip("演出中の倍率に到達するまでの時間（秒）")]
+    public float MidDuration;
     [Tooltip("ズームイン後、通常視野（1.0倍）へ戻るまでの時間（秒）")]
     public float ZoomOutDuration;
 }
@@ -55,6 +62,7 @@ public sealed class CameraPresentationController
         CinemachineCamera lockOnCamera,
         PlayerAttack playerAttack,
         PlayerModeController playerModeController,
+        PlayerAnimationController playerAnimationController,
         ChargeZoomSetting level2Zoom,
         ChargeZoomSetting level3Zoom,
         ReleaseZoomSetting releaseZoom,
@@ -79,6 +87,12 @@ public sealed class CameraPresentationController
         if (_playerModeController != null)
         {
             _playerModeController.OnModeChanged += HandleModeChanged;
+        }
+
+        _playerAnimationController = playerAnimationController;
+        if (_playerAnimationController != null)
+        {
+            _playerAnimationController.OnModeChangeComplete += HandleModeChangeComplete;
         }
     }
 
@@ -161,6 +175,11 @@ public sealed class CameraPresentationController
         {
             _playerModeController.OnModeChanged -= HandleModeChanged;
         }
+
+        if (_playerAnimationController != null)
+        {
+            _playerAnimationController.OnModeChangeComplete -= HandleModeChangeComplete;
+        }
     }
 
     private readonly CameraZoomController _zoomController;
@@ -171,6 +190,7 @@ public sealed class CameraPresentationController
     private readonly ModeChangeZoomSetting _thunderModeZoom;
     private readonly PlayerAttack _playerAttack;
     private readonly PlayerModeController _playerModeController;
+    private readonly PlayerAnimationController _playerAnimationController;
 
     private bool _hasChargedZoom;
 
@@ -199,8 +219,9 @@ public sealed class CameraPresentationController
     }
 
     /// <summary>
-    /// モード変更の通知を受けて、雷神モードへ切り替わった瞬間のみ一瞬ズームインしてから
-    /// 通常視野へ戻る演出を行います。
+    /// モード変更の通知を受けて、雷神モードへ切り替わった瞬間にズームインし、
+    /// 続けて演出中用の倍率へゆっくり寄せます（到達すればそこで停止）。
+    /// 通常視野へ戻すのはモードチェンジ演出の終了（OnModeChangeComplete）まで行いません。
     /// </summary>
     private void HandleModeChanged(PlayerMode mode)
     {
@@ -208,6 +229,14 @@ public sealed class CameraPresentationController
 
         _zoomController?.SetZoomSequence(
             _thunderModeZoom.Multiplier, _thunderModeZoom.ZoomInDuration,
-            1f, _thunderModeZoom.ZoomOutDuration);
+            _thunderModeZoom.MidMultiplier, _thunderModeZoom.MidDuration);
+    }
+
+    /// <summary>
+    /// モードチェンジ演出の終了通知を受けて、ズームを通常視野へ戻します。
+    /// </summary>
+    private void HandleModeChangeComplete()
+    {
+        _zoomController?.SetZoom(1f, _thunderModeZoom.ZoomOutDuration);
     }
 }
