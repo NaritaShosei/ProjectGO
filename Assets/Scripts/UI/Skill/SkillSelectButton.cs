@@ -49,7 +49,8 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
         }
 
         _selectButton.interactable = true;
-        _selectButton.onClick.RemoveAllListeners();
+        // UIButtonSoundなど、同じButtonに登録された他コンポーネントのリスナーは維持する。
+        _selectButton.onClick.RemoveListener(RequestClick);
         _selectButton.onClick.AddListener(RequestClick);
     }
 
