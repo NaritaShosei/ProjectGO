@@ -23,7 +23,7 @@ public class BossBattleState : ISequenceState
             _bossBattleTimerPresenter = new CountDownTimerPresenter(_bossBattleTimer, _bossBattleTimerView);
 
         if (_sequenceStatusView != null)
-            _sequenceStatusPresenter = new SequenceStatusPresenter(_sequenceStatusView, _bossSequenceName);
+            _sequenceStatusPresenter = new SequenceStatusPresenter(_sequenceStatusView);
 
         ShowSequenceStatus();
 
@@ -113,7 +113,8 @@ public class BossBattleState : ISequenceState
             return;
 
         _sequenceStatusPresenter.Show();
-        _sequenceStatusPresenter.ClearProgress();
+        _sequenceStatusPresenter.ClearText();
+        _sequenceStatusPresenter?.SetSequenceName(_bossSequenceName);
     }
 
     #endregion
