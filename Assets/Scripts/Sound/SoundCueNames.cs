@@ -12,9 +12,6 @@ public static class SoundCueNames
         public const string ArmorBreak = "ArmorBreak";
         public const string EnemyFinisher = "EnemyFinisher";
         public const string ItemHealPickup = "ItemHealPickup";
-        public const string ModeChangeActivate = Player.ModeChangeActivate;
-        public const string ModeChangeDeactivate = Player.ModeChangeDeactivate;
-        public const string PlayerDamage = Player.Damage;
     }
 
     public static class Player
@@ -32,7 +29,6 @@ public static class SoundCueNames
         public const string WarriorChargeReady = "WarriorChargeReady";
         public const string LightningStrike = "LightningStrike";
         public const string GroundCrush = "GroundCrush";
-        public const string ItemHealPickup = Common.ItemHealPickup;
     }
 
     public static class Skill
