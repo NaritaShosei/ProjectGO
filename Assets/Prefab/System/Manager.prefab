@@ -1230,8 +1230,10 @@ MonoBehaviour:
     SettleDuration: 0.35
   _thunderModeZoom:
     Multiplier: 0.8
-    ZoomInDuration: 0.04
-    ZoomOutDuration: 0.1
+    ZoomInDuration: 0.03
+    MidMultiplier: 1
+    MidDuration: 0.3
+    ZoomOutDuration: 0.3
   _lockOnController: {fileID: 7245693978089855125}
 --- !u!114 &1355759329580380758
 MonoBehaviour:
