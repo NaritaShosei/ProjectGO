@@ -6,9 +6,10 @@ using Cysharp.Threading.Tasks;
 # region BossEnemy関連using
 using BossEnemy.Data;
 using BossEnemy.Enum;
+using BossEnemy.Model.Attack;
 #endregion
 
-namespace BossEnemy.Model.System.Logic
+namespace BossEnemy.Model.Logic
 {
     #region 攻撃処理
     public class BossAttack
@@ -32,7 +33,9 @@ namespace BossEnemy.Model.System.Logic
 
         public void Hit()
         {
-            _playerInformationService.TakeDamage(_currentAttackData.Damage);
+            DamageReactionType damageReaction = (DamageReactionType)System.Enum.GetValues(typeof(DamageReactionType)).GetValue(_currentAttackData.KnockBackPower);
+
+            _playerInformationService.TakeDamage(_currentAttackData.Damage, damageReaction);
         }
 
         public void Finish()

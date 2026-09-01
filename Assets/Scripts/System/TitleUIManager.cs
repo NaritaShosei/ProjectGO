@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class TitleUIManager : MonoBehaviour
@@ -36,6 +36,8 @@ public class TitleUIManager : MonoBehaviour
 
     private void Start()
     {
+        Sound.PlayBGM(SoundCueNames.BGM.Title, CueSheetType.BGM);
+
         if (!ServiceLocator.TryGet(out _sceneTransitionManager))
         {
             Debug.LogError("SceneTransitionManager is not registered in ServiceLocator.", this);

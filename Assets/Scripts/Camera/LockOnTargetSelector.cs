@@ -28,6 +28,12 @@ public class LockOnTargetSelector
 
     #region パブリックメソッド
 
+    /// <summary>画面内判定と画面座標の計算に使用するカメラを更新します。</summary>
+    public void SetMainCamera(Camera camera)
+    {
+        _camera = camera;
+    }
+
     /// <summary>
     /// 手動ロックオン時の初回ターゲット選択。
     /// 優先順位：① 画面内にいる（いない場合は無視） → ② プレイヤーキャラクターの正面に近い → ③ プレイヤーに近い
@@ -116,10 +122,10 @@ public class LockOnTargetSelector
 
     #region プライベートフィールド
 
-    private readonly Camera _camera;
     private readonly Transform _playerTransform;
     private readonly float _lockOnRange;
     private readonly EnemyManager _enemyManager;
+    private Camera _camera;
 
     #endregion
 

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -22,19 +23,49 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        InitSequence();
-        InitPlayer();
-        InitCameraManager();
-        InitEnemyManager();
-        InitUI();
-        InitEffect();
-        InitEXPManager();
-        StartGame();
+        InitializeAsync().Forget();
     }
 
     private void OnDestroy()
     {
         _hitStopManager?.Dispose();
+    }
+
+    private async UniTask InitializeAsync()
+    {
+        var cancellationToken =
+            this.GetCancellationTokenOnDestroy();
+
+        try
+        {
+            InitSequence();
+            await UniTask.NextFrame(cancellationToken);
+
+            InitPlayer();
+            await UniTask.NextFrame(cancellationToken);
+
+            InitCameraManager();
+            await UniTask.NextFrame(cancellationToken);
+
+            InitEnemyManager();
+            await UniTask.NextFrame(cancellationToken);
+
+            InitUI();
+            await UniTask.NextFrame(cancellationToken);
+
+            InitEffect();
+            await UniTask.NextFrame(cancellationToken);
+
+            InitEXPManager();
+            await UniTask.NextFrame(cancellationToken);
+
+            // 初期化完了後、ロード画面が閉じるまで待つ
+            await StartGameAfterTransitionAsync();
+        }
+        catch (System.OperationCanceledException)
+        {
+            // 初期化中にシーンが破棄された場合は正常終了
+        }
     }
 
     private bool CheckReference(Object reference, string fieldName)
@@ -110,7 +141,9 @@ public class GameManager : MonoBehaviour
             Debug.LogError("[GameManager] PlayerUIInitializer or Player is missing.", this);
 
         if (_enemyUIManager != null && _enemyManager != null && _player != null)
-            _enemyUIManager.Init(_enemyManager, _player.transform);
+            _enemyUIManager.Init(
+                _enemyManager,
+                _player.transform);
         else
             Debug.LogError("[GameManager] EnemyUIManager, EnemyManager, or Player is missing.", this);
 
@@ -142,5 +175,41 @@ public class GameManager : MonoBehaviour
             _sequenceManager.StartSequence();
         else
             Debug.LogError("[GameManager] SequenceManager is missing.", this);
+    }
+
+    /// <summary>
+    /// ロード画面のフェードアウトが完了してからゲームを開始する。
+    /// インゲームシーンを直接再生した場合は、遷移中ではないため即座に開始する。
+    /// </summary>
+    private async UniTask StartGameAfterTransitionAsync()
+    {
+        if (!ServiceLocator.TryGet(out SceneTransitionManager transitionManager))
+        {
+            Debug.LogError(
+                "[GameManager] SceneTransitionManager is missing. " +
+                "ゲームの開始を中止します。",
+                this);
+            return;
+        }
+
+        var cancellationToken = this.GetCancellationTokenOnDestroy();
+
+        try
+        {
+            await UniTask.WaitUntil(
+                () => transitionManager == null || !transitionManager.IsTransitioning,
+                cancellationToken: cancellationToken);
+        }
+        catch (System.OperationCanceledException)
+        {
+            return;
+        }
+
+        if (transitionManager == null || cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        StartGame();
     }
 }
