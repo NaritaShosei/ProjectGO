@@ -1,13 +1,35 @@
 using DG.Tweening;
+using System;
 using UnityEngine;
 
-public class ShieldDraugr : MobEnemy
+public class ShieldDraugr : MobEnemy,IArmorHealth
 {
     public float CurrentShieldDurability => _currentShieldDurability;
 
     public float MaxShieldDurability => _shieldData.ShieldDurability;
 
     public bool IsShieldBroken => _shieldState == ShieldState.Broken;
+
+    public event Action<float, float> OnShieldChanged;
+    public event Action OnShieldBroken;
+
+    float IArmorHealth.CurrentHealth => _currentShieldDurability;
+    float IArmorHealth.MaxHealth => _shieldData.ShieldDurability;
+
+    event Action<float, float> IArmorHealth.OnHealthChanged
+    {
+        add => OnShieldChanged += value;
+        remove => OnShieldChanged -= value;
+    }
+
+    event Action IArmorHealth.OnBroken
+    {
+        add => OnShieldBroken += value;
+        remove => OnShieldBroken -= value;
+    }
+
+    // MobEnemyの鎧解決を、盾が健在な間だけ自分自身に差し替える
+    protected override IArmorHealth ActiveArmor => IsShieldBroken ? null : this;
 
     public override void Init()
     {
@@ -24,6 +46,7 @@ public class ShieldDraugr : MobEnemy
 
         _shieldObject.SetActive(true);
         ResetShieldAnimation();
+        InvokeArmorRegistered();
     }
 
     public override void TakeDamage(DamageContext context)
@@ -142,6 +165,17 @@ public class ShieldDraugr : MobEnemy
         SetShieldLayerWeight(1f);
     }
 
+    /// <summary>
+    /// 盾ゲージの表示アンカーを返す。未設定ならHPゲージと同じ位置にフォールバックする。
+    /// </summary>
+    public Transform GetShieldGaugeAnchor()
+    {
+        if (_shieldGaugeAnchor != null) return _shieldGaugeAnchor;
+
+        Debug.LogWarning($"{name}: ShieldGaugeAnchorが未設定です。UIAnchorを使用します。", this);
+        return GetUIAnchor();
+    }
+
     private enum ShieldState { Guarding, Broken }
 
     [Header("盾持ちドラウグル専用パラメータ")]
@@ -149,6 +183,9 @@ public class ShieldDraugr : MobEnemy
 
     [SerializeField] private Transform _shieldEffectPoint;
     [SerializeField] private GameObject _shieldObject;
+
+    [SerializeField, Tooltip("盾ゲージ表示位置（盾オブジェクトの上あたりに配置）")]
+    private Transform _shieldGaugeAnchor;
 
     private float _fistRerollTimer = 0f;
 
@@ -195,7 +232,7 @@ public class ShieldDraugr : MobEnemy
 
         _fistRerollTimer = _shieldData.FistRerollInterval;
 
-        if (Random.value < _shieldData.FistAttackChance)
+        if (UnityEngine.Random.value < _shieldData.FistAttackChance)
         {
             // 成功：既にクールダウン中でなければ即攻撃可能にする
             if (AttackCooldownRemaining > 0f) AttackCooldownRemaining = 0f;
@@ -218,6 +255,8 @@ public class ShieldDraugr : MobEnemy
     private void ApplyShieldDamage(int damage)
     {
         _currentShieldDurability = Mathf.Max(0f, _currentShieldDurability - damage);
+
+        OnShieldChanged?.Invoke(_currentShieldDurability, MaxShieldDurability);
 
         if (!IsShieldBroken)
         {
@@ -247,6 +286,7 @@ public class ShieldDraugr : MobEnemy
 
         //盾破壊通知
         InvokeOnArmorBroken();
+        OnShieldBroken?.Invoke();
 
         //盾破壊アニメーション開始
         _enemyAnimator.ShieldBreakTrigger();
