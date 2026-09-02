@@ -23,8 +23,8 @@ public class MobEnemy : Enemy,IFormationParticipant
     /// </summary>
     public bool TryGetActiveArmor(out IArmorHealth armor)
     {
-        armor = _armor;
-        return _armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor;
+        armor = ActiveArmor;
+        return armor != null;
     }
 
     /// <summary>
@@ -199,13 +199,22 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     protected void InvokeArmorRegistered()
     {
-        if (_armor == null)
+        var armor = ActiveArmor;
+        if (armor == null)
         {
             return;
         }
 
-        OnArmorRegistered?.Invoke(_armor);
+        OnArmorRegistered?.Invoke(armor);
     }
+
+
+
+    /// <summary>
+    /// 現在有効な鎧を返す。サブクラスが独自の防御システム（盾など）を持つ場合はオーバーライドする。
+    /// </summary>
+    protected virtual IArmorHealth ActiveArmor =>
+        (_armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor) ? _armor : null;
 
     // Armorの登録
     [SerializeField] protected MobArmor _armor;

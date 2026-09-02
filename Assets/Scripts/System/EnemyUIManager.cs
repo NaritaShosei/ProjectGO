@@ -156,11 +156,13 @@ public class EnemyUIManager : MonoBehaviour
         // イベント購読と現在値同期が同じ鎧を通知しても二重生成しない。
         if (armor == null || _armorPresenters.ContainsKey(armor)) return;
 
+        Transform armorGaugeTarget = ResolveArmorGaugeAnchor(enemy);
+
         var view = _armerGaugePool.Get();
         var presenter = new ArmorGaugePresenter(
             armor,
             view,
-            enemy is MobEnemy mob ? mob.GetUIAnchor() : enemy.GetTargetCenter(),
+            armorGaugeTarget,
             enemy.GetTargetCenter(),
             _playerTransform,
             _detectionRange,
@@ -269,5 +271,19 @@ public class EnemyUIManager : MonoBehaviour
         _armorPresenters.Clear();
 
         _popupPresenter.Dispose();
+    }
+
+    /// <summary>
+    /// 鎧・盾ゲージの表示アンカーを決定する。
+    /// ShieldDraugrは盾専用の位置、それ以外は通常のUIAnchorを使う。
+    /// </summary>
+    private Transform ResolveArmorGaugeAnchor(IEnemy enemy)
+    {
+        if (enemy is ShieldDraugr shieldDraugr)
+        {
+            return shieldDraugr.GetShieldGaugeAnchor();
+        }
+
+        return enemy is MobEnemy mob ? mob.GetUIAnchor() : enemy.GetTargetCenter();
     }
 }
