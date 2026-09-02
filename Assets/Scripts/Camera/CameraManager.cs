@@ -115,7 +115,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             _lockOnCamera,
             player.GetComponent<PlayerAttack>(),
             player.GetComponent<PlayerModeController>(),
-            player.AnimationController,
+            player.GetComponentInChildren<PlayerAnimationController>(),
             _level2Zoom,
             _level3Zoom,
             _releaseZoom,
@@ -353,6 +353,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
         RefreshMainCamera(scene);
+        _lockOnController?.SetMainCamera(_mainCamera);
     }
 
     private void RefreshMainCamera(Scene scene)

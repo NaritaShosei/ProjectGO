@@ -27,11 +27,14 @@
 ゲームイベント（チャージ、モード変更など）を受けてカメラの演出（ズーム・カメラシェイク）を発火する専用クラスです。`MonoBehaviour` ではなく、プレイヤー初期化時に `CameraManager` が生成します。カメラの参照・Priority・ライフサイクル管理は行わず、演出の発火条件と内容だけを持ちます。
 
 - `PlayerAttack` のチャージ関連イベント（`OnChargeLevelReached` / `OnChargingEnded`）を購読し、`CameraZoomController` のズーム倍率に変換
-- `PlayerModeController.OnModeChanged` を購読し、雷神モードへの切替時にズームインし、続けて演出中用の倍率（`MidMultiplier`）へゆっくり寄せる（`SetZoomSequence`で連結。演出終了までに到達すればそこで停止する）。`PlayerAnimationController.OnModeChangeComplete`（モードチェンジ演出の終了通知）を受けて、その時点の倍率から通常視野へ戻す。ズームアウトのタイミングは固定時間ではなく演出の実際の終了に同期する
+- `PlayerModeController.OnModeChanged` を購読し、雷神モードへの切替時にズームインし、続けて演出中用の倍率（`MidMultiplier`）へゆっくり寄せる（`SetZoomSequence`で連結。演出終了までに到達すればそこで停止する）
+- `PlayerAnimationController.OnModeChangeComplete`（モードチェンジ演出の終了通知）を受けて、その時点の倍率から通常視野へ戻す。ズームアウトのタイミングは固定時間ではなく演出の実際の終了に同期する
 - `CameraShake` を使ったカメラシェイクの開始・強制停止（対象カメラの選択は `CameraManager` が行い、引数として受け取る）
 - `CameraZoomController` を生成・保持し、毎フレームの補間（`Tick`）を実行
 
-`ChargeZoomSetting`（チャージ段階到達時の倍率と到達時間）、`ReleaseZoomSetting`（チャージ解放時のオーバーシュート設定）、`ModeChangeZoomSetting`（モード変更時のズーム設定）はいずれも`CameraPresentationController.cs`内で定義された`[Serializable]`構造体です。Inspector上の実体（`_level2Zoom`等）は`CameraManager`側にフィールドとして持ち、コンストラクタ引数として渡します。
+`ChargeZoomSetting`（チャージ段階到達時の倍率と到達時間）、`ReleaseZoomSetting`（チャージ解放時のオーバーシュート設定）、`ModeChangeZoomSetting`（モード変更時のズーム設定: `Multiplier`/`ZoomInDuration`でズームイン、`MidMultiplier`/`MidDuration`で演出中用倍率へ、`ZoomOutDuration`で通常視野へ戻す）はいずれも`CameraPresentationController.cs`内で定義された`[Serializable]`構造体です。Inspector上の実体（`_level2Zoom`等）は`CameraManager`側にフィールドとして持ち、コンストラクタ引数として渡します。
+
+`PlayerAnimationController`はPlayer本体とは別（ネストしたプレハブ上）のGameObjectにあるため、`CameraManager.Init`では`player.GetComponentInChildren<PlayerAnimationController>()`で取得して渡しています。
 
 ### CameraMotionController
 
@@ -54,7 +57,7 @@
 ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）を表し、FOVは`基準FOV × 倍率`で直接計算されます（補間の中間値のみ`Lerp`を使用）。
 
 - `SetZoom(zoom, duration)`: FOV倍率を指定。現在値からの距離に関わらず、必ず`duration`秒かけて到達する（距離ベースではなく時間ベースの補間）
-- `SetZoomSequence(overshootZoom, overshootDuration, settleZoom, settleDuration)`: 目標値へ到達したら続けて次の目標値へ遷移する、2段階のズームを予約する
+- `SetZoomSequence(zoom1, duration1, zoom2, duration2)`: zoom1へduration1秒で遷移し、到達したら続けてzoom2へduration2秒で遷移する。目標に到達すればそこで止まる
 - `ZoomIn(amount, duration)` / `ZoomOut(amount, duration)`: 現在の目標倍率を増減
 - `ResetZoom(duration = 0f)`: 通常視野（倍率1.0）へ戻す
 - `Tick(deltaTime)`: 目標倍率へ向けて補間し、カメラのFOVへ反映する。`CameraPresentationController.Tick`から毎フレーム呼ばれる
@@ -133,6 +136,7 @@ flowchart TD
     Manager --> Presentation[CameraPresentationController]
     PlayerAttack[PlayerAttack] --> Presentation
     ModeController[PlayerModeController] --> Presentation
+    AnimController[PlayerAnimationController] --> Presentation
     Presentation --> Zoom[CameraZoomController]
     Presentation --> Shake[CameraShake]
     Manager --> Area[LockOnAreaVisualizer]
