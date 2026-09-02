@@ -165,6 +165,8 @@ public sealed class CameraPresentationController
     /// <summary>購読していたイベントを解除します。</summary>
     public void Dispose()
     {
+        ForceStopShake();
+
         if (_playerAttack != null)
         {
             _playerAttack.OnChargeLevelReached -= HandleChargeLevelReached;
