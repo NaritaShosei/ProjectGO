@@ -28,12 +28,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public PlayerMode CurrentMode => _modeController.CurrentMode;
 
-    /// <summary>
-    /// アニメーション制御への参照。ネストしたプレハブ上のコンポーネントで
-    /// 同一GameObjectからは取得できないため、公開プロパティ経由で渡します。
-    /// </summary>
-    public PlayerAnimationController AnimationController => _playerAnimationController;
-
 
     /// ダメージを受けたときのイベント。ダメージのコンテキスト情報を引数として渡す。
     public event Action<PlayerDamageEffectContext> OnDamagedEffect;
