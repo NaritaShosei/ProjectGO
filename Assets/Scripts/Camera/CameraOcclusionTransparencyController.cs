@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>
-/// カメラとプレイヤーの間に入ったRendererを一時的に透過します。
+/// カメラとプレイヤーの間に入ったRendererを、近接エフェクト制御とは独立して一時的に透過します。
 /// 元の共有Materialは変更せず、遮蔽中だけ実行時Materialへ差し替えます。
 /// </summary>
 public sealed class CameraOcclusionTransparencyController
