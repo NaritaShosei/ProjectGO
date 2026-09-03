@@ -42,7 +42,10 @@
 
 - 通常カメラの入力回転と仮想アンカーの遅延追従
 - ロックオンカメラの位置追従と画面上のデッドゾーン判定に基づく回転
-- ロックオン開始時の位置・回転ブレンド
+- ロックオン開始時の位置・回転ブレンド（`BeginLockOnBlend` / `UpdateBlend`）
+  - 起点：初回ロックオンは通常カメラ姿勢へスナップしてから、対象切り替えは現在のロックオンカメラ姿勢から。判定は `CameraController.LockOn` が `wasLockedOn` から求め `LockOnCameraState.SetTarget(target, isInitialLockOn)` で渡す
+  - 補間：位置・回転ともイージング目標（`_lockOnBlendDuration` で到達）へ寄せつつ、移動を `_lockOnBlendMaxLinearSpeed`（m/秒）、回転を `_lockOnBlendMaxAngularSpeed`（度/秒）でクランプ。対象が近ければ上限に当たらず従来と同じ
+  - 終了：位置・回転が収束したら完了。上限で間に合わなければ延長し、`_lockOnBlendDuration + _lockOnBlendMaxExtraTime` 超過で強制終了
 - ロックオン解除時の角度を通常カメラへ引き継ぎ
 - ゲーム設定変更後の通常カメラ速度更新
 
@@ -71,12 +74,14 @@
 - `_currentState` の保持と `NormalCameraState` / `LockOnCameraState` 間の遷移実行（`LockOn` / `Unlock`）
 - `Tick` 内でロックオン対象の有効性・距離超過を判定し、無効なら自動解除
 - ロックオンボタンによる開始・解除
-- 左右入力によるロックオン対象の切り替え
-- 敵撃破時・敵の強制削除時の次ターゲット自動選択（`LockOnTargetSelector` への対象選定依頼）
+- 対象切り替え入力の蓄積判定（`Tick` 内の `UpdateTargetSwitch`）。スティックは「倒し量 × 時間」、マウスは「横移動量の累積」がそれぞれの閾値を超えたら1回切り替える。逆方向入力で蓄積をリセットし、閾値到達時は切り替えの成否に関わらず蓄積を0へ戻す。ロックオン開始時（通常状態から入ったとき）に蓄積をクリアする
+- 現在のロックオン対象**自身**が撃破・強制削除されたときのみ次ターゲットを自動選択（`LockOnTargetSelector` への対象選定依頼）。対象でない敵が倒れても現在の対象は変更しない。次が見つからなければ解除
 - 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
 - `InputHandler` と `EnemyManager` のイベント購読・解除
 
-このクラス自身は画面上の位置や距離から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。状態変更は `CameraManager` へイベント通知のみで伝えます。
+対象切り替えの入力値は `InputHandler` から受け取ります（スティックは `LockOnChangeInput`、マウス横移動量は `ConsumeLockOnSwitchMouseDelta()`）。閾値・デッドゾーンは `CameraController` の `[SerializeField]`（`_switchStickThreshold` / `_switchStickDeadzone` / `_switchMouseThreshold`）で調整します。
+
+このクラス自身は画面上の位置や角度から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。状態変更は `CameraManager` へイベント通知のみで伝えます。
 
 ### LockOnTargetSelector
 
@@ -86,16 +91,20 @@
 
 - ロックオン可能である
 - ターゲット中心のTransformが存在する
-- プレイヤーからロックオン可能距離以内である
+- プレイヤーからロックオン可能距離（`_lockOnRange`）以内である
 - 必要に応じて現在の対象を除外する
+
+画面内外・遮蔽・距離は選定スコアには使いません（距離は上記の候補足切りのみ）。
+
+選定スコアは **カメラ前方ベクトルと「カメラ位置 → 対象中心」ベクトルのなす角** です。角度が小さい（＝カメラ中心に近い）ほど優先度が高く、背後や画面端の対象は角度が大きくなるため自然に後回しになります。角度が同値のときは候補リスト順で先勝ちです。
 
 提供する選定方法は次の3つです。
 
-- `SelectInitialTarget`: 初回ロックオン。画面内の候補を優先し、その中でプレイヤー正面に近い対象を選びます。画面内に候補がなければプレイヤーに近い対象を選びます。
-- `SelectSwitchTarget`: 左右入力による切り替え。現在対象の左右方向にある画面内候補から、画面中央に近い対象を選びます。
-- `SelectNextTarget`: 現在対象が撃破・削除された後の次対象を選びます。初回選択と同じ優先順位を使います。
+- `SelectInitialTarget`: 初回ロックオン。全候補からカメラ前方とのなす角が最小の対象を選びます。
+- `SelectSwitchTarget`: 切り替え入力による対象変更。カメラ前方に映っている（`WorldToScreenPoint().z > 0`）候補のうち、画面X座標が現在対象より入力方向側にあるものから、なす角が最小の対象を選びます。方向側に候補がなければ何もしません。
+- `SelectNextTarget`: 現在対象が撃破・削除された後の次対象を選びます。初回選択と同じ基準（なす角最小）を使います。
 
-画面内判定にはカメラの視錐台と `Collider.bounds` を使用します。Colliderがない場合はターゲット中心を基準にした小さなBoundsを代用します。
+`SelectSwitchTarget` の左右判定にはカメラの `WorldToScreenPoint` を使用します。
 
 ### CameraShake / CameraShakeData
 
@@ -150,8 +159,9 @@ flowchart TD
 3. `LockOnController` が自身の `LockOn`（`CameraController.LockOn`）を実行し、選ばれた対象を `_lockOnState` に設定して状態を `LockOnCameraState` へ遷移します。
 4. `CameraManager.SetLockOnCameraActive(true)` によりロックオンカメラのPriorityが上がり、ブレンドが開始します。
 5. ブレンド完了後、対象の画面位置に応じてカメラを回転し、プレイヤーを基準に位置を追従します。
-6. `CameraController.Tick` が対象の無効化・自動解除距離超過を検知するか、`EnemyManager` の撃破・強制削除イベントを受けると、次対象への切り替えまたは解除を行います。
-7. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
+6. ロックオン中は `CameraController.Tick` 内の `UpdateTargetSwitch` が切り替え入力の蓄積を判定し、閾値到達で `SelectSwitchTarget` により対象を切り替えます。
+7. `CameraController.Tick` が対象の無効化（`IsLockable=false` 化など）・自動解除距離超過を検知すると解除します。`EnemyManager` の撃破・強制削除イベントは、**倒れたのが現在の対象のときだけ** 次対象への切り替え（なければ解除）を行います。対象でない敵の撃破では何もしません。
+8. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
 
 ## 参照関係と責務の境界
 
@@ -173,5 +183,6 @@ flowchart TD
 - シーン上の初期化順に依存するため、`CameraManager.Init(Player)` が呼ばれてからロックオン入力を扱える状態になります。
 - `CameraManager` は通常カメラ、ロックオンカメラ、ロックオンコントローラーの参照が不足すると初期化を中断します。
 - `LockOnController` は `EnemyManager` のイベントを購読するため、`OnDestroy` での購読解除が必要です。
-- `LockOnTargetSelector` は画面判定に `_camera` と `Screen.width` / `Screen.height` を使うため、カメラや画面状態が未準備の場合は正しく選定できません。
+- `LockOnTargetSelector` は選定スコアと左右判定に `_camera`（Cinemachine Brain 出力のメインカメラ）の `transform` と `WorldToScreenPoint` を使うため、カメラが未準備の場合は正しく選定できません。
+- キーボード＋マウス構成では対象切り替えを **マウス横移動量** で行います（矢印キーのバインドは廃止）。`LockOnChange` アクションはゲームパッド右スティック専用です。
 - `LockOnController.cs` はクラス名とファイル名を一致させています。Unityスクリプトをリネームする場合は、既存のMetaファイルのGUIDを維持してください。

@@ -75,13 +75,33 @@ public readonly struct LockOnSettings
 /// <summary>ロックオン開始時のブレンドに関する設定値。</summary>
 public readonly struct LockOnBlendSettings
 {
+    /// <summary>ブレンドの基準時間（秒）。</summary>
     public readonly float Duration;
+
+    /// <summary>イージング（EaseOut）の指数。大きいほど序盤が速い。</summary>
     public readonly float Exponent;
 
-    public LockOnBlendSettings(float duration, float exponent)
+    /// <summary>ブレンド中のカメラ回転の最大角速度（度/秒）。大きくズレたときだけ効く。</summary>
+    public readonly float MaxAngularSpeed;
+
+    /// <summary>ブレンド中のカメラ位置の最大移動速度（m/秒）。大きくズレたときだけ効く。</summary>
+    public readonly float MaxLinearSpeed;
+
+    /// <summary>速度上限で基準時間内に追いつかない場合の追加許容時間（秒）。超えたら強制終了。</summary>
+    public readonly float MaxExtraTime;
+
+    public LockOnBlendSettings(
+        float duration,
+        float exponent,
+        float maxAngularSpeed,
+        float maxLinearSpeed,
+        float maxExtraTime)
     {
         Duration = duration;
         Exponent = exponent;
+        MaxAngularSpeed = maxAngularSpeed;
+        MaxLinearSpeed = maxLinearSpeed;
+        MaxExtraTime = maxExtraTime;
     }
 }
 
@@ -120,6 +140,9 @@ public sealed class CameraMotionController
 
         _lockOnBlendDuration = blendSettings.Duration;
         _lockOnBlendExponent = blendSettings.Exponent;
+        _lockOnBlendMaxAngularSpeed = blendSettings.MaxAngularSpeed;
+        _lockOnBlendMaxLinearSpeed = blendSettings.MaxLinearSpeed;
+        _lockOnBlendMaxExtraTime = blendSettings.MaxExtraTime;
 
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
         _cameraFollowTarget.position = _playerTransform.position;
@@ -156,12 +179,23 @@ public sealed class CameraMotionController
         _cameraFollowTarget.position = _playerTransform.position;
     }
 
-    /// <summary>ロックオン開始時のブレンドを開始します。</summary>
-    public void BeginLockOnBlend()
+    /// <summary>ロックオン開始・対象切り替え時のブレンドを開始する。</summary>
+    /// <param name="snapToNormalCamera">初回ロックオンは true（通常カメラ姿勢から）、対象切り替えは false（現在のロックオン姿勢から）。</param>
+    public void BeginLockOnBlend(bool snapToNormalCamera)
     {
+        // 初回ロックオンのみ、通常カメラの現在姿勢へスナップ（古い姿勢から飛ぶのを防ぐ）
+        if (snapToNormalCamera)
+        {
+            _lockOnCamera.transform.SetPositionAndRotation(
+                _normalCamera.transform.position,
+                _normalCamera.transform.rotation);
+        }
+
+        // 現在のロックオンカメラ姿勢をブレンド起点として記録
         _blendStartPosition = _lockOnCamera.transform.position;
         _blendStartRotation = _lockOnCamera.transform.rotation;
         _blendT = 0f;
+        _blendElapsed = 0f;
         _isBlending = true;
     }
 
@@ -210,12 +244,22 @@ public sealed class CameraMotionController
     private readonly float _lockOnDeadzone;
     private readonly float _lockOnBlendDuration;
     private readonly float _lockOnBlendExponent;
+    private readonly float _lockOnBlendMaxAngularSpeed;
+    private readonly float _lockOnBlendMaxLinearSpeed;
+    private readonly float _lockOnBlendMaxExtraTime;
+
+    // ブレンド完了とみなす残り誤差
+    private const float BlendCompleteAngle = 1f;      // 度
+    private const float BlendCompleteDistance = 0.05f; // m
 
     private float _positionSmoothTime;
     private Vector2 _rotationSpeed;
     private Vector3 _normalFollowVelocity;
+
+    // ロックオン開始ブレンドの実行時状態
     private bool _isBlending;
-    private float _blendT;
+    private float _blendT;         // 0→1 の進行度（時間駆動）
+    private float _blendElapsed;   // 開始からの経過秒（タイムアウト判定用）
     private Vector3 _blendStartPosition;
     private Quaternion _blendStartRotation;
 
@@ -236,17 +280,44 @@ public sealed class CameraMotionController
             _normalOrbitalFollow.VerticalAxis.Range.y);
     }
 
+    /// <summary>ロックオン開始ブレンドの1フレーム分の更新。イージング目標へ寄せつつ移動・回転速度を上限でクランプする。</summary>
     private void UpdateBlend(Transform targetCenter)
     {
+        // 進行度と経過時間を進める
+        _blendElapsed += Time.fixedDeltaTime;
         _blendT += Time.fixedDeltaTime / _lockOnBlendDuration;
+
+        // EaseOut カーブ（序盤速く終盤ゆるやか）
         float eased = 1f - Mathf.Pow(1f - Mathf.Clamp01(_blendT), _lockOnBlendExponent);
+
+        // 最新の理想位置・理想回転（対象が動いても追従できるよう毎フレーム再計算）
         Vector3 desiredPosition = CalculateDesiredPosition();
         Quaternion desiredRotation = CalculateDesiredRotation(targetCenter, desiredPosition);
 
-        _lockOnCamera.transform.position = Vector3.Lerp(_blendStartPosition, desiredPosition, eased);
-        _lockOnCamera.transform.rotation = Quaternion.Slerp(_blendStartRotation, desiredRotation, eased);
+        // 位置：イージング目標へ、最大移動速度でクランプしながら寄せる
+        Vector3 easedPosition = Vector3.Lerp(_blendStartPosition, desiredPosition, eased);
+        float maxStepDistance = _lockOnBlendMaxLinearSpeed * Time.fixedDeltaTime;
+        _lockOnCamera.transform.position = Vector3.MoveTowards(
+            _lockOnCamera.transform.position, easedPosition, maxStepDistance);
 
-        if (_blendT >= 1f) _isBlending = false;
+        // 回転：イージング目標へ、最大角速度でクランプしながら回す
+        Quaternion easedRotation = Quaternion.Slerp(_blendStartRotation, desiredRotation, eased);
+        float maxStepDegrees = _lockOnBlendMaxAngularSpeed * Time.fixedDeltaTime;
+        _lockOnCamera.transform.rotation = Quaternion.RotateTowards(
+            _lockOnCamera.transform.rotation, easedRotation, maxStepDegrees);
+
+        // 終了：基準時間経過＋位置・回転が収束、または追加許容時間を超過で強制終了
+        bool durationElapsed = _blendT >= 1f;
+        bool positionSettled =
+            Vector3.Distance(_lockOnCamera.transform.position, desiredPosition) <= BlendCompleteDistance;
+        bool rotationSettled =
+            Quaternion.Angle(_lockOnCamera.transform.rotation, desiredRotation) <= BlendCompleteAngle;
+        bool timedOut = _blendElapsed >= _lockOnBlendDuration + _lockOnBlendMaxExtraTime;
+
+        if ((durationElapsed && positionSettled && rotationSettled) || timedOut)
+        {
+            _isBlending = false;
+        }
     }
 
     private void UpdateCameraPosition()

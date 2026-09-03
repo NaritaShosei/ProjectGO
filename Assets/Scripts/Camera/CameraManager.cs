@@ -98,7 +98,10 @@ public class CameraManager : MonoBehaviour, ISpeedChange
                 _lockOnDeadzone),
             new LockOnBlendSettings(
                 _lockOnBlendDuration,
-                _lockOnBlendExponent));
+                _lockOnBlendExponent,
+                _lockOnBlendMaxAngularSpeed,
+                _lockOnBlendMaxLinearSpeed,
+                _lockOnBlendMaxExtraTime));
 
         if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
@@ -236,10 +239,16 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _autoUnlockRange = 25f;
 
     [Header("ロックオン開始ブレンド")]
-    [Tooltip("ロックオン開始時のカメラ切り替えブレンドにかかる時間（秒）")]
+    [Tooltip("ロックオン開始ブレンドの基準時間（秒）")]
     [SerializeField] private float _lockOnBlendDuration = 0.4f;
-    [Tooltip("ブレンドのEaseOut強度。値が大きいほど最初の動きが速く、終わりに急激に収束する")]
+    [Tooltip("ブレンドのEaseOut強度。大きいほど序盤が速い")]
     [SerializeField, Range(1f, 8f)] private float _lockOnBlendExponent = 3f;
+    [Tooltip("ブレンド中の回転の最大角速度（度/秒）。大きくズレたときだけ効く")]
+    [SerializeField] private float _lockOnBlendMaxAngularSpeed = 240f;
+    [Tooltip("ブレンド中の位置の最大移動速度（m/秒）。大きくズレたときだけ効く")]
+    [SerializeField] private float _lockOnBlendMaxLinearSpeed = 25f;
+    [Tooltip("速度上限で基準時間内に追いつかない場合の追加許容時間（秒）。超えたら強制終了")]
+    [SerializeField] private float _lockOnBlendMaxExtraTime = 0.6f;
 
     [Header("ズーム設定")]
     [Tooltip("チャージ段階Level2時のFOV倍率と到達時間（Level1はズームなし固定）")]
