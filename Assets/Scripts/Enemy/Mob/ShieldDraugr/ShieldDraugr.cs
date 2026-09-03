@@ -44,6 +44,8 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
         _shieldState = ShieldState.Guarding;
         _fistRerollTimer = 0f;
 
+        _defenceContext.EnemyType = EnemyDefenceType.Armor;
+
         _shieldObject.SetActive(true);
         ResetShieldAnimation();
         InvokeArmorRegistered();
@@ -64,50 +66,16 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
         bool wasBlocked = false;
         bool isThunderArmorHit = false;
 
-        if (_shieldState == ShieldState.Broken)
-        {
-            Debug.Log("生身ダメージ");
-            _stats.TakeDamage(damage);
-            appliedToHp = true;
-        }
-        else if (isFrontal)
-        {
-            bool isPhysicalHit = isWarrior || (isThunder && !context.IsLightningDamage);
-            if (isPhysicalHit)
-            {
-                Debug.Log("盾にダメージ");
-                ApplyShieldDamage(damage);
-                appliedToShield = true;
-                didBreakThisHit = _shieldState == ShieldState.Broken;
+        //判定だけ先に行う
+        bool shieldBrokenAlready = _shieldState == ShieldState.Broken;
+        bool isPhysicalHit = isWarrior || (isThunder && !context.IsLightningDamage);
+        bool willHitShield = !shieldBrokenAlready && isFrontal && isPhysicalHit;
+        bool willHitHp = shieldBrokenAlready || !isFrontal;
+        bool willBeBlocked = !shieldBrokenAlready && isFrontal && !isPhysicalHit;
 
-                if (!didBreakThisHit)
-                {
-                    _enemyAnimator.ShieldBlockHitTrigger();
-                }
-            }
-            else
-            {
-                Debug.Log("正面につきダメージ無効");
-                wasBlocked = true;
-                _enemyAnimator.ShieldBlockHitTrigger();
-
-                if (isThunder)
-                {
-                    isThunderArmorHit = true;
-                }
-            }
-        }
-        else
-        {
-            Debug.Log("背面攻撃");
-            _stats.TakeDamage(damage);
-            appliedToHp = true;
-        }
-
-        bool willKill = appliedToHp && _stats.CurrentHealth <= 0;
 
         //ダメージ表記
-        if (appliedToShield)
+        if (willHitShield)
         {
             // 闘神：盾への実ダメージを表示
             InvokeOnDamageDealt(
@@ -115,7 +83,7 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
                 isWeakPoint: false,
                 context.IsCritical);
         }
-        else if (appliedToHp)
+        else if (willHitHp)
         {
             // 生身：通常通りダメージを表示
             InvokeOnDamageDealt(
@@ -123,14 +91,56 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
                 isWeakPoint: isWarrior || isThunder,
                 context.IsCritical);
         }
-        else if (isThunder && isFrontal)
+        else if (willBeBlocked && isThunder)
         {
+            //0ダメージ表記が出ていると表記が多すぎてかなり見ずらい
             // 雷神：盾にはダメージを与えないが、0ダメージを表示
             InvokeOnDamageDealt(
                 0,
                 isWeakPoint: false,
                 context.IsCritical);
         }
+
+        //ダメージ適応
+        if (willHitHp)
+        {
+            if (!isFrontal)
+            {
+                Debug.Log("背面攻撃");
+                _defenceContext.EnemyType = EnemyDefenceType.Flesh;
+            }
+            else
+            {
+                Debug.Log("生身ダメージ");
+            }
+            _stats.TakeDamage(damage);
+            appliedToHp = true;
+        }
+        else if (willHitShield)
+        {
+            Debug.Log("盾にダメージ");
+            ApplyShieldDamage(damage);
+            appliedToShield = true;
+            didBreakThisHit = _shieldState == ShieldState.Broken;
+
+            if (!didBreakThisHit)
+            {
+                _enemyAnimator.ShieldBlockHitTrigger();
+            }
+        }
+        else if (willBeBlocked)
+        {
+            Debug.Log("正面につきダメージ無効");
+            wasBlocked = true;
+            _enemyAnimator.ShieldBlockHitTrigger();
+
+            if (isThunder)
+            {
+                isThunderArmorHit = true;
+            }
+        }
+
+        bool willKill = appliedToHp && _stats.CurrentHealth <= 0;
 
         if (appliedToHp)
         {
@@ -282,6 +292,8 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
             return;
 
         _shieldState = ShieldState.Broken;
+
+        _defenceContext.EnemyType = EnemyDefenceType.Flesh;
 
         ClearSelectedPattern();
 
