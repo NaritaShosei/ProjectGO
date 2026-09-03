@@ -12,9 +12,6 @@ public static class SoundCueNames
         public const string ArmorBreak = "ArmorBreak";
         public const string EnemyFinisher = "EnemyFinisher";
         public const string ItemHealPickup = "ItemHealPickup";
-        public const string ModeChange1 = Player.ModeChange1;
-        public const string ModeChange2 = Player.ModeChange2;
-        public const string PlayerDamage = Player.Damage;
     }
 
     public static class Player
@@ -27,12 +24,11 @@ public static class SoundCueNames
         public const string HitArmorThunder = "PlayerHitArmorThunder";
         public const string ThunderElectrify = "PlayerThunderElectrify";
         public const string Damage = "PlayerDamage";
-        public const string ModeChange1 = "ModeChange(1)";
-        public const string ModeChange2 = "ModeChange(2)";
+        public const string ModeChangeActivate = "ModeChange_Activate";
+        public const string ModeChangeDeactivate = "ModeChange_Deactivate";
         public const string WarriorChargeReady = "WarriorChargeReady";
         public const string LightningStrike = "LightningStrike";
         public const string GroundCrush = "GroundCrush";
-        public const string ItemHealPickup = Common.ItemHealPickup;
     }
 
     public static class Skill

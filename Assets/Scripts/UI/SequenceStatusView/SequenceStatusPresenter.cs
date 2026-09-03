@@ -3,21 +3,24 @@ using UnityEngine;
 
 public class SequenceStatusPresenter : IDisposable
 {
-    public SequenceStatusPresenter(ISequenceStatusView view, string sequenceName)
+    public SequenceStatusPresenter(ISequenceStatusView view)
     {
         _view = view;
-        _sequenceName = sequenceName;
     }
 
     public void Show()
     {
         _view.Show();
-        _view.SetSequenceName(_sequenceName);
     }
 
     public void Hide()
     {
         _view.Hide();
+    }
+
+    public void SetSequenceName(string sequenceName)
+    {
+        _view.SetSequenceName(sequenceName);
     }
 
     public void UpdateProgress(int current)
@@ -26,9 +29,9 @@ public class SequenceStatusPresenter : IDisposable
         _view.SetProgress(safeCurrent);
     }
 
-    public void ClearProgress()
+    public void ClearText()
     {
-        _view.ClearProgress();
+        _view.ClearText();
     }
 
     public void Dispose()
@@ -37,5 +40,4 @@ public class SequenceStatusPresenter : IDisposable
     }
 
     private readonly ISequenceStatusView _view;
-    private readonly string _sequenceName;
 }

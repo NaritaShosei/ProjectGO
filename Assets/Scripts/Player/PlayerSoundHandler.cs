@@ -141,16 +141,13 @@ public class PlayerSoundHandler : MonoBehaviour
 
     // ── モード変更 ─────────────────────────────────────
 
-    private void OnModeChanged(PlayerMode _)
+    private void OnModeChanged(PlayerMode mode)
     {
         Sound.PlaySE(
             gameObject,
-            SoundCueNames.Player.ModeChange1,
-            CueSheetType.Player);
-
-        Sound.PlaySE(
-            gameObject,
-            SoundCueNames.Player.ModeChange2,
+            mode == PlayerMode.Thunder
+                ? SoundCueNames.Player.ModeChangeActivate
+                : SoundCueNames.Player.ModeChangeDeactivate,
             CueSheetType.Player);
     }
 
