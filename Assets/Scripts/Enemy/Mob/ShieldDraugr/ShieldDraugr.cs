@@ -91,15 +91,15 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
                 isWeakPoint: isWarrior || isThunder,
                 context.IsCritical);
         }
-        else if (willBeBlocked && isThunder)
-        {
-            //0ダメージ表記が出ていると表記が多すぎてかなり見ずらい
-            // 雷神：盾にはダメージを与えないが、0ダメージを表示
-            InvokeOnDamageDealt(
-                0,
-                isWeakPoint: false,
-                context.IsCritical);
-        }
+        //else if (willBeBlocked && isThunder)
+        //{
+        //    //0ダメージ表記が出ていると表記が多すぎてかなり見ずらい
+        //    // 雷神：盾にはダメージを与えないが、0ダメージを表示
+        //    InvokeOnDamageDealt(
+        //        0,
+        //        isWeakPoint: false,
+        //        context.IsCritical);
+        //}
 
         //ダメージ適応
         if (willHitHp)
