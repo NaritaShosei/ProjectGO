@@ -26,6 +26,11 @@ public interface ISkillSelectView
     public void Show(List<SkillViewData> skills);
 
     /// <summary>
+    /// 指定したスキルのクリック演出を再生し、演出完了後に選択を確定する。
+    /// </summary>
+    public void PlaySelect(int skillId);
+
+    /// <summary>
     /// スキル選択UIを非表示にする。
     /// </summary>
     public void Hide();

@@ -56,19 +56,17 @@ public class SkillSelectPresenter : IDisposable
     /// <summary>
     /// 時間切れの際に呼ばれるスキル自動選択。
     /// 現在ハイライト中のスキルがあればそれを優先し、なければ候補の先頭を選択する。
-    /// 自動選択は演出完了を待たず、スキル獲得とUI終了を確実に行う。
+    /// クリック操作と同じ演出を再生し、完了後にスキル獲得とUI終了を行う。
     /// </summary>
     public void AutoSelect()
     {
-        // 現在ハイライト中のスキルIDを優先して登録する
         if (_currentSkillId != -1)
         {
-            SelectSkill(_currentSkillId);
+            _view.PlaySelect(_currentSkillId);
         }
-        // そうでなければ、選択肢の最初のスキルを登録する
         else if (_currentSkills != null && _currentSkills.Count > 0)
         {
-            SelectSkill(_currentSkills[0].ID);
+            _view.PlaySelect(_currentSkills[0].ID);
         }
     }
 
