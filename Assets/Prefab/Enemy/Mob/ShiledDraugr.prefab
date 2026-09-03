@@ -24,12 +24,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 710000000000000051}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.38, y: 0.6026667, z: -0.048866667}
-  m_LocalScale: {x: 0.33333334, y: 0.33333334, z: 0.33333334}
+  m_LocalRotation: {x: -0.30998772, y: -0.4074709, z: -0.203473, w: 0.8345502}
+  m_LocalPosition: {x: -0.024, y: 0.185, z: 0.0126}
+  m_LocalScale: {x: 0.1315571, y: 0.18698066, z: 0.17277688}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 588119680018181543}
+  m_Father: {fileID: 6601979251523235111}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3488705074941606510
 GameObject:
@@ -115,11 +115,11 @@ MonoBehaviour:
   _useSpawnEffect: 1
   _spawnEffectKey: "\u30B9\u30DD\u30FC\u30F3\u30A8\u30D5\u30A7\u30AF\u30C8"
   _armor: {fileID: 0}
-  _uiAnchor: {fileID: 710000000000000052}
+  _uiAnchor: {fileID: 2622622182961375559}
   _shieldData: {fileID: 11400000, guid: 0112ac10d47160b429342930b0d13877, type: 2}
   _shieldEffectPoint: {fileID: 6601979251523235111}
   _shieldObject: {fileID: 5824598570186766237}
-  _shieldGaugeAnchor: {fileID: 2622622182961375559}
+  _shieldGaugeAnchor: {fileID: 710000000000000052}
   _shieldAnimationBlendDuration: 0.3
 --- !u!114 &258673169019590428
 MonoBehaviour:
@@ -221,7 +221,7 @@ Transform:
   m_GameObject: {fileID: 8920687939844257599}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.026, y: 0.698, z: -0.048866667}
+  m_LocalPosition: {x: -0.026, y: 0.725, z: 0.067}
   m_LocalScale: {x: 0.33333334, y: 0.33333334, z: 0.33333334}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -302,9 +302,6 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: ade4b9d6de35d974097b2f5405af1ba5, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 710000000000000052}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: ade4b9d6de35d974097b2f5405af1ba5, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2622622182961375559}
@@ -414,7 +411,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2df102ffe16da434394b5f3b3df79157, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 710000000000000052}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2df102ffe16da434394b5f3b3df79157, type: 3}
 --- !u!1 &5824598570186766237 stripped
