@@ -100,5 +100,6 @@ public enum HitStopTargetGroup
     Effects = 1 << 3,  // 戦闘エフェクト（環境VFX除く）
     Camera = 1 << 4,
     ThunderGauge = 1 << 5,
-    All = Player | HitEnemy | AllEnemies | Effects | Camera | ThunderGauge,
+    Time = 1 << 6,
+    All = Player | HitEnemy | AllEnemies | Effects | Camera | ThunderGauge | Time,
 }

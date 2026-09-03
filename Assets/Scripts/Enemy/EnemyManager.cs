@@ -472,13 +472,4 @@ public class EnemyManager : MonoBehaviour
             Debug.LogError("このインターフェースの実体はUnityのComponentではありません。");
         }
     }
-
-
-#if UNITY_EDITOR
-    // デバッグ用
-    private void OnGUI()
-    {
-        GUI.Label(new Rect(10, 10, 200, 30), $"残り敵数：{_enemies.Count}");
-    }
-#endif  
 }

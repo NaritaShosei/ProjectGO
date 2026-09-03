@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// カメラの挙動を管理するクラス。
 /// 通常時の追従遅延およびロックオン時のターゲット追従を制御します。
-/// ターゲット選定はLockOnControllerに委譲しています。
+/// ターゲット選定はLockOnControllerに、演出（ズーム・カメラシェイク）の発火は
+/// CameraPresentationControllerに委譲しています。
 /// </summary>
 public class CameraManager : MonoBehaviour, ISpeedChange
 {
@@ -28,15 +29,21 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     }
 
     /// <summary>現在ロックオンしている対象</summary>
-    public ILockOnTarget CurrentTarget => _currentTarget;
+    public ILockOnTarget CurrentTarget => _lockOnController?.CurrentTarget;
 
     /// <summary>現在ロックオン中かどうか</summary>
-    public bool IsLockedOn => _currentTarget != null;
+    public bool IsLockedOn => _lockOnController != null && _lockOnController.IsLockedOn;
 
     public float TimeScale => _timeScale;
 
     /// <summary>ロックオンエリアの半径（px）</summary>
     public float LockOnAreaRadius => _lockOnAreaRadius;
+
+    /// <summary>ロックオンを自動解除する距離を取得します。</summary>
+    public float AutoUnlockRange => _autoUnlockRange;
+
+    /// <summary>現在のズームFOV倍率。1で通常視野、1未満でズームイン、1より大きい値でズームアウト。</summary>
+    public float CurrentZoom => _cameraPresentationController?.CurrentZoom ?? 1f;
 
     /// <summary>ロックオン対象が変更された際の通知</summary>
     public event Action<ILockOnTarget> OnLockOnTargetChanged;
@@ -57,30 +64,62 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             return;
         }
 
-        if (_cameraFollowTarget == null || _normalCamera == null || _lockOnCamera == null || _lockOnController == null)
+        if (_normalCamera == null || _lockOnCamera == null || _lockOnController == null)
         {
             Debug.LogError("[CameraManager] Required camera references are missing.", this);
             return;
         }
 
         _playerTransform = player.transform;
-        _cameraFollowTarget.position = _playerTransform.position;
-        _normalCamera.Follow = _cameraFollowTarget;
 
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
         {
             hitStopManager.Register(this, HitStopTargetGroup.Camera);
         }
 
+        _cameraMotionController = new CameraMotionController(
+            new CameraReferences(
+                _normalCamera,
+                _lockOnCamera,
+                _normalOrbitalFollow,
+                _normalInputAxisController,
+                _playerTransform),
+            new NormalCameraSettings(
+                _cameraInputDirection,
+                _posSmoothTime,
+                _cameraRotationSpeed),
+            new LockOnSettings(
+                _cameraDistance,
+                _cameraHeight,
+                _lockOnAreaRadius,
+                _lockOnPositionSpeed,
+                _lockOnFollowSpeedMin,
+                _lockOnFollowSpeedMax,
+                _lockOnDeadzone),
+            new LockOnBlendSettings(
+                _lockOnBlendDuration,
+                _lockOnBlendExponent));
+
         if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
-            _inputHandler = inputHandler;
-            _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform);
+            _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform, _cameraMotionController);
+            _lockOnController.OnTargetChanged += HandleTargetChanged;
         }
         else
         {
             Debug.LogError("[CameraManager] InputHandler or EnemyManager is missing. LockOn is disabled.", this);
         }
+
+        _cameraPresentationController = new CameraPresentationController(
+            _normalCamera,
+            _lockOnCamera,
+            player.GetComponent<PlayerAttack>(),
+            player.GetComponent<PlayerModeController>(),
+            player.GetComponentInChildren<PlayerAnimationController>(),
+            _level2Zoom,
+            _level3Zoom,
+            _releaseZoom,
+            _thunderModeZoom);
     }
 
     /// <summary>
@@ -89,16 +128,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     /// </summary>
     public void LockOn(ILockOnTarget target)
     {
-        if (!IsValidTarget(target)) return;
-        if (_currentTarget == target) return;
-
-        _currentTarget = target;
-        _lockOnCamera.Priority = _lockOnPriority;
-
-        BeginLockOnBlend();
-
-        Debug.Log(_currentTarget);
-        OnLockOnTargetChanged?.Invoke(_currentTarget);
+        _lockOnController?.LockOn(target);
     }
 
     /// <summary>
@@ -107,29 +137,60 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     /// </summary>
     public void Unlock()
     {
-        if (_currentTarget == null) return;
+        _lockOnController?.Unlock();
+    }
 
-        ApplyRotationToNormalCamera();
+    /// <summary>
+    /// ズームのFOV倍率を設定します。1は変化なし、1未満でズームイン、1より大きい値でズームアウトです。
+    /// 現在値からの移動距離に関わらず、必ずduration秒かけて到達します。
+    /// </summary>
+    public void SetZoom(float zoom, float duration)
+    {
+        _cameraPresentationController?.SetZoom(zoom, duration);
+    }
 
-        _currentTarget = null;
-        _lockOnCamera.Priority = _normalPriority - 1;
-        _isLockOnBlending = false;
+    /// <summary>
+    /// チャージ段階をFOV倍率へ変換して設定します。
+    /// 各段階の倍率・到達時間はInspectorの「ズーム設定」で個別に調整できます。
+    /// Level1はズームなしのため何もしません。
+    /// </summary>
+    /// <returns>実際にズーム値を変更した場合はtrue。</returns>
+    public bool SetZoomLevel(ChargeLevel level)
+    {
+        return _cameraPresentationController != null && _cameraPresentationController.SetZoomLevel(level);
+    }
 
-        OnLockOnTargetChanged?.Invoke(null);
+    /// <summary>指定量だけズームインします（倍率を下げます）。</summary>
+    public void ZoomIn(float amount, float duration)
+    {
+        _cameraPresentationController?.ZoomIn(amount, duration);
+    }
+
+    /// <summary>指定量だけズームアウトします（倍率を上げます）。</summary>
+    public void ZoomOut(float amount, float duration)
+    {
+        _cameraPresentationController?.ZoomOut(amount, duration);
+    }
+
+    /// <summary>ズームを通常視野（倍率1.0）へ戻します。</summary>
+    public void ResetZoom(float duration = 0f)
+    {
+        _cameraPresentationController?.ResetZoom(duration);
     }
 
     /// <summary>カメラシェイクを実行します。</summary>
     public async UniTask ExecutionCameraShake(CameraShakeData data)
     {
-        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+        if (_cameraPresentationController == null) return;
 
-        await _cameraShake.StartCameraShake(camera, data);
+        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+        await _cameraPresentationController.Shake(camera, data);
     }
 
     /// <summary>カメラシェイクを強制停止します。</summary>
     public void ExecutionForceStopCameraShake()
     {
-        _cameraShake.ForceStopCameraShake();
+        _cameraPresentationController?.ForceStopShake();
     }
 
     #endregion
@@ -180,6 +241,16 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [Tooltip("ブレンドのEaseOut強度。値が大きいほど最初の動きが速く、終わりに急激に収束する")]
     [SerializeField, Range(1f, 8f)] private float _lockOnBlendExponent = 3f;
 
+    [Header("ズーム設定")]
+    [Tooltip("チャージ段階Level2時のFOV倍率と到達時間（Level1はズームなし固定）")]
+    [SerializeField] private ChargeZoomSetting _level2Zoom = new() { Multiplier = 0.85f, Duration = 0.3f };
+    [Tooltip("チャージ段階Level3時のFOV倍率と到達時間")]
+    [SerializeField] private ChargeZoomSetting _level3Zoom = new() { Multiplier = 0.7f, Duration = 0.25f };
+    [Tooltip("チャージ解放（攻撃発動 or キャンセル）時のオーバーシュート倍率・到達時間・通常視野へ戻るまでの時間")]
+    [SerializeField] private ReleaseZoomSetting _releaseZoom = new() { OvershootMultiplier = 1.1f, OvershootDuration = 0.15f, SettleDuration = 0.35f };
+    [Tooltip("雷神モードへ切り替わった瞬間のズームイン倍率・到達時間・通常視野へ戻るまでの時間")]
+    [SerializeField] private ModeChangeZoomSetting _thunderModeZoom = new() { Multiplier = 0.8f, ZoomInDuration = 0.15f, MidMultiplier = 0.8f, MidDuration = 0.1f, ZoomOutDuration = 0.3f };
+
     [SerializeField]
     private LockOnController _lockOnController;
 
@@ -189,30 +260,16 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private Camera _mainCamera;
     private Transform _playerTransform;
-    private ILockOnTarget _currentTarget;
+
     private CinemachineOrbitalFollow _normalOrbitalFollow;
     private CinemachineInputAxisController _normalInputAxisController;
-    private Transform _cameraFollowTarget;
-    private InputHandler _inputHandler;
-    private Vector3 _normalFollowVelocity;
-    private CameraShake _cameraShake;
-
-    private bool _isLockOnBlending;
-    private float _blendT;
-    private Vector3 _blendStartPosition;
-    private Quaternion _blendStartRotation;
+    private CameraMotionController _cameraMotionController;
+    private CameraPresentationController _cameraPresentationController;
 
     private float _timeScale = 1f;
     private float _basePositionSmoothTime;
     private Vector2 _baseRotationSpeed;
     private GameSettingService _gameSettingService;
-    #endregion
-
-    #region イージング関数
-
-    /// <summary>最初速く、終わりにゆっくり収束する。ロックオン開始ブレンドに使用。</summary>
-    private float EaseOut(float t) => 1f - Mathf.Pow(1f - t, _lockOnBlendExponent);
-
     #endregion
 
     #region Unityライフサイクル
@@ -231,9 +288,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             ApplyGameSettings(_gameSettingService.CurrentSettings);
             _gameSettingService.OnSettingsChanged += ApplyGameSettings;
         }
-
-        _cameraShake = new CameraShake();
-        _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
 
         if (_normalCamera == null || _lockOnCamera == null)
         {
@@ -265,18 +319,18 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         if (_playerTransform == null) return;
         if (Mathf.Approximately(TimeScale, 0f)) return;
 
-        if (IsLockedOn)
-            UpdateLockOnCamera();
-        else
-        {
-            UpdateFreeCameraRotation();
-            UpdateNormalCameraPosition();
-        }
+        _cameraPresentationController?.Tick(Time.fixedDeltaTime * TimeScale);
+        _lockOnController?.Tick(TimeScale);
     }
 
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
+
+        if (_lockOnController != null)
+        {
+            _lockOnController.OnTargetChanged -= HandleTargetChanged;
+        }
 
         if (_gameSettingService != null)
         {
@@ -289,12 +343,17 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             hitStopManager.Unregister(this, HitStopTargetGroup.Camera);
         }
 
+        _cameraMotionController?.Dispose();
+        _cameraPresentationController?.ResetZoom();
+        _cameraPresentationController?.Dispose();
+
         ServiceLocator.Unregister<CameraManager>();
     }
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
         RefreshMainCamera(scene);
+        _lockOnController?.SetMainCamera(_mainCamera);
     }
 
     private void RefreshMainCamera(Scene scene)
@@ -324,6 +383,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             * Mathf.Lerp(2f, 0.5f, settings.CameraMoveSpeed);
         _cameraRotationSpeed = _baseRotationSpeed
             * Mathf.Lerp(0.25f, 2f, settings.CameraRotationSensitivity);
+        _cameraMotionController?.SetNormalSettings(_posSmoothTime, _cameraRotationSpeed);
     }
 
     public void OnSpeedChange(float scale)
@@ -333,249 +393,14 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     #endregion
 
-    #region 通常カメラ
-
-    /// <summary>
-    /// 仮想アンカーをSmoothDampでプレイヤーに遅延追従させます。
-    /// 通常カメラはこのアンカーをFollowするため、カメラに自然な遅れが生まれます。
-    /// </summary>
-    private void UpdateNormalCameraPosition()
+    internal void SetLockOnCameraActive(bool isActive)
     {
-        _cameraFollowTarget.position = Vector3.SmoothDamp(
-            _cameraFollowTarget.position,
-            _playerTransform.position,
-            ref _normalFollowVelocity,
-            _posSmoothTime
-        );
+        _normalCamera.Priority = isActive ? _normalPriority - 1 : _normalPriority;
+        _lockOnCamera.Priority = isActive ? _lockOnPriority : _normalPriority - 1;
     }
 
-    private void UpdateFreeCameraRotation()
+    private void HandleTargetChanged(ILockOnTarget target)
     {
-        if (_normalOrbitalFollow == null || _inputHandler == null) return;
-
-        Vector2 input = _inputHandler.CameraMoveInput;
-        if (input.sqrMagnitude <= 0.0001f) return;
-
-        Vector2 rotationDelta = new(
-            input.x * _cameraInputDirection.x * _cameraRotationSpeed.x,
-            input.y * _cameraInputDirection.y * _cameraRotationSpeed.y
-        );
-
-        float deltaTime = Time.fixedDeltaTime * TimeScale;
-        _normalOrbitalFollow.HorizontalAxis.Value += rotationDelta.x * deltaTime;
-        _normalOrbitalFollow.VerticalAxis.Value =
-            Mathf.Clamp(
-                _normalOrbitalFollow.VerticalAxis.Value + rotationDelta.y * deltaTime,
-                _normalOrbitalFollow.VerticalAxis.Range.x,
-                _normalOrbitalFollow.VerticalAxis.Range.y);
+        OnLockOnTargetChanged?.Invoke(target);
     }
-
-    #endregion
-
-    #region ロックオンカメラ
-
-    /// <summary>
-    /// ロックオンカメラの更新。有効性・距離チェック後、ブレンド中か通常追従かで処理を分岐します。
-    /// </summary>
-    private void UpdateLockOnCamera()
-    {
-        if (!IsCurrentTargetValid())
-        {
-            Unlock();
-            return;
-        }
-
-        if (IsTargetOutOfRange())
-        {
-            Unlock();
-            return;
-        }
-
-        Transform targetCenter = _currentTarget.GetTargetCenter();
-
-        if (_isLockOnBlending)
-        {
-            UpdateBlend(targetCenter);
-            return;
-        }
-
-        UpdateLockOnCameraByArea(targetCenter);
-        _cameraFollowTarget.position = _playerTransform.position;
-    }
-
-    /// <summary>
-    /// ロックオン開始時のブレンドを更新します。
-    /// EaseOutで位置・回転を同時に補間し、完了後は通常追従に移行します。
-    /// </summary>
-    private void UpdateBlend(Transform targetCenter)
-    {
-        _blendT += Time.fixedDeltaTime / _lockOnBlendDuration;
-        float eased = EaseOut(Mathf.Clamp01(_blendT));
-
-        Vector3 desiredPos = CalcDesiredPosition();
-        Quaternion desiredRot = CalcDesiredRotation(targetCenter, desiredPos);
-
-        _lockOnCamera.transform.position = Vector3.Lerp(_blendStartPosition, desiredPos, eased);
-        _lockOnCamera.transform.rotation = Quaternion.Slerp(_blendStartRotation, desiredRot, eased);
-
-        if (_blendT >= 1f) _isLockOnBlending = false;
-    }
-
-    /// <summary>
-    /// カメラ位置と回転をエリア判定に基づいて更新します。
-    /// </summary>
-    private void UpdateLockOnCameraByArea(Transform targetCenter)
-    {
-        UpdateCameraPosition();
-        UpdateCameraRotation(targetCenter);
-    }
-
-    /// <summary>
-    /// カメラ位置を目標位置へ一定速度で追従させます。
-    /// </summary>
-    private void UpdateCameraPosition()
-    {
-        _lockOnCamera.transform.position = Vector3.MoveTowards(
-            _lockOnCamera.transform.position,
-            CalcDesiredPosition(),
-            _lockOnPositionSpeed * Time.fixedDeltaTime
-        );
-    }
-
-    /// <summary>
-    /// ターゲットの画面上の位置に応じてカメラ回転を更新します。
-    /// デッドゾーン内では回転せず、逸脱量に応じて速度が上がります。
-    /// ターゲットがカメラ後方に回り込んだ場合は最大速度で強制追従します。
-    /// </summary>
-    private void UpdateCameraRotation(Transform targetCenter)
-    {
-        Vector3 rawScreenPos = _mainCamera.WorldToScreenPoint(targetCenter.position);
-
-        if (rawScreenPos.z < 0)
-        {
-            RotateToward(targetCenter, _lockOnFollowSpeedMax);
-            return;
-        }
-
-        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
-        float deviation = Vector2.Distance(new Vector2(rawScreenPos.x, rawScreenPos.y), screenCenter);
-
-        if (deviation <= _lockOnAreaRadius) return;
-
-        float deviationFromArea = deviation - _lockOnAreaRadius;
-        float t = Mathf.Clamp01(deviationFromArea / _lockOnDeadzone);
-        float speed = Mathf.Lerp(_lockOnFollowSpeedMin, _lockOnFollowSpeedMax, t);
-
-        RotateToward(targetCenter, speed);
-    }
-
-    /// <summary>
-    /// 指定速度でターゲット方向にカメラを回転させます。
-    /// </summary>
-    private void RotateToward(Transform targetCenter, float speed)
-    {
-        Quaternion targetRot = CalcDesiredRotation(targetCenter, _lockOnCamera.transform.position);
-        _lockOnCamera.transform.rotation = Quaternion.Slerp(
-            _lockOnCamera.transform.rotation,
-            targetRot,
-            Time.fixedDeltaTime * speed
-        );
-    }
-
-    #endregion
-
-    #region ヘルパー
-
-    /// <summary>
-    /// ロックオン開始時のブレンド初期値を記録します。
-    /// </summary>
-    private void BeginLockOnBlend()
-    {
-        _blendStartPosition = _lockOnCamera.transform.position;
-        _blendStartRotation = _lockOnCamera.transform.rotation;
-        _blendT = 0f;
-        _isLockOnBlending = true;
-    }
-
-    ///  <summary>
-    /// プレイヤーの真後ろにカメラを置くための目標位置を計算します。
-    /// </summary>
-    private Vector3 CalcDesiredPosition()
-    {
-        // ロックオン中はカメラの向きの逆方向から距離を取る
-        if (IsLockedOn)
-        {
-            Vector3 back = -_lockOnCamera.transform.forward;
-            back.y = 0f;
-            back.Normalize();
-
-            return _playerTransform.position
-                 + (back * _cameraDistance)
-                 + (Vector3.up * _cameraHeight);
-        }
-
-        // 通常時はプレイヤーの向きの逆方向
-        Vector3 backNormal = -_playerTransform.forward;
-        backNormal.y = 0f;
-        backNormal.Normalize();
-
-        return _playerTransform.position
-             + (backNormal * _cameraDistance)
-             + (Vector3.up * _cameraHeight);
-    }
-
-    /// <summary>
-    /// プレイヤーとターゲットの中間点を見るカメラ回転を計算します。
-    /// </summary>
-    private Quaternion CalcDesiredRotation(Transform targetCenter, Vector3 fromPosition)
-    {
-        Vector3 lookAtPoint = Vector3.Lerp(_playerTransform.position, targetCenter.position, 0.5f);
-        Vector3 dir = lookAtPoint - fromPosition;
-        if (dir.sqrMagnitude < 0.001f) return _lockOnCamera.transform.rotation;
-        return Quaternion.LookRotation(dir);
-    }
-
-    /// <summary>
-    /// ロックオン解除時に現在のカメラ角度を通常カメラのOrbitalFollowに引き継ぎます。
-    /// </summary>
-    private void ApplyRotationToNormalCamera()
-    {
-        if (_normalOrbitalFollow == null) return;
-
-        Vector3 euler = _lockOnCamera.transform.rotation.eulerAngles;
-        _normalOrbitalFollow.HorizontalAxis.Value = euler.y;
-        _normalOrbitalFollow.VerticalAxis.Value = euler.x;
-    }
-
-    /// <summary>
-    /// ターゲットが有効なロックオン対象かチェックします。
-    /// </summary>
-    private bool IsValidTarget(ILockOnTarget target)
-    {
-        if (!target.IsLockable || target.GetTargetCenter() == null)
-        {
-            Debug.LogWarning("ロックオン対象が無効です。");
-            return false;
-        }
-        return true;
-    }
-
-    /// <summary>
-    /// 現在のターゲットが有効な状態かチェックします。
-    /// </summary>
-    private bool IsCurrentTargetValid()
-    {
-        return _currentTarget.IsLockable
-            && _currentTarget.GetTargetCenter() != null;
-    }
-
-    /// <summary>
-    /// 現在のターゲットが自動解除距離を超えているかチェックします。
-    /// </summary>
-    private bool IsTargetOutOfRange()
-    {
-        return Vector3.Distance(_playerTransform.position, _currentTarget.GetTargetCenter().position) > _autoUnlockRange;
-    }
-
-    #endregion
 }

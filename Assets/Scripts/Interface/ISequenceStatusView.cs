@@ -4,5 +4,5 @@ public interface ISequenceStatusView
     void Hide();
     void SetSequenceName(string sequenceName);
     void SetProgress(int current);
-    void ClearProgress();
+    void ClearText();
 }

@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 84284928402912834}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.79, y: 0, z: 9.91}
+  m_LocalPosition: {x: 10.08, y: 0, z: 9.91}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -47,8 +47,10 @@ MonoBehaviour:
   _key: 3
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
-  - {x: -1, y: 0, z: -1}
+  - {x: -2.5, y: 0, z: 2}
+  - {x: 2.5, y: 0, z: 2}
+  - {x: -4, y: 0, z: -1.5}
+  - {x: 4, y: 0, z: -1.5}
 --- !u!1 &777589909429660069
 GameObject:
   m_ObjectHideFlags: 0
@@ -386,7 +388,7 @@ Transform:
   m_GameObject: {fileID: 2169788507943024728}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.53, y: 0, z: 10.4}
+  m_LocalPosition: {x: -13.07, y: 0, z: 11.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -407,7 +409,10 @@ MonoBehaviour:
   _key: 1
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
+  - {x: -2.5, y: 0, z: 2}
+  - {x: 2.5, y: 0, z: 2}
+  - {x: -4, y: 0, z: -1.5}
+  - {x: 4, y: 0, z: -1.5}
 --- !u!1 &2185294170579187973
 GameObject:
   m_ObjectHideFlags: 0
@@ -434,7 +439,7 @@ Transform:
   m_GameObject: {fileID: 2185294170579187973}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.26, y: 0, z: 11.19}
+  m_LocalPosition: {x: -0.23, y: 0, z: 7.92}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -455,8 +460,10 @@ MonoBehaviour:
   _key: 4
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
-  - {x: 2, y: 0, z: 0}
-  - {x: -2, y: 0, z: 0}
+  - {x: -2.5, y: 0, z: 2}
+  - {x: 2.5, y: 0, z: 2}
+  - {x: -4, y: 0, z: -1.5}
+  - {x: 4, y: 0, z: -1.5}
 --- !u!1 &2837471110484879224
 GameObject:
   m_ObjectHideFlags: 0
@@ -564,7 +571,7 @@ Transform:
   m_GameObject: {fileID: 3721311690304933274}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.88, y: 0, z: -1.83}
+  m_LocalPosition: {x: 0.27, y: 0, z: -0.76}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -585,8 +592,10 @@ MonoBehaviour:
   _key: 2
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
-  - {x: 1, y: 0, z: 1}
-  - {x: -1, y: 0, z: -1}
+  - {x: -2.5, y: 0, z: 2}
+  - {x: 2.5, y: 0, z: 2}
+  - {x: -4, y: 0, z: -1.5}
+  - {x: 4, y: 0, z: -1.5}
 --- !u!1 &3763728631446097578
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,55 +921,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapManager
   _centerPosition: {x: -4.15, y: 0, z: 9.68}
   _radius: 21.2
---- !u!1 &6508732559360190048
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4195100406275903015}
-  - component: {fileID: 1078219947277476108}
-  m_Layer: 0
-  m_Name: SpawnPoint-5
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4195100406275903015
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6508732559360190048}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.26, y: 0, z: 18.69}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4297340128657640697}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1078219947277476108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6508732559360190048}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b548b39de4a40d4c81c88f81ed85d07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
-  _key: 5
-  _spawnSlots:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 2}
-  - {x: 0, y: 0, z: -2}
 --- !u!1 &6763467456206366161
 GameObject:
   m_ObjectHideFlags: 0
@@ -1119,7 +1079,6 @@ Transform:
   - {fileID: 5631138487203101612}
   - {fileID: 7374466586915306897}
   - {fileID: 3900919356117798245}
-  - {fileID: 4195100406275903015}
   m_Father: {fileID: 7036861525032570302}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7793837620590366497
@@ -1140,7 +1099,7 @@ MonoBehaviour:
   - {fileID: 1350980116522759186}
   - {fileID: 2319699771973055748}
   - {fileID: 723141865783775079}
-  - {fileID: 1078219947277476108}
+  - {fileID: 5423066343497906226}
 --- !u!1 &7616060526857187252
 GameObject:
   m_ObjectHideFlags: 0
@@ -1254,6 +1213,22 @@ MonoBehaviour:
   _autoUnlockRange: 25
   _lockOnBlendDuration: 0.4
   _lockOnBlendExponent: 3
+  _level2Zoom:
+    Multiplier: 0.85
+    Duration: 0.3
+  _level3Zoom:
+    Multiplier: 0.7
+    Duration: 0.25
+  _releaseZoom:
+    OvershootMultiplier: 1.1
+    OvershootDuration: 0.15
+    SettleDuration: 0.35
+  _thunderModeZoom:
+    Multiplier: 0.75
+    ZoomInDuration: 0.0325
+    MidMultiplier: 1
+    MidDuration: 0.3
+    ZoomOutDuration: 0.3
   _lockOnController: {fileID: 7245693978089855125}
 --- !u!114 &1355759329580380758
 MonoBehaviour:
@@ -1334,6 +1309,7 @@ MonoBehaviour:
   _thunderEffectView: {fileID: 0}
   _warriorEffectView: {fileID: 0}
   _levelUpEffectView: {fileID: 700543547462622834}
+  _modeChangeEffectPlayer: {fileID: 0}
 --- !u!1 &8941395912492371511
 GameObject:
   m_ObjectHideFlags: 0
@@ -1360,7 +1336,7 @@ Transform:
   m_GameObject: {fileID: 8941395912492371511}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.26, y: 0, z: 18.69}
+  m_LocalPosition: {x: -1.26, y: 0, z: 14.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1381,8 +1357,10 @@ MonoBehaviour:
   _key: 5
   _spawnSlots:
   - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 2}
-  - {x: 0, y: 0, z: -2}
+  - {x: -2.5, y: 0, z: 2}
+  - {x: 2.5, y: 0, z: 2}
+  - {x: -4, y: 0, z: -1.5}
+  - {x: 4, y: 0, z: -1.5}
 --- !u!1001 &2347181242427078975
 PrefabInstance:
   m_ObjectHideFlags: 0

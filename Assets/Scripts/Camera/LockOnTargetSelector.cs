@@ -7,15 +7,6 @@ using UnityEngine;
 /// </summary>
 public class LockOnTargetSelector
 {
-    #region フィールド
-
-    private readonly Camera _camera;
-    private readonly Transform _playerTransform;
-    private readonly float _lockOnRange;
-    private readonly EnemyManager _enemyManager;
-
-    #endregion
-
     #region コンストラクタ
 
     /// <param name="playerTransform">距離計算、プレイヤーの正面角度との距離を比較する</param>
@@ -36,6 +27,12 @@ public class LockOnTargetSelector
     #endregion
 
     #region パブリックメソッド
+
+    /// <summary>画面内判定と画面座標の計算に使用するカメラを更新します。</summary>
+    public void SetMainCamera(Camera camera)
+    {
+        _camera = camera;
+    }
 
     /// <summary>
     /// 手動ロックオン時の初回ターゲット選択。
@@ -120,6 +117,15 @@ public class LockOnTargetSelector
 
         return FindNearestToPlayer(candidates);
     }
+
+    #endregion
+
+    #region プライベートフィールド
+
+    private readonly Transform _playerTransform;
+    private readonly float _lockOnRange;
+    private readonly EnemyManager _enemyManager;
+    private Camera _camera;
 
     #endregion
 

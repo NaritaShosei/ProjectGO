@@ -13,10 +13,12 @@ public class PlayerEffectInitializer : MonoBehaviour
         //リーク対策
         _thunderEffectPresenter?.Dispose();
         _weaponEffectPresenter?.Dispose();
+        _modeChangeEffectPresenter?.Dispose();
         _levelUpEffectPresenter?.Dispose();
 
         _thunderEffectPresenter = null;
         _weaponEffectPresenter = null;
+        _modeChangeEffectPresenter = null;
         _levelUpEffectPresenter = null;
 
         if (skillManager != null && _levelUpEffectView != null)
@@ -47,6 +49,17 @@ public class PlayerEffectInitializer : MonoBehaviour
             {
                 Debug.LogError("[PlayerEffectInitializer] WeaponEffectView is missing.", this);
             }
+
+            if (_modeChangeEffectPlayer != null)
+            {
+                _modeChangeEffectPresenter = new ModeChangePostProcessEffectPresenter(
+                    _modeChangeEffectPlayer,
+                    modeController);
+            }
+            else
+            {
+                Debug.LogError("[PlayerEffectInitializer] ModeChangePostProcessEffectPlayer is missing.", this);
+            }
         }
         else
         {
@@ -70,15 +83,18 @@ public class PlayerEffectInitializer : MonoBehaviour
     [SerializeField] private WeaponEffectView _thunderEffectView;
     [SerializeField] private WeaponEffectView _warriorEffectView;
     [SerializeField] private LevelUpEffectView _levelUpEffectView;
+    [SerializeField] private ModeChangePostProcessEffectPlayer _modeChangeEffectPlayer;
 
     private ThunderEffectPresenter _thunderEffectPresenter;
     private WeaponEffectPresenter _weaponEffectPresenter;
+    private ModeChangePostProcessEffectPresenter _modeChangeEffectPresenter;
     private LevelUpEffectPresenter _levelUpEffectPresenter;
 
     private void OnDestroy()
     {
         _thunderEffectPresenter?.Dispose();
         _weaponEffectPresenter?.Dispose();
+        _modeChangeEffectPresenter?.Dispose();
         _levelUpEffectPresenter?.Dispose();
     }
 }

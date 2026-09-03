@@ -47,4 +47,7 @@ public interface IEnemyAnimationController
 
     /// <summary>エネミーの終了タイミング</summary>
     public void AnimEvent_SpawnEnd();
+
+    public void AnimEvent_ShieldBreakStart();
+    public void AnimEvent_ShieldBlockHitStart();
 }
