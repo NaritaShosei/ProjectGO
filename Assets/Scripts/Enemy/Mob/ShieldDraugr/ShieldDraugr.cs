@@ -72,7 +72,8 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
         }
         else if (isFrontal)
         {
-            if (isWarrior)
+            bool isPhysicalHit = isWarrior || (isThunder && !context.IsLightningDamage);
+            if (isPhysicalHit)
             {
                 Debug.Log("盾にダメージ");
                 ApplyShieldDamage(damage);
