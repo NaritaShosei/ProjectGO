@@ -72,14 +72,13 @@
 `CameraController` は**ロックオン状態と対象の遷移を担当する実行主体**です。`_currentState`（`NormalCameraState` / `LockOnCameraState`）を自身で保持し、`LockOn` / `Unlock` の状態遷移そのものを実行します。既存Prefabの参照を維持するため、現在のシーン上のコンポーネント型は `LockOnController : CameraController` として残しています。
 
 - `_currentState` の保持と `NormalCameraState` / `LockOnCameraState` 間の遷移実行（`LockOn` / `Unlock`）
-- `Tick` 内でロックオン対象の有効性・距離超過を判定し、無効なら自動解除
+- `Tick` 内の `TryHandleInvalidTarget` で対象を監視：自動解除距離を超えたら解除、対象が無効化（撃破・削除・非ロック化）されたら次の対象へ、いなければ解除。通常の敵撃破はこの経路で拾う（`OnEnemyDefeated` は購読しない）
 - ロックオンボタンによる開始・解除
 - 対象切り替え入力の蓄積判定（`Tick` 内の `UpdateTargetSwitch`）。スティックは「倒し量 × 時間」、マウスは「横移動量の累積」がそれぞれの閾値を超えたら1回切り替える。逆方向入力で蓄積をリセットし、閾値到達時は切り替えの成否に関わらず蓄積を0へ戻す。ロックオン開始時（通常状態から入ったとき）に蓄積をクリアする
-- 現在のロックオン対象**自身**が撃破・強制削除されたときのみ次ターゲットを自動選択（`LockOnTargetSelector` への対象選定依頼）。対象でない敵が倒れても現在の対象は変更しない。次が見つからなければ解除
+- `EnemyManager.OnEnemyForceRemoved` を購読し、削除されたのが現在の対象なら次へ切り替え（なければ解除）
 - 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
-- `InputHandler` と `EnemyManager` のイベント購読・解除
 
-対象切り替えの入力値は `InputHandler` から受け取ります（スティックは `LockOnChangeInput`、マウス横移動量は `ConsumeLockOnSwitchMouseDelta()`）。閾値・デッドゾーンは `CameraController` の `[SerializeField]`（`_switchStickThreshold` / `_switchStickDeadzone` / `_switchMouseThreshold`）で調整します。
+対象切り替えの入力は `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（変更を Camera フォルダ内に閉じるための割り切り。`InputHandler` は経由しない）。マウス横移動量は取りこぼし防止のため `Update` でフレーム精度で蓄積し `Tick` で消費します。閾値・デッドゾーンは `CameraController` の `[SerializeField]`（`_switchStickThreshold` / `_switchStickDeadzone` / `_switchMouseThreshold`）で調整します。
 
 このクラス自身は画面上の位置や角度から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。状態変更は `CameraManager` へイベント通知のみで伝えます。
 
@@ -160,7 +159,7 @@ flowchart TD
 4. `CameraManager.SetLockOnCameraActive(true)` によりロックオンカメラのPriorityが上がり、ブレンドが開始します。
 5. ブレンド完了後、対象の画面位置に応じてカメラを回転し、プレイヤーを基準に位置を追従します。
 6. ロックオン中は `CameraController.Tick` 内の `UpdateTargetSwitch` が切り替え入力の蓄積を判定し、閾値到達で `SelectSwitchTarget` により対象を切り替えます。
-7. `CameraController.Tick` が対象の無効化（`IsLockable=false` 化など）・自動解除距離超過を検知すると解除します。`EnemyManager` の撃破・強制削除イベントは、**倒れたのが現在の対象のときだけ** 次対象への切り替え（なければ解除）を行います。対象でない敵の撃破では何もしません。
+7. `CameraController.Tick` 内の `TryHandleInvalidTarget` が対象を監視します。自動解除距離超過なら解除。対象が無効化（撃破・削除・`IsLockable=false` 化）されたら `SelectNextTarget` で次へ切り替え、いなければ解除。対象でない敵の撃破では何も起きません。`OnEnemyForceRemoved` のみイベント購読で、現在の対象が削除されたときだけ同様に処理します。
 8. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
 
 ## 参照関係と責務の境界
@@ -171,7 +170,7 @@ flowchart TD
 | `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド | Cinemachine、Player、InputHandler |
 | `CameraPresentationController` | ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火 | CameraZoomController、CameraShake、PlayerAttack、PlayerModeController、PlayerAnimationController |
 | `CameraZoomController` | FOV倍率の時間ベース補間 | Cinemachine |
-| `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定 | InputHandler、EnemyManager、LockOnTargetSelector、CameraManager |
+| `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定、切り替え入力 | InputHandler、EnemyManager（ForceRemovedのみ）、LockOnTargetSelector、CameraManager、Unity Input System（Gamepad/Mouse直接参照） |
 | `LockOnController` | 既存Prefab向けの互換コンポーネント | CameraController |
 | `LockOnTargetSelector` | ロックオン候補の絞り込みと選定 | EnemyManager、Camera、Player |
 | `CameraShake` | Cinemachine Noiseの一時操作 | Cinemachine、UniTask |
@@ -182,7 +181,7 @@ flowchart TD
 
 - シーン上の初期化順に依存するため、`CameraManager.Init(Player)` が呼ばれてからロックオン入力を扱える状態になります。
 - `CameraManager` は通常カメラ、ロックオンカメラ、ロックオンコントローラーの参照が不足すると初期化を中断します。
-- `LockOnController` は `EnemyManager` のイベントを購読するため、`OnDestroy` での購読解除が必要です。
+- `LockOnController` は `EnemyManager.OnEnemyForceRemoved` と `InputHandler.OnLockOn` を購読するため、`OnDestroy` での購読解除が必要です。
 - `LockOnTargetSelector` は選定スコアと左右判定に `_camera`（Cinemachine Brain 出力のメインカメラ）の `transform` と `WorldToScreenPoint` を使うため、カメラが未準備の場合は正しく選定できません。
-- キーボード＋マウス構成では対象切り替えを **マウス横移動量** で行います（矢印キーのバインドは廃止）。`LockOnChange` アクションはゲームパッド右スティック専用です。
+- 対象切り替えは `CameraController` が `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（`InputHandler` を経由しない割り切り）。`LockOnChange` アクションや矢印キーは対象切り替えには使いません。
 - `LockOnController.cs` はクラス名とファイル名を一致させています。Unityスクリプトをリネームする場合は、既存のMetaファイルのGUIDを維持してください。
