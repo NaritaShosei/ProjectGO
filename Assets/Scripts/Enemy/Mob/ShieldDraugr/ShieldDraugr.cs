@@ -106,19 +106,19 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
         {
             if (!isFrontal)
             {
-                Debug.Log("背面攻撃");
+                //背面ダメージ
                 _defenceContext.EnemyType = EnemyDefenceType.Flesh;
             }
             else
             {
-                Debug.Log("生身ダメージ");
+                //生身ダメージ
             }
             _stats.TakeDamage(damage);
             appliedToHp = true;
         }
         else if (willHitShield)
         {
-            Debug.Log("盾にダメージ");
+            //盾にダメージ
             ApplyShieldDamage(damage);
             appliedToShield = true;
             didBreakThisHit = _shieldState == ShieldState.Broken;
@@ -130,7 +130,7 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
         }
         else if (willBeBlocked)
         {
-            Debug.Log("正面につきダメージ無効");
+            //正面ダメージ(無効)
             wasBlocked = true;
             _enemyAnimator.ShieldBlockHitTrigger();
 
@@ -279,8 +279,6 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
         {
             BreakShield();
         }
-
-
     }
 
     /// <summary>
@@ -315,7 +313,6 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
 
         // 現在のBehaviourを終了
         _runner.ForceExitAction();
-        Debug.Log("[ShieldDraugr] Shield Broken!");
     }
 
     /// <summary>
