@@ -72,6 +72,15 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         _playerTransform = player.transform;
 
+        _occlusionTransparencyController?.Dispose();
+        _occlusionTransparencyController = new CameraOcclusionTransparencyController(
+            _playerTransform,
+            MainCamera,
+            _occlusionMask,
+            _occlusionCastRadius,
+            _occludedAlpha,
+            _occlusionFadeSpeed);
+
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
         {
             hitStopManager.Register(this, HitStopTargetGroup.Camera);
@@ -201,6 +210,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     #region Inspectorフィールド
 
     [Header("カメラ参照")]
+    [SerializeField] private Camera _mainCamera;
     [Tooltip("通常時に使用するCinemachineカメラ")]
     [SerializeField] private CinemachineCamera _normalCamera;
     [Tooltip("ロックオン時に使用するCinemachineカメラ")]
@@ -219,6 +229,16 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _cameraHeight = 2f;
     [Tooltip("通常時のカメラ位置追従の遅延時間（秒）。大きいほど追従がゆっくりになる")]
     [SerializeField] private float _posSmoothTime = 0.2f;
+
+    [Header("遮蔽物透過設定")]
+    [Tooltip("透過対象として検出するLayer")]
+    [SerializeField] private LayerMask _occlusionMask = ~0;
+    [Tooltip("カメラとプレイヤーを結ぶ判定の太さ（m）")]
+    [SerializeField, Min(0f)] private float _occlusionCastRadius = 0.25f;
+    [Tooltip("遮蔽中の不透明度")]
+    [SerializeField, Range(0f, 1f)] private float _occludedAlpha = 0.25f;
+    [Tooltip("1秒あたりの不透明度変化量")]
+    [SerializeField, Min(0.01f)] private float _occlusionFadeSpeed = 5f;
 
     [Header("フリーカメラ入力")]
     [SerializeField] private Vector2 _cameraRotationSpeed = new(120f, 80f);
@@ -267,13 +287,13 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     #region プライベートフィールド
 
-    private Camera _mainCamera;
     private Transform _playerTransform;
 
     private CinemachineOrbitalFollow _normalOrbitalFollow;
     private CinemachineInputAxisController _normalInputAxisController;
     private CameraMotionController _cameraMotionController;
     private CameraPresentationController _cameraPresentationController;
+    private CameraOcclusionTransparencyController _occlusionTransparencyController;
 
     private float _timeScale = 1f;
     private float _basePositionSmoothTime;
@@ -332,6 +352,11 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _lockOnController?.Tick(TimeScale);
     }
 
+    private void LateUpdate()
+    {
+        _occlusionTransparencyController?.UpdateTransparency(Time.deltaTime);
+    }
+
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= HandleSceneLoaded;
@@ -355,6 +380,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraMotionController?.Dispose();
         _cameraPresentationController?.ResetZoom();
         _cameraPresentationController?.Dispose();
+        _occlusionTransparencyController?.Dispose();
 
         ServiceLocator.Unregister<CameraManager>();
     }
@@ -363,10 +389,16 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         RefreshMainCamera(scene);
         _lockOnController?.SetMainCamera(_mainCamera);
+        _occlusionTransparencyController?.SetMainCamera(_mainCamera);
     }
 
     private void RefreshMainCamera(Scene scene)
     {
+        if (_mainCamera != null && _mainCamera.gameObject.scene == scene)
+        {
+            return;
+        }
+
         if (scene.IsValid() && scene.isLoaded)
         {
             foreach (var root in scene.GetRootGameObjects())

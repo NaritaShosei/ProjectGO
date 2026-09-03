@@ -1,5 +1,6 @@
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// `CameraMotionController` が依存するカメラ・コンポーネント参照の組。
@@ -147,6 +148,10 @@ public sealed class CameraMotionController
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
         _cameraFollowTarget.position = _playerTransform.position;
         _normalCamera.Follow = _cameraFollowTarget;
+
+        SceneManager.MoveGameObjectToScene(
+            _cameraFollowTarget.gameObject,
+            _normalCamera.gameObject.scene);
 
         if (_normalInputAxisController != null)
         {
