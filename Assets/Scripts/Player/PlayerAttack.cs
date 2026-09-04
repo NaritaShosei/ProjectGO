@@ -482,6 +482,11 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FinishAttack()
     {
+        if (_stateManager.IsDead() || _stateManager.IsDown())
+        {
+            ResetCombo();
+            return;
+        }
         if (_stateManager.IsDodging() || _stateManager.IsDamaged()) { return; }
 
         _isHomingActive = false;
