@@ -1,5 +1,5 @@
 //BossEnemy関連
-using BossEnemy.Model.System;
+using BossEnemy.Model.Attack;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;

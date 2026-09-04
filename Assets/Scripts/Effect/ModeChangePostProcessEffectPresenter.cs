@@ -33,6 +33,8 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
     {
         bool shouldPlay = _previousMode == PlayerMode.Warrior
             && newMode == PlayerMode.Thunder;
+        bool shouldRevertTint = _previousMode == PlayerMode.Thunder
+            && newMode == PlayerMode.Warrior;
 
         _previousMode = newMode;
 
@@ -42,7 +44,13 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
         _effectPlayer.ChangeHammerEmission(newMode);
 
         if (shouldPlay)
+        {
             _effectPlayer.Play().Forget();
+            _effectPlayer.PlayColorTint().Forget();
+        }
+
+        if (shouldRevertTint)
+            _effectPlayer.StopColorTint().Forget();
     }
 
     private void HandleEffectEnabled()
