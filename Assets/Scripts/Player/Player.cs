@@ -263,9 +263,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     [SerializeField] private MoveData _moveData;
 
     [Header("ダウン復帰")]
-    [SerializeField]
-    private AnimationCurve _downRecoveryHealthCurve =
-    AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+    [SerializeField, Range(0f, 1f), Tooltip("起き上がり完了時の最大HPに対する回復割合。1で100%")]
+    private float _downRecoveryHealthRate = 1f;
 
     [Header("被弾時のコントローラーの振動")]
     [SerializeField] private ControllerVibrationData _smallDamageVibration =
@@ -457,7 +456,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             return;
         }
 
-        _playerStats.SetHealth(MaxHealth);
+        _playerStats.SetHealth(MaxHealth * _downRecoveryHealthRate);
         _playerStateManager.ChangeState(PlayerState.Idle);
 
         OnDownRecoveryEnded?.Invoke();
@@ -474,12 +473,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             return;
         }
 
-        float recoveryRate = Mathf.Clamp01(
-            _downRecoveryHealthCurve.Evaluate(normalizedTime)
-        );
-
         _playerStats.SetHealth(
-            MaxHealth * recoveryRate
+            MaxHealth * _downRecoveryHealthRate * Mathf.Clamp01(normalizedTime)
         );
     }
 
