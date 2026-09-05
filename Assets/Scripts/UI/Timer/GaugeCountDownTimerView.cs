@@ -25,6 +25,17 @@ public class GaugeCountDownTimerView : MonoBehaviour, IPhaseTimerView
         );
     }
 
+    public void ResetTimer()
+    {
+        if (_hasMaximumGaugeWidth)
+        {
+            _timerGaugeRect.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                _maximumGaugeWidth
+            );
+        }
+    }
+
     [SerializeField, Tooltip("残り時間に合わせて両端から中央へ縮むRectTransform")]
     private RectTransform _timerGaugeRect;
 

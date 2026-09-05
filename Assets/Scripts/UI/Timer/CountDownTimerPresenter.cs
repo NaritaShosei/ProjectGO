@@ -17,6 +17,8 @@ public class CountDownTimerPresenter : IDisposable
         // タイマーのイベントにリスナーを登録
         timer.OnTimerStarted += HandleTimerStarted;
         timer.OnTimeChanged += HandleTimeChanged;
+
+        view.ResetTimer();
     }
 
     public void Dispose()
