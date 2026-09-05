@@ -53,6 +53,11 @@ public sealed class EnemyAttackPattern : ScriptableObject
     public float HomingStrength => _homingStrength;
     public float HomingDuration => _homingDuration;
 
+    public bool EnableRetreat => _enableRetreat;
+    public float RecoveryTime => _recoveryTime;
+    public float RetreatDistance => _retreatDistance;
+    public float RetreatSpeed => _retreatSpeed;
+
     [SerializeField] private string _patternName;
 
     [Header("Slot")]
@@ -131,6 +136,19 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [Min(0f)]
     [SerializeField] private float _homingDuration = 0.15f;
 
+    [Header("Post-Attack Retreat")]
+    [Tooltip("falseの場合、攻撃後もその場に留まる（闘神モードのような設置型チャージ攻撃と相性が良い）")]
+    [SerializeField] private bool _enableRetreat = true;
+    [Tooltip("攻撃終了後、後退を始めるまでの硬直時間（秒）")]
+    [Min(0f)]
+    [SerializeField] private float _recoveryTime = 0.3f;
+    [Tooltip("この距離まで離れたら後退をやめる")]
+    [Min(0f)]
+    [SerializeField] private float _retreatDistance = 4f;
+    [Tooltip("距離を取り直す際の移動速度")]
+    [Min(0f)]
+    [SerializeField] private float _retreatSpeed = 3f;
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -183,6 +201,20 @@ public sealed class EnemyAttackPattern : ScriptableObject
                 "[EnemyAttackPattern] HomingDuration が MoveDuration を超えています。MoveDuration に補正しました。",
                 this
             );
+        }
+
+        // RetreatDistanceがトリガー距離以下だと後退直後に再び攻撃判定に入りバタつく
+        if (_enableRetreat)
+        {
+            float triggerRange = _attackRange * _attackTriggerRatio;
+            if (_retreatDistance < triggerRange)
+            {
+                _retreatDistance = triggerRange;
+                Debug.LogWarning(
+                    "[EnemyAttackPattern] RetreatDistance がトリガー距離未満です。トリガー距離に補正しました。",
+                    this
+                );
+            }
         }
     }
 #endif
