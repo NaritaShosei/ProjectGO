@@ -1,12 +1,9 @@
 using BossEnemy.Character;
 using System;
 using UniRx;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-namespace BossEnemy.AI
+namespace BossEnemy.AI.BehaviourTree
 {
     /// <summary> Nodeへの遷移結果 </summary>
     public enum NodeCondition
@@ -16,9 +13,9 @@ namespace BossEnemy.AI
         Running
     }
 
-    #region 実行中のノードの実行状況をControllerに通知するクラス
-    /// <summary> 実行中のノードの実行状況をControllerに通知するクラス </summary>
-    public class RunningConditionNotifier
+
+    #region 実行中の実行終了時に実行終了を通知するクラス
+    public class NodeRunningConditionNotifier
     {
         public event Action OnRunningEnd;
 
@@ -31,92 +28,96 @@ namespace BossEnemy.AI
 
     #region TreeのNode遷移を行い操作するクラス
 
-    /// <summary> BehaviorTreeの操作クラス </summary>
+    /// <summary>
+    /// BehaviourTreeの操作クラス
+    /// </summary>
     public class BehaviourController
     {
-        public BehaviourController(
-            BossCharacterEntity bossCharacterEntity, 
-            ITreeNode entryNode)
+        public BehaviourController(ITreeNode origin)
         {
-            _entryNode = entryNode;
+            _originNode = origin;
+            _nodeRunningEndNotifier = origin.NodeRunningEndNotifier;
+            _nodeRunningEndNotifier.OnRunningEnd += SearchNextRunningNode;
         }
 
         /// <summary> 毎フレーム実行する処理 </summary>
         public void OnUpdate()
         {
-            if (_runningNode == null) return;
+            if (_currentNode == null) return;
 
-            _runningNode.OnUpdate();
+            _currentNode.OnUpdate();
         }
 
-        /// <summary> BehaviourTreeを探索し次の実行ノードを決める処理 </summary>
+        /// <summary> 次の行動を決める </summary>
         public void SearchNextRunningNode()
         {
-            if(_entryNode == null) return;
+            if(_originNode == null) return;
 
+            ITreeNode nextNode = _originNode;
             NodeCondition runningCondition = NodeCondition.Success;
-
             int count = 0;
+
             while (runningCondition != NodeCondition.Running)
             {
-                runningCondition = _runningNode.TryEntryNextNode(out _runningNode);
+                var currentNode = nextNode;
+                runningCondition = currentNode.TryEntryNextNode(out nextNode);
                 count++;
 
                 if (runningCondition == NodeCondition.Failure)
                 {
-                    Debug.LogError("行動の選択を失敗しました");
+                    Debug.Log("行動の切り替えに失敗しました、現在の行動を続行します。");
                     return;
                 }
             }
 
-            ChangeRunningNode(_runningNode);
+            ChangeNode(nextNode);
         }
 
-        /// <summary> 現在の行動を強制的に停止させる処理 </summary>
+        /// <summary> 現在の行動を強制停止させる </summary>
         public void StopRunning()
         {
-            if (_entryNode == null) return;
+            if (_originNode == null) return;
 
-            if (_runningNode != null)
-                _runningNode.OnExit();
+            if (_currentNode != null)
+                _currentNode.OnExit();
         }
 
-        /// <summary> 現在実行中のNode </summary>
-        private ITreeNode _runningNode = null;
+        /// <summary> 現在のNode </summary>
+        private ITreeNode _currentNode = null;
 
-        /// <summary> 操作するBossの実体クラス </summary>
-        private BossCharacterEntity _bossCharacterEntity = null;
+        /// <summary> Entry地点のNode </summary>
+        private readonly ITreeNode _originNode = null;
 
-        /// <summary> 探索開始地点 </summary>
-        private readonly ITreeNode _entryNode = null;
-
-        /// <summary> 現在のNodeの実行状況通知クラス </summary>
-        private readonly RunningConditionNotifier _nodeRunningEndNotifier = new();
+        private readonly NodeRunningConditionNotifier _nodeRunningEndNotifier;
 
         /// <summary> 現在のNodeを変更する </summary>
-        /// <param name="nextAction"> 次のNode </param>
-        private void ChangeRunningNode(ITreeNode nextAction)
+        /// <param name="nextNode"> 次のNode </param>
+        private void ChangeNode(ITreeNode nextNode)
         {
-            if(_runningNode != null) _runningNode.OnExit();
-
-            if (nextAction == null) return;
-            if (!nextAction.IsInit) nextAction.Init(_nodeRunningEndNotifier);
-
-            _runningNode = nextAction;
-            _runningNode.OnEnter();
+            if (nextNode == null) return;
+            if(_currentNode != null) _currentNode.OnExit();
+            
+            _currentNode = nextNode;
+            _currentNode.OnEnter();
         }
     }
     #endregion
 
-    #region BehaviourTreeNodeのInterface
+    #region 各NodeのベースとなるClassとInterface
     /// <summary> TreeNodeのInterface </summary>
     public interface ITreeNode
     {
         /// <summary> 初期化済み判定フラグ </summary>
         public bool IsInit { get; }
 
+        /// <summary> 実行優先度 </summary>
+        public int RunningPriority { get; }
+
+        /// <summary> ノードの実行状況通知クラス </summary>
+        public NodeRunningConditionNotifier NodeRunningEndNotifier { get; }
+
         /// <summary> BehaviourTreeをSetする </summary>
-        void Init(RunningConditionNotifier nodeRunningEndNotifier);
+        void Init(NodeRunningConditionNotifier nodeRunningEndNotifier);
 
         /// <summary> このNodeへの遷移条件を確認して結果を返す </summary>
         NodeCondition TryEntry();
@@ -138,61 +139,53 @@ namespace BossEnemy.AI
         /// <summary> このNodeを離れる際の処理 </summary>
         void OnExit();
     }
-    #endregion
 
-    #region BehaviourTreeNodeの基底Class
     /// <summary> BehaviorTreeのNodeの基底クラス </summary>
-    public abstract class TreeNodeBase : Node, ITreeNode
+    [Serializable]
+    public class TreeNode : ITreeNode
     {
         public bool IsInit => _isInit;
 
-        public virtual void Init(
-            RunningConditionNotifier nodeRunningEndNotifier)
+        public int RunningPriority => _runningPriority;
+
+        public NodeRunningConditionNotifier NodeRunningEndNotifier => _nodeRunningConditionNotifier;
+
+        public void Init(NodeRunningConditionNotifier nodeRunningEndNotifier)
         {
             _isInit = true;
-            _nodeRunningEndNotifier = nodeRunningEndNotifier;
+            _nodeRunningConditionNotifier = nodeRunningEndNotifier;
         }
 
-        public abstract NodeCondition TryEntry();
-        public abstract NodeCondition TryEntryNextNode(out ITreeNode nextNode);
+        public void SetRunningPriority(int priority) => _runningPriority = priority;
+
+        public void SetChildren(TreeNode[] childrenNode) => _childrenNode = childrenNode;
+
+        public TreeNode[] Children => _childrenNode;
+
+        public virtual NodeCondition TryEntry()
+        {
+            return NodeCondition.Failure;
+        }
+
+        public virtual NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        {
+            nextNode = null;
+            return NodeCondition.Failure;
+        }
+
         public virtual void OnEnter() { return; }
         public virtual void OnUpdate() { return; }
         public virtual void OnExit() { return; }
 
-        private RunningConditionNotifier _nodeRunningEndNotifier = null;
-
         private bool _isInit = false;
 
-        protected void RunningEnd() => _nodeRunningEndNotifier.HandleRunningEnd();
-    }
-    #endregion
+        protected NodeRunningConditionNotifier _nodeRunningConditionNotifier = null;
 
-    #region BehaviorTreeを構築するTreeGraph生成用のEditor拡張
-    /// <summary> BehaviorTreeを構築するGraphView </summary>
-    public abstract class BehaviourTreeGraphView : GraphView
-    {
-        public BehaviourTreeGraphView(EditorWindow editorWindow)
-        {
-            // 親のサイズに合わせてGraphViewのサイズを設定
-            this.StretchToParentSize();
+        [SerializeReference] protected TreeNode[] _childrenNode = null;
 
-            // MMBスクロールでズームインアウトができるように
-            SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
-            // MMBドラッグで描画範囲を動かせるように
-            this.AddManipulator(new ContentDragger());
-            // LMBドラッグで選択した要素を動かせるように
-            this.AddManipulator(new SelectionDragger());
-            // LMBドラッグで範囲選択ができるように
-            this.AddManipulator(new RectangleSelector());
-        }
+        [SerializeField] private int _runningPriority = 0;
 
-        protected BehaviourTreeGraphPresenter _behaviourTreeGraphPresenter;
-    }
-
-    /// <summary> GraphViewによって変更されたBehaviourTreeの変更内容をRepositryに反映するクラス </summary>
-    public class BehaviourTreeGraphPresenter
-    {
-
+        protected void HandleRunningEnd() => _nodeRunningConditionNotifier.HandleRunningEnd();
     }
     #endregion
 }
