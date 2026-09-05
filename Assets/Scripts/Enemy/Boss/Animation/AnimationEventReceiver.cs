@@ -1,8 +1,5 @@
-using JetBrains.Annotations;
 using System;
 using UnityEngine;
-
-// BossEnemy関連
 using BossEnemy.Interface;
 
 /// <summary>
@@ -11,9 +8,9 @@ using BossEnemy.Interface;
 /// IEnemyAnimationControllerを継承したIBossEnemyAnimationControllerを実装し、SMBからanimator.TryGetComponent()で取得される。
 /// </summary>
 
-namespace BossEnemy.Animation
+namespace BossEnemy.Infrastructure
 {
-    public class AnimationEventReceiver : IAnimationEventReceiver
+    public class AnimationEventReceiver : IBossCharacterAnimationEventReceiver
     {
         /// <summary>Animation中に動く際のイベント(目的地と到達までの時間)</summary>
         public event Action<Vector3, float> OnMove;
@@ -22,7 +19,10 @@ namespace BossEnemy.Animation
         public event Action<bool> OnColliderIsTriggerIsEnabled;
 
         /// <summary>攻撃ヒットタイミングのイベント</summary>
-        public event Action OnAttackHit;
+        public event Action OnCheckHitAttack;
+
+        /// <summary> 攻撃当たり判定を行うタイミングのイベント </summary>
+        public event Action OnHitAttack;
 
         /// <summary>攻撃アニメーション終了のイベント</summary>
         public event Action OnAttackEnd;
@@ -46,9 +46,15 @@ namespace BossEnemy.Animation
         }
 
         /// <summary>AttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
-        public void AnimEvent_AttackHit()
+        public void AnimEvent_CheckHitAttack()
         {
-            OnAttackHit?.Invoke();
+            OnCheckHitAttack?.Invoke();
+        }
+
+        /// <summary> 攻撃が当たった際に呼ばれる </summary>
+        public void AnimEvent_HitAttack()
+        {
+            OnHitAttack?.Invoke();
         }
 
         /// <summary>AttackSMB からステート終了時に呼ばれる</summary>
