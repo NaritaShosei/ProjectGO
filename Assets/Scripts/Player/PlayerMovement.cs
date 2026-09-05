@@ -280,8 +280,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_playerStateManager.CanDodge()) return;
 
-        // 攻撃キャンセル回避かどうかを記録
-        bool isCancelDodge = _playerStateManager.CurrentState == PlayerState.Attacking;
+        // 攻撃またはチャージからのキャンセル回避かどうかを記録する。
+        // チャージ遷移中も先に攻撃側の状態を解除しないと、回避開始後に
+        // UpdateCharging がチャージモーションを再度 CrossFade してしまう。
+        bool isCancelDodge = _playerStateManager.CurrentState is PlayerState.Attacking
+            or PlayerState.Charging;
 
         if (isCancelDodge)
         {
