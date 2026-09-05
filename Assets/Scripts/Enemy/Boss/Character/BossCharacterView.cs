@@ -10,6 +10,7 @@ using BossEnemy.Attack;
 using BossEnemy.Interface;
 using BossEnemy.Enum;
 using BossEnemy.SMB;
+using BossEnemy.AI.BehaviourTree;
 
 namespace BossEnemy.Character
 {
@@ -18,6 +19,9 @@ namespace BossEnemy.Character
     /// </summary>
     public class BossCharacterView : MonoBehaviour, IBossEnemyCharacterView
     {
+        private const string TAKE_DAMAGE_ARMOR_EFFECT_KEY = "BossArmorHit";
+        private const string TAKE_DAMAGE_EFFECT_KEY = "テスト血しぶき";
+
         // --- Events ---
 
         /// <summary>HP変化時に発火するイベント（current, max）</summary>
@@ -37,6 +41,12 @@ namespace BossEnemy.Character
 
         /// <summary>ロックオン可能なパーツが変わった際のイベント<新しいターゲット、古いターゲット></summary>
         public event Action<(IReadOnlyList<ILockOnTarget> newTargetParts, IReadOnlyList<ILockOnTarget> oldTargetParts)> OnChangeLockOnParts;
+
+        /// <summary> Bossのすべての初期化が終了して動き出す際のイベント </summary>
+        public event Action OnBeginsAction;
+
+        /// <summary> TimeScaleの変更があったら発火するイベント </summary>
+        public event Action<float> OnChangedTimeScale;
 
         // --- Properties ---
         /// <summary> BossEnemyと内部Modelを繋ぐControllerClass </summary>
@@ -69,7 +79,7 @@ namespace BossEnemy.Character
         public bool IsLockable => _isLockable;
 
         /// <summary> 現在攻撃可能なボスの部位 </summary>
-        public BossEnemyPartsView[] ActiveBossEnemyPartsView => _activeBossEnemyPartsView;
+        public BossCharacterPartsView[] ActiveBossEnemyPartsView => _activeBossEnemyPartsView;
 
         // --- Methods ---
 
@@ -78,7 +88,7 @@ namespace BossEnemy.Character
         {
             _isDead = false;
             _isLockable = true;
-            SetPosture(PostureType.Stand);
+            ChangePosture(PostureType.Standing);
 
             if(!ServiceLocator.TryGet(out _cameraManager))
             {
@@ -93,18 +103,30 @@ namespace BossEnemy.Character
 
             foreach (var behaviour in _animator.GetBehaviours<AttackSMBBase>())
             {
-                behaviour.Init(_bossEnemyAnimationEventReceiver, _bossEnemyAnimator, _attackPresenter,
-                    _cameraManager, _attackHitAreaSpawner, Self, _services.PlayerInformationService.Player);
-            }
 
-            _bossEnemyController.Init(this, _services, _bossEnemyAnimationEventReceiver);
+            }
+        }
+
+        public void Init(
+            IBossCharacterEntity bossCharacterEntity,
+            ITreeNode entryNode
+            )
+        {
+            Init();
+
+            _bossEnemyController = new BossCharacterController();
+            _bossEnemyController.Init(this, _services, _bossEnemyAnimationEventReceiver, entryNode, bossCharacterEntity);
+        }
+
+        public void StartAction()
+        {
+            OnBeginsAction?.Invoke();
         }
 
         /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
         public void TakeDamage(DamageContext context)
         {
-            DamagePopupViewModel damagePopupViewModel;
-            BossEnemyPartsView parts = null;
+            BossCharacterPartsView hitParts = null;
 
             // 攻撃から一番近いボスエネミーのパーツを割り出す
             float saveClosestDistance = 1000;
@@ -121,41 +143,26 @@ namespace BossEnemy.Character
                 if (playerDistance < saveClosestDistance)
                 {
                     saveClosestDistance = playerDistance;
-                    parts = bossParts;
-
-                    isGuardArmor = false;
-                    armorAttachmentPoint = ArmorAttachmentType.None;
-
-                    if (bossParts.Armor != null && !bossParts.Armor.IsBreak)
-                    {
-                        isHitArmor = true;
-                        isGuardArmor = true;
-                        armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
-                    }
-
-                    hitPos = bossParts.PartsPosition; 
-
-                    switch (bossParts.PartsType)
-                    {
-                        case TakeDamageType.None:
-                            break;
-                        case TakeDamageType.Normal:
-                            isWeekPoint = false;
-                            break;
-                        case TakeDamageType.Hard:
-                            isWeekPoint = false;
-                            break;
-                        case TakeDamageType.WeekPoint:
-                            isWeekPoint = true;
-                            break;
-                        case TakeDamageType.VitalPoint:
-                            isWeekPoint = true;
-                            break;
-                    }
+                    hitParts = bossParts;
                 }
             }
 
-            // ダメージのポップアップ
+            if (hitParts.Armor != null && !hitParts.Armor.IsBroken)
+            {
+                isHitArmor = true;
+                isGuardArmor = true;
+                armorAttachmentPoint = hitParts.Armor.AttachmentPoints;
+            }
+            else
+            {
+                isGuardArmor = false;
+                armorAttachmentPoint = ArmorAttachmentType.None;
+            }
+
+            hitPos = hitParts.PartsPosition;
+            isWeekPoint = IsHitPartsWeekPoint(hitParts);
+
+            // 攻撃Hitイベントの発火
             HitResult result = new HitResult()
             {
                 IsKill = false,
@@ -165,20 +172,18 @@ namespace BossEnemy.Character
             };
             context.OnHitResult?.Invoke(result);
 
-            damagePopupViewModel = new(DamageSystem.CalculateDamage(context, default), isWeekPoint, true, hitPos);
-            OnDamageDealt?.Invoke(damagePopupViewModel);
+            // ダメージのポップアップ
+            DamagePopUp(context, hitParts, isWeekPoint);
 
-            Debug.Log("ダメージを検出(アーマーのガード:" + isGuardArmor + ")" + "(こうげきかしょ:" + parts.PartsType + ")");
-            OnTakeDamage?.Invoke(context, parts.PartsType, armorAttachmentPoint);
+            // ダメージを受けた際のイベント発火
+            HandleTakeDamage(context, hitParts, armorAttachmentPoint);
 
-            // 攻撃を受けた際のEffect
-            if (isHitArmor) _effectManager.PlayEffect(_takeArmorDamageEffectKey, hitPos);
-            else _effectManager.PlayEffect(_takeDamageEffectKey, hitPos);
+            // ダメージエフェクトの再生
+            PlayDamageHitEffect(isHitArmor, hitPos);
         }
 
-        public void Attack(Attack.AttackData bossEnemyAttackData)
+        public void StartAttack(Attack.AttackData bossEnemyAttackData)
         {
-            _attackPresenter.HnadleAttackStart(bossEnemyAttackData);
             _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
             Debug.Log(bossEnemyAttackData.AnimParamName);
         }
@@ -196,7 +201,7 @@ namespace BossEnemy.Character
             {
                 PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownVoice);
                 PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownImpact);
-                SetPosture(PostureType.SpreadEagled);
+                ChangePosture(PostureType.SpreadEagled);
                 return;
             }
 
@@ -204,47 +209,17 @@ namespace BossEnemy.Character
             {
                 PlayBossSE(SoundCueNames.Boss.OneLegBreakVoice);
                 PlayBossSE(SoundCueNames.Boss.OneLegBreakDownImpact);
-                SetPosture(PostureType.Crouch);
+                ChangePosture(PostureType.RightHalfKneel);
             }
         }
 
         public void RiseUp()
         {
             _bossEnemyAnimator.SetIsDown(false);
-            SetPosture(PostureType.Stand);
+            ChangePosture(PostureType.Standing);
         }
 
-        #region 鎧関連の処理
-        public void ArmorInit()
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                bossArmor.Init();
-            }
-        }
-
-        public void ArmorBreak(ArmorAttachmentType attachmentPointsType)
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                if (bossArmor.AttachmentPoints == attachmentPointsType)
-                {
-                    bossArmor.BreakArmer().Forget();
-                }
-            }
-        }
-
-        public void ArmorRepair(ArmorAttachmentType attachmentPointsType)
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                if (bossArmor.AttachmentPoints == attachmentPointsType)
-                {
-                    bossArmor.RepairArmor().Forget();
-                }
-            }
-        }
-        #endregion
+       
 
         /// <summary>ノックバックの力を与える</summary>
         public void AddKnockbackForce(Vector3 direction)
@@ -258,51 +233,22 @@ namespace BossEnemy.Character
 
         }
 
-        public void PhaseChange()
+        public void ChangePhase()
         {
             _bossEnemyAnimator.SetPhaseChange();
         }
 
-        public void SetPosture(PostureType postureType)
+        /// <summary> キャラクターの姿勢を変更 </summary>
+        public void ChangePosture(PostureType postureType)
         {
-            if (postureType == _currentPostureType) return;
-
-            BossEnemyPartsView[] lockOnOldTargets = null;
-            if (_activeBossEnemyPartsView != null)
+            switch (postureType)
             {
-                lockOnOldTargets = _activeBossEnemyPartsView;
-                foreach (var oldTarget in _activeBossEnemyPartsView)
-                {
-                    oldTarget.SetLockable(false);
-                }
+                case PostureType.Standing:
+                    
+                    break;
             }
 
-            foreach (var collision in _collisionDetections)
-            {
-                if (collision.CollisionDetectionPostureType == postureType)
-                {
-                    _bossCollider.size = collision.BossColliderSize;
-                    _bossCollider.center = collision.BossColliderCenter;
-                    _activeBossEnemyPartsView = collision.BossEnemyPartsView;
-                    _currentPostureType = postureType;
-
-                    BossEnemyPartsView[] lockOnNewTargets = _activeBossEnemyPartsView;
-
-                    foreach(var newTarget in _activeBossEnemyPartsView)
-                    {
-                        newTarget.SetLockable(true);
-                    }
-
-                    OnChangeLockOnParts?.Invoke((lockOnNewTargets, lockOnOldTargets));
-                    return;
-                }
-            }
-        }
-
-        /// <summary>ColliderのIsTriggerをセットする</summary>
-        public void SetIsTrigger(bool isTrigger)
-        {
-            _bossCollider.isTrigger = isTrigger;
+            ChangeLockOnParts(postureType);
         }
 
         /// <summary>位置をセットする</summary>
@@ -347,6 +293,7 @@ namespace BossEnemy.Character
         {
             _timeScale.Value = timeScale;
             _bossEnemyAnimator.SetAnimSpeed(timeScale);
+            OnChangedTimeScale?.Invoke(timeScale);
         }
 
         /// <summary>
@@ -378,6 +325,38 @@ namespace BossEnemy.Character
             Debug.Log("Boss討伐完了");
         }
 
+        #region 鎧関連の処理
+        public void ArmorInit()
+        {
+            foreach (var bossArmor in _bossArmorViews)
+            {
+                bossArmor.Init();
+            }
+        }
+
+        public void ArmorBreak(ArmorAttachmentType attachmentPointsType)
+        {
+            foreach (var bossArmor in _bossArmorViews)
+            {
+                if (bossArmor.AttachmentPoints == attachmentPointsType)
+                {
+                    bossArmor.BreakArmer().Forget();
+                }
+            }
+        }
+
+        public void ArmorRepair(ArmorAttachmentType attachmentPointsType)
+        {
+            foreach (var bossArmor in _bossArmorViews)
+            {
+                if (bossArmor.AttachmentPoints == attachmentPointsType)
+                {
+                    bossArmor.RepairArmor().Forget();
+                }
+            }
+        }
+        #endregion
+
         [Header("ボスの当たり判定")]
         [SerializeField] private CollisionInformation[] _collisionDetections;
 
@@ -395,15 +374,13 @@ namespace BossEnemy.Character
 
         [Header("ボスエネミーのAnimationEventReceiver")]
         [SerializeReference, SubclassSelector]
-        private IAnimationEventReceiver _bossEnemyAnimationEventReceiver;
+        private IBossCharacterAnimationEventReceiver _bossEnemyAnimationEventReceiver;
 
         // ボスエネミーのController
         private IBossEnemyCharacterController _bossEnemyController;
 
         // ボスエネミーのAnimator
         private BossEnemyAnimator _bossEnemyAnimator;
-
-        private BossAttackPresenter _attackPresenter = new();
 
         // 各種マネージャー
         private EffectManager _effectManager;
@@ -421,11 +398,7 @@ namespace BossEnemy.Character
         // ボスのタイムスケール
         private ReactiveProperty<float> _timeScale = new(1.0f);
 
-        private BossEnemyPartsView[] _activeBossEnemyPartsView;
-        private PostureType _currentPostureType = PostureType.None;
-
-        private const string _takeArmorDamageEffectKey = "BossArmorHit";
-        private const string _takeDamageEffectKey = "テスト血しぶき";
+        private BossCharacterPartsView[] _activeBossEnemyPartsView;
 
         private void Awake()
         {
@@ -440,9 +413,104 @@ namespace BossEnemy.Character
             if (!_isDead) _bossEnemyController.OnUpdate();
         }
 
+        #region ダメージを受けた際のメソッド群
+        private void HandleTakeDamage(DamageContext damageContext, BossCharacterPartsView hitParts, ArmorAttachmentType armorAttachmentType)
+        {
+            OnTakeDamage?.Invoke(damageContext, hitParts.PartsType, armorAttachmentType);
+        }
+
+        private void DamagePopUp(DamageContext damageContext, BossCharacterPartsView hitParts, bool isWeekPoint)
+        {
+            DamagePopupViewModel damagePopupViewModel;
+
+            damagePopupViewModel = new(DamageSystem.CalculateDamage(damageContext, GetDefenseContext(hitParts)), isWeekPoint, true, hitParts.GetTargetCenter().position);
+            OnDamageDealt?.Invoke(damagePopupViewModel);
+        }
+
+        private EnemyDefenseContext GetDefenseContext(BossCharacterPartsView bossParts)
+        {
+            EnemyDefenceType hitPartsDefenseType;
+            if (bossParts.Armor == null || bossParts.Armor.IsBroken)
+                hitPartsDefenseType = EnemyDefenceType.Flesh;
+            else
+                hitPartsDefenseType = EnemyDefenceType.Armor;
+
+            EnemyDefenseContext defenseContext = new EnemyDefenseContext()
+            {
+                EnemyType = hitPartsDefenseType,
+                HasShockDebuff = false
+            };
+
+            return defenseContext;
+        }
+
+        private bool IsHitPartsWeekPoint(BossCharacterPartsView bossParts)
+        {
+            bool isWeekPoint = false;
+            switch (bossParts.PartsType)
+            {
+                case TakeDamageType.None:
+                    break;
+                case TakeDamageType.Normal:
+                    isWeekPoint = false;
+                    break;
+                case TakeDamageType.Hard:
+                    isWeekPoint = false;
+                    break;
+                case TakeDamageType.WeekPoint:
+                    isWeekPoint = true;
+                    break;
+                case TakeDamageType.VitalPoint:
+                    isWeekPoint = true;
+                    break;
+            }
+            return isWeekPoint;
+        }
+
+        private void PlayDamageHitEffect(bool isHitArmor, Vector3 hitPos)
+        {
+            // 攻撃を受けた際のEffect
+            if (isHitArmor) _effectManager.PlayEffect(TAKE_DAMAGE_ARMOR_EFFECT_KEY, hitPos);
+            else _effectManager.PlayEffect(TAKE_DAMAGE_EFFECT_KEY, hitPos);
+        }
+        #endregion
+
         private void PlayBossSE(string cueName)
         {
             Sound.PlaySE(gameObject, cueName, CueSheetType.Boss);
+        }
+
+        private void ChangeLockOnParts(PostureType postureType)
+        {
+            BossCharacterPartsView[] lockOnOldTargets = null;
+            if (_activeBossEnemyPartsView != null)
+            {
+                lockOnOldTargets = _activeBossEnemyPartsView;
+                foreach (var oldTarget in _activeBossEnemyPartsView)
+                {
+                    oldTarget.SetLockable(false);
+                }
+            }
+
+            foreach (var collision in _collisionDetections)
+            {
+                if (collision.CollisionDetectionPostureType == postureType)
+                {
+                    _bossCollider.size = collision.BossColliderSize;
+                    _bossCollider.center = collision.BossColliderCenter;
+                    _activeBossEnemyPartsView = collision.BossEnemyPartsView;
+
+                    BossCharacterPartsView[] lockOnNewTargets = _activeBossEnemyPartsView;
+
+                    foreach (var newTarget in _activeBossEnemyPartsView)
+                    {
+                        newTarget.SetLockable(true);
+                    }
+
+                    OnChangeLockOnParts?.Invoke((lockOnNewTargets, lockOnOldTargets));
+                    return;
+                }
+            }
         }
 
         #region ボスの姿勢ごとの当たり判定情報
@@ -455,7 +523,7 @@ namespace BossEnemy.Character
 
             public Vector3 BossColliderCenter => _center;
 
-            public BossEnemyPartsView[] BossEnemyPartsView => _bossEnemyPartsView;
+            public BossCharacterPartsView[] BossEnemyPartsView => _bossEnemyPartsView;
 
             [Header("姿勢")]
             [SerializeField] private PostureType _postureType;
@@ -465,7 +533,7 @@ namespace BossEnemy.Character
             [SerializeField] private Vector3 _size;
 
             [Header("各部位")]
-            [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
+            [SerializeField] private BossCharacterPartsView[] _bossEnemyPartsView;
         }
         #endregion
     }
@@ -473,7 +541,7 @@ namespace BossEnemy.Character
 
     #region ボスエネミーの各部位
     [Serializable]
-    public class BossEnemyPartsView : ILockOnTarget
+    public class BossCharacterPartsView : ILockOnTarget
     {
         /// <summary>
         /// ロックオンなどの中心のTransformを取得する
