@@ -2447,10 +2447,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 625671375}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b74d6b7a7cc68bd49b9c6390d023887d, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cae6d4877f14d47a362fde223a0cd51, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CountDownTimerView
-  _timerText: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::GaugeCountDownTimerView
   _timerGaugeRect: {fileID: 625671376}
 --- !u!114 &625671378
 MonoBehaviour:
