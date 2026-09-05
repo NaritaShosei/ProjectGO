@@ -2,14 +2,13 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.Enum;
-using BossEnemy.Effect;
+using BossEnemy.View.Effect;
 
 namespace BossEnemy.Infrastructure
 {
     public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
     {
-        public void Spawn(HitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime)
+        public void Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime)
         {
             HitAreaViewBase hitArea = GetHitArea(hitAreaType);
             hitArea.gameObject.transform.position = spawnCenterPos;
@@ -20,19 +19,19 @@ namespace BossEnemy.Infrastructure
         [Header("円形のHitArea")]
         [SerializeField] private CircleHitAreaView _circleHitEffect;
 
-        private Dictionary<HitAreaType, Queue<HitAreaViewBase>> _pool = new();
+        private Dictionary<AttackHitAreaType, Queue<HitAreaViewBase>> _pool = new();
 
-        private HitAreaViewBase GetHitArea(HitAreaType hitAreaType)
+        private HitAreaViewBase GetHitArea(AttackHitAreaType hitAreaType)
         {
             HitAreaViewBase hitArea = null;
 
             switch (hitAreaType)
             {
-                case HitAreaType.None:
+                case AttackHitAreaType.None:
                     Debug.LogError("該当するものがありません");
                     return null;
-                case HitAreaType.Circle:
-                    if (TryGet(out hitArea, HitAreaType.Circle))
+                case AttackHitAreaType.Circle:
+                    if (TryGet(out hitArea, AttackHitAreaType.Circle))
                     {
                         hitArea.gameObject.SetActive(true);
                         return hitArea;
@@ -48,7 +47,7 @@ namespace BossEnemy.Infrastructure
             return null;
         }
 
-        private bool TryGet(out HitAreaViewBase result, HitAreaType hitAreaType)
+        private bool TryGet(out HitAreaViewBase result, AttackHitAreaType hitAreaType)
         {
             if (_pool.ContainsKey(hitAreaType))
             {
@@ -67,7 +66,7 @@ namespace BossEnemy.Infrastructure
             return false;
         }
 
-        private void Release(HitAreaViewBase hitArea, HitAreaType hitAreaType)
+        private void Release(HitAreaViewBase hitArea, AttackHitAreaType hitAreaType)
         {
             hitArea.OnDespawn -= Release;
             _pool[hitAreaType].Enqueue(hitArea);
