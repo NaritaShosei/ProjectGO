@@ -1,8 +1,11 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// カメラ入力とロックオン状態の遷移を管理するControllerです。
 /// ターゲット選択はLockOnTargetSelectorに、カメラの動きは各Stateに委譲します。
+/// 対象切り替えの入力は InputHandler を介さず Gamepad.current / Mouse.current を直接参照します
+/// （変更をCameraフォルダ内に閉じるための割り切り）。
 /// </summary>
 public class CameraController : MonoBehaviour
 {
@@ -59,8 +62,7 @@ public class CameraController : MonoBehaviour
 
         SubscribeInputEvents();
 
-        // 敵を倒したときの次ターゲット自動選択
-        enemyManager.OnEnemyDefeated += HandleEnemyDefeated;
+        // 敵の強制削除時の次ターゲット自動選択（通常の撃破は Tick の有効性チェックで拾う）
         enemyManager.OnEnemyForceRemoved += HandleEnemyForceRemoved;
     }
 
@@ -69,14 +71,37 @@ public class CameraController : MonoBehaviour
     {
         if (_currentState == null) return;
 
-        if (_currentState == _lockOnState
-            && (!_lockOnState.IsTargetValid || _lockOnState.IsTargetOutOfRange))
+        if (_currentState == _lockOnState && TryHandleInvalidTarget())
         {
-            Unlock();
             return;
         }
 
+        UpdateTargetSwitch(timeScale);
         _currentState.Tick(timeScale, _inputHandler.CameraMoveInput);
+    }
+
+    /// <summary>
+    /// ロックオン対象が無効になっていないか確認する。
+    /// 自動解除距離を超えた → 解除。撃破・削除・非ロック化 → 次の対象へ、いなければ解除。
+    /// </summary>
+    /// <returns>解除または切り替えを行った場合 true（このフレームの以降の更新はスキップ）。</returns>
+    private bool TryHandleInvalidTarget()
+    {
+        if (_lockOnState.IsTargetOutOfRange)
+        {
+            Unlock();
+            return true;
+        }
+
+        if (!_lockOnState.IsTargetValid)
+        {
+            var next = _selector.SelectNextTarget(_lockOnState.Target);
+            if (next != null) LockOn(next);
+            else Unlock();
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>ロックオン処理で使用するメインカメラを更新します。</summary>
@@ -96,15 +121,22 @@ public class CameraController : MonoBehaviour
 
         if (CurrentTarget == target) return;
 
+        bool wasLockedOn = IsLockedOn;
+
         if (_currentState != _normalState)
         {
             _currentState.Exit();
         }
 
-        _lockOnState.SetTarget(target);
+        // 初回か対象切り替えかでブレンド起点が変わる
+        _lockOnState.SetTarget(target, isInitialLockOn: !wasLockedOn);
         _currentState = _lockOnState;
         _cameraManager.SetLockOnCameraActive(true);
         _currentState.Enter();
+
+        // 初回のみ、ロックオン前に溜まった切り替え入力を捨てる
+        if (!wasLockedOn) ResetSwitchAccumulators();
+
         OnTargetChanged?.Invoke(target);
     }
 
@@ -127,6 +159,16 @@ public class CameraController : MonoBehaviour
     [Tooltip("ロックオン可能な最大距離（m）")]
     [SerializeField] private float _lockOnRange = 20f;
 
+    [Header("対象切り替え（スティック）")]
+    [Tooltip("倒し量×時間 の蓄積がこの値を超えると1回切り替える")]
+    [SerializeField] private float _switchStickThreshold = 0.35f;
+    [Tooltip("スティックの横成分がこの絶対値未満のときは蓄積しない（デッドゾーン）")]
+    [SerializeField, Range(0f, 1f)] private float _switchStickDeadzone = 0.2f;
+
+    [Header("対象切り替え（マウス）")]
+    [Tooltip("マウス横移動量の累積がこの絶対値を超えると1回切り替える")]
+    [SerializeField] private float _switchMouseThreshold = 400f;
+
     private CameraManager _cameraManager;
     private InputHandler _inputHandler;
     private LockOnTargetSelector _selector;
@@ -135,6 +177,12 @@ public class CameraController : MonoBehaviour
     private LockOnCameraState _lockOnState;
     private ICameraState _currentState;
 
+    // 対象切り替えの入力蓄積（符号付き。正で右、負で左）
+    private float _switchAccumStick;
+    private float _switchAccumMouse;
+    // マウス横移動量を Update でフレーム精度で貯め、Tick で消費する
+    private float _mouseSwitchDeltaX;
+
     #endregion
 
     #region プライベートメソッド
@@ -142,25 +190,28 @@ public class CameraController : MonoBehaviour
     private void SubscribeInputEvents()
     {
         _inputHandler.OnLockOn += HandleLockOnInput;
-        _inputHandler.OnLockOnLeft += HandleLockOnLeft;
-        _inputHandler.OnLockOnRight += HandleLockOnRight;
     }
 
     #region Unityライフサイクル
 
+    private void Update()
+    {
+        // マウス切り替え用の横移動量をフレーム精度で貯める（FixedUpdateだと取りこぼすため）
+        if (IsLockedOn && Mouse.current != null)
+        {
+            _mouseSwitchDeltaX += Mouse.current.delta.ReadValue().x;
+        }
+    }
 
     private void OnDestroy()
     {
         if (_inputHandler != null)
         {
             _inputHandler.OnLockOn -= HandleLockOnInput;
-            _inputHandler.OnLockOnLeft -= HandleLockOnLeft;
-            _inputHandler.OnLockOnRight -= HandleLockOnRight;
         }
 
         if (ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
-            enemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
             enemyManager.OnEnemyForceRemoved -= HandleEnemyForceRemoved;
         }
     }
@@ -187,29 +238,63 @@ public class CameraController : MonoBehaviour
             TryManualLockOn();
         }
     }
-    /// <summary>左方向へのターゲット切り替え。</summary>
-
-    private void HandleLockOnLeft()
+    /// <summary>切り替え入力を蓄積し、閾値を超えたらその方向のターゲットへ切り替える。</summary>
+    private void UpdateTargetSwitch(float timeScale)
     {
-        if (_cameraManager == null || _selector == null) return;
-        if (!_cameraManager.IsLockedOn) return;
+        if (_inputHandler == null || _selector == null) return;
+        if (!IsLockedOn) return;
 
-        var next = _selector.SelectSwitchTarget(_cameraManager.CurrentTarget, inputDirection: -1f);
-        if (next == null) return;
+        // スティック：デッドゾーン超えの間だけ「倒し量×時間」を蓄積
+        float stickX = Gamepad.current != null ? Gamepad.current.rightStick.ReadValue().x : 0f;
+        if (Mathf.Abs(stickX) >= _switchStickDeadzone)
+        {
+            // 逆方向へ倒したら蓄積をリセット
+            if (_switchAccumStick != 0f && Mathf.Sign(stickX) != Mathf.Sign(_switchAccumStick))
+                _switchAccumStick = 0f;
 
-        LockOn(next);
+            _switchAccumStick += stickX * (Time.fixedDeltaTime * timeScale);
+
+            // 閾値到達で切り替え、蓄積を0へ（成否に関わらず）
+            if (Mathf.Abs(_switchAccumStick) >= _switchStickThreshold)
+            {
+                TrySwitchTarget(Mathf.Sign(_switchAccumStick));
+                _switchAccumStick = 0f;
+            }
+        }
+
+        // マウス：Update で貯めた横移動量を消費して符号付きで累積（時間は掛けない）
+        float mouseDelta = _mouseSwitchDeltaX;
+        _mouseSwitchDeltaX = 0f;
+        if (mouseDelta != 0f)
+        {
+            // 逆方向へ動かしたら蓄積をリセット
+            if (_switchAccumMouse != 0f && Mathf.Sign(mouseDelta) != Mathf.Sign(_switchAccumMouse))
+                _switchAccumMouse = 0f;
+
+            _switchAccumMouse += mouseDelta;
+
+            // 閾値到達で切り替え、蓄積を0へ（成否に関わらず）
+            if (Mathf.Abs(_switchAccumMouse) >= _switchMouseThreshold)
+            {
+                TrySwitchTarget(Mathf.Sign(_switchAccumMouse));
+                _switchAccumMouse = 0f;
+            }
+        }
     }
 
-    /// <summary>右方向へのターゲット切り替え。</summary>
-    private void HandleLockOnRight()
+    /// <summary>指定方向のターゲットへ切り替える。対象がいなければ何もしない。</summary>
+    private void TrySwitchTarget(float direction)
     {
-        if (_cameraManager == null || _selector == null) return;
-        if (!_cameraManager.IsLockedOn) return;
+        var next = _selector.SelectSwitchTarget(CurrentTarget, direction);
+        if (next != null) LockOn(next);
+    }
 
-        var next = _selector.SelectSwitchTarget(_cameraManager.CurrentTarget, inputDirection: 1f);
-        if (next == null) return;
-
-        LockOn(next);
+    /// <summary>対象切り替えの入力蓄積を0に戻す。ロックオン開始時に呼ぶ。</summary>
+    private void ResetSwitchAccumulators()
+    {
+        _switchAccumStick = 0f;
+        _switchAccumMouse = 0f;
+        _mouseSwitchDeltaX = 0f;
     }
 
     #endregion
@@ -234,27 +319,7 @@ public class CameraController : MonoBehaviour
 
     #region 敵撃破ハンドラ
 
-    /// <summary>
-    /// 敵撃破時の処理。
-    /// ロックオン中であれば次のターゲットを自動選択します。
-    /// 次のターゲットが見つからなければロックオンを解除します。
-    /// </summary>
-    private void HandleEnemyDefeated()
-    {
-        if (!IsLockedOn) return;
-
-        var next = _selector.SelectNextTarget(CurrentTarget);
-        if (next != null)
-        {
-            // 自動ロックオン状態は引き継ぐ
-            LockOn(next);
-        }
-        else
-        {
-            Unlock();
-        }
-    }
-
+    /// <summary>敵の強制削除時の処理。削除されたのが現在の対象なら次へ切り替え、なければ解除する。</summary>
     private void HandleEnemyForceRemoved(IEnemy removedEnemy)
     {
         if (_cameraManager == null || _selector == null) return;
