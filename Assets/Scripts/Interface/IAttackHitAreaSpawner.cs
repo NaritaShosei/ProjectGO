@@ -1,7 +1,5 @@
 using UnityEngine;
 
-using BossEnemy.Enum;
-
 public interface IAttackHitAreaSpawner
 {
     /// <summary> 攻撃範囲エフェクトの生成 </summary>
@@ -9,5 +7,5 @@ public interface IAttackHitAreaSpawner
     /// <param name="spawnCenterPos"> エフェクトの中心座標 </param>
     /// <param name="range"> 当たり判定の半分の大きさ </param>
     /// <param name="despawnTime"> エフェクト消滅までの時間 </param>
-    public void Spawn(HitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime);
+    public void Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime);
 }

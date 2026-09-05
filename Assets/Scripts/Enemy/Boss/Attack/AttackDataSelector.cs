@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.Character;
-
 namespace BossEnemy.Attack
 {
     public class AttackDataSelector
