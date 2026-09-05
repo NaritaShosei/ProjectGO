@@ -82,7 +82,7 @@ namespace BossEnemy.UI
         }
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
-        public void PhaseChange(CharacterStatus bossEnemyData, int currentPhase)
+        public void PhaseChange(BossCharacterEntity bossEntity, int currentPhase)
         {
             if (currentPhase >= _bossEnemyAllPhaseHPBarArray.Length)
             {
@@ -97,9 +97,9 @@ namespace BossEnemy.UI
             _currentHPBar?.Disable();
 
             _currentHPBar = _bossEnemyAllPhaseHPBarArray[currentPhase];
-            _currentHPBar.Init(bossEnemyData.MaxHP);
+            _currentHPBar.Init(bossEntity.CharacterCurrentStats.MaxHP);
 
-            bossEnemyData.CurrentHP.Subscribe(async hp =>
+            bossEntity.CurrentHP.Subscribe(async hp =>
             {
                 await CurrentBar.TakeDamage(hp);
             }).AddTo(_disposable);
