@@ -93,31 +93,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
   _attackHitTime: 0.84
   _weaponSwingTime: 0.32
---- !u!1101 &-8706561066639563876
-AnimatorStateTransition:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: ShieldBreakTrigger
-    m_EventTreshold: 0
-  m_DstStateMachine: {fileID: 0}
-  m_DstState: {fileID: -5640221493339339244}
-  m_Solo: 0
-  m_Mute: 0
-  m_IsExit: 0
-  serializedVersion: 3
-  m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.75
-  m_HasExitTime: 0
-  m_HasFixedDuration: 1
-  m_InterruptionSource: 0
-  m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
 --- !u!114 &-8692597555028952745
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -130,6 +105,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e967c69c7e638a544910f98156670da2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDeadSMB
+--- !u!114 &-8339151908603982365
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d35251f50847b2468569dd700a716c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyShieldBlockSMB
 --- !u!114 &-7788459553001155151
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -142,18 +129,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 494a4a9917cae5b4dae1eee768c83078, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyKnockbackSMB
---- !u!114 &-7153922973909162252
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d35251f50847b2468569dd700a716c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyShieldBlockSMB
 --- !u!114 &-7125395916238504551
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -166,29 +141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 824d8ee1413e99946a75ca97238d8699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackEffectSMB
-  _effectTiming: 0.52
---- !u!1101 &-6979442414439119744
-AnimatorStateTransition:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: 
-  m_Conditions: []
-  m_DstStateMachine: {fileID: 0}
-  m_DstState: {fileID: -1146940107501373710}
-  m_Solo: 0
-  m_Mute: 0
-  m_IsExit: 0
-  serializedVersion: 3
-  m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.87068963
-  m_HasExitTime: 1
-  m_HasFixedDuration: 1
-  m_InterruptionSource: 0
-  m_OrderedInterruption: 1
-  m_CanTransitionToSelf: 1
+  _effectTiming: 0.36
 --- !u!114 &-6736881932113134288
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -201,6 +154,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 482582cdce8bd84409728f9b16105f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyShieldBlockHitSMB
+--- !u!1101 &-6303893964488277306
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_Conditions:
+  - m_ConditionMode: 1
+    m_ConditionEvent: ShieldBreakTrigger
+    m_EventTreshold: 0
+  m_DstStateMachine: {fileID: 0}
+  m_DstState: {fileID: 69516742858745350}
+  m_Solo: 0
+  m_Mute: 0
+  m_IsExit: 0
+  serializedVersion: 3
+  m_TransitionDuration: 0.25
+  m_TransitionOffset: 0
+  m_ExitTime: 0.75
+  m_HasExitTime: 0
+  m_HasFixedDuration: 1
+  m_InterruptionSource: 0
+  m_OrderedInterruption: 1
+  m_CanTransitionToSelf: 1
 --- !u!1102 &-6216087411424913607
 AnimatorState:
   serializedVersion: 6
@@ -306,34 +284,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!1102 &-5640221493339339244
-AnimatorState:
-  serializedVersion: 6
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Shield Break
-  m_Speed: 1
-  m_CycleOffset: 0
-  m_Transitions:
-  - {fileID: -6979442414439119744}
-  m_StateMachineBehaviours:
-  - {fileID: -7153922973909162252}
-  m_Position: {x: 50, y: 50, z: 0}
-  m_IKOnFeet: 0
-  m_WriteDefaultValues: 1
-  m_Mirror: 0
-  m_SpeedParameterActive: 0
-  m_MirrorParameterActive: 0
-  m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 523edb3deb197a847a5b61065756cd58, type: 2}
-  m_Tag: 
-  m_SpeedParameter: 
-  m_MirrorParameter: 
-  m_CycleOffsetParameter: 
-  m_TimeParameter: 
 --- !u!1102 &-5292889396655439397
 AnimatorState:
   serializedVersion: 6
@@ -779,15 +729,11 @@ AnimatorStateMachine:
     m_State: {fileID: -4024760729447857365}
     m_Position: {x: 590, y: 80, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -5640221493339339244}
-    m_Position: {x: 590, y: 150, z: 0}
-  - serializedVersion: 1
     m_State: {fileID: -6206754961940836823}
     m_Position: {x: 880, y: 40, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: -3926255609590200185}
-  - {fileID: -8706561066639563876}
   - {fileID: -152072554630291132}
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
@@ -935,6 +881,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackEffectSMB
   _effectTiming: 0.52
+--- !u!1102 &69516742858745350
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Shield Break
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions:
+  - {fileID: 2650331331710188993}
+  m_StateMachineBehaviours:
+  - {fileID: -8339151908603982365}
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7400000, guid: 523edb3deb197a847a5b61065756cd58, type: 2}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
 --- !u!1102 &77720519567833473
 AnimatorState:
   serializedVersion: 6
@@ -1084,6 +1058,28 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!1101 &2650331331710188993
+AnimatorStateTransition:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  m_Conditions: []
+  m_DstStateMachine: {fileID: 0}
+  m_DstState: {fileID: 77720519567833473}
+  m_Solo: 0
+  m_Mute: 0
+  m_IsExit: 0
+  serializedVersion: 3
+  m_TransitionDuration: 0.25
+  m_TransitionOffset: 0
+  m_ExitTime: 0.87068963
+  m_HasExitTime: 1
+  m_HasFixedDuration: 1
+  m_InterruptionSource: 0
+  m_OrderedInterruption: 1
+  m_CanTransitionToSelf: 1
 --- !u!1101 &2947353257229275879
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1121,7 +1117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5200d8c2d418da4fa93ffc4b1d5f391, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackSMB
-  _attackHitTime: 0.84
+  _attackHitTime: 0.36
   _weaponSwingTime: 0.32
 --- !u!1101 &3381916412857576136
 AnimatorStateTransition:
@@ -1667,6 +1663,9 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: -5292889396655439397}
     m_Position: {x: 600, y: 240, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 69516742858745350}
+    m_Position: {x: -110, y: 40, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions:
   - {fileID: -1251161148984676663}
@@ -1674,6 +1673,7 @@ AnimatorStateMachine:
   - {fileID: -4302898097996460583}
   - {fileID: 4094462129393626776}
   - {fileID: 5335936885713384500}
+  - {fileID: -6303893964488277306}
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
