@@ -1,28 +1,32 @@
-using UnityEngine;
-
+using BossEnemy.AI.BehaviourTree;
 using BossEnemy.Character;
 using BossEnemy.Enum;
+using UnityEngine;
 
 namespace BossEnemy.Interface
 {
     public interface IBossEnemyCharacterController : IUpdater
     {
         /// <summary> 初期化処理 </summary>
-        public void Init(IBossEnemyCharacterView bossEnemyCharacterView, EnemyServices enemyServices, IAnimationEventReceiver animationEventReceiver);
+        public void Init(
+            IBossEnemyCharacterView bossEnemyCharacterView,
+            EnemyServices enemyServices,
+            IBossCharacterAnimationEventReceiver animationEventReceiver,
+            ITreeNode entryNode,
+            IBossCharacterEntity bossCharacterEntity);
+
+        /// <summary> BehaviourTreeの探索を開始する </summary>
+        public void HandleRunningBehaviourTree();
 
         /// <summary> 死亡イベント発火時の処理 </summary>
         public void HandleDead();
 
         /// <summary> フェーズ切り替えイベント発火時の処理 </summary>
-        public void HnadlePhaseChange();
+        public void HandlePhaseChange();
 
         /// <summary> ボスの体勢が崩れた際のイベント発火時の処理 </summary>
         /// <param name="downPosture"> ダウン後のボスの体勢 </param>
-        public void HandleDown(PostureType downPosture);
-
-        /// <summary> ボスの体勢が立て直された際のイベント発火時の処理 </summary>
-        /// <param name="wakeUpPosture"> 起き上がった際のボスの体勢 </param>
-        public void HandleWakeUp(PostureType wakeUpPosture);
+        public void HandleChangePosture(PostureType downPosture);
 
         /// <summary> 被ダメージイベント発火時の処理 </summary>
         /// <param name="damageContext"> 被ダメージ状況 </param>
@@ -31,19 +35,25 @@ namespace BossEnemy.Interface
         public void HandleTakeDamage(DamageContext damageContext, TakeDamageType hitPartsType, ArmorAttachmentType scapegoatArmor);
 
         /// <summary> 移動イベント発火時の処理 </summary>
-        /// <param name="velocity"> 移動速度 </param>
-        /// <param name="position"> 現在地 </param>
-        /// <param name="rotation"> 向いている方向</param>
-        public void HandleMove(Vector3 velocity, Vector3 position, Quaternion rotation);
+        public void HandleMovePosition(Vector3 position);
+
+        /// <summary> Characterに回転が加わった際のイベント発火時の処理 </summary>
+        public void HandleChangeRotation(Quaternion quaternion);
+
+        /// <summary> 移動によってVelocityの値が変わったときの処理 </summary>
+        public void HandleChangeMoveVelocity(Vector3 velocity);
 
         /// <summary> ボスの攻撃開始イベント発火時の処理 </summary>
         /// <param name="bossEnemyAttackData"> 攻撃データ </param>
-        public void HandleAttackStart(Attack.AttackData bossEnemyAttackData);
+        public void HandleAttackStart();
 
         /// <summary> ボスの攻撃が終了した際のイベント発火時の処理 </summary>
         public void HandleAttackEnd();
 
         /// <summary> ボスの攻撃がターゲットに当たった際のイベント発火時の処理 </summary>
-        public void HandleAttackHit();
+        public void HandleCheckHitAttack();
+
+        /// <summary> TimeScale変更イベント発火時の処理 </summary>
+        public void HandleChangedTimeScale(float timeScale);
     }
 }
