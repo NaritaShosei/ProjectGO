@@ -1,21 +1,17 @@
-using BossEnemy.Character;
 
-namespace BossEnemy.AI
+using BossEnemy.Character;
+using System;
+
+namespace BossEnemy.AI.BehaviourTree
 {
     #region 子ノードをすべて順番に実行するSequenceNode
     /// <summary> 子ノードをすべて順番に実行する </summary>
-    public class SequenceNode : TreeNodeBase
+    [Serializable]
+    public class SequenceNode : BossCharacterBehaviourTreeNode
     {
-        public SequenceNode(ITreeNode[] childrenNode)
+        public override void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
         {
-            _childrenNode = childrenNode;
-
-            _sequenceChildNodeRunningEndNotifier.OnRunningEnd += ProceedSequence;
-        }
-
-        public override void Init(RunningConditionNotifier nodeRunningEndNotifier)
-        {
-            base.Init(nodeRunningEndNotifier);
+            base.Init(bossCharacterEntity, nodeRunningEndNotifier);
 
             foreach (var child in _childrenNode)
             {
@@ -37,6 +33,8 @@ namespace BossEnemy.AI
         public override void OnEnter()
         {
             ProceedSequence();
+
+            _sequenceChildNodeRunningEndNotifier.OnRunningEnd += ProceedSequence;
         }
 
         public override void OnUpdate()
@@ -53,44 +51,69 @@ namespace BossEnemy.AI
                 _currentNode.OnExit();
 
             _currentNode = null;
-        }
 
-        public void EntryNextChildNode(ITreeNode nextNode)
-        {
-            if (nextNode == null) return;
-
-            if (_currentNode != null)
-            {
-                _currentNode.OnExit();
-            }
-
-            _sequenceCount++;
-
-            _currentNode = nextNode;
-            _currentNode.OnEnter();
-
+            _sequenceChildNodeRunningEndNotifier.OnRunningEnd -= ProceedSequence;
         }
 
         private int _sequenceCount = 0;
-
-        /// <summary> 子ノード </summary>
-        private ITreeNode[] _childrenNode = null;
 
         /// <summary> 現在実行中のノード </summary>
         private ITreeNode _currentNode = null;
 
         /// <summary> シーケンス内の子ノード専用Notifier </summary>
-        private RunningConditionNotifier _sequenceChildNodeRunningEndNotifier = new();
+        private NodeRunningConditionNotifier _sequenceChildNodeRunningEndNotifier = new();
+
+        private void EntryNextChildNode(ITreeNode nextNode)
+        {
+            if (nextNode == null) return;
+
+            SearchNextRunningNode(nextNode);
+        }
 
         private void ProceedSequence()
         {
             if (_sequenceCount >= _childrenNode.Length)
             {
-                RunningEnd();
+                HandleRunningEnd();
                 return;
             };
 
             EntryNextChildNode(_childrenNode[_sequenceCount]);
+            _sequenceCount++;
+        }
+
+        /// <summary> 次の行動を決める </summary>
+        private void SearchNextRunningNode(ITreeNode searchNode)
+        {
+            if (searchNode == null) return;
+
+            ITreeNode nextNode = searchNode;
+            NodeCondition runningCondition = NodeCondition.Success;
+            int count = 0;
+
+            while (runningCondition != NodeCondition.Running)
+            {
+                runningCondition = nextNode.TryEntryNextNode(out nextNode);
+                count++;
+
+                if (runningCondition == NodeCondition.Failure)
+                {
+                    return;
+                }
+            }
+
+            ChangeNode(nextNode);
+        }
+
+        /// <summary> 現在のNodeを変更する </summary>
+        /// <param name="nextNode"> 次のNode </param>
+        private void ChangeNode(ITreeNode nextNode)
+        {
+            if (nextNode == null) return;
+
+            _currentNode.OnExit();
+            _currentNode = nextNode;
+            _currentNode.OnEnter();
         }
     }
     #endregion
