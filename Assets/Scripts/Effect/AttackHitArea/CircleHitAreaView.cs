@@ -2,13 +2,11 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-using BossEnemy.Enum;
-
-namespace BossEnemy.Effect
+namespace BossEnemy.View.Effect
 {
     public class CircleHitAreaView : HitAreaViewBase
     {
-        public override event Action<HitAreaViewBase, HitAreaType> OnDespawn;
+        public override event Action<HitAreaViewBase, AttackHitAreaType> OnDespawn;
 
         public override void ActiveView(float range, float despawnTime)
         {
@@ -30,7 +28,7 @@ namespace BossEnemy.Effect
 
         public override void Despawn()
         {
-            OnDespawn?.Invoke(this, HitAreaType.Circle);
+            OnDespawn?.Invoke(this, AttackHitAreaType.Circle);
             this.gameObject.SetActive(false);
         }
 

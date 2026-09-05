@@ -2,13 +2,11 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using System;
 
-using BossEnemy.Enum;
-
-namespace BossEnemy.Effect
+namespace BossEnemy.View.Effect
 {
     public abstract class HitAreaViewBase : MonoBehaviour
     {
-        public abstract event Action<HitAreaViewBase, HitAreaType> OnDespawn;
+        public abstract event Action<HitAreaViewBase, AttackHitAreaType> OnDespawn;
 
         public abstract void ActiveView(float range, float despawnTime);
 
