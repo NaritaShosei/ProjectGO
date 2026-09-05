@@ -299,9 +299,6 @@ public class PlayerAttack : MonoBehaviour
 
         // 自動発動済みなら何もしない（UpdateChargingが先に処理した）
         if (_autoFireTriggered) return;
-
-        // TODO:即攻撃ではなくチャージの構えモーションが再生されてから攻撃が発動するようにする
-
     }
     #endregion
 

@@ -20,6 +20,7 @@ public class MobAndSkillState : ISequenceState
         _timeUpFlag = false;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
+        _shouldTransitionAfterSkillSelect = false;
         _waveController = null;
 
         _mobBattleTimer = new CountDownTimer();
@@ -152,6 +153,7 @@ public class MobAndSkillState : ISequenceState
     private bool _timeUpFlag;
     private bool _isSkillSelected;
     private bool _skillSelectTimeUp;
+    private bool _shouldTransitionAfterSkillSelect;
 
     #endregion
 
@@ -273,22 +275,28 @@ public class MobAndSkillState : ISequenceState
     {
         if (_timeUpFlag)
         {
-            // バトルタイマー切れ：スキル選択を強制終了してからボスへ
-            ForceAutoSelect(context);
-            context.IsTimeUp = true;
-            return null;
+            // 選択演出の完了を待ってからボスへ遷移する。
+            _timeUpFlag = false;
+            _shouldTransitionAfterSkillSelect = true;
+            ForceAutoSelect();
         }
 
         if (_skillSelectTimeUp)
         {
             _skillSelectTimeUp = false;
-            ForceAutoSelect(context);
+            ForceAutoSelect();
         }
 
         if (_isSkillSelected)
         {
             _isSkillSelected = false;
-            EndSkillSelect(context);
+            EndSkillSelect(context, !_shouldTransitionAfterSkillSelect);
+
+            if (_shouldTransitionAfterSkillSelect)
+            {
+                _shouldTransitionAfterSkillSelect = false;
+                context.IsTimeUp = true;
+            }
         }
 
         return null;
@@ -303,6 +311,7 @@ public class MobAndSkillState : ISequenceState
         _subPhase = SubPhase.SkillSelect;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
+        _shouldTransitionAfterSkillSelect = false;
 
         // フリーカメラと雷神ゲージだけを止める
         _mobBattleTimer.PauseTimer();
@@ -329,7 +338,7 @@ public class MobAndSkillState : ISequenceState
         if (!hasSkill)
         {
             // 候補がない場合は即戦闘復帰
-            EndSkillSelect(context);
+            EndSkillSelect(context, true);
         }
         else
         {
@@ -337,7 +346,7 @@ public class MobAndSkillState : ISequenceState
         }
     }
 
-    private void EndSkillSelect(SequenceStateContext context)
+    private void EndSkillSelect(SequenceStateContext context, bool shouldStartNextWave)
     {
         _skillSelectView.OnSkillSelected -= OnSkillSelected;
 
@@ -358,14 +367,15 @@ public class MobAndSkillState : ISequenceState
 
         _subPhase = SubPhase.Battle;
 
-        // 次のWaveを開始
-        StartNextWave(context);
+        if (shouldStartNextWave)
+        {
+            StartNextWave(context);
+        }
     }
 
-    private void ForceAutoSelect(SequenceStateContext context)
+    private void ForceAutoSelect()
     {
         _skillSelectPresenter?.AutoSelect();
-        EndSkillSelect(context);
     }
 
     private void BeginSkillSelectHitStop()
