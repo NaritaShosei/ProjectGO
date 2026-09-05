@@ -25,13 +25,16 @@ public class TextCountDownTimerView : MonoBehaviour, IPhaseTimerView
     public void ResetTimer()
     {
         _emphasized = false;
+
+        _emphasisSequence?.Kill();
+
         if (_timerText != null)
         {
-            _timerText.color = Color.white; 
+            _timerText.color = _initialColor;
         }
         if (_emphasisPanel != null)
         {
-            _emphasisPanel.anchoredPosition = _initialPos; 
+            _emphasisPanel.anchoredPosition = _initialPos;
         }
     }
 
@@ -52,6 +55,7 @@ public class TextCountDownTimerView : MonoBehaviour, IPhaseTimerView
     [Tooltip("テキストの色")]
     [SerializeField] private Color _emphasisColor = Color.red;
 
+    private Color _initialColor;
     private Vector2 _initialPos;
     private Sequence _emphasisSequence;
 
@@ -62,6 +66,11 @@ public class TextCountDownTimerView : MonoBehaviour, IPhaseTimerView
         if (_emphasisPanel != null)
         {
             _initialPos = _emphasisPanel.anchoredPosition;
+        }
+
+        if (_timerText != null)
+        {
+            _initialColor = _timerText.color;
         }
     }
 
