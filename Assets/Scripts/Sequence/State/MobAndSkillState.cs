@@ -112,8 +112,8 @@ public class MobAndSkillState : ISequenceState
     #region シリアライズ
 
     [Header("モブ戦")]
-    [SerializeField, Tooltip("モブ戦のタイマーUI")] private CountDownTimerView _mobBattleTimerView;
-    [SerializeField, Tooltip("スキル選択のタイマーUI")] private CountDownTimerView _skillSelectTimerView;
+    [SerializeField, Tooltip("モブ戦のタイマーUI")] private TextCountDownTimerView _mobBattleTimerView;
+    [SerializeField, Tooltip("スキル選択のタイマーUI")] private GaugeCountDownTimerView _skillSelectTimerView;
     [SerializeField, Tooltip("モブ戦の時間制限（秒）")] private float _mobBattleTimeLimit = 180f;
     [SerializeField, Tooltip("スポーンポイントのセレクター")] private SpawnPointSelector _spawnPointSelector;
     [SerializeField, Tooltip("ウェーブデータ")] private WaveSequenceData _waveSequenceData;
