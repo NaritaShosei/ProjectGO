@@ -1,8 +1,11 @@
+using BossEnemy.Interface;
+using BossEnemy.UI;
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using UnityEngine;
-using BossEnemy.Interface;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -32,12 +35,12 @@ public class EnemyManager : MonoBehaviour
         _playerInformationService = new PlayerInformationService(_player, this);
 
         _enemyServices = new EnemyServices(
-       _spatialHashGrid,
-       _separationService,
-       _wallAvoidanceService,
-       _formationSystem,
-       _playerInformationService
-   );
+        _spatialHashGrid,
+        _separationService,
+        _wallAvoidanceService,
+        _formationSystem,
+        _playerInformationService
+        );
 
         if (_enemySpawner == null)
         {
@@ -92,8 +95,6 @@ public class EnemyManager : MonoBehaviour
             }
 
             OnEnemySpawned?.Invoke(enemy);
-
-            enemy.Init();
 
             // SpatialHashGridに初期位置を登録する
             // 指定されたposではなく、壁から押し戻された後の実座標を登録する。
@@ -194,7 +195,7 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary> ボスを生成 </summary>
-    public void SpawnBoss(string poolKey, Vector3 pos)
+    public async UniTask SpawnBoss(string poolKey, Vector3 pos)
     {
         if (_player == null)
         {
@@ -202,7 +203,8 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        IBossEnemyCharacterView enemy =　_bossEnemySpawner.Spawn(pos, out IBossHPView bossEnemyUIView);
+        BossEnemyHPView bossEnemyUIView = null;
+        IBossEnemyCharacterView enemy = await _bossEnemySpawner.Spawn(pos, bossEnemyUIView);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
@@ -214,10 +216,10 @@ public class EnemyManager : MonoBehaviour
 
         OnEnemySpawned?.Invoke(enemy);
 
-        enemy.Init();
-
         _spatialHashGrid.Register(enemy, pos);
         _enemies.Add(enemy);
+
+        enemy.StartAction();
     }
 
     /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
