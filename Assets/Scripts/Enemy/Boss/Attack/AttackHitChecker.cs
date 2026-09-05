@@ -1,16 +1,14 @@
 using UnityEngine;
 
-using BossEnemy.Enum;
-
-namespace BossEnemy.Attack
+namespace BossEnemy.Model.System
 {
     public class AttackHitChecker
     {
-        public static bool TryHitAttack(HitAreaType hitAreaType, Vector3 hitAreaCenterPos, IPlayer target, float hitRange)
+        public static bool TryHitAttack(AttackHitAreaType hitAreaType, Vector3 hitAreaCenterPos, IPlayer target, float hitRange, Vector3 forward = default)
         {
             switch (hitAreaType)
             {
-                case HitAreaType.Circle:
+                case AttackHitAreaType.Circle:
                     target.GetTargetCenter();
                     return CircleHitDetect(hitAreaCenterPos, target.GetTargetCenter().position, hitRange);
             }
