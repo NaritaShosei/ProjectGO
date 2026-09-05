@@ -1,7 +1,5 @@
 using System;
 using UnityEngine;
-
-// BossEnemy関連
 using BossEnemy.Interface;
 
 namespace BossEnemy.Animation
@@ -18,14 +16,14 @@ namespace BossEnemy.Animation
         /// <summary>
         /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
         /// </summary>
-        public BossEnemyAnimator(Animator animator, IAnimationEventReceiver receiver)
+        public BossEnemyAnimator(Animator animator, IBossCharacterAnimationEventReceiver receiver)
         {
             _animator = animator;
             _receiver = receiver;
 
             if (_receiver == null) return;
 
-            _receiver.OnAttackHit += HandleAttackHit;
+            _receiver.OnCheckHitAttack += HandleAttackHit;
             _receiver.OnAttackEnd += HandleAttackEnd;
             _receiver.OnDeadEnd += HandleDeadEnd;
             _receiver.OnPhaseChangeEnd += HandlePhaseChangeEnd;
@@ -138,7 +136,7 @@ namespace BossEnemy.Animation
         {
             if (_receiver == null) return;
 
-            _receiver.OnAttackHit -= HandleAttackHit;
+            _receiver.OnCheckHitAttack -= HandleAttackHit;
             _receiver.OnAttackEnd -= HandleAttackEnd;
             _receiver.OnDeadEnd -= HandleDeadEnd;
             _receiver.OnPhaseChangeEnd -= HandlePhaseChangeEnd;
@@ -159,7 +157,7 @@ namespace BossEnemy.Animation
         private readonly Animator _animator;
 
         // 購読解除のためにReceiverを保持する
-        private readonly IAnimationEventReceiver _receiver;
+        private readonly IBossCharacterAnimationEventReceiver _receiver;
 
         private void HandleAttackHit() => OnAttackHit?.Invoke();
         private void HandleAttackEnd() => OnAttackEnd?.Invoke();
