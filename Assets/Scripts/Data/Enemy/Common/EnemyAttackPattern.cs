@@ -41,6 +41,18 @@ public sealed class EnemyAttackPattern : ScriptableObject
     // 攻撃を開始するトリガー距離（AttackRange * AttackTriggerRatio）
     public float AttackTriggerRatio => _attackTriggerRatio;
 
+    public bool EnableMovement => _enableMovement;
+    public AnimationCurve MoveCurve => _moveCurve;
+    public float MoveDistance => _moveDistance;
+    public float MoveDuration => _moveDuration;
+    public float KeepDistance => _keepDistance;
+
+    public bool EnableHoming => _enableHoming;
+    public float HomingRadius => _homingRadius;
+    public float HomingAngle => _homingAngle;
+    public float HomingStrength => _homingStrength;
+    public float HomingDuration => _homingDuration;
+
     [SerializeField] private string _patternName;
 
     [Header("Slot")]
@@ -87,6 +99,38 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [Min(0.01f)]
     [SerializeField] private float _attackTriggerRatio = 1.0f;
 
+
+    [Header("Movement")]
+    [Tooltip("攻撃中に前進（突進）させるかどうか")]
+    [SerializeField] private bool _enableMovement = false;
+    [Tooltip("前進の進み方を0〜1で定義するカーブ。X=経過時間の割合(0〜1)、Y=移動距離の割合(0〜1)")]
+    [SerializeField] private AnimationCurve _moveCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    [Tooltip("前進の合計移動距離（MoveCurveのYが1のときにこの距離だけ進む）")]
+    [Min(0f)]
+    [SerializeField] private float _moveDistance = 0f;
+    [Tooltip("前進を開始してから完了するまでの秒数")]
+    [Min(0.01f)]
+    [SerializeField] private float _moveDuration = 0.3f;
+    [Tooltip("前進中、プレイヤーとこれ以上は詰めない距離")]
+    [Min(0f)]
+    [SerializeField] private float _keepDistance = 0.5f;
+
+    [Header("Homing")]
+    [Tooltip("前進はじめのみプレイヤー方向へ向き補正を行うかどうか")]
+    [SerializeField] private bool _enableHoming = false;
+    [Tooltip("この距離より遠いプレイヤーには補正しない")]
+    [Min(0f)]
+    [SerializeField] private float _homingRadius = 5f;
+    [Tooltip("この角度を超える補正は行わない（急旋回防止）")]
+    [Range(0f, 180f)]
+    [SerializeField] private float _homingAngle = 60f;
+    [Tooltip("向き補正の回転速度（度/秒）")]
+    [Min(0f)]
+    [SerializeField] private float _homingStrength = 180f;
+    [Tooltip("前進開始からこの秒数の間だけ補正を行う（絶対時間）")]
+    [Min(0f)]
+    [SerializeField] private float _homingDuration = 0.15f;
+
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -117,6 +161,26 @@ public sealed class EnemyAttackPattern : ScriptableObject
             _attackTriggerRatio = 0.01f;
             Debug.LogWarning(
                 "[EnemyAttackPattern] AttackTriggerRatio は 0.01 以上が必要です。0.01 に補正しました。",
+                this
+            );
+        }
+
+        // MoveDuration が 0 だと Evaluate(moveT) がゼロ除算になる
+        if (_enableMovement && _moveDuration <= 0f)
+        {
+            _moveDuration = 0.01f;
+            Debug.LogWarning(
+                "[EnemyAttackPattern] MoveDuration は 0 より大きい必要があります。0.01 に補正しました。",
+                this
+            );
+        }
+
+        // HomingDurationがMoveDurationを超えると「はじめのみ」の意味がなくなる
+        if (_enableMovement && _enableHoming && _homingDuration > _moveDuration)
+        {
+            _homingDuration = _moveDuration;
+            Debug.LogWarning(
+                "[EnemyAttackPattern] HomingDuration が MoveDuration を超えています。MoveDuration に補正しました。",
                 this
             );
         }
