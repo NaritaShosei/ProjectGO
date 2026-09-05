@@ -1,10 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-
-#region BossEnemy関連
 using BossEnemy.Enum;
-#endregion
-
 
 namespace BossEnemy.Armor
 {
@@ -13,7 +9,7 @@ namespace BossEnemy.Armor
     {
         public ArmorAttachmentType AttachmentPoints => _armorAttachmentPointsType;
 
-        public bool IsBreak => _isBreak;
+        public bool IsBroken => _isBreak;
 
         public void Init()
         {
