@@ -23,6 +23,8 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public event Action OnDodgeInvincibilityStart;
     public event Action OnDodgeEnd;
     public event Action OnChargeReady;
+    public event Action OnDownRecoveryEnd;
+    public event Action<float> OnDownRecoveryProgress;
 
 
     /// <summary>被弾アニメーション終了イベント（PlayerMovementやPlayerが購読）</summary>
@@ -214,6 +216,26 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.speed = _beforeAnimSpeed * speed;
     }
 
+    // ── ダウン時 ────────────────────────────────────────────
+    /// <summary>
+    /// ダウン回復アニメーション終了イベントを発火する。
+    /// </summary>
+    public void AnimEvent_DownRecoveryEnd()
+    {
+        OnDownRecoveryEnd?.Invoke();
+    }
+
+    /// <summary>
+    /// ダウン回復アニメーションの進行状況イベントを発火する。
+    /// </summary>
+    /// <param name="normalizedTime"></param>
+    public void AnimEvent_DownRecoveryProgress(float normalizedTime)
+    {
+        OnDownRecoveryProgress?.Invoke(
+            Mathf.Clamp01(normalizedTime)
+        );
+    }
+
     /// ── その他 ─────────────────────────────────────────────
     /// <summary>
     /// ロックオンのON/OFFをアニメーションに伝える。
@@ -271,6 +293,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         public static readonly int AttackId = Animator.StringToHash("AttackId");
         public static readonly int PlayerMode = Animator.StringToHash("PlayerMode");
         public static readonly int DamageReaction = Animator.StringToHash("DamageReaction");
+        public static readonly int Down = Animator.StringToHash("Down");
 
         // Bool
         public static readonly int IsCharging = Animator.StringToHash("IsCharging");
@@ -302,6 +325,9 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
                 break;
             case PlayerState.Damaged:
                 _animator.SetTrigger(AnimParams.Damaged);
+                break;
+            case PlayerState.Down:
+                _animator.SetTrigger(AnimParams.Down);
                 break;
         }
 

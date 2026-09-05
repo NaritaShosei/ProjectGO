@@ -46,6 +46,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public bool CanEnter()
     {
         if (_player == null) return false;
+        if (!_enemyServices.PlayerInformationService.CanAttackPlayer()) return false;
         if (_enemyServices.AttackerSlot == null) return false;
         if (_isAttacking) return false;
 
@@ -84,8 +85,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public bool CanContinue()
     {
-        // 攻撃開始後はアニメーション終了まで継続する
-        return _isAttacking;
+        return _isAttacking
+            && _enemyServices.PlayerInformationService.CanAttackPlayer();
     }
 
     public void OnEnter()

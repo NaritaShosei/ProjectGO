@@ -15,6 +15,8 @@ public class MobAndSkillState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
+        _context = context;
+
         _currentWaveIndex = 0;
         _waveCleared = false;
         _timeUpFlag = false;
@@ -43,6 +45,10 @@ public class MobAndSkillState : ISequenceState
 
         // EnemyManagerのウェーブクリア検知
         context.EnemyManager.OnEnemyDefeated += OnEnemyDefeated;
+
+        // モブ戦中は死亡をダウン復帰に置き換える
+        context.Player.OnBeforeDead += HandleBeforePlayerDead;
+        context.Player.OnDownRecoveryEnded += HandleDownRecoveryEnded;
 
         // 入力有効化
         context.InputHandler?.EnableInput(true);
@@ -75,6 +81,9 @@ public class MobAndSkillState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
+        context.Player.OnBeforeDead -= HandleBeforePlayerDead;
+        context.Player.OnDownRecoveryEnded -= HandleDownRecoveryEnded;
+
         _mobBattleTimer.StopTimer();
         _mobBattleTimer.OnTimeEnded -= OnMobTimeUp;
 
@@ -105,6 +114,8 @@ public class MobAndSkillState : ISequenceState
 
         context.InputHandler?.EnableInput(false);
         ShowCursor();
+
+        _context = null;
     }
 
     #endregion
@@ -148,6 +159,7 @@ public class MobAndSkillState : ISequenceState
     private CountDownTimerPresenter _skillSelectTimerPresenter;
     private SequenceStatusPresenter _sequenceStatusPresenter;
     private IDisposable _skillSelectHitStopHandle;
+    private SequenceStateContext _context;
 
     private bool _waveCleared;
     private bool _timeUpFlag;
@@ -162,6 +174,29 @@ public class MobAndSkillState : ISequenceState
     private void OnMobTimeUp() => _timeUpFlag = true;
     private void OnSkillSelectTimeUp() => _skillSelectTimeUp = true;
     private void OnSkillSelected(int _) => _isSkillSelected = true;
+
+    /// <summary>
+    /// モブ戦中の致死ダメージをダウン復帰に置き換える。
+    /// true を返し、PlayerStats の通常死亡をキャンセルする。
+    /// </summary>
+    private bool HandleBeforePlayerDead()
+    {
+        if (_context?.Player == null)
+            return false;
+
+        _context.InputHandler?.EnableInput(false);
+        _context.Player.StartDownRecovery();
+        return true;
+    }
+
+    /// <summary>起き上がり完了後、戦闘中の場合だけ入力を再開する。</summary>
+    private void HandleDownRecoveryEnded()
+    {
+        if (_context == null || _subPhase != SubPhase.Battle)
+            return;
+
+        _context.InputHandler?.EnableInput(true);
+    }
 
     private void OnEnemyDefeated()
     {
@@ -362,7 +397,8 @@ public class MobAndSkillState : ISequenceState
 
         // フリーカメラと雷神ゲージを再開
         _mobBattleTimer.ResumeTimer();
-        context.InputHandler?.EnableInput(true);
+        if (!context.Player.IsDown)
+            context.InputHandler?.EnableInput(true);
         HideCursor();
 
         _subPhase = SubPhase.Battle;
