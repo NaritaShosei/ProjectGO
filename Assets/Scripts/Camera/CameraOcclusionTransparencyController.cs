@@ -29,20 +29,22 @@ public sealed class CameraOcclusionTransparencyController
     {
         if (_playerTransform == null || _mainCamera == null) return;
 
-        _detectedRenderers.Clear();
-        DetectOccludingRenderers();
+        // 遮蔽判定は間引く。判定しないフレームは前回の検出結果を使い回す
+        if (ShouldDetectThisFrame(deltaTime))
+        {
+            _detectedRenderers.Clear();
+            DetectOccludingRenderers();
+        }
 
+        // 新規検出RendererぶんのFadeStateを用意
         foreach (Renderer renderer in _detectedRenderers)
         {
-            if (!_fadeStates.TryGetValue(renderer, out FadeState state))
-            {
-                state = CreateFadeState(renderer);
-                if (state == null) continue;
+            if (_fadeStates.ContainsKey(renderer)) continue;
 
-                _fadeStates.Add(renderer, state);
-            }
+            FadeState state = CreateFadeState(renderer);
+            if (state == null) continue;
 
-            state.IsOccluding = true;
+            _fadeStates.Add(renderer, state);
         }
 
         _removalBuffer.Clear();
@@ -57,26 +59,55 @@ public sealed class CameraOcclusionTransparencyController
                 continue;
             }
 
-            float targetAlpha = state.IsOccluding ? _occludedAlpha : 1f;
+            // 今フレームの遮蔽状態は検出セットの中身で判断
+            bool isOccluding = _detectedRenderers.Contains(renderer);
+            float targetAlpha = isOccluding ? _occludedAlpha : 1f;
+
+            float previousAlpha = state.CurrentAlpha;
             state.CurrentAlpha = Mathf.MoveTowards(
-                state.CurrentAlpha,
+                previousAlpha,
                 targetAlpha,
                 _fadeSpeed * deltaTime);
-            ApplyAlpha(state);
 
-            if (!state.IsOccluding && Mathf.Approximately(state.CurrentAlpha, 1f))
+            // アルファが動いた時だけMaterialへ反映
+            if (!Mathf.Approximately(previousAlpha, state.CurrentAlpha))
+            {
+                ApplyAlpha(state);
+            }
+
+            if (!isOccluding && Mathf.Approximately(state.CurrentAlpha, 1f))
             {
                 RestoreRenderer(renderer, state);
                 _removalBuffer.Add(renderer);
             }
-
-            state.IsOccluding = false;
         }
 
         foreach (Renderer renderer in _removalBuffer)
         {
             _fadeStates.Remove(renderer);
         }
+    }
+
+    /// <summary>間引き間隔かカメラ・プレイヤーの移動量から、今フレーム遮蔽判定するか判断します。</summary>
+    private bool ShouldDetectThisFrame(float deltaTime)
+    {
+        _detectionTimer -= deltaTime;
+
+        Vector3 cameraPosition = _mainCamera.transform.position;
+        Vector3 playerPosition = _playerTransform.position;
+        float thresholdSqr = DetectionMoveThreshold * DetectionMoveThreshold;
+
+        // 高速なカメラ振り・移動で壁抜けしないよう、大きく動いたら間隔を待たず判定
+        bool movedFar =
+            (cameraPosition - _lastDetectionCameraPosition).sqrMagnitude > thresholdSqr ||
+            (playerPosition - _lastDetectionPlayerPosition).sqrMagnitude > thresholdSqr;
+
+        if (_detectionTimer > 0f && !movedFar) return false;
+
+        _detectionTimer = DetectionInterval;
+        _lastDetectionCameraPosition = cameraPosition;
+        _lastDetectionPlayerPosition = playerPosition;
+        return true;
     }
 
     /// <summary>シーン切替などでメインカメラが変わった際に参照を更新します。</summary>
@@ -103,6 +134,7 @@ public sealed class CameraOcclusionTransparencyController
         _fadeStates.Clear();
         _detectedRenderers.Clear();
         _removalBuffer.Clear();
+        _colliderRenderers.Clear();
     }
 
     private const string SurfaceProperty = "_Surface";
@@ -112,6 +144,9 @@ public sealed class CameraOcclusionTransparencyController
     private const string ZWriteProperty = "_ZWrite";
     private const string BaseColorProperty = "_BaseColor";
     private const string ColorProperty = "_Color";
+    private const float DetectionInterval = 0.05f; // 遮蔽判定の実行間隔（秒）
+    private const float DetectionMoveThreshold = 0.5f; // 前回判定位置からこの距離以上動いたら間隔を待たず再判定（m）
+    private const int MaxHitCount = 64; // SphereCast結果を受けるバッファのサイズ
 
     private readonly Transform _playerTransform;
     private Camera _mainCamera;
@@ -122,6 +157,11 @@ public sealed class CameraOcclusionTransparencyController
     private readonly HashSet<Renderer> _detectedRenderers = new();
     private readonly Dictionary<Renderer, FadeState> _fadeStates = new();
     private readonly List<Renderer> _removalBuffer = new();
+    private readonly RaycastHit[] _hitBuffer = new RaycastHit[MaxHitCount];
+    private readonly Dictionary<Collider, Renderer[]> _colliderRenderers = new();
+    private float _detectionTimer;
+    private Vector3 _lastDetectionCameraPosition;
+    private Vector3 _lastDetectionPlayerPosition;
 
     private void DetectOccludingRenderers()
     {
@@ -130,22 +170,35 @@ public sealed class CameraOcclusionTransparencyController
         float distance = direction.magnitude;
         if (distance <= Mathf.Epsilon) return;
 
-        RaycastHit[] hits = Physics.SphereCastAll(
+        // 結果は再利用バッファへ受ける（毎フレームの配列確保を避ける）
+        int hitCount = Physics.SphereCastNonAlloc(
             cameraPosition,
             _castRadius,
             direction / distance,
+            _hitBuffer,
             distance,
             _occlusionMask,
             QueryTriggerInteraction.Ignore);
 
-        foreach (RaycastHit hit in hits)
+        for (int i = 0; i < hitCount; i++)
         {
-            if (hit.transform == _playerTransform || hit.transform.IsChildOf(_playerTransform)) continue;
+            Collider collider = _hitBuffer[i].collider;
+            if (collider == null) continue;
 
-            Renderer[] renderers = hit.collider.GetComponentsInChildren<Renderer>();
-            if (renderers.Length == 0)
+            Transform hitTransform = _hitBuffer[i].transform;
+            if (hitTransform == null) continue;
+            if (hitTransform == _playerTransform || hitTransform.IsChildOf(_playerTransform)) continue;
+
+            // Collider→Renderer解決はキャッシュして階層探索を1回に抑える
+            if (!_colliderRenderers.TryGetValue(collider, out Renderer[] renderers))
             {
-                renderers = hit.collider.GetComponentsInParent<Renderer>();
+                renderers = collider.GetComponentsInChildren<Renderer>();
+                if (renderers.Length == 0)
+                {
+                    renderers = collider.GetComponentsInParent<Renderer>();
+                }
+
+                _colliderRenderers.Add(collider, renderers);
             }
 
             foreach (Renderer renderer in renderers)
@@ -234,7 +287,6 @@ public sealed class CameraOcclusionTransparencyController
         public Material[] OriginalMaterials { get; }
         public Material[] FadeMaterials { get; }
         public float CurrentAlpha { get; set; } = 1f;
-        public bool IsOccluding { get; set; }
 
         public FadeState(Material[] originalMaterials, Material[] fadeMaterials)
         {

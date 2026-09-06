@@ -371,7 +371,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         _effectCameraProximityController?.UpdateEffects(
             _effectCameraRadius,
-            _effectHideStartDistance);
+            _effectHideStartDistance,
+            Time.deltaTime);
         _occlusionTransparencyController?.UpdateTransparency(Time.deltaTime);
     }
 
