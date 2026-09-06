@@ -10,21 +10,14 @@ using BossEnemy.Attack;
 using BossEnemy.Interface;
 using BossEnemy.Enum;
 using BossEnemy.SMB;
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
 using BossEnemy.AI.BehaviourTree;
-========
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
 
 namespace BossEnemy.Character
 {
     /// <summary>
     /// ボス本体のViewClass
     /// </summary>
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
     public class BossCharacterView : MonoBehaviour, IBossEnemyCharacterView
-========
-    public class BossEnemyCharacterView : MonoBehaviour, IBossEnemyCharacterView
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
     {
         private const string TAKE_DAMAGE_ARMOR_EFFECT_KEY = "BossArmorHit";
         private const string TAKE_DAMAGE_EFFECT_KEY = "テスト血しぶき";
@@ -41,26 +34,19 @@ namespace BossEnemy.Character
         public event Action<IEnemy> OnDamaged;
 
         /// <summary>ダメージを受けたときに発火するイベント</summary>
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
         public event Action<DamageContext, TakeDamageType, ArmorAttachmentType> OnTakeDamage;
-========
-        public event Action<DamageContext, BodysDefensesType, ArmorAttachmentType> OnTakeDamage;
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
 
         /// <summary>死亡時に発火するイベント</summary>
         public event Action<IEnemy> OnDead;
 
         /// <summary>ロックオン可能なパーツが変わった際のイベント<新しいターゲット、古いターゲット></summary>
         public event Action<(IReadOnlyList<ILockOnTarget> newTargetParts, IReadOnlyList<ILockOnTarget> oldTargetParts)> OnChangeLockOnParts;
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
 
         /// <summary> Bossのすべての初期化が終了して動き出す際のイベント </summary>
         public event Action OnBeginsAction;
 
         /// <summary> TimeScaleの変更があったら発火するイベント </summary>
         public event Action<float> OnChangedTimeScale;
-========
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
 
         // --- Properties ---
         /// <summary> BossEnemyと内部Modelを繋ぐControllerClass </summary>
@@ -93,7 +79,7 @@ namespace BossEnemy.Character
         public bool IsLockable => _isLockable;
 
         /// <summary> 現在攻撃可能なボスの部位 </summary>
-        public BossCharacterPartsView[] ActiveBossEnemyPartsView => _activeBossEnemyPartsView;
+        public BossCharacterPartsView[] ActiveBossEnemyPartsView => _activeCollisionPartsView;
 
         // --- Methods ---
 
@@ -102,7 +88,7 @@ namespace BossEnemy.Character
         {
             _isDead = false;
             _isLockable = true;
-            ChangePosture(PostureType.Standing);
+            _attackSMBList = new();
 
             if(!ServiceLocator.TryGet(out _cameraManager))
             {
@@ -110,15 +96,37 @@ namespace BossEnemy.Character
                 return;
             }
 
-            foreach (var parts in _activeBossEnemyPartsView)
+            if(!ServiceLocator.TryGet(out _effectManager))
             {
-                parts.Init(this);
+                Debug.Log("取得失敗");
+                return;
             }
 
-            foreach (var behaviour in _animator.GetBehaviours<AttackSMBBase>())
+            foreach (var collisionDetection in _collisionDetections)
             {
+                foreach(var parts in collisionDetection.BossEnemyPartsView)
+                {
+                    parts.Init(this);
+                }
+            }
 
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
+            foreach (var bossCharacterSMB in _animator.GetBehaviours<BossCharacterSMB>())
+            {
+                if(bossCharacterSMB is AttackSMB attackSMB)
+                {
+                    attackSMB.Init(
+                        _bossEnemyAnimationEventReceiver,
+                        _attackHitAreaSpawner,
+                        _effectManager,
+                        _cameraManager,
+                        GetTargetCenter());
+
+                    _attackSMBList.Add(attackSMB);
+
+                    continue;
+                }
+
+                bossCharacterSMB.Init(_bossEnemyAnimationEventReceiver, GetTargetCenter());
             }
         }
 
@@ -136,9 +144,6 @@ namespace BossEnemy.Character
         public void StartAction()
         {
             OnBeginsAction?.Invoke();
-========
-            _bossEnemyController.Init(this, _services, _bossEnemyAnimationEventReceiver);
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
         }
 
         /// <summary>攻撃の内容を渡して内部でダメージ計算をする</summary>
@@ -148,67 +153,33 @@ namespace BossEnemy.Character
 
             // 攻撃から一番近いボスエネミーのパーツを割り出す
             float saveClosestDistance = 1000;
-            bool isGuardArmor = false;
             ArmorAttachmentType armorAttachmentPoint = ArmorAttachmentType.None;
             Vector3 hitPos = Vector3.zero;
             bool isWeekPoint = false;
             bool isHitArmor = false;
 
-            foreach (var bossParts in _activeBossEnemyPartsView)
+            if (_activeCollisionPartsView == null)
+            {
+                Debug.LogError("現在の姿勢が設定されていない可能性があります");
+                return;
+            }
+
+            // 攻撃の当たった部位を取得
+            foreach (var bossParts in _activeCollisionPartsView)
             {
                 float playerDistance = _services.PlayerInformationService.ToPlayerDistance(bossParts.PartsPosition);
 
                 if (playerDistance < saveClosestDistance)
                 {
                     saveClosestDistance = playerDistance;
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
                     hitParts = bossParts;
-========
-                    parts = bossParts;
-
-                    isGuardArmor = false;
-                    armorAttachmentPoint = ArmorAttachmentType.None;
-
-                    if (bossParts.Armor != null && !bossParts.Armor.IsBreak)
-                    {
-                        isHitArmor = true;
-                        isGuardArmor = true;
-                        armorAttachmentPoint = bossParts.Armor.AttachmentPoints;
-                    }
-
-                    hitPos = bossParts.PartsPosition; 
-
-                    switch (bossParts.PartsType)
-                    {
-                        case BodysDefensesType.None:
-                            break;
-                        case BodysDefensesType.Normal:
-                            isWeekPoint = false;
-                            break;
-                        case BodysDefensesType.Hard:
-                            isWeekPoint = false;
-                            break;
-                        case BodysDefensesType.WeekPoint:
-                            isWeekPoint = true;
-                            break;
-                        case BodysDefensesType.VitalPoint:
-                            isWeekPoint = true;
-                            break;
-                    }
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
                 }
             }
 
             if (hitParts.Armor != null && !hitParts.Armor.IsBroken)
             {
                 isHitArmor = true;
-                isGuardArmor = true;
                 armorAttachmentPoint = hitParts.Armor.AttachmentPoints;
-            }
-            else
-            {
-                isGuardArmor = false;
-                armorAttachmentPoint = ArmorAttachmentType.None;
             }
 
             hitPos = hitParts.PartsPosition;
@@ -227,20 +198,20 @@ namespace BossEnemy.Character
             // ダメージのポップアップ
             DamagePopUp(context, hitParts, isWeekPoint);
 
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
             // ダメージを受けた際のイベント発火
             HandleTakeDamage(context, hitParts, armorAttachmentPoint);
-========
-            Debug.Log("ダメージを検出(アーマーのガード:" + isGuardArmor + ")" + "(こうげきかしょ:" + parts.PartsType + ")");
-            OnTakeDamage?.Invoke(context, parts.PartsType, armorAttachmentPoint);
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
 
             // ダメージエフェクトの再生
             PlayDamageHitEffect(isHitArmor, hitPos);
         }
 
-        public void StartAttack(Attack.AttackData bossEnemyAttackData)
+        public void ExecuteAttack(Attack.AttackData bossEnemyAttackData)
         {
+            foreach (var attack in _attackSMBList)
+            {
+                if(attack )
+            }
+
             _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
             Debug.Log(bossEnemyAttackData.AnimParamName);
         }
@@ -252,7 +223,7 @@ namespace BossEnemy.Character
 
         public void Down((bool isBreakLeftLeg, bool isBreakRightLeg) armorBreakData)
         {
-            _bossEnemyAnimator.SetBreakingArmor(armorBreakData.isBreakLeftLeg, armorBreakData.isBreakRightLeg);
+            
 
             if (armorBreakData.isBreakLeftLeg && armorBreakData.isBreakRightLeg)
             {
@@ -270,48 +241,6 @@ namespace BossEnemy.Character
             }
         }
 
-        public void RiseUp()
-        {
-            _bossEnemyAnimator.SetIsDown(false);
-            ChangePosture(PostureType.Standing);
-        }
-
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
-       
-========
-        #region 鎧関連の処理
-        public void ArmorInit()
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                bossArmor.Init();
-            }
-        }
-
-        public void ArmorBreak(ArmorAttachmentType attachmentPointsType)
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                if (bossArmor.AttachmentPoints == attachmentPointsType)
-                {
-                    bossArmor.BreakArmer().Forget();
-                }
-            }
-        }
-
-        public void ArmorRepair(ArmorAttachmentType attachmentPointsType)
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                if (bossArmor.AttachmentPoints == attachmentPointsType)
-                {
-                    bossArmor.RepairArmor().Forget();
-                }
-            }
-        }
-        #endregion
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
-
         /// <summary>ノックバックの力を与える</summary>
         public void AddKnockbackForce(Vector3 direction)
         {
@@ -324,51 +253,17 @@ namespace BossEnemy.Character
 
         }
 
-        public void ChangePhase()
+        public void ChangePhase(int nextPhase)
         {
-            _bossEnemyAnimator.SetPhaseChange();
+            _bossEnemyAnimator.SetPhaseChange(nextPhase);
         }
 
         /// <summary> キャラクターの姿勢を変更 </summary>
         public void ChangePosture(PostureType postureType)
         {
-            switch (postureType)
-            {
-                case PostureType.Standing:
-                    
-                    break;
-            }
+            _bossEnemyAnimator.SetPosture(postureType);
 
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
             ChangeLockOnParts(postureType);
-========
-            foreach (var collision in _collisionDetections)
-            {
-                if (collision.CollisionDetectionPostureType == postureType)
-                {
-                    _bossCollider.size = collision.BossColliderSize;
-                    _bossCollider.center = collision.BossColliderCenter;
-                    _activeBossEnemyPartsView = collision.BossEnemyPartsView;
-                    _currentPostureType = postureType;
-
-                    BossEnemyPartsView[] lockOnNewTargets = _activeBossEnemyPartsView;
-
-                    foreach(var newTarget in _activeBossEnemyPartsView)
-                    {
-                        newTarget.SetLockable(true);
-                    }
-
-                    OnChangeLockOnParts?.Invoke((lockOnNewTargets, lockOnOldTargets));
-                    return;
-                }
-            }
-        }
-
-        /// <summary>ColliderのIsTriggerをセットする</summary>
-        public void SetIsTrigger(bool isTrigger)
-        {
-            _bossCollider.isTrigger = isTrigger;
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
         }
 
         /// <summary>位置をセットする</summary>
@@ -445,7 +340,6 @@ namespace BossEnemy.Character
             Debug.Log("Boss討伐完了");
         }
 
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
         #region 鎧関連の処理
         public void ArmorInit()
         {
@@ -478,8 +372,6 @@ namespace BossEnemy.Character
         }
         #endregion
 
-========
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
         [Header("ボスの当たり判定")]
         [SerializeField] private CollisionInformation[] _collisionDetections;
 
@@ -503,13 +395,8 @@ namespace BossEnemy.Character
         private IBossEnemyCharacterController _bossEnemyController;
 
         // ボスエネミーのAnimator
-        private BossEnemyAnimator _bossEnemyAnimator;
+        private IBossEnemyAnimator _bossEnemyAnimator;
 
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
-========
-        private AttackInformationHolder _attackInformationHolder = new();
-
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
         // 各種マネージャー
         private EffectManager _effectManager;
         private CameraManager _cameraManager;
@@ -526,7 +413,11 @@ namespace BossEnemy.Character
         // ボスのタイムスケール
         private ReactiveProperty<float> _timeScale = new(1.0f);
 
-        private BossCharacterPartsView[] _activeBossEnemyPartsView;
+        // ボスの各種パーツ
+        private BossCharacterPartsView[] _activeCollisionPartsView;
+
+        // 攻撃のStateMachineBehaviourList
+        private List<AttackSMB> _attackSMBList = new List<AttackSMB>();
 
         private void Awake()
         {
@@ -611,10 +502,10 @@ namespace BossEnemy.Character
         private void ChangeLockOnParts(PostureType postureType)
         {
             BossCharacterPartsView[] lockOnOldTargets = null;
-            if (_activeBossEnemyPartsView != null)
+            if (_activeCollisionPartsView != null)
             {
-                lockOnOldTargets = _activeBossEnemyPartsView;
-                foreach (var oldTarget in _activeBossEnemyPartsView)
+                lockOnOldTargets = _activeCollisionPartsView;
+                foreach (var oldTarget in _activeCollisionPartsView)
                 {
                     oldTarget.SetLockable(false);
                 }
@@ -626,11 +517,11 @@ namespace BossEnemy.Character
                 {
                     _bossCollider.size = collision.BossColliderSize;
                     _bossCollider.center = collision.BossColliderCenter;
-                    _activeBossEnemyPartsView = collision.BossEnemyPartsView;
+                    _activeCollisionPartsView = collision.BossEnemyPartsView;
 
-                    BossCharacterPartsView[] lockOnNewTargets = _activeBossEnemyPartsView;
+                    BossCharacterPartsView[] lockOnNewTargets = _activeCollisionPartsView;
 
-                    foreach (var newTarget in _activeBossEnemyPartsView)
+                    foreach (var newTarget in _activeCollisionPartsView)
                     {
                         newTarget.SetLockable(true);
                     }
@@ -661,67 +552,7 @@ namespace BossEnemy.Character
             [SerializeField] private Vector3 _size;
 
             [Header("各部位")]
-<<<<<<<< HEAD:Assets/Scripts/Enemy/Boss/Character/BossCharacterView.cs
             [SerializeField] private BossCharacterPartsView[] _bossEnemyPartsView;
-========
-            [SerializeField] private BossEnemyPartsView[] _bossEnemyPartsView;
-        }
-        #endregion
-
-        #region ボスエネミーの各部位
-        [Serializable]
-        public class BossEnemyPartsView : ILockOnTarget
-        {
-            /// <summary>
-            /// ロックオンなどの中心のTransformを取得する
-            /// </summary>
-            public Transform GetTargetCenter()
-            {
-                return _partsTransform;
-            }
-
-            /// <summary>
-            /// ロックオン可能か(非アクティブ状態でオフにしたい場合など)。
-            /// </summary>
-            public bool IsLockable => _isLockable;
-
-            /// <summary>
-            /// パーツの座標
-            /// </summary>
-            public Vector3 PartsPosition => _partsTransform.position;
-
-            /// <summary>
-            /// このパーツにつけるアーマー
-            /// </summary>
-            public BossArmorView Armor => _thisPartsArmer;
-
-            /// <summary>
-            /// このパーツの硬さ(肉質)
-            /// </summary>
-            public BodysDefensesType PartsType => _bossEnemyPartsType;
-
-            public void Init(BossEnemyCharacterView bossEnemyView)
-            {
-                _bossEnemyView = bossEnemyView;
-
-                if (_thisPartsArmer != null) _thisPartsArmer.Init();
-            }
-
-            public void SetLockable (bool lockable) => _isLockable = lockable;
-
-            [Header("このPartsのTransform")]
-            [SerializeField] private Transform _partsTransform;
-
-            [Header("このパーツに装備するアーマー(なければNullにする)")]
-            [SerializeField] private BossArmorView _thisPartsArmer = null;
-
-            [Header("このPartsの硬さ(肉質)")]
-            [SerializeField] private BodysDefensesType _bossEnemyPartsType;
-
-            private bool _isLockable = false;
-
-            private BossEnemyCharacterView _bossEnemyView = null;
->>>>>>>> 83038f75 (Fix:ファイルの階層構造を変更、中間のレイヤー階層を削除):Assets/Scripts/Enemy/Boss/Character/BossEnemyCharacterView.cs
         }
         #endregion
     }
