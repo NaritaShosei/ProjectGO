@@ -30,6 +30,7 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     public void Show(List<SkillViewData> skills)
     {
         ResolveReferences();
+        _isSelecting = false;
 
         if (_buttons == null || _buttons.Length == 0)
         {
@@ -75,6 +76,27 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     }
 
     /// <summary>
+    /// 指定したスキルを選択状態にし、クリック操作と同じ演出を経て選択を確定する。
+    /// 時間切れによる自動選択もこの入口を使い、操作方法による見た目の差をなくす。
+    /// </summary>
+    public void PlaySelect(int skillId)
+    {
+        if (_isSelecting)
+        {
+            return;
+        }
+
+        if (!_buttonMap.TryGetValue(skillId, out var button) || button == null)
+        {
+            Debug.LogWarning($"スキルID {skillId} に対応するボタンが見つかりません", this);
+            OnSkillSelected?.Invoke(skillId);
+            return;
+        }
+
+        button.PerformClick();
+    }
+
+    /// <summary>
     /// スキル選択UIを閉じる。
     /// 非表示にするだけでなく、演出停止とイベント購読解除もここでまとめて行う。
     /// </summary>
@@ -97,6 +119,7 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     /// クリック演出や自動選択など、IDからボタンへ戻したい場面で使う。
     /// </summary>
     private readonly Dictionary<int, SkillSelectButton> _buttonMap = new();
+    private bool _isSelecting;
 
     /// <summary>
     /// Inspector参照が未設定でも動けるよう、起動時に参照解決を試みる。
@@ -121,6 +144,12 @@ public class SkillSelectView : MonoBehaviour, ISkillSelectView
     /// </summary>
     private void OnButtonClicked(SkillSelectButton button, int skillId)
     {
+        if (_isSelecting)
+        {
+            return;
+        }
+
+        _isSelecting = true;
         SelectHighlightedButton(button, skillId);
         button.PlayClick(() => OnSkillSelected?.Invoke(skillId));
     }
