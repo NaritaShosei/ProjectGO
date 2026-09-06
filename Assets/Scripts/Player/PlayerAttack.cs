@@ -1,7 +1,8 @@
+using Cysharp.Threading.Tasks;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -169,7 +170,7 @@ public class PlayerAttack : MonoBehaviour
     private AttackInput? _bufferedComboInput;
 
     private ILockOnTarget _currentLockOnTarget;
-    private Coroutine _attackDirectionRotationCoroutine;
+    private CancellationTokenSource _attackDirectionRotationCts;
 
     #endregion
 
@@ -178,6 +179,7 @@ public class PlayerAttack : MonoBehaviour
     private void OnDestroy()
     {
         ControllerVibration.Stop();
+        CancelAttackDirectionRotation();
 
         if (_modeController != null) _modeController.OnModeChanged -= OnModeChanged;
 
@@ -627,11 +629,7 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ClearAttackState()
     {
-        if (_attackDirectionRotationCoroutine != null)
-        {
-            StopCoroutine(_attackDirectionRotationCoroutine);
-            _attackDirectionRotationCoroutine = null;
-        }
+        CancelAttackDirectionRotation();
 
         _pendingAttackData = null;
         _pendingAttackInput = null;
@@ -1025,10 +1023,9 @@ public class PlayerAttack : MonoBehaviour
         if (GetCurrentLockOnTargetCenter() == null && TryGetAttackInputDirection(out _))
             _isHomingActive = false;
 
-        if (_attackDirectionRotationCoroutine != null)
-            StopCoroutine(_attackDirectionRotationCoroutine);
-
-        _attackDirectionRotationCoroutine = StartCoroutine(RotateAttackDirection(direction));
+        CancelAttackDirectionRotation();
+        _attackDirectionRotationCts = new CancellationTokenSource();
+        RotateAttackDirectionAsync(direction, _attackDirectionRotationCts.Token).Forget();
     }
 
     private Vector3 ResolveAttackMoveDirection()
@@ -1097,7 +1094,9 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// 攻撃開始時に確定した方向へ、短時間だけ線形補間して回転する。
     /// </summary>
-    private IEnumerator RotateAttackDirection(Vector3 direction)
+    private async UniTask RotateAttackDirectionAsync(
+        Vector3 direction,
+        CancellationToken cancellationToken)
     {
         Quaternion startRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -1105,21 +1104,37 @@ public class PlayerAttack : MonoBehaviour
         if (_attackDirectionRotationDuration <= 0f)
         {
             transform.rotation = targetRotation;
-            _attackDirectionRotationCoroutine = null;
-            yield break;
+            return;
         }
 
         float elapsed = 0f;
-        while (elapsed < _attackDirectionRotationDuration)
+        try
         {
-            elapsed += Time.deltaTime;
-            float normalizedTime = Mathf.Clamp01(elapsed / _attackDirectionRotationDuration);
-            transform.rotation = Quaternion.Lerp(startRotation, targetRotation, normalizedTime);
-            yield return null;
-        }
+            while (elapsed < _attackDirectionRotationDuration)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                elapsed += Time.deltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsed / _attackDirectionRotationDuration);
+                transform.rotation = Quaternion.Lerp(startRotation, targetRotation, normalizedTime);
+                await UniTask.Yield(cancellationToken);
+            }
 
-        transform.rotation = targetRotation;
-        _attackDirectionRotationCoroutine = null;
+            transform.rotation = targetRotation;
+        }
+        catch (OperationCanceledException)
+        {
+            // 次の攻撃、回避、被弾、破棄による回転中断。
+        }
+    }
+
+    /// <summary>
+    /// 実行中の攻撃方向補間を停止し、使用したトークンを破棄する。
+    /// </summary>
+    private void CancelAttackDirectionRotation()
+    {
+        _attackDirectionRotationCts?.Cancel();
+        _attackDirectionRotationCts?.Dispose();
+        _attackDirectionRotationCts = null;
     }
 
     private Transform GetCurrentLockOnTargetCenter()
