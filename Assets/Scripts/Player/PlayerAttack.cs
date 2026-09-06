@@ -1,11 +1,15 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class PlayerAttack : MonoBehaviour
 {
+    private const float ATTACK_DIRECTION_INPUT_THRESHOLD = 0.001f;
+
     #region Events
 
     /// <summary> 攻撃入力があったときに、攻撃の種類やチャージ時間などの情報を通知するイベント </summary>
@@ -63,7 +67,10 @@ public class PlayerAttack : MonoBehaviour
         _animationController.OnChargeReady += OnChargeReady;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
-            cameraManager.OnLockOnTargetChanged += ChangeLockOnTarget;
+        {
+            _cameraManager = cameraManager;
+            _cameraManager.OnLockOnTargetChanged += ChangeLockOnTarget;
+        }
     }
 
     /// <summary>
@@ -114,6 +121,7 @@ public class PlayerAttack : MonoBehaviour
         new(0.3f, ChargeLevel.Level1, new ControllerVibrationData(0.10f, 0.05f, 0f)),
     };
     [SerializeField] private LayerMask _homingLayer;
+    [SerializeField, Min(0f)] private float _attackDirectionRotationDuration = 0.08f;
 
     private PlayerStateManager _stateManager;
     private InputHandler _input;
@@ -121,6 +129,7 @@ public class PlayerAttack : MonoBehaviour
     private IModeController _modeController;
     private PlayerAnimationController _animationController;
     private SkillManager _skillManager;
+    private CameraManager _cameraManager;
 
     private ChargeThreshold[] _chargeThresholds;
 
@@ -161,6 +170,7 @@ public class PlayerAttack : MonoBehaviour
     private AttackInput? _bufferedComboInput;
 
     private ILockOnTarget _currentLockOnTarget;
+    private CancellationTokenSource _attackDirectionRotationCts;
 
     #endregion
 
@@ -169,6 +179,7 @@ public class PlayerAttack : MonoBehaviour
     private void OnDestroy()
     {
         ControllerVibration.Stop();
+        CancelAttackDirectionRotation();
 
         if (_modeController != null) _modeController.OnModeChanged -= OnModeChanged;
 
@@ -193,8 +204,8 @@ public class PlayerAttack : MonoBehaviour
             _animationController.OnChargeReady -= OnChargeReady;
         }
 
-        if (ServiceLocator.TryGet(out CameraManager cameraManager))
-            cameraManager.OnLockOnTargetChanged -= ChangeLockOnTarget;
+        if (_cameraManager != null)
+            _cameraManager.OnLockOnTargetChanged -= ChangeLockOnTarget;
     }
 
     private void Update()
@@ -489,6 +500,7 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        CancelAttackDirectionRotation();
         OnAttackEnded?.Invoke();
 
         _pendingAttackData = null;
@@ -618,6 +630,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ClearAttackState()
     {
+        CancelAttackDirectionRotation();
+
         _pendingAttackData = null;
         _pendingAttackInput = null;
         _activeAttackVariant = null;
@@ -814,9 +828,16 @@ public class PlayerAttack : MonoBehaviour
             _homingAngle = data.HomingAngle;
             _homingStrength = data.HomingStrength;
 
+            Vector3 inputDirection = Vector3.zero;
+            bool hasInputDirection = GetCurrentLockOnTargetCenter() == null &&
+                TryGetAttackInputDirection(out inputDirection);
+            Vector3 searchDirection = hasInputDirection ? inputDirection : transform.forward;
+
             _homingTarget = ResolveHomingTarget(
                 _homingRadius,
-                _homingAngle);
+                _homingAngle,
+                searchDirection,
+                hasInputDirection);
         }
         else
         {
@@ -828,13 +849,15 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// ホーミング対象を見つける。現在のロックオンターゲットが有効ならそれを返し、そうでない場合は周囲の敵から条件に合うものを探して返す。
     /// </summary>
-    private Transform FindHomingTarget(float radius, float angle)
+    private Transform FindHomingTarget(float radius, float angle, Vector3 searchDirection)
     {
-        if (_currentLockOnTarget != null)
-            return _currentLockOnTarget.GetTargetCenter();
+        Transform lockOnTarget = GetCurrentLockOnTargetCenter();
+        if (lockOnTarget != null)
+            return lockOnTarget;
 
         Transform best = null;
-        float bestScore = float.MaxValue;
+        float bestAngle = float.MaxValue;
+        float bestDistance = float.MaxValue;
 
         if (ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
@@ -843,10 +866,16 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (enemy.IsDead) continue;
                 var dir = (enemy.GetTargetCenter().position - transform.position).normalized;
-                float angleTo = Vector3.Angle(transform.forward, dir);
+                float angleTo = Vector3.Angle(searchDirection, dir);
                 if (angleTo > angle) continue;
                 float dist = Vector3.Distance(transform.position, enemy.GetTargetCenter().position);
-                if (dist < bestScore) { bestScore = dist; best = enemy.GetTargetCenter(); }
+                if (angleTo < bestAngle ||
+                    (Mathf.Approximately(angleTo, bestAngle) && dist < bestDistance))
+                {
+                    bestAngle = angleTo;
+                    bestDistance = dist;
+                    best = enemy.GetTargetCenter();
+                }
             }
             return best;
         }
@@ -856,10 +885,16 @@ public class PlayerAttack : MonoBehaviour
         {
             if (!hit.TryGetComponent(out IEnemy enemy) || enemy.IsDead) continue;
             var dir = (hit.transform.position - transform.position).normalized;
-            float angleTo = Vector3.Angle(transform.forward, dir);
+            float angleTo = Vector3.Angle(searchDirection, dir);
             if (angleTo > angle) continue;
             float dist = Vector3.Distance(transform.position, hit.transform.position);
-            if (dist < bestScore) { bestScore = dist; best = hit.transform; }
+            if (angleTo < bestAngle ||
+                (Mathf.Approximately(angleTo, bestAngle) && dist < bestDistance))
+            {
+                bestAngle = angleTo;
+                bestDistance = dist;
+                best = hit.transform;
+            }
         }
         return best;
     }
@@ -867,15 +902,23 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// ホーミング対象を解決する。ロックオンターゲットが有効ならそれを返し、そうでない場合は周囲から新たにホーミング対象を探す。新しい対象が見つかればホーミングロックする。
     /// </summary>
-    private Transform ResolveHomingTarget(float radius, float angle)
+    private Transform ResolveHomingTarget(
+        float radius,
+        float angle,
+        Vector3 searchDirection,
+        bool prioritizeInput)
     {
-        if (_isHomingLocked && _lockedHomingTarget != null)
+        // 各攻撃開始時に入力がある場合は、前段で保持した対象より今回の入力方向を優先する。
+        if (prioritizeInput)
+            ClearHomingLock();
+
+        if (!prioritizeInput && _isHomingLocked && _lockedHomingTarget != null)
         {
             if (_lockedHomingTarget.TryGetComponent(out IEnemy e) && !e.IsDead)
                 return _lockedHomingTarget;
             ClearHomingLock();
         }
-        var newTarget = FindHomingTarget(radius, angle);
+        var newTarget = FindHomingTarget(radius, angle, searchDirection);
         if (newTarget != null && _currentAttackId != -1)
         {
             _lockedHomingTarget = newTarget;
@@ -957,9 +1000,6 @@ public class PlayerAttack : MonoBehaviour
         if (!data.EnableMovement) return;
 
         Vector3 moveDirection = ResolveAttackMoveDirection();
-        if (moveDirection.sqrMagnitude > 0.001f)
-            transform.rotation = Quaternion.LookRotation(moveDirection);
-
         OnAttackMoveRequested?.Invoke(new AttackMoveRequest
         {
             MoveCurve = data.MoveCurve,
@@ -976,8 +1016,17 @@ public class PlayerAttack : MonoBehaviour
     private void FaceAttackTarget()
     {
         Vector3 direction = ResolveAttackMoveDirection();
-        if (direction.sqrMagnitude > 0.001f)
-            transform.rotation = Quaternion.LookRotation(direction);
+        if (direction.sqrMagnitude <= 0.001f)
+            return;
+
+        // ロックオンしていない場合のスティック入力は、この攻撃の方向として一度だけ確定する。
+        // 確定後にホーミングで上書きされないよう、攻撃判定までの向き追従を停止する。
+        if (GetCurrentLockOnTargetCenter() == null && TryGetAttackInputDirection(out _))
+            _isHomingActive = false;
+
+        CancelAttackDirectionRotation();
+        _attackDirectionRotationCts = new CancellationTokenSource();
+        RotateAttackDirectionAsync(direction, _attackDirectionRotationCts.Token).Forget();
     }
 
     private Vector3 ResolveAttackMoveDirection()
@@ -991,6 +1040,19 @@ public class PlayerAttack : MonoBehaviour
                 return toTarget.normalized;
         }
 
+        if (TryGetAttackInputDirection(out Vector3 inputDirection))
+        {
+            if (_homingTarget != null)
+            {
+                Vector3 toInputTarget = _homingTarget.position - transform.position;
+                toInputTarget.y = 0f;
+                if (toInputTarget.sqrMagnitude > 0.001f)
+                    return toInputTarget.normalized;
+            }
+
+            return inputDirection;
+        }
+
         if (_homingTarget != null)
         {
             Vector3 toTarget = _homingTarget.position - transform.position;
@@ -1002,6 +1064,78 @@ public class PlayerAttack : MonoBehaviour
         Vector3 forward = transform.forward;
         forward.y = 0f;
         return forward.sqrMagnitude > 0.001f ? forward.normalized : Vector3.forward;
+    }
+
+    /// <summary>
+    /// カメラ基準の移動スティック入力を、水平なワールド方向へ変換する。
+    /// </summary>
+    private bool TryGetAttackInputDirection(out Vector3 direction)
+    {
+        direction = Vector3.zero;
+        if (_input == null || _cameraManager == null || _cameraManager.MainCamera == null)
+            return false;
+
+        Vector2 input = _input.MoveInput;
+        if (input.sqrMagnitude < ATTACK_DIRECTION_INPUT_THRESHOLD * ATTACK_DIRECTION_INPUT_THRESHOLD)
+            return false;
+
+        Transform cameraTransform = _cameraManager.MainCamera.transform;
+        Vector3 cameraRight = Vector3.ProjectOnPlane(cameraTransform.right, Vector3.up).normalized;
+        Vector3 cameraForward = Vector3.ProjectOnPlane(cameraTransform.forward, Vector3.up).normalized;
+        direction = cameraRight * input.x + cameraForward * input.y;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0f)
+            return false;
+
+        direction.Normalize();
+        return true;
+    }
+
+    /// <summary>
+    /// 攻撃開始時に確定した方向へ、短時間だけ線形補間して回転する。
+    /// </summary>
+    private async UniTask RotateAttackDirectionAsync(
+        Vector3 direction,
+        CancellationToken cancellationToken)
+    {
+        Quaternion startRotation = transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+        if (_attackDirectionRotationDuration <= 0f)
+        {
+            transform.rotation = targetRotation;
+            return;
+        }
+
+        float elapsed = 0f;
+        try
+        {
+            while (elapsed < _attackDirectionRotationDuration)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                elapsed += Time.deltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsed / _attackDirectionRotationDuration);
+                transform.rotation = Quaternion.Lerp(startRotation, targetRotation, normalizedTime);
+                await UniTask.Yield(cancellationToken);
+            }
+
+            transform.rotation = targetRotation;
+        }
+        catch (OperationCanceledException)
+        {
+            // 次の攻撃、回避、被弾、破棄による回転中断。
+        }
+    }
+
+    /// <summary>
+    /// 実行中の攻撃方向補間を停止し、使用したトークンを破棄する。
+    /// </summary>
+    private void CancelAttackDirectionRotation()
+    {
+        _attackDirectionRotationCts?.Cancel();
+        _attackDirectionRotationCts?.Dispose();
+        _attackDirectionRotationCts = null;
     }
 
     private Transform GetCurrentLockOnTargetCenter()
