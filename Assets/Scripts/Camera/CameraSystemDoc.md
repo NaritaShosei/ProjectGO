@@ -74,11 +74,14 @@
 - `_currentState` の保持と `NormalCameraState` / `LockOnCameraState` 間の遷移実行（`LockOn` / `Unlock`）
 - `Tick` 内の `TryHandleInvalidTarget` で対象を監視：自動解除距離を超えたら解除、対象が無効化（撃破・削除・非ロック化）されたら次の対象へ、いなければ解除。通常の敵撃破はこの経路で拾う（`OnEnemyDefeated` は購読しない）
 - ロックオンボタンによる開始・解除
-- 対象切り替え入力の蓄積判定（`Tick` 内の `UpdateTargetSwitch`）。スティックは「倒し量 × 時間」、マウスは「横移動量の累積」がそれぞれの閾値を超えたら1回切り替える。逆方向入力で蓄積をリセットし、閾値到達時は切り替えの成否に関わらず蓄積を0へ戻す。ロックオン開始時（通常状態から入ったとき）に蓄積をクリアする
+- 対象切り替え判定（`Tick` 内の `UpdateTargetSwitch`）。**1入力につき1回だけ**切り替える（意図しない連続切り替えを防ぐ）
+  - スティック：横成分が `_switchStickOnThreshold` を超えたら1回切り替え。`_switchStickOffThreshold` 以下に戻るまで再切り替えしない（ヒステリシス）
+  - マウス：連続した横スワイプの移動量が `_switchMouseThreshold` を超えたら1回切り替え。1 Tick の移動量が `_switchMouseMinStep` 未満（スワイプ終了）または逆方向へ振り直すまで再切り替えしない
+  - ロックオン開始時はラッチ未武装で始め、入力がニュートラルに戻ってから受け付ける
 - `EnemyManager.OnEnemyForceRemoved` を購読し、削除されたのが現在の対象なら次へ切り替え（なければ解除）
 - 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
 
-対象切り替えの入力は `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（変更を Camera フォルダ内に閉じるための割り切り。`InputHandler` は経由しない）。マウス横移動量は取りこぼし防止のため `Update` でフレーム精度で蓄積し `Tick` で消費します。閾値・デッドゾーンは `CameraController` の `[SerializeField]`（`_switchStickThreshold` / `_switchStickDeadzone` / `_switchMouseThreshold`）で調整します。
+対象切り替えの入力は `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（変更を Camera フォルダ内に閉じるための割り切り。`InputHandler` は経由しない）。マウス横移動量は取りこぼし防止のため `Update` でフレーム精度で蓄積し `Tick` で消費します。閾値は `CameraController` の `[SerializeField]`（`_switchStickOnThreshold` / `_switchStickOffThreshold` / `_switchMouseThreshold` / `_switchMouseMinStep`）で調整します。
 
 このクラス自身は画面上の位置や角度から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。状態変更は `CameraManager` へイベント通知のみで伝えます。
 
@@ -93,15 +96,23 @@
 - プレイヤーからロックオン可能距離（`_lockOnRange`）以内である
 - 必要に応じて現在の対象を除外する
 
-画面内外・遮蔽・距離は選定スコアには使いません（距離は上記の候補足切りのみ）。
+遮蔽は選定に使いません。画面内外も足切りしません（画面外の候補はスコアで自然に後回しになる）。
 
-選定スコアは **カメラ前方ベクトルと「カメラ位置 → 対象中心」ベクトルのなす角** です。角度が小さい（＝カメラ中心に近い）ほど優先度が高く、背後や画面端の対象は角度が大きくなるため自然に後回しになります。角度が同値のときは候補リスト順で先勝ちです。
+### 選定スコア（`Score`。小さいほど優先。同スコアはリスト順で先勝ち）
+
+3項を 0..1 に正規化して加重合算します。重みは `CameraController` の `[SerializeField]` から `LockOnScoreWeights` として渡します。
+
+| 項 | 計算 | 重み |
+| --- | --- | --- |
+| 画面中心ズレ | カメラ前方と「カメラ位置→対象中心」のなす角 ÷ `CenterAngleReference`（度）を Clamp01 | `_scoreWeightScreenCenter` |
+| プレイヤー距離 | プレイヤー〜対象中心の距離 ÷ `_lockOnRange` を Clamp01 | `_scoreWeightPlayerDistance` |
+| カメラ側ペナルティ | 水平面で `dot((対象中心−プレイヤー).normalized, (プレイヤー−カメラ).normalized)`、その符号反転を Clamp01（プレイヤーより手前＝カメラ側の敵だけ 0→1） | `_scoreWeightCameraSide` |
 
 提供する選定方法は次の3つです。
 
-- `SelectInitialTarget`: 初回ロックオン。全候補からカメラ前方とのなす角が最小の対象を選びます。
-- `SelectSwitchTarget`: 切り替え入力による対象変更。カメラ前方に映っている（`WorldToScreenPoint().z > 0`）候補のうち、画面X座標が現在対象より入力方向側にあるものから、なす角が最小の対象を選びます。方向側に候補がなければ何もしません。
-- `SelectNextTarget`: 現在対象が撃破・削除された後の次対象を選びます。初回選択と同じ基準（なす角最小）を使います。
+- `SelectInitialTarget`: 初回ロックオン。全候補からスコア最小の対象を選びます。
+- `SelectSwitchTarget`: 切り替え入力による対象変更。カメラ前方に映っている（`WorldToScreenPoint().z > 0`）候補のうち、画面X座標が現在対象より入力方向側にあるものから、スコア最小の対象を選びます。方向側に候補がなければ何もしません。
+- `SelectNextTarget`: 現在対象が撃破・削除された後の次対象を選びます。初回選択と同じスコアを使います。
 
 `SelectSwitchTarget` の左右判定にはカメラの `WorldToScreenPoint` を使用します。
 
@@ -158,7 +169,7 @@ flowchart TD
 3. `LockOnController` が自身の `LockOn`（`CameraController.LockOn`）を実行し、選ばれた対象を `_lockOnState` に設定して状態を `LockOnCameraState` へ遷移します。
 4. `CameraManager.SetLockOnCameraActive(true)` によりロックオンカメラのPriorityが上がり、ブレンドが開始します。
 5. ブレンド完了後、対象の画面位置に応じてカメラを回転し、プレイヤーを基準に位置を追従します。
-6. ロックオン中は `CameraController.Tick` 内の `UpdateTargetSwitch` が切り替え入力の蓄積を判定し、閾値到達で `SelectSwitchTarget` により対象を切り替えます。
+6. ロックオン中は `CameraController.Tick` 内の `UpdateTargetSwitch` が切り替え入力を判定し、1入力につき1回だけ `SelectSwitchTarget` で対象を切り替えます。
 7. `CameraController.Tick` 内の `TryHandleInvalidTarget` が対象を監視します。自動解除距離超過なら解除。対象が無効化（撃破・削除・`IsLockable=false` 化）されたら `SelectNextTarget` で次へ切り替え、いなければ解除。対象でない敵の撃破では何も起きません。`OnEnemyForceRemoved` のみイベント購読で、現在の対象が削除されたときだけ同様に処理します。
 8. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
 

@@ -3,11 +3,13 @@ using UnityEngine;
 
 /// <summary>
 /// Inspectorで指定されたエフェクトを、カメラとの距離に応じて一時的に非表示にします。
+/// GameObjectのSetActiveではなくRenderer.enabledを切り替えるため、ParticleSystemの再起動を伴いません。
 /// このクラスが非表示にした対象だけを再表示し、他システムによる非表示状態は変更しません。
 /// </summary>
 public sealed class EffectCameraProximityController
 {
-    private const float ReactivateMargin = 0.25f;
+    private const float ReactivateMargin = 0.25f; // 非表示から復帰するまでの距離の猶予（m）
+    private const float DetectionInterval = 0.05f; // 距離判定の実行間隔（秒）
 
     public EffectCameraProximityController(
         Camera mainCamera,
@@ -27,12 +29,19 @@ public sealed class EffectCameraProximityController
     }
 
     /// <summary>対象エフェクトとカメラの距離を確認し、表示状態を更新します。</summary>
-    public void UpdateEffects(float cameraRadius, float hideStartDistance)
+    public void UpdateEffects(float cameraRadius, float hideStartDistance, float deltaTime)
     {
         if (_mainCamera == null) return;
 
+        // 距離判定は毎フレームではなく一定間隔で行う。
+        _detectionTimer -= deltaTime;
+        if (_detectionTimer > 0f) return;
+        _detectionTimer = DetectionInterval;
+
         float hideDistance = Mathf.Max(0f, cameraRadius) + Mathf.Max(0f, hideStartDistance);
         float showDistance = hideDistance + ReactivateMargin;
+        float hideDistanceSqr = hideDistance * hideDistance;
+        float showDistanceSqr = showDistance * showDistance;
         Vector3 cameraPosition = _mainCamera.transform.position;
 
         foreach (EffectState effectState in _effectStates)
@@ -40,14 +49,14 @@ public sealed class EffectCameraProximityController
             if (effectState.Target == null) continue;
 
             // CameraとEffectのTransform.positionはどちらもワールド座標なので、同じ座標系で距離を判定する。
-            float distance = Vector3.Distance(cameraPosition, effectState.Target.position);
-            if (!effectState.IsHiddenByController && effectState.Target.gameObject.activeSelf && distance <= hideDistance)
+            float distanceSqr = (cameraPosition - effectState.Target.position).sqrMagnitude;
+            if (!effectState.IsHiddenByController && effectState.Target.gameObject.activeSelf && distanceSqr <= hideDistanceSqr)
             {
-                effectState.HideObjects();
+                effectState.HideRenderers();
             }
-            else if (effectState.IsHiddenByController && distance >= showDistance)
+            else if (effectState.IsHiddenByController && distanceSqr >= showDistanceSqr)
             {
-                effectState.ShowObjects();
+                effectState.ShowRenderers();
             }
         }
     }
@@ -65,7 +74,7 @@ public sealed class EffectCameraProximityController
         {
             if (effectState.Target != null && effectState.IsHiddenByController)
             {
-                effectState.ShowObjects();
+                effectState.ShowRenderers();
             }
         }
 
@@ -73,6 +82,7 @@ public sealed class EffectCameraProximityController
     }
 
     private Camera _mainCamera;
+    private float _detectionTimer;
     private readonly List<EffectState> _effectStates = new();
 
     private sealed class EffectState
@@ -86,51 +96,46 @@ public sealed class EffectCameraProximityController
         {
             Target = target;
 
-            // Effectのルートは残し、直下にあるLight以外だけを表示切替の対象にする。
+            // ルート直下のLight以外の子から、配下のRendererをすべて集めて表示切替の対象にする。
             foreach (Transform childTransform in target)
             {
                 if (childTransform.name == ExcludedObjectName) continue;
-                _childStates.Add(new ChildState(childTransform.gameObject));
+
+                foreach (Renderer renderer in childTransform.GetComponentsInChildren<Renderer>(true))
+                {
+                    _renderers.Add(renderer);
+                }
             }
         }
 
-        public void HideObjects()
+        public void HideRenderers()
         {
-            foreach (ChildState childState in _childStates)
+            foreach (Renderer renderer in _renderers)
             {
-                if (childState.Target == null || !childState.Target.activeSelf) continue;
+                if (renderer == null || !renderer.enabled) continue;
 
-                childState.Target.SetActive(false);
-                childState.IsHiddenByController = true;
+                renderer.enabled = false;
+                _hiddenRenderers.Add(renderer);
             }
 
             IsHiddenByController = true;
         }
 
-        public void ShowObjects()
+        public void ShowRenderers()
         {
-            foreach (ChildState childState in _childStates)
+            foreach (Renderer renderer in _hiddenRenderers)
             {
-                if (childState.Target == null || !childState.IsHiddenByController) continue;
-
-                childState.Target.SetActive(true);
-                childState.IsHiddenByController = false;
+                if (renderer != null)
+                {
+                    renderer.enabled = true;
+                }
             }
 
+            _hiddenRenderers.Clear();
             IsHiddenByController = false;
         }
 
-        private readonly List<ChildState> _childStates = new();
-    }
-
-    private sealed class ChildState
-    {
-        public GameObject Target { get; }
-        public bool IsHiddenByController { get; set; }
-
-        public ChildState(GameObject target)
-        {
-            Target = target;
-        }
+        private readonly List<Renderer> _renderers = new();
+        private readonly List<Renderer> _hiddenRenderers = new();
     }
 }

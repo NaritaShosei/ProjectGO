@@ -57,7 +57,12 @@ public class CameraController : MonoBehaviour
             playerTransform,
             _lockOnRange,
             enemyManager,
-            _cameraManager.MainCamera
+            _cameraManager.MainCamera,
+            new LockOnScoreWeights(
+                _scoreWeightScreenCenter,
+                _scoreWeightPlayerDistance,
+                _scoreWeightCameraSide,
+                _scoreCenterAngleReference)
         );
 
         SubscribeInputEvents();
@@ -76,7 +81,7 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        UpdateTargetSwitch(timeScale);
+        UpdateTargetSwitch();
         _currentState.Tick(timeScale, _inputHandler.CameraMoveInput);
     }
 
@@ -135,7 +140,7 @@ public class CameraController : MonoBehaviour
         _currentState.Enter();
 
         // 初回のみ、ロックオン前に溜まった切り替え入力を捨てる
-        if (!wasLockedOn) ResetSwitchAccumulators();
+        if (!wasLockedOn) ResetSwitchState();
 
         OnTargetChanged?.Invoke(target);
     }
@@ -159,15 +164,27 @@ public class CameraController : MonoBehaviour
     [Tooltip("ロックオン可能な最大距離（m）")]
     [SerializeField] private float _lockOnRange = 20f;
 
+    [Header("ロックオン優先度スコアの重み（小さいほど優先）")]
+    [Tooltip("画面中心からのズレの重み")]
+    [SerializeField] private float _scoreWeightScreenCenter = 1f;
+    [Tooltip("プレイヤーからの距離の重み")]
+    [SerializeField] private float _scoreWeightPlayerDistance = 0.5f;
+    [Tooltip("プレイヤーより手前（カメラ側）にいる敵へのペナルティの重み")]
+    [SerializeField] private float _scoreWeightCameraSide = 1f;
+    [Tooltip("画面中心ズレを 0..1 に正規化する基準角（度）。この角度でスコア1.0")]
+    [SerializeField] private float _scoreCenterAngleReference = 50f;
+
     [Header("対象切り替え（スティック）")]
-    [Tooltip("倒し量×時間 の蓄積がこの値を超えると1回切り替える")]
-    [SerializeField] private float _switchStickThreshold = 0.35f;
-    [Tooltip("スティックの横成分がこの絶対値未満のときは蓄積しない（デッドゾーン）")]
-    [SerializeField, Range(0f, 1f)] private float _switchStickDeadzone = 0.2f;
+    [Tooltip("右スティック横成分がこの絶対値を超えたら1回切り替える")]
+    [SerializeField, Range(0f, 1f)] private float _switchStickOnThreshold = 0.6f;
+    [Tooltip("右スティック横成分がこの絶対値以下に戻ると次の切り替えを許可する（ヒステリシス）")]
+    [SerializeField, Range(0f, 1f)] private float _switchStickOffThreshold = 0.3f;
 
     [Header("対象切り替え（マウス）")]
-    [Tooltip("マウス横移動量の累積がこの絶対値を超えると1回切り替える")]
+    [Tooltip("1回の連続した横スワイプの移動量がこの絶対値を超えたら1回切り替える")]
     [SerializeField] private float _switchMouseThreshold = 400f;
+    [Tooltip("1 FixedUpdate のマウス横移動がこのpx未満ならスワイプ終了とみなす")]
+    [SerializeField] private float _switchMouseMinStep = 6f;
 
     private CameraManager _cameraManager;
     private InputHandler _inputHandler;
@@ -177,8 +194,10 @@ public class CameraController : MonoBehaviour
     private LockOnCameraState _lockOnState;
     private ICameraState _currentState;
 
-    // 対象切り替えの入力蓄積（符号付き。正で右、負で左）
-    private float _switchAccumStick;
+    // 1入力につき1回だけ切り替えるためのラッチ。ニュートラル復帰／スワイプ終了で再武装する
+    private bool _stickSwitchArmed;
+    private bool _mouseSwitchArmed;
+    // 進行中の横スワイプの移動量（符号付き。正で右、負で左）
     private float _switchAccumMouse;
     // マウス横移動量を Update でフレーム精度で貯め、Tick で消費する
     private float _mouseSwitchDeltaX;
@@ -238,47 +257,61 @@ public class CameraController : MonoBehaviour
             TryManualLockOn();
         }
     }
-    /// <summary>切り替え入力を蓄積し、閾値を超えたらその方向のターゲットへ切り替える。</summary>
-    private void UpdateTargetSwitch(float timeScale)
+    /// <summary>切り替え入力を判定する。1入力（1プッシュ／1スワイプ）につき1回だけ切り替える。</summary>
+    private void UpdateTargetSwitch()
     {
-        if (_inputHandler == null || _selector == null) return;
-        if (!IsLockedOn) return;
+        if (_selector == null || !IsLockedOn) return;
 
-        // スティック：デッドゾーン超えの間だけ「倒し量×時間」を蓄積
+        UpdateStickSwitch();
+        UpdateMouseSwitch();
+    }
+
+    /// <summary>右スティック：オン閾値を超えたら1回切り替え。オフ閾値以下に戻るまで再切り替えしない。</summary>
+    private void UpdateStickSwitch()
+    {
         float stickX = Gamepad.current != null ? Gamepad.current.rightStick.ReadValue().x : 0f;
-        if (Mathf.Abs(stickX) >= _switchStickDeadzone)
+        float absX = Mathf.Abs(stickX);
+
+        // ニュートラル付近まで戻ったら次の切り替えを許可
+        if (absX <= _switchStickOffThreshold) _stickSwitchArmed = true;
+
+        // 武装中にオン閾値を超えたら1回だけ切り替え
+        if (_stickSwitchArmed && absX >= _switchStickOnThreshold)
         {
-            // 逆方向へ倒したら蓄積をリセット
-            if (_switchAccumStick != 0f && Mathf.Sign(stickX) != Mathf.Sign(_switchAccumStick))
-                _switchAccumStick = 0f;
+            TrySwitchTarget(Mathf.Sign(stickX));
+            _stickSwitchArmed = false;
+        }
+    }
 
-            _switchAccumStick += stickX * (Time.fixedDeltaTime * timeScale);
+    /// <summary>マウス：連続した横スワイプの移動量が閾値を超えたら1回切り替え。スワイプ終了／反転まで再切り替えしない。</summary>
+    private void UpdateMouseSwitch()
+    {
+        // Update で貯めた1 Tick分の横移動量を取り出す
+        float delta = _mouseSwitchDeltaX;
+        _mouseSwitchDeltaX = 0f;
 
-            // 閾値到達で切り替え、蓄積を0へ（成否に関わらず）
-            if (Mathf.Abs(_switchAccumStick) >= _switchStickThreshold)
-            {
-                TrySwitchTarget(Mathf.Sign(_switchAccumStick));
-                _switchAccumStick = 0f;
-            }
+        // 移動が小さい Tick はスワイプ終了とみなし、蓄積を捨てて再武装
+        if (Mathf.Abs(delta) < _switchMouseMinStep)
+        {
+            _switchAccumMouse = 0f;
+            _mouseSwitchArmed = true;
+            return;
         }
 
-        // マウス：Update で貯めた横移動量を消費して符号付きで累積（時間は掛けない）
-        float mouseDelta = _mouseSwitchDeltaX;
-        _mouseSwitchDeltaX = 0f;
-        if (mouseDelta != 0f)
+        // 逆方向へ振り直したら蓄積を捨てて再武装
+        if (_switchAccumMouse != 0f && Mathf.Sign(delta) != Mathf.Sign(_switchAccumMouse))
         {
-            // 逆方向へ動かしたら蓄積をリセット
-            if (_switchAccumMouse != 0f && Mathf.Sign(mouseDelta) != Mathf.Sign(_switchAccumMouse))
-                _switchAccumMouse = 0f;
+            _switchAccumMouse = 0f;
+            _mouseSwitchArmed = true;
+        }
 
-            _switchAccumMouse += mouseDelta;
+        _switchAccumMouse += delta;
 
-            // 閾値到達で切り替え、蓄積を0へ（成否に関わらず）
-            if (Mathf.Abs(_switchAccumMouse) >= _switchMouseThreshold)
-            {
-                TrySwitchTarget(Mathf.Sign(_switchAccumMouse));
-                _switchAccumMouse = 0f;
-            }
+        // 武装中に閾値を超えたら1回だけ切り替え
+        if (_mouseSwitchArmed && Mathf.Abs(_switchAccumMouse) >= _switchMouseThreshold)
+        {
+            TrySwitchTarget(Mathf.Sign(_switchAccumMouse));
+            _mouseSwitchArmed = false;
         }
     }
 
@@ -289,10 +322,12 @@ public class CameraController : MonoBehaviour
         if (next != null) LockOn(next);
     }
 
-    /// <summary>対象切り替えの入力蓄積を0に戻す。ロックオン開始時に呼ぶ。</summary>
-    private void ResetSwitchAccumulators()
+    /// <summary>対象切り替えの入力状態を初期化する。ロックオン開始時に呼ぶ。</summary>
+    /// <remarks>ラッチは未武装で始め、入力がニュートラルに戻ってから初めて切り替えを受け付ける。</remarks>
+    private void ResetSwitchState()
     {
-        _switchAccumStick = 0f;
+        _stickSwitchArmed = false;
+        _mouseSwitchArmed = false;
         _switchAccumMouse = 0f;
         _mouseSwitchDeltaX = 0f;
     }
