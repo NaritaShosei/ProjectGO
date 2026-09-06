@@ -829,9 +829,16 @@ public class PlayerAttack : MonoBehaviour
             _homingAngle = data.HomingAngle;
             _homingStrength = data.HomingStrength;
 
+            Vector3 inputDirection = Vector3.zero;
+            bool hasInputDirection = GetCurrentLockOnTargetCenter() == null &&
+                TryGetAttackInputDirection(out inputDirection);
+            Vector3 searchDirection = hasInputDirection ? inputDirection : transform.forward;
+
             _homingTarget = ResolveHomingTarget(
                 _homingRadius,
-                _homingAngle);
+                _homingAngle,
+                searchDirection,
+                hasInputDirection);
         }
         else
         {
@@ -843,13 +850,15 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// ホーミング対象を見つける。現在のロックオンターゲットが有効ならそれを返し、そうでない場合は周囲の敵から条件に合うものを探して返す。
     /// </summary>
-    private Transform FindHomingTarget(float radius, float angle)
+    private Transform FindHomingTarget(float radius, float angle, Vector3 searchDirection)
     {
-        if (_currentLockOnTarget != null)
-            return _currentLockOnTarget.GetTargetCenter();
+        Transform lockOnTarget = GetCurrentLockOnTargetCenter();
+        if (lockOnTarget != null)
+            return lockOnTarget;
 
         Transform best = null;
-        float bestScore = float.MaxValue;
+        float bestAngle = float.MaxValue;
+        float bestDistance = float.MaxValue;
 
         if (ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
@@ -858,10 +867,16 @@ public class PlayerAttack : MonoBehaviour
             {
                 if (enemy.IsDead) continue;
                 var dir = (enemy.GetTargetCenter().position - transform.position).normalized;
-                float angleTo = Vector3.Angle(transform.forward, dir);
+                float angleTo = Vector3.Angle(searchDirection, dir);
                 if (angleTo > angle) continue;
                 float dist = Vector3.Distance(transform.position, enemy.GetTargetCenter().position);
-                if (dist < bestScore) { bestScore = dist; best = enemy.GetTargetCenter(); }
+                if (angleTo < bestAngle ||
+                    (Mathf.Approximately(angleTo, bestAngle) && dist < bestDistance))
+                {
+                    bestAngle = angleTo;
+                    bestDistance = dist;
+                    best = enemy.GetTargetCenter();
+                }
             }
             return best;
         }
@@ -871,10 +886,16 @@ public class PlayerAttack : MonoBehaviour
         {
             if (!hit.TryGetComponent(out IEnemy enemy) || enemy.IsDead) continue;
             var dir = (hit.transform.position - transform.position).normalized;
-            float angleTo = Vector3.Angle(transform.forward, dir);
+            float angleTo = Vector3.Angle(searchDirection, dir);
             if (angleTo > angle) continue;
             float dist = Vector3.Distance(transform.position, hit.transform.position);
-            if (dist < bestScore) { bestScore = dist; best = hit.transform; }
+            if (angleTo < bestAngle ||
+                (Mathf.Approximately(angleTo, bestAngle) && dist < bestDistance))
+            {
+                bestAngle = angleTo;
+                bestDistance = dist;
+                best = hit.transform;
+            }
         }
         return best;
     }
@@ -882,15 +903,23 @@ public class PlayerAttack : MonoBehaviour
     /// <summary>
     /// ホーミング対象を解決する。ロックオンターゲットが有効ならそれを返し、そうでない場合は周囲から新たにホーミング対象を探す。新しい対象が見つかればホーミングロックする。
     /// </summary>
-    private Transform ResolveHomingTarget(float radius, float angle)
+    private Transform ResolveHomingTarget(
+        float radius,
+        float angle,
+        Vector3 searchDirection,
+        bool prioritizeInput)
     {
-        if (_isHomingLocked && _lockedHomingTarget != null)
+        // 各攻撃開始時に入力がある場合は、前段で保持した対象より今回の入力方向を優先する。
+        if (prioritizeInput)
+            ClearHomingLock();
+
+        if (!prioritizeInput && _isHomingLocked && _lockedHomingTarget != null)
         {
             if (_lockedHomingTarget.TryGetComponent(out IEnemy e) && !e.IsDead)
                 return _lockedHomingTarget;
             ClearHomingLock();
         }
-        var newTarget = FindHomingTarget(radius, angle);
+        var newTarget = FindHomingTarget(radius, angle, searchDirection);
         if (newTarget != null && _currentAttackId != -1)
         {
             _lockedHomingTarget = newTarget;
@@ -1014,7 +1043,17 @@ public class PlayerAttack : MonoBehaviour
         }
 
         if (TryGetAttackInputDirection(out Vector3 inputDirection))
+        {
+            if (_homingTarget != null)
+            {
+                Vector3 toInputTarget = _homingTarget.position - transform.position;
+                toInputTarget.y = 0f;
+                if (toInputTarget.sqrMagnitude > 0.001f)
+                    return toInputTarget.normalized;
+            }
+
             return inputDirection;
+        }
 
         if (_homingTarget != null)
         {
