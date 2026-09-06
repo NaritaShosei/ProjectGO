@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 [Serializable]
@@ -24,6 +25,7 @@ public class ResultState : ISequenceState
             _timeScorePerSecond,
             _levelScoreMultiplier);
         _presenter = new ResultPanelPresenter(_view, _model);
+        _view.TitleRequested += HandleTitleRequested;
         _presenter.Show();
 
         context.SequenceManager?.NotifyAllSequencesComplete();
@@ -33,6 +35,9 @@ public class ResultState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
+        if (_view != null)
+            _view.TitleRequested -= HandleTitleRequested;
+
         _view?.Hide();
         _model = null;
         _presenter = null;
@@ -48,4 +53,19 @@ public class ResultState : ISequenceState
 
     private ResultPanelModel _model;
     private ResultPanelPresenter _presenter;
+
+    private void HandleTitleRequested()
+    {
+        if (!ServiceLocator.TryGet(out SceneTransitionManager transitionManager))
+        {
+            Debug.LogError("[ResultState] SceneTransitionManagerが見つかりません。");
+            return;
+        }
+
+        // ロード中の連打で遷移を重複要求しない。
+        if (transitionManager.IsTransitioning)
+            return;
+
+        transitionManager.TransitionToTitle().Forget();
+    }
 }
