@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using static EnemyRuntimeContext;
 using static SoundCueNames;
 
 /// <summary>
@@ -290,10 +291,23 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         if (!_isAttacking) return;
         _isAttacking = false;
 
+         var pattern = _context.SelectedPattern;
+
         // 攻撃後クールダウンをセット
         float cooldown = _cooldownOverride > 0f ? _cooldownOverride : (_context.SelectedPattern?.Cooldown ?? 1.5f);
         _context.AttackCooldownRemaining = cooldown;
-       
+
+        // 後退リクエストをセット（EnableRetreat=falseならリクエストを作らない）
+        _context.PendingRetreat = (pattern != null && pattern.EnableRetreat)
+            ? new RetreatRequest
+            {
+                Enabled = true,
+                RecoveryRemaining = pattern.RecoveryTime,
+                RetreatDistance = pattern.RetreatDistance,
+                RetreatSpeed = pattern.RetreatSpeed,
+            }
+            : RetreatRequest.None;
+
         // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
         _context.SelectedPattern = null;
 

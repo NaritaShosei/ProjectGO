@@ -36,8 +36,6 @@ public class RetreatBehaviour : IEnemyBehaviour
         var request = _context.PendingRetreat;
         if (!request.Enabled) return false;
 
-        if (request.RecoveryRemaining > 0f) return false;
-
         return CalcXZSqrDist() < request.RetreatDistance * request.RetreatDistance;
     }
 

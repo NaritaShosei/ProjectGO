@@ -230,6 +230,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         _bark?.Dispose();
         // MeleeAttackBehaviourのイベント購読を解除する
         _attack?.Dispose();
+        if (_attack != null) _attack.OnAttackFinished -= HandleAttackFinished;
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -242,15 +243,6 @@ public class MobEnemy : Enemy,IFormationParticipant
         {
             _context.AttackCooldownRemaining -= deltaTime;
             if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
-        }
-
-        // 後退の硬直時間をTimeScale反映済みdeltaTimeで進める
-        if (_context.PendingRetreat.Enabled && _context.PendingRetreat.RecoveryRemaining > 0f)
-        {
-            var retreat = _context.PendingRetreat;
-            retreat.RecoveryRemaining -= deltaTime;
-            if (retreat.RecoveryRemaining < 0f) retreat.RecoveryRemaining = 0f;
-            _context.PendingRetreat = retreat;
         }
 
         // スロット保持中にパターン未選択なら再選択する
@@ -324,6 +316,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
             _attack.Init(initCtx);
+            _attack.OnAttackFinished += HandleAttackFinished;   // ← 追加
             _runner.Register(_attack);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
@@ -363,6 +356,16 @@ public class MobEnemy : Enemy,IFormationParticipant
         var idle = new IdleBehaviour();
         idle.Init(initCtx);
         _runner.Register(idle);
+    }
+
+    // 新規メソッド追加
+    private void HandleAttackFinished()
+    {
+        float stunDuration = _context.PendingRetreat.RecoveryRemaining;
+        if (stunDuration > 0f)
+        {
+            _runner.ForceBehaviour(new PostAttackStunBehaviour(stunDuration));
+        }
     }
 
     /// <summary>
