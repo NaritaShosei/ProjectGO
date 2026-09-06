@@ -500,6 +500,7 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
+        CancelAttackDirectionRotation();
         OnAttackEnded?.Invoke();
 
         _pendingAttackData = null;
