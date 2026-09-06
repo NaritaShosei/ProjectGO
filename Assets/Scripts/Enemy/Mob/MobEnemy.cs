@@ -244,6 +244,15 @@ public class MobEnemy : Enemy,IFormationParticipant
             if (_context.AttackCooldownRemaining < 0f) _context.AttackCooldownRemaining = 0f;
         }
 
+        // 後退の硬直時間をTimeScale反映済みdeltaTimeで進める
+        if (_context.PendingRetreat.Enabled && _context.PendingRetreat.RecoveryRemaining > 0f)
+        {
+            var retreat = _context.PendingRetreat;
+            retreat.RecoveryRemaining -= deltaTime;
+            if (retreat.RecoveryRemaining < 0f) retreat.RecoveryRemaining = 0f;
+            _context.PendingRetreat = retreat;
+        }
+
         // スロット保持中にパターン未選択なら再選択する
         // スポーン時取得失敗後の再取得・攻撃終了後の再選択をここで一括処理する
         if (_services.AttackerSlot != null && _services.AttackerSlot.IsAcquired(Id) && _context.SelectedPattern == null)
@@ -337,6 +346,10 @@ public class MobEnemy : Enemy,IFormationParticipant
             var move = new ApproachBehaviour(_distanceProfile, _services);
             move.Init(initCtx);
             _runner.Register(move);
+
+            var retreat = new RetreatBehaviour(_distanceProfile, _services);
+            retreat.Init(initCtx);
+            _runner.Register(retreat);
 
             var roam = new RoamBehaviour(
                 _distanceProfile,
