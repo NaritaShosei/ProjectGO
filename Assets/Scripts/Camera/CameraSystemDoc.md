@@ -81,7 +81,7 @@
 - `EnemyManager.OnEnemyForceRemoved` を購読し、削除されたのが現在の対象なら次へ切り替え（なければ解除）
 - 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
 
-対象切り替えの入力は `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（変更を Camera フォルダ内に閉じるための割り切り。`InputHandler` は経由しない）。マウス横移動量は取りこぼし防止のため `Update` でフレーム精度で蓄積し `Tick` で消費します。閾値は `CameraController` の `[SerializeField]`（`_switchStickOnThreshold` / `_switchStickOffThreshold` / `_switchMouseThreshold` / `_switchMouseMinStep`）で調整します。
+対象切り替えの入力は `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（変更を Camera フォルダ内に閉じるための割り切り。`InputHandler` は経由しない）。マウス横移動量は取りこぼし防止のため `Update` でフレーム精度で蓄積し `Tick` で消費します。ただし**ヒットストップ中（`CameraManager.TimeScale ≈ 0` で `Tick` が止まる間）は蓄積せずゼロクリア**します。溜め込むと再開フレームで一括放出され、意図しない対象切り替え（撃破の瞬間に無関係な敵へロックオンが飛ぶ）が起きるためです。スティック・マウスとも入力がニュートラルに戻った Tick で蓄積・ラッチを初期化します。閾値は `CameraController` の `[SerializeField]`（`_switchStickOnThreshold` / `_switchStickOffThreshold` / `_switchMouseThreshold` / `_switchMouseMinStep`）で調整します。
 
 このクラス自身は画面上の位置や角度から候補を比較しません（`LockOnTargetSelector` に委譲）。カメラの位置・回転計算も `CameraMotionController` に委譲します。状態変更は `CameraManager` へイベント通知のみで伝えます。
 

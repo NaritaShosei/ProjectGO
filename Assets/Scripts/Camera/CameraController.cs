@@ -216,10 +216,17 @@ public class CameraController : MonoBehaviour
     private void Update()
     {
         // マウス切り替え用の横移動量をフレーム精度で貯める（FixedUpdateだと取りこぼすため）
-        if (IsLockedOn && Mouse.current != null)
+        if (!IsLockedOn || Mouse.current == null) return;
+
+        // ヒットストップ中は Tick が止まり蓄積が消費されない。
+        // ここで貯め続けると再開フレームで一括放出され、意図しない対象切り替えが起きるため貯めない。
+        if (_cameraManager != null && Mathf.Approximately(_cameraManager.TimeScale, 0f))
         {
-            _mouseSwitchDeltaX += Mouse.current.delta.ReadValue().x;
+            _mouseSwitchDeltaX = 0f;
+            return;
         }
+
+        _mouseSwitchDeltaX += Mouse.current.delta.ReadValue().x;
     }
 
     private void OnDestroy()
@@ -272,8 +279,12 @@ public class CameraController : MonoBehaviour
         float stickX = Gamepad.current != null ? Gamepad.current.rightStick.ReadValue().x : 0f;
         float absX = Mathf.Abs(stickX);
 
-        // ニュートラル付近まで戻ったら次の切り替えを許可
-        if (absX <= _switchStickOffThreshold) _stickSwitchArmed = true;
+        // ニュートラル付近まで戻ったらラッチを初期化して再武装する（持ち越しを防ぐ）
+        if (absX <= _switchStickOffThreshold)
+        {
+            _stickSwitchArmed = true;
+            return;
+        }
 
         // 武装中にオン閾値を超えたら1回だけ切り替え
         if (_stickSwitchArmed && absX >= _switchStickOnThreshold)
@@ -290,7 +301,8 @@ public class CameraController : MonoBehaviour
         float delta = _mouseSwitchDeltaX;
         _mouseSwitchDeltaX = 0f;
 
-        // 移動が小さい Tick はスワイプ終了とみなし、蓄積を捨てて再武装
+        // 移動が小さい Tick（＝ニュートラル／スワイプ終了）は蓄積・ラッチを毎回ゼロへ戻す。
+        // これで一時停止（ヒットストップ等）を挟んでも古い蓄積が残らない。
         if (Mathf.Abs(delta) < _switchMouseMinStep)
         {
             _switchAccumMouse = 0f;
