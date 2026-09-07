@@ -52,7 +52,7 @@ public class RetreatBehaviour : IEnemyBehaviour
     public void OnEnter()
     {
         _state.ChangeState(EnemyState.Move);
-        _enemyAnimator?.SetSpeed(1f);
+        _enemyAnimator?.SetSpeed(-1f);
     }
 
     public void OnExit()
@@ -116,7 +116,6 @@ public class RetreatBehaviour : IEnemyBehaviour
         {
             _spatialHashGrid.UpdatePosition(_enemy, oldPos, newPos);
         }
-
         _context.DistanceToPlayer = Vector3.Distance(_self.position, _player.position);
     }
 
@@ -127,7 +126,6 @@ public class RetreatBehaviour : IEnemyBehaviour
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private IEnemyAnimator _enemyAnimator;
-
     private readonly DistanceProfile _profile;
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
@@ -143,9 +141,3 @@ public class RetreatBehaviour : IEnemyBehaviour
         return dx * dx + dz * dz;
     }
 }
-
-//攻撃のホーミングは常にではなく、前進はじめのみホーミングさせ、
-//前進時（切りかかり～攻撃）はホーミングしないようにしてほしいです
-
-//プレイヤーとの距離と、攻撃をした後の硬直、プレイヤーに近づいた場合どれくらいの移動速度でまた距離を取り直すのか、をインスペクターから調整できるようにしたいです🙏 
-//すぐに距離を取り直してしまうと、闘神モードのようなその場でチャージ攻撃をするモードと相性がとても悪くなってしまうと思いました
