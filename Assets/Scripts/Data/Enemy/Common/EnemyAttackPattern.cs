@@ -41,21 +41,35 @@ public sealed class EnemyAttackPattern : ScriptableObject
     // 攻撃を開始するトリガー距離（AttackRange * AttackTriggerRatio）
     public float AttackTriggerRatio => _attackTriggerRatio;
 
+    //攻撃中に前進させるか
     public bool EnableMovement => _enableMovement;
+    //前進の進み方を定義するカーブ
     public AnimationCurve MoveCurve => _moveCurve;
+    //前進の合計移動距離
     public float MoveDistance => _moveDistance;
+    //前進を開始してから完了するまでの秒数
     public float MoveDuration => _moveDuration;
+    //前進中、プレイヤーとこれ以上は詰めない距離
     public float KeepDistance => _keepDistance;
 
+    //プレイヤー方向へ補正を行うか
     public bool EnableHoming => _enableHoming;
+    //この距離より遠いプレイヤーには補正しない
     public float HomingRadius => _homingRadius;
+    //補正の限界の角度
     public float HomingAngle => _homingAngle;
+    // 向き補正の回転速度（度/秒）
     public float HomingStrength => _homingStrength;
+    // 前進開始からこの秒数の間だけ補正を行う（絶対時間）
     public float HomingDuration => _homingDuration;
 
+    // falseの場合、攻撃後もその場に留まる
     public bool EnableRetreat => _enableRetreat;
+    // 攻撃終了後、後退を始めるまでの硬直時間（秒）
     public float RecoveryTime => _recoveryTime;
+    // この距離まで離れたら後退をやめる
     public float RetreatDistance => _retreatDistance;
+    // 距離を取り直す際の移動速度
     public float RetreatSpeed => _retreatSpeed;
 
     [SerializeField] private string _patternName;

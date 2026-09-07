@@ -367,6 +367,8 @@ public class MobEnemy : Enemy,IFormationParticipant
         float stunDuration = _context.PendingRetreat.RecoveryRemaining;
         if (stunDuration > 0f)
         {
+            // PostAttackStunBehaviourは攻撃終了の都度動的にnewしている
+            // そのため生成のたびにInit()を明示的に呼ぶ必要がある（呼び忘れるとOnEnter()でNRE）
             var stun = new PostAttackStunBehaviour(stunDuration, ConsumeRetreatIfUnnecessary);
             stun.Init(_initCtx);
             _runner.ForceBehaviour(stun);

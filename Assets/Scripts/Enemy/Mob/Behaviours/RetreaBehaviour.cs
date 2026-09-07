@@ -52,6 +52,7 @@ public class RetreatBehaviour : IEnemyBehaviour
     public void OnEnter()
     {
         _state.ChangeState(EnemyState.Move);
+        //負のSpeedを渡すことでIdleからBackStepへ
         _enemyAnimator?.SetSpeed(-1f);
     }
 
