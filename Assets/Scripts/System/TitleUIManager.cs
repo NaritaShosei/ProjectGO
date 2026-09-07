@@ -118,8 +118,8 @@ public class TitleUIManager : MonoBehaviour
         }
         _modeSelectCanvasGroup.interactable = false;
         _modeSelectPanel.SetActive(false);
-        _titlePanelView.ShowThisPanel();
         _titleCanvasGroup.interactable = true;
+        _titlePanelView.ShowThisPanel();
     }
 
     private async void SceneTransitionToScene(string sceneName)

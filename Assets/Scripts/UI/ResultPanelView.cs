@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ResultPanelView : MonoBehaviour
@@ -29,7 +30,8 @@ public class ResultPanelView : MonoBehaviour
     {
         _root.SetActive(true);
         Canvas.ForceUpdateCanvases();
-        _titleButton?.Select();
+        if (_titleButton != null && EventSystem.current != null)
+            EventSystem.current.SetSelectedGameObject(_titleButton.gameObject);
     }
 
     public void Hide()
