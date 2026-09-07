@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using System;
+using UnityEngine;
+using static EnemyRuntimeContext;
 
 // NOTE:
 // モブ敵のの基底クラスとして作成
@@ -220,6 +221,7 @@ public class MobEnemy : Enemy,IFormationParticipant
     protected MeleeAttackBehaviour _attack;
     protected TurnBehaviour _turn;
     protected BarkBehaviour _bark;
+    private BehaviourInitContext _initCtx;
 
     protected override void OnDestroy()
     {
@@ -295,6 +297,8 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     protected virtual void RegisterBehaviours(BehaviourInitContext initCtx)
     {
+        _initCtx = initCtx;
+
         // TurnProfileが未設定の場合は警告を出してTurnを登録しない
         if (_turnProfile == null)
         {
@@ -358,13 +362,37 @@ public class MobEnemy : Enemy,IFormationParticipant
         _runner.Register(idle);
     }
 
-    // 新規メソッド追加
     private void HandleAttackFinished()
     {
         float stunDuration = _context.PendingRetreat.RecoveryRemaining;
         if (stunDuration > 0f)
         {
-            _runner.ForceBehaviour(new PostAttackStunBehaviour(stunDuration));
+            var stun = new PostAttackStunBehaviour(stunDuration, ConsumeRetreatIfUnnecessary);
+            stun.Init(_initCtx);
+            _runner.ForceBehaviour(stun);
+        }
+        else
+        {
+            // 硬直がない場合も、その場で後退要否を判定しておく
+            ConsumeRetreatIfUnnecessary();
+        }
+    }
+
+    /// <summary>
+    /// 硬直明けの時点ですでにRetreatDistance以上離れている場合、
+    /// 後退リクエストを消費する（放置するとApproach後に不要な後退が発生するため）
+    /// </summary>
+    private void ConsumeRetreatIfUnnecessary()
+    {
+        if (!_context.PendingRetreat.Enabled) return;
+        if (_playerTransform == null) return;
+
+        float sqrDist = (transform.position - _playerTransform.position).sqrMagnitude; // XZのみ見るなら下記コメント参照
+        float retreatDist = _context.PendingRetreat.RetreatDistance;
+
+        if (sqrDist >= retreatDist * retreatDist)
+        {
+            _context.PendingRetreat = RetreatRequest.None;
         }
     }
 
