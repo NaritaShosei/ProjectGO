@@ -247,6 +247,20 @@ public class SceneTransitionManager : MonoBehaviour
     private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
         SuspendUIInput();
+
+        // Additiveロードでは旧シーンのEventSystemがcurrentに残る。
+        // 遷移先のStartが初期選択を旧シーンへ登録しないよう、入力停止中に切り替える。
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            foreach (EventSystem eventSystem in root.GetComponentsInChildren<EventSystem>())
+            {
+                if (!eventSystem.isActiveAndEnabled)
+                    continue;
+
+                EventSystem.current = eventSystem;
+                return;
+            }
+        }
     }
 
     private void SuspendUIInput()
