@@ -62,7 +62,7 @@ public class TurnBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
-        // Attack中・Bark中など、移動不可状態ではTurnしない（Runnerが並列実行のためCanEnter/CanContinueを見ないので、ここで自衛する）
+        // Attack中・Bark中など、移動不可状態ではTurnしない
         if (_state == null || !_state.CanMove())
         {
             return;

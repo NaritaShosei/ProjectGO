@@ -320,7 +320,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
             _attack.Init(initCtx);
-            _attack.OnAttackFinished += HandleAttackFinished;   // ← 追加
+            _attack.OnAttackFinished += HandleAttackFinished;
             _runner.Register(_attack);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
@@ -387,7 +387,9 @@ public class MobEnemy : Enemy,IFormationParticipant
         if (!_context.PendingRetreat.Enabled) return;
         if (_playerTransform == null) return;
 
-        float sqrDist = (transform.position - _playerTransform.position).sqrMagnitude; // XZのみ見るなら下記コメント参照
+        Vector3 delta = transform.position - _playerTransform.position;
+        delta.y = 0f;
+        float sqrDist = delta.sqrMagnitude;
         float retreatDist = _context.PendingRetreat.RetreatDistance;
 
         if (sqrDist >= retreatDist * retreatDist)

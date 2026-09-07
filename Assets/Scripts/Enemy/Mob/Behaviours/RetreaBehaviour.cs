@@ -103,7 +103,11 @@ public class RetreatBehaviour : IEnemyBehaviour
         }
 
         dir.y = 0f;
-        if (dir.sqrMagnitude < 0.001f) return;
+        if (dir.sqrMagnitude < 0.001f)
+        {
+            dir = -_self.forward;
+            dir.y = 0f;
+        }
 
         Vector3 displacement = dir.normalized * request.RetreatSpeed * deltaTime;
         if (_enemy is Enemy movableEnemy)
