@@ -62,6 +62,12 @@ public class TurnBehaviour : IEnemyBehaviour
 
     public void Tick(float deltaTime)
     {
+        // Attack中・Bark中など、移動不可状態ではTurnしない
+        if (_state == null || !_state.CanMove())
+        {
+            return;
+        }
+
         // 上書き方向が設定されている場合はそちらを優先する
         Vector3 toTarget = _overrideDirection.HasValue
             ? _overrideDirection.Value

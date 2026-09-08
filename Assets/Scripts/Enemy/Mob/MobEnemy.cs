@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using System;
+using UnityEngine;
+using static EnemyRuntimeContext;
 
 // NOTE:
 // モブ敵のの基底クラスとして作成
@@ -229,6 +230,7 @@ public class MobEnemy : Enemy,IFormationParticipant
     protected MeleeAttackBehaviour _attack;
     protected TurnBehaviour _turn;
     protected BarkBehaviour _bark;
+    private BehaviourInitContext _initCtx;
 
     protected override void OnDestroy()
     {
@@ -239,6 +241,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         _bark?.Dispose();
         // MeleeAttackBehaviourのイベント購読を解除する
         _attack?.Dispose();
+        if (_attack != null) _attack.OnAttackFinished -= HandleAttackFinished;
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -303,6 +306,8 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     protected virtual void RegisterBehaviours(BehaviourInitContext initCtx)
     {
+        _initCtx = initCtx;
+
         // TurnProfileが未設定の場合は警告を出してTurnを登録しない
         if (_turnProfile == null)
         {
@@ -324,6 +329,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         {
             _attack = new MeleeAttackBehaviour(_services, _animator, _distanceProfile);
             _attack.Init(initCtx);
+            _attack.OnAttackFinished += HandleAttackFinished;
             _runner.Register(_attack);
 
             // BarkをattackerSlotブロック内に移動（nullチェック済みの範囲で登録）
@@ -347,6 +353,10 @@ public class MobEnemy : Enemy,IFormationParticipant
             move.Init(initCtx);
             _runner.Register(move);
 
+            var retreat = new RetreatBehaviour(_distanceProfile, _services);
+            retreat.Init(initCtx);
+            _runner.Register(retreat);
+
             var roam = new RoamBehaviour(
                 _distanceProfile,
                 _services,
@@ -359,6 +369,65 @@ public class MobEnemy : Enemy,IFormationParticipant
         var idle = new IdleBehaviour();
         idle.Init(initCtx);
         _runner.Register(idle);
+    }
+
+    private void HandleAttackFinished()
+    {
+        if (!ShouldApplyPostAttackStun()) return;
+
+        // サブクラス固有の追加処理
+        OnBeforePostAttackStun();
+
+        float stunDuration = _context.PendingRetreat.RecoveryRemaining;
+        if (stunDuration > 0f)
+        {
+            var stun = new PostAttackStunBehaviour(stunDuration, OnPostAttackStunExit);
+            stun.Init(_initCtx);
+            _runner.ForceBehaviour(stun);
+        }
+        else
+        {
+            // 硬直がない場合も、その場で後退要否を判定しておく
+            OnPostAttackStunExit();
+        }
+    }
+
+    /// <summary>PostAttackStunBehaviour
+    /// 攻撃後の硬直を適用するかどうか。falseならHandleAttackFinishedは何もしない。
+    /// </summary>
+    protected virtual bool ShouldApplyPostAttackStun() => true;
+
+    /// <summary>
+    /// 硬直開始直前に呼ばれるフック。サブクラス固有の付随処理（ログ・向き固定など）用。
+    /// </summary>
+    protected virtual void OnBeforePostAttackStun() { }
+
+    /// <summary>
+    /// 硬直終了時（またはstunDuration=0で即時）に呼ばれるフック。
+    /// </summary>
+    protected virtual void OnPostAttackStunExit()
+    {
+        ConsumeRetreatIfUnnecessary();
+    }
+
+    /// <summary>
+    /// 硬直明けの時点ですでにRetreatDistance以上離れている場合、
+    /// 後退リクエストを消費する（放置するとApproach後に不要な後退が発生するため）
+    /// </summary>
+    private void ConsumeRetreatIfUnnecessary()
+    {
+        if (!_context.PendingRetreat.Enabled) return;
+        if (_playerTransform == null) return;
+
+        Vector3 delta = transform.position - _playerTransform.position;
+        delta.y = 0f;
+        float sqrDist = delta.sqrMagnitude;
+        float retreatDist = _context.PendingRetreat.RetreatDistance;
+
+        if (sqrDist >= retreatDist * retreatDist)
+        {
+            _context.PendingRetreat = RetreatRequest.None;
+        }
     }
 
     /// <summary>
