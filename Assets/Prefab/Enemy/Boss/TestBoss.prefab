@@ -161,12 +161,12 @@ MonoBehaviour:
   _animator: {fileID: 3292826818554440429}
   _bossCollider: {fileID: 8512062426125407450}
   _bossEnemyAnimationEventReceiver:
-    rid: 4501582710844424740
+    rid: 4923627528403812590
   references:
     version: 2
     RefIds:
-    - rid: 4501582710844424740
-      type: {class: AnimationEventReceiver, ns: BossEnemy.Infrastructure, asm: Assembly-CSharp}
+    - rid: 4923627528403812590
+      type: {class: BossCharacterAnimationEventReceiver, ns: BossEnemy.Infrastructure, asm: Assembly-CSharp}
       data: 
 --- !u!65 &8512062426125407450
 BoxCollider:
