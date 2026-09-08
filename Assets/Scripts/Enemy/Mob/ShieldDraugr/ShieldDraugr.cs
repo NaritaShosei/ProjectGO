@@ -205,21 +205,11 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
     private float _shieldAnimationBlendDuration = 0.3f;
 
     private Tween _shieldAnimationTween;
-    private PostAttackStunBehaviour _postAttackStun;
     private EffectManager _effectManager;
 
     protected override void RegisterBehaviours(BehaviourInitContext initCtx)
     {
         base.RegisterBehaviours(initCtx);
-
-        _postAttackStun = new PostAttackStunBehaviour(_shieldData.PostAttackRecoveryDuration, HandlePostAttackStunExit);
-        _postAttackStun.Init(initCtx);
-        _runner.Register(_postAttackStun);
-
-        if (_attack != null)
-        {
-            _attack.OnAttackFinished += HandleAttackFinished;
-        }
     }
 
     protected override void UpdateEnemy(float deltaTime)
@@ -345,10 +335,8 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
         return _shieldData.FistAttackPattern;
     }
 
-    private void HandleAttackFinished()
+    protected override void OnBeforePostAttackStun()
     {
-        if (IsShieldBroken) return;
-
         if (_turn != null)
         {
             _turn.SetOverrideDirection(transform.forward);
@@ -357,12 +345,12 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
         {
             Debug.LogWarning($"{nameof(ShieldDraugr)}: TurnBehaviourが未登録です");
         }
-
-        _runner.ForceBehaviour(_postAttackStun);
     }
 
-    private void HandlePostAttackStunExit()
+    protected override void OnPostAttackStunExit()
     {
+        base.OnPostAttackStunExit();
+
         if (_turn == null) return;
         _turn.SetOverrideDirection(null);
     }
@@ -388,10 +376,5 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
     protected override void OnDestroy()
     {
         base.OnDestroy();
-
-        if (_attack != null)
-        {
-            _attack.OnAttackFinished -= HandleAttackFinished;
-        }
     }
 }
