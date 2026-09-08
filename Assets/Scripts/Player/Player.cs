@@ -254,6 +254,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             return;
         }
 
+        // 回避終了通知が後から届いても、ダウン状態をIdleに戻さないよう先に中断する。
+        _move?.CancelDodge();
         _attack?.InterruptByDamage();
         _playerStateManager.ChangeState(PlayerState.Down);
     }
@@ -490,7 +492,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private void OnPlayerDead()
     {
-        _move?.CancelDodgeByDeath();
+        _move?.CancelDodge();
 
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();

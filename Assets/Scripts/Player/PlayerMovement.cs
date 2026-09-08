@@ -83,10 +83,10 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// 死亡時に回避を即座に中断する。
-    /// 死亡キャンセルでは回避完了イベントを発火しない。
+    /// 死亡・ダウン時に回避移動と無敵を即座に解除する。
+    /// 通常の回避完了ではないため、回避完了イベントは発火しない。
     /// </summary>
-    public void CancelDodgeByDeath()
+    public void CancelDodge()
     {
         if (!_isDodging) return;
 
@@ -427,7 +427,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_isDodging) return;
         _isDodging = false;
-        _playerStateManager.ChangeState(PlayerState.Idle);
+        // 遅れて届いた終了通知で、ダウンや死亡などの遷移先を上書きしない。
+        if (_playerStateManager.IsDodging())
+            _playerStateManager.ChangeState(PlayerState.Idle);
         OnEndDodge?.Invoke();
     }
 
