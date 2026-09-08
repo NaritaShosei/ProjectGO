@@ -1,10 +1,15 @@
+using BossEnemy.Effect;
+using Cysharp.Threading.Tasks;
+using System;
+using System.Threading;
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 
 
 namespace BossEnemy.SMB
 {
-    public class ChargeSMB : AttackSMBBase
+    public class ChargeSMB : AttackSMB
     {
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.RushAttackVoice;
 
@@ -12,49 +17,90 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            _goalPos =
+                _bossCharacterTransform.position +
+                (_bossCharacterTransform.forward * _moveDistance);
+
             base.OnStateEnter(animator, stateInfo, layerIndex);
         }
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateUpdate(animator, stateInfo, layerIndex);
-            
-            if(_elapsedSeconds > _startMoveTime && _elapsedSeconds < _endMoveTime)
-            {
-                if (_goalPos == Vector3.zero && _goalTime == 0)
-                {
-                    SetMoveGoal();
-                    _animationEventReceiver.AnimEvent_ColliderIsTriggerIsEnabled(true);
-                }
 
-                _animationEventReceiver.AnimEvent_Move(_goalPos, _goalTime);
+            if (_isAttackHitCheck && !_wasHitAttack)
+            {
+                _animationEventReceiver.AnimEvent_AttackHitCheck
+                    (AttackHitAreaType.Circle, _bossCharacterTransform.position);
+            }
+
+            if (_isMoving)
+            {
+                _goalArrivalTime -= Time.deltaTime;
+                _animationEventReceiver.AnimEvent_MoveCharacter(_goalPos, _goalArrivalTime);
+
+                if( _goalArrivalTime <= 0) _isMoving = false;
             }
         }
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            _animationEventReceiver.AnimEvent_ColliderIsTriggerIsEnabled(false);
             base.OnStateExit(animator, stateInfo, layerIndex);
+
             _goalPos = Vector3.zero;
-            _goalTime = 0;
+            _goalArrivalTime = 0f;
         }
 
-        [Header("移動開始時間")]
-        [SerializeField] private float _startMoveTime = 0.8f;
+        [Header("移動距離")]
+        [SerializeField] private float _moveDistance = 7.0f;
 
-        [Header("移動終了時間")]
+        [Header("移動開始時間")]
+        [SerializeField] private float _startMoveTime = 1f;
+
+        [Header("移動開始から終了までの時間")]
         [SerializeField] private float _endMoveTime = 1f;
 
         // 移動地点とかける時間
         private Vector3 _goalPos = Vector3.zero;
-        private float _goalTime = 0;
+        private float _goalArrivalTime = 0f;
+        private bool _isAttackHitCheck = false;
+        private bool _isMoving = false;
 
-        private void SetMoveGoal()
+        protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
-            Vector3 movementVector = _bossEnemyTransform.forward * _attackData.AttackStartDistance;
-            _goalPos = movementVector + _bossEnemyTransform.position;
+            float spawnDistance = _moveDistance / 2;
 
-            _goalTime = _endMoveTime - _elapsedSeconds;
+            // transform.position（自身の現在地） + transform.forward（正面方向の単位ベクトル） * 距離
+            Vector3 spawnPosition =
+                _bossCharacterTransform.position +
+                (_bossCharacterTransform.forward * spawnDistance);
+
+            // 実判定は移動中のボスを中心とした円形範囲の連続判定。
+            // その移動軌跡を、幅=円の直径・長さ=移動距離の矩形として表示する。
+            float displayWidth = _attackData.AttackHitAreaRadius * 2f;
+            float displayDuration = _startMoveTime + _endMoveTime;
+            HitAreaView hitArea = _attackHitAreaSpawner.Spawn(
+                AttackHitAreaType.Square,
+                spawnPosition,
+                _attackData.AttackHitAreaRadius,
+                displayDuration,
+                _bossCharacterTransform.forward);
+
+            if (hitArea is SquareHitAreaView squareHitArea)
+            {
+                squareHitArea.SetSize(displayWidth, _moveDistance);
+            }
+
+            await UniTask.Delay(TimeSpan.FromSeconds(_startMoveTime));
+
+            _goalArrivalTime = _endMoveTime;
+            _isAttackHitCheck = true;
+            _isMoving = true;
+
+            await UniTask.WaitUntil(() => !_isMoving);
+
+            _isAttackHitCheck = false;
+            _goalArrivalTime = 0;
         }
     }
 }

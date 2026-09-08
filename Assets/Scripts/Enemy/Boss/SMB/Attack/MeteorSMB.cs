@@ -9,7 +9,7 @@ using BossEnemy.Attack;
 
 namespace BossEnemy.SMB
 {
-    public class MeteorSMB : AttackSMBBase
+    public class MeteorSMB : AttackSMB
     {
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.MeteorVoice;
 
@@ -28,25 +28,11 @@ namespace BossEnemy.SMB
             base.OnStateExit(animator, stateInfo, layerIndex);
         }
 
-        public override void AttackSequence(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-        {
-            // 溜め
-            if (!_isChargeCompleted && _attackData.AttackChargeTime < _elapsedSeconds)
-            {
-                _attackHitFired = true;
-                _isChargeCompleted = true;
-            }
-
-            // 攻撃開始
-            if (_attackHitFired)
-            {
-                MeteorSequence(_cts.Token).Forget();
-                _attackHitFired = false;
-            }
-        }
-
         [Header("攻撃の間隔を開ける秒数")]
         [SerializeField] private float _consecutiveAttackInterval;
+
+        [Header("攻撃範囲の広さ正方形の1辺の半分")]
+        [SerializeField] private float _maxAttackFieldHalfRange = 20;
 
         [Header("攻撃の回数")]
         [SerializeField] private int _maxAttackCount = 20;
@@ -60,46 +46,55 @@ namespace BossEnemy.SMB
         [Header("隕石発射から到達までの秒数")]
         [SerializeField] private float _attackHitTime = 1.05f;
 
-        private CancellationTokenSource _cts = new();
-
-        private EffectManager _effectManager;
-
         private void Awake()
         {
             _effectManager = FindFirstObjectByType<EffectManager>();
         }
 
-        private async UniTask MeteorSequence(CancellationToken cancellationToken)
+        protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
             List<Vector3> attackPosList = new();
 
             for (int count = 0; count < _maxAttackCount; count++)
             {
-                float attackAreaX = UnityEngine.Random.Range(_bossEnemyTransform.position.x - _attackData.AttackStartDistance, _bossEnemyTransform.position.x + _attackData.AttackStartDistance);
-                float attackAreaZ = UnityEngine.Random.Range(_bossEnemyTransform.position.z - _attackData.AttackStartDistance, _bossEnemyTransform.position.z + _attackData.AttackStartDistance);
-                Vector3 attackCenter = new Vector3(attackAreaX, _attackAreaEffectPosY, attackAreaZ);
-                float despawnTime = _attackAreaDespawnTime + _attackHitTime + (count * (_attackHitTime + _consecutiveAttackInterval));
+                float attackAreaX = UnityEngine.Random.Range
+                    (_attackTarget.GetTargetCenter().position.x - _maxAttackFieldHalfRange,
+                    _attackTarget.GetTargetCenter().position.x + _maxAttackFieldHalfRange);
 
-                _attackHitAreaSpawner.Spawn(HitAreaType.Circle, attackCenter, _attackData.AttackRange, despawnTime);
+                float attackAreaZ = UnityEngine.Random.Range
+                    (_attackTarget.GetTargetCenter().position.z - _maxAttackFieldHalfRange,
+                    _attackTarget.GetTargetCenter().position.z + _maxAttackFieldHalfRange);
+
+                Vector3 attackCenter = new Vector3(attackAreaX, _attackAreaEffectPosY, attackAreaZ);
+
                 attackCenter.y = _meteorEffectPosY;
                 attackPosList.Add(attackCenter);
             }
 
             await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnTime), cancellationToken: cancellationToken);
+            int attackCount = 0;
 
             foreach (Vector3 attackPos in attackPosList)
             {
+                float despawnTime =
+                    _attackAreaDespawnTime +
+                    _attackHitTime +
+                    (attackCount * (_attackHitTime + _consecutiveAttackInterval));
+
+                attackCount++;
+
+                _attackHitAreaSpawner.Spawn
+                    (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius, despawnTime);
+
                 _effectManager.PlayEffect(_attackData.AnimParamName, attackPos);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
 
                 PlayBossSE(SoundCueNames.Boss.MeteorImpact);
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
-                if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, attackPos, _target, _attackData.AttackRange))
-                {
-                    _animationEventReceiver.AnimEvent_AttackHit();
-                    _attackHitFired = false;
-                }
+
+                _animationEventReceiver.AnimEvent_AttackHitCheck
+                    (AttackHitAreaType.Circle, _attackAreaCenter);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_consecutiveAttackInterval), cancellationToken: cancellationToken);
             }

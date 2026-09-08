@@ -8,7 +8,7 @@ using BossEnemy.Attack;
 
 namespace BossEnemy.SMB
 {
-    public class RockUpliftSMB : AttackSMBBase
+    public class RockUpliftSMB : AttackSMB
     {
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.RockEruptionVoice;
 
@@ -26,27 +26,11 @@ namespace BossEnemy.SMB
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateExit(animator, stateInfo, layerIndex);
-
-            if(animator.speed !=1) animator.speed = 1;
-            _attackHitFired = false;
         }
 
-        public override void AttackSequence(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-        {
-            // 溜め
-            if (!_isChargeCompleted && _attackData.AttackChargeTime < _elapsedSeconds)
-            {
-                _attackHitFired = true;
-                _isChargeCompleted = true;
-            }
+        [Header("攻撃ダメージ判定開始時間")]
+        [SerializeField] private float _startAttackTime = 1f;
 
-            // 攻撃開始
-            if (_attackHitFired)
-            {
-                RockUplift(_cts.Token).Forget();
-                _attackHitFired = false;
-            }
-        }
 
         [Header("攻撃の間隔を開けるフレーム数")]
         [SerializeField] private int _attackIntervalFlame;
@@ -60,21 +44,23 @@ namespace BossEnemy.SMB
         private CancellationTokenSource _cts;
         Vector3 _attackPos = Vector3.zero;
 
-        private EffectManager _effectManager;
+        private bool _isAttackHitCheck = false;
 
         private void Awake()
         {
             _effectManager = FindFirstObjectByType<EffectManager>();
         }
 
-        private async UniTask RockUplift(CancellationToken cancellationToken)
+        protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
-            for(int count = 0; count < _maxAttackCount; count++)
+            await UniTask.Delay(TimeSpan.FromSeconds(_startAttackTime), cancellationToken: cancellationToken);
+
+            for (int count = 0; count < _maxAttackCount; count++)
             {
-                _attackHitFired = true;
-                _attackPos = _target.GetTargetCenter().position;
+                _isAttackHitCheck = true;
+                _attackPos = _attackTarget.GetTargetCenter().position;
                 _attackPos.y = _attackAreaCircleGeneratePosY;
-                _attackHitAreaSpawner.Spawn(HitAreaType.Circle, _attackPos, _attackData.AttackRange, _attackAreaDespawnTime);
+                _attackHitAreaSpawner.Spawn(AttackHitAreaType.Circle, _attackPos, _attackData.AttackHitAreaRadius, _attackAreaDespawnTime);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnTime), cancellationToken: cancellationToken);
 
@@ -82,11 +68,12 @@ namespace BossEnemy.SMB
                 _effectManager.PlayEffect(_attackData.AnimParamName, _attackPos);
 
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
-                if (AttackHitChecker.TryHitAttack(HitAreaType.Circle, _attackPos, _target, _attackData.AttackRange))
-                {
-                    _animationEventReceiver.AnimEvent_AttackHit();
-                    _attackHitFired = false;
-                }
+
+                int waitPlayEffect = 40;
+                await UniTask.Delay(waitPlayEffect);
+
+                _animationEventReceiver.AnimEvent_AttackHitCheck
+                    (AttackHitAreaType.Circle, _attackPos);
 
                 await UniTask.Delay(_attackIntervalFlame);
             }

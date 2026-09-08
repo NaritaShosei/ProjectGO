@@ -6,10 +6,8 @@ using UnityEngine;
 
 namespace BossEnemy.SMB
 {
-    public class StompingRightSMB : AttackSMB
+    public class DownSweepSMB : AttackSMB
     {
-        private const string PLAY_EFFECT_NAME = "RockUpLift";
-
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.ChargePunchVoice;
 
         protected override string AttackCueName => SoundCueNames.Boss.ChargePunch;
@@ -35,7 +33,7 @@ namespace BossEnemy.SMB
             base.OnStateExit(animator, stateInfo, layerIndex);
         }
 
-        [Header("攻撃ダメージ判定開始距離")]
+        [Header("攻撃ダメージ判定開始時間")]
         [SerializeField] private float _attackDistance;
 
         [Header("攻撃ダメージ判定開始時間")]
@@ -64,11 +62,6 @@ namespace BossEnemy.SMB
                 displayDuration);
 
             await UniTask.Delay(TimeSpan.FromSeconds(_startAttackHitTiming));
-
-            PlayBossSE(SoundCueNames.Boss.RockEruption);
-            _effectManager.PlayEffect(PLAY_EFFECT_NAME, _attackAreaCenter);
-
-            _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 
             _isAttackHitCheck = true;
 
