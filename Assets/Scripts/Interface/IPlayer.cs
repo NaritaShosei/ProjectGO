@@ -5,9 +5,13 @@ public interface IPlayer :
      IPlayerStats
 {
     public event Action OnDead;
-    event Action<PlayerMode, ChargeLevel> OnAttackHit;
-    event Action<PlayerMode> OnModeChanged;
+    public event Action<PlayerMode, ChargeLevel> OnAttackHit;
+    public event Action<PlayerMode> OnModeChanged;
+    public event Action OnDownRecoveryEnded;
 
+    public bool IsDown { get; }
+
+    public void StartDownRecovery();
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
     /// </summary>
@@ -25,23 +29,23 @@ public interface IPlayerStats :
     IModeProvider
 {
     /// <summary> 雷ゲージ変化通知 (current, max, initialMax) </summary>
-    event Action<float, float, float> OnThunderGaugeChanged;
+    public event Action<float, float, float> OnThunderGaugeChanged;
 
-    event Action<Transform> OnEndDodge;
+    public event Action<Transform> OnEndDodge;
 
     /// <summary> ジャスト回避成立通知/// </summary>
-    event Action OnJustDodgeSuccess;
+    public event Action OnJustDodgeSuccess;
 
     /// <summary> 死亡直前イベント。true を返すと死亡をキャンセルする。 /// </summary>
-    event Func<bool> OnBeforeDead;
+    public event Func<bool> OnBeforeDead;
 }
 
 
 public interface IModifierHolder
 {
-    void AddModifier(IStatModifier modifier);
-    void AddDamageReactionModifier(IDamageReactionModifier modifier);
-    void AddDamageModifier(IDamageModifier modifier);
+    public void AddModifier(IStatModifier modifier);
+    public void AddDamageReactionModifier(IDamageReactionModifier modifier);
+    public void AddDamageModifier(IDamageModifier modifier);
 }
 
 /// <summary>

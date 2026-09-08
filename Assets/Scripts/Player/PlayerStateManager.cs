@@ -23,6 +23,7 @@ public class PlayerStateManager
                           && CurrentState != PlayerState.Dodge
                           && CurrentState != PlayerState.Charging
                           && CurrentState != PlayerState.Damaged
+                          && CurrentState != PlayerState.Down
                           && CurrentState != PlayerState.ModeChanging
                           && CurrentState != PlayerState.Dead;
 
@@ -38,6 +39,8 @@ public class PlayerStateManager
     public bool IsDodging() => CurrentState is PlayerState.Dodge;
 
     public bool IsCharging() => CurrentState is PlayerState.Charging;
+
+    public bool IsDown() => CurrentState is PlayerState.Down;
 
     public bool IsDead() => CurrentState is PlayerState.Dead;
 
@@ -70,6 +73,7 @@ public enum PlayerState
     Charging,
     Dodge,
     Damaged,
+    Down,
     Dead,
     ModeChanging
 }

@@ -15,11 +15,14 @@ public class MobAndSkillState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
+        _context = context;
+
         _currentWaveIndex = 0;
         _waveCleared = false;
         _timeUpFlag = false;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
+        _shouldTransitionAfterSkillSelect = false;
         _waveController = null;
 
         _mobBattleTimer = new CountDownTimer();
@@ -42,6 +45,10 @@ public class MobAndSkillState : ISequenceState
 
         // EnemyManagerのウェーブクリア検知
         context.EnemyManager.OnEnemyDefeated += OnEnemyDefeated;
+
+        // モブ戦中は死亡をダウン復帰に置き換える
+        context.Player.OnBeforeDead += HandleBeforePlayerDead;
+        context.Player.OnDownRecoveryEnded += HandleDownRecoveryEnded;
 
         // 入力有効化
         context.InputHandler?.EnableInput(true);
@@ -74,6 +81,9 @@ public class MobAndSkillState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
+        context.Player.OnBeforeDead -= HandleBeforePlayerDead;
+        context.Player.OnDownRecoveryEnded -= HandleDownRecoveryEnded;
+
         _mobBattleTimer.StopTimer();
         _mobBattleTimer.OnTimeEnded -= OnMobTimeUp;
 
@@ -104,6 +114,8 @@ public class MobAndSkillState : ISequenceState
 
         context.InputHandler?.EnableInput(false);
         ShowCursor();
+
+        _context = null;
     }
 
     #endregion
@@ -111,8 +123,8 @@ public class MobAndSkillState : ISequenceState
     #region シリアライズ
 
     [Header("モブ戦")]
-    [SerializeField, Tooltip("モブ戦のタイマーUI")] private CountDownTimerView _mobBattleTimerView;
-    [SerializeField, Tooltip("スキル選択のタイマーUI")] private CountDownTimerView _skillSelectTimerView;
+    [SerializeField, Tooltip("モブ戦のタイマーUI")] private TextCountDownTimerView _mobBattleTimerView;
+    [SerializeField, Tooltip("スキル選択のタイマーUI")] private GaugeCountDownTimerView _skillSelectTimerView;
     [SerializeField, Tooltip("モブ戦の時間制限（秒）")] private float _mobBattleTimeLimit = 180f;
     [SerializeField, Tooltip("スポーンポイントのセレクター")] private SpawnPointSelector _spawnPointSelector;
     [SerializeField, Tooltip("ウェーブデータ")] private WaveSequenceData _waveSequenceData;
@@ -147,11 +159,13 @@ public class MobAndSkillState : ISequenceState
     private CountDownTimerPresenter _skillSelectTimerPresenter;
     private SequenceStatusPresenter _sequenceStatusPresenter;
     private IDisposable _skillSelectHitStopHandle;
+    private SequenceStateContext _context;
 
     private bool _waveCleared;
     private bool _timeUpFlag;
     private bool _isSkillSelected;
     private bool _skillSelectTimeUp;
+    private bool _shouldTransitionAfterSkillSelect;
 
     #endregion
 
@@ -160,6 +174,29 @@ public class MobAndSkillState : ISequenceState
     private void OnMobTimeUp() => _timeUpFlag = true;
     private void OnSkillSelectTimeUp() => _skillSelectTimeUp = true;
     private void OnSkillSelected(int _) => _isSkillSelected = true;
+
+    /// <summary>
+    /// モブ戦中の致死ダメージをダウン復帰に置き換える。
+    /// true を返し、PlayerStats の通常死亡をキャンセルする。
+    /// </summary>
+    private bool HandleBeforePlayerDead()
+    {
+        if (_context?.Player == null)
+            return false;
+
+        _context.InputHandler?.EnableInput(false);
+        _context.Player.StartDownRecovery();
+        return true;
+    }
+
+    /// <summary>起き上がり完了後、戦闘中の場合だけ入力を再開する。</summary>
+    private void HandleDownRecoveryEnded()
+    {
+        if (_context == null || _subPhase != SubPhase.Battle)
+            return;
+
+        _context.InputHandler?.EnableInput(true);
+    }
 
     private void OnEnemyDefeated()
     {
@@ -273,22 +310,28 @@ public class MobAndSkillState : ISequenceState
     {
         if (_timeUpFlag)
         {
-            // バトルタイマー切れ：スキル選択を強制終了してからボスへ
-            ForceAutoSelect(context);
-            context.IsTimeUp = true;
-            return null;
+            // 選択演出の完了を待ってからボスへ遷移する。
+            _timeUpFlag = false;
+            _shouldTransitionAfterSkillSelect = true;
+            ForceAutoSelect();
         }
 
         if (_skillSelectTimeUp)
         {
             _skillSelectTimeUp = false;
-            ForceAutoSelect(context);
+            ForceAutoSelect();
         }
 
         if (_isSkillSelected)
         {
             _isSkillSelected = false;
-            EndSkillSelect(context);
+            EndSkillSelect(context, !_shouldTransitionAfterSkillSelect);
+
+            if (_shouldTransitionAfterSkillSelect)
+            {
+                _shouldTransitionAfterSkillSelect = false;
+                context.IsTimeUp = true;
+            }
         }
 
         return null;
@@ -303,6 +346,7 @@ public class MobAndSkillState : ISequenceState
         _subPhase = SubPhase.SkillSelect;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
+        _shouldTransitionAfterSkillSelect = false;
 
         // フリーカメラと雷神ゲージだけを止める
         _mobBattleTimer.PauseTimer();
@@ -329,7 +373,7 @@ public class MobAndSkillState : ISequenceState
         if (!hasSkill)
         {
             // 候補がない場合は即戦闘復帰
-            EndSkillSelect(context);
+            EndSkillSelect(context, true);
         }
         else
         {
@@ -337,7 +381,7 @@ public class MobAndSkillState : ISequenceState
         }
     }
 
-    private void EndSkillSelect(SequenceStateContext context)
+    private void EndSkillSelect(SequenceStateContext context, bool shouldStartNextWave)
     {
         _skillSelectView.OnSkillSelected -= OnSkillSelected;
 
@@ -353,19 +397,21 @@ public class MobAndSkillState : ISequenceState
 
         // フリーカメラと雷神ゲージを再開
         _mobBattleTimer.ResumeTimer();
-        context.InputHandler?.EnableInput(true);
+        if (!context.Player.IsDown)
+            context.InputHandler?.EnableInput(true);
         HideCursor();
 
         _subPhase = SubPhase.Battle;
 
-        // 次のWaveを開始
-        StartNextWave(context);
+        if (shouldStartNextWave)
+        {
+            StartNextWave(context);
+        }
     }
 
-    private void ForceAutoSelect(SequenceStateContext context)
+    private void ForceAutoSelect()
     {
         _skillSelectPresenter?.AutoSelect();
-        EndSkillSelect(context);
     }
 
     private void BeginSkillSelectHitStop()

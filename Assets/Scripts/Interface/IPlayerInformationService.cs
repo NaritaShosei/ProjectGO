@@ -17,6 +17,11 @@ public interface IPlayerInformationService
     /// <returns> targetTransformがPlayerから見て背後にいればtrue、前ならfalse </returns>
     public bool IsBehaindPlayer(Transform targetTransform, float playerViewAngle = 120f);
 
+    /// <summary>
+    /// Playerに攻撃可能かの判定
+    /// </summary>
+    public bool CanAttackPlayer();
+
     /// <summary> Playerとの距離を取得する </summary>
     /// <param name="targetPosition"> 距離を測定する対象の位置 </param>
     /// <returns> Playerとの距離 </returns>

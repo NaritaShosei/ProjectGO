@@ -38,7 +38,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public float BaseMaxHealth => _playerData.Stats.MaxHealth;
 
+    public bool IsDown => _playerStateManager.IsDown();
+
     public PlayerMode CurrentMode => _modeController.CurrentMode;
+
+    public event Action OnDownRecoveryEnded;
 
 
     /// ダメージを受けたときのイベント。ダメージのコンテキスト情報を引数として渡す。
@@ -128,7 +132,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     public void TakeDamage(float damage, DamageReactionType reactionType)
     {
-        if (_playerStateManager.IsDead()) return;
+        if (_playerStateManager.IsDead()
+        || _playerStateManager.IsDown())
+        {
+            return;
+        }
 
         if (CurrentMode == PlayerMode.Thunder
             && _justDodgeSystem != null
@@ -148,6 +156,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
         int reductDamage = DamageSystem.ApplyDamageReduction(damage, DefensePower);
         _playerStats.TakeDamage(reductDamage);
+
+        if (_playerStateManager.IsDown())
+        {
+            return;
+        }
 
         ControllerVibrationData vibration;
         switch (reactionType)
@@ -242,9 +255,30 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _move.SetTimeScale(timeScale);
     }
 
+    /// <summary>
+    /// ダウン状態からの回復を開始する
+    /// </summary>
+    public void StartDownRecovery()
+    {
+        if (_playerStateManager.IsDead()
+            || _playerStateManager.IsDown())
+        {
+            return;
+        }
+
+        // 回避終了通知が後から届いても、ダウン状態をIdleに戻さないよう先に中断する。
+        _move?.CancelDodge();
+        _attack?.InterruptByDamage();
+        _playerStateManager.ChangeState(PlayerState.Down);
+    }
+
     [Header("Data")]
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
+
+    [Header("ダウン復帰")]
+    [SerializeField, Range(0f, 1f), Tooltip("起き上がり完了時の最大HPに対する回復割合。1で100%")]
+    private float _downRecoveryHealthRate = 1f;
 
     [Header("被弾時のコントローラーの振動")]
     [SerializeField] private ControllerVibrationData _smallDamageVibration =
@@ -309,6 +343,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         if (_playerAnimationController != null)
         {
             _playerAnimationController.OnModeChangeComplete -= OnModeChangeComplete;
+            _playerAnimationController.OnDownRecoveryProgress -= HandleDownRecoveryProgress;
+            _playerAnimationController.OnDownRecoveryEnd -= HandleDownRecoveryEnd;
             _playerAnimationController.OnDestroy();
         }
 
@@ -329,7 +365,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         _playerStats.OnDead += OnPlayerDead;
         _playerStats.OnThunderGaugeDepleted += HandleThunderGaugeDepleted;
-
+        _playerAnimationController.OnDownRecoveryEnd += HandleDownRecoveryEnd;
+        _playerAnimationController.OnDownRecoveryProgress += HandleDownRecoveryProgress;
         if (_playerAnimationController != null && _playerStateManager != null)
             _playerAnimationController.OnModeChangeComplete += OnModeChangeComplete;
 
@@ -424,6 +461,38 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
     /// <summary>
+    /// ダウン回復が完了したときの処理
+    /// </summary>
+    private void HandleDownRecoveryEnd()
+    {
+        if (!_playerStateManager.IsDown())
+        {
+            return;
+        }
+
+        _playerStats.SetHealth(MaxHealth * _downRecoveryHealthRate);
+        _playerStateManager.ChangeState(PlayerState.Idle);
+
+        OnDownRecoveryEnded?.Invoke();
+    }
+
+    /// <summary>
+    /// ダウン回復中の進行状況に応じて、プレイヤーの体力を回復する処理
+    /// </summary>
+    /// <param name="normalizedTime"></param>
+    private void HandleDownRecoveryProgress(float normalizedTime)
+    {
+        if (!_playerStateManager.IsDown())
+        {
+            return;
+        }
+
+        _playerStats.SetHealth(
+            MaxHealth * _downRecoveryHealthRate * Mathf.Clamp01(normalizedTime)
+        );
+    }
+
+    /// <summary>
     /// ジャスト回避成功時の処理。
     /// </summary>
     private void HandleJustDodgeSuccess()
@@ -435,6 +504,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private void OnPlayerDead()
     {
+        _move?.CancelDodge();
+
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();
     }
