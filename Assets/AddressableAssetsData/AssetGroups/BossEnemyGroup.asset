@@ -15,18 +15,23 @@ MonoBehaviour:
   m_GroupName: BossEnemyGroup
   m_GUID: dfb41fdb43de26742b2d26628d42d0be
   m_SerializeEntries:
-  - m_GUID: 114f382548e818e46b0acf5225ac2e89
-    m_Address: Assets/Data/BossEnemy/Repositry/BossEnemyAttackMasterDataRepository.asset
+  - m_GUID: 225fdaee3334bcd4e84fb7d94bf55e9d
+    m_Address: Assets/Data/BossEnemy/Repositry/BossAttackDataRepositry.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ab3ebdd455797a14c976dfb52ed2a029
-    m_Address: Assets/Data/BossEnemy/Repositry/BossEnemyMasterDataRepository.asset
+  - m_GUID: 47bd6b2cb0a8ea243967d1ed9e7e4ce6
+    m_Address: Assets/Data/BossEnemy/Repositry/AttackDataSelectionPoolRepository.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e399fdc048f9faa45a32193411b37d9b
-    m_Address: Assets/Data/BossEnemy/BehaviorTree/ID1_BossEnemyBehaviorTree.asset
+  - m_GUID: 63d5060328d74044cae35e3c87bdf524
+    m_Address: Assets/Data/BossEnemy/Repositry/BossAIBehaviourTreeNodeRepositry.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c2ffc18280b15444eab10a31c0d1dea5
+    m_Address: Assets/Data/BossEnemy/Repositry/BossEnemyEntityRepository.asset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

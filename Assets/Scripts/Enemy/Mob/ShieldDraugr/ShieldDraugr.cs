@@ -349,12 +349,10 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
 
     protected override void OnPostAttackStunExit()
     {
-        base.OnPostAttackStunExit(); 
+        base.OnPostAttackStunExit();
 
-        if (_turn != null)
-        {
-            _turn.SetOverrideDirection(null);
-        }
+        if (_turn == null) return;
+        _turn.SetOverrideDirection(null);
     }
 
     private void SetShieldLayerWeight(float weight)
