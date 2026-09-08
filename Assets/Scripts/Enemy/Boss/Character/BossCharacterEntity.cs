@@ -397,7 +397,10 @@ namespace BossEnemy.Character
             {
                 _armorCurrentHPDict.Add(key, GetArmorStats(key).MaxHP);
             }
+
             RepairArmor();
+
+            SetCharacterPosture(PostureType.Standing);
 
             // フェーズ切り替えフラグをTrueにする
             _isPhaseChanging.Value = true;

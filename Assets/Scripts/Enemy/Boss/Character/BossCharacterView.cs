@@ -242,8 +242,6 @@ namespace BossEnemy.Character
         {
             RepairArmor();
 
-            ChangePosture(PostureType.Standing);
-
             _bossEnemyAnimator.SetPhaseChange(nextPhase);
         }
 
