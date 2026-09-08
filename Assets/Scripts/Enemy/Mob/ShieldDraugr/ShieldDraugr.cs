@@ -2,7 +2,7 @@ using DG.Tweening;
 using System;
 using UnityEngine;
 
-public class ShieldDraugr : MobEnemy,IArmorHealth
+public class ShieldDraugr : MobEnemy, IArmorHealth
 {
     public float CurrentShieldDurability => _currentShieldDurability;
 
@@ -81,7 +81,8 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
             InvokeOnDamageDealt(
                 damage,
                 isWeakPoint: false,
-                context.IsCritical);
+                context.IsCritical,
+                context.IsLightningDamage);
         }
         else if (willHitHp)
         {
@@ -89,7 +90,8 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
             InvokeOnDamageDealt(
                 damage,
                 isWeakPoint: isWarrior || isThunder,
-                context.IsCritical);
+                context.IsCritical,
+                context.IsLightningDamage);
         }
         else if (willBeBlocked && isThunder)
         {
@@ -97,7 +99,8 @@ public class ShieldDraugr : MobEnemy,IArmorHealth
             InvokeOnDamageDealt(
                 0,
                 isWeakPoint: false,
-                context.IsCritical);
+                context.IsCritical,
+                context.IsLightningDamage);
         }
 
         //ダメージ適応
