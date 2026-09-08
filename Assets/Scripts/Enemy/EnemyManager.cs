@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
 using BossEnemy.Interface;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -290,7 +292,7 @@ public class EnemyManager : MonoBehaviour
     }
 
     /// <summary> ボスを生成 </summary>
-    public void SpawnBoss(string poolKey, Vector3 pos)
+    public async UniTaskVoid SpawnBoss(string poolKey, Vector3 pos)
     {
         if (_player == null)
         {
@@ -298,7 +300,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
-        IBossEnemyCharacterView enemy =　_bossEnemySpawner.Spawn(pos, out IBossHPView bossEnemyUIView);
+        IBossEnemyCharacterView enemy = _bossEnemySpawner.Spawn(pos, out IBossHPView bossEnemyUIView, _player);
         if (enemy == null) return;
 
         // Enemy死亡時と被弾時のイベント登録
@@ -314,6 +316,8 @@ public class EnemyManager : MonoBehaviour
 
         _spatialHashGrid.Register(enemy, pos);
         _enemies.Add(enemy);
+
+        enemy.StartAction();
     }
 
     /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
