@@ -24,8 +24,8 @@ public class MobEnemy : Enemy,IFormationParticipant
     /// </summary>
     public bool TryGetActiveArmor(out IArmorHealth armor)
     {
-        armor = _armor;
-        return _armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor;
+        armor = ActiveArmor;
+        return armor != null;
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
         bool isArmorHit = armorWasAlive && !isArmorBreak;
 
-        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical, context.IsLightningDamage);
 
         //ヒットエフェクトの通知
         InvokeOnHitEffect(
@@ -192,6 +192,26 @@ public class MobEnemy : Enemy,IFormationParticipant
         _armor.OnBroken += BreakArmor;
     }
 
+    /// <summary>
+    /// 現在有効な鎧を返す。サブクラスが独自の防御システム（盾など）を持つ場合はオーバーライドする。
+    /// </summary>
+    protected virtual IArmorHealth ActiveArmor =>
+        (_armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor) ? _armor : null;
+
+    // Armorの登録
+    [SerializeField] protected MobArmor _armor;
+
+    protected EnemyBehaviourRunner _runner;
+    protected MeleeAttackBehaviour _attack;
+    protected TurnBehaviour _turn;
+    protected BarkBehaviour _bark;
+
+    protected float AttackCooldownRemaining
+    {
+        get => _context.AttackCooldownRemaining;
+        set => _context.AttackCooldownRemaining = value;
+    }
+
     protected override void RefreshDataDependents()
     {
         base.RefreshDataDependents();
@@ -200,27 +220,21 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     protected void InvokeArmorRegistered()
     {
-        if (_armor == null)
+        var armor = ActiveArmor;
+        if (armor == null)
         {
             return;
         }
 
-        OnArmorRegistered?.Invoke(_armor);
+        OnArmorRegistered?.Invoke(armor);
     }
-
-    // Armorの登録
-    [SerializeField] protected MobArmor _armor;
 
     [SerializeField, Tooltip("root直下に配置するゲージUI用の固定Transform")]
     private Transform _uiAnchor;
 
-    protected EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private EnemyConditionController _conditionController;
-    protected MeleeAttackBehaviour _attack;
-    protected TurnBehaviour _turn;
-    protected BarkBehaviour _bark;
     private BehaviourInitContext _initCtx;
 
     protected override void OnDestroy()
@@ -552,12 +566,6 @@ public class MobEnemy : Enemy,IFormationParticipant
             new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
 
         this.ActivateShockDebuff().Forget();
-    }
-
-    protected float AttackCooldownRemaining
-    {
-        get => _context.AttackCooldownRemaining;
-        set => _context.AttackCooldownRemaining = value;
     }
 
 #if UNITY_EDITOR

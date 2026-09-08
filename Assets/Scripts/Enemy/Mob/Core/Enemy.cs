@@ -187,7 +187,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
                 IsWeakPoint = isWeakPoint
             });
 
-        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical);
+        InvokeOnDamageDealt(damage, isWeakPoint, context.IsCritical, context.IsLightningDamage);
 
         if (!isKill) InvokeOnDamaged();
     }
@@ -257,14 +257,15 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// <summary>
     /// ダメージポップアップ表示用イベントを発火する
     /// </summary>
-    protected void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical)
+    protected void InvokeOnDamageDealt(int damage, bool isWeakPoint, bool isCritical, bool isLightningDamage = false)
     {
         OnDamageDealt?.Invoke(
             new DamagePopupViewModel(
                 damage: damage,
                 isWeakPoint: isWeakPoint,
                 isCritical: isCritical,
-                worldPosition: GetTargetCenter().position
+                worldPosition: GetTargetCenter().position,
+                isWideSpread: isLightningDamage
                 )
             );
     }
