@@ -23,14 +23,12 @@ namespace BossEnemy.AI.BehaviourTree
                 if (childCondition == NodeCondition.Success)
                 {
                     nextNode = child;
-                    Debug.Log("ノードの選択に成功しました");
                     return NodeCondition.Success;
                 }
 
                 if (childCondition == NodeCondition.Running)
                 {
                     nextNode = child;
-                    Debug.Log("ノードの選択に成功しました");
                     return NodeCondition.Running;
                 }
             }

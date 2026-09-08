@@ -49,15 +49,26 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override NodeCondition TryEntry()
         {
+            if (_canEntryArmorConditions == null || _canEntryArmorConditions.Length == 0)
+            {
+                return NodeCondition.Failure;
+            }
+
+            bool hasArmorCondition = false;
             foreach (var condition in _canEntryArmorConditions)
             {
+                // None は「装備なし」を示す既定値であり、鎧の破壊条件には使用できない。
+                // 可変長の条件配列に残った既定値を鎧として問い合わせないよう除外する。
+                if (condition == ArmorAttachmentType.None) continue;
+
+                hasArmorCondition = true;
                 if (!_bossCharacterEntity.GetArmorStats(condition).IsArmorBroken)
                 {
                     return NodeCondition.Failure;
                 }
             }
 
-            return NodeCondition.Success;
+            return hasArmorCondition ? NodeCondition.Success : NodeCondition.Failure;
         }
 
         [SerializeField] private ArmorAttachmentType[] _canEntryArmorConditions = null;
@@ -144,18 +155,31 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override NodeCondition TryEntry()
         {
+            if (_bossCharacterEntity == null)
+            {
+                Debug.LogError("CharacterHPDecoratorNodeが初期化されていません。BehaviourTreeをEntityとともにInitしてください。");
+                return NodeCondition.Failure;
+            }
+
+            var currentHP = _bossCharacterEntity.CurrentHP;
+            if (currentHP == null)
+            {
+                Debug.LogError("CharacterHPDecoratorNodeのCurrentHPが未初期化です。Entity.Init()完了後にBehaviourTreeを開始してください。");
+                return NodeCondition.Failure;
+            }
+
             switch (_numericalComparisonType)
             {
                 case InequalityType.Greater:
-                    if(_bossCharacterEntity.CurrentHP.Value < _canEntryRemainingHP)
+                    if(currentHP.Value < _canEntryRemainingHP)
                         return NodeCondition.Success;
                     break;
                 case InequalityType.Less:
-                    if(_bossCharacterEntity.CurrentHP.Value > _canEntryRemainingHP)
+                    if(currentHP.Value > _canEntryRemainingHP)
                         return NodeCondition.Success;
                     break;
                 case InequalityType.Equals:
-                    if (_bossCharacterEntity.CurrentHP.Value == _canEntryRemainingHP)
+                    if (currentHP.Value == _canEntryRemainingHP)
                         return NodeCondition.Success;
                     break;
             }

@@ -12,27 +12,33 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
 
         _bossCharacterEntity = bossCharacterEntity;
 
-        if(_childrenNode != null && _childrenNode.Length > 0)
+        // 子ノードを初期化
+        if (_childrenNode != null && _childrenNode.Length > 0)
         {
             foreach (var child in _childrenNode)
             {
-                InitChildren(child);
+                InitChildren(child, nodeRunningEndNotifier);
             }
         }
     }
 
     protected IBossCharacterEntity _bossCharacterEntity = null;
 
-    protected virtual void InitChildren(TreeNode treeNode)
+    /// <summary> 子ノードを初期化 </summary>
+    protected virtual void InitChildren(TreeNode treeNode, NodeRunningConditionNotifier nodeRunningEndNotifier)
     {
-        if (treeNode.IsInit) return;
-
-        if (treeNode is BossCharacterBehaviourTreeNode bossCharacterBehaviourTreeNode)
+        if (treeNode == null)
         {
-            bossCharacterBehaviourTreeNode.Init(_bossCharacterEntity, _nodeRunningConditionNotifier);
+            Debug.LogError("BehaviourTreeにNullの子ノードが設定されています。");
             return;
         }
 
-        treeNode.Init(_nodeRunningConditionNotifier);
+        if (treeNode is BossCharacterBehaviourTreeNode bossCharacterBehaviourTreeNode)
+        {
+            bossCharacterBehaviourTreeNode.Init(_bossCharacterEntity, nodeRunningEndNotifier);
+            return;
+        }
+
+        treeNode.Init(nodeRunningEndNotifier);
     }
 }

@@ -3,6 +3,7 @@ using BossEnemy.Enum;
 using BossEnemy.Interface;
 using BossEnemy.Logic;
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UniRx;
 
@@ -52,9 +53,7 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
-            _bossCharacterEntity.SelectNextAttackData(_attackSelectPoolID);
-
-            HandleRunningEnd();
+            SelectNextAttackAsync().Forget();
         }
 
         public void SetAttackSelectPoolID(int id)
@@ -63,6 +62,12 @@ namespace BossEnemy.AI.BehaviourTree
         }
 
         [SerializeField] private int _attackSelectPoolID;
+
+        private async UniTaskVoid SelectNextAttackAsync()
+        {
+            await _bossCharacterEntity.SelectNextAttackData(_attackSelectPoolID);
+            HandleRunningEnd();
+        }
     }
 
     [Serializable]
@@ -75,18 +80,28 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            Attack.AttackData nextAttackData = _bossCharacterEntity.GetNextAttackData();
+            if (nextAttackData.AttackStartDistance == 0)
+            {
+                HandleRunningEnd();
+                return;
+            }
+
             var toTargetDistance =
                 Vector3.Distance(_bossCharacterEntity.Position.Value,
                 _bossCharacterEntity.AttackTarget.GetTargetCenter().position);
 
-            if (_bossCharacterEntity.ExecutingAttackData.AttackStartDistance > toTargetDistance)
+            // 攻撃開始位置よりも敵が近ければ攻撃を行う
+            if (nextAttackData.AttackStartDistance > toTargetDistance)
             {
-                _nodeRunningConditionNotifier.HandleRunningEnd();
+                HandleRunningEnd();
             }
         }
 
         public override void OnUpdate()
         {
+            Attack.AttackData nextAttackData = _bossCharacterEntity.GetNextAttackData();
+
             Movement.MoveTargetPosition(
                 _bossCharacterEntity,
                 _bossCharacterEntity.AttackTarget.GetTargetCenter().position,
@@ -97,10 +112,15 @@ namespace BossEnemy.AI.BehaviourTree
                 Vector3.Distance(_bossCharacterEntity.Position.Value,
                 _bossCharacterEntity.AttackTarget.GetTargetCenter().position);
 
-            if (_bossCharacterEntity.ExecutingAttackData.AttackStartDistance > toTargetDistance)
+            if (nextAttackData.AttackStartDistance > toTargetDistance)
             {
-                _nodeRunningConditionNotifier.HandleRunningEnd();
+                HandleRunningEnd();
             }
+        }
+
+        public override void OnExit()
+        {
+            _bossCharacterEntity.SetVelocity(Vector3.zero);
         }
 
         [SerializeField] float _moveSpeed = 1.0f;
@@ -125,7 +145,12 @@ namespace BossEnemy.AI.BehaviourTree
                 out bool isLookAtTarget,
                 _bossCharacterEntity.TimeScale);
 
-            if (isLookAtTarget) _nodeRunningConditionNotifier.HandleRunningEnd();
+            if (isLookAtTarget) _nodeRunningConditionNotifier.HandleResearchBehaviourTree();
+        }
+
+        public override void OnExit()
+        {
+            _bossCharacterEntity.SetVelocity(Vector3.zero);
         }
 
         [Header("振り向き速度")]
@@ -142,20 +167,22 @@ namespace BossEnemy.AI.BehaviourTree
         {
             _bossCharacterEntity.ExecuteAttack();
 
-            _subscription = _bossCharacterEntity.IsAttacking.Subscribe(isAttacking =>
+            _disposable = _bossCharacterEntity.ExecutingAttackData.Subscribe(executingAttackData =>
             {
-                if(!isAttacking) HandleRunningEnd();
+                if(executingAttackData.ID == 0)
+                {
+                    HandleRunningEnd();
+                }
             });
         }
 
         public override void OnExit()
         {
-            // 個別に購読を解除
-            _subscription?.Dispose();
-            _subscription = null;
+            _disposable?.Dispose();
+            _disposable = null;
         }
 
-        private IDisposable _subscription;
+        IDisposable _disposable = null;
     }
 
     [Serializable]
@@ -164,7 +191,6 @@ namespace BossEnemy.AI.BehaviourTree
         public override void OnEnter()
         {
             _bossCharacterEntity.HandleDead();
-            _nodeRunningConditionNotifier.HandleRunningEnd();
         }
     }
 
@@ -173,21 +199,7 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
-            _bossCharacterEntity.OnPhaseChange();
-
-            _subscription = _bossCharacterEntity.IsPhaseChaging.Subscribe(isPhaseChanging =>
-            {
-                if(!isPhaseChanging) HandleRunningEnd();
-            });
+            _bossCharacterEntity.PhaseChange();
         }
-
-        public override void OnExit()
-        {
-            // 個別に購読を解除
-            _subscription?.Dispose();
-            _subscription = null;
-        }
-
-        private IDisposable _subscription;
     }
 }

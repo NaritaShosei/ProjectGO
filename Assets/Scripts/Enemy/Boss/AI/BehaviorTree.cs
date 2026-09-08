@@ -14,14 +14,14 @@ namespace BossEnemy.AI.BehaviourTree
     }
 
 
-    #region 実行中の実行終了時に実行終了を通知するクラス
+    #region ビヘイビアツリーの実行状況通知クラス
     public class NodeRunningConditionNotifier
     {
-        public event Action OnRunningEnd;
+        public event Action OnResearchBehaviourTree;
 
-        public void HandleRunningEnd()
+        public void HandleResearchBehaviourTree()
         {
-            OnRunningEnd?.Invoke();
+            OnResearchBehaviourTree?.Invoke();
         }
     }
     #endregion
@@ -36,8 +36,8 @@ namespace BossEnemy.AI.BehaviourTree
         public BehaviourController(ITreeNode origin)
         {
             _originNode = origin;
-            _nodeRunningEndNotifier = origin.NodeRunningEndNotifier;
-            _nodeRunningEndNotifier.OnRunningEnd += SearchNextRunningNode;
+            _nodeRunningEndNotifier = origin.NodeRunningConditionNotifier;
+            _nodeRunningEndNotifier.OnResearchBehaviourTree += SearchNextRunningNode;
         }
 
         /// <summary> 毎フレーム実行する処理 </summary>
@@ -98,6 +98,9 @@ namespace BossEnemy.AI.BehaviourTree
             if(_currentNode != null) _currentNode.OnExit();
             
             _currentNode = nextNode;
+
+            Debug.Log($"現在実行中のノード：{_currentNode.GetType()}");
+
             _currentNode.OnEnter();
         }
     }
@@ -114,7 +117,7 @@ namespace BossEnemy.AI.BehaviourTree
         public int RunningPriority { get; }
 
         /// <summary> ノードの実行状況通知クラス </summary>
-        public NodeRunningConditionNotifier NodeRunningEndNotifier { get; }
+        public NodeRunningConditionNotifier NodeRunningConditionNotifier { get; }
 
         /// <summary> BehaviourTreeをSetする </summary>
         void Init(NodeRunningConditionNotifier nodeRunningEndNotifier);
@@ -148,7 +151,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public int RunningPriority => _runningPriority;
 
-        public NodeRunningConditionNotifier NodeRunningEndNotifier => _nodeRunningConditionNotifier;
+        public NodeRunningConditionNotifier NodeRunningConditionNotifier => _nodeRunningConditionNotifier;
 
         public void Init(NodeRunningConditionNotifier nodeRunningEndNotifier)
         {
@@ -185,7 +188,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         [SerializeField] private int _runningPriority = 0;
 
-        protected void HandleRunningEnd() => _nodeRunningConditionNotifier.HandleRunningEnd();
+        protected void HandleRunningEnd() => _nodeRunningConditionNotifier.HandleResearchBehaviourTree();
     }
     #endregion
 }
