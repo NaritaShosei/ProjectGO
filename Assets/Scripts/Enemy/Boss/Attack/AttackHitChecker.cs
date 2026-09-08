@@ -20,10 +20,10 @@ namespace BossEnemy.Attack
 
         private static bool CircleHitDetect(Vector3 hitAreaCenterPos, Vector3 targetPos, float hitRange)
         {
-            float distance = Vector3.Distance(hitAreaCenterPos, targetPos);
-            if (distance <= hitRange) return true;
-
-            return false;
+            // 円形範囲表示は地面（XZ 平面）に描画されるため、実判定も同じ平面で測る。
+            Vector3 offset = targetPos - hitAreaCenterPos;
+            offset.y = 0f;
+            return offset.sqrMagnitude <= hitRange * hitRange;
         }
     }
 

@@ -7,7 +7,7 @@ namespace BossEnemy.Attack
     {
         public static int GetRandamSelectAttackDataID(AttackSelectionPool selectionPool, List<int> coolTimeAttackList)
         {
-            if (selectionPool.SelectionPool.Length == 0 || selectionPool.SelectionPool == null) return default;
+            if (selectionPool.SelectionPool == null || selectionPool.SelectionPool.Length == 0) return default;
 
             // すべての攻撃の確率（重み）の合計を計算する
             float totalChance = 0f;
@@ -39,7 +39,7 @@ namespace BossEnemy.Attack
             }
 
             // 基本的にはここには到達しませんが、安全のため最後の要素を返す
-            return default;
+            return 0;
         }
     }
 }

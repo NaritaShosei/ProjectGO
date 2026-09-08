@@ -1,10 +1,8 @@
 using BossEnemy.Infrastructure.Repository;
 using BossEnemy.Interface;
-using BossEnemy.Model.System;
 using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
-using static UnityEditorInternal.ReorderableList;
 
 namespace BossEnemy.Attack
 {
@@ -12,27 +10,53 @@ namespace BossEnemy.Attack
     {
         public AttackExecutor()
         {
-            Init().Forget();
+            _attackCoolTimer = new();
+
+            // 複数回の攻撃選択から待機されるため、await可能なTaskを保持する。
+            _initializationTask = InitAsync().Preserve();
         }
 
         public AttackData ExecutingAttack => _executingAttackData;
 
-        public async UniTask Init()
+        public bool WasHitAttack => _wasAttackHit;
+
+        /// <summary> 攻撃関連のRepositryLoadのため非同期で初期化 </summary>
+        private async UniTask InitAsync()
         {
             _attackDataRepository = await AssetsLoader.LoadAssetAsync<AttackDataRepositry>
-            (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
+                (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
 
             _bossEnemyAttackSelectionPoolRepository = await AssetsLoader.LoadAssetAsync<AttackDataSelectionPoolRepository>
                 (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
 
-            _isInit = true;
+            _attackDataRepository.Init();
+            _bossEnemyAttackSelectionPoolRepository.Init();
         }
 
-        public void SetExecuteAttack(int attackSelectPoolID)
+        /// <summary> 次の攻撃を確定させる </summary>
+        public async UniTask SetNextAttack(int attackSelectPoolID)
         {
+            // Addressablesの非同期ロード完了前にAIが攻撃選択へ進まないよう待機する。
+            await _initializationTask;
+
             AttackSelectionPool attackSelectionPool = _bossEnemyAttackSelectionPoolRepository.GetSelectionPool(attackSelectPoolID);
 
+            if (attackSelectionPool.SelectionPool == null) Debug.LogError("PoolがNullです");
+
             int executeAttackID = AttackDataSelector.GetRandamSelectAttackDataID(attackSelectionPool, _attackCoolTimer.AttackCoolTimeList);
+
+            if(executeAttackID == 0)
+            {
+                Debug.Log("選択可能な攻撃がありません、CoolTimeを待ちます");
+
+                int awaitFrame = 100;
+
+                await UniTask.Delay(awaitFrame);
+
+                await SetNextAttack(attackSelectPoolID);
+
+                return;
+            }
 
             _executingAttackData = _attackDataRepository.GetData(executeAttackID);
         }
@@ -42,17 +66,23 @@ namespace BossEnemy.Attack
         {
             _attackTarget = attackTarget;
             _wasAttackHit = false;
+
+            
         }
 
         /// <summary> 攻撃によってダメージが発生したか否かの判定 </summary>
-        public bool IsHitAttackSuccess(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
+        public bool TryHitAttack(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
-            switch (attackHitAreaType)
+            if(AttackHitChecker.TryHitAttack
+                (attackHitAreaType, 
+                attackPosition, 
+                _attackTarget,
+                _executingAttackData.AttackHitAreaRadius))
             {
-                case AttackHitAreaType.Circle:
-
-                    break;
+                AttackHit(_attackTarget);
+                _wasAttackHit = true;
             }
+            else _wasAttackHit = false;
 
             return _wasAttackHit;
         }
@@ -60,7 +90,8 @@ namespace BossEnemy.Attack
         /// <summary> 攻撃終了 </summary>
         public void Complete()
         {
-
+            _attackCoolTimer.StartCoolTime(_executingAttackData.ID, _executingAttackData.CoolTime).Forget();
+            _wasAttackHit = false;
         }
 
         public void Dispose() 
@@ -75,7 +106,7 @@ namespace BossEnemy.Attack
         private IBossEnemyAttackSelectionPoolRepository _bossEnemyAttackSelectionPoolRepository;
         private IBossEnemyAttackDataRepository _attackDataRepository;
 
-        private bool _isInit = false;
+        private readonly UniTask _initializationTask;
 
         private bool _wasAttackHit = false;
 
@@ -87,7 +118,7 @@ namespace BossEnemy.Attack
         /// <summary> 攻撃が当たった際のイベント発火時の処理 </summary>
         private void AttackHit(IPlayer hitTarget)
         {
-            hitTarget.TakeDamage(_executingAttackData.Damage);
+            hitTarget.TakeDamage(_executingAttackData.Damage, _executingAttackData.DamageReaction);
         }
     }
 }

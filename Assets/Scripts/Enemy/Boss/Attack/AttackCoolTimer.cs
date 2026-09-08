@@ -10,7 +10,7 @@ namespace BossEnemy.Attack
     {
         public List<int> AttackCoolTimeList => _coolTimeList;
 
-        public async UniTask StartCoolTime(int id, float coolTime)
+        public async UniTaskVoid StartCoolTime(int id, float coolTime)
         {
             if (_coolTimeList.Contains(id)) return;
 
