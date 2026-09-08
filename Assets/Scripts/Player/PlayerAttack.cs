@@ -776,6 +776,10 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void OnChargeReady()
     {
+        // 回避などでチャージを中断しても、ChargeReadySMB.OnStateExit から通知が届く。
+        // 終了済みのチャージの準備状態と継続振動を再開させない。
+        if (!_isCharging) return;
+
         _canStartCharge = true;
         _chargeStartTime = Time.time;
 
