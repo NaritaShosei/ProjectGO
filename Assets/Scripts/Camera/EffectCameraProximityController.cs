@@ -5,6 +5,7 @@ using UnityEngine;
 /// Inspectorで指定されたエフェクトを、カメラとの距離に応じて一時的に非表示にします。
 /// GameObjectのSetActiveではなくRenderer.enabledを切り替えるため、ParticleSystemの再起動を伴いません。
 /// このクラスが非表示にした対象だけを再表示し、他システムによる非表示状態は変更しません。
+/// 非表示にした後で他システムがenabledを変更した対象は所有を手放し、以後操作しません。
 /// </summary>
 public sealed class EffectCameraProximityController
 {
@@ -47,6 +48,9 @@ public sealed class EffectCameraProximityController
         foreach (EffectState effectState in _effectStates)
         {
             if (effectState.Target == null) continue;
+
+            // 非表示フェーズ中は、他システムがenabledを戻した対象を管理下から外す。
+            if (effectState.IsHiddenByController) effectState.ReconcileExternalChanges();
 
             // CameraとEffectのTransform.positionはどちらもワールド座標なので、同じ座標系で距離を判定する。
             float distanceSqr = (cameraPosition - effectState.Target.position).sqrMagnitude;
@@ -115,7 +119,7 @@ public sealed class EffectCameraProximityController
                 if (renderer == null || !renderer.enabled) continue;
 
                 renderer.enabled = false;
-                _hiddenRenderers.Add(renderer);
+                _claimedRenderers.Add(renderer);
             }
 
             IsHiddenByController = true;
@@ -123,19 +127,37 @@ public sealed class EffectCameraProximityController
 
         public void ShowRenderers()
         {
-            foreach (Renderer renderer in _hiddenRenderers)
+            foreach (Renderer renderer in _claimedRenderers)
             {
-                if (renderer != null)
-                {
-                    renderer.enabled = true;
-                }
+                // 外部がtrueに戻していたら触らず、自分がfalseにした分だけ戻す。
+                if (renderer != null && !renderer.enabled) renderer.enabled = true;
             }
 
-            _hiddenRenderers.Clear();
+            _claimedRenderers.Clear();
             IsHiddenByController = false;
         }
 
+        /// <summary>非表示フェーズ中に他システムがenabledを戻した対象を管理下から外します。</summary>
+        public void ReconcileExternalChanges()
+        {
+            if (_claimedRenderers.Count == 0) return;
+
+            // falseにしたはずがtrueになっている対象は他システムが変更したとみなす。
+            _releaseBuffer.Clear();
+            foreach (Renderer renderer in _claimedRenderers)
+            {
+                if (renderer == null || renderer.enabled) _releaseBuffer.Add(renderer);
+            }
+            if (_releaseBuffer.Count == 0) return;
+
+            foreach (Renderer renderer in _releaseBuffer) _claimedRenderers.Remove(renderer);
+
+            // 所有をすべて手放したら通常の距離判定へ復帰させる。
+            if (_claimedRenderers.Count == 0) IsHiddenByController = false;
+        }
+
         private readonly List<Renderer> _renderers = new();
-        private readonly List<Renderer> _hiddenRenderers = new();
+        private readonly HashSet<Renderer> _claimedRenderers = new();
+        private readonly List<Renderer> _releaseBuffer = new();
     }
 }
