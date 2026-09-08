@@ -5,7 +5,11 @@ public interface IPlayer :
      IPlayerStats
 {
     public event Action OnDead;
+    public event Action OnDownRecoveryEnded;
 
+    public bool IsDown { get; }
+
+    public void StartDownRecovery();
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
     /// </summary>
