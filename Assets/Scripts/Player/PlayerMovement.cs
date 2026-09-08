@@ -171,6 +171,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (_playerStateManager == null) return;
+
         if (!_isAttackMoving)
         {
             Rotate();
@@ -181,6 +183,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (_playerStateManager == null) return;
+
         if (!_isAttackMoving)
             Move();
     }
