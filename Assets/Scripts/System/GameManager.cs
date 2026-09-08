@@ -136,7 +136,7 @@ public class GameManager : MonoBehaviour
     private void InitUI()
     {
         if (_inGameUIInitializer != null && _player != null)
-            _inGameUIInitializer.Init(_player);
+            _inGameUIInitializer.Init(_player, _skillManager);
         else
             Debug.LogError("[GameManager] PlayerUIInitializer or Player is missing.", this);
 
