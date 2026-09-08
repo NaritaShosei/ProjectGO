@@ -1,6 +1,7 @@
+using BossEnemy.Enum;
+using BossEnemy.Interface;
 using System;
 using UnityEngine;
-using BossEnemy.Interface;
 
 namespace BossEnemy.Animation
 {
@@ -14,7 +15,7 @@ namespace BossEnemy.Animation
         public event Action OnPhaseChangeEnd;
 
         /// <summary>
-        /// コンストラクタ。ReceiverのイベントをEnemyAnimatorへ中継する。
+        /// コンストラクタ。ReceiverのイベントをAnimatorへ中継する。
         /// </summary>
         public BossEnemyAnimator(Animator animator, IBossCharacterAnimationEventReceiver receiver)
         {
@@ -23,7 +24,6 @@ namespace BossEnemy.Animation
 
             if (_receiver == null) return;
 
-            _receiver.OnCheckHitAttack += HandleAttackHit;
             _receiver.OnAttackEnd += HandleAttackEnd;
             _receiver.OnDeadEnd += HandleDeadEnd;
             _receiver.OnPhaseChangeEnd += HandlePhaseChangeEnd;
@@ -56,41 +56,12 @@ namespace BossEnemy.Animation
         /// <summary>
         /// 各所アーマー破壊フラグを設定する
         /// </summary>
-        public void SetBreakingArmor(bool isBreakingLeftLeg, bool isBreakingRightLeg)
+        public void SetPosture(PostureType postureType)
         {
             if (_animator == null) return;
-
-            if (isBreakingLeftLeg && isBreakingRightLeg)
-            {
-                Debug.Log("両足");
-                _animator.SetTrigger(_hashIsBreakAllArmor);
-            }
-            else if (isBreakingLeftLeg)
-            {
-                Debug.Log("左足");
-                _animator.SetTrigger(_hashIsBreakLeftLegArmor);
-            }
-            else if (isBreakingRightLeg)
-            {
-                Debug.Log("右足");
-                _animator.SetTrigger(_hashIsBreakRightLegArmor);
-            }
-            else
-            {
-                Debug.Log("全部無事");
-                return;
-            }
-
-            SetIsDown(true);
-        }
-
-        /// <summary>
-        /// ダウンフラグを設定する
-        /// </summary>
-        public void SetIsDown(bool isDown)
-        {
-            if (_animator == null) return;
-            _animator.SetBool(_hashIsDown, isDown);
+            
+            int enumValue = (int)postureType;
+            _animator.SetInteger(_hashPostureTypeValue, enumValue);
         }
 
         /// <summary>
@@ -111,10 +82,11 @@ namespace BossEnemy.Animation
             _animator.SetBool(_hashIsDead, true);
         }
 
-        public void SetPhaseChange()
+        public void SetPhaseChange(int nextPhase)
         {
             if (_animator == null) return;
             _animator.SetTrigger(_hashPhaseChange);
+            _animator.SetInteger(_hashCurrentPhase, nextPhase);
         }
 
         /// <summary>
@@ -136,7 +108,6 @@ namespace BossEnemy.Animation
         {
             if (_receiver == null) return;
 
-            _receiver.OnCheckHitAttack -= HandleAttackHit;
             _receiver.OnAttackEnd -= HandleAttackEnd;
             _receiver.OnDeadEnd -= HandleDeadEnd;
             _receiver.OnPhaseChangeEnd -= HandlePhaseChangeEnd;
@@ -145,21 +116,18 @@ namespace BossEnemy.Animation
         // Animatorパラメータのハッシュ
         private readonly int _hashXSpeed = Animator.StringToHash("Speed_x");
         private readonly int _hashZSpeed = Animator.StringToHash("Speed_z");
-        private readonly int _hashIsBreakLeftLegArmor = Animator.StringToHash("IsBreakLeftLegArmor");
-        private readonly int _hashIsBreakRightLegArmor = Animator.StringToHash("IsBreakRightLegArmor");
-        private readonly int _hashIsBreakAllArmor = Animator.StringToHash("IsBreakAllLegArmor");
-        private readonly int _hashIsDown = Animator.StringToHash("IsDown");
+        private readonly int _hashPostureTypeValue = Animator.StringToHash("PostureTypeValue");
         private readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
         private readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
         private readonly int _hashIsDead = Animator.StringToHash("IsDead");
-        private readonly int _hashPhaseChange = Animator.StringToHash("PhaseChangeTrigger");
+        private readonly int _hashPhaseChange = Animator.StringToHash("PhaseChange");
+        private readonly int _hashCurrentPhase = Animator.StringToHash("CurrentPhase");
 
         private readonly Animator _animator;
 
         // 購読解除のためにReceiverを保持する
         private readonly IBossCharacterAnimationEventReceiver _receiver;
 
-        private void HandleAttackHit() => OnAttackHit?.Invoke();
         private void HandleAttackEnd() => OnAttackEnd?.Invoke();
         private void HandleDeadEnd() => OnDeadEnd?.Invoke();
         private void HandlePhaseChangeEnd() => OnPhaseChangeEnd?.Invoke();
