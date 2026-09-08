@@ -12,128 +12,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemyHPGauge
       objectReference: {fileID: 0}
+    - target: {fileID: 7424933241276065154, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
+      propertyPath: _gaugeIcon
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7424933241276065154, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
+      propertyPath: _gaugeIcons.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 4157501628024554427, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
---- !u!222 &2483151608207831116 stripped
-CanvasRenderer:
-  m_CorrespondingSourceObject: {fileID: 429027048859922924, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &3462707179199146755 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1697814442800229027, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!225 &4563042238854891699 stripped
-CanvasGroup:
-  m_CorrespondingSourceObject: {fileID: 1788762849820150035, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &534129874502807681 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 2371220669294145825, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &147881108616684589 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2705741974046516621, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!1 &2176278057394733595 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4157501628024554427, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!222 &7208078750135455525 stripped
-CanvasRenderer:
-  m_CorrespondingSourceObject: {fileID: 4866673236880068229, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &7982458879480524546 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5280115309391900322, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!1 &7802493284443440117 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5461140824779768405, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &7586177028924767790 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5676324677777588110, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &8518284488561359063 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5888138155191040375, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!224 &8410420614580389570 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5995988843454613346, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &8920041536795175402 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6650552678241364042, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!222 &8832429380925734826 stripped
-CanvasRenderer:
-  m_CorrespondingSourceObject: {fileID: 6706650742397320714, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &8759271042178897809 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 6777625460412962353, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!222 &5095480048499397706 stripped
-CanvasRenderer:
-  m_CorrespondingSourceObject: {fileID: 7005086384450639338, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &4781016638145769458 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 7338700968044244562, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4650935944076157986 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7424933241276065154, guid: 406cf857a84649daa59cc0838fdab9c8, type: 3}
-  m_PrefabInstance: {fileID: 2846794933992325536}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97cc81285db55f54594b221066f18257, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyGaugeView

@@ -49,6 +49,8 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
         float hpAmount = current / max;
         AnimateHPGauge(hpAmount);
 
+        if (_gaugeIcons == null || _gaugeIcons.Length == 0) return;
+
         foreach (var iconData in _gaugeIcons)
         {
             if (hpAmount <= iconData.FillThreshold)
@@ -72,8 +74,11 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
         _mainGauge.fillAmount = 1f;
         _delayGauge.fillAmount = 1f;
 
-        // 降順に並べ替えたアイコンの中で、最も高い閾値のアイコンをデフォルトとして設定
-        _gaugeIcon.sprite = _gaugeIcons[0].IconSprite;
+        if (_gaugeIcons != null || _gaugeIcons.Length != 0)
+        {
+            // 降順に並べ替えたアイコンの中で、最も高い閾値のアイコンをデフォルトとして設定
+            _gaugeIcon.sprite = _gaugeIcons[0].IconSprite;
+        }
 
         SetVisible(false);
     }
