@@ -334,7 +334,7 @@ AnimatorStateMachine:
     m_Position: {x: 560, y: -130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 560373011336659301}
-    m_Position: {x: 220, y: -140, z: 0}
+    m_Position: {x: 230, y: -140, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 8685627706576656378}
     m_Position: {x: 1100, y: -300, z: 0}
@@ -1403,7 +1403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5717a9b29099ef4e936e62e37364764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DodgeSMB
-  _invincibleStartTime: 0.05
+  _invincibleStartTime: 0
   _dodgeEndTime: 0.9
 --- !u!1109 &-3047913078075690707
 AnimatorTransition:
@@ -2489,7 +2489,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5717a9b29099ef4e936e62e37364764, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DodgeSMB
-  _invincibleStartTime: 0.05
+  _invincibleStartTime: 0
   _dodgeEndTime: 0.75
 --- !u!206 &2338858263752972697
 BlendTree:

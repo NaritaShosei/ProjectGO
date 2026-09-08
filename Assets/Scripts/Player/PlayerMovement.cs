@@ -82,6 +82,26 @@ public class PlayerMovement : MonoBehaviour
             _damageReactionMoveCts.Token).Forget();
     }
 
+    /// <summary>
+    /// 死亡時に回避を即座に中断する。
+    /// 死亡キャンセルでは回避完了イベントを発火しない。
+    /// </summary>
+    public void CancelDodgeByDeath()
+    {
+        if (!_isDodging) return;
+
+        _isDodging = false;
+
+        _dodgeMoveCts?.Cancel();
+        _dodgeMoveCts?.Dispose();
+        _dodgeMoveCts = null;
+
+        _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+
+        if (_rb != null)
+            _rb.linearVelocity = Vector3.zero;
+    }
+
     [SerializeField] private Rigidbody _rb;
 
     [Header("Damage Reaction")]

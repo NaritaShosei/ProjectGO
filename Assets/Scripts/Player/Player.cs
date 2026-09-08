@@ -490,6 +490,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     private void OnPlayerDead()
     {
+        _move?.CancelDodgeByDeath();
+
         _playerStateManager.ChangeState(PlayerState.Dead);
         OnDead?.Invoke();
     }

@@ -321,6 +321,9 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
                 _animator.SetBool(AnimParams.IsCharging, true);
                 break;
             case PlayerState.Dead:
+                _animator.ResetTrigger(AnimParams.Dodge);
+                _animator.ResetTrigger(AnimParams.Damaged);
+                _animator.SetBool(AnimParams.IsCharging, false);
                 _animator.SetTrigger(AnimParams.Dead);
                 break;
             case PlayerState.Damaged:
