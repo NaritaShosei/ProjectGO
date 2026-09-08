@@ -175,7 +175,7 @@ namespace BossEnemy.Logic
     {
         /// <summary> ダメージを受けた際に呼ばれるメソッド </summary>
         public static void TakeDamage(
-            BossCharacterEntity target, 
+            IBossCharacterEntity target, 
             DamageContext damageContext, 
             TakeDamageType hitDefenseType, 
             ArmorAttachmentType attachmentArmor)
@@ -192,7 +192,7 @@ namespace BossEnemy.Logic
 
         /// <summary> Boss本体へのダメージ処理 </summary>
         private static void TakeDamageInBody(
-            BossCharacterEntity target,
+            IBossCharacterEntity target,
             DamageContext damageContext,
             TakeDamageType damageType)
         {
@@ -216,7 +216,7 @@ namespace BossEnemy.Logic
         }
 
         private static void TakeDamageInAttachmentArmor(
-            BossCharacterEntity target,
+            IBossCharacterEntity target,
             DamageContext damageContext,
             ArmorAttachmentType attachmentType)
         {

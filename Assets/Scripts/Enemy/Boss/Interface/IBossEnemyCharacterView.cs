@@ -36,13 +36,13 @@ namespace BossEnemy.Interface
         public void StartAction();
 
         /// <summary> 攻撃処理 </summary>
-        public void StartAttack(Attack.AttackData bossEnemyAttackData);
+        public void ExecuteAttack(Attack.AttackData bossEnemyAttackData);
 
         /// <summary> 攻撃終了処理 </summary>
-        public void AttackEnd();
+        public void AttackCompleted();
 
         /// <summary> フェーズ切り替え処理 </summary>
-        public void ChangePhase();
+        public void ChangePhase(int nextPhase);
 
         /// <summary> キャラクターの姿勢を変更 </summary>
         /// <param name="postureType"></param>
