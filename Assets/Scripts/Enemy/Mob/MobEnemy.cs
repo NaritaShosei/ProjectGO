@@ -364,20 +364,41 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     private void HandleAttackFinished()
     {
+        if (!ShouldApplyPostAttackStun()) return;
+
+        // サブクラス固有の追加処理
+        OnBeforePostAttackStun();
+
         float stunDuration = _context.PendingRetreat.RecoveryRemaining;
         if (stunDuration > 0f)
         {
-            // PostAttackStunBehaviourは攻撃終了の都度動的にnewしている
-            // そのため生成のたびにInit()を明示的に呼ぶ必要がある（呼び忘れるとOnEnter()でNRE）
-            var stun = new PostAttackStunBehaviour(stunDuration, ConsumeRetreatIfUnnecessary);
+            var stun = new PostAttackStunBehaviour(stunDuration, OnPostAttackStunExit);
             stun.Init(_initCtx);
             _runner.ForceBehaviour(stun);
         }
         else
         {
             // 硬直がない場合も、その場で後退要否を判定しておく
-            ConsumeRetreatIfUnnecessary();
+            OnPostAttackStunExit();
         }
+    }
+
+    /// <summary>PostAttackStunBehaviour
+    /// 攻撃後の硬直を適用するかどうか。falseならHandleAttackFinishedは何もしない。
+    /// </summary>
+    protected virtual bool ShouldApplyPostAttackStun() => true;
+
+    /// <summary>
+    /// 硬直開始直前に呼ばれるフック。サブクラス固有の付随処理（ログ・向き固定など）用。
+    /// </summary>
+    protected virtual void OnBeforePostAttackStun() { }
+
+    /// <summary>
+    /// 硬直終了時（またはstunDuration=0で即時）に呼ばれるフック。
+    /// </summary>
+    protected virtual void OnPostAttackStunExit()
+    {
+        ConsumeRetreatIfUnnecessary();
     }
 
     /// <summary>
