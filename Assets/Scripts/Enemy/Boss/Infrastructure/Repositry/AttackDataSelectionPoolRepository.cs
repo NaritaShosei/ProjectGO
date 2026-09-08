@@ -62,24 +62,25 @@ namespace BossEnemy.Infrastructure.Repository
 
         public AttackSelectionPool GetSelectionPool(int id)
         {
-            AttackSelectionPool attackSelectionPool = default;
-
             if (_csvMasterData == null)
             {
                 throw new InvalidOperationException("Init() が呼ばれていません。");
             }
 
+            // Dictionary内に同じIDを持つPoolが存在すればそれを取得
             if (_attackDataSelectionPoolDict.TryGetValue(id, out var cachedPool)) return cachedPool;
+
+            AttackSelectionPool attackSelectionPool = default;
 
             for (int row = _csvDataSearchStartRow + 1; row < _csvDataSearchEndRow; row++)
             {
                 // ID は先頭列、2列目以降は要素
                 if (!int.TryParse(GetCell(row, 0), out int foundId) || foundId != id) continue;
 
-                var pool = CreatePool(row);
+                attackSelectionPool = CreatePool(row);
 
-                _attackDataSelectionPoolDict.Add(id, pool);
-                return pool;
+                _attackDataSelectionPoolDict.Add(id, attackSelectionPool);
+                return attackSelectionPool;
             }
 
             Debug.LogError($"AttackSelectPoolの取得に失敗しました。ID: {id}");
@@ -94,25 +95,20 @@ namespace BossEnemy.Infrastructure.Repository
 
         private AttackSelectionPool CreatePool(int row)
         {
-            bool isFinishAttackAddSelectionPool = false;
             AttackSelectionPool pool = new();
             List<AttackCondition> selectionField = new();
 
+            // 1列目はPoolID。以降は「攻撃ID, 発動確率」の組が空セルまで続く。
             int column = 1;
-            while (isFinishAttackAddSelectionPool)
+            while (column + 1 < _csvMasterData.GetLength(1))
             {
-                if (column < 0 || column >= _csvMasterData.GetLength(1) || 
-                    !int.TryParse(GetCell(row, column), out int result))
+                if (string.IsNullOrEmpty(GetCell(row, column)))
                 {
-                    isFinishAttackAddSelectionPool = true;
-                    continue;
+                    break;
                 }
 
-                int id = ParseInt(row, column, "攻撃ID");
-                column++;
-
-                int activationRate = ParseInt(row, column, "攻撃発生確率");
-                column++;
+                int id = ParseInt(row, column++, "攻撃ID");
+                int activationRate = ParseInt(row, column++, "攻撃発生確率");
 
                 selectionField.Add(
                     new AttackCondition()
@@ -122,6 +118,12 @@ namespace BossEnemy.Infrastructure.Repository
                 });
             }
 
+            if (selectionField.Count == 0)
+            {
+                throw new InvalidOperationException($"AttackSelectionPoolの候補がありません。Row: {row}");
+            }
+
+            pool.SetSelectionPool(selectionField.ToArray());
             return pool;
         }
 

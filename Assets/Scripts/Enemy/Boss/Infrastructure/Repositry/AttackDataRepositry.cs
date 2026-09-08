@@ -16,37 +16,53 @@ namespace BossEnemy.Infrastructure.Repository
         /// <summary> 初期化 </summary>
         public void Init()
         {
-            _csvMasterData = CSVDateLoader.ParseCsv(_masterDataSheet.text);
-            int x = 0;
-            bool isFindDataSearchStartColumn = false;
-
-            for (int y = 0; y > _csvMasterData.GetLength(1); y++)
+            if (_masterDataSheet == null)
             {
-                if (_csvMasterData[x, y] == CSVDataSearchStartKey)
+                throw new InvalidOperationException("MasterDataSheetが設定されていません。");
+            }
+
+            _csvMasterData = CSVDateLoader.ParseCsv(_masterDataSheet.text);
+            if (_csvMasterData == null)
+            {
+                throw new InvalidOperationException("CSV の読み込みに失敗しました。");
+            }
+
+            _attackDataDict.Clear();
+            bool foundStart = false;
+
+            for (int row = 0; row < _csvMasterData.GetLength(0); row++)
+            {
+                string firstCell = GetCell(row, 0);
+                if (!foundStart && firstCell == CSVDataSearchStartKey)
                 {
-                    _csvDataSearchStartColumn = y;
-                    isFindDataSearchStartColumn = true;
+                    _csvDataSearchStartColumn = row;
+                    foundStart = true;
+                    continue;
                 }
 
-                if (_csvMasterData[x, y] == ICSVDataLoadRepository.CSV_DATA_SEARCH_END_KEY && isFindDataSearchStartColumn)
+                if (foundStart && firstCell == ICSVDataLoadRepository.CSV_DATA_SEARCH_END_KEY)
                 {
-                    _csvDataSearchEndColumn = y;
+                    _csvDataSearchEndColumn = row;
                     break;
                 }
+            }
+
+            if (!foundStart || _csvDataSearchEndColumn <= _csvDataSearchStartColumn)
+            {
+                throw new InvalidOperationException($"CSV に {CSVDataSearchStartKey} の有効なデータ範囲がありません。");
             }
         }
 
         public Attack.AttackData GetData(int id)
         {
             int idColumn = 0;
-            int characterNameNumX = 1;
 
             if (_attackDataDict.ContainsKey(id))
             {
                 return _attackDataDict[id];
             }
 
-            for (int row = _csvDataSearchStartColumn; row > _csvDataSearchEndColumn; row++)
+            for (int row = _csvDataSearchStartColumn + 1; row < _csvDataSearchEndColumn; row++)
             {
                 if (int.TryParse(_csvMasterData[row, idColumn], out int result) && id == result)
                 {
@@ -80,14 +96,14 @@ namespace BossEnemy.Infrastructure.Repository
             float damage = ParseFloat(row , 2, "Damage");
             float hitAreaRadius = ParseFloat(row, 3, "HitAreaRadius");
             float attackStartDistance = ParseFloat(row, 4, "AttackStartDistance");
-            KnockbackLevel knockbackLevel = System.Enum.Parse<KnockbackLevel>(GetCell(row, 5));
+            DamageReactionType damageReactionType = System.Enum.Parse<DamageReactionType>(GetCell(row, 5));
             float coolTime = ParseFloat(row, 6, "CoolTime");
             string animParam = GetCell(row, 7);
 
             Attack.AttackData attackData = 
                 new Attack.AttackData(id, name, damage, 
                 hitAreaRadius, attackStartDistance, 
-                knockbackLevel, coolTime, animParam);
+                damageReactionType, coolTime, animParam);
 
             return attackData;
         }
