@@ -133,7 +133,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
         bool isArmorHit = armorWasAlive && !isArmorBreak;
 
-        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical, context.IsLightningDamage);
 
         //ヒットエフェクトの通知
         InvokeOnHitEffect(
