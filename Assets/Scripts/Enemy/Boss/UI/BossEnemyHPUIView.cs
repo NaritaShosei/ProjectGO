@@ -78,7 +78,7 @@ namespace BossEnemy.UI
 
         public void OnRelease()
         {
-            _disposable?.Dispose();
+            
         }
 
         /// <summary> 初期化 </summary>
@@ -90,7 +90,8 @@ namespace BossEnemy.UI
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
         public async UniTaskVoid ChangeHPUI(int maxHP, int currentPhase)
         {
-            if (currentPhase >= _bossEnemyAllPhaseHPBarArray.Length)
+            int nextHPBarArrNum = currentPhase - 1;
+            if (nextHPBarArrNum >= _bossEnemyAllPhaseHPBarArray.Length)
             {
                 Debug.LogError("存在しないPhaseのHPBarが選ばれました");
                 return;
@@ -98,13 +99,10 @@ namespace BossEnemy.UI
 
             await _runningTask;
 
-            _disposable?.Dispose();
-            _disposable = new();
-
             // 現在使用中のHPBarがあれば破棄
             _currentHPBar?.Disable();
 
-            _currentHPBar = _bossEnemyAllPhaseHPBarArray[currentPhase - 1];
+            _currentHPBar = _bossEnemyAllPhaseHPBarArray[nextHPBarArrNum];
             _currentHPBar.Init(maxHP);
 
             Debug.Log("HPUIの設定が完了しました");
@@ -129,13 +127,6 @@ namespace BossEnemy.UI
         private BossEnemyHPUIPresenter _presenter;
 
         private UniTask _runningTask = UniTask.CompletedTask;
-
-        private CompositeDisposable _disposable;
-
-        private void OnDestroy()
-        {
-            _disposable?.Dispose();
-        }
     }
 
 }
