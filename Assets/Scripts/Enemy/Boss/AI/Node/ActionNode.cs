@@ -123,7 +123,7 @@ namespace BossEnemy.AI.BehaviourTree
             _bossCharacterEntity.SetVelocity(Vector3.zero);
         }
 
-        [SerializeField] float _moveSpeed = 1.0f;
+        [SerializeField] private float _moveSpeed = 1.0f;
     }
 
     [Serializable]

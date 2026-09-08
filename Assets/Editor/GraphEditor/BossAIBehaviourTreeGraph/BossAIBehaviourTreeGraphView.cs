@@ -57,7 +57,18 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
         public override void OnGraphChanged(GraphLogger graphLogger)
         {
-            if (_changedSaveNode == null) return;
+            if (_changedSaveNode == null)
+            {
+                // Graph上のすべてのノードを取得
+                var nodes = GetNodes();
+
+                foreach (var node in nodes)
+                {
+                    TryGetGraphChangedSaveNode(node);
+                }
+
+                if (_changedSaveNode == null) return;
+            };
 
             _changedSaveNode.OnGraphChanged(graphLogger);
 

@@ -171,6 +171,8 @@ namespace BossEnemy.Character
         private void HandleDead()
         {
             UnregisterEvents();
+
+            _bossCharacterView.HandleDead();
         }
 
         /// <summary> 鎧破壊イベント発火時の処理 </summary>
@@ -184,7 +186,7 @@ namespace BossEnemy.Character
         /// <summary> 鎧修復イベント発火時の処理 </summary>
         private void HandleArmorRepair(ArmorAttachmentType armorAttachmentType)
         {
-            _bossCharacterView.BreakArmor(armorAttachmentType);
+            _bossCharacterView.RepairArmor(armorAttachmentType);
         }
 
         /// <summary> ボスのHPが0になった際のイベント発火時の処理 </summary>

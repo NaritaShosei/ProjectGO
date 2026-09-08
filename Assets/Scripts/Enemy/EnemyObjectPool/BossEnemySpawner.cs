@@ -28,8 +28,10 @@ public class BossEnemySpawner : MonoBehaviour
     /// <param name="poolKey">Enemyのキー</param>
     /// <param name="position">生成位置</param>
     /// <returns>生成されたEnemy</returns>
-    public IBossEnemyCharacterView Spawn(Vector3 position, out IBossHPView bossEnemyHPUI, IPlayer attackTarget)
+    public async UniTask<IBossEnemyCharacterView> Spawn(Vector3 position, IBossHPView bossEnemyHPUI, IPlayer attackTarget)
     {
+        await UniTask.WaitUntil(() => _isLoadedRepositries);
+
         BossCharacterView enemyView = _bossEnemyObjectPool.Get();
         bossEnemyHPUI = _enemyUIObjectPool.Get();
 

@@ -331,7 +331,7 @@ namespace BossEnemy.Character
         }
 
         /// <summary> 死んだ際の処理 </summary>
-        public void Dead()
+        public void HandleDead()
         {
             if (_isDead) return;
 

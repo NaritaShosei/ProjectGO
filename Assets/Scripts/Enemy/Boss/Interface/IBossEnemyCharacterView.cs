@@ -48,6 +48,9 @@ namespace BossEnemy.Interface
         /// <param name="postureType"></param>
         public void ChangePosture(PostureType postureType);
 
+        /// <summary> 死亡イベント発生時の処理 </summary>
+        public void HandleDead();
+
         #region 鎧関連の処理
         public void InitArmor();
 
