@@ -108,6 +108,25 @@ public class PlayerStats
         OnDead?.Invoke();
     }
 
+    /// <summary>
+    /// ヒールパワーの影響を受けない回復
+    /// </summary>
+    /// <param name="health"></param>
+    public void SetHealth(float health)
+    {
+        _currentHealth = Mathf.Clamp(
+            health,
+            0f,
+            MaxHealth
+        );
+
+        OnHealthChanged?.Invoke(
+            _currentHealth,
+            MaxHealth,
+            InitialMaxHealth
+        );
+    }
+
     public void Heal(float amount)
     {
         amount *= HealPower;

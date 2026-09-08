@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using static EnemyRuntimeContext;
+using static SoundCueNames;
 
 /// <summary>
 /// 近接攻撃Behaviour
@@ -9,7 +11,15 @@ using UnityEngine;
 /// </summary>
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
+    // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
+    private const float _attackFallbackTimeout = 5f;
+
+    // Attackアニメーターステートの名前
+    private const string _attackStateName = "Attack";
+
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
+
+    public event Action OnAttackFinished;
 
     /// <summary>
     /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
@@ -29,6 +39,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public void Init(BehaviourInitContext ctx)
     {
         _self = ctx.Owner.Self;
+        _enemy = ctx.Owner;
         _enemyId = ctx.Owner.Id;
         _player = ctx.Player;
         _context = ctx.RuntimeContext;
@@ -46,6 +57,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     public bool CanEnter()
     {
         if (_player == null) return false;
+        if (!_enemyServices.PlayerInformationService.CanAttackPlayer()) return false;
         if (_enemyServices.AttackerSlot == null) return false;
         if (_isAttacking) return false;
 
@@ -84,8 +96,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public bool CanContinue()
     {
-        // 攻撃開始後はアニメーション終了まで継続する
-        return _isAttacking;
+        return _isAttacking
+            && _enemyServices.PlayerInformationService.CanAttackPlayer();
     }
 
     public void OnEnter()
@@ -95,6 +107,8 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _hitCount = 0;
         _nextHitTime = float.MaxValue;
         _attackEndFired = false;
+        _moveFinished = false;
+        _moveCurvePrevEval = 0f;
         _state.ChangeState(EnemyState.Attack);
         _enemyAnimator?.SetAttacking(true);
     }
@@ -104,6 +118,14 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         if (!_isAttacking) return;
 
         _timer += deltaTime;
+
+        var pattern = _context.SelectedPattern;
+
+        // 前進 + はじめのみホーミング
+        if (pattern != null && pattern.EnableMovement && !_moveFinished)
+        {
+            TickAttackMovement(pattern, deltaTime);
+        }
 
         // 多段ヒット：deltaTimeが大きい場合も期限超過分をすべて消化する
         int maxHitCount = _context.SelectedPattern?.MaxHitCount ?? 1;
@@ -155,6 +177,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     }
 
     private Transform _self;
+    private IEnemy _enemy;
     private Transform _player;
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
@@ -173,14 +196,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private bool _attackEndFired;
     private readonly float _cooldownOverride;//攻撃のCT 後々OverrideじゃなくてEnemyDataから取れるといいかも？
 
-    // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
-    private const float _attackFallbackTimeout = 5f;
-
-    // Attackアニメーターステートの名前
-    private const string _attackStateName = "Attack";
-
-    public event Action OnAttackFinished;
-
+    // 前進移動の進捗管理
+    private bool _moveFinished;
+    private float _moveCurvePrevEval;
 
     /// <summary>
     /// 実際の攻撃判定とダメージ適用を行う
@@ -217,15 +235,79 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         _nextHitTime += pattern.HitInterval;
     }
 
+    private void TickAttackMovement(EnemyAttackPattern pattern, float deltaTime)
+    {
+        if(pattern.EnableHoming && _timer <= pattern.HomingDuration && _player != null)
+        {
+            Vector3 toPlayer = _player.position - _self.position;
+            toPlayer.y = 0f;
+
+            if(toPlayer.sqrMagnitude > 0.1f && toPlayer.sqrMagnitude <= pattern.HomingRadius * pattern.HomingRadius)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(toPlayer.normalized);
+                float angle = Quaternion.Angle(_self.rotation, targetRot);
+
+                if(angle <= pattern.HomingAngle)
+                {
+                    _self.rotation = Quaternion.RotateTowards(_self.rotation, targetRot, pattern.HomingStrength * deltaTime);
+                }
+            }
+        }
+
+        // --- MoveCurveに従って前進量を計算 ---
+        float moveT = Mathf.Clamp01(_timer / pattern.MoveDuration);
+        float curEval = pattern.MoveCurve.Evaluate(moveT);
+        float deltaDist = (curEval - _moveCurvePrevEval) * pattern.MoveDistance;
+        _moveCurvePrevEval = curEval;
+
+        // KeepDistanceより内側には詰めない
+        if (deltaDist > 0f && _player != null)
+        {
+            float distToPlayer = Vector3.Distance(_self.position, _player.position);
+            float maxAllowedDist = Mathf.Max(0f, distToPlayer - pattern.KeepDistance);
+            deltaDist = Mathf.Min(deltaDist, maxAllowedDist);
+        }
+
+        if (deltaDist != 0f)
+        {
+            Vector3 oldPos = _self.position;
+            Vector3 displacement = _self.forward * deltaDist;
+
+            if (_enemy is Enemy movableEnemy)
+                movableEnemy.Move(displacement);
+            else
+                _self.position += displacement;
+
+            if (_enemyServices.SpatialHashGrid != null)
+                _enemyServices.SpatialHashGrid.UpdatePosition(_enemy, oldPos, _self.position);
+        }
+
+        if (moveT >= 1f)
+            _moveFinished = true;
+    }
+
     private void Exit(bool notifyAttackFinished)
     {
         if (!_isAttacking) return;
         _isAttacking = false;
 
+         var pattern = _context.SelectedPattern;
+
         // 攻撃後クールダウンをセット
         float cooldown = _cooldownOverride > 0f ? _cooldownOverride : (_context.SelectedPattern?.Cooldown ?? 1.5f);
         _context.AttackCooldownRemaining = cooldown;
-       
+
+        // 後退リクエストをセット（EnableRetreat=falseならリクエストを作らない）
+        _context.PendingRetreat = (pattern != null && pattern.EnableRetreat)
+            ? new RetreatRequest
+            {
+                Enabled = true,
+                RecoveryRemaining = pattern.RecoveryTime,
+                RetreatDistance = pattern.RetreatDistance,
+                RetreatSpeed = pattern.RetreatSpeed,
+            }
+            : RetreatRequest.None;
+
         // パターンをクリアする。MobEnemy.UpdateEnemy()が次フレームで再選択する
         _context.SelectedPattern = null;
 
