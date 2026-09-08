@@ -13,15 +13,21 @@ public class PlayerInformationService : IPlayerInformationService
     /// <summary> 情報源となるPlayer </summary>
     public IPlayer Player => _player;
 
+    /// <summary>
+    /// Playerに攻撃可能かの判定
+    /// </summary>
+    /// <returns></returns>
+    public bool CanAttackPlayer()
+    {
+        return _player.CurrentHealth > 0f
+            && !_player.IsDown;
+    }
+
     /// <summary> Playerが生きているかの判定 </summary>
     /// <returns> 生きていればtrue、そうでなければfalse </returns>
     public bool IsPlayerAlive()
     {
-        if (_player.CurrentHealth <= 0)
-        {
-            _isPlayerAlive = false;
-        }
-        return _isPlayerAlive;
+        return _player.CurrentHealth > 0f;
     }
 
     /// <summary> Playerが接敵中か(正面に敵がいるか)の判定 </summary>

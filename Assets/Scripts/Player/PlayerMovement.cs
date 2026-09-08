@@ -82,6 +82,26 @@ public class PlayerMovement : MonoBehaviour
             _damageReactionMoveCts.Token).Forget();
     }
 
+    /// <summary>
+    /// 死亡・ダウン時に回避移動と無敵を即座に解除する。
+    /// 通常の回避完了ではないため、回避完了イベントは発火しない。
+    /// </summary>
+    public void CancelDodge()
+    {
+        if (!_isDodging) return;
+
+        _isDodging = false;
+
+        _dodgeMoveCts?.Cancel();
+        _dodgeMoveCts?.Dispose();
+        _dodgeMoveCts = null;
+
+        _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+
+        if (_rb != null)
+            _rb.linearVelocity = Vector3.zero;
+    }
+
     [SerializeField] private Rigidbody _rb;
 
     [Header("Damage Reaction")]
@@ -151,6 +171,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (_playerStateManager == null) return;
+
         if (!_isAttackMoving)
         {
             Rotate();
@@ -161,6 +183,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (_playerStateManager == null) return;
+
         if (!_isAttackMoving)
             Move();
     }
@@ -403,7 +427,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!_isDodging) return;
         _isDodging = false;
-        _playerStateManager.ChangeState(PlayerState.Idle);
+        // 遅れて届いた終了通知で、ダウンや死亡などの遷移先を上書きしない。
+        if (_playerStateManager.IsDodging())
+            _playerStateManager.ChangeState(PlayerState.Idle);
         OnEndDodge?.Invoke();
     }
 
