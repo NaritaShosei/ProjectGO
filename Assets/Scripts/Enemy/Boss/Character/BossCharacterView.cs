@@ -81,6 +81,9 @@ namespace BossEnemy.Character
         /// <summary> 現在攻撃可能なボスの部位 </summary>
         public BossCharacterPartsView[] ActiveBossEnemyPartsView => _activeCollisionPartsView;
 
+        /// <summary> アニメーション駆動によるイベント受け取りクラス </summary>
+        public IBossCharacterAnimationEventReceiver BossEnemyAnimationEventReceiver => _bossEnemyAnimationEventReceiver;
+
         // --- Methods ---
 
         /// <summary> 初期化する </summary>
@@ -90,7 +93,10 @@ namespace BossEnemy.Character
             _isLockable = true;
             _attackSMBList = new();
 
-            if(!ServiceLocator.TryGet(out _cameraManager))
+            // 鎧の初期化
+            ArmorInit();
+
+            if (!ServiceLocator.TryGet(out _cameraManager))
             {
                 Debug.Log("取得失敗");
                 return;
@@ -110,6 +116,8 @@ namespace BossEnemy.Character
                 }
             }
 
+            ChangeLockOnParts(PostureType.Standing);
+
             foreach (var bossCharacterSMB in _animator.GetBehaviours<BossCharacterSMB>())
             {
                 if(bossCharacterSMB is AttackSMB attackSMB)
@@ -119,7 +127,8 @@ namespace BossEnemy.Character
                         _attackHitAreaSpawner,
                         _effectManager,
                         _cameraManager,
-                        GetTargetCenter());
+                        GetTargetCenter(),
+                        _services.PlayerInformationService.Player);
 
                     _attackSMBList.Add(attackSMB);
 
@@ -130,15 +139,11 @@ namespace BossEnemy.Character
             }
         }
 
-        public void Init(
-            IBossCharacterEntity bossCharacterEntity,
-            ITreeNode entryNode
-            )
+        public void Init(IBossEnemyCharacterController bossEnemyCharacterController)
         {
             Init();
 
-            _bossEnemyController = new BossCharacterController();
-            _bossEnemyController.Init(this, _services, _bossEnemyAnimationEventReceiver, entryNode, bossCharacterEntity);
+            _bossEnemyController = bossEnemyCharacterController;
         }
 
         public void StartAction()
@@ -209,36 +214,19 @@ namespace BossEnemy.Character
         {
             foreach (var attack in _attackSMBList)
             {
-                if(attack )
+                if(attack.AttackID == bossEnemyAttackData.ID)
+                {
+                    attack.SetAttackData(bossEnemyAttackData);
+                }
             }
 
             _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
             Debug.Log(bossEnemyAttackData.AnimParamName);
         }
 
-        public void AttackEnd()
+        public void AttackCompleted()
         {
             _bossEnemyAnimator.SetAttacking(false);
-        }
-
-        public void Down((bool isBreakLeftLeg, bool isBreakRightLeg) armorBreakData)
-        {
-            
-
-            if (armorBreakData.isBreakLeftLeg && armorBreakData.isBreakRightLeg)
-            {
-                PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownVoice);
-                PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownImpact);
-                ChangePosture(PostureType.SpreadEagled);
-                return;
-            }
-
-            if (armorBreakData.isBreakLeftLeg || armorBreakData.isBreakRightLeg)
-            {
-                PlayBossSE(SoundCueNames.Boss.OneLegBreakVoice);
-                PlayBossSE(SoundCueNames.Boss.OneLegBreakDownImpact);
-                ChangePosture(PostureType.RightHalfKneel);
-            }
         }
 
         /// <summary>ノックバックの力を与える</summary>
@@ -255,12 +243,28 @@ namespace BossEnemy.Character
 
         public void ChangePhase(int nextPhase)
         {
+            ArmorRepair();
+
+            ChangePosture(PostureType.Standing);
+
             _bossEnemyAnimator.SetPhaseChange(nextPhase);
         }
 
         /// <summary> キャラクターの姿勢を変更 </summary>
         public void ChangePosture(PostureType postureType)
         {
+            if(postureType == PostureType.SpreadEagled)
+            {
+                PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownVoice);
+                PlayBossSE(SoundCueNames.Boss.TwoLegBreakDownImpact);
+            }
+
+            if (postureType == PostureType.RightHalfKneel || postureType == PostureType.LeftHalfKneel)
+            {
+                PlayBossSE(SoundCueNames.Boss.OneLegBreakVoice);
+                PlayBossSE(SoundCueNames.Boss.OneLegBreakDownImpact);
+            }
+
             _bossEnemyAnimator.SetPosture(postureType);
 
             ChangeLockOnParts(postureType);
@@ -360,8 +364,17 @@ namespace BossEnemy.Character
             }
         }
 
-        public void ArmorRepair(ArmorAttachmentType attachmentPointsType)
+        public void ArmorRepair(ArmorAttachmentType attachmentPointsType = ArmorAttachmentType.None)
         {
+            if (attachmentPointsType == ArmorAttachmentType.None)
+            {
+                foreach (var bossArmor in _bossArmorViews)
+                {
+                    bossArmor.RepairArmor().Forget();
+                }
+                return;
+            }
+
             foreach (var bossArmor in _bossArmorViews)
             {
                 if (bossArmor.AttachmentPoints == attachmentPointsType)

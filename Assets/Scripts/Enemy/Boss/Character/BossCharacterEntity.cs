@@ -1,8 +1,5 @@
 using BossEnemy.Armor;
-using BossEnemy.Attack;
 using BossEnemy.Enum;
-using BossEnemy.Interface;
-using BossEnemy.Logic;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -15,8 +12,16 @@ namespace BossEnemy.Character
     # region CharacterInterface
     public interface IBossCharacterEntity : IMovement
     {
-        public event Action OnArmorBreak;
+        /// <summary> 鎧破壊時のイベント </summary>
+        public event Action<ArmorAttachmentType> OnArmorBreak;
 
+        /// <summary> 鎧修復時のイベント </summary>
+        public event Action<ArmorAttachmentType> OnArmorRepair;
+
+        /// <summary> ボスの攻撃命中時イベント </summary>
+        public event Action OnAttackHit;
+
+        /// <summary> 死亡時のイベント </summary>
         public event Action OnDead;
 
         /// <summary> ボスの名前 </summary>
@@ -24,9 +29,6 @@ namespace BossEnemy.Character
 
         /// <summary> 攻撃標的 </summary>
         public IPlayer AttackTarget { get; }
-
-
-        public int CurrentAttackSelectPoolID { get; }
 
         /// <summary> 現在のHP </summary>
         public IReadOnlyReactiveProperty<int> CurrentHP { get; }
@@ -69,6 +71,9 @@ namespace BossEnemy.Character
         /// <param name="damageType"> ボスの防御力の種類 </param>
         public int GetBodyDefense(TakeDamageType damageType);
 
+        /// <summary> 発動予定の攻撃を取得する </summary>
+        public Attack.AttackData GetNextAttackData();
+
         /// <summary> タイムスケールを設定 </summary>
         /// <param name="timeScale"> 新しいタイムスケール </param>
         public void SetTimeScale(float timeScale);
@@ -76,6 +81,10 @@ namespace BossEnemy.Character
         /// <summary> 攻撃の標的を設定する </summary>
         /// <param name="nextTarget"> 次の攻撃の標的 </param>
         public void SetAttackTarget(IPlayer nextTarget);
+
+        /// <summary> 現在のキャラクターの姿勢を変更 </summary>
+        /// <param name="postureType"> 変更後の姿勢 </param>
+        public void SetCharacterPosture(PostureType postureType);
 
         /// <summary> 実行する攻撃を選択肢から選択する </summary>
         public UniTask SelectNextAttackData(int selectPoolID);
@@ -90,11 +99,7 @@ namespace BossEnemy.Character
         public void TryHitAttackDamageToTarget(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default);
 
         /// <summary> 攻撃を終了する </summary>
-        public void AttackEnd();
-
-        /// <summary> 現在のキャラクターの姿勢を変更 </summary>
-        /// <param name="postureType"> 変更後の姿勢 </param>
-        public void SetCharacterPosture(PostureType postureType);
+        public void AttackCompleted();
 
         /// <summary> BossEnemyへのダメージ処理 </summary>
         /// <param name="damage"> ダメージの総量 </param>
@@ -110,7 +115,7 @@ namespace BossEnemy.Character
         public void PhaseChange();
 
         /// <summary> フェーズ切り替え終了時の処理 </summary>
-        public void PhaseChangeEnd();
+        public void PhaseChangeCompleted();
 
         /// <summary> 死亡時の処理 </summary>
         public void HandleDead();
@@ -120,7 +125,11 @@ namespace BossEnemy.Character
     /// <summary> BossEnemyのEntity </summary>
     public class BossCharacterEntity : IBossCharacterEntity
     {
-        public event Action OnArmorBreak;
+        public event Action<ArmorAttachmentType> OnArmorBreak;
+
+        public event Action<ArmorAttachmentType> OnArmorRepair;
+
+        public event Action OnAttackHit;
 
         public event Action OnDead;
 
@@ -135,9 +144,6 @@ namespace BossEnemy.Character
 
         /// <summary> 攻撃標的 </summary>
         public IPlayer AttackTarget => _attackTarget;
-
-        /// <summary> 攻撃の選択肢のID </summary>
-        public int CurrentAttackSelectPoolID => _attackSelectPoolID;
 
         /// <summary> 現在のHP </summary>
         public IReadOnlyReactiveProperty<int> CurrentHP => _currentHP;
@@ -259,10 +265,17 @@ namespace BossEnemy.Character
         /// <param name="nextTarget"> 次の攻撃の標的 </param>
         public void SetAttackTarget(IPlayer nextTarget) => _attackTarget = nextTarget;
 
-        /// <summary> 実行する攻撃を選択肢から選択する </summary>
-        public UniTask SelectNextAttackData(int selectPoolID)
+        /// <summary> 発動予定の攻撃を取得する </summary>
+        public Attack.AttackData GetNextAttackData()
         {
-            return _attackExecutor.SetNextAttack(selectPoolID);
+            return _attackExecutor.ExecutingAttack;
+        }
+
+        /// <summary> 実行する攻撃を選択肢から選択する </summary>
+        public async UniTask SelectNextAttackData(int selectPoolID)
+        {
+            await _attackExecutor.SetNextAttack(selectPoolID);
+            return;
         }
 
         /// <summary> 攻撃実行処理 </summary>
@@ -283,11 +296,14 @@ namespace BossEnemy.Character
         {
             if (_executingAttack == null) return;
 
-
+            if(_attackExecutor.TryHitAttack(attackHitAreaType, attackPosition, forward))
+            {
+                OnAttackHit?.Invoke();
+            }
         }
 
         /// <summary> 攻撃終了処理 </summary>
-        public void AttackEnd()
+        public void AttackCompleted()
         {
             if (_executingAttack == null) return;
 
@@ -315,12 +331,13 @@ namespace BossEnemy.Character
                 if (TryTakeDamageArmor(scapegoatArmor, damage)) return;
             }
 
-            _currentHP.Value -= damage;
-
-            if (_currentHP.Value <= 0)
+            if (_currentHP.Value - damage < 0)
             {
                 _currentHP.Value = 0;
+                return;
             }
+
+            _currentHP.Value -= damage;
         }
 
         /// <summary> 鎧の修復処理 </summary>
@@ -328,7 +345,33 @@ namespace BossEnemy.Character
         /// <param name="repairedArmorHP"> 修復後の鎧のHP(特に指定がなければ最大値になる) </param>
         public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.None, int repairedArmorHP = 0)
         {
-            _currentPhaseStats.RepairArmor(repairArmor, repairedArmorHP);
+            if(repairArmor != ArmorAttachmentType.None)
+            {
+                if (!_armorCurrentHPDict.ContainsKey(repairArmor))
+                    _armorCurrentHPDict.Add(repairArmor, GetArmorStats(repairArmor).MaxHP);
+                else
+                    _armorCurrentHPDict[repairArmor] = GetArmorStats(repairArmor).MaxHP;
+
+                _currentPhaseStats.RepairArmor(repairArmor);
+                // スポーン初期化中など、購読者がまだ登録されていない場合がある。
+                OnArmorRepair?.Invoke(repairArmor); 
+                return;
+            }
+
+            // RepairArmor がステータスDictionaryの値を書き換えるため、
+            // Keys を直接列挙すると Dictionary の列挙バージョンが変わる。
+            var armorTypes = new List<ArmorAttachmentType>(GetAllArmorStats().Keys);
+            foreach (var key in armorTypes)
+            {
+                if (!_armorCurrentHPDict.ContainsKey(key))
+                    _armorCurrentHPDict.Add(key, GetArmorStats(key).MaxHP);
+                else
+                    _armorCurrentHPDict[key] = GetArmorStats(key).MaxHP;
+
+                _currentPhaseStats.RepairArmor(key);
+            }
+            // スポーン初期化中など、購読者がまだ登録されていない場合がある。
+            OnArmorRepair?.Invoke(ArmorAttachmentType.None);
         }
 
         /// <summary> 現在のPhaseから次のPhaseに移行する処理 </summary>
@@ -348,18 +391,20 @@ namespace BossEnemy.Character
             // 現在のHPをつぎのPhaseのMaxHPにする
             _currentHP.Value = _currentPhaseStats.MaxHP;
 
+            // 装備中のアーマーの初期化
             _armorCurrentHPDict = new();
             foreach (var key in GetAllArmorStats().Keys)
             {
                 _armorCurrentHPDict.Add(key, GetArmorStats(key).MaxHP);
             }
+            RepairArmor();
 
             // フェーズ切り替えフラグをTrueにする
             _isPhaseChanging.Value = true;
         }
 
         /// <summary> フェーズ切り替え終了時の処理 </summary>
-        public void PhaseChangeEnd()
+        public void PhaseChangeCompleted()
         {
             _isPhaseChanging.Value = false;
         }
@@ -372,9 +417,6 @@ namespace BossEnemy.Character
 
         // ボスの攻撃の標的
         private IPlayer _attackTarget;
-
-        // 実行中の攻撃データID
-        private int _attackSelectPoolID;
 
         // BossEnemyの現在のHP
         private ReactiveProperty<int> _currentHP = null;
@@ -427,8 +469,8 @@ namespace BossEnemy.Character
             if (_armorCurrentHPDict[scapegoatArmor] - damage <= 0)
             {
                 _armorCurrentHPDict[scapegoatArmor] = 0;
-                GetArmorStats(scapegoatArmor).Break();
-                OnArmorBreak?.Invoke();
+                _currentPhaseStats.BreakArmor(scapegoatArmor);
+                OnArmorBreak?.Invoke(scapegoatArmor);
                 Debug.Log($"鎧が破壊されました 破壊箇所: {scapegoatArmor} ");
 
                 return true;
@@ -473,7 +515,9 @@ namespace BossEnemy.Character
         /// <summary> 初期化 </summary>
         public void Init()
         {
-            foreach(var attachmentArmorType in _attachmentArmorStatsDict.Keys)
+            // Dictionary の値更新中に Keys を列挙しないよう、キーを退避する。
+            var attachmentArmorTypes = new List<ArmorAttachmentType>(_attachmentArmorStatsDict.Keys);
+            foreach (var attachmentArmorType in attachmentArmorTypes)
             {
                 var newArmorStats = _attachmentArmorStatsDict[attachmentArmorType];
 
@@ -483,17 +527,28 @@ namespace BossEnemy.Character
             }
         }
 
+        /// <summary> 鎧の破壊処理 </summary>
+        public void BreakArmor(ArmorAttachmentType breakArmor)
+        {
+            ArmorStatus targetStats = _attachmentArmorStatsDict[breakArmor];
+
+            targetStats.Break();
+            _attachmentArmorStatsDict[breakArmor] = targetStats;
+        }
+
         /// <summary> 鎧の修復処理 </summary>
         /// <param name="repairArmor"> 特定の修復ヶ所(特に指定がなければすべて修復する) </param>
         /// <param name="repairedArmorHP"> 修復後の鎧のHP(特に指定がなければ最大値になる) </param>
-        public void RepairArmor(ArmorAttachmentType repairArmor, int repairedArmorHP)
+        public void RepairArmor(ArmorAttachmentType repairArmor)
         {
             ArmorStatus targetStats;
 
             // 特に指定がなければ(repairArmorがArmorAttachmentType.Noneなら)すべて修復する
             if (repairArmor == ArmorAttachmentType.None)
             {
-                foreach(var attachmentType in _attachmentArmorStatsDict.Keys)
+                // Repair による値更新で列挙子を無効化しないよう、キーを退避する。
+                var attachmentTypes = new List<ArmorAttachmentType>(_attachmentArmorStatsDict.Keys);
+                foreach (var attachmentType in attachmentTypes)
                 {
                     // 対象の鎧を取得
                     targetStats = _attachmentArmorStatsDict[attachmentType];

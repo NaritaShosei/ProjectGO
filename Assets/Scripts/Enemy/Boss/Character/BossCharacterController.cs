@@ -62,7 +62,18 @@ namespace BossEnemy.Character
 
             // ビヘイビアツリー探索開始イベント
             _bossCharacterView.OnBeginsAction += HandleRunningBehaviourTree;
-            _characterEntity.OnArmorBreak += HandleRunningBehaviourTree;
+
+            // 鎧破壊時のイベント登録
+            _characterEntity.OnArmorBreak += HandleArmorBreak;
+
+            // 鎧修復時のイベント登録
+            _characterEntity.OnArmorRepair += HandleArmorRepair;
+
+            // 現在のHPが0になった際のイベント登録
+            _characterEntity.CurrentHP.Subscribe(currentHP =>
+            {
+                if (currentHP == 0) HandleHPZero();
+            }).AddTo(_deadEventDisposables);
 
             // Phase切り替えイベント登録
             _characterEntity.IsPhaseChaging.Subscribe(isPhaseChanging =>
@@ -71,7 +82,7 @@ namespace BossEnemy.Character
             }).AddTo(_deadEventDisposables);
 
             // Phase切り替え完了時イベント登録
-            _animationEventReceiver.OnPhaseChangeEnd += HandlePhaseChangeEnd;
+            _animationEventReceiver.OnPhaseChangeEnd += HandlePhaseChangeCompleted;
 
             // 死亡時のイベント登録
             _characterEntity.OnDead += HandleDead;
@@ -81,6 +92,9 @@ namespace BossEnemy.Character
             {
                 HandleChangePosture(posture);
             }).AddTo(_deadEventDisposables);
+
+            // 姿勢切り替え完了イベント登録
+            _animationEventReceiver.OnPostureChangeCompleted += HandlePostureChangeCompleted;
 
             // 被ダメージイベント登録
             _bossCharacterView.OnTakeDamage += HandleTakeDamage;
@@ -96,26 +110,53 @@ namespace BossEnemy.Character
                 if(attack.ID != 0) HandleExecuteAttack(attack);
             }).AddTo(_deadEventDisposables);
 
-            // ボスの攻撃の当たり判定を行うイベント
+            // ボスの攻撃の当たり判定を行うイベント登録
             _animationEventReceiver.OnCheckHitAttack += HandleCheckHitAttack;
 
-            // ボスが攻撃を終了したことの通知をアニメーター側から受け取る
-            _animationEventReceiver.OnAttackEnd += HandleAttackEnd;
+            // ボスの攻撃が当たった際のイベント登録
+            _characterEntity.OnAttackHit += HandleAttackHit;
 
-            // TimeScale変更時のイベント
+            // ボスが攻撃を終了したことの通知をアニメーター側から受け取る
+            _animationEventReceiver.OnAttackEnd += HandleAttackCompleted;
+
+            // TimeScale変更時のイベント登録
             _bossCharacterView.OnChangedTimeScale += HandleChangedTimeScale;
+
+            // キャラクターの移動イベント登録
+            _animationEventReceiver.OnMoveCharacter += HandleMoveCharacter;
         }
 
         private void UnregisterEvents()
         {
+            // ビヘイビアツリー探索開始イベント購読解除
             _bossCharacterView.OnBeginsAction -= HandleRunningBehaviourTree;
-            _characterEntity.OnArmorBreak -= HandleRunningBehaviourTree;
-            _bossCharacterView.OnTakeDamage -= HandleTakeDamage;
+            _characterEntity.OnArmorBreak -= HandleArmorBreak;
+
+            // Phase切り替え完了時イベント購読解除
+            _animationEventReceiver.OnPhaseChangeEnd -= HandlePhaseChangeCompleted;
+
+            // 死亡時のイベント購読解除
             _characterEntity.OnDead -= HandleDead;
+
+            // 姿勢切り替え完了イベント購読解除
+            _animationEventReceiver.OnPostureChangeCompleted -= HandlePostureChangeCompleted;
+
+            // 被ダメージイベント購読解除
+            _bossCharacterView.OnTakeDamage -= HandleTakeDamage;
+
+            // ボスの攻撃の当たり判定を行うイベント購読解除
             _animationEventReceiver.OnCheckHitAttack -= HandleCheckHitAttack;
-            _animationEventReceiver.OnAttackEnd -= HandleAttackEnd;
+
+            // ボスが攻撃を終了したことの通知をアニメーター側から受け取るイベント購読解除
+            _animationEventReceiver.OnAttackEnd -= HandleAttackCompleted;
+
+            // TimeScale変更時のイベント購読解除
             _bossCharacterView.OnChangedTimeScale -= HandleChangedTimeScale;
 
+            // キャラクターの移動イベント購読解除
+            _animationEventReceiver.OnMoveCharacter -= HandleMoveCharacter;
+
+            // Subscribe解除
             _deadEventDisposables.Dispose();
         }
 
@@ -132,15 +173,41 @@ namespace BossEnemy.Character
             UnregisterEvents();
         }
 
+        /// <summary> 鎧破壊イベント発火時の処理 </summary>
+        private void HandleArmorBreak(ArmorAttachmentType armorAttachmentType)
+        {
+            _bossCharacterView.ArmorBreak(armorAttachmentType);
+
+            HandleRunningBehaviourTree();
+        }
+
+        /// <summary> 鎧修復イベント発火時の処理 </summary>
+        private void HandleArmorRepair(ArmorAttachmentType armorAttachmentType)
+        {
+            _bossCharacterView.ArmorBreak(armorAttachmentType);
+        }
+
+        /// <summary> ボスのHPが0になった際のイベント発火時の処理 </summary>
+        private void HandleHPZero()
+        {
+            HandleRunningBehaviourTree();
+        }
+
         /// <summary> フェーズ切り替えイベント発火時の処理 </summary>
         private void HandlePhaseChange()
         {
+            _bossCharacterView.AttackCompleted();
             _bossCharacterView.ChangePhase(_characterEntity.CharacterCurrentStats.PhaseNum);
         }
 
-        private void HandlePhaseChangeEnd()
+        private void HandlePhaseChangeCompleted()
         {
-            _characterEntity.PhaseChangeEnd();
+            _characterEntity.PhaseChangeCompleted();
+
+            // フェーズ演出終了後は、待機中の PhaseChangeAction を必ず抜けて
+            // 次の行動を探索する。Action 側の一時購読に依存すると、通知順序次第で
+            // 行動ツリーが再開されずボスが停止する。
+            HandleRunningBehaviourTree();
         }
 
         /// <summary> ボスの体勢が変わった際のイベント発火時の処理 </summary>
@@ -148,6 +215,12 @@ namespace BossEnemy.Character
         private void HandleChangePosture(PostureType posture)
         {
             _bossCharacterView.ChangePosture(posture);
+        }
+
+        /// <summary> ボスの体勢変化が完了した際のイベント発火時の処理 </summary>
+        private void HandlePostureChangeCompleted() 
+        {
+            HandleRunningBehaviourTree();
         }
 
         /// <summary> 被ダメージイベント発火時の処理 </summary>
@@ -184,11 +257,10 @@ namespace BossEnemy.Character
         }
 
         /// <summary> ボスの攻撃が終了した際のイベント発火時の処理 </summary>
-        private void HandleAttackEnd()
+        private void HandleAttackCompleted()
         {
-            _characterEntity.AttackEnd();
-
-            HandleRunningBehaviourTree();
+            _bossCharacterView.AttackCompleted();
+            _characterEntity.AttackCompleted();
         }
 
         /// <summary> ボスの攻撃がターゲットに当たった際のイベント発火時の処理 </summary>
@@ -197,10 +269,23 @@ namespace BossEnemy.Character
             _characterEntity.TryHitAttackDamageToTarget(attackHitAreaType, attackPosition, forward);
         }
 
+        /// <summary> 攻撃が当たった際のイベント </summary>
+        private void HandleAttackHit()
+        {
+            _animationEventReceiver.AnimEvent_HitAttack();
+        }
+
         /// <summary> TimeScale変更イベント発火時の処理 </summary>
         private void HandleChangedTimeScale(float timeScale)
         {
             _characterEntity.SetTimeScale(timeScale);
+        }
+
+        /// <summary> キャラクター移動イベント発火時の処理 </summary>
+        private void HandleMoveCharacter(Vector3 goalPos, float moveTime)
+        {
+            Logic.Movement.MoveTargetPositionRightOnTime
+                (_characterEntity, goalPos, moveTime, _characterEntity.TimeScale);
         }
     }
 }
