@@ -35,14 +35,16 @@ public readonly struct DamagePopupViewModel
     public readonly bool IsCritical;
     public readonly Vector3 WorldPosition;
     public readonly Color? TextColor;
+    public readonly bool IsWideSpread;
 
-    public DamagePopupViewModel(int damage, bool isWeakPoint, bool isCritical, Vector3 worldPosition, Color? textColor = null)
+    public DamagePopupViewModel(int damage, bool isWeakPoint, bool isCritical, Vector3 worldPosition, Color? textColor = null, bool isWideSpread = false)
     {
         Damage = damage;
         IsWeakPoint = isWeakPoint;
         IsCritical = isCritical;
         WorldPosition = worldPosition;
         TextColor = textColor ?? DamagePopupColorScope.Current;
+        IsWideSpread = isWideSpread;
     }
 }
 
