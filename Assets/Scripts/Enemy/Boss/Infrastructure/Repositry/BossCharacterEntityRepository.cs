@@ -142,6 +142,8 @@ namespace BossEnemy.Infrastructure.Repository
 
                 while (row < _csvDataSearchEndRow && System.Enum.TryParse(GetCell(row, 1), out ArmorAttachmentType attachmentType))
                 {
+                    if (int.TryParse(GetCell(row, 1), out int phaseNum)) break;
+
                     int armorHp = ParseInt(row, 2, "鎧HP");
                     int armorDef = ParseInt(row, 3, "鎧の肉質");
 
