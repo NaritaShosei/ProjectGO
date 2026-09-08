@@ -236,18 +236,20 @@ public sealed class HitStopManager : IDisposable
             return;
         }
 
-        _currentPriority = priority;
-
         _hitStopCancellation?.Cancel();
         _hitStopCancellation?.Dispose();
 
         var cancellation = new CancellationTokenSource();
         _hitStopCancellation = cancellation;
-
-        ApplyTimedSpeedScale(timeScale, targetGroups, hitEnemyTargets);
+        _currentPriority = priority;
 
         try
         {
+            // 上書きされた処理の finally は復元を行わないため、旧対象をここで解除する。
+            // 時間指定分だけを戻し、スキル選択などの手動停止は維持する。
+            ApplyTimedSpeedScale(1f, HitStopTargetGroup.All, null);
+            ApplyTimedSpeedScale(timeScale, targetGroups, hitEnemyTargets);
+
             await UniTask.Delay(
                 TimeSpan.FromSeconds(duration),
                 DelayType.UnscaledDeltaTime,
