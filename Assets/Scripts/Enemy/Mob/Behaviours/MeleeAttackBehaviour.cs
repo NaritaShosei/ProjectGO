@@ -11,7 +11,15 @@ using static SoundCueNames;
 /// </summary>
 public class MeleeAttackBehaviour : IEnemyBehaviour
 {
+    // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
+    private const float _attackFallbackTimeout = 5f;
+
+    // Attackアニメーターステートの名前
+    private const string _attackStateName = "Attack";
+
     public int Priority { get => (int)EnemyBehaviourPriority.Attack; }
+
+    public event Action OnAttackFinished;
 
     /// <summary>
     /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
@@ -190,15 +198,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     // 前進移動の進捗管理
     private bool _moveFinished;
     private float _moveCurvePrevEval;
-
-    // AnimationEventが来ない場合の攻撃強制終了タイムアウト（秒）
-    private const float _attackFallbackTimeout = 5f;
-
-    // Attackアニメーターステートの名前
-    private const string _attackStateName = "Attack";
-
-    public event Action OnAttackFinished;
-
 
     /// <summary>
     /// 実際の攻撃判定とダメージ適用を行う
