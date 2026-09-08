@@ -40,7 +40,8 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
             _mainCamera = cameraManager.MainCamera;
         }
 
-        SetVisible(false);
+        // 初回生成時もプール返却時と同じ初期表示にそろえる。
+        ResetView();
     }
 
     public void UpdateGauge(float current, float max)
