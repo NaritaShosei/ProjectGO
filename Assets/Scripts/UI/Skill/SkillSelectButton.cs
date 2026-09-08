@@ -99,6 +99,20 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
     }
 
     /// <summary>
+    /// UnityのButtonクリックイベントを実行する。
+    /// 自動選択でも通常クリックと同じリスナーを通し、効果音などの付随処理を共通化する。
+    /// </summary>
+    public void PerformClick()
+    {
+        if (!isActiveAndEnabled || _selectButton == null || !_selectButton.IsInteractable())
+        {
+            return;
+        }
+
+        _selectButton.onClick.Invoke();
+    }
+
+    /// <summary>
     /// ボタンの内部状態とスケールを初期状態へ戻す。
     /// UIの再表示、非表示、未使用スロットの無効化時に使用する。
     /// </summary>

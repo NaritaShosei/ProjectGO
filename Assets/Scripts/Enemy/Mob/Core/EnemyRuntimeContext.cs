@@ -21,6 +21,12 @@ public class EnemyRuntimeContext
     public EnemyAttackPattern SelectedPattern;
 
     /// <summary>
+    /// 攻撃終了時にMeleeAttackBehaviourがセットする後退リクエスト。
+    /// RetreatBehaviourが参照し、消費後はEnabled=falseにする
+    /// </summary>
+    public RetreatRequest PendingRetreat = RetreatRequest.None;
+
+    /// <summary>
     /// ObjectPoolから再利用する際に状態を初期値に戻す
     /// </summary>
     public void Reset()
@@ -28,5 +34,21 @@ public class EnemyRuntimeContext
         DistanceToPlayer = 0f;
         AttackCooldownRemaining = 0f;
         SelectedPattern = null;
+        PendingRetreat = RetreatRequest.None;
+    }
+
+    /// <summary>
+    /// 攻撃後の後退要求。EnemyAttackPatternのRetreat関連値をコピーして保持する
+    /// </summary>
+    public struct RetreatRequest
+    {
+        public bool Enabled;
+
+        /// <summary>後退を開始するまでの残り硬直時間（秒）。MobEnemy.UpdateEnemy()で減算する</summary>
+        public float RecoveryRemaining;
+        public float RetreatDistance;
+        public float RetreatSpeed;
+
+        public static RetreatRequest None => new RetreatRequest { Enabled = false };
     }
 }
