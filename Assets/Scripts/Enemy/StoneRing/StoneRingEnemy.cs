@@ -43,15 +43,6 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
         base.Init();
 
         OnArmorBroken += HandleArmorBroken;
-
-        if (_attack != null)
-        {
-            _attack.OnAttackFinished += HandleAttackFinished;
-        }
-        else 
-        {
-            Debug.LogWarning($"{nameof(StoneRingEnemy)}: Attackが未設定です。攻撃後の硬直は発生しません。");
-        }
     }
 
     /// <summary>
@@ -75,12 +66,6 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
         _groupFollowBehaviour.Init(initCtx);
         _runner.Register(_groupFollowBehaviour);
 
-        _postAttackStun =
-            new PostAttackStunBehaviour(
-                _postAttackRecoveryDuration);
-
-        _postAttackStun.Init(initCtx);
-
         _groupPromotion =
             new GroupPromotionBehaviour(
                 this,
@@ -88,16 +73,6 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
 
         _groupPromotion.Init(initCtx);
         _runner.Register(_groupPromotion);
-    }
-
-    /// <summary>
-    /// 攻撃終了後に硬直を開始する。
-    /// </summary>
-    private void HandleAttackFinished()
-    {
-        if (_isDead || _postAttackStun == null) return;
-        Debug.Log($"{nameof(StoneRingEnemy)}: 攻撃終了後の硬直を開始します。");
-        _runner.ForceBehaviour(_postAttackStun);
     }
 
     /// <summary>
@@ -110,21 +85,17 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
         _stats.Kill();
     }
 
+    protected override void OnBeforePostAttackStun()
+    {
+        Debug.Log($"{nameof(StoneRingEnemy)}: 攻撃終了後の硬直を開始します。");
+    }
+
     protected override void OnDestroy()
     {
         OnArmorBroken -= HandleArmorBroken;
 
-        if (_attack != null)
-        {
-            _attack.OnAttackFinished -= HandleAttackFinished;
-        }
-
         base.OnDestroy();
     }
-
-    [Header("Attack Recovery")]
-    [SerializeField, Min(0f)]
-    private float _postAttackRecoveryDuration = 1.5f;
 
     [Header("Group Follow")]
     [Tooltip("攻撃役の後ろへ並ぶ間隔")]
@@ -143,7 +114,6 @@ public sealed class StoneRingEnemy : MobEnemy,IEnemyGroupMember
     [SerializeField, Min(0.01f)]
     private float _groupFollowStopDistance = 0.15f;
 
-    private PostAttackStunBehaviour _postAttackStun;
     private GroupFollowBehaviour _groupFollowBehaviour;
     private EnemyGroup _group;
     private GroupPromotionBehaviour
