@@ -64,7 +64,8 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
             InvokeOnDamageDealt(
                 showDamage,
                 isWeak,
-                context.IsCritical);
+                context.IsCritical,
+                context.IsLightningDamage);
 
             InvokeOnHitEffect(new HitEffectContext
             {
@@ -93,7 +94,7 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         // Down中、または鎧なし/生身状態は本体HPへ
         bool isWeakPoint = context.PlayerMode == PlayerMode.Thunder;
 
-        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical);
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical, context.IsLightningDamage);
 
         _stats.TakeDamage(damage);
 
