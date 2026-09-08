@@ -86,7 +86,7 @@ public class BossBattleState : ISequenceState
 
     [Header("ボス戦設定")]
     [SerializeField, Tooltip("ボス戦の時間制限（秒）")] private float _bossBattleTimeLimit = 120f;
-    [SerializeField, Tooltip("ボス戦のタイマーUI")] private CountDownTimerView _bossBattleTimerView;
+    [SerializeField, Tooltip("ボス戦のタイマーUI")] private TextCountDownTimerView _bossBattleTimerView;
     [SerializeField, Tooltip("ボス戦のシークエンス名を表示するUI")] private SequenceStatusView _sequenceStatusView;
     [SerializeField, Tooltip("UIに表示するボス戦のシークエンス名")] private string _bossSequenceName = "ボス戦";
     [SerializeField, Tooltip("ボスのスポーンデータ")] private SpawnData _bossSpawnData;
