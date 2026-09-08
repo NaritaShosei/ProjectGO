@@ -3,8 +3,6 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
-
 
 
 namespace BossEnemy.SMB
