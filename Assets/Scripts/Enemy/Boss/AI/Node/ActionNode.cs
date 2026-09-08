@@ -154,10 +154,10 @@ namespace BossEnemy.AI.BehaviourTree
         }
 
         [Header("振り向き速度")]
-        [SerializeField] float _lookSpeed;
+        [SerializeField] private float _lookSpeed;
 
         [Header("Targetの方向を向いていると判定できる振り向き方向の最小誤差")]
-        [SerializeField] float _finishAngleThreshold;
+        [SerializeField] private float _finishAngleThreshold;
     }
 
     [Serializable]
@@ -182,7 +182,7 @@ namespace BossEnemy.AI.BehaviourTree
             _disposable = null;
         }
 
-        IDisposable _disposable = null;
+        private IDisposable _disposable = null;
     }
 
     [Serializable]
