@@ -211,8 +211,11 @@ MonoBehaviour:
   _lifeTime: 1
   _fadeDuration: 0.2
   _popupDistance: 10
-  _randomOffsetX: 15
-  _randomOffsetY: 10
+  _normalOffsetX: 20
+  _normalOffsetY: 15
+  _wideOffsetX: 140
+  _wideOffsetY: 70
+  _wideMinRadius: 0.6
   _normalColor: {r: 1, g: 1, b: 1, a: 1}
   _weakColor: {r: 1, g: 0.68235296, b: 0, a: 1}
 --- !u!1 &5980305884172010166
