@@ -183,8 +183,10 @@ public class CameraController : MonoBehaviour
     [Header("対象切り替え（マウス）")]
     [Tooltip("1回の連続した横スワイプの移動量がこの絶対値を超えたら1回切り替える")]
     [SerializeField] private float _switchMouseThreshold = 400f;
-    [Tooltip("1 FixedUpdate のマウス横移動がこのpx未満ならスワイプ終了とみなす")]
+    [Tooltip("1フレームのマウス横移動がこのpx以上なら「スワイプ中」とみなす")]
     [SerializeField] private float _switchMouseMinStep = 6f;
+    [Tooltip("有意なマウス移動がこの秒数ないとスワイプ終了とみなし蓄積をリセットする（低FPSでの誤リセット防止のため時間で判定）")]
+    [SerializeField] private float _switchMouseIdleTime = 0.15f;
 
     private CameraManager _cameraManager;
     private InputHandler _inputHandler;
@@ -201,6 +203,8 @@ public class CameraController : MonoBehaviour
     private float _switchAccumMouse;
     // マウス横移動量を Update でフレーム精度で貯め、Tick で消費する
     private float _mouseSwitchDeltaX;
+    // 最後に有意なマウス横移動があった時刻（スワイプ終了を時間で判定する）
+    private float _lastMouseSwipeTime;
 
     #endregion
 
@@ -297,18 +301,25 @@ public class CameraController : MonoBehaviour
     /// <summary>マウス：連続した横スワイプの移動量が閾値を超えたら1回切り替え。スワイプ終了／反転まで再切り替えしない。</summary>
     private void UpdateMouseSwitch()
     {
-        // Update で貯めた1 Tick分の横移動量を取り出す
+        // Update で貯めた分の横移動量を取り出す（低FPSではこのTickが空＝delta 0 のこともある）
         float delta = _mouseSwitchDeltaX;
         _mouseSwitchDeltaX = 0f;
 
-        // 移動が小さい Tick（＝ニュートラル／スワイプ終了）は蓄積・ラッチを毎回ゼロへ戻す。
-        // これで一時停止（ヒットストップ等）を挟んでも古い蓄積が残らない。
-        if (Mathf.Abs(delta) < _switchMouseMinStep)
+        // 有意な移動があったフレームの時刻を記録
+        if (Mathf.Abs(delta) >= _switchMouseMinStep)
+            _lastMouseSwipeTime = Time.unscaledTime;
+
+        // 有意な移動が一定時間ないときだけスワイプ終了とみなし、蓄積を捨てて再武装。
+        // 入力未更新のTick（低FPS）で毎回リセットしないよう per-Tick ではなく時間で判定する。
+        if (Time.unscaledTime - _lastMouseSwipeTime > _switchMouseIdleTime)
         {
             _switchAccumMouse = 0f;
             _mouseSwitchArmed = true;
             return;
         }
+
+        // 入力が更新されていないTickは蓄積を触らない（次のUpdateで移動量が入るのを待つ）
+        if (delta == 0f) return;
 
         // 逆方向へ振り直したら蓄積を捨てて再武装
         if (_switchAccumMouse != 0f && Mathf.Sign(delta) != Mathf.Sign(_switchAccumMouse))
@@ -342,6 +353,8 @@ public class CameraController : MonoBehaviour
         _mouseSwitchArmed = false;
         _switchAccumMouse = 0f;
         _mouseSwitchDeltaX = 0f;
+        // 直近にスワイプがあった扱いにして、アイドル判定で即再武装されないようにする
+        _lastMouseSwipeTime = Time.unscaledTime;
     }
 
     #endregion
