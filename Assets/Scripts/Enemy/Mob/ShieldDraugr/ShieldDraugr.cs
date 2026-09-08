@@ -220,7 +220,6 @@ public class ShieldDraugr : MobEnemy
 
         // 現在のBehaviourを終了
         _runner.ForceExitAction();
-        Debug.Log("[ShieldDraugr] Shield Broken!");
     }
 
     /// <summary>
@@ -258,7 +257,6 @@ public class ShieldDraugr : MobEnemy
 
     protected override void OnBeforePostAttackStun()
     {
-        Debug.Log("[ShieldDraugr] PostAttackStun START");
         if (_turn != null)
         {
             _turn.SetOverrideDirection(transform.forward);
