@@ -11,7 +11,6 @@ public class ShieldDraugrData : ScriptableObject
     public Vector3 ShieldBrokenEffectScale => _shieldBrokenEffectScale;
     public float FistAttackChance => _fistAttackChance;
     public float FistRerollInterval => _fistRerollInterval;
-    public float PostAttackRecoveryDuration => _postAttackRecoveryDuration;
     public EnemyAttackPattern FistAttackPattern => _fistAttackPattern;
 
     [SerializeField, Tooltip("盾の耐久値")] private float _shieldDurability = 100f;
@@ -21,6 +20,5 @@ public class ShieldDraugrData : ScriptableObject
     [SerializeField, Tooltip("盾破壊時のエフェクトの大きさ")] private Vector3 _shieldBrokenEffectScale = Vector3.one;
     [SerializeField, Tooltip("こぶし攻撃の確率"), Range(0f, 1f)] private float _fistAttackChance = 0.1f;
     [SerializeField, Tooltip("こぶし攻撃の抽選間隔（秒）")] private float _fistRerollInterval = 2f;
-    [SerializeField, Tooltip("攻撃後硬直の時間")] private float _postAttackRecoveryDuration = 5f;
     [SerializeField] private EnemyAttackPattern _fistAttackPattern;
 }
