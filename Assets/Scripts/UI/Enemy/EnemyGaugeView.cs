@@ -33,7 +33,8 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
         _onBehindCameraChanged = onBehindCameraChanged;
         _linkEnemy = enemyTransform;
 
-        _gaugeIcons = _gaugeIcons.OrderByDescending(icon => icon.FillThreshold).ToArray();
+        if (_gaugeIcons != null && _gaugeIcons.Length != 0)
+            _gaugeIcons = _gaugeIcons.OrderByDescending(icon => icon.FillThreshold).ToArray();
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
@@ -74,7 +75,7 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
         _mainGauge.fillAmount = 1f;
         _delayGauge.fillAmount = 1f;
 
-        if (_gaugeIcons != null || _gaugeIcons.Length != 0)
+        if (_gaugeIcons != null && _gaugeIcons.Length != 0)
         {
             // 降順に並べ替えたアイコンの中で、最も高い閾値のアイコンをデフォルトとして設定
             _gaugeIcon.sprite = _gaugeIcons[0].IconSprite;
