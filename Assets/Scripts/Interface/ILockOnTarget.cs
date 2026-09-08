@@ -13,5 +13,5 @@ public interface ILockOnTarget
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
     /// </summary>
-    public Transform GetTargetCenter();
+    Transform GetTargetCenter();
 }
