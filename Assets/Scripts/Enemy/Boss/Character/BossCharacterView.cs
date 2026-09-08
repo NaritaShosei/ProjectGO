@@ -3,14 +3,11 @@ using System;
 using UniRx;
 using UnityEngine;
 using System.Collections.Generic;
-
 using BossEnemy.Armor;
 using BossEnemy.Animation;
-using BossEnemy.Attack;
 using BossEnemy.Interface;
 using BossEnemy.Enum;
 using BossEnemy.SMB;
-using BossEnemy.AI.BehaviourTree;
 
 namespace BossEnemy.Character
 {
@@ -94,7 +91,7 @@ namespace BossEnemy.Character
             _attackSMBList = new();
 
             // 鎧の初期化
-            ArmorInit();
+            InitArmor();
 
             if (!ServiceLocator.TryGet(out _cameraManager))
             {
@@ -243,7 +240,7 @@ namespace BossEnemy.Character
 
         public void ChangePhase(int nextPhase)
         {
-            ArmorRepair();
+            RepairArmor();
 
             ChangePosture(PostureType.Standing);
 
@@ -345,7 +342,7 @@ namespace BossEnemy.Character
         }
 
         #region 鎧関連の処理
-        public void ArmorInit()
+        public void InitArmor()
         {
             foreach (var bossArmor in _bossArmorViews)
             {
@@ -353,18 +350,18 @@ namespace BossEnemy.Character
             }
         }
 
-        public void ArmorBreak(ArmorAttachmentType attachmentPointsType)
+        public void BreakArmor(ArmorAttachmentType attachmentPointsType)
         {
             foreach (var bossArmor in _bossArmorViews)
             {
                 if (bossArmor.AttachmentPoints == attachmentPointsType)
                 {
-                    bossArmor.BreakArmer().Forget();
+                    bossArmor.BreakArmor().Forget();
                 }
             }
         }
 
-        public void ArmorRepair(ArmorAttachmentType attachmentPointsType = ArmorAttachmentType.None)
+        public void RepairArmor(ArmorAttachmentType attachmentPointsType = ArmorAttachmentType.None)
         {
             if (attachmentPointsType == ArmorAttachmentType.None)
             {

@@ -40,7 +40,7 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
     [Serializable]
     public class PostureChangeAction : ActionNode<BehaviourTree.PostureChangeAction>
     {
-        private string CHANGE_POSTURE_NAME = "次の姿勢";
+        private const string CHANGE_POSTURE_NAME = "次の姿勢";
 
         public PostureChangeAction()
         {

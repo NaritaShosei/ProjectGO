@@ -283,7 +283,7 @@ namespace BossEnemy.Character
         {
             if(AttackTarget == null) return;
 
-            _attackExecutor.Execute(_attackTarget);
+            _attackExecutor.ExecuteAttack(_attackTarget);
 
             _executingAttack.Value = _attackExecutor.ExecutingAttack;
         }
@@ -307,7 +307,7 @@ namespace BossEnemy.Character
         {
             if (_executingAttack == null) return;
 
-            _attackExecutor.Complete();
+            _attackExecutor.AttackComplete();
             _executingAttack.Value = default;
         }
 

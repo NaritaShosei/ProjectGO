@@ -20,19 +20,6 @@ namespace BossEnemy.Attack
 
         public bool WasHitAttack => _wasAttackHit;
 
-        /// <summary> 攻撃関連のRepositryLoadのため非同期で初期化 </summary>
-        private async UniTask InitAsync()
-        {
-            _attackDataRepository = await AssetsLoader.LoadAssetAsync<AttackDataRepositry>
-                (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
-
-            _bossEnemyAttackSelectionPoolRepository = await AssetsLoader.LoadAssetAsync<AttackDataSelectionPoolRepository>
-                (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
-
-            _attackDataRepository.Init();
-            _bossEnemyAttackSelectionPoolRepository.Init();
-        }
-
         /// <summary> 次の攻撃を確定させる </summary>
         public async UniTask SetNextAttack(int attackSelectPoolID)
         {
@@ -43,7 +30,7 @@ namespace BossEnemy.Attack
 
             if (attackSelectionPool.SelectionPool == null) Debug.LogError("PoolがNullです");
 
-            int executeAttackID = AttackDataSelector.GetRandamSelectAttackDataID(attackSelectionPool, _attackCoolTimer.AttackCoolTimeList);
+            int executeAttackID = AttackDataSelector.GetRandomSelectAttackDataID(attackSelectionPool, _attackCoolTimer.AttackCoolTimeList);
 
             if(executeAttackID == 0)
             {
@@ -62,12 +49,10 @@ namespace BossEnemy.Attack
         }
 
         /// <summary> 攻撃の実行 </summary>
-        public void Execute(IPlayer attackTarget)
+        public void ExecuteAttack(IPlayer attackTarget)
         {
             _attackTarget = attackTarget;
             _wasAttackHit = false;
-
-            
         }
 
         /// <summary> 攻撃によってダメージが発生したか否かの判定 </summary>
@@ -88,7 +73,7 @@ namespace BossEnemy.Attack
         }
 
         /// <summary> 攻撃終了 </summary>
-        public void Complete()
+        public void AttackComplete()
         {
             _attackCoolTimer.StartCoolTime(_executingAttackData.ID, _executingAttackData.CoolTime).Forget();
             _wasAttackHit = false;
@@ -114,6 +99,19 @@ namespace BossEnemy.Attack
 
         // 攻撃対象(今のところPlayer1人のみ)
         private IPlayer _attackTarget;
+
+        /// <summary> 攻撃関連のRepositryLoadのため非同期で初期化 </summary>
+        private async UniTask InitAsync()
+        {
+            _attackDataRepository = await AssetsLoader.LoadAssetAsync<AttackDataRepositry>
+                (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
+
+            _bossEnemyAttackSelectionPoolRepository = await AssetsLoader.LoadAssetAsync<AttackDataSelectionPoolRepository>
+                (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+
+            _attackDataRepository.Init();
+            _bossEnemyAttackSelectionPoolRepository.Init();
+        }
 
         /// <summary> 攻撃が当たった際のイベント発火時の処理 </summary>
         private void AttackHit(IPlayer hitTarget)

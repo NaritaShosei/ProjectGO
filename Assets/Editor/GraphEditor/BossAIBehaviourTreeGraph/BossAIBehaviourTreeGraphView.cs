@@ -265,8 +265,6 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAIBehaviourTreeNodeRepositry);
         }
 
-        private bool _isSaveScheduled = false;
-
         public void SaveRepository()
         {
             ScriptableObject repositoryAsset = _bossAIBehaviourTreeNodeRepository as ScriptableObject;
@@ -308,6 +306,8 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
             _bossAIBehaviourTreeNodeRepository.SyncTreeNodes(entryNode, connectedNodes);
         }
+
+        private bool _isSaveScheduled = false;
 
         private BehaviourTreeGraphView _behaviourTreeGraphView = null;
 

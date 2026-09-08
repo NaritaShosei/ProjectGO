@@ -49,11 +49,11 @@ namespace BossEnemy.Interface
         public void ChangePosture(PostureType postureType);
 
         #region 鎧関連の処理
-        public void ArmorInit();
+        public void InitArmor();
 
-        public void ArmorBreak(ArmorAttachmentType attachmentPointsType);
+        public void BreakArmor(ArmorAttachmentType attachmentPointsType);
 
-        public void ArmorRepair(ArmorAttachmentType attachmentPointsType);
+        public void RepairArmor(ArmorAttachmentType attachmentPointsType);
         #endregion
     }
 }

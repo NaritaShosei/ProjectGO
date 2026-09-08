@@ -176,7 +176,7 @@ namespace BossEnemy.Character
         /// <summary> 鎧破壊イベント発火時の処理 </summary>
         private void HandleArmorBreak(ArmorAttachmentType armorAttachmentType)
         {
-            _bossCharacterView.ArmorBreak(armorAttachmentType);
+            _bossCharacterView.BreakArmor(armorAttachmentType);
 
             HandleRunningBehaviourTree();
         }
@@ -184,7 +184,7 @@ namespace BossEnemy.Character
         /// <summary> 鎧修復イベント発火時の処理 </summary>
         private void HandleArmorRepair(ArmorAttachmentType armorAttachmentType)
         {
-            _bossCharacterView.ArmorBreak(armorAttachmentType);
+            _bossCharacterView.BreakArmor(armorAttachmentType);
         }
 
         /// <summary> ボスのHPが0になった際のイベント発火時の処理 </summary>

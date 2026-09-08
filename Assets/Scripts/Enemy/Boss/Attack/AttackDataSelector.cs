@@ -5,7 +5,7 @@ namespace BossEnemy.Attack
 {
     public class AttackDataSelector
     {
-        public static int GetRandamSelectAttackDataID(AttackSelectionPool selectionPool, List<int> coolTimeAttackList)
+        public static int GetRandomSelectAttackDataID(AttackSelectionPool selectionPool, List<int> coolTimeAttackList)
         {
             if (selectionPool.SelectionPool == null || selectionPool.SelectionPool.Length == 0) return default;
 

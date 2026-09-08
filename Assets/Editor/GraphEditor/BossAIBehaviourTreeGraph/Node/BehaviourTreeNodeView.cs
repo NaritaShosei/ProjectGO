@@ -41,6 +41,21 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
         public string NodeAccesskey => _nodeAccesskey;
 
+        public override void OnEnable()
+        {
+            _isVisible = true;
+
+            if (string.IsNullOrEmpty(_nodeAccesskey))
+            {
+                _nodeAccesskey = CreateUniqueKey();
+            }
+        }
+
+        public override void OnDisable()
+        {
+            _isVisible = false;
+        }
+
         public virtual void OnGraphChanged(GraphLogger graphLogger)
         {
             ResetConnectedNodes();
@@ -81,12 +96,6 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             return connectTreeNodes;
         }
 
-        /// <summary> Node間のつながりをリセットする </summary>
-        protected void ResetConnectedNodes()
-        {
-            _connectedNodesKey.Clear();
-        }
-
         /// <summary> 確実にほかのノードと被らないユニークなKeyを作る </summary>
         public string CreateUniqueKey()
         {
@@ -101,24 +110,16 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
         private bool _isVisible = true;
 
-        public override void OnEnable()
-        {
-            _isVisible = true;
-
-            if (string.IsNullOrEmpty(_nodeAccesskey))
-            {
-                _nodeAccesskey = CreateUniqueKey();
-            }
-        }
-
-        public override void OnDisable()
-        {
-            _isVisible = false;
-        }
 
         protected override void OnDefineOptions(IOptionDefinitionContext context)
         {
             context.AddOption<int>(RUNNING_PRIORITY_OPTION_NAME).Build();
+        }
+
+        /// <summary> Node間のつながりをリセットする </summary>
+        protected void ResetConnectedNodes()
+        {
+            _connectedNodesKey.Clear();
         }
     }
 

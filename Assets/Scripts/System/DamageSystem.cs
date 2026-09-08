@@ -1,7 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Infrastructure;
 
 // Boss関連
 using BossEnemy.Enum;

@@ -28,7 +28,7 @@ namespace BossEnemy.Armor
         }
 
         /// <summary> アーマー破壊時の処理 </summary>
-        public async UniTask BreakArmer()
+        public async UniTask BreakArmor()
         {
             if (_isBreak == true) return;
 
