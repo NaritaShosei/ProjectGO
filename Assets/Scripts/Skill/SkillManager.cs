@@ -6,21 +6,8 @@ using UnityEngine;
 public class SkillManager : MonoBehaviour
 {
     public event Action<SkillBase> OnSkillAcquired;
-    public event Action<StatSkillType> OnApply
-    {
-        add
-        {
-            if (_statSkillSystem != null)
-                _statSkillSystem.OnApply += value;
-            else
-                Debug.LogWarning("[SkillManager] StatSkillSystem is not initialized.", this);
-        }
-        remove
-        {
-            if (_statSkillSystem != null)
-                _statSkillSystem.OnApply -= value;
-        }
-    }
+    public event Action<StatSkillType> OnApply;
+    public StatUpgradeState StatUpgrades { get; } = new StatUpgradeState();
 
     public void Init(IPlayerStats stats, IModeController modeController,
         Transform playerTransform, EnemyManager enemyManager)
@@ -39,7 +26,14 @@ public class SkillManager : MonoBehaviour
 
         if (ServiceLocator.TryGet(out EXPManager eXPManager))
         {
+            if (_statSkillSystem != null)
+            {
+                _statSkillSystem.OnApply -= HandleStatApplied;
+                _statSkillSystem.Dispose();
+            }
+            StatUpgrades.ResetCounts();
             _statSkillSystem = new StatSkillSystem(_statSkillDataArray, stats, eXPManager);
+            _statSkillSystem.OnApply += HandleStatApplied;
         }
         else
         {
@@ -163,7 +157,16 @@ public class SkillManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_statSkillSystem != null)
+            _statSkillSystem.OnApply -= HandleStatApplied;
         _statSkillSystem?.Dispose();
+    }
+
+    private void HandleStatApplied(StatSkillType type)
+    {
+        // 通知前に回数を確定し、UIの接続前や非表示中の取得も復元可能にする。
+        StatUpgrades.AddAcquisition(type);
+        OnApply?.Invoke(type);
     }
 
     /// <summary>
