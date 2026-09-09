@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerUIInitializer : MonoBehaviour
 {
-    public void Init(Player player)
+    public void Init(Player player, SkillManager skillManager = null)
     {
         if (player == null)
         {
@@ -27,11 +27,18 @@ public class PlayerUIInitializer : MonoBehaviour
                 playerStats: player,
                 view: _playerGaugeView
             );
+
+            // HPバーのPrefab内に事前配置したViewを使い、シーンごとの追加設定を減らす。
+            if (_statUpgradeIconView == null)
+                _statUpgradeIconView = _playerGaugeView.GetComponentInChildren<StatUpgradeIconView>(true);
         }
         else
         {
             Debug.LogError("[PlayerUIInitializer] PlayerGaugeView is missing.", this);
         }
+
+        if (_statUpgradeIconView != null)
+            _statUpgradeIconView.BindManager(skillManager);
 
         // ロックオンマーカー初期化
         if (_lockOnMarkerView != null && ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -47,6 +54,7 @@ public class PlayerUIInitializer : MonoBehaviour
     [SerializeField] private PlayerModeView _playerModeView;
     [SerializeField] private PlayerGaugeView _playerGaugeView;
     [SerializeField] private LockOnMarkerView _lockOnMarkerView;
+    [SerializeField] private StatUpgradeIconView _statUpgradeIconView;
 
     private IModeController _playerModeController;
     private PlayerModePresenter _playerModePresenter;
@@ -58,5 +66,7 @@ public class PlayerUIInitializer : MonoBehaviour
         _playerModePresenter?.Dispose();
         _playerGaugePresenter?.Dispose();
         _lockOnMarkerPresenter?.Dispose();
+        if (_statUpgradeIconView != null)
+            _statUpgradeIconView.UnbindManager();
     }
 }

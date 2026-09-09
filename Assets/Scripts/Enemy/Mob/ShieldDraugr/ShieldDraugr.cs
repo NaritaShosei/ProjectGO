@@ -1,13 +1,37 @@
 using DG.Tweening;
+using System;
 using UnityEngine;
 
-public class ShieldDraugr : MobEnemy
+public class ShieldDraugr : MobEnemy, IArmorHealth
 {
+    private const int ShieldLayerIndex = 1;
+
     public float CurrentShieldDurability => _currentShieldDurability;
 
     public float MaxShieldDurability => _shieldData.ShieldDurability;
 
     public bool IsShieldBroken => _shieldState == ShieldState.Broken;
+
+    public event Action<float, float> OnShieldChanged;
+    public event Action OnShieldBroken;
+
+    float IArmorHealth.CurrentHealth => _currentShieldDurability;
+    float IArmorHealth.MaxHealth => _shieldData.ShieldDurability;
+
+    event Action<float, float> IArmorHealth.OnHealthChanged
+    {
+        add => OnShieldChanged += value;
+        remove => OnShieldChanged -= value;
+    }
+
+    event Action IArmorHealth.OnBroken
+    {
+        add => OnShieldBroken += value;
+        remove => OnShieldBroken -= value;
+    }
+
+    // MobEnemyの鎧解決を、盾が健在な間だけ自分自身に差し替える
+    protected override IArmorHealth ActiveArmor => IsShieldBroken ? null : this;
 
     public override void Init()
     {
@@ -22,60 +46,99 @@ public class ShieldDraugr : MobEnemy
         _shieldState = ShieldState.Guarding;
         _fistRerollTimer = 0f;
 
+        _defenceContext.EnemyType = EnemyDefenceType.Armor;
+
         _shieldObject.SetActive(true);
         ResetShieldAnimation();
+        InvokeArmorRegistered();
     }
 
     public override void TakeDamage(DamageContext context)
     {
         if (_isDead || !CanTakeDamage) return;
 
-        int damage = DamageSystem.CalculateDamage(context, _defenceContext);
-        bool isBattleGod = context.PlayerMode == PlayerMode.Warrior;
+        bool isWarrior = context.PlayerMode == PlayerMode.Warrior;
+        bool isThunder = context.PlayerMode == PlayerMode.Thunder;
         bool isFrontal = IsFrontalHit();
 
         bool appliedToHp = false;
         bool appliedToShield = false;
         bool didBreakThisHit = false;
         bool wasBlocked = false;
+        bool isThunderArmorHit = false;
 
-        if (_shieldState == ShieldState.Broken)
+        //判定だけ先に行う
+        bool shieldBrokenAlready = _shieldState == ShieldState.Broken;
+        bool isPhysicalHit = isWarrior || (isThunder && !context.IsLightningDamage);
+        bool willHitShield = !shieldBrokenAlready && isFrontal && isPhysicalHit;
+        bool willHitHp = shieldBrokenAlready || !isFrontal;
+        bool willBeBlocked = !shieldBrokenAlready && isFrontal && !isPhysicalHit;
+
+        // 背面への命中で盾の防御状態を変更しないよう、今回の命中先だけをコピーに反映する。
+        var hitDefenceContext = _defenceContext;
+        hitDefenceContext.EnemyType = willHitHp ? EnemyDefenceType.Flesh : EnemyDefenceType.Armor;
+        int damage = DamageSystem.CalculateDamage(context, hitDefenceContext);
+
+        //ダメージ表記
+        if (willHitShield)
         {
-            Debug.Log("生身ダメージ");
+            // 闘神：盾への実ダメージを表示
+            InvokeOnDamageDealt(
+                damage,
+                isWeakPoint: false,
+                context.IsCritical,
+                context.IsLightningDamage);
+        }
+        else if (willHitHp)
+        {
+            // 生身：通常通りダメージを表示
+            InvokeOnDamageDealt(
+                damage,
+                isWeakPoint: isWarrior || isThunder,
+                context.IsCritical,
+                context.IsLightningDamage);
+        }
+        else if (willBeBlocked && isThunder)
+        {
+            // 雷神：盾にはダメージを与えないが、0ダメージを表示
+            InvokeOnDamageDealt(
+                0,
+                isWeakPoint: false,
+                context.IsCritical,
+                context.IsLightningDamage);
+        }
+
+        //ダメージ適応
+        if (willHitHp)
+        {
             _stats.TakeDamage(damage);
             appliedToHp = true;
         }
-        else if (isFrontal)
+        else if (willHitShield)
         {
-            if (isBattleGod)
-            {
-                Debug.Log("盾にダメージ");
-                ApplyShieldDamage(damage);
-                appliedToShield = true;
-                didBreakThisHit = _shieldState == ShieldState.Broken;
+            //盾にダメージ
+            ApplyShieldDamage(damage);
+            appliedToShield = true;
+            didBreakThisHit = _shieldState == ShieldState.Broken;
 
-                if (!didBreakThisHit)
-                {
-                    _enemyAnimator.ShieldBlockHitTrigger();
-                }
-            }
-            else
+            if (!didBreakThisHit)
             {
-                Debug.Log("正面につきダメージ無効");
-                wasBlocked = true;
                 _enemyAnimator.ShieldBlockHitTrigger();
             }
         }
-        else
+        else if (willBeBlocked)
         {
-            Debug.Log("背面攻撃");
-            _stats.TakeDamage(damage);
-            appliedToHp = true;
+            //正面ダメージ(無効)
+            wasBlocked = true;
+            _enemyAnimator.ShieldBlockHitTrigger();
+
+            if (isThunder)
+            {
+                isThunderArmorHit = true;
+            }
         }
 
         bool willKill = appliedToHp && _stats.CurrentHealth <= 0;
-
-        InvokeOnDamageDealt(damage, isWeakPoint: isBattleGod && appliedToShield, context.IsCritical);
 
         if (appliedToHp)
         {
@@ -91,9 +154,10 @@ public class ShieldDraugr : MobEnemy
         {
             IsKill = willKill,
             IsArmorBreak = didBreakThisHit,
-            IsWeakPoint = isBattleGod && appliedToShield,
-            IsArmorHit = appliedToShield,
+            IsWeakPoint = (isWarrior || isThunder) && appliedToHp,
+            IsArmorHit = (appliedToShield && !didBreakThisHit) || isThunderArmorHit,
         });
+
 
         if (appliedToHp && !willKill) InvokeOnDamaged();
 
@@ -110,6 +174,17 @@ public class ShieldDraugr : MobEnemy
         SetShieldLayerWeight(1f);
     }
 
+    /// <summary>
+    /// 盾ゲージの表示アンカーを返す。未設定ならHPゲージと同じ位置にフォールバックする。
+    /// </summary>
+    public Transform GetShieldGaugeAnchor()
+    {
+        if (_shieldGaugeAnchor != null) return _shieldGaugeAnchor;
+
+        Debug.LogWarning($"{name}: ShieldGaugeAnchorが未設定です。UIAnchorを使用します。", this);
+        return GetUIAnchor();
+    }
+
     private enum ShieldState { Guarding, Broken }
 
     [Header("盾持ちドラウグル専用パラメータ")]
@@ -118,11 +193,13 @@ public class ShieldDraugr : MobEnemy
     [SerializeField] private Transform _shieldEffectPoint;
     [SerializeField] private GameObject _shieldObject;
 
+    [SerializeField, Tooltip("盾ゲージ表示位置（盾オブジェクトの上あたりに配置）")]
+    private Transform _shieldGaugeAnchor;
+
     private float _fistRerollTimer = 0f;
 
     private ShieldState _shieldState = ShieldState.Guarding;
     private float _currentShieldDurability;
-    private const int ShieldLayerIndex = 1;
 
     [SerializeField, Tooltip("盾構え解除にかかる時間")]
     private float _shieldAnimationBlendDuration = 0.3f;
@@ -153,7 +230,7 @@ public class ShieldDraugr : MobEnemy
 
         _fistRerollTimer = _shieldData.FistRerollInterval;
 
-        if (Random.value < _shieldData.FistAttackChance)
+        if (UnityEngine.Random.value < _shieldData.FistAttackChance)
         {
             // 成功：既にクールダウン中でなければ即攻撃可能にする
             if (AttackCooldownRemaining > 0f) AttackCooldownRemaining = 0f;
@@ -177,7 +254,9 @@ public class ShieldDraugr : MobEnemy
     {
         _currentShieldDurability = Mathf.Max(0f, _currentShieldDurability - damage);
 
-        if(!IsShieldBroken)
+        OnShieldChanged?.Invoke(_currentShieldDurability, MaxShieldDurability);
+
+        if (!IsShieldBroken)
         {
             //岩を砕くエフェクト通知
             _effectManager.PlayEffect(_shieldData.ShieldDamageEffect, _shieldEffectPoint.position, _shieldData.ShieldBrokenEffectScale);
@@ -187,8 +266,6 @@ public class ShieldDraugr : MobEnemy
         {
             BreakShield();
         }
-
-       
     }
 
     /// <summary>
@@ -201,10 +278,13 @@ public class ShieldDraugr : MobEnemy
 
         _shieldState = ShieldState.Broken;
 
+        _defenceContext.EnemyType = EnemyDefenceType.Flesh;
+
         ClearSelectedPattern();
 
         //盾破壊通知
         InvokeOnArmorBroken();
+        OnShieldBroken?.Invoke();
 
         //盾破壊アニメーション開始
         _enemyAnimator.ShieldBreakTrigger();
@@ -269,12 +349,10 @@ public class ShieldDraugr : MobEnemy
 
     protected override void OnPostAttackStunExit()
     {
-        base.OnPostAttackStunExit(); 
+        base.OnPostAttackStunExit();
 
-        if (_turn != null)
-        {
-            _turn.SetOverrideDirection(null);
-        }
+        if (_turn == null) return;
+        _turn.SetOverrideDirection(null);
     }
 
     private void SetShieldLayerWeight(float weight)

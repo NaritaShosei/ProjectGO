@@ -113,7 +113,7 @@ MonoBehaviour:
     _prefab: {fileID: 146184047964149964, guid: 618f481dad270584ab4a2b6970264d75, type: 3}
   - _key: "\u30C6\u30B9\u30C8\u30A2\u30FC\u30DE\u30FC\u7834\u58CA"
     _prefab: {fileID: 7530617160647338765, guid: c6ca6326235194944ab29c48ab546f26, type: 3}
-  - _key: Rock
+  - _key: RockUpLift
     _prefab: {fileID: 8833923644228565619, guid: 2aa072756bb89ba43b4c51482593ab69, type: 3}
   - _key: Meteor
     _prefab: {fileID: 3812723360568179772, guid: b1e7e059141b9b44fa290fda79777263, type: 3}
@@ -255,12 +255,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemySpawner
   _bossPoolData:
     _key: Boss
-    _bossPrefab: {fileID: 5384278836889019338, guid: dd10024fcc4a56a4d842480a8e562eff, type: 3}
+    _bossPrefab: {fileID: 7350875548853188761, guid: dd10024fcc4a56a4d842480a8e562eff, type: 3}
     _enemyUIPrefab: {fileID: 587803215771795472, guid: 677f481a80400d7489ff00354f1786f4, type: 3}
   _enemyParent: {fileID: 4787318458227283089}
   _enemyUIParent: {fileID: 0}
   _preloadCount: 1
+  _rotate: {x: 0, y: 0, z: 0}
   _attackHitAreaSpawner: {fileID: 951417871150168760}
+  _id: 1
 --- !u!1 &2077946794018349390
 GameObject:
   m_ObjectHideFlags: 0
@@ -791,7 +793,6 @@ MonoBehaviour:
         _spawnPointSelector: {fileID: 7793837620590366497}
         _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
         _sequenceStatusView: {fileID: 0}
-        _mobSequenceName: "\u30E2\u30D6\u6226"
         _skillSelectView: {fileID: 0}
         _skillSelectTimeLimit: 10
         _skillSelectCount: 3
@@ -830,7 +831,7 @@ MonoBehaviour:
         _gameOverDuration: 10
         _gameOverTimerView: {fileID: 0}
         _gameOverView: {fileID: 0}
-        _titleSceneName: GOTestScene
+        _titleSceneName: TitleScene
         _restartSequence: 1
     - rid: 6731506274227978454
       type: {class: TutorialState, ns: , asm: Assembly-CSharp}
@@ -1505,6 +1506,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7036861525032570302}
     m_Modifications:
+    - target: {fileID: 2863959258576345544, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
+      propertyPath: _squareHitEffect
+      value: 
+      objectReference: {fileID: -6294498667741390425, guid: 1ea112b2106b69248a7aace00dd1646a, type: 3}
     - target: {fileID: 3888326202347260338, guid: 029e86eb691a302418a2d231eff36d33, type: 3}
       propertyPath: m_Name
       value: AttackHitAreaSpawner

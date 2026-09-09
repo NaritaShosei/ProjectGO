@@ -342,6 +342,7 @@ public class AttackExecutor : MonoBehaviour
                     PlayerMode = mode,
                     IsCritical = false,
                     CriticalMultiplier = 1f,
+                    IsLightningDamage = true,
                 });
             }
         }
@@ -398,9 +399,7 @@ public struct AttackContext
     }
 }
 
-/// <summary>
-/// Enemyが攻撃を受ける際に扱う情報
-/// </summary>
+/// <summary> 攻撃を受ける際の被ダメージ状況 </summary>
 public struct DamageContext
 {
     public float AttackPower;
@@ -420,6 +419,11 @@ public struct DamageContext
     /// 攻撃がヒットした瞬間に発動するイベント。HitResultでヒットの結果を受け取ることができる。
     /// </summary>
     public Action<HitResult> OnHitResult;
+
+    /// <summary>
+    /// 雷神モードの追加雷ダメージによるヒットかどうかの判定。
+    /// </summary>
+    public bool IsLightningDamage;
 }
 
 /// <summary>
