@@ -24,7 +24,7 @@ namespace BossEnemy.Animation
 
             if (_receiver == null) return;
 
-            _receiver.OnAttackEnd += HandleAttackEnd;
+            _receiver.OnAttackCompleted += HandleAttackEnd;
             _receiver.OnDeadEnd += HandleDeadEnd;
             _receiver.OnPhaseChangeEnd += HandlePhaseChangeEnd;
         }
@@ -105,7 +105,7 @@ namespace BossEnemy.Animation
         {
             if (_receiver == null) return;
 
-            _receiver.OnAttackEnd -= HandleAttackEnd;
+            _receiver.OnAttackCompleted -= HandleAttackEnd;
             _receiver.OnDeadEnd -= HandleDeadEnd;
             _receiver.OnPhaseChangeEnd -= HandlePhaseChangeEnd;
         }

@@ -115,7 +115,7 @@ namespace BossEnemy.Character
             _characterEntity.OnAttackHit += HandleAttackHit;
 
             // ボスが攻撃を終了したことの通知をアニメーター側から受け取る
-            _animationEventReceiver.OnAttackEnd += HandleAttackCompleted;
+            _animationEventReceiver.OnAttackCompleted += HandleAttackCompleted;
 
             // TimeScale変更時のイベント登録
             _bossCharacterView.TimeScaleReactiveProperty.Subscribe(timaScale => 
@@ -147,7 +147,7 @@ namespace BossEnemy.Character
             _animationEventReceiver.OnCheckHitAttack -= HandleCheckHitAttack;
 
             // ボスが攻撃を終了したことの通知をアニメーター側から受け取るイベント購読解除
-            _animationEventReceiver.OnAttackEnd -= HandleAttackCompleted;
+            _animationEventReceiver.OnAttackCompleted -= HandleAttackCompleted;
 
             // キャラクターの移動イベント購読解除
             _animationEventReceiver.OnMoveCharacter -= HandleMoveCharacter;
