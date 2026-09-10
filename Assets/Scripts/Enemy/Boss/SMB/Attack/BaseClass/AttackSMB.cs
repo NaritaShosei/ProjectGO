@@ -1,8 +1,4 @@
-using BossEnemy.Animation;
-using BossEnemy.Attack;
-using BossEnemy.Character;
 using BossEnemy.Effect;
-using BossEnemy.Enum;
 using BossEnemy.Interface;
 using Cysharp.Threading.Tasks;
 using System;
@@ -34,13 +30,19 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if( _attackStartTime >= stateInfo.length)
+            // アニメーションステート開始フラグ
+            _isAnimPlaying = true;
+
+            if ( _attackStartTime >= stateInfo.length)
             {
-                NotifyAttackEnd();
+                NotifyAttackAnimCompleted();
                 return;
             }
 
             base.OnStateEnter(animator, stateInfo, layerIndex);
+
+            // 経過時間をリセット
+            _elapsedTime = 0;
 
             // 攻撃命中済みフラグをfalseに
             _wasHitAttack = false;
@@ -61,7 +63,7 @@ namespace BossEnemy.SMB
         {
             _elapsedTime += Time.deltaTime * _timeScale;
 
-            if(_elapsedTime >= _attackStartTime && !_isAttackPlayed)
+            if(_elapsedTime >= _attackStartTime && !_isAttackPlayed && _currentPlayAttackCts != null)
             {
                 // 攻撃を開始する
                 PlayAttackAsync(_currentPlayAttackCts).Forget();
@@ -69,16 +71,27 @@ namespace BossEnemy.SMB
                 // 攻撃開始済みフラグをTrueにする
                 _isAttackPlayed = true;
             }
+
+            if(stateInfo.length <= _elapsedTime && _isAnimPlaying)
+            {
+                NotifyAttackAnimCompleted();
+            }
         }
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            _wasHitAttack = false;
-            _elapsedTime = 0;
+            if (_elapsedTime < _attackStartTime)
+            {
+                _playAttackCancellationTokenSources.Remove(_currentPlayAttackCts);
+                _currentPlayAttackCts.Dispose();
+            }
 
-            // OnStateExit はクリップの再生終了時ではなく、遷移の開始時に呼ばれる。
-            // ここで通知すると、遷移ブレンド中に BehaviourTree が次の攻撃を開始してしまう。
-            NotifyAttackEnd();
+            _wasHitAttack = false;
+
+            if (_isAnimPlaying)
+            {
+                NotifyAttackAnimCompleted();
+            }
 
             _animationEventReceiver.OnHitAttack -= HandleAttackHit;
         }
@@ -93,6 +106,8 @@ namespace BossEnemy.SMB
 
             _playAttackCancellationTokenSources.Clear();
             _currentPlayAttackCts = null;
+
+            _isAnimPlaying = false;
         }
 
         public void SetAttackData(Attack.AttackData attackData)
@@ -142,9 +157,12 @@ namespace BossEnemy.SMB
         // 現在の再生開始からの経過時間（秒）
         protected float _elapsedTime;
 
-        // 実行中の PlayAttack をアニメーション State とは独立して追跡する。
+        // 実行中のPlayAttackをアニメーションStateとは独立して追跡するCancellationTokenSource
         private readonly List<CancellationTokenSource> _playAttackCancellationTokenSources = new();
         private CancellationTokenSource _currentPlayAttackCts;
+
+        // AnimState実行中(NotifyAttackAnimCompletedの2重実行回避用)フラグ
+        private bool _isAnimPlaying = false;
 
         protected void PlayBossSE(string cueName)
         {
@@ -196,12 +214,13 @@ namespace BossEnemy.SMB
         /// 攻撃ステートから Idle への遷移が完了してから攻撃終了を通知する。
         /// 他の攻撃ステートへの割り込み遷移では、古い攻撃の終了通知を送らない。
         /// </summary>
-        private void NotifyAttackEnd()
+        private void NotifyAttackAnimCompleted()
         {
             if (_animationEventReceiver == null) return;
 
             _animationEventReceiver.AnimEvent_AttackCompleted();
 
+            _isAnimPlaying = false;
             Debug.Log("攻撃終了");
         }
 

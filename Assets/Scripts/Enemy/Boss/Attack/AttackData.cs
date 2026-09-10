@@ -13,7 +13,6 @@ namespace BossEnemy.Attack
         /// <param name="attackStartDistance"> 攻撃を開始できるターゲットとの距離 </param>
         /// <param name="damageReactionType"> 攻撃によるノックバックの威力 </param>
         /// <param name="coolTime"> 攻撃終了から次に使えるようになるまでのクールタイム </param>
-        /// <param name="animParam"> 攻撃アニメーションのパラメータ名 </param>
         public AttackData(
             int id, string name, float damage, float attackHitAreaRadius, float attackStartDistance, DamageReactionType damageReactionType, float coolTime)
         {

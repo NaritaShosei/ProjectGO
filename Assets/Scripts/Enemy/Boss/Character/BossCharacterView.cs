@@ -33,7 +33,6 @@ namespace BossEnemy.Character
         /// <summary> 姿勢変更後発火されるイベント </summary>
         public event Action<PostureType> OnChangedPosture;
 
-
         /// <summary>ダメージを受けたときに発火するイベント</summary>
         public event Action<DamageContext, TakeDamageType, ArmorAttachmentType> OnTakeDamage;
 
@@ -234,11 +233,6 @@ namespace BossEnemy.Character
             {
                 attack.StopPlayAttack();
             }
-        }
-
-        public void FinishAttackAnimation()
-        {
-            _bossEnemyAnimator.SetAttacking(false, 0);
         }
 
         /// <summary>ノックバックの力を与える</summary>

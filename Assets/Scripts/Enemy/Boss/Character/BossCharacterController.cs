@@ -118,7 +118,9 @@ namespace BossEnemy.Character
             _animationEventReceiver.OnAttackCompleted += HandleAttackCompleted;
 
             // TimeScale変更時のイベント登録
-            _bossCharacterView.TimeScaleReactiveProperty.Subscribe(timaScale => 
+            _bossCharacterView.TimeScaleReactiveProperty
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(timaScale => 
             { HandleChangedTimeScale(timaScale); }).AddTo(_deadEventDisposables);
 
             // キャラクターの移動イベント登録
@@ -220,7 +222,9 @@ namespace BossEnemy.Character
         private void HandleChangePosture(PostureType posture)
         {
             // のけぞり・ダウンへ遷移する場合、進行中の攻撃処理を残さない。
-            if (posture != PostureType.Standing)
+            if (posture == PostureType.LeftHalfKneel
+                || posture == PostureType.RightHalfKneel
+                || posture == PostureType.SpreadEagled)
                 _bossCharacterView.StopActiveAttacks();
 
             _bossCharacterView.ChangePosture(posture);
