@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ShieldDraugr : MobEnemy, IArmorHealth
 {
+    private const int ShieldLayerIndex = 1;
+
     public float CurrentShieldDurability => _currentShieldDurability;
 
     public float MaxShieldDurability => _shieldData.ShieldDurability;
@@ -55,7 +57,6 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
     {
         if (_isDead || !CanTakeDamage) return;
 
-        int damage = DamageSystem.CalculateDamage(context, _defenceContext);
         bool isWarrior = context.PlayerMode == PlayerMode.Warrior;
         bool isThunder = context.PlayerMode == PlayerMode.Thunder;
         bool isFrontal = IsFrontalHit();
@@ -73,6 +74,10 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
         bool willHitHp = shieldBrokenAlready || !isFrontal;
         bool willBeBlocked = !shieldBrokenAlready && isFrontal && !isPhysicalHit;
 
+        // 背面への命中で盾の防御状態を変更しないよう、今回の命中先だけをコピーに反映する。
+        var hitDefenceContext = _defenceContext;
+        hitDefenceContext.EnemyType = willHitHp ? EnemyDefenceType.Flesh : EnemyDefenceType.Armor;
+        int damage = DamageSystem.CalculateDamage(context, hitDefenceContext);
 
         //ダメージ表記
         if (willHitShield)
@@ -106,15 +111,6 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
         //ダメージ適応
         if (willHitHp)
         {
-            if (!isFrontal)
-            {
-                //背面ダメージ
-                _defenceContext.EnemyType = EnemyDefenceType.Flesh;
-            }
-            else
-            {
-                //生身ダメージ
-            }
             _stats.TakeDamage(damage);
             appliedToHp = true;
         }
@@ -204,7 +200,6 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
 
     private ShieldState _shieldState = ShieldState.Guarding;
     private float _currentShieldDurability;
-    private const int ShieldLayerIndex = 1;
 
     [SerializeField, Tooltip("盾構え解除にかかる時間")]
     private float _shieldAnimationBlendDuration = 0.3f;
@@ -354,12 +349,10 @@ public class ShieldDraugr : MobEnemy, IArmorHealth
 
     protected override void OnPostAttackStunExit()
     {
-        base.OnPostAttackStunExit(); 
+        base.OnPostAttackStunExit();
 
-        if (_turn != null)
-        {
-            _turn.SetOverrideDirection(null);
-        }
+        if (_turn == null) return;
+        _turn.SetOverrideDirection(null);
     }
 
     private void SetShieldLayerWeight(float weight)
