@@ -6,11 +6,15 @@ public interface IPlayer :
 {
     public event Action OnDead;
     public event Action<PlayerMode, ChargeLevel> OnAttackHit;
+    public event Action OnArmorBroken;
     public event Action<PlayerMode> OnModeChanged;
+    public event Action OnModeChangeCompleted;
     public event Action OnDownRecoveryEnded;
 
     public bool IsDown { get; }
 
+    /// <summary>チュートリアル中に限り、現在のプレイヤー状態に関係なくモードチェンジを許可する。</summary>
+    public void SetTutorialModeChangeEnabled(bool enabled);
     public void StartDownRecovery();
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
