@@ -61,7 +61,7 @@
 
 - `EnemyManager.OnEnemySpawned` を購読し、`IEnemy.IsBoss` の敵が出現したらボスカメラを有効化。`OnBossDefeated` / `OnEnemyForceRemoved`（現在のボス）で無効化
 - 有効化時：`_bossBodyCamera` の Follow に `CameraMotionController.FollowAnchor`、LookAt に内部生成の注視プロキシを設定し、`CameraManager.SetBossCameraActive(true)` でPriorityを最前面へ。水平軸を現在のメインカメラ方位へ合わせて切り替えの飛びを抑える
-- 注視（体をむく）：ボスの子から `CameraAnglePoint`（`Top`＝頭側 / `Under`＝足元側）を集め、プレイヤー↔ボス距離を `_bossFramingNearDistance`〜`_bossFramingFarDistance` で正規化した補間量を `_bossFramingSmoothTime`（秒）で `SmoothDamp` してから注視プロキシを `Under`→`Top` で補間。距離が急変しても足元⇔頭へ一気に飛ばず緩やかに移る。アンカーが無ければ `IEnemy.GetTargetCenter()` へフォールバック
+- 注視（体をむく）：ボスの子から `CameraAnglePoint`（`Top`＝頭側 / `Under`＝足元側）を集め、プレイヤー↔ボス距離を `_bossFramingNearDistance`〜`_bossFramingFarDistance` で 0..1 に正規化し、その比率で注視プロキシを `Under`→`Top` で線形補間（`Under`以下＝足元、`Far`以上＝頭）。アンカーが無ければ `IEnemy.GetTargetCenter()` へフォールバック
 - カメラの定位置：プレイヤー→ボス方向から求めた方位角（プレイヤーから見てボスの反対側にカメラが来る角度）へ、`CinemachineOrbitalFollow.HorizontalAxis` を `_bossOrbitTrackSpeed`（度/秒）で追従させる。プレイヤー・ボスが動くたびに毎フレーム再計算するので、カメラは常にボスへ正対する側へ収束する（vcam の `CinemachineInputAxisController` は無効化し、このオービット自体は入力で動かさない）
 - 左右スイベル：`InputHandler.CameraMoveInput.x` で注視プロキシをカメラ右方向へ `_bossSwivelRange`（m）を上限に `_bossSwivelSpeed` でオフセットし、入力が無ければ `_bossSwivelReturnSpeed` で中央へ戻す。オービット位置は動かさず注視点だけをずらすため、カメラは大きく回り込まずボスを画面内に保ったまま少しだけ振れる
 - 体制連動ズーム：`IBossEnemyCharacterView.OnChangedPosture` を購読し、`_bossPostureZooms`（`BossPostureZoom[]`：`PostureType`→倍率・到達時間）から一致するエントリを引いて `CameraManager.SetZoom` に流す。一致が無ければ何もしない。姿勢の現在値getterは無いため、有効化時は `Standing` 想定でズームを当て以降はイベントで補正する

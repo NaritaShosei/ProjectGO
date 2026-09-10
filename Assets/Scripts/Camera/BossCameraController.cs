@@ -75,7 +75,7 @@ public sealed class BossCameraController
 
         UpdateOrbitTracking(deltaTime);
         UpdateSwivelOffset(deltaTime);
-        UpdateLookAtProxy(deltaTime);
+        UpdateLookAtProxy();
     }
 
     /// <summary>イベント購読を解除し、生成したプロキシを破棄する。</summary>
@@ -143,12 +143,8 @@ public sealed class BossCameraController
         _bossBodyCamera.Follow = _followAnchor;
         _bossBodyCamera.LookAt = _lookAtProxy;
 
-        // 足元⇔頭の補間量を現在の距離へスナップしておく（有効化直後に寄っていかないように）
-        _framingT = _angleTop != null && _angleUnder != null ? ComputeFramingTarget() : 0f;
-        _framingTVelocity = 0f;
-
         // 注視点を現在の距離で初期化
-        UpdateLookAtProxy(0f);
+        UpdateLookAtProxy();
         // 現在のメインカメラ方位へ水平軸を合わせて切り替えの飛びを抑える
         AlignHorizontalAxisToCurrentView();
 
@@ -195,8 +191,8 @@ public sealed class BossCameraController
         _bossView = null;
     }
 
-    /// <summary>足元(Under)〜頭(Top)の補間量を距離目標へ緩やかに寄せ、注視点を更新して左右スイベル分だけ横にずらす。</summary>
-    private void UpdateLookAtProxy(float deltaTime)
+    /// <summary>プレイヤー↔ボス距離の比率で足元(Under)〜頭(Top)へ注視点を置き、左右スイベル分だけ横にずらす。</summary>
+    private void UpdateLookAtProxy()
     {
         // アンカーが無ければ体中心へフォールバック（スイベルは適用しない）
         if (_angleTop == null || _angleUnder == null)
@@ -206,22 +202,14 @@ public sealed class BossCameraController
             return;
         }
 
-        // 距離目標へ補間量を緩やかに追従させる（一気に足元⇔頭へ飛ばない）
-        _framingT = Mathf.SmoothDamp(
-            _framingT, ComputeFramingTarget(), ref _framingTVelocity, _settings.FramingSmoothTime, Mathf.Infinity, deltaTime);
-
-        Vector3 basePosition = Vector3.Lerp(_angleUnder.position, _angleTop.position, _framingT);
+        // Near〜Far の距離を 0(足元)〜1(頭) へ正規化し、その比率で補間
+        float distance = Vector3.Distance(_playerTransform.position, _boss.Self.position);
+        float t = Mathf.InverseLerp(_settings.FramingNearDistance, _settings.FramingFarDistance, distance);
+        Vector3 basePosition = Vector3.Lerp(_angleUnder.position, _angleTop.position, t);
 
         // 注視点をカメラ右方向へスイベル分だけずらす（オービット自体は動かさない）
         Vector3 cameraRight = _mainCamera != null ? _mainCamera.transform.right : Vector3.right;
         _lookAtProxy.position = basePosition + cameraRight * _swivelOffset;
-    }
-
-    /// <summary>プレイヤー↔ボス距離を0(足元)〜1(頭)へ正規化した注視補間量の目標値。</summary>
-    private float ComputeFramingTarget()
-    {
-        float distance = Vector3.Distance(_playerTransform.position, _boss.Self.position);
-        return Mathf.InverseLerp(_settings.FramingNearDistance, _settings.FramingFarDistance, distance);
     }
 
     /// <summary>カメラの定位置を、プレイヤーから見てボスの反対側の方位へ滑らかに追従させる。</summary>
@@ -281,6 +269,4 @@ public sealed class BossCameraController
     private Transform _angleUnder;
     private bool _isActive;
     private float _swivelOffset;
-    private float _framingT;
-    private float _framingTVelocity;
 }

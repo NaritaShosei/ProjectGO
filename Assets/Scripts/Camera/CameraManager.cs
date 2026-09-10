@@ -132,7 +132,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
                     new BossCameraSettings(
                         _bossFramingNearDistance,
                         _bossFramingFarDistance,
-                        _bossFramingSmoothTime,
                         _bossOrbitTrackSpeed,
                         _bossSwivelRange,
                         _bossSwivelSpeed,
@@ -247,7 +246,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private int _normalPriority = 10;
     [Tooltip("ロックオン時に設定するPriority。通常カメラより高くする必要がある")]
     [SerializeField] private int _lockOnPriority = 20;
-    [Tooltip("ボス戦時に設定するPriority。ロックオンより高くする必要がある")]
+    [Tooltip("ボス戦中に _bossBodyCamera へ設定するPriority。通常(10)・ロックオン(20)より高い必要がある。待機中は自動で最下位へ下がる。基本いじらない")]
     [SerializeField] private int _bossPriority = 30;
 
     [Header("通常追従設定")]
@@ -319,21 +318,19 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private ModeChangeZoomSetting _thunderModeZoom = new() { Multiplier = 0.8f, ZoomInDuration = 0.15f, MidMultiplier = 0.8f, MidDuration = 0.1f, ZoomOutDuration = 0.3f };
 
     [Header("ボスカメラ設定")]
-    [Tooltip("プレイヤー↔ボスがこの距離(m)以下でボスの足元(Under)を注視する")]
+    [Tooltip("プレイヤー↔ボスがこの距離(m)以下でボスの足元(CameraAngleUnder)を注視する。Far との間は距離の比率で足元⇔頭を補間。\n増やすと：もっと離れても足元を見続ける（見上げ始めが遅い）\n減らすと：少し離れただけで視線が頭側へ動き始める")]
     [SerializeField] private float _bossFramingNearDistance = 6f;
-    [Tooltip("プレイヤー↔ボスがこの距離(m)以上でボスの頭(Top)を注視する")]
+    [Tooltip("プレイヤー↔ボスがこの距離(m)以上でボスの頭(CameraAngleTop)を注視する。\n増やすと：かなり離れないと頭まで見上げない\n減らすと：少し離れただけで頭まで映す")]
     [SerializeField] private float _bossFramingFarDistance = 18f;
-    [Tooltip("足元⇔頭の注視補間を滑らかにする追従時間（秒）。0で即時、大きいほど緩やか")]
-    [SerializeField] private float _bossFramingSmoothTime = 0.5f;
-    [Tooltip("カメラの定位置（プレイヤーから見てボスの反対側）を追従させる速度（度/秒）")]
+    [Tooltip("カメラを常に『プレイヤーから見てボスの反対側』へ向け直す最大回転速度（度/秒）。入力ではなくプレイヤー・ボスの位置関係から自動で決まる。\n増やすと：ボスが回り込んでもすぐ背後に付く（キビキビ／速い動きだとやや固い）\n減らすと：追従が遅れ、ボスを横〜前から見る時間が増える。0だとカメラ角度が固定され不自然になりうる")]
     [SerializeField] private float _bossOrbitTrackSpeed = 180f;
-    [Tooltip("入力で振れる注視点の左右オフセットの最大値（m）")]
+    [Tooltip("カメラ移動入力で注視点を左右へずらせる最大量（m）。オービット位置は動かさず視線だけ振る。\n増やすと：ボスを画面端寄りまで動かせて見回し幅が広い\n減らすと：ほぼ正面固定。0で入力による振りは無効")]
     [SerializeField] private float _bossSwivelRange = 1.5f;
-    [Tooltip("入力に対する注視点オフセットの変化速度（m/秒）")]
+    [Tooltip("入力を入れている間に注視点オフセットが伸びる速さ（m/秒、スティック全倒し時）。\n増やすと：倒した瞬間にサッと横へ振れる\n減らすと：じわっと横へ寄っていく")]
     [SerializeField] private float _bossSwivelSpeed = 3f;
-    [Tooltip("入力が無いとき注視点オフセットを中央へ戻す速度（m/秒）")]
+    [Tooltip("入力を離したとき注視点オフセットが中央（ボス正面）へ戻る速さ（m/秒）。\n増やすと：離すとすぐ正面へ戻る\n減らすと：ゆっくり戻る。0だと戻らずその向きを維持")]
     [SerializeField] private float _bossSwivelReturnSpeed = 2f;
-    [Tooltip("ボスの姿勢ごとのFOV倍率と到達時間。姿勢が変わると一致するエントリの倍率へ寄せる")]
+    [Tooltip("ボスの姿勢ごとのFOV倍率と到達時間。姿勢が変わると一致するエントリの倍率へ寄せる。リストに無い姿勢は現在のズームを維持")]
     [SerializeField] private BossPostureZoom[] _bossPostureZooms =
     {
         new() { Posture = PostureType.Standing, ZoomMultiplier = 1f, Duration = 0.3f },
@@ -341,7 +338,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         new() { Posture = PostureType.LeftHalfKneel, ZoomMultiplier = 0.9f, Duration = 0.3f },
         new() { Posture = PostureType.SpreadEagled, ZoomMultiplier = 0.8f, Duration = 0.4f },
     };
-    [Tooltip("ボスカメラ終了時に通常視野へ戻す時間（秒）")]
+    [Tooltip("ボスカメラ終了時に通常視野（等倍）へ戻すまでの時間（秒）。\n増やすと：ゆっくり戻る\n減らすと（0）：即座に戻る")]
     [SerializeField] private float _bossZoomResetDuration = 0.3f;
 
     [SerializeField]
