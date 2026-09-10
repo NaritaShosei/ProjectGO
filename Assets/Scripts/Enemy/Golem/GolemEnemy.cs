@@ -28,6 +28,20 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         }
     }
 
+    public override void ReInitialize(Vector3 spawnPosition)
+    {
+        base.ReInitialize(spawnPosition);
+
+        // プール再利用時に前回の点滅状態を必ずリセット
+        _blinkEffect?.StopBlink();
+
+        // プールから再利用されたときは死亡用Colliderを必ずOFF
+        if (_deathCollider != null)
+        {
+            _deathCollider.SetActive(false);
+        }
+    }
+
     /// <summary>
     /// ゴーレム専用ダメージ処理
     ///
@@ -140,6 +154,18 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         InvokeArmorRegistered();
     }
 
+    protected override void OnDeathInternal()
+    {
+        if (_deathCollider != null)
+        {
+            _deathCollider.SetActive(true);
+        }
+
+        _blinkEffect?.StopBlink();
+
+        base.OnDeathInternal();
+    }
+
     [Header("Down Settings")]
     [SerializeField, Tooltip("鎧破壊後にダウン状態を維持する時間（秒）")]
     private float _downDuration = 5f;
@@ -163,6 +189,9 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
 
     [SerializeField]
     private string _attackEffectKey;
+
+    [SerializeField, Tooltip("死亡時に使用するコライダー")]
+    private GameObject _deathCollider;
 
     private BlinkEffect _blinkEffect;
     private EffectManager _effectManager;
