@@ -18,6 +18,7 @@ public class CueSheetPathHolder
         CueSheetPathDict.Add(CueSheetType.Environment, "Environment_SE");
         CueSheetPathDict.Add(CueSheetType.BGM, "BGM");
         CueSheetPathDict.Add(CueSheetType.InGameBGM, "BGM");
+        CueSheetPathDict.Add(CueSheetType.PlayerVoice, "Player_Voice");
     }
 }
 
@@ -35,4 +36,5 @@ public enum CueSheetType
     Environment,
     BGM,
     InGameBGM,
+    PlayerVoice,
 }
