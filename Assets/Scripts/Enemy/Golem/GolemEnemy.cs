@@ -32,6 +32,9 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
     {
         base.ReInitialize(spawnPosition);
 
+        // プール再利用時に前回の点滅状態を必ずリセット
+        _blinkEffect?.StopBlink();
+
         // プールから再利用されたときは死亡用Colliderを必ずOFF
         if (_deathCollider != null)
         {
@@ -157,6 +160,8 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
         {
             _deathCollider.SetActive(true);
         }
+
+        _blinkEffect?.StopBlink();
 
         base.OnDeathInternal();
     }
