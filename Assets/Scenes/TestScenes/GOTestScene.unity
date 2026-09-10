@@ -1963,19 +1963,23 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2200000002}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: managedReferences[6731506274227978454]._checklistView
-      value: 
-      objectReference: {fileID: 2300000002}
-    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: managedReferences[6731506274227978454]._skillSelectView
-      value: 
-      objectReference: {fileID: 1504407408}
+      propertyPath: managedReferences[6731506274227978447]._nextSequence
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978453]._gameOverView
       value: 
       objectReference: {fileID: 2100000002}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978454]._checklistView
+      value: 
+      objectReference: {fileID: 2300000002}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978448]._skillSelectView
+      value: 
+      objectReference: {fileID: 1504407408}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978454]._skillSelectView
       value: 
       objectReference: {fileID: 1504407408}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
@@ -3312,7 +3316,7 @@ PrefabInstance:
     - target: {fileID: 5312931378833072110, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: 'm_Bindings.Array.data[0]'
       value: 
-      objectReference: {fileID: 1621227474}
+      objectReference: {fileID: 0}
     - target: {fileID: 5435391086855291110, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.9524729
@@ -9827,17 +9831,6 @@ SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7688002424138293575, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
   m_PrefabInstance: {fileID: 650177779}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1621227474 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8598521479156495737, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-  m_PrefabInstance: {fileID: 650177779}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7fdfea1f838247c40921a07afedde962, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.VisualEffectGraph.Runtime::UnityEngine.VFX.Utility.VFXTransformBinder
 --- !u!1 &1700981379
 GameObject:
   m_ObjectHideFlags: 0
@@ -10539,6 +10532,34 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
       propertyPath: m_Name
       value: TutorialChecklistView
+      objectReference: {fileID: 0}
+    - target: {fileID: 114002, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 114002, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_ActiveFontFeatures.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114003, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_fontSize
+      value: 24.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114003, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 114003, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_ActiveFontFeatures.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114016, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 114016, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_ActiveFontFeatures.Array.size
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
       propertyPath: m_LocalPosition.x
