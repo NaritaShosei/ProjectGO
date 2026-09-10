@@ -75,9 +75,10 @@ namespace BossEnemy.SMB
             _elapsedTime = 0;
         }
 
-        public void StopAttack()
+        public void StopPlayAttack()
         {
-            _cts.Dispose();
+            _cts?.Cancel();
+            _cts?.Dispose();
             _cts = null;
         }
 
@@ -204,6 +205,14 @@ namespace BossEnemy.SMB
             _animationEventReceiver.AnimEvent_AttackEnd();
 
             Debug.Log("攻撃終了");
+        }
+
+        private void OnDestroy()
+        {
+            // 破棄時に非同期処理をキャンセル
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
         }
     }
 }

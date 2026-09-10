@@ -17,7 +17,6 @@ namespace BossEnemy.SMB
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             base.OnStateEnter(animator, stateInfo, layerIndex);
-            _cts = new();
         }
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -43,7 +42,6 @@ namespace BossEnemy.SMB
         [Header("攻撃の回数")]
         [SerializeField] private int _maxAttackCount = 4;
 
-        private CancellationTokenSource _cts;
         Vector3 _attackPos = Vector3.zero;
 
         private bool _isAttackHitCheck = false;
@@ -72,20 +70,13 @@ namespace BossEnemy.SMB
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 
                 int waitPlayEffect = 40;
-                await UniTask.Delay(waitPlayEffect);
+                await UniTask.Delay(waitPlayEffect, cancellationToken: cancellationToken);
 
                 _animationEventReceiver.AnimEvent_AttackHitCheck
                     (AttackHitAreaType.Circle, _attackPos);
 
-                await UniTask.Delay(_attackIntervalFlame);
+                await UniTask.Delay(_attackIntervalFlame, cancellationToken: cancellationToken);
             }
-        }
-
-        private void OnDestroy()
-        {
-            // 破棄時に非同期処理をキャンセル
-            _cts?.Cancel();
-            _cts?.Dispose();
         }
     }
 }

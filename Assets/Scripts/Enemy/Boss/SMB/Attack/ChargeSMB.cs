@@ -98,13 +98,13 @@ namespace BossEnemy.SMB
                     squareHitArea.SetSize(displayWidth, _moveDistance);
                 }
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_startMoveTime));
+                await UniTask.Delay(TimeSpan.FromSeconds(_startMoveTime), cancellationToken: cancellationToken);
 
                 _goalArrivalTime = _endMoveTime;
                 _isAttackHitCheck = true;
                 _isMoving = true;
 
-                await UniTask.WaitUntil(() => !_isMoving);
+                await UniTask.WaitUntil(() => !_isMoving, cancellationToken: cancellationToken);
 
                 _isAttackHitCheck = false;
                 _goalArrivalTime = 0;
