@@ -8,9 +8,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
   m_Solo: 0
@@ -60,9 +60,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7937429894567203005}
   m_Solo: 0
@@ -129,9 +129,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6628811051747405274}
   m_Solo: 0
@@ -179,9 +179,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   - m_ConditionMode: 1
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
@@ -207,9 +207,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   - m_ConditionMode: 1
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
@@ -227,6 +227,28 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &-8530615335577396973
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704a900117db8ad41b628dd6c21344e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
+  _attackID: 1
+  _attackStartTime: 0.5
+  _attackAreaDespawnTime: 1
+  _cameraShakeData:
+    _amplitude: 0
+    _frequency: 0
+    _duration: 0
+  _attackDistance: 2
+  _startAttackHitTiming: 1
+  _endAttackHitTiming: 0.1
 --- !u!1101 &-8512754007252017794
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -339,8 +361,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Sweep
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 8
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 9019623883209432096}
   m_Solo: 0
@@ -525,9 +550,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7937429894567203005}
   m_Solo: 0
@@ -550,9 +575,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
   m_Solo: 0
@@ -630,6 +655,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 6
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 2.2
@@ -731,9 +757,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -181589887419665542}
   m_Solo: 0
@@ -873,9 +899,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
   m_Solo: 0
@@ -900,6 +926,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
@@ -1024,7 +1053,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 704a900117db8ad41b628dd6c21344e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
-  _attackID: 0
+  _attackID: 8
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -1115,14 +1145,14 @@ AnimatorStateMachine:
     m_Position: {x: 290, y: 110, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3993543957679222048}
-    m_Position: {x: 60, y: 10, z: 0}
+    m_Position: {x: 50, y: 0, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6365022283571838848}
     m_Position: {x: 580, y: 180, z: 0}
   m_ChildStateMachines:
   - serializedVersion: 1
     m_StateMachine: {fileID: 6571484589851438618}
-    m_Position: {x: 330, y: 10, z: 0}
+    m_Position: {x: 430, y: -40, z: 0}
   - serializedVersion: 1
     m_StateMachine: {fileID: -7175431075728381387}
     m_Position: {x: 290, y: 180, z: 0}
@@ -1131,9 +1161,9 @@ AnimatorStateMachine:
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: 0, y: -80, z: 0}
-  m_EntryPosition: {x: 50, y: 120, z: 0}
+  m_EntryPosition: {x: 60, y: 100, z: 0}
   m_ExitPosition: {x: 970, y: 140, z: 0}
-  m_ParentStateMachinePosition: {x: 580, y: 110, z: 0}
+  m_ParentStateMachinePosition: {x: 570, y: 110, z: 0}
   m_DefaultState: {fileID: 5991001029202522158}
 --- !u!1101 &-5178183747818198830
 AnimatorStateTransition:
@@ -1194,7 +1224,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ee48b8e5d0118847b8b05b56cb0b345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
-  _attackID: 0
+  _attackID: 11
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -1212,9 +1243,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -181589887419665542}
   m_Solo: 0
@@ -1237,9 +1268,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3158497122056379763}
   m_Solo: 0
@@ -1262,9 +1293,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7142586009534698118}
   m_Solo: 0
@@ -1287,9 +1318,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3158497122056379763}
   m_Solo: 0
@@ -1314,6 +1345,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
@@ -1379,27 +1413,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &-4288038358447164044
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3d20154e49fe1d429355c4c07e4bea6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PunchSMB
-  _attackID: 1
-  _attackAreaDespawnTime: 1
-  _cameraShakeData:
-    _amplitude: 2
-    _frequency: 2
-    _duration: 0.18
-  _attackDistance: 0
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 1
 --- !u!1101 &-4285351797143824645
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1408,9 +1421,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3158497122056379763}
   m_Solo: 0
@@ -1517,9 +1530,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7142586009534698118}
   m_Solo: 0
@@ -1578,9 +1591,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7937429894567203005}
   m_Solo: 0
@@ -1603,9 +1616,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -181589887419665542}
   m_Solo: 0
@@ -1707,8 +1720,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Sweep
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 8
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7462028388753480653}
   m_Solo: 0
@@ -1731,9 +1747,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
   m_Solo: 0
@@ -1792,6 +1808,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
@@ -1857,27 +1876,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &-1301219043645019234
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 704a900117db8ad41b628dd6c21344e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
-  _attackID: 0
-  _attackAreaDespawnTime: 1
-  _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
-  _attackDistance: 0
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 1
 --- !u!1101 &-1213903369462923695
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1886,9 +1884,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -181589887419665542}
   m_Solo: 0
@@ -1940,7 +1938,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08dd6a5c08227b148bf7c08dda56efe6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.HeavyPunchSMB
-  _attackID: 0
+  _attackID: 9
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -1957,9 +1956,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7142586009534698118}
   m_Solo: 0
@@ -2008,7 +2007,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ee48b8e5d0118847b8b05b56cb0b345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
-  _attackID: 0
+  _attackID: 11
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -2026,9 +2026,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8805771252905067955}
   m_Solo: 0
@@ -2053,6 +2053,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
@@ -2083,7 +2086,7 @@ AnimatorStateMachine:
   m_ChildStateMachines:
   - serializedVersion: 1
     m_StateMachine: {fileID: -5323510030040098453}
-    m_Position: {x: 150, y: 0, z: 0}
+    m_Position: {x: 140, y: 0, z: 0}
   - serializedVersion: 1
     m_StateMachine: {fileID: 3590865070579990697}
     m_Position: {x: -10, y: 140, z: 0}
@@ -2191,9 +2194,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   - m_ConditionMode: 1
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
@@ -2224,6 +2227,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
   _attackID: 3
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 3.5
@@ -2241,8 +2245,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Refining
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 10
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -812563210983846130}
   m_Solo: 0
@@ -2343,6 +2350,28 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &-123122877069923033
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 704a900117db8ad41b628dd6c21344e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
+  _attackID: 8
+  _attackStartTime: 0.5
+  _attackAreaDespawnTime: 1
+  _cameraShakeData:
+    _amplitude: 0
+    _frequency: 0
+    _duration: 0
+  _attackDistance: 0
+  _startAttackHitTiming: 1
+  _endAttackHitTiming: 1
 --- !u!1101 &-116788342441944738
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2401,9 +2430,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
   m_Solo: 0
@@ -2523,8 +2552,8 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
-  - m_Name: Punch
-    m_Type: 9
+  - m_Name: ExecutingAttackID
+    m_Type: 3
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
@@ -2598,9 +2627,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7142586009534698118}
   m_Solo: 0
@@ -2747,9 +2776,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6628811051747405274}
   m_Solo: 0
@@ -2777,26 +2806,26 @@ AnimatorStateMachine:
     m_State: {fileID: -17464240564406131}
     m_Position: {x: 270, y: 90, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: 9019623883209432096}
-    m_Position: {x: 240, y: 0, z: 0}
-  - serializedVersion: 1
     m_State: {fileID: -7452281038287288523}
-    m_Position: {x: 460, y: 0, z: 0}
+    m_Position: {x: 480, y: 0, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7631892115851761343}
-    m_Position: {x: 540, y: 90, z: 0}
+    m_Position: {x: 560, y: 70, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 9019623883209432096}
+    m_Position: {x: 580, y: 140, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6058405512842583964}
-    m_Position: {x: 490, y: 180, z: 0}
+    m_Position: {x: 570, y: 220, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: -80, y: -100, z: 0}
-  m_EntryPosition: {x: 50, y: 120, z: 0}
+  m_EntryPosition: {x: 290, y: 200, z: 0}
   m_ExitPosition: {x: 800, y: 120, z: 0}
-  m_ParentStateMachinePosition: {x: 20, y: 20, z: 0}
+  m_ParentStateMachinePosition: {x: 20, y: 90, z: 0}
   m_DefaultState: {fileID: -17464240564406131}
 --- !u!1101 &589352664000434590
 AnimatorStateTransition:
@@ -2831,9 +2860,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -181589887419665542}
   m_Solo: 0
@@ -2932,7 +2961,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d2c0651f5f14ab46bc0b4a936a9b37f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
-  _attackID: 0
+  _attackID: 10
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -2946,9 +2976,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   - m_ConditionMode: 1
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
@@ -2975,8 +3005,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 11
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6058405512842583964}
   m_Solo: 0
@@ -3001,6 +3034,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
@@ -3036,9 +3072,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7937429894567203005}
   m_Solo: 0
@@ -3100,6 +3136,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
   _attackID: 7
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 4
@@ -3149,6 +3186,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingLeftSMB
   _attackID: 2
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 3.5
@@ -3165,9 +3203,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -181589887419665542}
   m_Solo: 0
@@ -3386,6 +3424,9 @@ AnimatorStateTransition:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
   m_Solo: 0
@@ -3434,9 +3475,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8805771252905067955}
   m_Solo: 0
@@ -3459,8 +3500,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 11
   - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 2210018754530114918}
@@ -3520,9 +3564,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8805771252905067955}
   m_Solo: 0
@@ -3571,7 +3615,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d2c0651f5f14ab46bc0b4a936a9b37f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
-  _attackID: 0
+  _attackID: 10
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -3590,6 +3635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.ChargeSMB
   _attackID: 5
+  _attackStartTime: 0
   _attackAreaDespawnTime: 2
   _cameraShakeData:
     _amplitude: 2.5
@@ -3606,9 +3652,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   - m_ConditionMode: 1
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
@@ -3744,9 +3790,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3158497122056379763}
   m_Solo: 0
@@ -3773,7 +3819,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08dd6a5c08227b148bf7c08dda56efe6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.HeavyPunchSMB
-  _attackID: 0
+  _attackID: 9
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 0
@@ -3949,9 +3996,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6628811051747405274}
   m_Solo: 0
@@ -4002,9 +4049,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8805771252905067955}
   m_Solo: 0
@@ -4027,8 +4074,11 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
@@ -4052,9 +4102,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8805771252905067955}
   m_Solo: 0
@@ -4077,9 +4127,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6628811051747405274}
   m_Solo: 0
@@ -4102,9 +4152,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Punch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8805771252905067955}
   m_Solo: 0
@@ -4256,9 +4306,6 @@ AnimatorStateMachine:
   m_Name: Attack
   m_ChildStates:
   - serializedVersion: 1
-    m_State: {fileID: 8328141107929331845}
-    m_Position: {x: -440, y: -60, z: 0}
-  - serializedVersion: 1
     m_State: {fileID: 8805771252905067955}
     m_Position: {x: 40, y: -200, z: 0}
   - serializedVersion: 1
@@ -4279,6 +4326,9 @@ AnimatorStateMachine:
   - serializedVersion: 1
     m_State: {fileID: 7018468052547485821}
     m_Position: {x: -740, y: 220, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 8328141107929331845}
+    m_Position: {x: -510, y: -60, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -4288,7 +4338,7 @@ AnimatorStateMachine:
   m_EntryPosition: {x: -390, y: -220, z: 0}
   m_ExitPosition: {x: 860, y: 50, z: 0}
   m_ParentStateMachinePosition: {x: -820, y: -60, z: 0}
-  m_DefaultState: {fileID: 8328141107929331845}
+  m_DefaultState: {fileID: 8805771252905067955}
 --- !u!1101 &6693940727641165091
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -4381,8 +4431,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 9
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7452281038287288523}
   m_Solo: 0
@@ -4430,9 +4483,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6628811051747405274}
   m_Solo: 0
@@ -4455,9 +4508,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 4
   - m_ConditionMode: 1
     m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
@@ -4505,9 +4558,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7142586009534698118}
   m_Solo: 0
@@ -4531,8 +4584,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Refining
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 10
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7631892115851761343}
   m_Solo: 0
@@ -4557,6 +4613,9 @@ AnimatorStateTransition:
   m_Conditions:
   - m_ConditionMode: 2
     m_ConditionEvent: IsAttacking
+    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 8328141107929331845}
@@ -4585,6 +4644,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeavyPunchSMB
   _attackID: 4
+  _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
     _amplitude: 5
@@ -4637,9 +4697,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3158497122056379763}
   m_Solo: 0
@@ -4694,9 +4754,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Meteor
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 7
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7018468052547485821}
   m_Solo: 0
@@ -4719,9 +4779,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7937429894567203005}
   m_Solo: 0
@@ -4798,9 +4858,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: RockUpLift
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 6
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6628811051747405274}
   m_Solo: 0
@@ -4849,8 +4909,11 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: HeavyPunch
+    m_ConditionEvent: IsAttacking
     m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 9
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6779888127852869895}
   m_Solo: 0
@@ -4873,9 +4936,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Left
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 2
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 3158497122056379763}
   m_Solo: 0
@@ -4922,7 +4985,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Punch
+  m_Name: Sweep
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -4936,7 +4999,7 @@ AnimatorState:
   - {fileID: 2007598466347762090}
   - {fileID: -5178183747818198830}
   m_StateMachineBehaviours:
-  - {fileID: -4288038358447164044}
+  - {fileID: -8530615335577396973}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -4964,7 +5027,7 @@ AnimatorState:
   m_Transitions:
   - {fileID: -6064135475993373477}
   m_StateMachineBehaviours:
-  - {fileID: -1301219043645019234}
+  - {fileID: -123122877069923033}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -4987,9 +5050,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Stomping_Right
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 3
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7937429894567203005}
   m_Solo: 0
@@ -5012,9 +5075,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 1
-    m_ConditionEvent: Charge
-    m_EventTreshold: 0
+  - m_ConditionMode: 6
+    m_ConditionEvent: ExecutingAttackID
+    m_EventTreshold: 5
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -7142586009534698118}
   m_Solo: 0

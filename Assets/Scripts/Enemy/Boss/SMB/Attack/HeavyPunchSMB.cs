@@ -26,6 +26,8 @@ namespace BossEnemy.SMB
                 _animationEventReceiver.AnimEvent_AttackHitCheck
                     (AttackHitAreaType.Circle, _attackAreaCenter);
             }
+
+
         }
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

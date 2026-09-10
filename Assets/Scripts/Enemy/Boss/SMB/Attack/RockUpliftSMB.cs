@@ -10,6 +10,8 @@ namespace BossEnemy.SMB
 {
     public class RockUpliftSMB : AttackSMB
     {
+        private const string ROCK_UP_LIFT_EFFECT_NAME = "RockUpLift";
+
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.RockEruptionVoice;
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -65,7 +67,7 @@ namespace BossEnemy.SMB
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnTime), cancellationToken: cancellationToken);
 
                 PlayBossSE(SoundCueNames.Boss.RockEruption);
-                _effectManager.PlayEffect(_attackData.AnimParamName, _attackPos);
+                _effectManager.PlayEffect(ROCK_UP_LIFT_EFFECT_NAME, _attackPos);
 
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 

@@ -42,15 +42,12 @@ namespace BossEnemy.Animation
         /// <summary>
         /// 攻撃中フラグを設定する
         /// </summary>
-        public void SetAttacking(bool value, string triggerValue = null)
+        public void SetAttacking(bool value, int attackDataID)
         {
             if (_animator == null) return;
+
             _animator.SetBool(_hashIsAttacking, value);
-
-            Debug.Log("攻撃のトリガー" + triggerValue);
-
-            if (triggerValue != null)
-                _animator.SetTrigger(triggerValue);
+            _animator.SetInteger(_hashExecutingAttackID, attackDataID);
         }
 
         /// <summary>
@@ -118,6 +115,7 @@ namespace BossEnemy.Animation
         private readonly int _hashZSpeed = Animator.StringToHash("Speed_z");
         private readonly int _hashPostureTypeValue = Animator.StringToHash("PostureTypeValue");
         private readonly int _hashIsAttacking = Animator.StringToHash("IsAttacking");
+        private readonly int _hashExecutingAttackID = Animator.StringToHash("ExecutingAttackID");
         private readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
         private readonly int _hashIsDead = Animator.StringToHash("IsDead");
         private readonly int _hashPhaseChange = Animator.StringToHash("PhaseChange");
