@@ -27,9 +27,6 @@ public static class SoundCueNames
         public const string ModeChangeActivate = "ModeChange_Activate";
         public const string ModeChangeDeactivate = "ModeChange_Deactivate";
         public const string WarriorChargeReady = "WarriorChargeReady";
-        public const string Footstep = "PlayerFootstep";
-        public const string ThunderDodge = "PlayerThunderDodge";
-        public const string WarriorRoll = "PlayerRoll";
         public const string LightningStrike = "LightningStrike";
         public const string GroundCrush = "GroundCrush";
     }
@@ -38,14 +35,11 @@ public static class SoundCueNames
     {
         public const string LightningStrike = Player.LightningStrike;
         public const string GroundCrush = Player.GroundCrush;
-        public const string ElectricDodgeSkill = "ElectricDodgeSkill";
     }
 
     public static class Enemy
     {
         public const string DraugrWeaponSwing = "DraugrWeaponSwing";
-        public const string DraugrShieldbash = "DraugrShieldbash";
-        public const string StoneRingAttack = "StoneRingAttack";
         public const string DraugrAttackVoice = "DraugrAttackVoice";
         public const string DraugrBark = "DraugrBark";
         public const string DraugrDamageVoice = "DraugrDamageVoice";
@@ -77,69 +71,6 @@ public static class SoundCueNames
         public const string MeteorVoice = "BossMeteorImpactVoice";
         public const string OneLegBreakVoice = "BossOneLegBreakVoice";
         public const string TwoLegBreakDownVoice = "BossTwoLegBreakDownVoice";
-    }
-
-    // Player_Voiceキューシート専用。SEとは異なるシートを指定して再生する。
-    public static class PlayerVoice
-    {
-        public const string DamageLarge01 = "Damage_Voice_Large_01";
-        public const string DamageLarge02 = "Damage_Voice_Large_02";
-        public const string DamageMedium01 = "Damage_Voice_Medium_01";
-        public const string DamageMedium02 = "Damage_Voice_Medium_02";
-        public const string DamageSmall01 = "Damage_Voice_Small_01";
-        public const string DamageSmall02 = "Damage_Voice_Small_02";
-        public const string Death = "Death_Voice";
-        public const string IntroMovie = "IntroMovie_Voice";
-        public const string ModeChange01 = "ModeChange_Voice_01";
-        public const string ModeChange02 = "ModeChange_Voice_02";
-        public const string ModeChange03 = "ModeChange_Voice_03";
-        public const string Result = "Result_Voice";
-        public const string Revive01 = "Revive_Voice_01";
-        public const string Revive02 = "Revive_Voice_02";
-        public const string SkillGet01 = "SkillGet_Voice_01";
-        public const string SkillGet02 = "SkillGet_Voice_02";
-        public const string SkillGet03 = "SkillGet_Voice_03";
-        public const string SkillGet04 = "SkillGet_Voice_04";
-        public const string SkillGet05 = "SkillGet_Voice_05";
-        public const string SkillGet06 = "SkillGet_Voice_06";
-        public const string ThunderCombo0101 = "Thunder_Voice_Combo_01_01";
-        public const string ThunderCombo0102 = "Thunder_Voice_Combo_01_02";
-        public const string ThunderCombo0103 = "Thunder_Voice_Combo_01_03";
-        public const string ThunderCombo0104 = "Thunder_Voice_Combo_01_04";
-        public const string ThunderCombo0201 = "Thunder_Voice_Combo_02_01";
-        public const string ThunderCombo0202 = "Thunder_Voice_Combo_02_02";
-        public const string ThunderCombo0203 = "Thunder_Voice_Combo_02_03";
-        public const string ThunderCombo0204 = "Thunder_Voice_Combo_02_04";
-        public const string ThunderCombo0301 = "Thunder_Voice_Combo_03_01";
-        public const string ThunderCombo0302 = "Thunder_Voice_Combo_03_02";
-        public const string ThunderCombo0303 = "Thunder_Voice_Combo_03_03";
-        public const string ThunderCombo0304 = "Thunder_Voice_Combo_03_04";
-        public const string ThunderCombo0305 = "Thunder_Voice_Combo_03_05";
-        public const string ThunderCombo0306 = "Thunder_Voice_Combo_03_06";
-        public const string ThunderCombo0401 = "Thunder_Voice_Combo_04_01";
-        public const string ThunderCombo0402 = "Thunder_Voice_Combo_04_02";
-        public const string ThunderCombo0403 = "Thunder_Voice_Combo_04_03";
-        public const string ThunderCombo0404 = "Thunder_Voice_Combo_04_04";
-        public const string ThunderCombo0405 = "Thunder_Voice_Combo_04_05";
-        public const string ThunderCombo0406 = "Thunder_Voice_Combo_04_06";
-        public const string ThunderCombo0501 = "Thunder_Voice_Combo_05_01";
-        public const string ThunderCombo0502 = "Thunder_Voice_Combo_05_02";
-        public const string ThunderCombo0503 = "Thunder_Voice_Combo_05_03";
-        public const string ThunderCombo0504 = "Thunder_Voice_Combo_05_04";
-        public const string ThunderCombo0505 = "Thunder_Voice_Combo_05_05";
-        public const string ThunderCombo0506 = "Thunder_Voice_Combo_05_06";
-        public const string ThunderCombo0507 = "Thunder_Voice_Combo_05_07";
-        public const string WarriorAttack01 = "Warrior_Voice_Attack_01";
-        public const string WarriorAttack02 = "Warrior_Voice_Attack_02";
-        public const string WarriorAttack03 = "Warrior_Voice_Attack_03";
-        public const string WarriorAttack04 = "Warrior_Voice_Attack_04";
-        public const string WarriorAttack05 = "Warrior_Voice_Attack_05";
-        public const string WarriorAttack06 = "Warrior_Voice_Attack_06";
-    }
-
-    public static class Environment
-    {
-        public const string VillageFire = "VillageFire";
     }
 
     public static class BGM

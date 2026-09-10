@@ -192,26 +192,6 @@ public class MobEnemy : Enemy,IFormationParticipant
         _armor.OnBroken += BreakArmor;
     }
 
-    /// <summary>
-    /// 現在有効な鎧を返す。サブクラスが独自の防御システム（盾など）を持つ場合はオーバーライドする。
-    /// </summary>
-    protected virtual IArmorHealth ActiveArmor =>
-        (_armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor) ? _armor : null;
-
-    // Armorの登録
-    [SerializeField] protected MobArmor _armor;
-
-    protected EnemyBehaviourRunner _runner;
-    protected MeleeAttackBehaviour _attack;
-    protected TurnBehaviour _turn;
-    protected BarkBehaviour _bark;
-
-    protected float AttackCooldownRemaining
-    {
-        get => _context.AttackCooldownRemaining;
-        set => _context.AttackCooldownRemaining = value;
-    }
-
     protected override void RefreshDataDependents()
     {
         base.RefreshDataDependents();
@@ -229,12 +209,27 @@ public class MobEnemy : Enemy,IFormationParticipant
         OnArmorRegistered?.Invoke(armor);
     }
 
+
+
+    /// <summary>
+    /// 現在有効な鎧を返す。サブクラスが独自の防御システム（盾など）を持つ場合はオーバーライドする。
+    /// </summary>
+    protected virtual IArmorHealth ActiveArmor =>
+        (_armor != null && _defenceContext.EnemyType == EnemyDefenceType.Armor) ? _armor : null;
+
+    // Armorの登録
+    [SerializeField] protected MobArmor _armor;
+
     [SerializeField, Tooltip("root直下に配置するゲージUI用の固定Transform")]
     private Transform _uiAnchor;
 
+    protected EnemyBehaviourRunner _runner;
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
     private EnemyConditionController _conditionController;
+    protected MeleeAttackBehaviour _attack;
+    protected TurnBehaviour _turn;
+    protected BarkBehaviour _bark;
     private BehaviourInitContext _initCtx;
 
     protected override void OnDestroy()
@@ -566,6 +561,12 @@ public class MobEnemy : Enemy,IFormationParticipant
             new ElectrifiedCondition(context.ElectricShock.DurationEffect, enemyIsBoss: false));
 
         this.ActivateShockDebuff().Forget();
+    }
+
+    protected float AttackCooldownRemaining
+    {
+        get => _context.AttackCooldownRemaining;
+        set => _context.AttackCooldownRemaining = value;
     }
 
 #if UNITY_EDITOR

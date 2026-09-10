@@ -1,13 +1,9 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Character;
-using BossEnemy.Infrastructure;
-using BossEnemy.Infrastructure.Repository;
-using BossEnemy.Interface;
-using BossEnemy.UI;
-using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+
+using BossEnemy.View;
+using BossEnemy.Infrastructure;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -28,45 +24,18 @@ public class BossEnemySpawner : MonoBehaviour
     /// <param name="poolKey">Enemyのキー</param>
     /// <param name="position">生成位置</param>
     /// <returns>生成されたEnemy</returns>
-    public async UniTask<IBossEnemyCharacterView> Spawn(Vector3 position, IBossHPView bossEnemyHPUI, IPlayer attackTarget)
+    public BossEnemyView Spawn(Vector3 position, out BossEnemyUIView bossEnemyUIView)
     {
-        await UniTask.WaitUntil(() => _isLoadedRepositries);
+        BossEnemyView enemy = _bossEnemyObjectPool.Get();
+        bossEnemyUIView = _enemyUIObjectPool.Get();
 
-        BossCharacterView enemyView = _bossEnemyObjectPool.Get();
-        bossEnemyHPUI = _enemyUIObjectPool.Get();
+        enemy.InjectServices(_services);
+        enemy.SetPosition(position);
+        enemy.SetSpawner(_attackHitAreaSpawner);
 
-        // Viewに必要な情報を渡す
-        enemyView.InjectServices(_services);
-        enemyView.SetPosition(position);
-        enemyView.SetSpawner(_attackHitAreaSpawner);
+        enemy.BossEnemyController.SetView(enemy, bossEnemyUIView);
 
-        // Entityの取得
-        IBossCharacterEntity characterEntity = _bossCharacterEntityRepository.GetEntity(_id);
-
-        // AIとなるBehaviourTreeのEntryNode(スタート地点)を取得
-        if (!_bossAIBehaviourTreeNodeRepository.TryGetEntryNode(_id, out EntryNode entryNode))
-        {
-            Debug.LogError("entryNodeの取得に失敗しました");
-        }
-
-        NodeRunningConditionNotifier nodeRunningConditionNotifier = new NodeRunningConditionNotifier();
-
-        // 各種初期化、生成
-        BossEnemyHPUIPresenter bossEnemyHPUIPresenter = new(characterEntity, bossEnemyHPUI);
-        entryNode.Init(characterEntity, nodeRunningConditionNotifier);
-
-        BossCharacterController bossEnemyController = new BossCharacterController();
-        enemyView.Init(bossEnemyController);
-
-        Quaternion quaternion = Quaternion.LookRotation(position - _rotate);
-        characterEntity.OnSpawn(attackTarget, position, quaternion);
-
-        bossEnemyController.Init(enemyView, _services, enemyView.BossEnemyAnimationEventReceiver, entryNode, characterEntity);
-
-        // HPUI関連の初期化
-        bossEnemyHPUIPresenter.Init();
-        bossEnemyHPUI.Init(bossEnemyHPUIPresenter);
-        return enemyView;
+        return enemy;
     }
 
     [Header("プール生成するためのエネミーのデータ")]
@@ -80,24 +49,12 @@ public class BossEnemySpawner : MonoBehaviour
     [Header("最初のBossEnemyの生成数")]
     [SerializeField] private int _preloadCount = 1;
 
-    [Header("生成時に向いている方向")]
-    [SerializeField] private Vector3 _rotate;
-
     [Header("BossEnemyが使用するSpawner")]
     [SerializeField] private AttackHitAreaSpawner _attackHitAreaSpawner;
 
-    [SerializeField, Header("スポーンさせるボスのID")]
-
-    private int _id;
-
-    private bool _isLoadedRepositries = false;
     private EnemyServices _services;
-    private GenericObjectPool<BossCharacterView> _bossEnemyObjectPool;
-    private GenericObjectPool<BossEnemyHPUIView> _enemyUIObjectPool;
-
-    // 各種リポジトリクラス
-    private IBossCharacterEntityRepository _bossCharacterEntityRepository;
-    private IBossAIBehaviourTreeNodeRepository _bossAIBehaviourTreeNodeRepository;
+    private GenericObjectPool<BossEnemyView> _bossEnemyObjectPool;
+    private GenericObjectPool<BossEnemyUIView> _enemyUIObjectPool;
 
     /// <summary>
     /// Enemyプールの辞書
@@ -105,16 +62,6 @@ public class BossEnemySpawner : MonoBehaviour
     /// Value:EnemyobjectPool
     /// </summary>
     private readonly Dictionary<string, EnemyObjectPool> _pools = new();
-
-    private void Awake()
-    {
-        LoadRepositories().Forget();
-    }
-
-    private void OnDestroy()
-    {
-        ReleaseRepositories();
-    }
 
     /// <summary>
     /// Enemy死亡時の処理
@@ -125,43 +72,18 @@ public class BossEnemySpawner : MonoBehaviour
         
     }
 
-    private async UniTask LoadRepositories()
-    {
-        Debug.Log("RepositryLoad開始");
-
-        _bossCharacterEntityRepository = await AssetsLoader.LoadAssetAsync<BossCharacterEntityRepository>
-            (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossEnemyEntityRepository);
-
-        _bossAIBehaviourTreeNodeRepository = await AssetsLoader.LoadAssetAsync<BossAIBehaviourTreeNodeRepositry>
-            (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAIBehaviourTreeNodeRepositry);
-
-        _bossCharacterEntityRepository.Init();
-
-        _isLoadedRepositries = true;
-        Debug.Log("RepositryLoad終了");
-    }
-
-    private void ReleaseRepositories()
-    {
-        _bossCharacterEntityRepository = null;
-        _bossAIBehaviourTreeNodeRepository = null;
-
-        AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossEnemyEntityRepository);
-        AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAIBehaviourTreeNodeRepositry);
-    }
-
     [Serializable]
     public struct BossPoolData
     {
         public string Key => _key;
-        public BossCharacterView BossPrefab => _bossPrefab;
-        public BossEnemyHPUIView BossUIPrefab => _enemyUIPrefab;
+        public BossEnemyView BossPrefab => _bossPrefab;
+        public BossEnemyUIView BossUIPrefab => _enemyUIPrefab;
 
         [Header("BossEnemyを呼び出すための名前")]
         [SerializeField] private string _key;
 
         [Header("BossEnemyのPrefab")]
-        [SerializeField] private BossCharacterView _bossPrefab;
-        [SerializeField] private BossEnemyHPUIView _enemyUIPrefab;
+        [SerializeField] private BossEnemyView _bossPrefab;
+        [SerializeField] private BossEnemyUIView _enemyUIPrefab;
     }
 }

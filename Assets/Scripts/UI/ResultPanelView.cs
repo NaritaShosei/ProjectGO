@@ -1,13 +1,8 @@
-using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class ResultPanelView : MonoBehaviour
 {
-    public event Action TitleRequested;
-
     public void SetBossClearTime(string value)
     {
         if (_clearTimeValue != null)
@@ -30,8 +25,6 @@ public class ResultPanelView : MonoBehaviour
     {
         _root.SetActive(true);
         Canvas.ForceUpdateCanvases();
-        if (_titleButton != null && EventSystem.current != null)
-            EventSystem.current.SetSelectedGameObject(_titleButton.gameObject);
     }
 
     public void Hide()
@@ -44,21 +37,9 @@ public class ResultPanelView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _clearTimeValue;
     [SerializeField] private TextMeshProUGUI _scoreValue;
     [SerializeField] private TextMeshProUGUI _levelValue;
-    [SerializeField] private Button _titleButton;
 
     private void Awake()
     {
-        if (_titleButton != null)
-            _titleButton.onClick.AddListener(HandleTitleButtonClicked);
-
         Hide();
     }
-
-    private void OnDestroy()
-    {
-        if (_titleButton != null)
-            _titleButton.onClick.RemoveListener(HandleTitleButtonClicked);
-    }
-
-    private void HandleTitleButtonClicked() => TitleRequested?.Invoke();
 }

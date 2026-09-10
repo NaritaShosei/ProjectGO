@@ -1,7 +1,6 @@
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public sealed class GameOverView : MonoBehaviour, IGameOverView
@@ -15,10 +14,6 @@ public sealed class GameOverView : MonoBehaviour, IGameOverView
     {
         if (_messageText != null) _messageText.text = message;
         SetVisible(true);
-
-        // 表示した時点で決定入力を受け取れるよう、戻るボタンを初期選択する。
-        if (_titleButton != null && EventSystem.current != null)
-            EventSystem.current.SetSelectedGameObject(_titleButton.gameObject);
 
         // 死亡アニメーションやカメラ演出は、ゲームオーバー理由別のイベント購読側で再生する。
         switch (reason)

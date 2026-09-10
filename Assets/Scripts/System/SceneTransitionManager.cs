@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 
@@ -41,7 +39,6 @@ public class SceneTransitionManager : MonoBehaviour
 
     [SerializeField] private LoadingScreenView _loadingScreen;
     private bool _isTransitioning;
-    private readonly List<BaseInputModule> _suspendedUIInputModules = new List<BaseInputModule>();
 
     private void Awake()
     {
@@ -53,9 +50,6 @@ public class SceneTransitionManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        SceneManager.sceneLoaded -= HandleSceneLoaded;
-        RestoreUIInput();
-
         if (ServiceLocator.TryGet(out SceneTransitionManager current) && ReferenceEquals(current, this))
         {
             ServiceLocator.Unregister<SceneTransitionManager>();
@@ -98,11 +92,6 @@ public class SceneTransitionManager : MonoBehaviour
 
         try
         {
-            // PlayerのActionMap停止ではUIの決定・移動・クリックは止まらない。
-            // sceneLoadedは遷移先のStartより先に呼ばれるため、初回のUI操作も遮断できる。
-            SceneManager.sceneLoaded += HandleSceneLoaded;
-            SuspendUIInput();
-
             Debug.Log($"{sceneName}へ遷移する");
 
             inputHandler?.EnableInput(false);
@@ -230,9 +219,6 @@ public class SceneTransitionManager : MonoBehaviour
             }
             finally
             {
-                SceneManager.sceneLoaded -= HandleSceneLoaded;
-                RestoreUIInput();
-
                 if (gameTimePaused)
                 {
                     Time.timeScale = previousTimeScale;
@@ -242,50 +228,5 @@ public class SceneTransitionManager : MonoBehaviour
                 _isTransitioning = false;
             }
         }
-    }
-
-    private void HandleSceneLoaded(Scene scene, LoadSceneMode loadMode)
-    {
-        SuspendUIInput();
-
-        // Additiveロードでは旧シーンのEventSystemがcurrentに残る。
-        // 遷移先のStartが初期選択を旧シーンへ登録しないよう、入力停止中に切り替える。
-        foreach (GameObject root in scene.GetRootGameObjects())
-        {
-            foreach (EventSystem eventSystem in root.GetComponentsInChildren<EventSystem>())
-            {
-                if (!eventSystem.isActiveAndEnabled)
-                    continue;
-
-                EventSystem.current = eventSystem;
-                return;
-            }
-        }
-    }
-
-    private void SuspendUIInput()
-    {
-        // EventSystem自体は残し、タイトルの初期選択設定を妨げず入力処理だけを止める。
-        foreach (BaseInputModule inputModule in FindObjectsByType<BaseInputModule>(
-                     FindObjectsInactive.Include, FindObjectsSortMode.None))
-        {
-            if (!inputModule.enabled)
-                continue;
-
-            _suspendedUIInputModules.Add(inputModule);
-            inputModule.enabled = false;
-        }
-    }
-
-    private void RestoreUIInput()
-    {
-        // 元から無効なモジュールや、アンロードで破棄されたモジュールは復帰対象にしない。
-        foreach (BaseInputModule inputModule in _suspendedUIInputModules)
-        {
-            if (inputModule != null)
-                inputModule.enabled = true;
-        }
-
-        _suspendedUIInputModules.Clear();
     }
 }

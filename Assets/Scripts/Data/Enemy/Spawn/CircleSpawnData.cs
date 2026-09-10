@@ -227,7 +227,7 @@ public struct CircleSpawnStrategy : ISpawnStrategy
 
                 _enemyManager.SpawnBoss(
                     enemyKey,
-                    position).Forget();
+                    position);
                 break;
         }
     }

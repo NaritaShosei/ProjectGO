@@ -1,10 +1,11 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Infrastructure;
 
 // Boss関連
 using BossEnemy.Enum;
-using BossEnemy.Character;
+using BossEnemy.Data;
 
 public class DamageSystem
 {
@@ -77,6 +78,51 @@ public class DamageSystem
 
         return Mathf.RoundToInt(Mathf.Max(
             MIN_DAMAGE, damage * (1f - reductionRate)));
+    }
+
+    /// <summary> BossEnemyの被弾場所の硬度(肉質)を割り出す </summary>
+    /// <param name="partsType"> 被弾場所 </param>
+    /// <param name="bossEnemyData"> 被弾したBossEnemyのData </param>
+    /// <returns> 被弾場所の硬度(肉質) </returns>
+    public static int GetHitPartsDefense(BodysDefensesType partsType, BossEnemyData bossEnemyData)
+    {
+        switch (partsType)
+        {
+            case BodysDefensesType.None:
+                Debug.LogError("PartsNone");
+                break;
+            case BodysDefensesType.Hard:
+                return bossEnemyData.HardSpotsDefense;
+            case BodysDefensesType.Normal:
+                return bossEnemyData.NormalSpotsDefense;
+            case BodysDefensesType.WeekPoint:
+                return bossEnemyData.WeekPointDefense;
+            case BodysDefensesType.VitalPoint:
+                return bossEnemyData.VitalPointDefense;
+        }
+
+        return 0;
+    }
+
+    /// <summary> BossEnemyの被弾場所の鎧の硬度(肉質)を割り出す </summary>
+    public static int GetHitPartsArmorDefense(ArmorAttachmentPointType attachmentPointsType, BossEnemyData bossEnemyData)
+    {
+        switch (attachmentPointsType)
+        {
+            case ArmorAttachmentPointType.None:
+                Debug.LogError("PartsNone");
+                break;
+            case ArmorAttachmentPointType.LeftArm:
+                return bossEnemyData.LeftArmArmer.Defense;
+            case ArmorAttachmentPointType.RightArm:
+                return bossEnemyData.RightArmArmer.Defense;
+            case ArmorAttachmentPointType.LeftLeg:
+                return bossEnemyData.LeftLegArmer.Defense;
+            case ArmorAttachmentPointType.RightLeg:
+                return bossEnemyData.RightLegArmer.Defense;
+        }
+
+        return 0;
     }
 
     private static DamageSystemSettings _settings;

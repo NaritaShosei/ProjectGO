@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using Cysharp.Threading.Tasks; 
 
 public class TestInGameUIManager : MonoBehaviour
@@ -19,9 +18,6 @@ public class TestInGameUIManager : MonoBehaviour
         {
             HandleTransitionToResult().Forget();
         });
-
-        if (EventSystem.current != null)
-            EventSystem.current.SetSelectedGameObject(_transitionToResult.gameObject);
     }
 
     private void OnDestroy()

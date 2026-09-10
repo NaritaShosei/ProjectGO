@@ -29,12 +29,9 @@ public sealed class LockOnCameraState : ICameraState
             _playerTransform.position,
             Target.GetTargetCenter().position) > _autoUnlockRange;
 
-    /// <summary>ロックオン対象を設定する。</summary>
-    /// <param name="isInitialLockOn">初回ロックオンなら true、対象切り替えなら false（Enter でのブレンド起点判定に使う）。</param>
-    public void SetTarget(ILockOnTarget target, bool isInitialLockOn)
+    public void SetTarget(ILockOnTarget target)
     {
         Target = target;
-        _isInitialLockOn = isInitialLockOn;
     }
 
     /// <summary>画面座標の計算に使用するメインカメラを更新します。</summary>
@@ -45,8 +42,7 @@ public sealed class LockOnCameraState : ICameraState
 
     public void Enter()
     {
-        // 初回は通常カメラ姿勢から、切り替えは現在のロックオン姿勢からブレンド
-        _motionController.BeginLockOnBlend(snapToNormalCamera: _isInitialLockOn);
+        _motionController.BeginLockOnBlend();
     }
 
     public void Tick(float timeScale, Vector2 cameraInput)
@@ -69,5 +65,4 @@ public sealed class LockOnCameraState : ICameraState
     private readonly Transform _playerTransform;
     private readonly float _autoUnlockRange;
     private Camera _mainCamera;
-    private bool _isInitialLockOn;
 }

@@ -1,7 +1,6 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using System;
-using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,32 +32,18 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
         _onBehindCameraChanged = onBehindCameraChanged;
         _linkEnemy = enemyTransform;
 
-        if (_gaugeIcons != null && _gaugeIcons.Length != 0)
-            _gaugeIcons = _gaugeIcons.OrderByDescending(icon => icon.FillThreshold).ToArray();
-
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
             _mainCamera = cameraManager.MainCamera;
         }
 
-        // 初回生成時もプール返却時と同じ初期表示にそろえる。
-        ResetView();
+        SetVisible(false);
     }
 
     public void UpdateGauge(float current, float max)
     {
         float hpAmount = current / max;
         AnimateHPGauge(hpAmount);
-
-        if (_gaugeIcons == null || _gaugeIcons.Length == 0) return;
-
-        foreach (var iconData in _gaugeIcons)
-        {
-            if (hpAmount <= iconData.FillThreshold)
-            {
-                _gaugeIcon.sprite = iconData.IconSprite;
-            }
-        }
     }
 
     public void SetVisible(bool visible)
@@ -74,13 +59,6 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
 
         _mainGauge.fillAmount = 1f;
         _delayGauge.fillAmount = 1f;
-
-        if (_gaugeIcons != null && _gaugeIcons.Length != 0)
-        {
-            // 降順に並べ替えたアイコンの中で、最も高い閾値のアイコンをデフォルトとして設定
-            _gaugeIcon.sprite = _gaugeIcons[0].IconSprite;
-        }
-
         SetVisible(false);
     }
 
@@ -92,19 +70,6 @@ public class EnemyGaugeView : MonoBehaviour, IPoolable
     [SerializeField] private float _animationDuration = 0.4f;
     [SerializeField] private float _animationDelay = 0.4f;
     [SerializeField] private Ease _animationEase = Ease.Linear;
-
-    [Serializable]
-    private struct GaugeIconData
-    {
-        public float FillThreshold => _fillThreshold;
-        public Sprite IconSprite => _iconSprite;
-
-        [SerializeField] private float _fillThreshold;
-        [SerializeField] private Sprite _iconSprite;
-    }
-
-    [SerializeField] private Image _gaugeIcon;
-    [SerializeField] private GaugeIconData[] _gaugeIcons;
 
     private Sequence _delaySequence;
     private Transform _linkEnemy;

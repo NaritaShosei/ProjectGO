@@ -82,7 +82,7 @@ public class GameOverState : ISequenceState
     [SerializeField, Tooltip("ゲームオーバーからタイトルへ遷移するまでの時間（秒）")] private float _gameOverDuration = 10f;
     [SerializeField, Tooltip("ゲームオーバーの残り時間を表示するUI")] private TextCountDownTimerView _gameOverTimerView;
     [SerializeField, Tooltip("ゲームオーバー表示UI（MVPのView）")] private GameOverView _gameOverView;
-    [SerializeField, Tooltip("タイトルへ戻るボタンで遷移するシーン名")] private string _titleSceneName = "TitleScene";
+    [SerializeField, Tooltip("タイトルへ戻るボタンで遷移するシーン名")] private string _titleSceneName = "GOTestScene";
 
     [Header("シークエンス設定")]
     [SerializeField, Tooltip("リスタート時に遷移するシークエンス")] private SequenceStateType _restartSequence = SequenceStateType.MobAndSkill;

@@ -2,43 +2,36 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.Enum;
-using BossEnemy.Effect;
+using BossEnemy.View.Effect;
 
 namespace BossEnemy.Infrastructure
 {
     public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
     {
-        public HitAreaView Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime, Vector3 forward = default)
+        public void Spawn(HitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime)
         {
-            HitAreaView hitArea = GetHitArea(hitAreaType);
+            HitAreaViewBase hitArea = GetHitArea(hitAreaType);
             hitArea.gameObject.transform.position = spawnCenterPos;
-            hitArea.gameObject.transform.forward = forward;
             hitArea.OnDespawn += Release;
             hitArea.ActiveView(range, despawnTime);
-
-            return hitArea;
         }
 
         [Header("円形のHitArea")]
         [SerializeField] private CircleHitAreaView _circleHitEffect;
 
-        [Header("正方形のHitArea")]
-        [SerializeField] private SquareHitAreaView _squareHitEffect;
+        private Dictionary<HitAreaType, Queue<HitAreaViewBase>> _pool = new();
 
-        private Dictionary<AttackHitAreaType, Queue<HitAreaView>> _pool = new();
-
-        private HitAreaView GetHitArea(AttackHitAreaType hitAreaType)
+        private HitAreaViewBase GetHitArea(HitAreaType hitAreaType)
         {
-            HitAreaView hitArea = null;
+            HitAreaViewBase hitArea = null;
 
             switch (hitAreaType)
             {
-                case AttackHitAreaType.None:
+                case HitAreaType.None:
                     Debug.LogError("該当するものがありません");
                     return null;
-                case AttackHitAreaType.Circle:
-                    if (TryGet(out hitArea, AttackHitAreaType.Circle))
+                case HitAreaType.Circle:
+                    if (TryGet(out hitArea, HitAreaType.Circle))
                     {
                         hitArea.gameObject.SetActive(true);
                         return hitArea;
@@ -49,28 +42,16 @@ namespace BossEnemy.Infrastructure
                     if (hitArea != null)
                         hitArea.gameObject.transform.SetParent(gameObject.transform, true);
                     return hitArea;
-                case AttackHitAreaType.Square:
-                    if (TryGet(out hitArea, AttackHitAreaType.Square))
-                    {
-                        hitArea.gameObject.SetActive(true);
-                        return hitArea;
-                    }
-
-                    hitArea = Instantiate(_squareHitEffect);
-
-                    if (hitArea != null)
-                        hitArea.gameObject.transform.SetParent(gameObject.transform, true);
-                    return hitArea;
             }
 
             return null;
         }
 
-        private bool TryGet(out HitAreaView result, AttackHitAreaType hitAreaType)
+        private bool TryGet(out HitAreaViewBase result, HitAreaType hitAreaType)
         {
             if (_pool.ContainsKey(hitAreaType))
             {
-                if (_pool[hitAreaType].TryDequeue(out HitAreaView obj))
+                if (_pool[hitAreaType].TryDequeue(out HitAreaViewBase obj))
                 {
                     result = obj;
                     return true;
@@ -78,17 +59,18 @@ namespace BossEnemy.Infrastructure
             }
             else
             {
-                _pool.Add(hitAreaType, new Queue<HitAreaView>());
+                _pool.Add(hitAreaType, new Queue<HitAreaViewBase>());
             }
 
             result = null;
             return false;
         }
 
-        private void Release(HitAreaView hitArea, AttackHitAreaType hitAreaType)
+        private void Release(HitAreaViewBase hitArea, HitAreaType hitAreaType)
         {
             hitArea.OnDespawn -= Release;
-            _pool[hitAreaType]?.Enqueue(hitArea);
+            _pool[hitAreaType].Enqueue(hitArea);
         }
     }
+
 }

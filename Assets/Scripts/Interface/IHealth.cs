@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 /// <summary>
 /// プレイヤーがダメージを受けた際のリアクション強度。
