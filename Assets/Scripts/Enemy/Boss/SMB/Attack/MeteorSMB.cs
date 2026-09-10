@@ -11,6 +11,8 @@ namespace BossEnemy.SMB
 {
     public class MeteorSMB : AttackSMB
     {
+        private const string METEOR_EFFECT_NAME = "Meteor";
+
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.MeteorVoice;
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -86,7 +88,7 @@ namespace BossEnemy.SMB
                 _attackHitAreaSpawner.Spawn
                     (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius, despawnTime);
 
-                _effectManager.PlayEffect(_attackData.AnimParamName, attackPos);
+                _effectManager.PlayEffect(METEOR_EFFECT_NAME, attackPos);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
 

@@ -26,6 +26,8 @@ namespace BossEnemy.SMB
                 _animationEventReceiver.AnimEvent_AttackHitCheck
                     (AttackHitAreaType.Circle, _attackAreaCenter);
             }
+
+
         }
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -61,11 +63,11 @@ namespace BossEnemy.SMB
                 _attackData.AttackHitAreaRadius,
                 displayDuration);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_startAttackHitTiming));
+            await UniTask.Delay(TimeSpan.FromSeconds(_startAttackHitTiming), cancellationToken: cancellationToken);
 
             _isAttackHitCheck = true;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_endAttackHitTiming));
+            await UniTask.Delay(TimeSpan.FromSeconds(_endAttackHitTiming), cancellationToken: cancellationToken);
 
             _isAttackHitCheck = false;
         }

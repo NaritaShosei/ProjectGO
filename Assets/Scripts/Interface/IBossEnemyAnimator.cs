@@ -20,7 +20,7 @@ public interface IBossEnemyAnimator
     /// <summary>
     /// 攻撃中フラグを設定する
     /// </summary>
-    public void SetAttacking(bool value, string triggerValue = null);
+    public void SetAttacking(bool value, int attackDataID);
 
     /// <summary>
     /// 各所アーマー破壊フラグを設定する
