@@ -228,6 +228,14 @@ namespace BossEnemy.Character
             _bossEnemyAnimator.SetAttacking(false, 0);
         }
 
+        public void StopActiveAttacks()
+        {
+            foreach (AttackSMB attack in _attackSMBList)
+            {
+                attack.StopPlayAttack();
+            }
+        }
+
         public void FinishAttackAnimation()
         {
             _bossEnemyAnimator.SetAttacking(false, 0);
@@ -242,7 +250,7 @@ namespace BossEnemy.Character
         /// <summary>ConditionによりActionを阻害する</summary>
         public void OnConditionInterrupt()
         {
-
+            StopActiveAttacks();
         }
 
         public void ChangePhase(int nextPhase)

@@ -166,6 +166,7 @@ namespace BossEnemy.Character
         /// <summary> 死亡イベント発火時の処理 </summary>
         private void HandleDead()
         {
+            _bossCharacterView.StopActiveAttacks();
             UnregisterEvents();
 
             _bossCharacterView.HandleDead();
@@ -194,6 +195,8 @@ namespace BossEnemy.Character
         /// <summary> フェーズ切り替えイベント発火時の処理 </summary>
         private void HandlePhaseChange()
         {
+            _bossCharacterView.StopActiveAttacks();
+
             if(_characterEntity.ExecutingAttackData.Value.ID != 0)
             {
                 HandleAttackCompleted();
@@ -216,6 +219,10 @@ namespace BossEnemy.Character
         /// <param name="posture"> ボスの体勢 </param>
         private void HandleChangePosture(PostureType posture)
         {
+            // のけぞり・ダウンへ遷移する場合、進行中の攻撃処理を残さない。
+            if (posture != PostureType.Standing)
+                _bossCharacterView.StopActiveAttacks();
+
             _bossCharacterView.ChangePosture(posture);
         }
 

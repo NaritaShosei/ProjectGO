@@ -6,6 +6,7 @@ using BossEnemy.Enum;
 using BossEnemy.Interface;
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            if( _attackStartTime <= stateInfo.length)
+            if( _attackStartTime >= stateInfo.length)
             {
                 NotifyAttackEnd();
                 return;
@@ -47,10 +48,10 @@ namespace BossEnemy.SMB
             // 攻撃開始済みフラグ
             _isAttackPlayed = false;
 
-            // CancellationTokenSourceの初期化
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = new();
+            // 攻撃ごとにトークンを保持する。通常のアニメーション終了では
+            // 既存の PlayAttack を中断しない。
+            _currentPlayAttackCts = new CancellationTokenSource();
+            _playAttackCancellationTokenSources.Add(_currentPlayAttackCts);
 
             // 攻撃ヒットイベントの発火を検知できるようにする
             _animationEventReceiver.OnHitAttack += HandleAttackHit;
@@ -63,7 +64,7 @@ namespace BossEnemy.SMB
             if(_elapsedTime >= _attackStartTime && !_isAttackPlayed)
             {
                 // 攻撃を開始する
-                PlayAttackAsync(_cts.Token).Forget();
+                PlayAttackAsync(_currentPlayAttackCts).Forget();
 
                 // 攻撃開始済みフラグをTrueにする
                 _isAttackPlayed = true;
@@ -84,9 +85,14 @@ namespace BossEnemy.SMB
 
         public void StopPlayAttack()
         {
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = null;
+            foreach (CancellationTokenSource cts in _playAttackCancellationTokenSources.ToArray())
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+
+            _playAttackCancellationTokenSources.Clear();
+            _currentPlayAttackCts = null;
         }
 
         public void SetAttackData(Attack.AttackData attackData)
@@ -136,8 +142,9 @@ namespace BossEnemy.SMB
         // 現在の再生開始からの経過時間（秒）
         protected float _elapsedTime;
 
-        // 攻撃が中断になった際のCancellationTokenSource
-        private CancellationTokenSource _cts = new();
+        // 実行中の PlayAttack をアニメーション State とは独立して追跡する。
+        private readonly List<CancellationTokenSource> _playAttackCancellationTokenSources = new();
+        private CancellationTokenSource _currentPlayAttackCts;
 
         protected void PlayBossSE(string cueName)
         {
@@ -168,15 +175,20 @@ namespace BossEnemy.SMB
         /// 攻撃終了イベントそのものは Idle への遷移完了後に送るため、
         /// Animator の遷移条件と攻撃終了通知が相互待ちにならない。
         /// </summary>
-        private async UniTaskVoid PlayAttackAsync(CancellationToken cancellationToken)
+        private async UniTaskVoid PlayAttackAsync(CancellationTokenSource cts)
         {
             try
             {
-                await PlayAttack(cancellationToken);
+                await PlayAttack(cts.Token);
             }
             catch (OperationCanceledException)
             {
                 // 攻撃中止
+            }
+            finally
+            {
+                _playAttackCancellationTokenSources.Remove(cts);
+                cts.Dispose();
             }
         }
 
@@ -196,9 +208,7 @@ namespace BossEnemy.SMB
         private void OnDestroy()
         {
             // 破棄時に非同期処理をキャンセル
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = null;
+            StopPlayAttack();
         }
     }
 }

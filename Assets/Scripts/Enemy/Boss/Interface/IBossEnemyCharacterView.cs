@@ -42,6 +42,9 @@ namespace BossEnemy.Interface
         /// <summary> 攻撃終了処理 </summary>
         public void AttackCompleted();
 
+        /// <summary> フェーズ変更・死亡などによって中断された攻撃処理を停止する </summary>
+        public void StopActiveAttacks();
+
         /// <summary> フェーズ切り替え処理 </summary>
         public void ChangePhase(int nextPhase);
 
