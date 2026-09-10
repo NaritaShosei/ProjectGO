@@ -11,9 +11,9 @@
 
 カメラシステムの初期化・更新統括を担当する`MonoBehaviour`です。シーン上に配置され、次の処理を担当します。
 
-- 通常カメラとロックオンカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` によるロックオン時の切り替え
-- `CameraMotionController` / `CameraPresentationController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し
-- 毎 `FixedUpdate` での `CameraPresentationController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）
+- 通常カメラ・ロックオンカメラ・ボスカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` / `SetBossCameraActive` による切り替え
+- `CameraMotionController` / `CameraPresentationController` / `BossCameraController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し（`BossCameraController` は `_bossBodyCamera` 設定時のみ）
+- 毎 `FixedUpdate` での `CameraPresentationController.Tick` / `BossCameraController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）。ボスカメラ有効中は `CameraController.Tick` を止める
 - `CameraController.OnTargetChanged` を `OnLockOnTargetChanged` として中継
 - ゲーム設定によるカメラ移動速度・回転感度の反映
 - シーン切り替え後のMain Camera再取得
@@ -52,6 +52,22 @@
 コンストラクタは用途別にまとめた4つの構造体（`CameraReferences` / `NormalCameraSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
 
 ロックオン対象の有効性、距離、現在のロックオン状態は保持せず、`CameraManager` から更新指示と対象Transformを受け取ります。
+
+通常カメラがFollowするプレイヤー追従アンカー（内部生成の `CameraFollowTarget`）は `FollowAnchor` プロパティで公開しており、`BossCameraController` がボスカメラのFollowにそのまま流用します。ボスカメラ有効中は `CameraMotionController` のTickが止まるため、アンカーの位置更新は `BossCameraController` 側が肩代わりします。
+
+### BossCameraController
+
+ボス戦中だけ有効化する専用カメラの制御クラスです。`MonoBehaviour` ではなく、`_bossBodyCamera` が設定されている場合のみプレイヤー初期化時に `CameraManager` が生成します。ボス側からは `IEnemy` / `IBossEnemyCharacterView`（`OnChangedPosture`）と、ボスの子階層に置かれた `CameraAnglePoint` だけを参照します（ボス側のメソッドは呼ばず、購読のみ）。
+
+- `EnemyManager.OnEnemySpawned` を購読し、`IEnemy.IsBoss` の敵が出現したらボスカメラを有効化。`OnBossDefeated` / `OnEnemyForceRemoved`（現在のボス）で無効化
+- 有効化時：`_bossBodyCamera` の Follow に `CameraMotionController.FollowAnchor`、LookAt に内部生成の注視プロキシを設定し、`CameraManager.SetBossCameraActive(true)` でPriorityを最前面へ。水平軸を現在のメインカメラ方位へ合わせて切り替えの飛びを抑える
+- 注視（体をむく）：ボスの子から `CameraAnglePoint`（`Top`＝頭側 / `Under`＝足元側）を集め、プレイヤー↔ボス距離を `_bossFramingNearDistance`〜`_bossFramingFarDistance` で正規化した補間量を `_bossFramingSmoothTime`（秒）で `SmoothDamp` してから注視プロキシを `Under`→`Top` で補間。距離が急変しても足元⇔頭へ一気に飛ばず緩やかに移る。アンカーが無ければ `IEnemy.GetTargetCenter()` へフォールバック
+- カメラの定位置：プレイヤー→ボス方向から求めた方位角（プレイヤーから見てボスの反対側にカメラが来る角度）へ、`CinemachineOrbitalFollow.HorizontalAxis` を `_bossOrbitTrackSpeed`（度/秒）で追従させる。プレイヤー・ボスが動くたびに毎フレーム再計算するので、カメラは常にボスへ正対する側へ収束する（vcam の `CinemachineInputAxisController` は無効化し、このオービット自体は入力で動かさない）
+- 左右スイベル：`InputHandler.CameraMoveInput.x` で注視プロキシをカメラ右方向へ `_bossSwivelRange`（m）を上限に `_bossSwivelSpeed` でオフセットし、入力が無ければ `_bossSwivelReturnSpeed` で中央へ戻す。オービット位置は動かさず注視点だけをずらすため、カメラは大きく回り込まずボスを画面内に保ったまま少しだけ振れる
+- 体制連動ズーム：`IBossEnemyCharacterView.OnChangedPosture` を購読し、`_bossPostureZooms`（`BossPostureZoom[]`：`PostureType`→倍率・到達時間）から一致するエントリを引いて `CameraManager.SetZoom` に流す。一致が無ければ何もしない。姿勢の現在値getterは無いため、有効化時は `Standing` 想定でズームを当て以降はイベントで補正する
+- 無効化時：Priorityを待機位置へ戻し、`CameraManager.ResetZoom` で通常視野へ
+
+切り替えブレンドは Cinemachine Brain（`Main Camera Custom Blends`）に任せ、ロックオン用のイージング（`BeginLockOnBlend`）は使いません。チューニング値はすべて `CameraManager` の `[SerializeField]`（`_bossXXX`）から `BossCameraSettings` 構造体（`BossCameraSettings.cs`）へ詰め替えて渡します。
 
 ### CameraZoomController
 
@@ -152,6 +168,9 @@ flowchart TD
     Manager --> Motion[CameraMotionController]
     Motion --> Normal[Cinemachine通常カメラ]
     Motion --> Lock[Cinemachineロックオンカメラ]
+    Manager --> Boss[BossCameraController]
+    Enemy --> Boss
+    Boss --> BossCam[Cinemachineボスカメラ]
     Manager --> Presentation[CameraPresentationController]
     PlayerAttack[PlayerAttack] --> Presentation
     ModeController[PlayerModeController] --> Presentation
@@ -178,7 +197,9 @@ flowchart TD
 | クラス | 主な責務 | 主な依存先 |
 | --- | --- | --- |
 | `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraPresentationController |
-| `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド | Cinemachine、Player、InputHandler |
+| `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド。追従アンカーを `FollowAnchor` で公開 | Cinemachine、Player、InputHandler |
+| `BossCameraController` | ボス戦中の専用カメラ（定位置のボス正対追従・注視点の左右スイベル・姿勢連動ズーム）の有効化と駆動 | Cinemachine、EnemyManager（Spawned/BossDefeated/ForceRemoved）、InputHandler、CameraManager、CameraAnglePoint、IBossEnemyCharacterView（OnChangedPosture） |
+| `BossCameraSettings` | `BossCameraController` へ渡すチューニング値の組（`CameraManager` の Inspector 値から詰め替え） | なし |
 | `CameraPresentationController` | ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火 | CameraZoomController、CameraShake、PlayerAttack、PlayerModeController、PlayerAnimationController |
 | `CameraZoomController` | FOV倍率の時間ベース補間 | Cinemachine |
 | `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定、切り替え入力 | InputHandler、EnemyManager（ForceRemovedのみ）、LockOnTargetSelector、CameraManager、Unity Input System（Gamepad/Mouse直接参照） |
