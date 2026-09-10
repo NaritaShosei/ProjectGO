@@ -28,7 +28,7 @@ public sealed class TutorialPanelView : MonoBehaviour
             _illustration.gameObject.SetActive(page.Illustration != null);
         }
 
-        ApplyLayout(modal);
+        ApplyPresentation(modal);
         SetVisible(true, modal);
     }
 
@@ -41,7 +41,6 @@ public sealed class TutorialPanelView : MonoBehaviour
     }
 
     [SerializeField] private CanvasGroup _canvasGroup;
-    [SerializeField] private RectTransform _contentPanel;
     [SerializeField] private GameObject _backdrop;
     [SerializeField] private TMP_Text _titleText;
     [SerializeField] private TMP_Text _descriptionText;
@@ -64,31 +63,16 @@ public sealed class TutorialPanelView : MonoBehaviour
 
     private void HandleNextClicked() => OnNextRequested?.Invoke();
 
-    private void ApplyLayout(bool modal)
+    /// <summary>
+    /// パネルの位置と大きさはPrefabで調整した値を維持し、用途に応じた部品だけを切り替える。
+    /// </summary>
+    private void ApplyPresentation(bool modal)
     {
         if (_backdrop != null)
             _backdrop.SetActive(modal);
 
         if (_nextButton != null)
             _nextButton.gameObject.SetActive(modal);
-
-        if (_contentPanel == null)
-            return;
-
-        if (modal)
-        {
-            _contentPanel.anchorMin = new Vector2(0.18f, 0.2f);
-            _contentPanel.anchorMax = new Vector2(0.82f, 0.8f);
-        }
-        else
-        {
-            // リアルタイム説明はプレイ画面を隠さないよう右端へ寄せる。
-            _contentPanel.anchorMin = new Vector2(0.7f, 0.56f);
-            _contentPanel.anchorMax = new Vector2(0.98f, 0.94f);
-        }
-
-        _contentPanel.anchoredPosition = Vector2.zero;
-        _contentPanel.sizeDelta = Vector2.zero;
     }
 
     private void SetVisible(bool visible, bool blocksInput)
@@ -112,6 +96,7 @@ public enum TutorialTrigger
     LockOn,
     FirstEnemyDefeated,
     WaveCleared,
+    ThunderModeChanged,
 }
 
 [Serializable]

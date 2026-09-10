@@ -2,34 +2,36 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// 操作説明、ドロップ説明、スキル獲得を順に体験するチュートリアルシークエンス。
-/// </summary>
+/// <summary>最初のウェーブで基本操作からスキル獲得までを案内する。</summary>
 [Serializable]
 public sealed class TutorialState : ISequenceState
 {
     public SequenceStateType StateType => SequenceStateType.Tutorial;
 
+    /// <summary>チュートリアル用ウェーブと入力監視を開始する。</summary>
     public void OnEnter(SequenceStateContext context)
     {
         _context = context;
         _phase = Phase.Battle;
+        _step = TutorialStep.BasicOperations;
         _waveController = null;
-        _defeatGuideShown = false;
+        _panelIsOpen = false;
         _waveClearDetected = false;
+        _defeatGuideShown = false;
         _skillSelected = false;
         _transitionRequested = false;
-        _hasSuspendedRealtimeGuide = false;
-        _skillSelectPending = false;
-        ResetOperationProgress();
+        ResetBasicOperationProgress();
 
-        context.InputHandler?.EnableInput(false);
-        context.EnemyManager.OnEnemyDefeated += HandleEnemyDefeated;
+        context.InputHandler.EnableInput(false);
+        context.InputHandler.SetModeChangeEnabled(false);
+        context.InputHandler.SetLockOnEnabled(true);
+        context.Player.SetTutorialModeChangeEnabled(false);
         context.InputHandler.OnDodge += HandleDodge;
         context.Player.OnAttackHit += HandleAttackHit;
+        context.Player.OnArmorBroken += HandleArmorBroken;
         context.Player.OnModeChanged += HandleModeChanged;
-        context.InputHandler.SetModeChangeEnabled(false);
-        context.InputHandler.SetLockOnEnabled(false);
+        context.Player.OnModeChangeCompleted += HandleModeChangeCompleted;
+        context.EnemyManager.OnEnemyDefeated += HandleEnemyDefeated;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
         {
@@ -41,42 +43,45 @@ public sealed class TutorialState : ISequenceState
             _panelView.OnNextRequested += HandleNextRequested;
 
         StartTutorialWave();
-        StartRealtimeGuide(TutorialTrigger.BattleStarted);
+        ShowRealtimePage(TutorialTrigger.BattleStarted);
     }
 
+    /// <summary>戦闘、基本操作チェック、ウェーブ終了を更新する。</summary>
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
     {
         if (_transitionRequested)
             return _nextSequence;
 
-        if (_phase != Phase.Battle || _panelIsOpen)
+        if (_phase != Phase.Battle || _panelIsOpen || _step == TutorialStep.WaitingModeChange)
             return null;
 
-        TickRealtimeGuide(deltaTime);
+        if (_step == TutorialStep.BasicOperations)
+            TickBasicOperations(deltaTime);
 
         _waveController?.Tick();
-
-        bool waveComplete = _waveClearDetected ||
-            (_waveController != null && _waveController.IsComplete);
-
-        if (waveComplete)
+        bool waveComplete = _waveClearDetected || (_waveController != null && _waveController.IsComplete);
+        if (waveComplete && _defeatGuideShown && _step == TutorialStep.ThunderCombat)
         {
             _waveClearDetected = false;
             _phase = Phase.WaitingForSkillGuide;
-            ShowPages(TutorialTrigger.WaveCleared);
+            ShowModalPages(TutorialTrigger.WaveCleared);
         }
 
         return null;
     }
 
+    /// <summary>購読と時間停止を解除し、通常操作へ戻す。</summary>
     public void OnExit(SequenceStateContext context)
     {
-        context.EnemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
         context.InputHandler.OnDodge -= HandleDodge;
         context.Player.OnAttackHit -= HandleAttackHit;
+        context.Player.OnArmorBroken -= HandleArmorBroken;
         context.Player.OnModeChanged -= HandleModeChanged;
+        context.Player.OnModeChangeCompleted -= HandleModeChangeCompleted;
+        context.EnemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
         context.InputHandler.SetModeChangeEnabled(true);
         context.InputHandler.SetLockOnEnabled(true);
+        context.Player.SetTutorialModeChangeEnabled(false);
 
         if (_cameraManager != null)
             _cameraManager.OnLockOnTargetChanged -= HandleLockOnTargetChanged;
@@ -87,64 +92,42 @@ public sealed class TutorialState : ISequenceState
             _panelView.Hide();
         }
 
+        _checklistView?.Hide();
+
         if (_skillSelectView != null)
             _skillSelectView.OnSkillSelected -= HandleSkillSelected;
 
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
         ReleasePause();
-
         _pagesToShow.Clear();
         _waveController = null;
         _cameraManager = null;
         _context = null;
-
-        context.InputHandler?.EnableInput(false);
+        context.InputHandler.EnableInput(false);
         ShowCursor();
     }
 
     [Header("チュートリアルUI")]
+    [SerializeField] private TutorialChecklistView _checklistView;
     [SerializeField] private TutorialPanelView _panelView;
     [SerializeField] private List<TutorialPage> _pages = new()
     {
-        new TutorialPage(
-            TutorialTrigger.BattleStarted,
-            "基本操作・闘神モード",
-            "移動：左スティック / WASD\n攻撃：RB / 左クリック\n回避：A / Space\n\n闘神モードは重い一撃で敵の鎧を崩すことに優れています。",
-            8f),
-        new TutorialPage(
-            TutorialTrigger.ModeChange,
-            "モードチェンジ・雷神モード",
-            "モードチェンジ：Y / E\n\n雷神モードは素早い連続攻撃が得意です。雷神ゲージを消費するため、残量に注意しましょう。",
-            8f),
-        new TutorialPage(
-            TutorialTrigger.LockOn,
-            "ロックオン",
-            "ロックオン：右スティック押し込み / Shift\n対象切替：右スティック / 矢印キー\n\n敵を注視しながら移動・攻撃できます。",
-            8f),
-        new TutorialPage(
-            TutorialTrigger.FirstEnemyDefeated,
-            "ドロップアイテム",
-            "敵を倒すと経験値が手に入ります。回復アイテムが落ちた場合は、近づいて取得すると体力を回復できます。"),
-        new TutorialPage(
-            TutorialTrigger.WaveCleared,
-            "スキル獲得",
-            "ウェーブをクリアするとスキルを獲得できます。候補の中から、今後の戦いに役立つスキルを1つ選びましょう。"),
+        new TutorialPage(TutorialTrigger.BattleStarted, "基本操作", "各操作を試しましょう。"),
+        new TutorialPage(TutorialTrigger.ModeChange, "闘神モード", "RT長押しで強力な広範囲チャージ攻撃ができます。\n鎧をまとった敵には闘神モードが有効です。"),
+        new TutorialPage(TutorialTrigger.LockOn, "モードチェンジ", "敵の鎧を破壊しました。\nLBで雷神モードへ切り替えてください。"),
+        new TutorialPage(TutorialTrigger.FirstEnemyDefeated, "レベルアップ", "敵を倒すと経験値を獲得できます。\n経験値が一定量たまると、攻撃力・HP・雷神ゲージ・クリティカル率のいずれかが上昇します。"),
+        new TutorialPage(TutorialTrigger.WaveCleared, "トールの加護", "ウェーブをクリアすると3つのスキルが提示されます。\n3つの中から1つを選んで獲得できます。"),
+        new TutorialPage(TutorialTrigger.ThunderModeChanged, "雷神モード", "RT連打による連撃を得意とする高速戦闘スタイルです。\n雷神ゲージを消費しますが、鎧が剥がれた敵に強力です。\n攻撃に合わせて回避するとジャスト回避が発生します。"),
     };
 
     [Header("チュートリアル戦闘")]
     [SerializeField] private SpawnPointSelector _spawnPointSelector;
-    [SerializeField, Tooltip("先頭のWaveをチュートリアルで使用します")]
-    private WaveSequenceData _waveSequenceData;
+    [SerializeField, Tooltip("先頭のWaveをチュートリアルで使用します")] private WaveSequenceData _waveSequenceData;
 
-    [Header("操作課題の達成条件")]
-    [SerializeField, Min(0.1f)] private float _moveDuration = 2f;
-    [SerializeField, Min(1)] private int _dodgeRequiredCount = 1;
-    [SerializeField, Min(1)] private int _warriorNormalAttackRequiredCount = 1;
-    [SerializeField, Min(1)] private int _warriorChargeAttackRequiredCount = 1;
-    [SerializeField, Min(1)] private int _thunderAttackRequiredCount = 1;
-    [SerializeField, Min(1)] private int _lockOnRequiredCount = 1;
-    [SerializeField, Min(1)] private int _lockOnChangeRequiredCount = 1;
+    [Header("基本操作の達成条件")]
+    [SerializeField, Min(0.1f)] private float _moveDuration = 1f;
+    [SerializeField, Min(0.1f)] private float _cameraMoveDuration = 0.5f;
 
     [Header("スキル獲得")]
     [SerializeField] private SkillSelectView _skillSelectView;
@@ -156,12 +139,8 @@ public sealed class TutorialState : ISequenceState
     [Header("パネル表示中に停止する対象")]
     [SerializeField] private HitStopTargetGroup _pauseTargetGroup = HitStopTargetGroup.All;
 
-    private enum Phase
-    {
-        Battle,
-        WaitingForSkillGuide,
-        SkillSelect,
-    }
+    private enum Phase { Battle, WaitingForSkillGuide, SkillSelect }
+    private enum TutorialStep { BasicOperations, WarriorExplanation, WarriorCombat, WaitingModeChange, WaitingModeChangeComplete, ThunderExplanation, ThunderCombat }
 
     private readonly Queue<TutorialPage> _pagesToShow = new();
     private SequenceStateContext _context;
@@ -170,122 +149,34 @@ public sealed class TutorialState : ISequenceState
     private CameraManager _cameraManager;
     private IDisposable _pauseHandle;
     private Phase _phase;
+    private TutorialStep _step;
     private TutorialTrigger _activeTrigger;
     private bool _panelIsOpen;
-    private bool _defeatGuideShown;
     private bool _waveClearDetected;
+    private bool _defeatGuideShown;
     private bool _skillSelected;
     private bool _transitionRequested;
-    private bool _realtimeGuideActive;
-    private float _realtimeGuideRemaining;
-    private OperationStep _operationStep;
+    private bool _armorBrokenWhilePanelOpen;
     private float _moveElapsed;
-    private int _dodgeCount;
-    private int _warriorNormalAttackCount;
-    private int _warriorChargeAttackCount;
-    private int _thunderAttackCount;
-    private int _lockOnCount;
-    private int _lockOnChangeCount;
-    private ILockOnTarget _lastLockOnTarget;
-    private bool _hasSuspendedRealtimeGuide;
-    private TutorialTrigger _suspendedRealtimeTrigger;
-    private bool _skillSelectPending;
+    private float _cameraMoveElapsed;
+    private bool _dodgeCompleted;
+    private bool _lockOnCompleted;
+    private bool _attackCompleted;
 
-    private enum OperationStep
+    /// <summary>移動と視点操作を同じパネル上で並行判定する。</summary>
+    private void TickBasicOperations(float deltaTime)
     {
-        Move,
-        Dodge,
-        WarriorNormalAttack,
-        WarriorChargeAttack,
-        ThunderModeChange,
-        ThunderAttack,
-        LockOn,
-        LockOnChange,
+        if (_context.InputHandler.MoveInput.sqrMagnitude > 0.01f)
+            _moveElapsed = Mathf.Min(_moveDuration, _moveElapsed + deltaTime);
+        if (_context.InputHandler.CameraMoveInput.sqrMagnitude > 0.01f)
+            _cameraMoveElapsed = Mathf.Min(_cameraMoveDuration, _cameraMoveElapsed + deltaTime);
+        UpdateBasicOperationProgress();
     }
 
-    private void HandleEnemyDefeated()
-    {
-        _waveController?.OnEnemyDefeated();
-
-        if (!_defeatGuideShown)
-        {
-            _defeatGuideShown = true;
-            ShowPages(TutorialTrigger.FirstEnemyDefeated);
-        }
-
-        if (_waveController != null && _waveController.IsComplete)
-            _waveClearDetected = true;
-    }
-
-    private void ShowPages(TutorialTrigger trigger)
-    {
-        SuspendRealtimeGuide();
-        _pagesToShow.Clear();
-        _activeTrigger = trigger;
-
-        if (_pages != null)
-        {
-            foreach (var page in _pages)
-            {
-                if (page != null && page.Trigger == trigger)
-                    _pagesToShow.Enqueue(page);
-            }
-        }
-
-        if (_panelView == null || _pagesToShow.Count == 0)
-        {
-            CompleteGuide(trigger);
-            return;
-        }
-
-        _panelIsOpen = true;
-        BeginPause();
-        _panelView.Show(_pagesToShow.Dequeue(), true);
-    }
-
-    private void HandleNextRequested()
-    {
-        if (!_panelIsOpen)
-            return;
-
-        if (_pagesToShow.Count > 0)
-        {
-            _panelView.Show(_pagesToShow.Dequeue(), true);
-            return;
-        }
-
-        _panelView.Hide();
-        _panelIsOpen = false;
-        ReleasePause();
-        CompleteGuide(_activeTrigger);
-    }
-
-    private void CompleteGuide(TutorialTrigger trigger)
-    {
-        switch (trigger)
-        {
-            case TutorialTrigger.FirstEnemyDefeated:
-                ResumeSuspendedRealtimeGuide();
-                break;
-            case TutorialTrigger.WaveCleared:
-                if (_hasSuspendedRealtimeGuide)
-                {
-                    _skillSelectPending = true;
-                    StartTutorialWave();
-                    ResumeSuspendedRealtimeGuide();
-                }
-                else
-                {
-                    StartSkillSelect();
-                }
-                break;
-        }
-    }
-
+    /// <summary>最初のウェーブをチュートリアル用として生成する。</summary>
     private void StartTutorialWave()
     {
-        if (_waveSequenceData == null || _waveSequenceData.Waves == null ||
-            _waveSequenceData.Waves.Count == 0 || _spawnPointSelector == null)
+        if (_waveSequenceData == null || _waveSequenceData.Waves == null || _waveSequenceData.Waves.Count == 0 || _spawnPointSelector == null)
         {
             Debug.LogError("[TutorialState] WaveSequenceData または SpawnPointSelector が未設定です。");
             _transitionRequested = true;
@@ -299,343 +190,282 @@ public sealed class TutorialState : ISequenceState
             _transitionRequested = true;
             return;
         }
-
         ResumeBattle();
     }
 
-    private void StartRealtimeGuide(TutorialTrigger trigger)
+    /// <summary>画面端の非モーダルパネルを表示する。</summary>
+    private void ShowRealtimePage(TutorialTrigger trigger)
+    {
+        TutorialPage page = GetPage(trigger);
+        if (_checklistView == null || page == null)
+            return;
+        _checklistView.ShowBasicOperations(page.Title);
+        UpdateBasicOperationProgress();
+    }
+
+    /// <summary>ゲームを停止する説明ページをインスペクター設定のまま表示する。</summary>
+    private void ShowModalPages(TutorialTrigger trigger)
     {
         _pagesToShow.Clear();
         _activeTrigger = trigger;
-
         if (_pages != null)
         {
-            foreach (var page in _pages)
-            {
+            foreach (TutorialPage page in _pages)
                 if (page != null && page.Trigger == trigger)
                     _pagesToShow.Enqueue(page);
-            }
         }
 
-        ShowNextRealtimePage();
-    }
-
-    private void ShowNextRealtimePage()
-    {
-        if (_panelView != null && _pagesToShow.Count > 0)
+        if (_panelView == null || _pagesToShow.Count == 0)
         {
-            var page = _pagesToShow.Dequeue();
-            _realtimeGuideActive = true;
-            _realtimeGuideRemaining = _activeTrigger == TutorialTrigger.LockOn
-                ? page.Duration
-                : float.PositiveInfinity;
-            _panelView.Show(page, false);
-            UpdateOperationProgress();
+            CompleteModalGuide(trigger);
             return;
         }
 
-        AdvanceRealtimeGuide();
+        _panelIsOpen = true;
+        BeginPause();
+        _panelView.Show(_pagesToShow.Dequeue(), true);
     }
 
-    private void TickRealtimeGuide(float deltaTime)
+    /// <summary>時間停止パネルの次へボタンを処理する。</summary>
+    private void HandleNextRequested()
     {
-        if (!_realtimeGuideActive)
+        if (!_panelIsOpen)
             return;
-
-        if (_activeTrigger == TutorialTrigger.BattleStarted)
+        if (_pagesToShow.Count > 0)
         {
-            if (_operationStep == OperationStep.Move &&
-                _context.InputHandler.MoveInput.sqrMagnitude > 0.01f)
-            {
-                _moveElapsed = Mathf.Min(_moveDuration, _moveElapsed + deltaTime);
-                if (_moveElapsed >= _moveDuration)
-                    _operationStep = OperationStep.Dodge;
-
-                UpdateOperationProgress();
-            }
+            _panelView.Show(_pagesToShow.Dequeue(), true);
             return;
         }
-
-        if (_activeTrigger == TutorialTrigger.ModeChange ||
-            _activeTrigger == TutorialTrigger.LockOn)
-            return;
-
-        _realtimeGuideRemaining -= deltaTime;
-        if (_realtimeGuideRemaining > 0f)
-            return;
-
-        _realtimeGuideActive = false;
-        ShowNextRealtimePage();
+        _panelView.Hide();
+        _panelIsOpen = false;
+        ReleasePause();
+        CompleteModalGuide(_activeTrigger);
     }
 
-    private void AdvanceRealtimeGuide()
+    /// <summary>説明を閉じた後、仕様上の次段階へ移る。</summary>
+    private void CompleteModalGuide(TutorialTrigger trigger)
     {
-        switch (_activeTrigger)
+        switch (trigger)
         {
-            case TutorialTrigger.BattleStarted:
-                _context.InputHandler.SetModeChangeEnabled(true);
-                _operationStep = OperationStep.ThunderModeChange;
-                StartRealtimeGuide(TutorialTrigger.ModeChange);
-                break;
             case TutorialTrigger.ModeChange:
-                _context.InputHandler.SetLockOnEnabled(true);
-                _operationStep = OperationStep.LockOn;
-                StartRealtimeGuide(TutorialTrigger.LockOn);
+                _step = TutorialStep.WarriorCombat;
+                ResumeBattle();
+                if (_armorBrokenWhilePanelOpen)
+                    StartModeChangeGuide();
                 break;
-            default:
-                EndRealtimeGuide();
+            case TutorialTrigger.ThunderModeChanged:
+                _step = TutorialStep.ThunderCombat;
+                ResumeBattle();
+                break;
+            case TutorialTrigger.FirstEnemyDefeated:
+                _defeatGuideShown = true;
+                ResumeBattle();
+                break;
+            case TutorialTrigger.WaveCleared:
+                StartSkillSelect();
                 break;
         }
     }
 
-    private void ResetOperationProgress()
-    {
-        _operationStep = OperationStep.Move;
-        _moveElapsed = 0f;
-        _dodgeCount = 0;
-        _warriorNormalAttackCount = 0;
-        _warriorChargeAttackCount = 0;
-        _thunderAttackCount = 0;
-        _lockOnCount = 0;
-        _lockOnChangeCount = 0;
-        _lastLockOnTarget = null;
-    }
-
+    /// <summary>回避を基本操作チェックへ反映する。</summary>
     private void HandleDodge()
     {
-        if (!_realtimeGuideActive ||
-            _activeTrigger != TutorialTrigger.BattleStarted ||
-            _operationStep != OperationStep.Dodge)
+        if (_step != TutorialStep.BasicOperations)
             return;
-
-        _dodgeCount++;
-        if (_dodgeCount >= _dodgeRequiredCount)
-            _operationStep = OperationStep.WarriorNormalAttack;
-
-        UpdateOperationProgress();
+        _dodgeCompleted = true;
+        UpdateBasicOperationProgress();
     }
 
+    /// <summary>最初の攻撃命中を契機に闘神説明を開く。</summary>
     private void HandleAttackHit(PlayerMode mode, ChargeLevel chargeLevel)
     {
-        if (!_realtimeGuideActive)
+        if (_step != TutorialStep.BasicOperations)
             return;
-
-        if (_activeTrigger == TutorialTrigger.BattleStarted && mode == PlayerMode.Warrior)
-        {
-            if (_operationStep == OperationStep.WarriorNormalAttack && chargeLevel == ChargeLevel.None)
-            {
-                _warriorNormalAttackCount++;
-                if (_warriorNormalAttackCount >= _warriorNormalAttackRequiredCount)
-                    _operationStep = OperationStep.WarriorChargeAttack;
-            }
-            else if (_operationStep == OperationStep.WarriorChargeAttack && chargeLevel > ChargeLevel.None)
-            {
-                _warriorChargeAttackCount++;
-                if (_warriorChargeAttackCount >= _warriorChargeAttackRequiredCount)
-                {
-                    _realtimeGuideActive = false;
-                    AdvanceRealtimeGuide();
-                    return;
-                }
-            }
-        }
-        else if (_activeTrigger == TutorialTrigger.ModeChange &&
-                 _operationStep == OperationStep.ThunderAttack &&
-                 mode == PlayerMode.Thunder)
-        {
-            _thunderAttackCount++;
-            if (_thunderAttackCount >= _thunderAttackRequiredCount)
-            {
-                _realtimeGuideActive = false;
-                AdvanceRealtimeGuide();
-                return;
-            }
-        }
-
-        UpdateOperationProgress();
+        _attackCompleted = true;
+        UpdateBasicOperationProgress();
+        _checklistView?.Hide();
+        _step = TutorialStep.WarriorExplanation;
+        ShowModalPages(TutorialTrigger.ModeChange);
     }
 
+    /// <summary>鎧破壊後、モードチェンジ専用の操作待ちへ移る。</summary>
+    private void HandleArmorBroken()
+    {
+        if (_step == TutorialStep.WarriorExplanation)
+        {
+            _armorBrokenWhilePanelOpen = true;
+            return;
+        }
+        if (_step == TutorialStep.WarriorCombat)
+            StartModeChangeGuide();
+    }
+
+    /// <summary>時間を止めたままモードチェンジ入力だけを受け付ける。</summary>
+    private void StartModeChangeGuide()
+    {
+        _step = TutorialStep.WaitingModeChange;
+        TutorialPage page = GetPage(TutorialTrigger.LockOn);
+        if (_checklistView != null && page != null)
+            _checklistView.ShowModeChange(page.Title, page.Description);
+        BeginModeChangePause();
+    }
+
+    /// <summary>雷神への切り替え成立後、演出を進めるため時間停止だけを解除する。</summary>
     private void HandleModeChanged(PlayerMode mode)
     {
-        if (!_realtimeGuideActive ||
-            _activeTrigger != TutorialTrigger.ModeChange ||
-            _operationStep != OperationStep.ThunderModeChange ||
-            mode != PlayerMode.Thunder)
+        if (_step != TutorialStep.WaitingModeChange || mode != PlayerMode.Thunder)
             return;
-
-        _operationStep = OperationStep.ThunderAttack;
-        UpdateOperationProgress();
+        _checklistView?.CompleteModeChange();
+        _checklistView?.Hide();
+        _context.Player.SetTutorialModeChangeEnabled(false);
+        ReleasePause();
+        _step = TutorialStep.WaitingModeChangeComplete;
     }
 
+    /// <summary>モードチェンジ演出が完了して操作可能になってから、雷神モードの説明を開く。</summary>
+    private void HandleModeChangeCompleted()
+    {
+        if (_step != TutorialStep.WaitingModeChangeComplete)
+            return;
+
+        _step = TutorialStep.ThunderExplanation;
+        ShowModalPages(TutorialTrigger.ThunderModeChanged);
+    }
+
+    /// <summary>ロックオン成立を基本操作チェックへ反映する。</summary>
     private void HandleLockOnTargetChanged(ILockOnTarget target)
     {
-        if (!_realtimeGuideActive || _activeTrigger != TutorialTrigger.LockOn)
-        {
-            _lastLockOnTarget = target;
+        if (_step != TutorialStep.BasicOperations || target == null)
             return;
-        }
-
-        if (_operationStep == OperationStep.LockOn &&
-            target != null && _lastLockOnTarget == null)
-        {
-            _lockOnCount++;
-            if (_lockOnCount >= _lockOnRequiredCount)
-                _operationStep = OperationStep.LockOnChange;
-        }
-        else if (_operationStep == OperationStep.LockOnChange &&
-                 target != null && _lastLockOnTarget != null &&
-                 target != _lastLockOnTarget)
-        {
-            _lockOnChangeCount++;
-            if (_lockOnChangeCount >= _lockOnChangeRequiredCount)
-            {
-                _lastLockOnTarget = target;
-                _realtimeGuideActive = false;
-                AdvanceRealtimeGuide();
-                return;
-            }
-        }
-
-        _lastLockOnTarget = target;
-        UpdateOperationProgress();
+        _lockOnCompleted = true;
+        UpdateBasicOperationProgress();
     }
 
-    private void UpdateOperationProgress()
+    /// <summary>敵撃破とウェーブ完了を記録し、雷神段階で経験値説明を開く。</summary>
+    private void HandleEnemyDefeated()
     {
-        if (_panelView == null)
+        _waveController?.OnEnemyDefeated();
+        if (_waveController != null && _waveController.IsComplete)
+            _waveClearDetected = true;
+        if (_step == TutorialStep.ThunderCombat && !_defeatGuideShown)
+            ShowModalPages(TutorialTrigger.FirstEnemyDefeated);
+    }
+
+    /// <summary>STEP 1の全項目を一枚のチェックリストとして更新する。</summary>
+    private void UpdateBasicOperationProgress()
+    {
+        if (_checklistView == null || _step != TutorialStep.BasicOperations)
             return;
-
-        string progress = _operationStep switch
-        {
-            OperationStep.Move => $"移動する  {_moveElapsed:0.0} / {_moveDuration:0.0} 秒",
-            OperationStep.Dodge => $"回避する  {_dodgeCount} / {_dodgeRequiredCount} 回",
-            OperationStep.WarriorNormalAttack =>
-                $"闘神の通常攻撃を当てる  {_warriorNormalAttackCount} / {_warriorNormalAttackRequiredCount} 回",
-            OperationStep.WarriorChargeAttack =>
-                $"闘神のチャージ攻撃を当てる  {_warriorChargeAttackCount} / {_warriorChargeAttackRequiredCount} 回",
-            OperationStep.ThunderModeChange => "雷神モードへチェンジする",
-            OperationStep.ThunderAttack =>
-                $"雷神の攻撃を当てる  {_thunderAttackCount} / {_thunderAttackRequiredCount} 回",
-            OperationStep.LockOn =>
-                $"敵をロックオンする  {_lockOnCount} / {_lockOnRequiredCount} 回",
-            OperationStep.LockOnChange =>
-                $"ロックオン対象を切り替える  {_lockOnChangeCount} / {_lockOnChangeRequiredCount} 回",
-            _ => string.Empty,
-        };
-
-        _panelView.SetProgress(progress);
+        _checklistView.SetBasicOperationProgress(
+            _moveElapsed >= _moveDuration,
+            _cameraMoveElapsed >= _cameraMoveDuration,
+            _lockOnCompleted,
+            _dodgeCompleted,
+            _attackCompleted);
     }
 
-    private void EndRealtimeGuide()
-    {
-        _realtimeGuideActive = false;
-        _realtimeGuideRemaining = 0f;
-        _pagesToShow.Clear();
-        _panelView?.Hide();
-
-        if (_skillSelectPending)
-        {
-            _skillSelectPending = false;
-            _context.EnemyManager.ClearAllMobEnemies();
-            StartSkillSelect();
-        }
-    }
-
-    private void SuspendRealtimeGuide()
-    {
-        if (!_realtimeGuideActive)
-            return;
-
-        _hasSuspendedRealtimeGuide = true;
-        _suspendedRealtimeTrigger = _activeTrigger;
-        _realtimeGuideActive = false;
-        _pagesToShow.Clear();
-        _panelView?.Hide();
-    }
-
-    private void ResumeSuspendedRealtimeGuide()
-    {
-        if (!_hasSuspendedRealtimeGuide)
-        {
-            ResumeBattle();
-            return;
-        }
-
-        var trigger = _suspendedRealtimeTrigger;
-        _hasSuspendedRealtimeGuide = false;
-        ResumeBattle();
-        StartRealtimeGuide(trigger);
-    }
-
-    private void ResumeBattle()
-    {
-        _phase = Phase.Battle;
-        _context.InputHandler?.EnableInput(true);
-        HideCursor();
-    }
-
+    /// <summary>スキル三択を開く。</summary>
     private void StartSkillSelect()
     {
         _phase = Phase.SkillSelect;
-        _context.InputHandler?.EnableInput(false);
+        _context.InputHandler.EnableInput(false);
         ShowCursor();
         BeginPause();
-
         if (_skillSelectView == null)
         {
             Debug.LogWarning("[TutorialState] SkillSelectView が未設定のため、スキル選択をスキップします。");
             FinishTutorial();
             return;
         }
-
-        _skillSelectPresenter = new SkillSelectPresenter(
-            _context.SkillManager,
-            _skillSelectView,
-            _context.Player);
-
+        _skillSelectPresenter = new SkillSelectPresenter(_context.SkillManager, _skillSelectView, _context.Player);
         if (!_skillSelectPresenter.Open(_skillSelectCount))
         {
             FinishTutorial();
             return;
         }
-
         _skillSelectView.OnSkillSelected += HandleSkillSelected;
     }
 
+    /// <summary>スキル選択完了を一度だけ受理する。</summary>
     private void HandleSkillSelected(int _)
     {
         if (_skillSelected)
             return;
-
         _skillSelected = true;
         FinishTutorial();
     }
 
+    /// <summary>チュートリアルを終了し次シークエンスへの遷移を要求する。</summary>
     private void FinishTutorial()
     {
         if (_skillSelectView != null)
             _skillSelectView.OnSkillSelected -= HandleSkillSelected;
-
         _skillSelectPresenter?.Dispose();
         _skillSelectPresenter = null;
         ReleasePause();
         _transitionRequested = true;
     }
 
+    /// <summary>説明パネル用にゲーム全体と入力を停止する。</summary>
     private void BeginPause()
     {
         ReleasePause();
-        _context?.InputHandler?.EnableInput(false);
+        _context.InputHandler.EnableInput(false);
         ShowCursor();
-
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
             _pauseHandle = hitStopManager.BeginManualStop(_pauseTargetGroup);
     }
 
+    /// <summary>モードチェンジだけ可能な状態でゲーム時間を停止する。</summary>
+    private void BeginModeChangePause()
+    {
+        ReleasePause();
+        _context.InputHandler.EnableInput(true);
+        _context.InputHandler.SetLockOnEnabled(false);
+        _context.InputHandler.SetModeChangeEnabled(true);
+        // 鎧破壊は攻撃ヒット中に発生するため、停止した攻撃ステートのままでも切り替えを受理させる。
+        _context.Player.SetTutorialModeChangeEnabled(true);
+        HideCursor();
+        if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+            _pauseHandle = hitStopManager.BeginManualStop(_pauseTargetGroup);
+    }
+
+    /// <summary>手動の時間停止を解除する。</summary>
     private void ReleasePause()
     {
         _pauseHandle?.Dispose();
         _pauseHandle = null;
+    }
+
+    /// <summary>戦闘入力とカーソルを通常へ戻す。</summary>
+    private void ResumeBattle()
+    {
+        _phase = Phase.Battle;
+        _context.InputHandler.SetLockOnEnabled(true);
+        _context.InputHandler.EnableInput(true);
+        HideCursor();
+    }
+
+    /// <summary>基本操作チェックを初期化する。</summary>
+    private void ResetBasicOperationProgress()
+    {
+        _moveElapsed = 0f;
+        _cameraMoveElapsed = 0f;
+        _dodgeCompleted = false;
+        _lockOnCompleted = false;
+        _attackCompleted = false;
+        _armorBrokenWhilePanelOpen = false;
+    }
+
+    /// <summary>指定トリガーに対応する最初の設定ページを取得する。</summary>
+    private TutorialPage GetPage(TutorialTrigger trigger)
+    {
+        if (_pages == null)
+            return null;
+        foreach (TutorialPage page in _pages)
+            if (page != null && page.Trigger == trigger)
+                return page;
+        return null;
     }
 
     private static void HideCursor() => Cursor.visible = false;
