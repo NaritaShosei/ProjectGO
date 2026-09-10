@@ -14,18 +14,18 @@ public class PlayerSoundHandler : MonoBehaviour
 
         if (animController != null)
         {
-            animController.OnModeChangeComplete += OnModeChangeComplete;
+            animController.OnModeChangeComplete += HandleModeChangeComplete;
             _animController = animController;
         }
 
         if (modeController != null)
         {
-            modeController.OnModeChanged += OnModeChanged;
+            modeController.OnModeChanged += HandleModeChanged;
         }
 
         if (stateManager != null)
         {
-            stateManager.OnStateChanged += OnStateChanged;
+            stateManager.OnStateChanged += HandleStateChanged;
             _stateManager = stateManager;
         }
 
@@ -49,16 +49,23 @@ public class PlayerSoundHandler : MonoBehaviour
         }
     }
 
+    private IModeController _modeController;
+    private PlayerAnimationController _animController;
+    private PlayerStateManager _stateManager;
+    private AttackExecutor _attackExecutor;
+    private PlayerAttack _playerAttack;
+    private Player _player;
+
     private void OnDestroy()
     {
         if (_animController != null)
-            _animController.OnModeChangeComplete -= OnModeChangeComplete;
+            _animController.OnModeChangeComplete -= HandleModeChangeComplete;
 
         if (_modeController != null)
-            _modeController.OnModeChanged -= OnModeChanged;
+            _modeController.OnModeChanged -= HandleModeChanged;
 
         if (_stateManager != null)
-            _stateManager.OnStateChanged -= OnStateChanged;
+            _stateManager.OnStateChanged -= HandleStateChanged;
 
         if (_attackExecutor != null)
         {
@@ -141,8 +148,12 @@ public class PlayerSoundHandler : MonoBehaviour
 
     // ── モード変更 ─────────────────────────────────────
 
-    private void OnModeChanged(PlayerMode mode)
+    private void HandleModeChanged(PlayerMode mode)
     {
+        // アニメーション通知の購読順に依存せず、闘神へ戻った時点で止める。
+        if (mode != PlayerMode.Thunder)
+            Sound.StopLoopSE(gameObject, SoundCueNames.Player.ThunderElectrify);
+
         Sound.PlaySE(
             gameObject,
             mode == PlayerMode.Thunder
@@ -167,7 +178,7 @@ public class PlayerSoundHandler : MonoBehaviour
             CueSheetType.Player);
     }
 
-    private void OnModeChangeComplete()
+    private void HandleModeChangeComplete()
     {
         if (_modeController.CurrentMode == PlayerMode.Thunder)
         {
@@ -186,18 +197,22 @@ public class PlayerSoundHandler : MonoBehaviour
 
     // ── ステート変更 ───────────────────────────────────
 
-    private void OnStateChanged(PlayerState oldState, PlayerState newState)
+    private void HandleStateChanged(PlayerState oldState, PlayerState newState)
     {
+        if (newState == PlayerState.Dodge && _modeController != null)
+        {
+            // 入力ではなく回避が成立した時点で鳴らす。拒否された入力では再生しない。
+            Sound.PlaySE(gameObject,
+                _modeController.CurrentMode == PlayerMode.Thunder
+                    ? SoundCueNames.Player.ThunderDodge
+                    : SoundCueNames.Player.WarriorRoll,
+                CueSheetType.Player);
+        }
+
         if (newState == PlayerState.Dead)
         {
             Sound.StopSE(gameObject);
         }
     }
 
-    private IModeController _modeController;
-    private PlayerAnimationController _animController;
-    private PlayerStateManager _stateManager;
-    private AttackExecutor _attackExecutor;
-    private PlayerAttack _playerAttack;
-    private Player _player;
 }
