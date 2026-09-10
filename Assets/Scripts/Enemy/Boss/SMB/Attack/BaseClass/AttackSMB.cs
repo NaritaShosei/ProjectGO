@@ -13,8 +13,6 @@ namespace BossEnemy.SMB
 {
     public abstract class AttackSMB : BossCharacterSMB
     {
-        private static readonly int IdleStateHash = Animator.StringToHash("Idle");
-
         public int AttackID => _attackID;
 
         public void Init(
@@ -35,6 +33,12 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            if( _attackStartTime <= stateInfo.length)
+            {
+                NotifyAttackEnd();
+                return;
+            }
+
             base.OnStateEnter(animator, stateInfo, layerIndex);
 
             // 攻撃命中済みフラグをfalseに
@@ -44,6 +48,8 @@ namespace BossEnemy.SMB
             _isAttackPlayed = false;
 
             // CancellationTokenSourceの初期化
+            _cts?.Cancel();
+            _cts?.Dispose();
             _cts = new();
 
             // 攻撃ヒットイベントの発火を検知できるようにする
@@ -66,13 +72,14 @@ namespace BossEnemy.SMB
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // OnStateExit はクリップの再生終了時ではなく、遷移の開始時に呼ばれる。
-            // ここで通知すると、遷移ブレンド中に BehaviourTree が次の攻撃を開始してしまう。
-            NotifyAttackEndAfterTransitionAsync(animator, layerIndex).Forget();
-
-            _animationEventReceiver.OnHitAttack -= HandleAttackHit;
             _wasHitAttack = false;
             _elapsedTime = 0;
+
+            // OnStateExit はクリップの再生終了時ではなく、遷移の開始時に呼ばれる。
+            // ここで通知すると、遷移ブレンド中に BehaviourTree が次の攻撃を開始してしまう。
+            NotifyAttackEnd();
+
+            _animationEventReceiver.OnHitAttack -= HandleAttackHit;
         }
 
         public void StopPlayAttack()
@@ -126,18 +133,8 @@ namespace BossEnemy.SMB
         // 攻撃データ
         protected Attack.AttackData _attackData = default;
 
-        // ------------------ アニメーションの時間関連 ------------------
-
-        // アニメーション1ループの長さ（秒）
-        protected float _clipLength;
-
         // 現在の再生開始からの経過時間（秒）
         protected float _elapsedTime;
-
-        // 1ループ内の現在の再生位置（秒）
-        protected float _currentLoopTime;
-
-        // --------------------------------------------------------------
 
         // 攻撃が中断になった際のCancellationTokenSource
         private CancellationTokenSource _cts = new();
@@ -176,9 +173,6 @@ namespace BossEnemy.SMB
             try
             {
                 await PlayAttack(cancellationToken);
-
-                if (!cancellationToken.IsCancellationRequested)
-                    _bossCharacterView.FinishAttackAnimation();
             }
             catch (OperationCanceledException)
             {
@@ -190,19 +184,11 @@ namespace BossEnemy.SMB
         /// 攻撃ステートから Idle への遷移が完了してから攻撃終了を通知する。
         /// 他の攻撃ステートへの割り込み遷移では、古い攻撃の終了通知を送らない。
         /// </summary>
-        private async UniTaskVoid NotifyAttackEndAfterTransitionAsync(Animator animator, int layerIndex)
+        private void NotifyAttackEnd()
         {
-            // OnStateExit の呼び出し中は、まだ退出元ステートが Current の場合がある。
-            await UniTask.NextFrame();
+            if (_animationEventReceiver == null) return;
 
-            await UniTask.WaitUntil(() => animator == null || !animator.IsInTransition(layerIndex));
-
-            if (animator == null || _animationEventReceiver == null) return;
-
-            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(layerIndex);
-            if (currentState.shortNameHash != IdleStateHash) return;
-
-            _animationEventReceiver.AnimEvent_AttackEnd();
+            _animationEventReceiver.AnimEvent_AttackCompleted();
 
             Debug.Log("攻撃終了");
         }

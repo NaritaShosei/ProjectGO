@@ -49,6 +49,7 @@ namespace BossEnemy.SMB
 
             _goalPos = Vector3.zero;
             _goalArrivalTime = 0f;
+            _isMoving = false;
 
             if(_isAttackHitCheck) 
                 _isAttackHitCheck = false;
@@ -113,11 +114,6 @@ namespace BossEnemy.SMB
             {
 
             }
-        }
-
-        protected override void ChangeTimeScale(float timeScale)
-        {
-            _timeScale = timeScale;
         }
     }
 }

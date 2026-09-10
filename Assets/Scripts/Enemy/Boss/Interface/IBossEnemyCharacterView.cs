@@ -42,12 +42,6 @@ namespace BossEnemy.Interface
         /// <summary> 攻撃終了処理 </summary>
         public void AttackCompleted();
 
-        /// <summary>
-        /// 攻撃演出の完了を Animator に伝える。
-        /// BehaviourTree の再開は、Idle への遷移完了通知で行う。
-        /// </summary>
-        public void FinishAttackAnimation();
-
         /// <summary> フェーズ切り替え処理 </summary>
         public void ChangePhase(int nextPhase);
 

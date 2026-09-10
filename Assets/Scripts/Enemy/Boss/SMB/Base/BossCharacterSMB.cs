@@ -15,6 +15,8 @@ public abstract class BossCharacterSMB : StateMachineBehaviour
         _bossCharacterView = bossEnemyCharacterView;
         _bossCharacterTransform = bossCharacterTransform;
 
+        _timeScaleDisposable?.Dispose();
+
         _timeScaleDisposable = _bossCharacterView.TimeScaleReactiveProperty.Subscribe(timeScale =>
         {
             ChangeTimeScale(timeScale);
