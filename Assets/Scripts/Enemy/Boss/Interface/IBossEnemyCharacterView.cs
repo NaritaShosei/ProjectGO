@@ -4,6 +4,7 @@ using BossEnemy.Character;
 using BossEnemy.Enum;
 using System;
 using System.Collections.Generic;
+using UniRx;
 using UnityEngine;
 using static UnityEngine.RuleTile.TilingRuleOutput;
 
@@ -14,14 +15,14 @@ namespace BossEnemy.Interface
         /// <summary>ダメージを受けたときに発火するイベント</summary>
         public event Action<DamageContext, TakeDamageType, ArmorAttachmentType> OnTakeDamage;
 
+        /// <summary> 姿勢変更後発火されるイベント </summary>
+        public event Action<PostureType> OnChangedPosture;
+
         /// <summary>ロックオン可能なパーツが変わった際のイベント<新しいターゲット、古いターゲット></summary>
         public event Action<(IReadOnlyList<ILockOnTarget> newTargetParts, IReadOnlyList<ILockOnTarget> oldTargetParts)> OnChangeLockOnParts;
 
         /// <summary> 行動開始イベント </summary>
         public event Action OnBeginsAction;
-
-        /// <summary> TimeScaleの変更があったら発火するイベント </summary>
-        public event Action<float> OnChangedTimeScale;
 
         /// <summary> 現在攻撃可能なボスの部位 </summary>
         public BossCharacterPartsView[] ActiveBossEnemyPartsView { get; }
@@ -41,12 +42,21 @@ namespace BossEnemy.Interface
         /// <summary> 攻撃終了処理 </summary>
         public void AttackCompleted();
 
+        /// <summary>
+        /// 攻撃演出の完了を Animator に伝える。
+        /// BehaviourTree の再開は、Idle への遷移完了通知で行う。
+        /// </summary>
+        public void FinishAttackAnimation();
+
         /// <summary> フェーズ切り替え処理 </summary>
         public void ChangePhase(int nextPhase);
 
         /// <summary> キャラクターの姿勢を変更 </summary>
         /// <param name="postureType"></param>
         public void ChangePosture(PostureType postureType);
+
+        /// <summary> タイムスケールの数値変更時に発火するReactiveProperty </summary>
+        public IReadOnlyReactiveProperty<float> TimeScaleReactiveProperty { get; }
 
         /// <summary> 死亡イベント発生時の処理 </summary>
         public void HandleDead();

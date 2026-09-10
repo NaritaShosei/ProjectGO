@@ -30,6 +30,10 @@ namespace BossEnemy.Character
         /// <summary>ダメージを受けて生存したときに発火するイベント（被弾入れ替え判定に使用）</summary>
         public event Action<IEnemy> OnDamaged;
 
+        /// <summary> 姿勢変更後発火されるイベント </summary>
+        public event Action<PostureType> OnChangedPosture;
+
+
         /// <summary>ダメージを受けたときに発火するイベント</summary>
         public event Action<DamageContext, TakeDamageType, ArmorAttachmentType> OnTakeDamage;
 
@@ -41,9 +45,6 @@ namespace BossEnemy.Character
 
         /// <summary> Bossのすべての初期化が終了して動き出す際のイベント </summary>
         public event Action OnBeginsAction;
-
-        /// <summary> TimeScaleの変更があったら発火するイベント </summary>
-        public event Action<float> OnChangedTimeScale;
 
         // --- Properties ---
         /// <summary> BossEnemyと内部Modelを繋ぐControllerClass </summary>
@@ -67,7 +68,8 @@ namespace BossEnemy.Character
         /// <summary>HitStop等で使用するタイムスケール（DeadCondition の物理スケーリングに使用）</summary>
         public float TimeScale => _timeScale.Value;
 
-        public IReadOnlyReactiveProperty<float> TimeScaleProperty => _timeScale;
+        /// <summary> タイムスケールの数値変更時に発火するReactiveProperty </summary>
+        public IReadOnlyReactiveProperty<float> TimeScaleReactiveProperty => _timeScale;
 
         /// <summary> 死亡判定 </summary>
         public bool IsDead => _isDead;
@@ -121,6 +123,7 @@ namespace BossEnemy.Character
                 {
                     attackSMB.Init(
                         _bossEnemyAnimationEventReceiver,
+                        this,
                         _attackHitAreaSpawner,
                         _effectManager,
                         _cameraManager,
@@ -132,7 +135,7 @@ namespace BossEnemy.Character
                     continue;
                 }
 
-                bossCharacterSMB.Init(_bossEnemyAnimationEventReceiver, GetTargetCenter());
+                bossCharacterSMB.Init(_bossEnemyAnimationEventReceiver, this, GetTargetCenter());
             }
         }
 
@@ -217,13 +220,17 @@ namespace BossEnemy.Character
                 }
             }
 
-            _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.AnimParamName);
-            Debug.Log(bossEnemyAttackData.AnimParamName);
+            _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.ID);
         }
 
         public void AttackCompleted()
         {
-            _bossEnemyAnimator.SetAttacking(false);
+            _bossEnemyAnimator.SetAttacking(false, 0);
+        }
+
+        public void FinishAttackAnimation()
+        {
+            _bossEnemyAnimator.SetAttacking(false, 0);
         }
 
         /// <summary>ノックバックの力を与える</summary>
@@ -263,6 +270,8 @@ namespace BossEnemy.Character
             _bossEnemyAnimator.SetPosture(postureType);
 
             ChangeLockOnParts(postureType);
+
+            OnChangedPosture?.Invoke(postureType);
         }
 
         /// <summary>位置をセットする</summary>
@@ -307,7 +316,6 @@ namespace BossEnemy.Character
         {
             _timeScale.Value = timeScale;
             _bossEnemyAnimator.SetAnimSpeed(timeScale);
-            OnChangedTimeScale?.Invoke(timeScale);
         }
 
         /// <summary>

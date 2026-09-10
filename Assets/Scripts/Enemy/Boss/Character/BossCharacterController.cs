@@ -9,7 +9,8 @@ namespace BossEnemy.Character
 {
     public class BossCharacterController : IBossEnemyCharacterController 
     {
-        public void Init(IBossEnemyCharacterView bossEnemyCharacterView,
+        public void Init(
+            IBossEnemyCharacterView bossEnemyCharacterView,
             EnemyServices enemyServices,
             IBossCharacterAnimationEventReceiver animationEventReceiver,
             ITreeNode entryNode,
@@ -71,15 +72,11 @@ namespace BossEnemy.Character
 
             // 現在のHPが0になった際のイベント登録
             _characterEntity.CurrentHP.Subscribe(currentHP =>
-            {
-                if (currentHP == 0) HandleHPZero();
-            }).AddTo(_deadEventDisposables);
+            { if (currentHP == 0) HandleHPZero(); }).AddTo(_deadEventDisposables);
 
             // Phase切り替えイベント登録
-            _characterEntity.IsPhaseChaging.Subscribe(isPhaseChanging =>
-            {
-                if (isPhaseChanging) HandlePhaseChange();
-            }).AddTo(_deadEventDisposables);
+            _characterEntity.IsPhaseChaging.Subscribe(isPhaseChanging => 
+            {if (isPhaseChanging) HandlePhaseChange();}).AddTo(_deadEventDisposables);
 
             // Phase切り替え完了時イベント登録
             _animationEventReceiver.OnPhaseChangeEnd += HandlePhaseChangeCompleted;
@@ -88,10 +85,8 @@ namespace BossEnemy.Character
             _characterEntity.OnDead += HandleDead;
 
             // 姿勢切り替えイベント登録
-            _characterEntity.CurrentCharacterPostureType.Subscribe(posture =>
-            {
-                HandleChangePosture(posture);
-            }).AddTo(_deadEventDisposables);
+            _characterEntity.CurrentCharacterPostureType.Subscribe(posture => 
+            { HandleChangePosture(posture);}).AddTo(_deadEventDisposables);
 
             // 姿勢切り替え完了イベント登録
             _animationEventReceiver.OnPostureChangeCompleted += HandlePostureChangeCompleted;
@@ -100,15 +95,18 @@ namespace BossEnemy.Character
             _bossCharacterView.OnTakeDamage += HandleTakeDamage;
 
             // ボスが移動した際のイベント登録
-            _characterEntity.Position.Subscribe(newPosition => { HandleMovePosition(newPosition); }).AddTo(_deadEventDisposables);
-            _characterEntity.Rotation.Subscribe(newRotation => { HandleMoveRotation(newRotation); }).AddTo(_deadEventDisposables);
-            _characterEntity.Velocity.Subscribe(newVelocity => { HandleMoveVelocity(newVelocity); }).AddTo(_deadEventDisposables);
+            _characterEntity.Position.Subscribe(newPosition => 
+            { HandleMovePosition(newPosition); }).AddTo(_deadEventDisposables);
+
+            _characterEntity.Rotation.Subscribe(newRotation => 
+            { HandleMoveRotation(newRotation); }).AddTo(_deadEventDisposables);
+
+            _characterEntity.Velocity.Subscribe(newVelocity => 
+            { HandleMoveVelocity(newVelocity); }).AddTo(_deadEventDisposables);
 
             // ボスが攻撃を行った際のイベント登録
             _characterEntity.ExecutingAttackData.Subscribe(attack =>
-            {
-                if(attack.ID != 0) HandleExecuteAttack(attack);
-            }).AddTo(_deadEventDisposables);
+            { if(attack.ID != 0) HandleExecuteAttack(attack); }).AddTo(_deadEventDisposables);
 
             // ボスの攻撃の当たり判定を行うイベント登録
             _animationEventReceiver.OnCheckHitAttack += HandleCheckHitAttack;
@@ -120,7 +118,8 @@ namespace BossEnemy.Character
             _animationEventReceiver.OnAttackEnd += HandleAttackCompleted;
 
             // TimeScale変更時のイベント登録
-            _bossCharacterView.OnChangedTimeScale += HandleChangedTimeScale;
+            _bossCharacterView.TimeScaleReactiveProperty.Subscribe(timaScale => 
+            { HandleChangedTimeScale(timaScale); }).AddTo(_deadEventDisposables);
 
             // キャラクターの移動イベント登録
             _animationEventReceiver.OnMoveCharacter += HandleMoveCharacter;
@@ -149,9 +148,6 @@ namespace BossEnemy.Character
 
             // ボスが攻撃を終了したことの通知をアニメーター側から受け取るイベント購読解除
             _animationEventReceiver.OnAttackEnd -= HandleAttackCompleted;
-
-            // TimeScale変更時のイベント購読解除
-            _bossCharacterView.OnChangedTimeScale -= HandleChangedTimeScale;
 
             // キャラクターの移動イベント購読解除
             _animationEventReceiver.OnMoveCharacter -= HandleMoveCharacter;
@@ -198,7 +194,11 @@ namespace BossEnemy.Character
         /// <summary> フェーズ切り替えイベント発火時の処理 </summary>
         private void HandlePhaseChange()
         {
-            _bossCharacterView.AttackCompleted();
+            if(_characterEntity.ExecutingAttackData.Value.ID != 0)
+            {
+                HandleAttackCompleted();
+            }
+
             _bossCharacterView.ChangePhase(_characterEntity.CharacterCurrentStats.PhaseNum);
         }
 
