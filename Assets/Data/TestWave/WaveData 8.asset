@@ -10,33 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
-  m_Name: WaveData 7
+  m_Name: WaveData 8
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 6
-      MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 5
-    NextWaveConditions:
-    - WaveConditionType: 0
-      Threshold: 3
-    SpawnPointKey: 1
-    _spawnSetSize: 3
-    _spawnSetInterval: 0.5
-    _placementMode: 1
-    _clusterRadius: 2
-  - SpawnEntries:
-    - EnemyTypeKey: ShiledDraugr
-      SpawnCount: 1
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 2
       MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: Enemy_Armor_Heavy
-      SpawnCount: 1
-      MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Armor_Medium
-      SpawnCount: 1
-      MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Armor_Light
       SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
@@ -44,39 +25,55 @@ MonoBehaviour:
     - WaveConditionType: 0
       Threshold: 0
     SpawnPointKey: 2
-    _spawnSetSize: 3
+    _spawnSetSize: 2
     _spawnSetInterval: 0.5
-    _placementMode: 1
+    _placementMode: 0
     _clusterRadius: 2
   - SpawnEntries:
-    - EnemyTypeKey: StoneGolem
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    - EnemyTypeKey: Enemy_Armor_Heavy
       SpawnCount: 1
-      MidBossLevelTable: {fileID: 11400000, guid: fd7814b140cca00498baf15536d6a050, type: 2}
+      MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 0
       Threshold: 0
-    SpawnPointKey: 1
-    _spawnSetSize: 3
+    SpawnPointKey: 3
+    _spawnSetSize: 2
     _spawnSetInterval: 0.5
-    _placementMode: 1
+    _placementMode: 0
     _clusterRadius: 2
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    - EnemyTypeKey: Enemy_Armor_Heavy
       SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Medium
-      SpawnCount: 1
+    ExclusionRadius: 5
+    NextWaveConditions:
+    - WaveConditionType: 0
+      Threshold: 0
+    SpawnPointKey: 4
+    _spawnSetSize: 2
+    _spawnSetInterval: 0.5
+    _placementMode: 0
+    _clusterRadius: 2
+  - SpawnEntries:
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 2
       MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Light
+    - EnemyTypeKey: Enemy_Armor_Heavy
       SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
-    SpawnPointKey: 4
-    _spawnSetSize: 3
+    SpawnPointKey: 5
+    _spawnSetSize: 2
     _spawnSetInterval: 0.5
-    _placementMode: 1
+    _placementMode: 0
     _clusterRadius: 2
