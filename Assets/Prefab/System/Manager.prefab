@@ -598,6 +598,8 @@ MonoBehaviour:
   _wallLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  _clampSpawnToWalls: 1
+  _spawnWallMargin: 1
   _enemySpawner: {fileID: 4380269281932468535}
   _bossEnemySpawner: {fileID: 7246669613523359550}
 --- !u!1 &3721311690304933274
@@ -777,6 +779,8 @@ MonoBehaviour:
     _name: Boss
   - _timelineAsset: {fileID: 11400000, guid: 3c44121e764069846855708757e33cb5, type: 2}
     _name: Ending
+  - _timelineAsset: {fileID: 11400000, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    _name: GameOver
 --- !u!114 &7618133072352931599
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1001,6 +1005,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
+  _subtitleSettingsAddress: SubtitleSettings
   _subtitleView: {fileID: 0}
   _moviePlayer: {fileID: 3281229546311345012}
   _firstSequence: 1
@@ -1065,6 +1070,7 @@ MonoBehaviour:
     - rid: 6731506274227978453
       type: {class: GameOverState, ns: , asm: Assembly-CSharp}
       data:
+        _movieName: GameOver
         _gameOverDuration: 10
         _gameOverTimerView: {fileID: 0}
         _gameOverView: {fileID: 0}
@@ -1077,33 +1083,33 @@ MonoBehaviour:
         _panelView: {fileID: 0}
         _pages:
         - _trigger: 0
-          _title: "基本操作"
-          _description: "各操作を試してください。攻撃が命中すると次へ進みます。"
+          _title: "\u57FA\u672C\u64CD\u4F5C"
+          _description: "\u5404\u64CD\u4F5C\u3092\u8A66\u3057\u3066\u304F\u3060\u3055\u3044\u3002\u653B\u6483\u304C\u547D\u4E2D\u3059\u308B\u3068\u6B21\u3078\u9032\u307F\u307E\u3059\u3002"
           _illustration: {fileID: 0}
           _duration: 8
         - _trigger: 1
-          _title: "闘神モード"
-          _description: "RT長押しで強力な広範囲チャージ攻撃ができます。鎧をまとった敵には闘神モードが有効です。"
+          _title: "\u95D8\u795E\u30E2\u30FC\u30C9"
+          _description: "RT\u9577\u62BC\u3057\u3067\u5F37\u529B\u306A\u5E83\u7BC4\u56F2\u30C1\u30E3\u30FC\u30B8\u653B\u6483\u304C\u3067\u304D\u307E\u3059\u3002\u93A7\u3092\u307E\u3068\u3063\u305F\u6575\u306B\u306F\u95D8\u795E\u30E2\u30FC\u30C9\u304C\u6709\u52B9\u3067\u3059\u3002"
           _illustration: {fileID: 0}
           _duration: 8
         - _trigger: 2
-          _title: "モードチェンジ"
-          _description: "敵の鎧を破壊しました。LBで雷神モードへ切り替えてください。"
+          _title: "\u30E2\u30FC\u30C9\u30C1\u30A7\u30F3\u30B8"
+          _description: "\u6575\u306E\u93A7\u3092\u7834\u58CA\u3057\u307E\u3057\u305F\u3002LB\u3067\u96F7\u795E\u30E2\u30FC\u30C9\u3078\u5207\u308A\u66FF\u3048\u3066\u304F\u3060\u3055\u3044\u3002"
           _illustration: {fileID: 0}
           _duration: 8
         - _trigger: 3
-          _title: "レベルアップ"
-          _description: "敵を倒すと経験値を獲得できます。一定量たまると、攻撃力・HP・雷神ゲージ・クリティカル率のいずれかが上昇します。"
+          _title: "\u30EC\u30D9\u30EB\u30A2\u30C3\u30D7"
+          _description: "\u6575\u3092\u5012\u3059\u3068\u7D4C\u9A13\u5024\u3092\u7372\u5F97\u3067\u304D\u307E\u3059\u3002\u4E00\u5B9A\u91CF\u305F\u307E\u308B\u3068\u3001\u653B\u6483\u529B\u30FBHP\u30FB\u96F7\u795E\u30B2\u30FC\u30B8\u30FB\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u7387\u306E\u3044\u305A\u308C\u304B\u304C\u4E0A\u6607\u3057\u307E\u3059\u3002"
           _illustration: {fileID: 0}
           _duration: 6
         - _trigger: 4
-          _title: "トールの加護"
-          _description: "ウェーブをクリアすると3つのスキルが提示されます。3つの中から1つを選んで獲得できます。"
+          _title: "\u30C8\u30FC\u30EB\u306E\u52A0\u8B77"
+          _description: "\u30A6\u30A7\u30FC\u30D6\u3092\u30AF\u30EA\u30A2\u3059\u308B\u30683\u3064\u306E\u30B9\u30AD\u30EB\u304C\u63D0\u793A\u3055\u308C\u307E\u3059\u30023\u3064\u306E\u4E2D\u304B\u30891\u3064\u3092\u9078\u3093\u3067\u7372\u5F97\u3067\u304D\u307E\u3059\u3002"
           _illustration: {fileID: 0}
           _duration: 6
         - _trigger: 5
-          _title: "雷神モード"
-          _description: "RT連打による連撃を得意とする高速戦闘スタイルです。雷神ゲージを消費しますが、鎧が剥がれた敵に強力です。敵の攻撃に合わせて回避するとジャスト回避が発生します。"
+          _title: "\u96F7\u795E\u30E2\u30FC\u30C9"
+          _description: "RT\u9023\u6253\u306B\u3088\u308B\u9023\u6483\u3092\u5F97\u610F\u3068\u3059\u308B\u9AD8\u901F\u6226\u95D8\u30B9\u30BF\u30A4\u30EB\u3067\u3059\u3002\u96F7\u795E\u30B2\u30FC\u30B8\u3092\u6D88\u8CBB\u3057\u307E\u3059\u304C\u3001\u93A7\u304C\u5265\u304C\u308C\u305F\u6575\u306B\u5F37\u529B\u3067\u3059\u3002\u6575\u306E\u653B\u6483\u306B\u5408\u308F\u305B\u3066\u56DE\u907F\u3059\u308B\u3068\u30B8\u30E3\u30B9\u30C8\u56DE\u907F\u304C\u767A\u751F\u3057\u307E\u3059\u3002"
           _illustration: {fileID: 0}
           _duration: 6
         _spawnPointSelector: {fileID: 7793837620590366497}
@@ -1438,8 +1444,10 @@ MonoBehaviour:
   _mainCamera: {fileID: 0}
   _normalCamera: {fileID: 0}
   _lockOnCamera: {fileID: 0}
+  _bossBodyCamera: {fileID: 0}
   _normalPriority: 10
   _lockOnPriority: 20
+  _bossPriority: 30
   _cameraDistance: 5
   _cameraHeight: 2
   _posSmoothTime: 0.2
@@ -1482,6 +1490,26 @@ MonoBehaviour:
     MidMultiplier: 1
     MidDuration: 0.3
     ZoomOutDuration: 0.3
+  _bossFramingNearDistance: 6
+  _bossFramingFarDistance: 18
+  _bossOrbitTrackSpeed: 180
+  _bossSwivelRange: 1.5
+  _bossSwivelSpeed: 3
+  _bossSwivelReturnSpeed: 2
+  _bossPostureZooms:
+  - Posture: 1
+    ZoomMultiplier: 1
+    Duration: 0.3
+  - Posture: 2
+    ZoomMultiplier: 0.9
+    Duration: 0.3
+  - Posture: 3
+    ZoomMultiplier: 0.9
+    Duration: 0.3
+  - Posture: 4
+    ZoomMultiplier: 0.8
+    Duration: 0.4
+  _bossZoomResetDuration: 0.3
   _lockOnController: {fileID: 7245693978089855125}
 --- !u!114 &1355759329580380758
 MonoBehaviour:
