@@ -25,7 +25,7 @@ namespace BossEnemy.Infrastructure
         public event Action OnHitAttack;
 
         /// <summary>攻撃アニメーション終了のイベント</summary>
-        public event Action OnAttackEnd;
+        public event Action OnAttackCompleted;
 
         /// <summary>Phase切り替え終了のイベント</summary>
         public event Action OnPhaseChangeEnd;
@@ -61,9 +61,9 @@ namespace BossEnemy.Infrastructure
         }
 
         /// <summary>AttackSMB からステート終了時に呼ばれる</summary>
-        public void AnimEvent_AttackEnd()
+        public void AnimEvent_AttackCompleted()
         {
-            OnAttackEnd?.Invoke();
+            OnAttackCompleted?.Invoke();
         }
 
         /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>

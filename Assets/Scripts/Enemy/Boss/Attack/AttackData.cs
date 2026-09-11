@@ -13,9 +13,8 @@ namespace BossEnemy.Attack
         /// <param name="attackStartDistance"> 攻撃を開始できるターゲットとの距離 </param>
         /// <param name="damageReactionType"> 攻撃によるノックバックの威力 </param>
         /// <param name="coolTime"> 攻撃終了から次に使えるようになるまでのクールタイム </param>
-        /// <param name="animParam"> 攻撃アニメーションのパラメータ名 </param>
         public AttackData(
-            int id, string name, float damage, float attackHitAreaRadius, float attackStartDistance, DamageReactionType damageReactionType, float coolTime, string animParam)
+            int id, string name, float damage, float attackHitAreaRadius, float attackStartDistance, DamageReactionType damageReactionType, float coolTime)
         {
             ID = id;
             Name = name;
@@ -24,7 +23,6 @@ namespace BossEnemy.Attack
             AttackStartDistance = attackStartDistance;
             DamageReaction = damageReactionType;
             CoolTime = coolTime;
-            AnimParamName = animParam;
         }
 
         /// <summary> データID </summary>
@@ -47,8 +45,5 @@ namespace BossEnemy.Attack
 
         /// <summary> 攻撃終了から次に使えるようになるまでのクールタイム </summary>
         public readonly float CoolTime;
-
-        /// <summary> アニメーションのパラメータ名 </summary>
-        public readonly string AnimParamName;
     }
 }

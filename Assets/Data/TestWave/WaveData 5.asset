@@ -20,16 +20,26 @@ MonoBehaviour:
     ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 0
-      Threshold: 1
+      Threshold: 0.1
     SpawnPointKey: 
     _spawnSetSize: 3
     _spawnSetInterval: 0.5
     _placementMode: 0
     _clusterRadius: 2
   - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 4
+    - EnemyTypeKey: Enemy_Medium
+      SpawnCount: 2
       MidBossLevelTable: {fileID: 0}
+    ExclusionRadius: 5
+    NextWaveConditions:
+    - WaveConditionType: 0
+      Threshold: 0.1
+    SpawnPointKey: 
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 0
+    _clusterRadius: 2
+  - SpawnEntries:
     - EnemyTypeKey: Enemy_Heavy
       SpawnCount: 2
       MidBossLevelTable: {fileID: 0}
@@ -40,5 +50,5 @@ MonoBehaviour:
     SpawnPointKey: 
     _spawnSetSize: 3
     _spawnSetInterval: 0.5
-    _placementMode: 1
+    _placementMode: 0
     _clusterRadius: 2
