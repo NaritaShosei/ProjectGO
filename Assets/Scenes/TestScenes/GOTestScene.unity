@@ -1959,27 +1959,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1123313772}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: managedReferences[6731506274227978454]._panelView
-      value: 
-      objectReference: {fileID: 2200000002}
-    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: managedReferences[6731506274227978447]._nextSequence
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978453]._gameOverView
       value: 
       objectReference: {fileID: 2100000002}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: managedReferences[6731506274227978454]._checklistView
-      value: 
-      objectReference: {fileID: 2300000002}
-    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978448]._skillSelectView
-      value: 
-      objectReference: {fileID: 1504407408}
-    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: managedReferences[6731506274227978454]._skillSelectView
       value: 
       objectReference: {fileID: 1504407408}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
@@ -3316,7 +3300,7 @@ PrefabInstance:
     - target: {fileID: 5312931378833072110, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: 'm_Bindings.Array.data[0]'
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1621227474}
     - target: {fileID: 5435391086855291110, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.9524729
@@ -7144,8 +7128,6 @@ RectTransform:
   - {fileID: 4083503}
   - {fileID: 2100000001}
   - {fileID: 1123313771}
-  - {fileID: 2200000001}
-  - {fileID: 2300000001}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -9831,6 +9813,17 @@ SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7688002424138293575, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
   m_PrefabInstance: {fileID: 650177779}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1621227474 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8598521479156495737, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+  m_PrefabInstance: {fileID: 650177779}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fdfea1f838247c40921a07afedde962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.VisualEffectGraph.Runtime::UnityEngine.VFX.Utility.VFXTransformBinder
 --- !u!1 &1700981379
 GameObject:
   m_ObjectHideFlags: 0
@@ -10476,124 +10469,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a17c8c94490c4d428e98d9bc94a61d01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverView
---- !u!1001 &2200000000
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 728091136}
-    m_Modifications:
-    - target: {fileID: 100000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
-      propertyPath: m_Name
-      value: TutorialPanelView
-      objectReference: {fileID: 0}
-    - target: {fileID: 224000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
---- !u!224 &2200000001 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 224000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
-  m_PrefabInstance: {fileID: 2200000000}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2200000002 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 114000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
-  m_PrefabInstance: {fileID: 2200000000}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bbb8bf917ac1499b9cf656eb8d7d5553, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialPanelView
---- !u!1001 &2300000000
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 728091136}
-    m_Modifications:
-    - target: {fileID: 100000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_Name
-      value: TutorialChecklistView
-      objectReference: {fileID: 0}
-    - target: {fileID: 114002, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 114002, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_ActiveFontFeatures.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114003, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_fontSize
-      value: 24.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 114003, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 114003, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_ActiveFontFeatures.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114016, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_TextStyleHashCode
-      value: -1183493901
-      objectReference: {fileID: 0}
-    - target: {fileID: 114016, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_ActiveFontFeatures.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 224000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
---- !u!224 &2300000001 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 224000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-  m_PrefabInstance: {fileID: 2300000000}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2300000002 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 114000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
-  m_PrefabInstance: {fileID: 2300000000}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90b67d4f3dca4e5ea5b1ff8983787352, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TutorialChecklistView
 --- !u!1001 &2091035684598317434
 PrefabInstance:
   m_ObjectHideFlags: 0
