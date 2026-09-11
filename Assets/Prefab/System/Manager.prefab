@@ -51,6 +51,52 @@ MonoBehaviour:
   - {x: 2.5, y: 0, z: 2}
   - {x: -4, y: 0, z: -1.5}
   - {x: 4, y: 0, z: -1.5}
+--- !u!1 &236048899464679252
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1183957128632323862}
+  - component: {fileID: 1795229135816969069}
+  m_Layer: 0
+  m_Name: FireSoundPlayer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1183957128632323862
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 236048899464679252}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7036861525032570302}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1795229135816969069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 236048899464679252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c609cc7a54d420bb1ae1ef90960cebb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireSoundPlayer
+  _playOnEnable: 1
+  _volume: 0.25
 --- !u!1 &777589909429660069
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,6 +416,7 @@ MonoBehaviour:
   _playerModeView: {fileID: 0}
   _playerGaugeView: {fileID: 0}
   _lockOnMarkerView: {fileID: 0}
+  _statUpgradeIconView: {fileID: 0}
 --- !u!1 &2169788507943024728
 GameObject:
   m_ObjectHideFlags: 0
@@ -907,6 +954,7 @@ Transform:
   - {fileID: 4131464219702442700}
   - {fileID: 6581172022573930489}
   - {fileID: 1727641133782366586}
+  - {fileID: 1183957128632323862}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4996710551187502800
