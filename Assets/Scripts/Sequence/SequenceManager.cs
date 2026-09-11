@@ -103,6 +103,7 @@ public class SequenceManager : MonoBehaviour
     private ISequenceState[] _sequences = new ISequenceState[]
     {
         new IntroMovieState(),
+        new TutorialState(),
         new MobAndSkillState(),
         new BossIntroMovieState(),
         new BossBattleState(),
@@ -130,6 +131,7 @@ public class SequenceManager : MonoBehaviour
         _sequences = new ISequenceState[]
         {
             new IntroMovieState(),
+            new TutorialState(),
             new MobAndSkillState(),
             new BossIntroMovieState(),
             new BossBattleState(),
