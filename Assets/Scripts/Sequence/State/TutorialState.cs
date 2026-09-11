@@ -18,6 +18,7 @@ public sealed class TutorialState : ISequenceState
         _panelIsOpen = false;
         _waveClearDetected = false;
         _defeatGuideShown = false;
+        _defeatGuidePending = false;
         _skillSelected = false;
         _transitionRequested = false;
         ResetBasicOperationProgress();
@@ -154,6 +155,7 @@ public sealed class TutorialState : ISequenceState
     private bool _panelIsOpen;
     private bool _waveClearDetected;
     private bool _defeatGuideShown;
+    private bool _defeatGuidePending;
     private bool _skillSelected;
     private bool _transitionRequested;
     private bool _armorBrokenWhilePanelOpen;
@@ -256,6 +258,11 @@ public sealed class TutorialState : ISequenceState
             case TutorialTrigger.ThunderModeChanged:
                 _step = TutorialStep.ThunderCombat;
                 ResumeBattle();
+                if (_defeatGuidePending)
+                {
+                    _defeatGuidePending = false;
+                    ShowModalPages(TutorialTrigger.FirstEnemyDefeated);
+                }
                 break;
             case TutorialTrigger.FirstEnemyDefeated:
                 _defeatGuideShown = true;
@@ -341,14 +348,20 @@ public sealed class TutorialState : ISequenceState
         UpdateBasicOperationProgress();
     }
 
-    /// <summary>敵撃破とウェーブ完了を記録し、雷神段階で経験値説明を開く。</summary>
+    /// <summary>敵撃破とウェーブ完了を記録し、雷神段階で経験値説明を開く。段階到達前の撃破は保留する。</summary>
     private void HandleEnemyDefeated()
     {
         _waveController?.OnEnemyDefeated();
         if (_waveController != null && _waveController.IsComplete)
             _waveClearDetected = true;
-        if (_step == TutorialStep.ThunderCombat && !_defeatGuideShown)
+
+        if (_defeatGuideShown)
+            return;
+
+        if (_step == TutorialStep.ThunderCombat)
             ShowModalPages(TutorialTrigger.FirstEnemyDefeated);
+        else
+            _defeatGuidePending = true;
     }
 
     /// <summary>STEP 1の全項目を一枚のチェックリストとして更新する。</summary>
