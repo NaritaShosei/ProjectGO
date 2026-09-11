@@ -160,6 +160,10 @@ public class PlayerSoundHandler : MonoBehaviour
 
     private void HandleModeChanged(PlayerMode mode)
     {
+        // アニメーション通知の購読順に依存せず、闘神へ戻った時点で止める。
+        if (mode != PlayerMode.Thunder)
+            Sound.StopLoopSE(gameObject, SoundCueNames.Player.ThunderElectrify);
+
         Sound.PlaySE(
             gameObject,
             mode == PlayerMode.Thunder
@@ -223,6 +227,16 @@ public class PlayerSoundHandler : MonoBehaviour
 
     private void HandleStateChanged(PlayerState oldState, PlayerState newState)
     {
+        if (newState == PlayerState.Dodge && _modeController != null)
+        {
+            // 入力ではなく回避が成立した時点で鳴らす。拒否された入力では再生しない。
+            Sound.PlaySE(gameObject,
+                _modeController.CurrentMode == PlayerMode.Thunder
+                    ? SoundCueNames.Player.ThunderDodge
+                    : SoundCueNames.Player.WarriorRoll,
+                CueSheetType.Player);
+        }
+
         if (newState == PlayerState.Dead)
         {
             Sound.StopSE(gameObject);

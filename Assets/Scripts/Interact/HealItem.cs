@@ -26,6 +26,8 @@ public class HealItem : MonoBehaviour, IInteractable, IPoolable
         if (interactor.TryGetComponent(out IHealth component))
         {
             component.Healing(_healValue);
+            // アイテムは直後にプールへ返るため、取得者を音源にして途中停止を防ぐ。
+            Sound.PlaySE(interactor, SoundCueNames.Common.ItemHealPickup, CueSheetType.Common);
             OnInteracted?.Invoke(this);
         }
     }
