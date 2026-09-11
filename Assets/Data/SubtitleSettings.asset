@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 082f13bcb1f94a7cb2155832a042093d, type: 3}
+  m_Name: SubtitleSettings
+  m_EditorClassIdentifier: 
+  _lines:
+  - _cueName: SkillGetVoice01
+    _text: これが…雷神の力…
+    _delay: 2
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: SkillGetVoice02
+    _text: この力は…何のために…？
+    _delay: 2
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: SkillGetVoice03
+    _text: この力なら戦える！
+    _delay: 2
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: SkillGetVoice04
+    _text: この力でやつらを倒す！
+    _delay: 2
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: SkillGetVoice05
+    _text: みんなの仇を！
+    _delay: 2
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: SkillGetVoice06
+    _text: トール…あなたの想いは私が繋ぐ！
+    _delay: 2
+    _duration: 5
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: ReviveVoice01
+    _text: トールあなたの想いを無駄にはしない！
+    _delay: 0
+    _duration: 5
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: ReviveVoice02
+    _text: このままでは終われない...！
+    _delay: 0
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
+  - _cueName: DeathVoice
+    _text: こんなところで…
+    _delay: 0
+    _duration: 4
+    _fadeIn: 0.2
+    _fadeOut: 0.3
