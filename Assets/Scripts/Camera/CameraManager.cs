@@ -409,7 +409,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _normalCamera.Priority = _normalPriority;
         _lockOnCamera.Priority = _normalPriority - 1;
         // ボスカメラは待機時は全カメラより下に置く
-        if (_bossBodyCamera != null) _bossBodyCamera.Priority = _normalPriority - 2;
+        if (_bossBodyCamera != null) _bossBodyCamera.Priority = BossIdlePriority;
 
         _normalOrbitalFollow = _normalCamera.GetComponent<CinemachineOrbitalFollow>();
         _normalInputAxisController = _normalCamera.GetComponent<CinemachineInputAxisController>();
@@ -579,9 +579,12 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         }
         else
         {
-            _bossBodyCamera.Priority = _normalPriority - 2;
+            _bossBodyCamera.Priority = BossIdlePriority;
         }
     }
+
+    /// <summary>ボスカメラの待機時Priority。通常・ロックオンより下に置く。</summary>
+    private int BossIdlePriority => _normalPriority - 2;
 
     private void HandleTargetChanged(ILockOnTarget target)
     {

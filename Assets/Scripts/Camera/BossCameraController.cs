@@ -34,12 +34,13 @@ public sealed class BossCameraController
         _playerTransform = playerTransform;
         _settings = settings;
 
-        // オービット・入力コンポーネントを取得
+        // オービットコンポーネントを取得
         _orbitalFollow = _bossBodyCamera.GetComponent<CinemachineOrbitalFollow>();
-        _inputAxisController = _bossBodyCamera.GetComponent<CinemachineInputAxisController>();
-        // Cinemachine既定の入力適用は使わず自前で回す
-        if (_inputAxisController != null) _inputAxisController.enabled = false;
         if (_orbitalFollow == null) Debug.LogError("[BossCameraController] CinemachineOrbitalFollow が BossBodyCamera にありません。", _bossBodyCamera);
+
+        // Cinemachine既定の入力適用は使わず自前で回すため無効化する（以降参照しないのでローカル変数で十分）
+        var inputAxisController = _bossBodyCamera.GetComponent<CinemachineInputAxisController>();
+        if (inputAxisController != null) inputAxisController.enabled = false;
 
         // 注視点プロキシを生成しカメラと同じシーンへ移す
         _lookAtProxy = new GameObject("BossCameraLookAtProxy").transform;
@@ -92,6 +93,24 @@ public sealed class BossCameraController
 
         if (_lookAtProxy != null) Object.Destroy(_lookAtProxy.gameObject);
     }
+
+    private readonly CameraManager _cameraManager;
+    private readonly CinemachineCamera _bossBodyCamera;
+    private readonly Transform _followAnchor;
+    private readonly InputHandler _inputHandler;
+    private readonly EnemyManager _enemyManager;
+    private readonly Transform _playerTransform;
+    private readonly BossCameraSettings _settings;
+    private readonly CinemachineOrbitalFollow _orbitalFollow;
+    private readonly Transform _lookAtProxy;
+
+    private Camera _mainCamera;
+    private IEnemy _boss;
+    private IBossEnemyCharacterView _bossView;
+    private Transform _angleTop;
+    private Transform _angleUnder;
+    private bool _isActive;
+    private float _swivelOffset;
 
     /// <summary>スポーンした敵がボスなら参照・頭足アンカー・姿勢イベントを保持し、ボスカメラを有効化する。</summary>
     private void HandleEnemySpawned(IEnemy enemy)
@@ -255,23 +274,4 @@ public sealed class BossCameraController
         if (_orbitalFollow == null || _mainCamera == null) return;
         _orbitalFollow.HorizontalAxis.Value = _mainCamera.transform.eulerAngles.y;
     }
-
-    private readonly CameraManager _cameraManager;
-    private readonly CinemachineCamera _bossBodyCamera;
-    private readonly Transform _followAnchor;
-    private readonly InputHandler _inputHandler;
-    private readonly EnemyManager _enemyManager;
-    private readonly Transform _playerTransform;
-    private readonly BossCameraSettings _settings;
-    private readonly CinemachineOrbitalFollow _orbitalFollow;
-    private readonly CinemachineInputAxisController _inputAxisController;
-    private readonly Transform _lookAtProxy;
-
-    private Camera _mainCamera;
-    private IEnemy _boss;
-    private IBossEnemyCharacterView _bossView;
-    private Transform _angleTop;
-    private Transform _angleUnder;
-    private bool _isActive;
-    private float _swivelOffset;
 }
