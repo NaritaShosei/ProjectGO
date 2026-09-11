@@ -35,6 +35,7 @@ public class GameOverState : ISequenceState
                 _gameOverView,
                 () => context.IsTitleRequested = true);
             _gameOverPresenter.Show();
+            context.SequenceManager?.Subtitles?.ShowSubtitle(SoundCueNames.PlayerVoice.Death);
         }
 
         _gameOverTimer = new CountDownTimer();
@@ -119,6 +120,7 @@ public class GameOverState : ISequenceState
             return;
 
         _isCleanedUp = true;
+        context.SequenceManager?.Subtitles?.HideSubtitle();
 
         if (_gameOverTimer != null)
         {

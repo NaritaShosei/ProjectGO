@@ -104,7 +104,8 @@ public class SkillSelectPresenter : IDisposable
         if (_isSelected) return;
 
         _isSelected = true;
-        _skillManager.TryRegisterSkillId(skillId, _stats);
+        if (_skillManager.TryRegisterSkillId(skillId, _stats))
+            _skillManager.QueueAcquisitionVoice();
         _view.Hide();
     }
 
