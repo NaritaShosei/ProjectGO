@@ -3300,7 +3300,7 @@ PrefabInstance:
     - target: {fileID: 5312931378833072110, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: 'm_Bindings.Array.data[0]'
       value: 
-      objectReference: {fileID: 1621227474}
+      objectReference: {fileID: 0}
     - target: {fileID: 5435391086855291110, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.9524729
@@ -9813,17 +9813,6 @@ SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7688002424138293575, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
   m_PrefabInstance: {fileID: 650177779}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1621227474 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8598521479156495737, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-  m_PrefabInstance: {fileID: 650177779}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7fdfea1f838247c40921a07afedde962, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.VisualEffectGraph.Runtime::UnityEngine.VFX.Utility.VFXTransformBinder
 --- !u!1 &1700981379
 GameObject:
   m_ObjectHideFlags: 0
