@@ -69,6 +69,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
+        pos = ClampSpawnPosition(pos);
         var obj = Instantiate(original, pos, Quaternion.identity, parent: transform);
 
         if (obj.TryGetComponent(out IEnemy enemy))
@@ -144,6 +145,7 @@ public class EnemyManager : MonoBehaviour
             return null;
         }
 
+        pos = ClampSpawnPosition(pos);
         Enemy enemy = _enemySpawner.Spawn(
             poolKey,
             pos,
@@ -300,6 +302,7 @@ public class EnemyManager : MonoBehaviour
             return;
         }
 
+        pos = ClampSpawnPosition(pos);
         IBossHPView bossEnemyUIView = null;
         IBossEnemyCharacterView enemy = await _bossEnemySpawner.Spawn(pos, bossEnemyUIView, _player);
         if (enemy == null) return;
@@ -369,6 +372,12 @@ public class EnemyManager : MonoBehaviour
     // 壁判定に使用するレイヤーマスク
     [SerializeField] private LayerMask _wallLayerMask;
 
+    [Header("生成位置の補正")]
+    [SerializeField, Tooltip("Playerから生成予定位置までのWallを検出し、壁の手前へ戻す")]
+    private bool _clampSpawnToWalls = true;
+    [SerializeField, Min(0f), Tooltip("生成位置を壁からPlayer側へ離す距離")]
+    private float _spawnWallMargin = 1f;
+
     // Enemyの生成を行うクラス
     [SerializeField] private EnemySpawner _enemySpawner;
     [SerializeField] private BossEnemySpawner _bossEnemySpawner;
@@ -388,6 +397,32 @@ public class EnemyManager : MonoBehaviour
     private EnemyServices _enemyServices;
 
     private EXPManager _expManager;
+
+    private Vector3 ClampSpawnPosition(Vector3 position)
+    {
+        if (!_clampSpawnToWalls || _wallLayerMask == 0) return position;
+        Transform playerCenter = _player?.GetTargetCenter();
+        if (playerCenter == null) return position;
+
+        // 範囲の中心・半径は使わない。マップ内にいるPlayerから外向きに調べ、
+        // 集団配置のオフセット加算後でも外周Wallを越えない位置へ戻す。
+        // 起点は胸元の高さとし、床との接触を壁越えと誤判定しない。
+        Vector3 origin = playerCenter.position;
+        Vector3 direction = position - origin;
+        direction.y = 0f;
+        float distance = direction.magnitude;
+        if (distance <= Mathf.Epsilon) return position;
+        direction /= distance;
+
+        float margin = Mathf.Max(0f, _spawnWallMargin);
+        if (!Physics.Raycast(origin, direction, out RaycastHit hit, distance + margin,
+                _wallLayerMask, QueryTriggerInteraction.Ignore))
+            return position;
+
+        Vector3 clamped = origin + direction * Mathf.Max(0f, hit.distance - margin);
+        // スポーン演出で使用する高さは維持する。
+        return new Vector3(clamped.x, position.y, clamped.z);
+    }
 
     private void Awake()
     {

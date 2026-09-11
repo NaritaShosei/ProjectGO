@@ -9,6 +9,7 @@ public class ResultState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
+        _context = context;
         context.InputHandler?.EnableInput(false);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -27,6 +28,7 @@ public class ResultState : ISequenceState
         _presenter = new ResultPanelPresenter(_view, _model);
         _view.TitleRequested += HandleTitleRequested;
         _presenter.ShowResult();
+        context.SequenceManager?.Subtitles?.PlayVoiceSubtitle(SoundCueNames.PlayerVoice.Result);
 
         context.SequenceManager?.NotifyAllSequencesComplete();
     }
@@ -35,12 +37,14 @@ public class ResultState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
+        context.SequenceManager?.Subtitles?.HideSubtitle();
         if (_view != null)
             _view.TitleRequested -= HandleTitleRequested;
 
         _view?.HidePanel();
         _model = null;
         _presenter = null;
+        _context = null;
     }
 
     [Header("Result UI")]
@@ -53,6 +57,7 @@ public class ResultState : ISequenceState
 
     private ResultPanelModel _model;
     private ResultPanelPresenter _presenter;
+    private SequenceStateContext _context;
 
     private void HandleTitleRequested()
     {
@@ -66,6 +71,7 @@ public class ResultState : ISequenceState
         if (transitionManager.IsTransitioning)
             return;
 
+        _context?.SequenceManager?.Subtitles?.HideSubtitle();
         transitionManager.TransitionToTitle().Forget();
     }
 }

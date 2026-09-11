@@ -189,7 +189,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         OnDamagedEffect?.Invoke(
             new PlayerDamageEffectContext
             {
-                HitPosition = _targetCenter.position
+                HitPosition = _targetCenter.position,
+                ReactionType = reactionType,
+                // 致死ダメージでは死亡ボイスを優先する。ダウン時は通知前に処理を終了する。
+                SuppressDamageVoice = _playerStateManager.IsDead()
             });
 
         bool canInterrupt = true;

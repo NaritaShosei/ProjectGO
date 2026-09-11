@@ -71,6 +71,7 @@ public class SequenceStateMachine
         }
 
         _current?.OnExit(_context);
+        _context.SequenceManager?.Subtitles?.SetSequence(nextType);
         _context.ResetTransitionFlags();
 
         _current = next;
