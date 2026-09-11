@@ -16,6 +16,8 @@ public class PlayerAttack : MonoBehaviour
     public event Action<AttackMoveRequest> OnAttackMoveRequested;
     public event Action OnAttackMoveStopRequested;
     public event Action OnAttackEnded;
+    /// <summary>ヒット判定と独立して、攻撃モーションの開始ごとに一度だけ発声を通知する。</summary>
+    public event Action<PlayerMode, ChargeLevel, int> OnAttackVoiceReady;
     /// <summary> 溜め開始を移動制限のためにPlayerMovementへ通知</summary>
     public event Action OnChargingStarted;
     /// <summary> 溜め終了（攻撃発動 or キャンセル）を通知</summary>
@@ -417,6 +419,7 @@ public class PlayerAttack : MonoBehaviour
         _canModeChangeDuringAttack = false;
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
+        OnAttackVoiceReady?.Invoke(attackData.Mode, input.ChargeLevel, _currentComboStage);
     }
 
     /// <summary>
@@ -483,6 +486,7 @@ public class PlayerAttack : MonoBehaviour
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
+        OnAttackVoiceReady?.Invoke(nextAttack.Mode, bufferedInput.ChargeLevel, _currentComboStage);
     }
 
     /// <summary>

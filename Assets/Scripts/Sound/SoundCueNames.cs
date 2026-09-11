@@ -82,26 +82,27 @@ public static class SoundCueNames
     // Player_Voiceキューシート専用。SEとは異なるシートを指定して再生する。
     public static class PlayerVoice
     {
-        public const string DamageLarge01 = "Damage_Voice_Large_01";
-        public const string DamageLarge02 = "Damage_Voice_Large_02";
-        public const string DamageMedium01 = "Damage_Voice_Medium_01";
-        public const string DamageMedium02 = "Damage_Voice_Medium_02";
-        public const string DamageSmall01 = "Damage_Voice_Small_01";
-        public const string DamageSmall02 = "Damage_Voice_Small_02";
-        public const string Death = "Death_Voice";
+        public const string DamageLarge01 = "DamageVoiceLarge01";
+        public const string DamageLarge02 = "DamageVoiceLarge02";
+        public const string DamageMedium01 = "DamageVoiceMedium01";
+        public const string DamageMedium02 = "DamageVoiceMedium02";
+        public const string DamageSmall01 = "DamageVoiceSmall01";
+        // 配布されているACBのキュー名は「Smal」。表記を補正すると音源を解決できない。
+        public const string DamageSmall02 = "DamageVoiceSmal02";
+        public const string Death = "DeathVoice";
         public const string IntroMovie = "IntroMovie_Voice";
         public const string ModeChange01 = "ModeChange_Voice_01";
         public const string ModeChange02 = "ModeChange_Voice_02";
         public const string ModeChange03 = "ModeChange_Voice_03";
         public const string Result = "Result_Voice";
-        public const string Revive01 = "Revive_Voice_01";
-        public const string Revive02 = "Revive_Voice_02";
-        public const string SkillGet01 = "SkillGet_Voice_01";
-        public const string SkillGet02 = "SkillGet_Voice_02";
-        public const string SkillGet03 = "SkillGet_Voice_03";
-        public const string SkillGet04 = "SkillGet_Voice_04";
-        public const string SkillGet05 = "SkillGet_Voice_05";
-        public const string SkillGet06 = "SkillGet_Voice_06";
+        public const string Revive01 = "ReviveVoice01";
+        public const string Revive02 = "ReviveVoice02";
+        public const string SkillGet01 = "SkillGetVoice01";
+        public const string SkillGet02 = "SkillGetVoice02";
+        public const string SkillGet03 = "SkillGetVoice03";
+        public const string SkillGet04 = "SkillGetVoice04";
+        public const string SkillGet05 = "SkillGetVoice05";
+        public const string SkillGet06 = "SkillGetVoice06";
         public const string ThunderCombo0101 = "Thunder_Voice_Combo_01_01";
         public const string ThunderCombo0102 = "Thunder_Voice_Combo_01_02";
         public const string ThunderCombo0103 = "Thunder_Voice_Combo_01_03";
@@ -129,12 +130,12 @@ public static class SoundCueNames
         public const string ThunderCombo0505 = "Thunder_Voice_Combo_05_05";
         public const string ThunderCombo0506 = "Thunder_Voice_Combo_05_06";
         public const string ThunderCombo0507 = "Thunder_Voice_Combo_05_07";
-        public const string WarriorAttack01 = "Warrior_Voice_Attack_01";
-        public const string WarriorAttack02 = "Warrior_Voice_Attack_02";
-        public const string WarriorAttack03 = "Warrior_Voice_Attack_03";
-        public const string WarriorAttack04 = "Warrior_Voice_Attack_04";
-        public const string WarriorAttack05 = "Warrior_Voice_Attack_05";
-        public const string WarriorAttack06 = "Warrior_Voice_Attack_06";
+        public const string WarriorAttack01 = "WarriorVoiceAttack01";
+        public const string WarriorAttack02 = "WarriorVoiceAttack02";
+        public const string WarriorAttack03 = "WarriorVoiceAttack03";
+        public const string WarriorAttack04 = "WarriorVoiceAttack04";
+        public const string WarriorAttack05 = "WarriorVoiceAttack05";
+        public const string WarriorAttack06 = "WarriorVoiceAttack06";
     }
 
     public static class Environment
