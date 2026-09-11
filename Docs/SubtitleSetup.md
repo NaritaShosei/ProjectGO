@@ -1,7 +1,7 @@
 # 字幕の設定と確認
 
 `Assets/Data/SubtitleSettings.asset` をUnityのInspectorで編集します。
-SequenceManagerが字幕UIを自動生成するため、既存シーンにCanvasを追加する必要はありません。
+GOTestSceneなどの既存の `Canvas` 直下に `SubtitleText` を事前配置し、SequenceManagerのSubtitle Viewに接続しています。実行時にUIを生成しません。位置・フォント・サイズは配置済みText UIで調整します。
 既存の `AssetsLoader.LoadAssetAsync` でAddressablesアドレス `SubtitleSettings` を読み込み、完了後にゲームを初期化します。Default Local Groupに登録済みです。
 シーンごとに設定を分ける場合は、このアセットを複製してAddressablesに登録し、SequenceManagerのSubtitle Settings Addressにそのアドレスを指定します。
 
