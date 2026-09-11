@@ -60,6 +60,7 @@ public sealed class CameraPresentationController
     public CameraPresentationController(
         CinemachineCamera normalCamera,
         CinemachineCamera lockOnCamera,
+        CinemachineCamera bossBodyCamera,
         PlayerAttack playerAttack,
         PlayerModeController playerModeController,
         PlayerAnimationController playerAnimationController,
@@ -68,7 +69,7 @@ public sealed class CameraPresentationController
         ReleaseZoomSetting releaseZoom,
         ModeChangeZoomSetting thunderModeZoom)
     {
-        _zoomController = new CameraZoomController(normalCamera, lockOnCamera);
+        _zoomController = new CameraZoomController(normalCamera, lockOnCamera, bossBodyCamera);
         _cameraShake = new CameraShake();
 
         _level2Zoom = level2Zoom;
@@ -109,6 +110,15 @@ public sealed class CameraPresentationController
     public void SetZoom(float zoom, float duration)
     {
         _zoomController?.SetZoom(zoom, duration);
+    }
+
+    /// <summary>
+    /// ベース層のズーム倍率を設定します。チャージ等のエフェクト層とは独立に補間され、実FOVには両者の積が掛かります。
+    /// ボスの姿勢連動など「基準そのものを動かす」用途に使います。
+    /// </summary>
+    public void SetBaseZoom(float zoom, float duration)
+    {
+        _zoomController?.SetBaseZoom(zoom, duration);
     }
 
     /// <summary>
