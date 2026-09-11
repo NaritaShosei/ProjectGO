@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// エネミーの出現地点
-/// SpawnSlotによるフォーメーション配置とエリアクランプを担当するクラス
+/// SpawnSlotによるフォーメーション配置を担当する。壁への補正は生成直前にEnemyManagerで行う。
 /// </summary>
 public class SpawnPoint : MonoBehaviour
 {
@@ -18,8 +18,7 @@ public class SpawnPoint : MonoBehaviour
         foreach (var localSlot in _spawnSlots)
         {
             Vector3 worldPos = transform.TransformPoint(localSlot);
-            Vector3 clamped = _mapManager != null ? _mapManager.ClampToArea(worldPos) : worldPos;
-            result.Add(clamped);
+            result.Add(worldPos);
         }
         return result;
     }
@@ -45,7 +44,7 @@ public class SpawnPoint : MonoBehaviour
         Vector3 worldPos =
             transform.TransformPoint(_spawnSlots[index]);
 
-        return _mapManager != null ? _mapManager.ClampToArea(worldPos) : worldPos;
+        return worldPos;
     }    
 
     [Tooltip("SpawnPointSelector から参照するためのKey")]
@@ -54,15 +53,4 @@ public class SpawnPoint : MonoBehaviour
     [Tooltip("エネミーを生成するローカル座標リスト（インスペクターで指定）")]
     [SerializeField] private List<Vector3> _spawnSlots = new();
 
-    private MapManager _mapManager;
-
-    private void Awake()
-    {
-        if (ServiceLocator.TryGet(out MapManager mapManager))
-        {
-            _mapManager = mapManager;
-            return;
-        }
-        Debug.LogError("[SpawnPoint] MapManagerが取得できません");
-    }
 }

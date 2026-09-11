@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 導入ムービーのState。
 /// ムービー完了またはスキップで MobAndSkill へ遷移する。
-/// 実際のTimeline再生は IMoviePlayer 経由で行う（仮実装ではフラグで即完了）。
+/// 映像はMoviePlayer、字幕とボイスは字幕設定の遅延時間で制御する。
 /// </summary>
 [Serializable]
 public class IntroMovieState : ISequenceState
@@ -32,7 +32,11 @@ public class IntroMovieState : ISequenceState
         {
             Debug.LogWarning($"ムービー '{_movieName}' の再生に失敗しました。");
             context.IsMovieCompleted = true; // ムービー再生に失敗した場合も即座にムービー完了とする
+            return;
         }
+
+        // TimelineのトラックやSignalは使わず、ムービー開始からの秒数で終盤に合わせる。
+        context.SequenceManager?.Subtitles?.PlayVoiceSubtitle(SoundCueNames.PlayerVoice.IntroMovie);
     }
 
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
@@ -47,7 +51,8 @@ public class IntroMovieState : ISequenceState
     {
         var moviePlayer = context.MoviePlayer;
 
-        moviePlayer.OnMovieFinished -= HandleMovieFinished;
+        if (moviePlayer != null) moviePlayer.OnMovieFinished -= HandleMovieFinished;
+        context.SequenceManager?.Subtitles?.HideSubtitle();
     }
 
     [Header("Movie Settings")]
@@ -59,6 +64,7 @@ public class IntroMovieState : ISequenceState
 
     private void HandleMovieFinished()
     {
+        _context.SequenceManager?.Subtitles?.HideSubtitle();
         _context.IsMovieCompleted = true;
     }
 }

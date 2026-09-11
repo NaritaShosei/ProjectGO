@@ -9,6 +9,7 @@ public class AttackData : ScriptableObject
 {
     public int AttackId => _attackId;
     public PlayerMode Mode => _mode;
+    public int IntendedComboStage => _intendedComboStage;
 
     public int NextComboAttackId => _nextComboAttackId;
     public int InsertAfterAttackId => _insertAfterAttackId;
@@ -40,6 +41,9 @@ public class AttackData : ScriptableObject
     [SerializeField] private PlayerMode _mode; // 闘神 or 雷神
 
     [Header("Combo")]
+    [Tooltip("この攻撃が想定するコンボ段数。ボイス選択に使用し、実際の連続攻撃回数とは独立。0はボイスなし。")]
+    [Min(0)]
+    [SerializeField] private int _intendedComboStage;
     [Tooltip("次のコンボ攻撃ID。-1の場合はコンボ終了。")]
     [SerializeField] private int _nextComboAttackId = -1;
     [Tooltip("この差し込み攻撃を発動する起点となるAttackDataのID。-1で無効。")]

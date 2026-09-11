@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
 
         try
         {
-            InitSequence();
+            await InitializeSequenceAsync();
             await UniTask.NextFrame(cancellationToken);
 
             InitPlayer();
@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
         _enemyManager.Init(_player);
     }
 
-    private void InitSequence()
+    private async UniTask InitializeSequenceAsync()
     {
         if (!CheckReference(_sequenceManager, nameof(_sequenceManager))) return;
         if (!CheckReference(_enemyManager, nameof(_enemyManager))) return;
@@ -130,7 +130,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        _sequenceManager.Init(_enemyManager, _skillManager, input, _player);
+        await _sequenceManager.InitializeAsync(_enemyManager, _skillManager, input, _player);
     }
 
     private void InitUI()
