@@ -240,7 +240,7 @@ public class PlayerSoundHandler : MonoBehaviour
         if (newState == PlayerState.Dead)
         {
             Sound.StopSE(gameObject);
-            Sound.PlaySE(gameObject, SoundCueNames.PlayerVoice.Death, CueSheetType.PlayerVoice);
+            // 死亡ボイスはGameOverStateで字幕と一緒に予約し、二重再生を防ぐ。
         }
     }
 

@@ -35,7 +35,8 @@ public class GameOverState : ISequenceState
                 _gameOverView,
                 () => context.IsTitleRequested = true);
             _gameOverPresenter.Show();
-            context.SequenceManager?.Subtitles?.ShowSubtitle(SoundCueNames.PlayerVoice.Death);
+            // HP切れと時間切れを同じ経路で扱い、Delay後に字幕と音声を同時開始する。
+            context.SequenceManager?.Subtitles?.PlayVoiceSubtitle(SoundCueNames.PlayerVoice.Death);
         }
 
         _gameOverTimer = new CountDownTimer();

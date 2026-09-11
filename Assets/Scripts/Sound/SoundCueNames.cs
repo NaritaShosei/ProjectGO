@@ -90,11 +90,11 @@ public static class SoundCueNames
         // 配布されているACBのキュー名は「Smal」。表記を補正すると音源を解決できない。
         public const string DamageSmall02 = "DamageVoiceSmal02";
         public const string Death = "DeathVoice";
-        public const string IntroMovie = "IntroMovie_Voice";
+        public const string IntroMovie = "IntroMovieVoice";
         public const string ModeChange01 = "ModeChange_Voice_01";
         public const string ModeChange02 = "ModeChange_Voice_02";
         public const string ModeChange03 = "ModeChange_Voice_03";
-        public const string Result = "Result_Voice";
+        public const string Result = "ResultVoice";
         public const string Revive01 = "ReviveVoice01";
         public const string Revive02 = "ReviveVoice02";
         public const string SkillGet01 = "SkillGetVoice01";

@@ -30,7 +30,7 @@ public sealed class SubtitleLine
     [SerializeField, Tooltip("対応するPlayer_Voiceのキュー名。文章変更時はこの名前を維持する")]
     private string _cueName;
     [SerializeField, TextArea(2, 4)] private string _text;
-    [SerializeField, Min(0f), Tooltip("トリガー発生から表示開始までの秒数")]
+    [SerializeField, Min(0f), Tooltip("トリガー発生から字幕と予約ボイスを同時開始するまでの秒数。導入はムービー開始が基準")]
     private float _delay;
     [SerializeField, Min(0f), Tooltip("フェードを除いた表示継続秒数")]
     private float _duration = 4f;

@@ -5,6 +5,9 @@ public sealed class SubtitleController : MonoBehaviour
     public void InitializeController(SubtitleSettings settings, Player player, SubtitleView view)
     {
         _settings = settings;
+        // Player直下の原点に置いて移動に追従させる。専用の所有者で効果音と停止処理を分離する。
+        _voiceOwner = new GameObject("SubtitleVoice");
+        _voiceOwner.transform.SetParent(player != null ? player.transform : transform, false);
         if (_settings == null || view == null)
         {
             Debug.LogError("[SubtitleController] 字幕設定または事前配置したSubtitleViewが未設定です。", this);
@@ -24,18 +27,23 @@ public sealed class SubtitleController : MonoBehaviour
         _sequence = sequence;
     }
 
+    public void PlayVoiceSubtitle(string cueName)
+    {
+        ShowSubtitle(cueName, _voiceOwner);
+    }
+
     public void ShowSubtitle(string cueName, GameObject voiceOwner = null)
     {
         if (!isActiveAndEnabled) return;
         HideSubtitle();
         SubtitleLine line = _settings != null ? _settings.GetLine(cueName) : null;
-        if (line == null || _view == null)
+        if (line == null)
         {
             // 字幕設定の欠落によって既存ボイスまで失われないようにする。
             if (voiceOwner != null) Sound.PlaySE(voiceOwner, cueName, CueSheetType.PlayerVoice);
             return;
         }
-        _view.SetText(line.Text);
+        _view?.SetText(line.Text);
         _timeline = new SubtitleTimeline(line.Delay, line.Duration, line.FadeIn, line.FadeOut);
         _pendingVoiceOwner = voiceOwner;
         _pendingCue = cueName;
@@ -44,10 +52,8 @@ public sealed class SubtitleController : MonoBehaviour
 
     public void HideSubtitle()
     {
-        _timeline = null;
-        _pendingVoiceOwner = null;
-        _pendingCue = null;
-        _view?.HideSubtitle();
+        if (_voiceOwner != null) Sound.StopSE(_voiceOwner);
+        ClearSubtitle();
     }
 
     private SubtitleSettings _settings;
@@ -55,8 +61,17 @@ public sealed class SubtitleController : MonoBehaviour
     private PlayerSoundHandler _soundHandler;
     private SubtitleTimeline _timeline;
     private SequenceStateType _sequence;
+    private GameObject _voiceOwner;
     private GameObject _pendingVoiceOwner;
     private string _pendingCue;
+
+    private void ClearSubtitle()
+    {
+        _timeline = null;
+        _pendingVoiceOwner = null;
+        _pendingCue = null;
+        _view?.HideSubtitle();
+    }
 
     private void Update()
     {
@@ -74,10 +89,11 @@ public sealed class SubtitleController : MonoBehaviour
         }
         if (_timeline.IsComplete)
         {
-            HideSubtitle();
+            // 表示時間は音声の長さとは独立。字幕終了だけではボイスを切らない。
+            ClearSubtitle();
             return;
         }
-        _view.SetAlpha(_timeline.GetAlpha());
+        _view?.SetAlpha(_timeline.GetAlpha());
     }
 
     private void HandleReviveVoice(string cueName)
@@ -95,5 +111,7 @@ public sealed class SubtitleController : MonoBehaviour
     {
         if (_soundHandler != null)
             _soundHandler.OnReviveVoicePlayed -= HandleReviveVoice;
+        // Playerが残る場合も、コントローラーが作成した音源を残さない。
+        if (_voiceOwner != null) Destroy(_voiceOwner);
     }
 }

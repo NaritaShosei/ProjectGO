@@ -43,11 +43,9 @@ public class SequenceManager : MonoBehaviour
         }
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (subtitleSettings != null)
-        {
-            Subtitles = gameObject.AddComponent<SubtitleController>();
-            Subtitles.InitializeController(subtitleSettings, player as Player, _subtitleView);
-        }
+        // 設定のロード失敗時もコントローラー経由でボイスの再生・停止を管理する。
+        Subtitles = gameObject.AddComponent<SubtitleController>();
+        Subtitles.InitializeController(subtitleSettings, player as Player, _subtitleView);
 
         // コンテキスト構築
         _context = new SequenceStateContext

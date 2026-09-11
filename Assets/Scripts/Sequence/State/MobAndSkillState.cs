@@ -252,7 +252,7 @@ public class MobAndSkillState : ISequenceState
         if (!string.IsNullOrEmpty(cueName))
         {
             if (context.SequenceManager?.Subtitles != null)
-                context.SequenceManager.Subtitles.ShowSubtitle(cueName, context.SkillManager.gameObject);
+                context.SequenceManager.Subtitles.PlayVoiceSubtitle(cueName);
             else
                 Sound.PlaySE(context.SkillManager.gameObject, cueName, CueSheetType.PlayerVoice);
         }
