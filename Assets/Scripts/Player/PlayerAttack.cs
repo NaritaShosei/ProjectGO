@@ -431,7 +431,7 @@ public class PlayerAttack : MonoBehaviour
         _canModeChangeDuringAttack = false;
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
-        OnAttackVoiceReady?.Invoke(attackData.Mode, input.ChargeLevel, _currentComboStage);
+        OnAttackVoiceReady?.Invoke(attackData.Mode, input.ChargeLevel, attackData.IntendedComboStage);
     }
 
     /// <summary>
@@ -498,7 +498,7 @@ public class PlayerAttack : MonoBehaviour
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
-        OnAttackVoiceReady?.Invoke(nextAttack.Mode, bufferedInput.ChargeLevel, _currentComboStage);
+        OnAttackVoiceReady?.Invoke(nextAttack.Mode, bufferedInput.ChargeLevel, nextAttack.IntendedComboStage);
     }
 
     /// <summary>

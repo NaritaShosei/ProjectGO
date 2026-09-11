@@ -244,14 +244,18 @@ public class PlayerSoundHandler : MonoBehaviour
         }
     }
 
-    private void PlayAttackVoice(PlayerMode mode, ChargeLevel chargeLevel, int comboStage)
+    private void PlayAttackVoice(PlayerMode mode, ChargeLevel chargeLevel, int intendedComboStage)
     {
-        // 雷神攻撃はボイスの対応が未確定のため、闘神の3段コンボだけを扱う。
+        if (mode == PlayerMode.Thunder)
+        {
+            PlayThunderAttackVoice(intendedComboStage);
+            return;
+        }
         if (mode != PlayerMode.Warrior) return;
 
         bool isCharged = chargeLevel > ChargeLevel.None;
         string cueName;
-        switch (comboStage)
+        switch (intendedComboStage)
         {
             case 1:
                 cueName = isCharged ? SoundCueNames.PlayerVoice.WarriorAttack04 : SoundCueNames.PlayerVoice.WarriorAttack01;
@@ -265,6 +269,24 @@ public class PlayerSoundHandler : MonoBehaviour
             default:
                 return;
         }
+        Sound.PlaySE(gameObject, cueName, CueSheetType.PlayerVoice);
+    }
+
+    private void PlayThunderAttackVoice(int intendedComboStage)
+    {
+        // 差し込み攻撃の解放状態によらず、攻撃データの想定段数に対応するボイスを鳴らす。
+        string cueName = intendedComboStage switch
+        {
+            1 => SoundCueNames.PlayerVoice.ThunderCombo0301,
+            2 => SoundCueNames.PlayerVoice.ThunderCombo0302,
+            3 => SoundCueNames.PlayerVoice.ThunderCombo0303,
+            4 => SoundCueNames.PlayerVoice.ThunderCombo0304,
+            5 => SoundCueNames.PlayerVoice.ThunderCombo0305,
+            6 => SoundCueNames.PlayerVoice.ThunderCombo0306,
+            _ => null
+        };
+        if (cueName == null) return;
+
         Sound.PlaySE(gameObject, cueName, CueSheetType.PlayerVoice);
     }
 
