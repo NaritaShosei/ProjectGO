@@ -27,7 +27,7 @@ public class ResultState : ISequenceState
             _levelScoreMultiplier);
         _presenter = new ResultPanelPresenter(_view, _model);
         _view.TitleRequested += HandleTitleRequested;
-        _presenter.Show();
+        _presenter.ShowResult();
         context.SequenceManager?.Subtitles?.PlayVoiceSubtitle(SoundCueNames.PlayerVoice.Result);
 
         context.SequenceManager?.NotifyAllSequencesComplete();
@@ -41,7 +41,7 @@ public class ResultState : ISequenceState
         if (_view != null)
             _view.TitleRequested -= HandleTitleRequested;
 
-        _view?.Hide();
+        _view?.HidePanel();
         _model = null;
         _presenter = null;
         _context = null;
