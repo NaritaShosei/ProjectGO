@@ -22,6 +22,8 @@ public class PlayerAttack : MonoBehaviour
     public event Action OnChargingEnded;
     /// <summary> 溜め段階を通知 </summary>
     public event Action<ChargeLevel> OnChargeLevelReached; // チャージレベルに応じたSEやエフェクトの発動に使用
+    public event Action<PlayerMode, ChargeLevel> OnAttackHit;
+    public event Action OnArmorBroken;
 
     #endregion
 
@@ -107,6 +109,15 @@ public class PlayerAttack : MonoBehaviour
         _currentComboStage = 0;
     }
 
+    /// <summary>
+    /// チュートリアルで攻撃命中直後に時間停止した場合でも、説明どおりモードチェンジできるようにする。
+    /// 通常戦闘の状態制限を変えないため、チュートリアル側が待機中だけ明示的に有効化する。
+    /// </summary>
+    public void SetTutorialModeChangeEnabled(bool enabled)
+    {
+        _tutorialModeChangeEnabled = enabled;
+    }
+
     #endregion
 
     #region Fields
@@ -151,6 +162,7 @@ public class PlayerAttack : MonoBehaviour
 
     private bool _isInComboWindow;
     private bool _canModeChangeDuringAttack;
+    private bool _tutorialModeChangeEnabled;
     private bool _isComboTransitioned;
 
     private bool _isHomingActive;
@@ -976,7 +988,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ChangeMode()
     {
-        bool canChange = _stateManager.CanModeChange()
+        bool canChange = _tutorialModeChangeEnabled
+            || _stateManager.CanModeChange()
             || (_stateManager.CurrentState == PlayerState.Attacking && _canModeChangeDuringAttack);
         if (!canChange) { return; }
 
@@ -1159,8 +1172,18 @@ _currentLockOnTarget.GetTargetCenter() == null)
         return _currentLockOnTarget.GetTargetCenter();
     }
 
-    private void HandleAttackHitConfirmed(int hitIndex)
+    private void HandleAttackHitConfirmed(int hitIndex, bool isArmorBreak)
     {
+        if (_pendingAttackData != null && _pendingAttackInput.HasValue)
+        {
+            OnAttackHit?.Invoke(
+                _pendingAttackData.Mode,
+                _pendingAttackInput.Value.ChargeLevel);
+
+            if (isArmorBreak)
+                OnArmorBroken?.Invoke();
+        }
+
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
         if (!_stoppedHitIndices.Add(hitIndex)) return;
 

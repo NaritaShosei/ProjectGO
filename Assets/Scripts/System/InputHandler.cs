@@ -28,6 +28,7 @@ public class InputHandler : MonoBehaviour
         {
             _isDisablingInput = false;
             _input.Player.Enable();
+            ApplyTutorialInputRestrictions();
         }
         else
         {
@@ -41,8 +42,44 @@ public class InputHandler : MonoBehaviour
         }
     }
 
+    public void SetModeChangeEnabled(bool enabled)
+    {
+        _modeChangeEnabled = enabled;
+        ApplyTutorialInputRestrictions();
+    }
+
+    public void SetLockOnEnabled(bool enabled)
+    {
+        _lockOnEnabled = enabled;
+        ApplyTutorialInputRestrictions();
+    }
+
     private PlayerInput _input;
     private bool _isDisablingInput;
+    private bool _modeChangeEnabled = true;
+    private bool _lockOnEnabled = true;
+
+    private void ApplyTutorialInputRestrictions()
+    {
+        if (_input == null || !_input.Player.enabled)
+            return;
+
+        if (_modeChangeEnabled)
+            _input.Player.ModeChange.Enable();
+        else
+            _input.Player.ModeChange.Disable();
+
+        if (_lockOnEnabled)
+        {
+            _input.Player.LockOn.Enable();
+            _input.Player.LockOnChange.Enable();
+        }
+        else
+        {
+            _input.Player.LockOn.Disable();
+            _input.Player.LockOnChange.Disable();
+        }
+    }
 
     private void Awake()
     {

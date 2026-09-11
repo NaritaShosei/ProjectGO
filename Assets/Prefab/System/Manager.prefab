@@ -963,6 +963,7 @@ MonoBehaviour:
   - rid: 6731506274227978451
   - rid: 6731506274227978452
   - rid: 6731506274227978453
+  - rid: 6731506274227978454
   references:
     version: 2
     RefIds:
@@ -1020,6 +1021,50 @@ MonoBehaviour:
         _gameOverView: {fileID: 0}
         _titleSceneName: TitleScene
         _restartSequence: 1
+    - rid: 6731506274227978454
+      type: {class: TutorialState, ns: , asm: Assembly-CSharp}
+      data:
+        _checklistView: {fileID: 0}
+        _panelView: {fileID: 0}
+        _pages:
+        - _trigger: 0
+          _title: "基本操作"
+          _description: "各操作を試してください。攻撃が命中すると次へ進みます。"
+          _illustration: {fileID: 0}
+          _duration: 8
+        - _trigger: 1
+          _title: "闘神モード"
+          _description: "RT長押しで強力な広範囲チャージ攻撃ができます。鎧をまとった敵には闘神モードが有効です。"
+          _illustration: {fileID: 0}
+          _duration: 8
+        - _trigger: 2
+          _title: "モードチェンジ"
+          _description: "敵の鎧を破壊しました。LBで雷神モードへ切り替えてください。"
+          _illustration: {fileID: 0}
+          _duration: 8
+        - _trigger: 3
+          _title: "レベルアップ"
+          _description: "敵を倒すと経験値を獲得できます。一定量たまると、攻撃力・HP・雷神ゲージ・クリティカル率のいずれかが上昇します。"
+          _illustration: {fileID: 0}
+          _duration: 6
+        - _trigger: 4
+          _title: "トールの加護"
+          _description: "ウェーブをクリアすると3つのスキルが提示されます。3つの中から1つを選んで獲得できます。"
+          _illustration: {fileID: 0}
+          _duration: 6
+        - _trigger: 5
+          _title: "雷神モード"
+          _description: "RT連打による連撃を得意とする高速戦闘スタイルです。雷神ゲージを消費しますが、鎧が剥がれた敵に強力です。敵の攻撃に合わせて回避するとジャスト回避が発生します。"
+          _illustration: {fileID: 0}
+          _duration: 6
+        _spawnPointSelector: {fileID: 7793837620590366497}
+        _waveSequenceData: {fileID: 11400000, guid: d355a2e9471a77f4db1b847647b64d04, type: 2}
+        _moveDuration: 2
+        _cameraMoveDuration: 0.5
+        _skillSelectView: {fileID: 0}
+        _skillSelectCount: 3
+        _nextSequence: 1
+        _pauseTargetGroup: 63
 --- !u!1 &5368403579476760681
 GameObject:
   m_ObjectHideFlags: 0

@@ -11,7 +11,7 @@ public class AttackExecutor : MonoBehaviour
 
     /// <summary> スイング音通知用。攻撃判定が出る瞬間に発火する </summary>
     public event Action<PlayerMode> OnSwingReady;
-    public event Action<int> OnHitConfirmed;
+    public event Action<int, bool> OnHitConfirmed;
 
     public void Init(IPlayerStats stats, SkillManager manager)
     {
@@ -113,7 +113,7 @@ public class AttackExecutor : MonoBehaviour
 
         if (hasHitResult)
         {
-            OnHitConfirmed?.Invoke(hitIndex);
+            OnHitConfirmed?.Invoke(hitIndex, isArmorBreak);
 
             PlayHitVibration(
                 hitData,
