@@ -56,11 +56,11 @@ MonoBehaviour:
   _sMinimumScore: 25000
   _aMinimumScore: 20000
   _bMinimumScore: 15000
-  _rankImage: {fileID: 0}
-  _sRankSprite: {fileID: 0}
-  _aRankSprite: {fileID: 0}
-  _bRankSprite: {fileID: 0}
-  _cRankSprite: {fileID: 0}
+  _rankImage: {fileID: 5532851904839940095}
+  _sRankSprite: {fileID: 21300000, guid: 652f659073951cd439dc819489eb58fb, type: 3}
+  _aRankSprite: {fileID: 21300000, guid: 0af275fcfa11c594398582be56b7a046, type: 3}
+  _bRankSprite: {fileID: 21300000, guid: 874d44de688678b45b05994c7b8ac86a, type: 3}
+  _cRankSprite: {fileID: 21300000, guid: 8c4352cd3ba0f9841969124587cf56e2, type: 3}
 --- !u!1 &100003
 GameObject:
   m_ObjectHideFlags: 0
@@ -350,7 +350,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &200001
 RectTransform:
   m_ObjectHideFlags: 0
