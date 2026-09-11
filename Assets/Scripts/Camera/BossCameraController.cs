@@ -98,6 +98,9 @@ public sealed class BossCameraController
     {
         if (enemy == null || !enemy.IsBoss) return;
 
+        // 既存ボスの姿勢購読を必ず外してから差し替える（ボスが複数スポーンしても旧ボスの通知が残らないように）
+        UnsubscribePosture();
+
         _boss = enemy;
         _bossView = enemy as IBossEnemyCharacterView;
         CollectAnglePoints(enemy.Self);
@@ -163,7 +166,8 @@ public sealed class BossCameraController
 
         _isActive = false;
         _cameraManager.SetBossCameraActive(false);
-        _cameraManager.ResetZoom(_settings.ZoomResetDuration);
+        // ベース層（姿勢連動）だけ等倍へ戻す。チャージ等のエフェクト層はそのまま
+        _cameraManager.SetBaseZoom(1f, _settings.ZoomResetDuration);
 
         UnsubscribePosture();
         _boss = null;
@@ -171,7 +175,7 @@ public sealed class BossCameraController
         _angleUnder = null;
     }
 
-    /// <summary>姿勢に対応するFOV倍率を探してズームへ反映する。一致が無ければ何もしない。</summary>
+    /// <summary>姿勢に対応するFOV倍率をベース層ズームへ反映する。一致が無ければ何もしない。</summary>
     private void HandleChangedPosture(PostureType posture)
     {
         if (_settings.PostureZooms == null) return;
@@ -179,7 +183,8 @@ public sealed class BossCameraController
         foreach (BossPostureZoom entry in _settings.PostureZooms)
         {
             if (entry == null || entry.Posture != posture) continue;
-            _cameraManager.SetZoom(entry.ZoomMultiplier, entry.Duration);
+            // ベース層へ。チャージ等のエフェクトズームはこの倍率を基準に上乗せされる
+            _cameraManager.SetBaseZoom(entry.ZoomMultiplier, entry.Duration);
             return;
         }
     }

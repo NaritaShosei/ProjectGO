@@ -64,22 +64,25 @@
 - 注視（体をむく）：ボスの子から `CameraAnglePoint`（`Top`＝頭側 / `Under`＝足元側）を集め、プレイヤー↔ボス距離を `_bossFramingNearDistance`〜`_bossFramingFarDistance` で 0..1 に正規化し、その比率で注視プロキシを `Under`→`Top` で線形補間（`Under`以下＝足元、`Far`以上＝頭）。アンカーが無ければ `IEnemy.GetTargetCenter()` へフォールバック
 - カメラの定位置：プレイヤー→ボス方向から求めた方位角（プレイヤーから見てボスの反対側にカメラが来る角度）へ、`CinemachineOrbitalFollow.HorizontalAxis` を `_bossOrbitTrackSpeed`（度/秒）で追従させる。プレイヤー・ボスが動くたびに毎フレーム再計算するので、カメラは常にボスへ正対する側へ収束する（vcam の `CinemachineInputAxisController` は無効化し、このオービット自体は入力で動かさない）
 - 左右スイベル：`InputHandler.CameraMoveInput.x` で注視プロキシをカメラ右方向へ `_bossSwivelRange`（m）を上限に `_bossSwivelSpeed` でオフセットし、入力が無ければ `_bossSwivelReturnSpeed` で中央へ戻す。オービット位置は動かさず注視点だけをずらすため、カメラは大きく回り込まずボスを画面内に保ったまま少しだけ振れる
-- 体制連動ズーム：`IBossEnemyCharacterView.OnChangedPosture` を購読し、`_bossPostureZooms`（`BossPostureZoom[]`：`PostureType`→倍率・到達時間）から一致するエントリを引いて `CameraManager.SetZoom` に流す。一致が無ければ何もしない。姿勢の現在値getterは無いため、有効化時は `Standing` 想定でズームを当て以降はイベントで補正する
-- 無効化時：Priorityを待機位置へ戻し、`CameraManager.ResetZoom` で通常視野へ
+- 体制連動ズーム：`IBossEnemyCharacterView.OnChangedPosture` を購読し、`_bossPostureZooms`（`BossPostureZoom[]`：`PostureType`→倍率・到達時間）から一致するエントリを引いて `CameraManager.SetBaseZoom`（＝ズームのベース層）に流す。一致が無ければ何もしない。チャージ・モード変更のエフェクトズームはこのベース倍率の上に掛かる（実FOV = 基準FOV × ベース × エフェクト）。姿勢の現在値getterは無いため、有効化時は `Standing` 想定でベースズームを当て以降はイベントで補正する。`CameraZoomController` が `_bossBodyCamera` のFOVも書き換えるので、ボスカメラがアクティブでも倍率が反映される
+- スポーンイベントは既存ボス数を確認しないため、`HandleEnemySpawned` は毎回 `UnsubscribePosture()` してから購読し直す（旧ボスの姿勢変化が `SetBaseZoom` を呼び続けるのを防ぐ）
+- 無効化時：Priorityを待機位置へ戻し、`CameraManager.SetBaseZoom(1, ...)` でベース層だけ等倍へ戻す（エフェクト層はそのまま）
 
 切り替えブレンドは Cinemachine Brain（`Main Camera Custom Blends`）に任せ、ロックオン用のイージング（`BeginLockOnBlend`）は使いません。チューニング値はすべて `CameraManager` の `[SerializeField]`（`_bossXXX`）から `BossCameraSettings` 構造体（`BossCameraSettings.cs`）へ詰め替えて渡します。
 
 ### CameraZoomController
 
-通常カメラとロックオンカメラのField of Viewをまとめて補間するズーム専用クラスです。`CameraPresentationController` が生成し、チャージ段階やモードといったゲーム側の意味は一切知りません。倍率と時間だけを扱う低レベルな補間エンジンです。
+通常カメラ・ロックオンカメラ・ボスカメラ（`_bossBodyCamera`、未設定シーンではnull可）のField of Viewをまとめて補間するズーム専用クラスです。`CameraPresentationController` が生成し、チャージ段階やモードといったゲーム側の意味は一切知りません。倍率と時間だけを扱う低レベルな補間エンジンです。3台とも毎フレーム FOV を書き込むため、どのカメラがアクティブでもズームが効きます。
 
-ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）を表し、FOVは`基準FOV × 倍率`で直接計算されます（補間の中間値のみ`Lerp`を使用）。
+倍率は**ベース層とエフェクト層の2段**で、実FOV = `基準FOV × ベース倍率 × エフェクト倍率`。それぞれ独立に時間ベース補間します。
 
-- `SetZoom(zoom, duration)`: FOV倍率を指定。現在値からの距離に関わらず、必ず`duration`秒かけて到達する（距離ベースではなく時間ベースの補間）
-- `SetZoomSequence(zoom1, duration1, zoom2, duration2)`: zoom1へduration1秒で遷移し、到達したら続けてzoom2へduration2秒で遷移する。目標に到達すればそこで止まる
-- `ZoomIn(amount, duration)` / `ZoomOut(amount, duration)`: 現在の目標倍率を増減
-- `ResetZoom(duration = 0f)`: 通常視野（倍率1.0）へ戻す
-- `Tick(deltaTime)`: 目標倍率へ向けて補間し、カメラのFOVへ反映する。`CameraPresentationController.Tick`から毎フレーム呼ばれる
+- **ベース層**（`SetBaseZoom(zoom, duration)`）：基準そのものを動かす用途。ボスの体制連動ズームがここ。ボス戦外は常に1
+- **エフェクト層**（`SetZoom` / `SetZoomSequence` / `ZoomIn` / `ZoomOut` / `ResetZoom`）：基準に対して一時的に掛ける用途。チャージ段階・チャージ解放・モード変更がここ。`ResetZoom`（や解放シーケンスの settle 目標「1」）はエフェクト層を1へ戻す＝ベース（体制）倍率へ戻る
+
+ズーム値は基準FOVに対する**直接の倍率**です。1.0で変化なし、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト（画角が広がる）。補間の中間値のみ`Lerp`を使用します。
+
+- `Tick(deltaTime)`: ベース・エフェクト両層を目標へ補間し、その積をカメラのFOVへ反映する。`CameraPresentationController.Tick`から毎フレーム呼ばれる
+- `CurrentZoom`: 実効倍率（ベース×エフェクト）を返す
 
 チャージ段階（`SetZoomLevel`）・チャージ解放・モード変更をFOV倍率へ変換する判断ロジックは `CameraPresentationController` 側が持ちます。
 
@@ -201,7 +204,7 @@ flowchart TD
 | `BossCameraController` | ボス戦中の専用カメラ（定位置のボス正対追従・注視点の左右スイベル・姿勢連動ズーム）の有効化と駆動 | Cinemachine、EnemyManager（Spawned/BossDefeated/ForceRemoved）、InputHandler、CameraManager、CameraAnglePoint、IBossEnemyCharacterView（OnChangedPosture） |
 | `BossCameraSettings` | `BossCameraController` へ渡すチューニング値の組（`CameraManager` の Inspector 値から詰め替え） | なし |
 | `CameraPresentationController` | ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火 | CameraZoomController、CameraShake、PlayerAttack、PlayerModeController、PlayerAnimationController |
-| `CameraZoomController` | FOV倍率の時間ベース補間 | Cinemachine |
+| `CameraZoomController` | FOV倍率の時間ベース補間。ベース層（体制連動）×エフェクト層（チャージ等）の2段を通常・ロックオン・ボスの3カメラへ毎フレーム適用 | Cinemachine |
 | `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定、切り替え入力 | InputHandler、EnemyManager（ForceRemovedのみ）、LockOnTargetSelector、CameraManager、Unity Input System（Gamepad/Mouse直接参照） |
 | `LockOnController` | 既存Prefab向けの互換コンポーネント | CameraController |
 | `LockOnTargetSelector` | ロックオン候補の絞り込みと選定 | EnemyManager、Camera、Player |

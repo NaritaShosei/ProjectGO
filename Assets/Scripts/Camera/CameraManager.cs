@@ -148,6 +148,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraPresentationController = new CameraPresentationController(
             _normalCamera,
             _lockOnCamera,
+            _bossBodyCamera,
             player.GetComponent<PlayerAttack>(),
             player.GetComponent<PlayerModeController>(),
             player.GetComponentInChildren<PlayerAnimationController>(),
@@ -185,6 +186,15 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     }
 
     /// <summary>
+    /// ベース層のズーム倍率を設定します。チャージ等のエフェクトズームは常にこの倍率を基準（＝1）として上に掛かります。
+    /// ボスの姿勢連動ズームで使用します。
+    /// </summary>
+    public void SetBaseZoom(float zoom, float duration)
+    {
+        _cameraPresentationController?.SetBaseZoom(zoom, duration);
+    }
+
+    /// <summary>
     /// チャージ段階をFOV倍率へ変換して設定します。
     /// 各段階の倍率・到達時間はInspectorの「ズーム設定」で個別に調整できます。
     /// Level1はズームなしのため何もしません。
@@ -218,7 +228,11 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         if (_cameraPresentationController == null) return;
 
-        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+        var camera = _bossCameraController?.IsActive == true
+            ? _bossBodyCamera
+            : IsLockedOn
+                ? _lockOnCamera
+                : _normalCamera;
         await _cameraPresentationController.Shake(camera, data);
     }
 
@@ -331,7 +345,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [Tooltip("入力を離したとき注視点オフセットが中央（ボス正面）へ戻る速さ（m/秒）。\n増やすと：離すとすぐ正面へ戻る\n減らすと：ゆっくり戻る。0だと戻らずその向きを維持")]
     [SerializeField] private float _bossSwivelReturnSpeed = 2f;
     [Tooltip("ボスの姿勢ごとのFOV倍率と到達時間。姿勢が変わると一致するエントリの倍率へ寄せる。リストに無い姿勢は現在のズームを維持")]
-    [SerializeField] private BossPostureZoom[] _bossPostureZooms =
+    [SerializeField]
+    private BossPostureZoom[] _bossPostureZooms =
     {
         new() { Posture = PostureType.Standing, ZoomMultiplier = 1f, Duration = 0.3f },
         new() { Posture = PostureType.RightHalfKneel, ZoomMultiplier = 0.9f, Duration = 0.3f },
