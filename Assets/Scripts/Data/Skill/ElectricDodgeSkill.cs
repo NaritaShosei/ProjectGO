@@ -52,6 +52,8 @@ public class ElectricDodgeSkill : SkillBase
         await UniTask.Delay(TimeSpan.FromSeconds(_delaySeconds), cancellationToken: token);
 
         SpawnEffect(effectPos, _scale);
+        // 生成待ち時間の後に鳴らし、雷エフェクトの出現と同期させる。
+        Sound.PlaySE(playerTransform.gameObject, SoundCueNames.Skill.ElectricDodgeSkill, CueSheetType.Skill);
 
         HashSet<IEnemy> hittedEnemies = new HashSet<IEnemy>();
         float elapsed = 0;

@@ -16,12 +16,16 @@ public class PlayerAttack : MonoBehaviour
     public event Action<AttackMoveRequest> OnAttackMoveRequested;
     public event Action OnAttackMoveStopRequested;
     public event Action OnAttackEnded;
+    /// <summary>ヒット判定と独立して、攻撃モーションの開始ごとに一度だけ発声を通知する。</summary>
+    public event Action<PlayerMode, ChargeLevel, int> OnAttackVoiceReady;
     /// <summary> 溜め開始を移動制限のためにPlayerMovementへ通知</summary>
     public event Action OnChargingStarted;
     /// <summary> 溜め終了（攻撃発動 or キャンセル）を通知</summary>
     public event Action OnChargingEnded;
     /// <summary> 溜め段階を通知 </summary>
     public event Action<ChargeLevel> OnChargeLevelReached; // チャージレベルに応じたSEやエフェクトの発動に使用
+    public event Action<PlayerMode, ChargeLevel> OnAttackHit;
+    public event Action OnArmorBroken;
 
     #endregion
 
@@ -107,6 +111,15 @@ public class PlayerAttack : MonoBehaviour
         _currentComboStage = 0;
     }
 
+    /// <summary>
+    /// チュートリアルで攻撃命中直後に時間停止した場合でも、説明どおりモードチェンジできるようにする。
+    /// 通常戦闘の状態制限を変えないため、チュートリアル側が待機中だけ明示的に有効化する。
+    /// </summary>
+    public void SetTutorialModeChangeEnabled(bool enabled)
+    {
+        _tutorialModeChangeEnabled = enabled;
+    }
+
     #endregion
 
     #region Fields
@@ -151,6 +164,7 @@ public class PlayerAttack : MonoBehaviour
 
     private bool _isInComboWindow;
     private bool _canModeChangeDuringAttack;
+    private bool _tutorialModeChangeEnabled;
     private bool _isComboTransitioned;
 
     private bool _isHomingActive;
@@ -417,6 +431,7 @@ public class PlayerAttack : MonoBehaviour
         _canModeChangeDuringAttack = false;
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
+        OnAttackVoiceReady?.Invoke(attackData.Mode, input.ChargeLevel, attackData.IntendedComboStage);
     }
 
     /// <summary>
@@ -483,6 +498,7 @@ public class PlayerAttack : MonoBehaviour
         _stateManager.ChangeState(PlayerState.Attacking);
         float transition = variant.TransitionDuration < 0 ? 0.1f : variant.TransitionDuration;
         _animationController.PlayAttackBlend(_currentAttackId, variant.AnimationStateName, transition);
+        OnAttackVoiceReady?.Invoke(nextAttack.Mode, bufferedInput.ChargeLevel, nextAttack.IntendedComboStage);
     }
 
     /// <summary>
@@ -976,7 +992,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void ChangeMode()
     {
-        bool canChange = _stateManager.CanModeChange()
+        bool canChange = _tutorialModeChangeEnabled
+            || _stateManager.CanModeChange()
             || (_stateManager.CurrentState == PlayerState.Attacking && _canModeChangeDuringAttack);
         if (!canChange) { return; }
 
@@ -1159,8 +1176,18 @@ _currentLockOnTarget.GetTargetCenter() == null)
         return _currentLockOnTarget.GetTargetCenter();
     }
 
-    private void HandleAttackHitConfirmed(int hitIndex)
+    private void HandleAttackHitConfirmed(int hitIndex, bool isArmorBreak)
     {
+        if (_pendingAttackData != null && _pendingAttackInput.HasValue)
+        {
+            OnAttackHit?.Invoke(
+                _pendingAttackData.Mode,
+                _pendingAttackInput.Value.ChargeLevel);
+
+            if (isArmorBreak)
+                OnArmorBroken?.Invoke();
+        }
+
         if (_activeAttackVariant == null || !_activeAttackVariant.StopOnHit) return;
         if (!_stoppedHitIndices.Add(hitIndex)) return;
 

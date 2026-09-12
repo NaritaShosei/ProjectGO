@@ -307,6 +307,7 @@ public class WaveController
             {
                 _enemyManager.RegisterWaitingGroup(
                     request.Group);
+                _enemyManager.TryPromoteGroup(request.Group);
             }
 
             return;

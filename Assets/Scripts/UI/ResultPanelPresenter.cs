@@ -8,7 +8,7 @@ public sealed class ResultPanelPresenter
         _model = model;
     }
 
-    public void Show()
+    public void ShowResult()
     {
         int totalCentiseconds = Mathf.RoundToInt(_model.BossClearTime * 100f);
         int minutes = totalCentiseconds / 6000;
@@ -16,9 +16,9 @@ public sealed class ResultPanelPresenter
         int centiseconds = totalCentiseconds % 100;
 
         _view.SetBossClearTime($"{minutes:00}:{seconds:00}.{centiseconds:00}");
-        _view.SetScore(_model.Score.ToString("N0"));
-        _view.SetLevel($"Lv. {_model.Level}");
-        _view.Show();
+        _view.SetRank(_model.GetRank(_view.SMinimumScore, _view.AMinimumScore, _view.BMinimumScore));
+        _view.SetLevel($"Lv. {_model.Level:00}");
+        _view.ShowPanel();
     }
 
     private readonly ResultPanelView _view;
