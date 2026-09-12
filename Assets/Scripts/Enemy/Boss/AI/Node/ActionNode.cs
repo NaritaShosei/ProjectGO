@@ -1,12 +1,13 @@
 using BossEnemy.Attack;
+using BossEnemy.Character;
 using BossEnemy.Enum;
 using BossEnemy.Interface;
 using BossEnemy.Logic;
-using System;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
-using UniRx;
+using System;
 using System.Threading;
+using UniRx;
+using UnityEngine;
 
 
 namespace BossEnemy.AI.BehaviourTree
@@ -123,13 +124,12 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            CancelRevert();
 
-            _cancellationTokenSource = new CancellationTokenSource();
+            var cts = new CancellationTokenSource();
+            _cancellationTokenSource = cts;
 
-            RevertInSecondsAsync().Forget();
+            RevertInSecondsAsync(_cancellationTokenSource.Token).Forget();
 
             HandleRunningEnd();
         }
@@ -140,22 +140,34 @@ namespace BossEnemy.AI.BehaviourTree
 
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        private async UniTask RevertInSecondsAsync()
+        private void CancelRevert()
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(_revertInSeconds), cancellationToken: _cancellationTokenSource.Token);
-
-            _bossCharacterEntity.SetCharacterPosture(_changePosture);
-
-            await UniTask.WaitUntil(
-                () => _bossCharacterEntity.CurrentAction.Value
-                != Character.CharacterAction.PostureChanging, 
-                cancellationToken: _cancellationTokenSource.Token);
-
-            HandleRunningEnd();
-
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
+        }
+
+        private async UniTaskVoid RevertInSecondsAsync(CancellationToken token)
+        {
+            try
+            {
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(_revertInSeconds),
+                    cancellationToken: token);
+
+                _bossCharacterEntity.SetCharacterPosture(_changePosture);
+
+                await UniTask.WaitUntil(
+                    () => _bossCharacterEntity.CurrentAction.Value
+                        != CharacterAction.PostureChanging,
+                    cancellationToken: token);
+
+                if (!token.IsCancellationRequested)
+                    HandleRunningEnd();
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
     }
 
