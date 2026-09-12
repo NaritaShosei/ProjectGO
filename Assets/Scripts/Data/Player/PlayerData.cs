@@ -12,7 +12,18 @@ public class PlayerData : ScriptableObject
     public float ThunderDrainPerSecond => _thunderDrainPerSecond;
     /// <summary> 闘神モード中の毎秒回復量。デフォルトで3秒で全回復 </summary>
     public float ThunderRecoverPerSecond => _thunderRecoverPerSecond;
-    public float InvincibleDuration => _invincibleDuration;
+    public float GetDamageInvincibleDuration(DamageReactionType reactionType)
+    {
+        switch (reactionType)
+        {
+            case DamageReactionType.Medium:
+                return _mediumDamageInvincibleDuration;
+            case DamageReactionType.Large:
+                return _largeDamageInvincibleDuration;
+            default:
+                return _smallDamageInvincibleDuration;
+        }
+    }
 
     [SerializeField] private StatsData _stats;
     [SerializeField] private float _attackPower;
@@ -25,6 +36,12 @@ public class PlayerData : ScriptableObject
     [Min(0f)]
     [SerializeField] private float _thunderRecoverPerSecond = 100f / 3f;
 
-    [Header("ダメージを受けた際の無敵時間")]
-    [SerializeField] private float _invincibleDuration = 0.2f;
+    [Header("ダメージを受けた際の無敵時間（被弾時からの秒数）")]
+    [UnityEngine.Serialization.FormerlySerializedAs("_invincibleDuration")]
+    [SerializeField, Min(0f), Tooltip("小ダメージの無敵時間")]
+    private float _smallDamageInvincibleDuration = 0.5f;
+    [SerializeField, Min(0f), Tooltip("中ダメージの無敵時間")]
+    private float _mediumDamageInvincibleDuration = 0.5f;
+    [SerializeField, Min(0f), Tooltip("大ダメージの無敵時間")]
+    private float _largeDamageInvincibleDuration = 0.5f;
 }
