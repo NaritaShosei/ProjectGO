@@ -132,7 +132,7 @@ namespace BossEnemy.Character
         /// <summary> 鎧の修復処理 </summary>
         /// <param name="repairArmor"> 特定の修復ヶ所(特に指定がなければすべて修復する) </param>
         /// <param name="repairedArmorHP"> 修復後の鎧のHP(特に指定がなければ最大値になる) </param>
-        public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.None, int repairedArmorHP = 0);
+        public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.AllArmor, int repairedArmorHP = 0);
 
         /// <summary> 現在のPhaseから次のPhaseに移行する処理 </summary>
         public void StartPhaseChange();
