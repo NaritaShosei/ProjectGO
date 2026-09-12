@@ -2,13 +2,10 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-
 /// <summary>
 /// ゲームオーバーのState。
-/// 倒れたスヴァナ→ボスへのカメラ切り替えを含む専用ムービーを再生した後、
-/// ゲームオーバーUIを表示する。10秒のタイマーで自動的にタイトルへ遷移。
-/// リスタートが選ばれた場合はモブ戦の最初からやり直す。
-/// ムービーの中身（カメラワーク・ボスモーション）とUI演出はプランナー側の実装範囲。
+/// 演出ムービーを再生し、Stateに入ってから指定秒数後にタイトルへ遷移する。
+/// ゲームオーバーUIは表示せず、ムービー終了やボタン入力を待たない。
 /// </summary>
 [Serializable]
 public class GameOverState : ISequenceState
@@ -17,134 +14,63 @@ public class GameOverState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
-        _context = context;
+        _enteredAt = Time.unscaledTime;
+        _isCleanedUp = false;
+        _isTransitionRequested = false;
         context.InputHandler?.EnableInput(false);
 
-        _isCleanedUp = false;
-        _isDisplayTimeEnded = false;
-        _isUiShown = false;
-        _reason = context.GameOverReason == GameOverReason.None
-            ? GameOverReason.PlayerHealthDepleted
-            : context.GameOverReason;
+        // 既存シーンに設定済みのUIも表示しない。
+        _gameOverView?.Hide();
+        if (_gameOverTimerView != null)
+            _gameOverTimerView.gameObject.SetActive(false);
 
-        // HP切れと時間切れを同じ経路で扱い、ムービー開始に合わせて字幕と音声を開始する。
         context.SequenceManager?.Subtitles?.PlayVoiceSubtitle(SoundCueNames.PlayerVoice.Death);
 
         var moviePlayer = context.MoviePlayer;
-
         if (moviePlayer == null)
         {
-            Debug.LogWarning("MoviePlayerが見つかりません。ゲームオーバーの演出ムービーを再生せずUIを表示します。");
-            ShowGameOverUI(context);
+            Debug.LogWarning("MoviePlayerが見つかりません。演出なしで指定秒数後にタイトルへ遷移します。");
             return;
         }
 
-        moviePlayer.OnMovieFinished += HandleMovieFinished;
-
         if (!moviePlayer.PlayMovie(_movieName))
-        {
-            Debug.LogWarning($"ムービー '{_movieName}' の再生に失敗しました。ムービーを再生せずUIを表示します。");
-            moviePlayer.OnMovieFinished -= HandleMovieFinished;
-            ShowGameOverUI(context);
-        }
+            Debug.LogWarning($"ムービー '{_movieName}' の再生に失敗しました。指定秒数後にタイトルへ遷移します。");
     }
 
     public SequenceStateType? Tick(SequenceStateContext context, float deltaTime)
     {
-        if (!_isUiShown)
-        {
-            if (context.IsMovieCompleted)
-                ShowGameOverUI(context);
-
+        // ポーズやスローモーション中も実時間で計測し、遷移要求は一度だけ送る。
+        if (_isTransitionRequested || Time.unscaledTime - _enteredAt < Mathf.Max(0f, _gameOverDuration))
             return null;
-        }
 
-        if (context.IsRestartRequested)
-        {
-            context.IsRestartRequested = false;
-            context.IsTitleRequested = false;
-            context.IsTimeUp = false;
-
-            RestartGame(context);
-            return _restartSequence;
-        }
-
-        if (context.IsTitleRequested || _isDisplayTimeEnded)
-        {
-            if (!TransitionToTitleScene())
-                return null;
-
-            context.IsTitleRequested = false;
-            _isDisplayTimeEnded = false;
-            Cleanup(context);
+        if (!TransitionToTitleScene())
             return null;
-        }
 
+        _isTransitionRequested = true;
+        Cleanup(context);
         return null;
     }
 
     public void OnExit(SequenceStateContext context)
     {
-        var moviePlayer = context.MoviePlayer;
-        if (moviePlayer != null)
-            moviePlayer.OnMovieFinished -= HandleMovieFinished;
-
         Cleanup(context);
     }
 
     [Header("Movie Settings")]
-    [SerializeField, Tooltip("ゲームオーバー演出ムービー（倒れたスヴァナ→ボスへのカメラ切り替え）の名前")] private string _movieName = "GameOver";
+    [SerializeField, Tooltip("ゲームオーバー演出ムービーの名前")] private string _movieName = "GameOver";
 
     [Header("ゲームオーバー設定")]
-    [SerializeField, Tooltip("ゲームオーバーからタイトルへ遷移するまでの時間（秒）")] private float _gameOverDuration = 10f;
-    [SerializeField, Tooltip("ゲームオーバーの残り時間を表示するUI")] private TextCountDownTimerView _gameOverTimerView;
-    [SerializeField, Tooltip("ゲームオーバー表示UI（MVPのView）")] private GameOverView _gameOverView;
-    [SerializeField, Tooltip("タイトルへ戻るボタンで遷移するシーン名")] private string _titleSceneName = "TitleScene";
+    [SerializeField, Min(0f), Tooltip("ゲームオーバーステートに入ってからタイトルへの遷移を開始するまでの実時間（秒）")]
+    private float _gameOverDuration = 10f;
+    [SerializeField, Tooltip("指定秒数後に遷移するシーン名")] private string _titleSceneName = "TitleScene";
 
-    [Header("シークエンス設定")]
-    [SerializeField, Tooltip("リスタート時に遷移するシークエンス")] private SequenceStateType _restartSequence = SequenceStateType.MobAndSkill;
+    // 既存シーン・Prefabの参照を維持し、配置済みの旧UIを非表示にするためだけに使用する。
+    [SerializeField, HideInInspector] private TextCountDownTimerView _gameOverTimerView;
+    [SerializeField, HideInInspector] private GameOverView _gameOverView;
 
-    private SequenceStateContext _context;
-    private CountDownTimer _gameOverTimer;
-    private CountDownTimerPresenter _gameOverTimerPresenter;
-    private GameOverPresenter _gameOverPresenter;
-    private GameOverReason _reason;
-    private bool _isUiShown;
-    private bool _isDisplayTimeEnded;
+    private float _enteredAt;
+    private bool _isTransitionRequested;
     private bool _isCleanedUp;
-
-    private void HandleMovieFinished()
-    {
-        _context.IsMovieCompleted = true;
-    }
-
-    private void ShowGameOverUI(SequenceStateContext context)
-    {
-        _isUiShown = true;
-
-        if (_gameOverView == null)
-        {
-            Debug.LogError("[GameOverState] シーンに配置したGameOverViewが設定されていません。");
-        }
-        else
-        {
-            _gameOverPresenter = new GameOverPresenter(
-                new GameOverModel(_reason),
-                _gameOverView,
-                () => context.IsTitleRequested = true);
-            _gameOverPresenter.Show();
-        }
-
-        _gameOverTimer = new CountDownTimer();
-
-        if (_gameOverTimerView != null)
-            _gameOverTimerPresenter = new CountDownTimerPresenter(_gameOverTimer, _gameOverTimerView);
-
-        _gameOverTimer.OnTimeEnded += OnGameOverTimeUp;
-        _gameOverTimer.StartTimer(_gameOverDuration);
-    }
-
-    private void OnGameOverTimeUp() => _isDisplayTimeEnded = true;
 
     private bool TransitionToTitleScene()
     {
@@ -171,31 +97,6 @@ public class GameOverState : ISequenceState
 
         _isCleanedUp = true;
         context.SequenceManager?.Subtitles?.HideSubtitle();
-
-        if (_gameOverTimer != null)
-        {
-            _gameOverTimer.StopTimer();
-            _gameOverTimer.OnTimeEnded -= OnGameOverTimeUp;
-        }
-
-        _gameOverTimerPresenter?.Dispose();
-        _gameOverTimerPresenter = null;
-
-        _gameOverPresenter?.Dispose();
-        _gameOverPresenter = null;
         context.GameOverReason = GameOverReason.None;
-    }
-
-    private void RestartGame(SequenceStateContext context)
-    {
-        // スキルをリセット
-        // TODO: SkillManagerにResetメソッドを追加する
-        // context.SkillManager?.Reset();
-
-        // プレイヤーのHPをリセット
-        // TODO: Player側にリスタート用の初期化メソッドを追加する
-        // context.Player?.ReInitialize();
-
-        Debug.Log("[GameOverState] リスタート: モブ戦の最初から");
     }
 }
