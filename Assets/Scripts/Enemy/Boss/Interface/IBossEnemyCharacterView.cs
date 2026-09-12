@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 namespace BossEnemy.Interface
 {
@@ -39,8 +38,8 @@ namespace BossEnemy.Interface
         /// <summary> 攻撃処理 </summary>
         public void ExecuteAttack(Attack.AttackData bossEnemyAttackData);
 
-        /// <summary> 攻撃終了処理 </summary>
-        public void AttackCompleted();
+        /// <summary> 攻撃アニメーションの終了を Animator に反映する </summary>
+        public void FinishAttackAnimation();
 
         /// <summary> フェーズ変更・死亡などによって中断された攻撃処理を停止する </summary>
         public void StopActiveAttacks();
