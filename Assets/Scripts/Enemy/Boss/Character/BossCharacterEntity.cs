@@ -118,6 +118,9 @@ namespace BossEnemy.Character
         /// <summary> 攻撃を終了する </summary>
         public void AttackCompleted();
 
+        /// <summary> 攻撃強制終了処理 </summary>
+        public void CancelAttack();
+
         /// <summary> 鎧の破損が起こった際のイベントが2回以上流れないようにリセットする </summary>
         public void ResetArmorBreakingEvent();
 
@@ -347,6 +350,15 @@ namespace BossEnemy.Character
         {
             if (_currentCharacterAction.Value != CharacterAction.Attacking) return;
 
+            _attackExecutor.AttackCompleted();
+            _executingAttack = default;
+
+            SetCurrentAction(CharacterAction.Idle);
+        }
+
+        /// <summary> 攻撃強制終了処理 </summary>
+        public void CancelAttack()
+        {
             _attackExecutor.AttackCompleted();
             _executingAttack = default;
 
