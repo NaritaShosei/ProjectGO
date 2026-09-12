@@ -84,7 +84,6 @@ namespace BossEnemy.AI.BehaviourTree
         {
             if(_bossCharacterEntity.BreakingArmorAttachmentType.Value != ArmorAttachmentType.None)
             {
-                _bossCharacterEntity.ResetArmorBreakingEvent();
                 return NodeCondition.Success;
             }
 

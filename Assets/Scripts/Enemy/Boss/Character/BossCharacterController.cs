@@ -205,6 +205,8 @@ namespace BossEnemy.Character
             _bossCharacterView.BreakArmor(armorAttachmentType);
 
             HandleRunningBehaviourTree();
+
+            _characterEntity.ResetArmorBreakingEvent();
         }
 
         /// <summary> 鎧修復イベント発火時の処理 </summary>
