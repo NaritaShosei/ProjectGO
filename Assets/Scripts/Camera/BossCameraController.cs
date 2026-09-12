@@ -76,7 +76,7 @@ public sealed class BossCameraController
 
         UpdateOrbitTracking(deltaTime);
         UpdateSwivelOffset(deltaTime);
-        UpdateLookAtProxy();
+        UpdateLookAtProxy(deltaTime);
     }
 
     /// <summary>イベント購読を解除し、生成したプロキシを破棄する。</summary>
@@ -109,8 +109,12 @@ public sealed class BossCameraController
     private IBossEnemyCharacterView _bossView;
     private Transform _angleTop;
     private Transform _angleUnder;
+    private Transform _angleLeft;
+    private Transform _angleRight;
     private bool _isActive;
     private float _swivelOffset;
+    private Vector3 _smoothedUnderPosition;
+    private Vector3 _underSmoothVelocity;
 
     /// <summary>スポーンした敵がボスなら参照・頭足アンカー・姿勢イベントを保持し、ボスカメラを有効化する。</summary>
     private void HandleEnemySpawned(IEnemy enemy)
@@ -139,21 +143,73 @@ public sealed class BossCameraController
         if (ReferenceEquals(enemy, _boss)) Deactivate();
     }
 
-    /// <summary>ボスの子階層から頭(Top)・足(Under)のカメラアングル基準点を取得する。</summary>
+    /// <summary>ボスの子階層から頭(Top)・足(Under)・左右(Left/Right)のカメラアングル基準点を取得する。</summary>
     private void CollectAnglePoints(Transform bossRoot)
     {
         _angleTop = null;
         _angleUnder = null;
+        _angleLeft = null;
+        _angleRight = null;
 
         // 子階層のCameraAnglePointを種類で仕分け
         foreach (CameraAnglePoint point in bossRoot.GetComponentsInChildren<CameraAnglePoint>(true))
         {
-            if (point.AnglePoint == CameraAnglePointType.Top) _angleTop = point.GetTargetCenter();
-            else if (point.AnglePoint == CameraAnglePointType.Under) _angleUnder = point.GetTargetCenter();
+            switch (point.AnglePoint)
+            {
+                case CameraAnglePointType.Top: _angleTop = point.GetTargetCenter(); break;
+                case CameraAnglePointType.Under: _angleUnder = point.GetTargetCenter(); break;
+                case CameraAnglePointType.Left: _angleLeft = point.GetTargetCenter(); break;
+                case CameraAnglePointType.Right: _angleRight = point.GetTargetCenter(); break;
+            }
         }
 
-        if (_angleTop == null || _angleUnder == null)
-            Debug.LogWarning("[BossCameraController] CameraAnglePoint(Top/Under) がボスに見つかりません。注視は体中心へフォールバックします。", _bossBodyCamera);
+        if (_angleTop == null || !HasUnderReference)
+            Debug.LogWarning("[BossCameraController] CameraAnglePoint(Top/Under, または Left+Right) がボスに見つかりません。注視は体中心へフォールバックします。", _bossBodyCamera);
+
+        // スムージングの起点を現在位置へスナップする（出現直後にゼロから寄っていかないように）
+        if (TryGetRawUnderPosition(out Vector3 initialUnder))
+        {
+            _smoothedUnderPosition = initialUnder;
+            _underSmoothVelocity = Vector3.zero;
+        }
+    }
+
+    /// <summary>足元の基準点を持っているか（Under単体、またはLeft+Rightの組）。</summary>
+    private bool HasUnderReference => _angleUnder != null || (_angleLeft != null && _angleRight != null);
+
+    /// <summary>足元の基準位置をスムージング込みで取得する。歩行アニメ等によるボーンの揺れを抑える。</summary>
+    private bool TryGetUnderPosition(float deltaTime, out Vector3 position)
+    {
+        if (!TryGetRawUnderPosition(out Vector3 rawPosition))
+        {
+            position = default;
+            return false;
+        }
+
+        _smoothedUnderPosition = Vector3.SmoothDamp(
+            _smoothedUnderPosition, rawPosition, ref _underSmoothVelocity, _settings.UnderSmoothTime, Mathf.Infinity, deltaTime);
+        position = _smoothedUnderPosition;
+        return true;
+    }
+
+    /// <summary>足元の生の基準位置を取得する。Left/Rightが揃っていればその中点を優先し、無ければUnder単体を使う。</summary>
+    private bool TryGetRawUnderPosition(out Vector3 position)
+    {
+        if (_angleLeft != null && _angleRight != null)
+        {
+            // 直線で結んだ中点。左右どちらかの脚に寄らないようにする
+            position = (_angleLeft.position + _angleRight.position) * 0.5f;
+            return true;
+        }
+
+        if (_angleUnder != null)
+        {
+            position = _angleUnder.position;
+            return true;
+        }
+
+        position = default;
+        return false;
     }
 
     /// <summary>ボスカメラを最前面へ出し、追従・注視・水平軸初期値を設定する。</summary>
@@ -165,8 +221,8 @@ public sealed class BossCameraController
         _bossBodyCamera.Follow = _followAnchor;
         _bossBodyCamera.LookAt = _lookAtProxy;
 
-        // 注視点を現在の距離で初期化
-        UpdateLookAtProxy();
+        // 注視点を現在の距離で初期化（スムージング起点はCollectAnglePointsで既にスナップ済み）
+        UpdateLookAtProxy(0f);
         // 現在のメインカメラ方位へ水平軸を合わせて切り替えの飛びを抑える
         AlignHorizontalAxisToCurrentView();
 
@@ -192,6 +248,8 @@ public sealed class BossCameraController
         _boss = null;
         _angleTop = null;
         _angleUnder = null;
+        _angleLeft = null;
+        _angleRight = null;
     }
 
     /// <summary>姿勢に対応するFOV倍率をベース層ズームへ反映する。一致が無ければ何もしない。</summary>
@@ -215,11 +273,11 @@ public sealed class BossCameraController
         _bossView = null;
     }
 
-    /// <summary>プレイヤー↔ボス距離の比率で足元(Under)〜頭(Top)へ注視点を置き、左右スイベル分だけ横にずらす。</summary>
-    private void UpdateLookAtProxy()
+    /// <summary>プレイヤー↔ボス距離の比率で足元〜頭(Top)へ注視点を置き、左右スイベル分だけ横にずらす。</summary>
+    private void UpdateLookAtProxy(float deltaTime)
     {
         // アンカーが無ければ体中心へフォールバック（スイベルは適用しない）
-        if (_angleTop == null || _angleUnder == null)
+        if (_angleTop == null || !TryGetUnderPosition(deltaTime, out Vector3 underPosition))
         {
             Transform center = _boss.GetTargetCenter();
             _lookAtProxy.position = center != null ? center.position : _boss.Self.position;
@@ -229,7 +287,7 @@ public sealed class BossCameraController
         // Near〜Far の距離を 0(足元)〜1(頭) へ正規化し、その比率で補間
         float distance = Vector3.Distance(_playerTransform.position, _boss.Self.position);
         float t = Mathf.InverseLerp(_settings.FramingNearDistance, _settings.FramingFarDistance, distance);
-        Vector3 basePosition = Vector3.Lerp(_angleUnder.position, _angleTop.position, t);
+        Vector3 basePosition = Vector3.Lerp(underPosition, _angleTop.position, t);
 
         // 注視点をカメラ右方向へスイベル分だけずらす（オービット自体は動かさない）
         Vector3 cameraRight = _mainCamera != null ? _mainCamera.transform.right : Vector3.right;

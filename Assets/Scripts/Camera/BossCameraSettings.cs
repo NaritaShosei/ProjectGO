@@ -19,6 +19,9 @@ public readonly struct BossCameraSettings
     /// <summary>入力を離したとき注視点オフセットが中央（ボス正面）へ戻る速さ(m/秒)。</summary>
     public readonly float SwivelReturnSpeed;
 
+    /// <summary>足元基準点(Under、またはLeft/Rightの中点)の追従にかけるスムージング時間(秒)。歩行アニメ等のボーンの揺れを抑える。</summary>
+    public readonly float UnderSmoothTime;
+
     /// <summary>姿勢ごとのFOVズーム設定。姿勢が変わると一致するエントリの倍率へ寄せる。</summary>
     public readonly BossPostureZoom[] PostureZooms;
 
@@ -32,6 +35,7 @@ public readonly struct BossCameraSettings
         float swivelRange,
         float swivelSpeed,
         float swivelReturnSpeed,
+        float underSmoothTime,
         BossPostureZoom[] postureZooms,
         float zoomResetDuration)
     {
@@ -41,6 +45,7 @@ public readonly struct BossCameraSettings
         SwivelRange = swivelRange;
         SwivelSpeed = swivelSpeed;
         SwivelReturnSpeed = swivelReturnSpeed;
+        UnderSmoothTime = underSmoothTime;
         PostureZooms = postureZooms;
         ZoomResetDuration = zoomResetDuration;
     }

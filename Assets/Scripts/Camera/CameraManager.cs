@@ -136,6 +136,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
                         _bossSwivelRange,
                         _bossSwivelSpeed,
                         _bossSwivelReturnSpeed,
+                        _bossUnderSmoothTime,
                         _bossPostureZooms,
                         _bossZoomResetDuration));
             }
@@ -344,6 +345,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _bossSwivelSpeed = 3f;
     [Tooltip("入力を離したとき注視点オフセットが中央（ボス正面）へ戻る速さ（m/秒）。\n増やすと：離すとすぐ正面へ戻る\n減らすと：ゆっくり戻る。0だと戻らずその向きを維持")]
     [SerializeField] private float _bossSwivelReturnSpeed = 2f;
+    [Tooltip("足元基準点（Under、またはLeft/Rightの中点）の追従にかけるスムージング時間（秒）。歩行アニメ等でのボーンの揺れを抑える。\n増やすと：揺れは減るがボスの移動・旋回への追従も遅れる\n減らすと（0）：即座に追従するが揺れがそのまま出る")]
+    [SerializeField] private float _bossUnderSmoothTime = 0.15f;
     [Tooltip("ボスの姿勢ごとのFOV倍率と到達時間。姿勢が変わると一致するエントリの倍率へ寄せる。リストに無い姿勢は現在のズームを維持")]
     [SerializeField]
     private BossPostureZoom[] _bossPostureZooms =
