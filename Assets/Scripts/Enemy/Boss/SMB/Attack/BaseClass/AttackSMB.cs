@@ -28,17 +28,18 @@ namespace BossEnemy.SMB
             _cameraManager = cameraManager;
             _attackHitAreaSpawner = attackHitAreaSpawner;
             _attackTarget = attackTarget;
-
-            _idleStateHash = Animator.StringToHash(_exitTransitionStateName);
         }
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
             _animationStateVersion++;
 
+            Debug.Log($"[AttackSMB] Enter: id={_attackID}, version={_animationStateVersion}, layer={layerIndex}");
+
             // アニメーションステート開始フラグ
             _isStopPlayAttack = false;
             _isAttackAnimationEndRequested = false;
+            _isAttackCompletionNotified = false;
 
             // 攻撃発動時間がAnimationの時間より長い場合攻撃を取りやめる
             if ( _attackStartTime >= stateInfo.length)
@@ -91,6 +92,8 @@ namespace BossEnemy.SMB
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            Debug.Log($"[AttackSMB] Exit: id={_attackID}, version={_animationStateVersion}, layer={layerIndex}");
+
             // Stateを抜けた段階でAnimatorの攻撃解除が間に合っていなければすぐに解除する
             if (!_isAttackAnimationEndRequested)
             {
@@ -115,14 +118,12 @@ namespace BossEnemy.SMB
 
             _wasHitAttack = false;
 
-            // 途中で攻撃が中断されていなければAnimationが流れ切ったことを確認して攻撃終了通知を飛ばす
+            // 途中で攻撃が中断されていなければ、攻撃ステートを抜けた時点で終了通知を飛ばす。
+            // 遷移先ステートは直後に別ステートへ遷移し得るため、ここで判定しない。
             if (!_isStopPlayAttack)
             {
                 _isStopPlayAttack = true;
-                NotifyAttackAnimCompletedAfterTransitionAsync(
-                    animator,
-                    layerIndex,
-                    _animationStateVersion).Forget();
+                NotifyAttackAnimCompleted();
             }
 
             // イベント購読解除
@@ -154,9 +155,6 @@ namespace BossEnemy.SMB
 
         [Header("攻撃ID")]
         [SerializeField] protected int _attackID = 0;
-
-        [Header("遷移先のState名称")]
-        [SerializeField] protected string _exitTransitionStateName = "AttackReady";
 
         [Header("攻撃開始時間")]
         [SerializeField] protected float _attackStartTime = 0.5f;
@@ -194,9 +192,6 @@ namespace BossEnemy.SMB
         // 攻撃データ
         protected Attack.AttackData _attackData = default;
 
-        // StateExit後のState取得用HashCode
-        protected int _idleStateHash = 0;
-
         // 現在の再生開始からの経過時間（秒）
         protected float _elapsedTime;
 
@@ -207,6 +202,9 @@ namespace BossEnemy.SMB
         // 攻撃中断フラグ
         private bool _isStopPlayAttack = false;
         private uint _animationStateVersion;
+
+        // 同じ攻撃ステートの早期終了と OnStateExit による二重通知を防ぐ。
+        private bool _isAttackCompletionNotified;
 
         // 攻撃クリップ終端でAnimatorの攻撃フラグを解除済みか。
         private bool _isAttackAnimationEndRequested;
@@ -245,41 +243,20 @@ namespace BossEnemy.SMB
             {
                 // 攻撃の完全終了とみなしCancellationTokenSourcesを開放
                 _playAttackCancellationTokenSources.Remove(cts);
-                cts.Dispose();
+                cts.Dispose(); 
             }
         }
 
         /// <summary> 攻撃アニメーション終了通知 </summary>
         private void NotifyAttackAnimCompleted()
         {
+            if (_isAttackCompletionNotified) return;
+            _isAttackCompletionNotified = true;
+
             if (_animationEventReceiver == null) return;
 
             _animationEventReceiver.AnimEvent_AttackCompleted();
-
-            _isStopPlayAttack = false;
             Debug.Log("攻撃の完全終了");
-        }
-
-        /// <summary> 完全にAnimationが流れ切ったことを確認して攻撃終了通知を行う処理 </summary>
-        private async UniTaskVoid NotifyAttackAnimCompletedAfterTransitionAsync(
-            Animator animator,
-            int layerIndex,
-            uint animationStateVersion)
-        {
-            await UniTask.NextFrame();
-
-            // AnimatorがNullになるか、Animatorの遷移が完了した場合に確認する
-            await UniTask.WaitUntil(() => animator == null || !animator.IsInTransition(layerIndex));
-
-            // 遷移待ちの間に同じ攻撃ステートへ再入した場合、これは前回分の通知であるため return;
-            if (animator == null || animationStateVersion != _animationStateVersion) return;
-
-            // IdleState以外への割込み遷移では終了通知を送らない。
-            AnimatorStateInfo currentState = animator.GetCurrentAnimatorStateInfo(layerIndex);
-            if (currentState.shortNameHash != _idleStateHash) return;
-
-            // 攻撃終了通知
-            NotifyAttackAnimCompleted();
         }
 
         private void OnDestroy()
