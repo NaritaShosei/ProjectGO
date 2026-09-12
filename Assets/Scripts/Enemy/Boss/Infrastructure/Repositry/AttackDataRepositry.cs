@@ -96,12 +96,11 @@ namespace BossEnemy.Infrastructure.Repository
             float attackStartDistance = ParseFloat(row, 4, "AttackStartDistance");
             DamageReactionType damageReactionType = System.Enum.Parse<DamageReactionType>(GetCell(row, 5));
             float coolTime = ParseFloat(row, 6, "CoolTime");
-            string animParam = GetCell(row, 7);
 
             Attack.AttackData attackData = 
                 new Attack.AttackData(id, name, damage, 
                 hitAreaRadius, attackStartDistance, 
-                damageReactionType, coolTime, animParam);
+                damageReactionType, coolTime);
 
             return attackData;
         }

@@ -43,6 +43,8 @@ public class SkillManager : MonoBehaviour
         _skillExecutor = new SkillExecutor(this, stats, modeController, playerTransform, enemyManager);
 
         // 最初から所持させるスキルの付与
+        _acquisitionVoiceCount = 0;
+        _pendingAcquisitionVoice = null;
         GrantInitialSkills(stats);
     }
 
@@ -84,6 +86,21 @@ public class SkillManager : MonoBehaviour
     }
 
     public IReadOnlyList<ISkillUpdater> GetUpdaters() => _updaters;
+
+    public void QueueAcquisitionVoice()
+    {
+        // 初期所持スキルやステータス強化は数えず、選択で獲得した順番に対応する。
+        if (_acquisitionVoiceCount >= _acquisitionVoiceCues.Length) return;
+        _pendingAcquisitionVoice = _acquisitionVoiceCues[_acquisitionVoiceCount];
+        _acquisitionVoiceCount++;
+    }
+
+    public string TakeAcquisitionVoice()
+    {
+        string cueName = _pendingAcquisitionVoice;
+        _pendingAcquisitionVoice = null;
+        return cueName;
+    }
     public IEnumerable<int> GetOwnedSkillIDs() => _ownedSkillIDs;
     public IEnumerable<SkillBase> GetAttackSkills() => GetSkillsByTiming(SkillTiming.OnAttack);
 
@@ -143,6 +160,17 @@ public class SkillManager : MonoBehaviour
     [SerializeField] private SkillBase[] _initialSkills;
 
     private SkillExecutor _skillExecutor;
+    private int _acquisitionVoiceCount;
+    private string _pendingAcquisitionVoice;
+    private readonly string[] _acquisitionVoiceCues =
+    {
+        SoundCueNames.PlayerVoice.SkillGet01,
+        SoundCueNames.PlayerVoice.SkillGet02,
+        SoundCueNames.PlayerVoice.SkillGet03,
+        SoundCueNames.PlayerVoice.SkillGet04,
+        SoundCueNames.PlayerVoice.SkillGet05,
+        SoundCueNames.PlayerVoice.SkillGet06
+    };
     private StatSkillSystem _statSkillSystem;
     private List<ISkillUpdater> _updaters = new();
     private HashSet<int> _ownedSkillIDs = new(); // 獲得したスキルIDのセット。重複なしで管理。

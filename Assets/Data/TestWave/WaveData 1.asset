@@ -14,6 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
+    - EnemyTypeKey: StoneRing
+      SpawnCount: 3
+      MidBossLevelTable: {fileID: 0}
+    ExclusionRadius: 5
+    NextWaveConditions:
+    - WaveConditionType: 0
+      Threshold: 0.1
+    SpawnPointKey: 3
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 1
+    _clusterRadius: 2
+  - SpawnEntries:
+    - EnemyTypeKey: StoneRing
+      SpawnCount: 3
+      MidBossLevelTable: {fileID: 0}
+    ExclusionRadius: 5
+    NextWaveConditions:
+    - WaveConditionType: 1
+      Threshold: 6
+    SpawnPointKey: 5
+    _spawnSetSize: 3
+    _spawnSetInterval: 0.5
+    _placementMode: 1
+    _clusterRadius: 2
+  - SpawnEntries:
     - EnemyTypeKey: StoneGolem
       SpawnCount: 1
       MidBossLevelTable: {fileID: 11400000, guid: fd7814b140cca00498baf15536d6a050, type: 2}
@@ -21,34 +47,8 @@ MonoBehaviour:
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
-    SpawnPointKey: 
+    SpawnPointKey: 1
     _spawnSetSize: 3
     _spawnSetInterval: 0.5
     _placementMode: 0
-    _clusterRadius: 2
-  - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 5
-      MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 5
-    NextWaveConditions:
-    - WaveConditionType: 1
-      Threshold: 2
-    SpawnPointKey: 
-    _spawnSetSize: 3
-    _spawnSetInterval: 0.5
-    _placementMode: 1
-    _clusterRadius: 2
-  - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 5
-      MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 5
-    NextWaveConditions:
-    - WaveConditionType: 2
-      Threshold: 2
-    SpawnPointKey: 
-    _spawnSetSize: 3
-    _spawnSetInterval: 0.5
-    _placementMode: 1
     _clusterRadius: 2

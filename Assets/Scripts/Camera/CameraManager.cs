@@ -1,4 +1,5 @@
 using System;
+using BossEnemy.Enum;
 using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -116,6 +117,28 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         {
             _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform, _cameraMotionController);
             _lockOnController.OnTargetChanged += HandleTargetChanged;
+
+            // ボスカメラはカメラ参照がある場合のみ生成する
+            if (_bossBodyCamera != null)
+            {
+                _bossCameraController = new BossCameraController(
+                    this,
+                    _bossBodyCamera,
+                    _cameraMotionController.FollowAnchor,
+                    MainCamera,
+                    inputHandler,
+                    enemyManager,
+                    _playerTransform,
+                    new BossCameraSettings(
+                        _bossFramingNearDistance,
+                        _bossFramingFarDistance,
+                        _bossOrbitTrackSpeed,
+                        _bossSwivelRange,
+                        _bossSwivelSpeed,
+                        _bossSwivelReturnSpeed,
+                        _bossPostureZooms,
+                        _bossZoomResetDuration));
+            }
         }
         else
         {
@@ -125,6 +148,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraPresentationController = new CameraPresentationController(
             _normalCamera,
             _lockOnCamera,
+            _bossBodyCamera,
             player.GetComponent<PlayerAttack>(),
             player.GetComponent<PlayerModeController>(),
             player.GetComponentInChildren<PlayerAnimationController>(),
@@ -162,6 +186,15 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     }
 
     /// <summary>
+    /// ベース層のズーム倍率を設定します。チャージ等のエフェクトズームは常にこの倍率を基準（＝1）として上に掛かります。
+    /// ボスの姿勢連動ズームで使用します。
+    /// </summary>
+    public void SetBaseZoom(float zoom, float duration)
+    {
+        _cameraPresentationController?.SetBaseZoom(zoom, duration);
+    }
+
+    /// <summary>
     /// チャージ段階をFOV倍率へ変換して設定します。
     /// 各段階の倍率・到達時間はInspectorの「ズーム設定」で個別に調整できます。
     /// Level1はズームなしのため何もしません。
@@ -195,7 +228,11 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         if (_cameraPresentationController == null) return;
 
-        var camera = IsLockedOn ? _lockOnCamera : _normalCamera;
+        var camera = _bossCameraController?.IsActive == true
+            ? _bossBodyCamera
+            : IsLockedOn
+                ? _lockOnCamera
+                : _normalCamera;
         await _cameraPresentationController.Shake(camera, data);
     }
 
@@ -215,12 +252,16 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private CinemachineCamera _normalCamera;
     [Tooltip("ロックオン時に使用するCinemachineカメラ")]
     [SerializeField] private CinemachineCamera _lockOnCamera;
+    [Tooltip("ボス戦時に使用するCinemachineカメラ（未設定ならボスカメラ機能は無効）")]
+    [SerializeField] private CinemachineCamera _bossBodyCamera;
 
     [Header("優先度設定")]
     [Tooltip("通常カメラのPriority。ロックオンカメラはこれより低い値で待機する")]
     [SerializeField] private int _normalPriority = 10;
     [Tooltip("ロックオン時に設定するPriority。通常カメラより高くする必要がある")]
     [SerializeField] private int _lockOnPriority = 20;
+    [Tooltip("ボス戦中に _bossBodyCamera へ設定するPriority。通常(10)・ロックオン(20)より高い必要がある。待機中は自動で最下位へ下がる。基本いじらない")]
+    [SerializeField] private int _bossPriority = 30;
 
     [Header("通常追従設定")]
     [Tooltip("プレイヤー真後ろからのカメラ距離（m）")]
@@ -290,6 +331,31 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [Tooltip("雷神モードへ切り替わった瞬間のズームイン倍率・到達時間・通常視野へ戻るまでの時間")]
     [SerializeField] private ModeChangeZoomSetting _thunderModeZoom = new() { Multiplier = 0.8f, ZoomInDuration = 0.15f, MidMultiplier = 0.8f, MidDuration = 0.1f, ZoomOutDuration = 0.3f };
 
+    [Header("ボスカメラ設定")]
+    [Tooltip("プレイヤー↔ボスがこの距離(m)以下でボスの足元(CameraAngleUnder)を注視する。Far との間は距離の比率で足元⇔頭を補間。\n増やすと：もっと離れても足元を見続ける（見上げ始めが遅い）\n減らすと：少し離れただけで視線が頭側へ動き始める")]
+    [SerializeField] private float _bossFramingNearDistance = 6f;
+    [Tooltip("プレイヤー↔ボスがこの距離(m)以上でボスの頭(CameraAngleTop)を注視する。\n増やすと：かなり離れないと頭まで見上げない\n減らすと：少し離れただけで頭まで映す")]
+    [SerializeField] private float _bossFramingFarDistance = 18f;
+    [Tooltip("カメラを常に『プレイヤーから見てボスの反対側』へ向け直す最大回転速度（度/秒）。入力ではなくプレイヤー・ボスの位置関係から自動で決まる。\n増やすと：ボスが回り込んでもすぐ背後に付く（キビキビ／速い動きだとやや固い）\n減らすと：追従が遅れ、ボスを横〜前から見る時間が増える。0だとカメラ角度が固定され不自然になりうる")]
+    [SerializeField] private float _bossOrbitTrackSpeed = 180f;
+    [Tooltip("カメラ移動入力で注視点を左右へずらせる最大量（m）。オービット位置は動かさず視線だけ振る。\n増やすと：ボスを画面端寄りまで動かせて見回し幅が広い\n減らすと：ほぼ正面固定。0で入力による振りは無効")]
+    [SerializeField] private float _bossSwivelRange = 1.5f;
+    [Tooltip("入力を入れている間に注視点オフセットが伸びる速さ（m/秒、スティック全倒し時）。\n増やすと：倒した瞬間にサッと横へ振れる\n減らすと：じわっと横へ寄っていく")]
+    [SerializeField] private float _bossSwivelSpeed = 3f;
+    [Tooltip("入力を離したとき注視点オフセットが中央（ボス正面）へ戻る速さ（m/秒）。\n増やすと：離すとすぐ正面へ戻る\n減らすと：ゆっくり戻る。0だと戻らずその向きを維持")]
+    [SerializeField] private float _bossSwivelReturnSpeed = 2f;
+    [Tooltip("ボスの姿勢ごとのFOV倍率と到達時間。姿勢が変わると一致するエントリの倍率へ寄せる。リストに無い姿勢は現在のズームを維持")]
+    [SerializeField]
+    private BossPostureZoom[] _bossPostureZooms =
+    {
+        new() { Posture = PostureType.Standing, ZoomMultiplier = 1f, Duration = 0.3f },
+        new() { Posture = PostureType.RightHalfKneel, ZoomMultiplier = 0.9f, Duration = 0.3f },
+        new() { Posture = PostureType.LeftHalfKneel, ZoomMultiplier = 0.9f, Duration = 0.3f },
+        new() { Posture = PostureType.SpreadEagled, ZoomMultiplier = 0.8f, Duration = 0.4f },
+    };
+    [Tooltip("ボスカメラ終了時に通常視野（等倍）へ戻すまでの時間（秒）。\n増やすと：ゆっくり戻る\n減らすと（0）：即座に戻る")]
+    [SerializeField] private float _bossZoomResetDuration = 0.3f;
+
     [SerializeField]
     private LockOnController _lockOnController;
 
@@ -303,6 +369,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private CinemachineInputAxisController _normalInputAxisController;
     private CameraMotionController _cameraMotionController;
     private CameraPresentationController _cameraPresentationController;
+    private BossCameraController _bossCameraController;
     private EffectCameraProximityController _effectCameraProximityController;
     private CameraOcclusionTransparencyController _occlusionTransparencyController;
 
@@ -341,6 +408,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         _normalCamera.Priority = _normalPriority;
         _lockOnCamera.Priority = _normalPriority - 1;
+        // ボスカメラは待機時は全カメラより下に置く
+        if (_bossBodyCamera != null) _bossBodyCamera.Priority = BossIdlePriority;
 
         _normalOrbitalFollow = _normalCamera.GetComponent<CinemachineOrbitalFollow>();
         _normalInputAxisController = _normalCamera.GetComponent<CinemachineInputAxisController>();
@@ -364,7 +433,13 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         if (Mathf.Approximately(TimeScale, 0f)) return;
 
         _cameraPresentationController?.Tick(Time.fixedDeltaTime * TimeScale);
-        _lockOnController?.Tick(TimeScale);
+        _bossCameraController?.Tick(Time.fixedDeltaTime * TimeScale);
+
+        // ボスカメラ有効中は通常・ロックオンのTickを止める（入力の二重適用防止）
+        if (_bossCameraController == null || !_bossCameraController.IsActive)
+        {
+            _lockOnController?.Tick(TimeScale);
+        }
     }
 
     private void LateUpdate()
@@ -427,6 +502,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraMotionController?.Dispose();
         _cameraPresentationController?.ResetZoom();
         _cameraPresentationController?.Dispose();
+        _bossCameraController?.Dispose();
         _effectCameraProximityController?.Dispose();
         _occlusionTransparencyController?.Dispose();
 
@@ -437,6 +513,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     {
         RefreshMainCamera(scene);
         _lockOnController?.SetMainCamera(_mainCamera);
+        _bossCameraController?.SetMainCamera(_mainCamera);
         _effectCameraProximityController?.SetMainCamera(_mainCamera);
         _occlusionTransparencyController?.SetMainCamera(_mainCamera);
     }
@@ -488,6 +565,26 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _normalCamera.Priority = isActive ? _normalPriority - 1 : _normalPriority;
         _lockOnCamera.Priority = isActive ? _lockOnPriority : _normalPriority - 1;
     }
+
+    /// <summary>ボス戦カメラのPriorityを切り替える。有効化時はロックオンを解除する。</summary>
+    internal void SetBossCameraActive(bool isActive)
+    {
+        if (_bossBodyCamera == null) return;
+
+        // 有効化時はロックオンを解除してから最前面へ、無効化時は待機位置へ戻す
+        if (isActive)
+        {
+            _lockOnController?.Unlock();
+            _bossBodyCamera.Priority = _bossPriority;
+        }
+        else
+        {
+            _bossBodyCamera.Priority = BossIdlePriority;
+        }
+    }
+
+    /// <summary>ボスカメラの待機時Priority。通常・ロックオンより下に置く。</summary>
+    private int BossIdlePriority => _normalPriority - 2;
 
     private void HandleTargetChanged(ILockOnTarget target)
     {

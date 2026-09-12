@@ -159,6 +159,9 @@ public sealed class CameraMotionController
         }
     }
 
+    /// <summary>通常カメラがFollowするプレイヤー追従アンカー。ボス用カメラのFollowにも流用する。</summary>
+    public Transform FollowAnchor => _cameraFollowTarget;
+
     /// <summary>通常カメラの入力回転とプレイヤー追従を更新します。</summary>
     public void UpdateNormal(float timeScale, Vector2 input)
     {

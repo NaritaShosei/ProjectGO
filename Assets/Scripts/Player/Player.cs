@@ -6,6 +6,26 @@ using UnityEngine;
 
 public class Player : MonoBehaviour, IPlayer, ISpeedChange
 {
+    public event Action<PlayerMode, ChargeLevel> OnAttackHit
+    {
+        add => _attack.OnAttackHit += value;
+        remove => _attack.OnAttackHit -= value;
+    }
+
+    public event Action OnArmorBroken
+    {
+        add => _attack.OnArmorBroken += value;
+        remove => _attack.OnArmorBroken -= value;
+    }
+
+    public event Action<PlayerMode> OnModeChanged
+    {
+        add => _modeController.OnModeChanged += value;
+        remove => _modeController.OnModeChanged -= value;
+    }
+
+    public event Action OnModeChangeCompleted;
+
     // ---- IPlayerStats 実装 ----
     public float AttackPower => _playerStats.AttackPower;
     public float CriticalRate => _playerStats.CriticalRate;
@@ -169,7 +189,10 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         OnDamagedEffect?.Invoke(
             new PlayerDamageEffectContext
             {
-                HitPosition = _targetCenter.position
+                HitPosition = _targetCenter.position,
+                ReactionType = reactionType,
+                // 致死ダメージでは死亡ボイスを優先する。ダウン時は通知前に処理を終了する。
+                SuppressDamageVoice = _playerStateManager.IsDead()
             });
 
         bool canInterrupt = true;
@@ -241,6 +264,14 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _timeScale = timeScale;
         _playerAnimationController.SetAnimSpeed(timeScale);
         _move.SetTimeScale(timeScale);
+    }
+
+    /// <summary>
+    /// チュートリアルのモードチェンジ待機中だけ、攻撃ステートによる入力制限を解除する。
+    /// </summary>
+    public void SetTutorialModeChangeEnabled(bool enabled)
+    {
+        _attack.SetTutorialModeChangeEnabled(enabled);
     }
 
     /// <summary>
@@ -399,8 +430,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     /// </summary>
     private void OnModeChangeComplete()
     {
-        if (_playerStateManager.CurrentState == PlayerState.ModeChanging)
-            _playerStateManager.ChangeState(PlayerState.Idle);
+        if (_playerStateManager.CurrentState != PlayerState.ModeChanging)
+            return;
+
+        _playerStateManager.ChangeState(PlayerState.Idle);
+        OnModeChangeCompleted?.Invoke();
     }
 
     /// <summary>ロックオン対象を設定する（nullで解除）</summary>

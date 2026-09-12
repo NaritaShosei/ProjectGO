@@ -15,26 +15,23 @@ MonoBehaviour:
   SpawnGroups:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 2
+      SpawnCount: 4
       MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: Enemy_Armor_Medium
       SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 0
     NextWaveConditions:
-    - WaveConditionType: 2
-      Threshold: 2
+    - WaveConditionType: 1
+      Threshold: 1
     SpawnPointKey: 
     _spawnSetSize: 3
     _spawnSetInterval: 0.5
     _placementMode: 0
     _clusterRadius: 2
   - SpawnEntries:
-    - EnemyTypeKey: Enemy_Armor_Heavy
-      SpawnCount: 2
-      MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 1
+    - EnemyTypeKey: Enemy_Armor_Medium
+      SpawnCount: 3
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 0
     NextWaveConditions:

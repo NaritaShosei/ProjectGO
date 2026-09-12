@@ -61,11 +61,11 @@ namespace BossEnemy.SMB
                 _attackData.AttackHitAreaRadius,
                 displayDuration);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_startAttackHitTiming));
+            await UniTask.Delay(TimeSpan.FromSeconds(_startAttackHitTiming), cancellationToken: cancellationToken);
 
             _isAttackHitCheck = true;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_endAttackHitTiming));
+            await UniTask.Delay(TimeSpan.FromSeconds(_endAttackHitTiming), cancellationToken: cancellationToken);
 
             _isAttackHitCheck = false;
         }

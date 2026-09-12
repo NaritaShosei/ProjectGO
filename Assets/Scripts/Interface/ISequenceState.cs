@@ -25,4 +25,5 @@ public enum SequenceStateType
     EndingMovie,        // エンディングムービー
     Result,             // リザルト
     GameOver,           // ゲームオーバー
+    Tutorial,           // チュートリアル
 }

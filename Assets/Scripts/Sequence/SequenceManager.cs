@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
@@ -10,14 +11,42 @@ public class SequenceManager : MonoBehaviour
 
     /// <summary>タイトルへ戻るリクエスト（ゲームオーバー後）</summary>
     public event Action OnTitleRequested;
+    public SubtitleController Subtitles { get; private set; }
 
-    public void Init(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
+    public async UniTask InitializeAsync(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
     {
         if (enemyManager == null || skillManager == null || inputHandler == null || player == null)
         {
             Debug.LogError("EnemyManager、SkillManagerが未設定です");
             return;
         }
+        var cancellationToken = this.GetCancellationTokenOnDestroy();
+        SubtitleSettings subtitleSettings = null;
+        _isLoadingSubtitleSettings = true;
+        try
+        {
+            // 共通ローダーのキャッシュを利用し、字幕が準備できてからシークエンスを初期化する。
+            subtitleSettings = await AssetsLoader.LoadAssetAsync<SubtitleSettings>(_subtitleSettingsAddress);
+        }
+        catch (Exception exception)
+        {
+            AssetsLoader.Release(_subtitleSettingsAddress);
+            if (!cancellationToken.IsCancellationRequested)
+                Debug.LogError($"[SequenceManager] 字幕設定を読み込めませんでした: {exception.Message}", this);
+        }
+        finally
+        {
+            _isLoadingSubtitleSettings = false;
+            // ロード中のシーン破棄では完了を待ってから解放し、待機中のハンドルを無効化しない。
+            if (cancellationToken.IsCancellationRequested)
+                AssetsLoader.Release(_subtitleSettingsAddress);
+        }
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // 設定のロード失敗時もコントローラー経由でボイスの再生・停止を管理する。
+        Subtitles = gameObject.AddComponent<SubtitleController>();
+        Subtitles.InitializeController(subtitleSettings, player as Player, _subtitleView);
+
         // コンテキスト構築
         _context = new SequenceStateContext
         {
@@ -62,12 +91,17 @@ public class SequenceManager : MonoBehaviour
     #region　インスペクター
 
     [Header("Sequence設定")]
+    [SerializeField, Tooltip("AssetsLoaderで読み込む字幕設定のAddressablesアドレス")]
+    private string _subtitleSettingsAddress = "SubtitleSettings";
+    [SerializeField, Tooltip("事前配置した字幕用Text UIを参照するView")]
+    private SubtitleView _subtitleView;
     [SerializeField, Tooltip("シークエンス内で共通して使用するMoviePlayer")] private MoviePlayer _moviePlayer;
     [SerializeField, Tooltip("最初に開始するシークエンスのタイプ")] private SequenceStateType _firstSequence = SequenceStateType.IntroMovie;
     [SerializeReference, SubclassSelector]
     private ISequenceState[] _sequences = new ISequenceState[]
     {
         new IntroMovieState(),
+        new TutorialState(),
         new MobAndSkillState(),
         new BossIntroMovieState(),
         new BossBattleState(),
@@ -82,6 +116,7 @@ public class SequenceManager : MonoBehaviour
 
     private SequenceStateMachine _stateMachine;
     private SequenceStateContext _context;
+    private bool _isLoadingSubtitleSettings;
 
     #endregion
 
@@ -94,6 +129,7 @@ public class SequenceManager : MonoBehaviour
         _sequences = new ISequenceState[]
         {
             new IntroMovieState(),
+            new TutorialState(),
             new MobAndSkillState(),
             new BossIntroMovieState(),
             new BossBattleState(),
@@ -112,6 +148,8 @@ public class SequenceManager : MonoBehaviour
     {
         if (_context?.Player != null)
             _context.Player.OnDead -= HandlePlayerDead;
+        if (!_isLoadingSubtitleSettings)
+            AssetsLoader.Release(_subtitleSettingsAddress);
     }
 
     #endregion

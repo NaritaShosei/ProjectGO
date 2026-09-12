@@ -23,7 +23,7 @@ namespace BossEnemy.Interface
         public event Action OnHitAttack;
 
         /// <summary>攻撃アニメーション終了のイベント</summary>
-        public event Action OnAttackEnd;
+        public event Action OnAttackCompleted;
 
         /// <summary>Phase切り替え終了のイベント</summary>
         public event Action OnPhaseChangeEnd;
@@ -47,7 +47,7 @@ namespace BossEnemy.Interface
         public void AnimEvent_HitAttack();
 
         /// <summary>AttackSMB からステート終了時に呼ばれる</summary>
-        public void AnimEvent_AttackEnd();
+        public void AnimEvent_AttackCompleted();
 
         /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>
         public void AnimEvent_PhaseChangeEnd();

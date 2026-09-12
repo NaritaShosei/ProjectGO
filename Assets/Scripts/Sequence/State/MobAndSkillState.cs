@@ -16,6 +16,7 @@ public class MobAndSkillState : ISequenceState
     public void OnEnter(SequenceStateContext context)
     {
         _context = context;
+        context.SkillManager.TakeAcquisitionVoice();
 
         _currentWaveIndex = 0;
         _waveCleared = false;
@@ -81,6 +82,7 @@ public class MobAndSkillState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
+        context.SkillManager.TakeAcquisitionVoice();
         context.Player.OnBeforeDead -= HandleBeforePlayerDead;
         context.Player.OnDownRecoveryEnded -= HandleDownRecoveryEnded;
 
@@ -245,6 +247,15 @@ public class MobAndSkillState : ISequenceState
         }
 
         UpdateWaveStatus();
+        // 選択直後ではなく、次ウェーブが実際に始まってから字幕と音声を同時に開始する。
+        string cueName = context.SkillManager.TakeAcquisitionVoice();
+        if (!string.IsNullOrEmpty(cueName))
+        {
+            if (context.SequenceManager?.Subtitles != null)
+                context.SequenceManager.Subtitles.PlayVoiceSubtitle(cueName);
+            else
+                Sound.PlaySE(context.SkillManager.gameObject, cueName, CueSheetType.PlayerVoice);
+        }
     }
 
     #endregion
@@ -343,6 +354,7 @@ public class MobAndSkillState : ISequenceState
 
     private void StartSkillSelect(SequenceStateContext context)
     {
+        context.SequenceManager?.Subtitles?.HideSubtitle();
         _subPhase = SubPhase.SkillSelect;
         _isSkillSelected = false;
         _skillSelectTimeUp = false;
