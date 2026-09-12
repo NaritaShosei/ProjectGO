@@ -15,6 +15,13 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            // PlayAttack はアニメーション終了後も継続し得る。そのため、前回の
+            // PlayAttack が await から復帰して今回の Charge 用の状態を変更しないよう、
+            // ステートへの入場ごとに実行世代を更新する。
+            _executionVersion++;
+            _goalArrivalTime = 0f;
+            _isAttackHitCheck = false;
+            _isMoving = false;
             _goalPos =
                 _bossCharacterTransform.position +
                 (_bossCharacterTransform.forward * _moveDistance);
@@ -69,51 +76,57 @@ namespace BossEnemy.SMB
         private float _goalArrivalTime = 0f;
         private bool _isAttackHitCheck = false;
         private bool _isMoving = false;
+        private uint _executionVersion;
 
         protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
-            try
+            uint executionVersion = _executionVersion;
+
+            float spawnDistance = _moveDistance / 2;
+
+            // transform.position（自身の現在地） + transform.forward（正面方向の単位ベクトル） * 距離
+            Vector3 spawnPosition =
+                _bossCharacterTransform.position +
+                (_bossCharacterTransform.forward * spawnDistance);
+
+            // 実判定は移動中のボスを中心とした円形範囲の連続判定。
+            // その移動軌跡を、幅=円の直径・長さ=移動距離の矩形として表示する。
+            float displayWidth = _attackData.AttackHitAreaRadius * 2f;
+            float displayDuration = _startMoveTime + _endMoveTime;
+
+
+            HitAreaView hitArea = _attackHitAreaSpawner.Spawn(
+                AttackHitAreaType.Square,
+                spawnPosition,
+                _attackData.AttackHitAreaRadius,
+                displayDuration,
+                _bossCharacterTransform.forward);
+
+            if (hitArea is SquareHitAreaView squareHitArea)
             {
-                float spawnDistance = _moveDistance / 2;
-
-                // transform.position（自身の現在地） + transform.forward（正面方向の単位ベクトル） * 距離
-                Vector3 spawnPosition =
-                    _bossCharacterTransform.position +
-                    (_bossCharacterTransform.forward * spawnDistance);
-
-                // 実判定は移動中のボスを中心とした円形範囲の連続判定。
-                // その移動軌跡を、幅=円の直径・長さ=移動距離の矩形として表示する。
-                float displayWidth = _attackData.AttackHitAreaRadius * 2f;
-                float displayDuration = _startMoveTime + _endMoveTime;
-
-
-                HitAreaView hitArea = _attackHitAreaSpawner.Spawn(
-                    AttackHitAreaType.Square,
-                    spawnPosition,
-                    _attackData.AttackHitAreaRadius,
-                    displayDuration,
-                    _bossCharacterTransform.forward);
-
-                if (hitArea is SquareHitAreaView squareHitArea)
-                {
-                    squareHitArea.SetSize(displayWidth, _moveDistance);
-                }
-
-                await UniTask.Delay(TimeSpan.FromSeconds(_startMoveTime), cancellationToken: cancellationToken);
-
-                _goalArrivalTime = _endMoveTime;
-                _isAttackHitCheck = true;
-                _isMoving = true;
-
-                await UniTask.WaitUntil(() => !_isMoving, cancellationToken: cancellationToken);
-
-                _isAttackHitCheck = false;
-                _goalArrivalTime = 0;
+                squareHitArea.SetSize(displayWidth, _moveDistance);
             }
-            catch (OperationCanceledException)
-            {
 
-            }
+            await UniTask.Delay(TimeSpan.FromSeconds(_startMoveTime), cancellationToken: cancellationToken);
+
+            // 前回の Charge が遅延後に復帰した場合は、今回の Charge の
+            // _isMoving / _isAttackHitCheck を変更させない。
+            if (executionVersion != _executionVersion)
+                return;
+
+            _goalArrivalTime = _endMoveTime;
+            _isAttackHitCheck = true;
+            _isMoving = true;
+
+            await UniTask.WaitUntil(
+                () => executionVersion != _executionVersion || !_isMoving,
+                cancellationToken: cancellationToken);
+
+            if (executionVersion != _executionVersion)
+                return;
+
+            _isAttackHitCheck = false;
+            _goalArrivalTime = 0;
         }
     }
 }

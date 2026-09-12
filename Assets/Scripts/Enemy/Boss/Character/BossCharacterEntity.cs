@@ -9,20 +9,24 @@ using UnityEngine;
 // BossEnemyに関するData
 namespace BossEnemy.Character
 {
+    public enum CharacterAction
+    {
+        Idle,
+        Walking,
+        Attacking,
+        PostureChanging,
+        PhaseChanging,
+        Dead
+    }
+
     # region CharacterInterface
     public interface IBossCharacterEntity : IMovement
     {
-        /// <summary> 鎧破壊時のイベント </summary>
-        public event Action<ArmorAttachmentType> OnArmorBreak;
-
-        /// <summary> 鎧修復時のイベント </summary>
-        public event Action<ArmorAttachmentType> OnArmorRepair;
-
         /// <summary> ボスの攻撃命中時イベント </summary>
         public event Action OnAttackHit;
 
-        /// <summary> 死亡時のイベント </summary>
-        public event Action OnDead;
+        /// <summary> 行動開始済みフラグ </summary>
+        public bool IsBeganAction { get; }
 
         /// <summary> ボスの名前 </summary>
         public string BossName { get; }
@@ -30,17 +34,23 @@ namespace BossEnemy.Character
         /// <summary> 攻撃標的 </summary>
         public IPlayer AttackTarget { get; }
 
+        /// <summary> 現在実行中の行動 </summary>
+        public IReadOnlyReactiveProperty<CharacterAction> CurrentAction { get; }
+
         /// <summary> 現在のHP </summary>
         public IReadOnlyReactiveProperty<int> CurrentHP { get; }
 
         /// <summary> 現在の姿勢 </summary>
-        public IReadOnlyReactiveProperty<PostureType> CurrentCharacterPostureType { get; }
+        public PostureType CurrentCharacterPostureType { get; }
 
-        /// <summary> Phase切り替え中フラグ </summary>
-        public IReadOnlyReactiveProperty<bool> IsPhaseChaging { get; }
+        /// <summary> 鎧が破壊された際に破壊された装備箇所を反映するReactivePropaty </summary>
+        public IReadOnlyReactiveProperty<ArmorAttachmentType> BreakingArmorAttachmentType { get; }
+
+        /// <summary> 鎧が破壊された際に破壊された装備箇所を反映するReactivePropaty </summary>
+        public IReadOnlyReactiveProperty<ArmorAttachmentType> RepairArmorAttachmentType { get; }
 
         /// <summary> 攻撃中フラグ </summary>
-        public IReadOnlyReactiveProperty<Attack.AttackData> ExecutingAttackData { get; }
+        public Attack.AttackData ExecutingAttackData { get; }
 
         /// <summary> ボスのタイムスケール </summary>
         public float TimeScale { get; }
@@ -56,6 +66,9 @@ namespace BossEnemy.Character
 
         /// <summary> 初期化 </summary>
         public void Init();
+
+        /// <summary> 行動開始処理 </summary>
+        public void BeginAction();
 
         /// <summary> 生成(スポーン)された際の処理 </summary>
         public void OnSpawn(IPlayer firstTarget, Vector3 position, Quaternion quaternion);
@@ -73,6 +86,10 @@ namespace BossEnemy.Character
 
         /// <summary> 発動予定の攻撃を取得する </summary>
         public Attack.AttackData GetNextAttackData();
+
+        /// <summary> キャラクターの行動 </summary>
+        /// <param name="characterAction"></param>
+        public void SetCurrentAction(CharacterAction characterAction);
 
         /// <summary> タイムスケールを設定 </summary>
         /// <param name="timeScale"> 新しいタイムスケール </param>
@@ -101,6 +118,15 @@ namespace BossEnemy.Character
         /// <summary> 攻撃を終了する </summary>
         public void AttackCompleted();
 
+        /// <summary> 攻撃強制終了処理 </summary>
+        public void CancelAttack();
+
+        /// <summary> 鎧の破損が起こった際のイベントが2回以上流れないようにリセットする </summary>
+        public void ResetArmorBreakingEvent();
+
+        /// <summary> 鎧の修復が起こった際のイベントが2回以上流れないようにリセットする </summary>
+        public void ResetRepairArmorEvent();
+
         /// <summary> BossEnemyへのダメージ処理 </summary>
         /// <param name="damage"> ダメージの総量 </param>
         /// <param name="scapegoatArmor"> 本体の代わりにダメージを背負う鎧 </param>
@@ -109,29 +135,20 @@ namespace BossEnemy.Character
         /// <summary> 鎧の修復処理 </summary>
         /// <param name="repairArmor"> 特定の修復ヶ所(特に指定がなければすべて修復する) </param>
         /// <param name="repairedArmorHP"> 修復後の鎧のHP(特に指定がなければ最大値になる) </param>
-        public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.None, int repairedArmorHP = 0);
+        public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.AllArmor, int repairedArmorHP = 0);
 
         /// <summary> 現在のPhaseから次のPhaseに移行する処理 </summary>
-        public void PhaseChange();
+        public void StartPhaseChange();
 
         /// <summary> フェーズ切り替え終了時の処理 </summary>
         public void PhaseChangeCompleted();
-
-        /// <summary> 死亡時の処理 </summary>
-        public void HandleDead();
     }
     #endregion
 
     /// <summary> BossEnemyのEntity </summary>
     public class BossCharacterEntity : IBossCharacterEntity
     {
-        public event Action<ArmorAttachmentType> OnArmorBreak;
-
-        public event Action<ArmorAttachmentType> OnArmorRepair;
-
         public event Action OnAttackHit;
-
-        public event Action OnDead;
 
         public BossCharacterEntity(string name, CharacterStatus[] characterStatus)
         {
@@ -139,11 +156,17 @@ namespace BossEnemy.Character
             _allPhaseStats = characterStatus;
         }
 
+        /// <summary> 行動開始済みフラグ </summary>
+        public bool IsBeganAction => _isBeganAction;
+
         /// <summary> ボスの名前 </summary>
         public string BossName => _bossName;
 
         /// <summary> 攻撃標的 </summary>
         public IPlayer AttackTarget => _attackTarget;
+
+        /// <summary> 現在実行中の行動 </summary>
+        public IReadOnlyReactiveProperty<CharacterAction> CurrentAction => _currentCharacterAction;
 
         /// <summary> 現在のHP </summary>
         public IReadOnlyReactiveProperty<int> CurrentHP => _currentHP;
@@ -158,13 +181,16 @@ namespace BossEnemy.Character
         public IReadOnlyReactiveProperty<Vector3> Velocity => _velocity;
 
         /// <summary> 現在の姿勢 </summary>
-        public IReadOnlyReactiveProperty<PostureType> CurrentCharacterPostureType => _currentPostureType;
+        public PostureType CurrentCharacterPostureType => _currentPostureType;
 
-        /// <summary> Phase切り替え中フラグ </summary>
-        public IReadOnlyReactiveProperty<bool> IsPhaseChaging => _isPhaseChanging;
+        /// <summary> 鎧が破壊された際に破壊された装備箇所を反映するReactivePropaty </summary>
+        public IReadOnlyReactiveProperty<ArmorAttachmentType> BreakingArmorAttachmentType => _breakingArmorAttachmentType;
+
+        /// <summary> 鎧が破壊された際に破壊された装備箇所を反映するReactivePropaty </summary>
+        public IReadOnlyReactiveProperty<ArmorAttachmentType> RepairArmorAttachmentType => _repairArmorAttachmentType;
 
         /// <summary> 攻撃中フラグ </summary>
-        public IReadOnlyReactiveProperty<Attack.AttackData> ExecutingAttackData => _executingAttack;
+        public Attack.AttackData ExecutingAttackData => _executingAttack;
 
         /// <summary> ボスのタイムスケール </summary>
         public float TimeScale => _timeScale;
@@ -181,16 +207,23 @@ namespace BossEnemy.Character
         /// <summary> 初期化 </summary>
         public void Init()
         {
-            // 攻撃実行クラスを初期化
+            // 行動開始済みフラグを初期化
+            _isBeganAction = false;
+
+            // 攻撃関係の初期化
             _attackExecutor = new();
+            _executingAttack = default;
 
             // 現在のフェーズを最初のフェーズにする
             _currentPhaseNum = 0;
 
+            // 現在の姿勢の初期化
+            _currentPostureType = PostureType.Standing;
+
             // ReactivePropertyの初期化
-            _currentPostureType = new(PostureType.Standing);
-            _isPhaseChanging = new(false);
-            _executingAttack = new(default);
+            _currentCharacterAction = new(CharacterAction.Idle);
+            _breakingArmorAttachmentType = new(ArmorAttachmentType.None);
+            _repairArmorAttachmentType = new(ArmorAttachmentType.None);
             _currentHP = new();
             _position = new();
             _rotation = new();
@@ -200,6 +233,12 @@ namespace BossEnemy.Character
             _timeScale = 1.0f;
         }
 
+        /// <summary> 行動開始済みフラグをTrueにする </summary>
+        public void BeginAction()
+        {
+            _isBeganAction = true;
+        }
+
         /// <summary> 生成(スポーン)された際の処理 </summary>
         public void OnSpawn(IPlayer firstTarget, Vector3 position, Quaternion quaternion)
         {
@@ -207,8 +246,6 @@ namespace BossEnemy.Character
             SetPosition(position);
             SetRotation(quaternion);
             SetVelocity(Vector3.zero);
-
-            PhaseChange();
 
             Debug.Log("召喚されました");
         }
@@ -245,6 +282,15 @@ namespace BossEnemy.Character
             return default;
         }
 
+        /// <summary> 現在の行動を設定 </summary>
+        public void SetCurrentAction(CharacterAction characterAction)
+        {
+            if(_currentCharacterAction.Value == characterAction) return;
+
+            Debug.Log($"現在の行動{characterAction}");
+            _currentCharacterAction.Value = characterAction;
+        }
+
         /// <summary> BossEnemyの座標を設定する </summary>
         /// <param name="position"> 新しい座標 </param>
         public void SetPosition(Vector3 position) => _position.Value = position;
@@ -261,6 +307,17 @@ namespace BossEnemy.Character
         /// <param name="timeScale"> 新しいタイムスケール </param>
         public void SetTimeScale(float timeScale) => _timeScale = timeScale;
 
+        /// <summary> 現在のキャラクターの姿勢を変更 </summary>
+        /// <param name="postureType"> 変更後の姿勢 </param>
+        public void SetCharacterPosture(PostureType postureType)
+        {
+            if (_currentPostureType == postureType) return;
+
+            _currentPostureType = postureType;
+
+            SetCurrentAction(CharacterAction.PostureChanging);
+        }
+
         /// <summary> 攻撃の標的を設定する </summary>
         /// <param name="nextTarget"> 次の攻撃の標的 </param>
         public void SetAttackTarget(IPlayer nextTarget) => _attackTarget = nextTarget;
@@ -268,7 +325,7 @@ namespace BossEnemy.Character
         /// <summary> 発動予定の攻撃を取得する </summary>
         public Attack.AttackData GetNextAttackData()
         {
-            return _attackExecutor.ExecutingAttack;
+            return _attackExecutor.NextAttack;
         }
 
         /// <summary> 実行する攻撃を選択肢から選択する </summary>
@@ -281,11 +338,31 @@ namespace BossEnemy.Character
         /// <summary> 攻撃実行処理 </summary>
         public async UniTask ExecuteAttack()
         {
-            if(AttackTarget == null) return;
+            if(AttackTarget == null || _attackExecutor.NextAttack.ID == 0) return;
 
-            _attackExecutor.ExecuteAttack(_attackTarget);
+            _executingAttack = _attackExecutor.ExecuteAttack(_attackTarget);
 
-            _executingAttack.Value = _attackExecutor.ExecutingAttack;
+            SetCurrentAction(CharacterAction.Attacking);
+        }
+
+        /// <summary> 攻撃終了処理 </summary>
+        public void AttackCompleted()
+        {
+            if (_currentCharacterAction.Value != CharacterAction.Attacking) return;
+
+            _attackExecutor.AttackCompleted();
+            _executingAttack = default;
+
+            SetCurrentAction(CharacterAction.Idle);
+        }
+
+        /// <summary> 攻撃強制終了処理 </summary>
+        public void CancelAttack()
+        {
+            _attackExecutor.AttackCompleted();
+            _executingAttack = default;
+
+            SetCurrentAction(CharacterAction.Idle);
         }
 
         /// <summary> 攻撃の当たり判定を行う </summary>
@@ -294,30 +371,12 @@ namespace BossEnemy.Character
         /// <param name="forward"> 必要であれば当たり判定を行う方角を渡す </param>
         public void TryHitAttackDamageToTarget(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
-            if (_executingAttack == null) return;
+            if (_currentCharacterAction.Value != CharacterAction.Attacking) return;
 
             if(_attackExecutor.TryHitAttack(attackHitAreaType, attackPosition, forward))
             {
                 OnAttackHit?.Invoke();
             }
-        }
-
-        /// <summary> 攻撃終了処理 </summary>
-        public void AttackCompleted()
-        {
-            if (_executingAttack == null) return;
-
-            _attackExecutor.AttackComplete();
-            _executingAttack.Value = default;
-        }
-
-        /// <summary> 現在のキャラクターの姿勢を変更 </summary>
-        /// <param name="postureType"> 変更後の姿勢 </param>
-        public void SetCharacterPosture(PostureType postureType)
-        {
-            if(_currentPostureType.Value == postureType) return;
-
-            _currentPostureType.Value = postureType;
         }
 
         /// <summary> BossEnemyへのダメージ処理 </summary>
@@ -343,9 +402,10 @@ namespace BossEnemy.Character
         /// <summary> 鎧の修復処理 </summary>
         /// <param name="repairArmor"> 特定の修復ヶ所(特に指定がなければすべて修復する) </param>
         /// <param name="repairedArmorHP"> 修復後の鎧のHP(特に指定がなければ最大値になる) </param>
-        public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.None, int repairedArmorHP = 0)
+        public void RepairArmor(ArmorAttachmentType repairArmor = ArmorAttachmentType.AllArmor, int repairedArmorHP = 0)
         {
-            if(repairArmor != ArmorAttachmentType.None)
+            // 修復対象の指定があれば対象を修復する
+            if (repairArmor != ArmorAttachmentType.AllArmor)
             {
                 if (!_armorCurrentHPDict.ContainsKey(repairArmor))
                     _armorCurrentHPDict.Add(repairArmor, GetArmorStats(repairArmor).MaxHP);
@@ -354,12 +414,11 @@ namespace BossEnemy.Character
 
                 _currentPhaseStats.RepairArmor(repairArmor);
                 // スポーン初期化中など、購読者がまだ登録されていない場合がある。
-                OnArmorRepair?.Invoke(repairArmor); 
+                _repairArmorAttachmentType.Value = repairArmor;
                 return;
             }
 
-            // RepairArmor がステータスDictionaryの値を書き換えるため、
-            // Keys を直接列挙すると Dictionary の列挙バージョンが変わる。
+            // 全ての鎧が修復対象になっていれば全ての鎧を修復する
             var armorTypes = new List<ArmorAttachmentType>(GetAllArmorStats().Keys);
             foreach (var key in armorTypes)
             {
@@ -370,17 +429,18 @@ namespace BossEnemy.Character
 
                 _currentPhaseStats.RepairArmor(key);
             }
+
             // スポーン初期化中など、購読者がまだ登録されていない場合がある。
-            OnArmorRepair?.Invoke(ArmorAttachmentType.None);
+            _repairArmorAttachmentType.Value = ArmorAttachmentType.AllArmor;
         }
 
         /// <summary> 現在のPhaseから次のPhaseに移行する処理 </summary>
-        public void PhaseChange()
+        public void StartPhaseChange()
         {
             // 全てのPhaseが終了していたら死亡する
             if (_allPhaseStats.Length <= _currentPhaseNum)
             {
-                HandleDead();
+                SetCurrentAction(CharacterAction.Dead);
                 return;
             }
 
@@ -400,26 +460,41 @@ namespace BossEnemy.Character
 
             RepairArmor();
 
-            SetCharacterPosture(PostureType.Standing);
-
             // フェーズ切り替えフラグをTrueにする
-            _isPhaseChanging.Value = true;
+            SetCurrentAction(CharacterAction.PhaseChanging);
+        }
+
+        public void ResetArmorBreakingEvent()
+        {
+            if (_breakingArmorAttachmentType.Value == ArmorAttachmentType.None) return;
+
+            _breakingArmorAttachmentType.Value = ArmorAttachmentType.None;
+        }
+
+        public void ResetRepairArmorEvent()
+        {
+            if (_repairArmorAttachmentType.Value == ArmorAttachmentType.None) return;
+
+            _repairArmorAttachmentType.Value = ArmorAttachmentType.None;
         }
 
         /// <summary> フェーズ切り替え終了時の処理 </summary>
         public void PhaseChangeCompleted()
         {
-            _isPhaseChanging.Value = false;
+            SetCurrentAction(CharacterAction.Idle);
         }
 
-        /// <summary> 死亡時のイベント発火 </summary>
-        public void HandleDead() => OnDead?.Invoke();
+        // 行動開始済みフラグ
+        private bool _isBeganAction;
 
         // 名前
         private string _bossName;
 
         // ボスの攻撃の標的
         private IPlayer _attackTarget;
+
+        // 現在行っているボスの行動
+        public ReactiveProperty<CharacterAction> _currentCharacterAction;
 
         // BossEnemyの現在のHP
         private ReactiveProperty<int> _currentHP = null;
@@ -433,14 +508,17 @@ namespace BossEnemy.Character
         // 移動速度
         private ReactiveProperty<Vector3> _velocity = null;
 
+        // 鎧破壊時に発火するリアクティブプロパティ
+        private ReactiveProperty<ArmorAttachmentType> _breakingArmorAttachmentType;
+
+        // 鎧修復時に発火するリアクティブプロパティ
+        private ReactiveProperty<ArmorAttachmentType> _repairArmorAttachmentType;
+
         // キャラクターの姿勢
-        private ReactiveProperty<PostureType> _currentPostureType = null;
+        private PostureType _currentPostureType = default;
 
-        // Phase切り替え中フラグ
-        private ReactiveProperty<bool> _isPhaseChanging = null;
-
-        // 攻撃中フラグ
-        private ReactiveProperty<Attack.AttackData> _executingAttack = null;
+        // 実行中の攻撃
+        private Attack.AttackData _executingAttack = default;
 
         // ボスのタイムスケール
         private float _timeScale;
@@ -473,8 +551,10 @@ namespace BossEnemy.Character
             {
                 _armorCurrentHPDict[scapegoatArmor] = 0;
                 _currentPhaseStats.BreakArmor(scapegoatArmor);
-                OnArmorBreak?.Invoke(scapegoatArmor);
+                
                 Debug.Log($"鎧が破壊されました 破壊箇所: {scapegoatArmor} ");
+
+                _breakingArmorAttachmentType.Value = scapegoatArmor;
 
                 return true;
             }
@@ -547,7 +627,7 @@ namespace BossEnemy.Character
             ArmorStatus targetStats;
 
             // 特に指定がなければ(repairArmorがArmorAttachmentType.Noneなら)すべて修復する
-            if (repairArmor == ArmorAttachmentType.None)
+            if (repairArmor == ArmorAttachmentType.AllArmor)
             {
                 // Repair による値更新で列挙子を無効化しないよう、キーを退避する。
                 var attachmentTypes = new List<ArmorAttachmentType>(_attachmentArmorStatsDict.Keys);

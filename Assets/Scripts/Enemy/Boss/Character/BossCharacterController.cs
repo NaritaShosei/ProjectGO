@@ -35,6 +35,9 @@ namespace BossEnemy.Character
                 _bossAIBehaviourController.OnUpdate();
         }
 
+        // イベントの登録処理をすでに行っているか
+        private bool _isRegisterEvents = false;
+
         // AnimationのEvent通知者
         private IBossCharacterAnimationEventReceiver _animationEventReceiver = null;
 
@@ -58,6 +61,8 @@ namespace BossEnemy.Character
 
         private void RegisterEvents()
         {
+            if (_isRegisterEvents) return;
+
             // Disposableを初期化
             _deadEventDisposables = new();
 
@@ -65,28 +70,48 @@ namespace BossEnemy.Character
             _bossCharacterView.OnBeginsAction += HandleRunningBehaviourTree;
 
             // 鎧破壊時のイベント登録
-            _characterEntity.OnArmorBreak += HandleArmorBreak;
+            _characterEntity.BreakingArmorAttachmentType
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(breakArmor =>
+                {
+                    HandleArmorBreak(breakArmor);
+                }).AddTo(_deadEventDisposables);
 
             // 鎧修復時のイベント登録
-            _characterEntity.OnArmorRepair += HandleArmorRepair;
+            _characterEntity.RepairArmorAttachmentType
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(repairArmor =>
+                {
+                    HandleArmorRepair(repairArmor);
+                }).AddTo(_deadEventDisposables);
 
-            // 現在のHPが0になった際のイベント登録
-            _characterEntity.CurrentHP.Subscribe(currentHP =>
+            // 現在のキャラクターの行動変更時のイベント登録
+            _characterEntity.CurrentAction
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(currentAction =>
+            {
+                switch (currentAction)
+                {
+                    case CharacterAction.Attacking:
+                        HandleExecuteAttack(_characterEntity.ExecutingAttackData);
+                        break;
+                    case CharacterAction.PhaseChanging:
+                        HandlePhaseChange();
+                        break;
+                    case CharacterAction.PostureChanging:
+                        HandleChangePosture(_characterEntity.CurrentCharacterPostureType);
+                        break;
+                    case CharacterAction.Dead:
+                        HandleDead();
+                        break;
+                }
+            }).AddTo(_deadEventDisposables);
+
+            // HPが0になった際のイベント登録
+            _characterEntity.CurrentHP
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(currentHP =>
             { if (currentHP == 0) HandleHPZero(); }).AddTo(_deadEventDisposables);
-
-            // Phase切り替えイベント登録
-            _characterEntity.IsPhaseChaging.Subscribe(isPhaseChanging => 
-            {if (isPhaseChanging) HandlePhaseChange();}).AddTo(_deadEventDisposables);
-
-            // Phase切り替え完了時イベント登録
-            _animationEventReceiver.OnPhaseChangeEnd += HandlePhaseChangeCompleted;
-
-            // 死亡時のイベント登録
-            _characterEntity.OnDead += HandleDead;
-
-            // 姿勢切り替えイベント登録
-            _characterEntity.CurrentCharacterPostureType.Subscribe(posture => 
-            { HandleChangePosture(posture);}).AddTo(_deadEventDisposables);
 
             // 姿勢切り替え完了イベント登録
             _animationEventReceiver.OnPostureChangeCompleted += HandlePostureChangeCompleted;
@@ -103,10 +128,6 @@ namespace BossEnemy.Character
 
             _characterEntity.Velocity.Subscribe(newVelocity => 
             { HandleMoveVelocity(newVelocity); }).AddTo(_deadEventDisposables);
-
-            // ボスが攻撃を行った際のイベント登録
-            _characterEntity.ExecutingAttackData.Subscribe(attack =>
-            { if(attack.ID != 0) HandleExecuteAttack(attack); }).AddTo(_deadEventDisposables);
 
             // ボスの攻撃の当たり判定を行うイベント登録
             _animationEventReceiver.OnCheckHitAttack += HandleCheckHitAttack;
@@ -125,19 +146,17 @@ namespace BossEnemy.Character
 
             // キャラクターの移動イベント登録
             _animationEventReceiver.OnMoveCharacter += HandleMoveCharacter;
+
+            // 既にイベントの登録が完了しているフラグを立てる
+            _isRegisterEvents = true;
         }
 
         private void UnregisterEvents()
         {
+            if (!_isRegisterEvents) return;
+
             // ビヘイビアツリー探索開始イベント購読解除
             _bossCharacterView.OnBeginsAction -= HandleRunningBehaviourTree;
-            _characterEntity.OnArmorBreak -= HandleArmorBreak;
-
-            // Phase切り替え完了時イベント購読解除
-            _animationEventReceiver.OnPhaseChangeEnd -= HandlePhaseChangeCompleted;
-
-            // 死亡時のイベント購読解除
-            _characterEntity.OnDead -= HandleDead;
 
             // 姿勢切り替え完了イベント購読解除
             _animationEventReceiver.OnPostureChangeCompleted -= HandlePostureChangeCompleted;
@@ -156,6 +175,9 @@ namespace BossEnemy.Character
 
             // Subscribe解除
             _deadEventDisposables.Dispose();
+
+            // 既にイベントの登録が完了しているフラグをFalseに
+            _isRegisterEvents = false;
         }
 
         /// <summary> BehaviourTreeの探索を開始する </summary>
@@ -169,6 +191,7 @@ namespace BossEnemy.Character
         private void HandleDead()
         {
             _bossCharacterView.StopActiveAttacks();
+            _bossAIBehaviourController.StopRunning();
             UnregisterEvents();
 
             _bossCharacterView.HandleDead();
@@ -177,15 +200,23 @@ namespace BossEnemy.Character
         /// <summary> 鎧破壊イベント発火時の処理 </summary>
         private void HandleArmorBreak(ArmorAttachmentType armorAttachmentType)
         {
+            if (armorAttachmentType == ArmorAttachmentType.None) return;
+
             _bossCharacterView.BreakArmor(armorAttachmentType);
 
             HandleRunningBehaviourTree();
+
+            _characterEntity.ResetArmorBreakingEvent();
         }
 
         /// <summary> 鎧修復イベント発火時の処理 </summary>
         private void HandleArmorRepair(ArmorAttachmentType armorAttachmentType)
         {
+            if (armorAttachmentType == ArmorAttachmentType.None) return;
+
             _bossCharacterView.RepairArmor(armorAttachmentType);
+
+            _characterEntity.ResetRepairArmorEvent();
         }
 
         /// <summary> ボスのHPが0になった際のイベント発火時の処理 </summary>
@@ -197,35 +228,33 @@ namespace BossEnemy.Character
         /// <summary> フェーズ切り替えイベント発火時の処理 </summary>
         private void HandlePhaseChange()
         {
-            _bossCharacterView.StopActiveAttacks();
-
-            if(_characterEntity.ExecutingAttackData.Value.ID != 0)
+            // もし攻撃実行中であったのであれば攻撃を中断する
+            if(_characterEntity.ExecutingAttackData.ID != 0)
             {
-                HandleAttackCompleted();
+                _bossCharacterView.StopActiveAttacks();
+                _characterEntity.CancelAttack();
             }
 
             _bossCharacterView.ChangePhase(_characterEntity.CharacterCurrentStats.PhaseNum);
-        }
 
-        private void HandlePhaseChangeCompleted()
-        {
             _characterEntity.PhaseChangeCompleted();
-
-            // フェーズ演出終了後は、待機中の PhaseChangeAction を必ず抜けて
-            // 次の行動を探索する。Action 側の一時購読に依存すると、通知順序次第で
-            // 行動ツリーが再開されずボスが停止する。
-            HandleRunningBehaviourTree();
         }
 
         /// <summary> ボスの体勢が変わった際のイベント発火時の処理 </summary>
         /// <param name="posture"> ボスの体勢 </param>
         private void HandleChangePosture(PostureType posture)
         {
-            // のけぞり・ダウンへ遷移する場合、進行中の攻撃処理を残さない。
-            if (posture == PostureType.LeftHalfKneel
+            // ダウンへ遷移する場合、進行中の攻撃処理を残さない。
+            if(_characterEntity.ExecutingAttackData.ID != 0)
+            {
+                if (posture == PostureType.LeftHalfKneel
                 || posture == PostureType.RightHalfKneel
                 || posture == PostureType.SpreadEagled)
-                _bossCharacterView.StopActiveAttacks();
+                {
+                    _bossCharacterView.StopActiveAttacks();
+                    _characterEntity.CancelAttack();
+                }
+            }
 
             _bossCharacterView.ChangePosture(posture);
         }
@@ -233,7 +262,8 @@ namespace BossEnemy.Character
         /// <summary> ボスの体勢変化が完了した際のイベント発火時の処理 </summary>
         private void HandlePostureChangeCompleted() 
         {
-            HandleRunningBehaviourTree();
+            // 現在の行動を元に戻す
+            _characterEntity.SetCurrentAction(CharacterAction.Idle);
         }
 
         /// <summary> 被ダメージイベント発火時の処理 </summary>
@@ -272,7 +302,6 @@ namespace BossEnemy.Character
         /// <summary> ボスの攻撃が終了した際のイベント発火時の処理 </summary>
         private void HandleAttackCompleted()
         {
-            _bossCharacterView.AttackCompleted();
             _characterEntity.AttackCompleted();
         }
 

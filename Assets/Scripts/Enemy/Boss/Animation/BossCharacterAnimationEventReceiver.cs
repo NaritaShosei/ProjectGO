@@ -28,7 +28,7 @@ namespace BossEnemy.Infrastructure
         public event Action OnAttackCompleted;
 
         /// <summary>Phase切り替え終了のイベント</summary>
-        public event Action OnPhaseChangeEnd;
+        public event Action OnPhaseChangeCompleted;
 
         /// <summary> 姿勢の切り替え完了時イベント </summary>
         public event Action OnPostureChangeCompleted;
@@ -64,12 +64,6 @@ namespace BossEnemy.Infrastructure
         public void AnimEvent_AttackCompleted()
         {
             OnAttackCompleted?.Invoke();
-        }
-
-        /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>
-        public void AnimEvent_PhaseChangeEnd()
-        {
-            OnPhaseChangeEnd?.Invoke();
         }
 
         /// <summary> 姿勢の切り替え完了時に呼ばれる </summary>

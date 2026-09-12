@@ -28,12 +28,44 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
     }
 
     [Serializable]
-    public class AwaitAction : ActionNode<BehaviourTree.AwaitAction>
+    public class WaitForTimeAction : ActionNode<BehaviourTree.WaitForTimeAction>
     {
-        public AwaitAction()
+        private const string WAIT_TIME = "計測時間";
+
+        public WaitForTimeAction()
         {
             _nodeAccesskey = CreateUniqueKey();
-            _behaviourTreeNode = new BehaviourTree.AwaitAction();
+            _behaviourTreeNode = new BehaviourTree.WaitForTimeAction();
+        }
+
+        public override void OnGraphChanged(GraphLogger graphLogger)
+        {
+            base.OnGraphChanged(graphLogger);
+
+            if (GetNodeOptionByName(WAIT_TIME).TryGetValue(out float waitTime))
+            {
+                _behaviourTreeNode.SetWaitTime(waitTime);
+            }
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext context)
+        {
+            base.OnDefineOptions(context);
+
+            context
+                .AddOption<float>(WAIT_TIME)
+                .WithDisplayName(WAIT_TIME)
+                .Build();
+        }
+    }
+
+    [Serializable]
+    public class CancelSearchAction : ActionNode<BehaviourTree.CancelSearchAction>
+    {
+        public CancelSearchAction()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.CancelSearchAction();
         }
     }
 
@@ -66,6 +98,54 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
                 .AddOption<PostureType>(CHANGE_POSTURE_NAME)
                 .WithDisplayName(CHANGE_POSTURE_NAME)
                 .Build();
+        }
+    }
+
+    [Serializable]
+    public class PostureRevertInSecondsAction : ActionNode<BehaviourTree.PostureRevertInSecondsAction>
+    {
+        private const string WAIT_TIME = "計測時間";
+
+        private const string CHANGE_POSTURE_NAME = "変更する姿勢";
+
+        public PostureRevertInSecondsAction()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.PostureRevertInSecondsAction();
+        }
+
+        public override void OnGraphChanged(GraphLogger graphLogger)
+        {
+            base.OnGraphChanged(graphLogger);
+
+            if (!GetNodeOptionByName(CHANGE_POSTURE_NAME).TryGetValue(out PostureType postureType))
+            {
+                Debug.LogError(CHANGE_POSTURE_NAME + "の取得に失敗しました");
+                return;
+            }
+
+            if (!GetNodeOptionByName(WAIT_TIME).TryGetValue(out float waitTime))
+            {
+                Debug.LogError(WAIT_TIME + "の取得に失敗しました");
+                return;
+            }
+
+            _behaviourTreeNode.SetConditions(postureType, waitTime);
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext context)
+        {
+            base.OnDefineOptions(context);
+
+            context
+                .AddOption<PostureType>(CHANGE_POSTURE_NAME)
+                .WithDisplayName(CHANGE_POSTURE_NAME)
+                .Build();
+
+            context
+               .AddOption<float>(WAIT_TIME)
+               .WithDisplayName(WAIT_TIME)
+               .Build();
         }
     }
 

@@ -9,6 +9,7 @@ namespace BossEnemy.Enum
         [InspectorName("右腕")] RightArm,
         [InspectorName("左腕")] LeftArm,
         [InspectorName("右足")] RightLeg,
-        [InspectorName("左足")] LeftLeg
+        [InspectorName("左足")] LeftLeg,
+        [InspectorName("すべての鎧")] AllArmor,
     }
 }

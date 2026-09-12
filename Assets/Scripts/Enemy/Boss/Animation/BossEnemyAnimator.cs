@@ -26,7 +26,6 @@ namespace BossEnemy.Animation
 
             _receiver.OnAttackCompleted += HandleAttackEnd;
             _receiver.OnDeadEnd += HandleDeadEnd;
-            _receiver.OnPhaseChangeEnd += HandlePhaseChangeEnd;
         }
 
         /// <summary>
@@ -79,10 +78,12 @@ namespace BossEnemy.Animation
             _animator.SetBool(_hashIsDead, true);
         }
 
+        /// <summary>
+        /// Phase切り替え時に現在のPhaseを設定する
+        /// </summary>
         public void SetPhaseChange(int nextPhase)
         {
             if (_animator == null) return;
-            _animator.SetTrigger(_hashPhaseChange);
             _animator.SetInteger(_hashCurrentPhase, nextPhase);
         }
 
@@ -107,7 +108,6 @@ namespace BossEnemy.Animation
 
             _receiver.OnAttackCompleted -= HandleAttackEnd;
             _receiver.OnDeadEnd -= HandleDeadEnd;
-            _receiver.OnPhaseChangeEnd -= HandlePhaseChangeEnd;
         }
 
         // Animatorパラメータのハッシュ
@@ -118,7 +118,6 @@ namespace BossEnemy.Animation
         private readonly int _hashExecutingAttackID = Animator.StringToHash("ExecutingAttackID");
         private readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
         private readonly int _hashIsDead = Animator.StringToHash("IsDead");
-        private readonly int _hashPhaseChange = Animator.StringToHash("PhaseChange");
         private readonly int _hashCurrentPhase = Animator.StringToHash("CurrentPhase");
 
         private readonly Animator _animator;

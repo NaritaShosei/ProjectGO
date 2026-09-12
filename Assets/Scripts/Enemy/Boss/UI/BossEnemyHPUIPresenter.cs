@@ -16,14 +16,19 @@ namespace BossEnemy.UI
 
         public void Init()
         {
-            _phaseChangeSubscription = _bossCharacterEntity.IsPhaseChaging.Subscribe(isPhaseChaging =>
+            _phaseChangeSubscription = _bossCharacterEntity.CurrentAction
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(currentAction =>
             {
-                if (isPhaseChaging) _bossHPUIView.ChangeHPUI(
+                if (currentAction == CharacterAction.PhaseChanging) 
+                    _bossHPUIView.ChangeHPUI(
                     _bossCharacterEntity.CharacterCurrentStats.MaxHP,
                     _bossCharacterEntity.CharacterCurrentStats.PhaseNum);
             });
 
-            _bossHPSubscription = _bossCharacterEntity.CurrentHP.Subscribe(async hp =>
+            _bossHPSubscription = _bossCharacterEntity.CurrentHP
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(async hp =>
             {
                 UniTask takeDamageTask = _bossHPUIView.TakeDamage(hp);
                 _bossHPUIView.SetRunningTask(takeDamageTask);

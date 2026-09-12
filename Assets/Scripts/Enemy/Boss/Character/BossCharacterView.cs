@@ -145,6 +145,8 @@ namespace BossEnemy.Character
             _bossEnemyController = bossEnemyCharacterController;
         }
 
+
+        /// <summary> 行動を開始する </summary>
         public void StartAction()
         {
             OnBeginsAction?.Invoke();
@@ -222,7 +224,7 @@ namespace BossEnemy.Character
             _bossEnemyAnimator.SetAttacking(true, bossEnemyAttackData.ID);
         }
 
-        public void AttackCompleted()
+        public void FinishAttackAnimation()
         {
             _bossEnemyAnimator.SetAttacking(false, 0);
         }
@@ -369,9 +371,11 @@ namespace BossEnemy.Character
             }
         }
 
-        public void RepairArmor(ArmorAttachmentType attachmentPointsType = ArmorAttachmentType.None)
+        public void RepairArmor(ArmorAttachmentType attachmentPointsType = ArmorAttachmentType.AllArmor)
         {
-            if (attachmentPointsType == ArmorAttachmentType.None)
+            if (attachmentPointsType == ArmorAttachmentType.None) return;
+
+            if (attachmentPointsType == ArmorAttachmentType.AllArmor)
             {
                 foreach (var bossArmor in _bossArmorViews)
                 {

@@ -10,6 +10,8 @@ namespace BossEnemy.SMB
 {
     public abstract class AttackSMB : BossCharacterSMB
     {
+        private const float ANIM_END_NORMALIZED_TIME = 1.0f;
+
         public int AttackID => _attackID;
 
         public void Init(
@@ -30,16 +32,21 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            // アニメーションステート開始フラグ
-            _isAnimPlaying = true;
+            _animationStateVersion++;
 
+            Debug.Log($"[AttackSMB] Enter: id={_attackID}, version={_animationStateVersion}, layer={layerIndex}");
+
+            // アニメーションステート開始フラグ
+            _isStopPlayAttack = false;
+            _isAttackAnimationEndRequested = false;
+            _isAttackCompletionNotified = false;
+
+            // 攻撃発動時間がAnimationの時間より長い場合攻撃を取りやめる
             if ( _attackStartTime >= stateInfo.length)
             {
                 NotifyAttackAnimCompleted();
                 return;
             }
-
-            base.OnStateEnter(animator, stateInfo, layerIndex);
 
             // 経過時間をリセット
             _elapsedTime = 0;
@@ -61,8 +68,10 @@ namespace BossEnemy.SMB
 
         public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            // 攻撃時間の計測
             _elapsedTime += Time.deltaTime * _timeScale;
 
+            // 攻撃開始時間になったら攻撃を始める
             if(_elapsedTime >= _attackStartTime && !_isAttackPlayed && _currentPlayAttackCts != null)
             {
                 // 攻撃を開始する
@@ -72,32 +81,59 @@ namespace BossEnemy.SMB
                 _isAttackPlayed = true;
             }
 
-            if(stateInfo.length <= _elapsedTime && _isAnimPlaying)
+            // StateのAnimationがすべて再生されていれば攻撃を終了する
+            if (!_isAttackAnimationEndRequested
+                && stateInfo.normalizedTime >= ANIM_END_NORMALIZED_TIME)
             {
-                NotifyAttackAnimCompleted();
+                _isAttackAnimationEndRequested = true;
+                _bossCharacterView.FinishAttackAnimation();
             }
         }
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            Debug.Log($"[AttackSMB] Exit: id={_attackID}, version={_animationStateVersion}, layer={layerIndex}");
+
+            // Stateを抜けた段階でAnimatorの攻撃解除が間に合っていなければすぐに解除する
+            if (!_isAttackAnimationEndRequested)
+            {
+                _isAttackAnimationEndRequested = true;
+                _bossCharacterView.FinishAttackAnimation();
+            }
+
+            // 攻撃が始まる前にStateを抜けた場合攻撃のために用意したCancellationTokenSourcesを削除する
             if (_elapsedTime < _attackStartTime)
             {
-                _playAttackCancellationTokenSources.Remove(_currentPlayAttackCts);
-                _currentPlayAttackCts.Dispose();
+                // OnStateEnter の早期終了時、および StopPlayAttack 実行後は
+                // TokenSource が生成済みでない（または既に解放済み）ことがある。
+                // OnStateExit はその場合にも呼ばれるため、存在する場合だけ解放する。
+                CancellationTokenSource currentPlayAttackCts = _currentPlayAttackCts;
+                if (currentPlayAttackCts != null)
+                {
+                    _playAttackCancellationTokenSources.Remove(currentPlayAttackCts);
+                    currentPlayAttackCts.Dispose();
+                    _currentPlayAttackCts = null;
+                }
             }
 
             _wasHitAttack = false;
 
-            if (_isAnimPlaying)
+            // 途中で攻撃が中断されていなければ、攻撃ステートを抜けた時点で終了通知を飛ばす。
+            // 遷移先ステートは直後に別ステートへ遷移し得るため、ここで判定しない。
+            if (!_isStopPlayAttack)
             {
+                _isStopPlayAttack = true;
                 NotifyAttackAnimCompleted();
             }
 
+            // イベント購読解除
             _animationEventReceiver.OnHitAttack -= HandleAttackHit;
         }
 
+        /// <summary> 攻撃中断メソッド </summary>
         public void StopPlayAttack()
         {
+            // すべての攻撃を強制的に終了させる
             foreach (CancellationTokenSource cts in _playAttackCancellationTokenSources.ToArray())
             {
                 cts.Cancel();
@@ -107,9 +143,11 @@ namespace BossEnemy.SMB
             _playAttackCancellationTokenSources.Clear();
             _currentPlayAttackCts = null;
 
-            _isAnimPlaying = false;
+            // 攻撃中断フラグをTrieに
+            _isStopPlayAttack = true;
         }
 
+        /// <summary> 攻撃データを設定 </summary>
         public void SetAttackData(Attack.AttackData attackData)
         {
             _attackData = attackData;
@@ -161,27 +199,24 @@ namespace BossEnemy.SMB
         private readonly List<CancellationTokenSource> _playAttackCancellationTokenSources = new();
         private CancellationTokenSource _currentPlayAttackCts;
 
-        // AnimState実行中(NotifyAttackAnimCompletedの2重実行回避用)フラグ
-        private bool _isAnimPlaying = false;
+        // 攻撃中断フラグ
+        private bool _isStopPlayAttack = false;
+        private uint _animationStateVersion;
 
+        // 同じ攻撃ステートの早期終了と OnStateExit による二重通知を防ぐ。
+        private bool _isAttackCompletionNotified;
+
+        // 攻撃クリップ終端でAnimatorの攻撃フラグを解除済みか。
+        private bool _isAttackAnimationEndRequested;
+
+        // ボスの音源再生メソッド
         protected void PlayBossSE(string cueName)
         {
             if (string.IsNullOrEmpty(cueName)) return;
             if (_bossCharacterTransform == null) return;
 
+            // 再生
             Sound.PlaySE(_bossCharacterTransform.gameObject, cueName, CueSheetType.Boss);
-        }
-
-        protected virtual HitAreaView VisibleAttackArea(AttackHitAreaType attackHitAreaType, Vector3 position)
-        {
-            HitAreaView hitArea
-                = _attackHitAreaSpawner.Spawn(
-                    attackHitAreaType, 
-                    position, 
-                    _attackData.AttackHitAreaRadius, 
-                    _attackAreaDespawnTime);
-
-            return hitArea;
         }
 
         protected virtual void HandleAttackHit() => _wasHitAttack = true;
@@ -197,6 +232,7 @@ namespace BossEnemy.SMB
         {
             try
             {
+                // 攻撃開始
                 await PlayAttack(cts.Token);
             }
             catch (OperationCanceledException)
@@ -205,23 +241,22 @@ namespace BossEnemy.SMB
             }
             finally
             {
+                // 攻撃の完全終了とみなしCancellationTokenSourcesを開放
                 _playAttackCancellationTokenSources.Remove(cts);
-                cts.Dispose();
+                cts.Dispose(); 
             }
         }
 
-        /// <summary>
-        /// 攻撃ステートから Idle への遷移が完了してから攻撃終了を通知する。
-        /// 他の攻撃ステートへの割り込み遷移では、古い攻撃の終了通知を送らない。
-        /// </summary>
+        /// <summary> 攻撃アニメーション終了通知 </summary>
         private void NotifyAttackAnimCompleted()
         {
+            if (_isAttackCompletionNotified) return;
+            _isAttackCompletionNotified = true;
+
             if (_animationEventReceiver == null) return;
 
             _animationEventReceiver.AnimEvent_AttackCompleted();
-
-            _isAnimPlaying = false;
-            Debug.Log("攻撃終了");
+            Debug.Log("攻撃の完全終了");
         }
 
         private void OnDestroy()

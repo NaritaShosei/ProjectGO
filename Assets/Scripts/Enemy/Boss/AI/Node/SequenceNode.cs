@@ -25,8 +25,6 @@ namespace BossEnemy.AI.BehaviourTree
                     InitChildren(child, _sequenceChildNodeRunningEndNotifier);
                 }
             }
-
-            Debug.Log("Sequenceの初期化");
         }
 
         public override NodeCondition TryEntry()
@@ -42,6 +40,10 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            if(_currentNode != null) _currentNode = null;
+
+            _sequenceCount = 0;
+
             _sequenceChildNodeRunningEndNotifier.OnResearchBehaviourTree += ProceedSequence;
 
             ProceedSequence();
@@ -55,8 +57,6 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnExit()
         {
-            _sequenceCount = 0;
-
             if (_currentNode != null)
                 _currentNode.OnExit();
 

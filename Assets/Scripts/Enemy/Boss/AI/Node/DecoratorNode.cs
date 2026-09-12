@@ -1,3 +1,4 @@
+using BossEnemy.Character;
 using BossEnemy.Enum;
 using System;
 using UniRx;
@@ -35,6 +36,57 @@ namespace BossEnemy.AI.BehaviourTree
             }
 
             nextNode = null;
+            return NodeCondition.Failure;
+        }
+    }
+
+    [Serializable]
+    public class NotBeginActionDecoratorNode : DecoratorNode
+    {
+        public override NodeCondition TryEntry()
+        {
+            // もし最初の行動開始を開始していなければこのNode以降にある最初の行動を開始する
+            if (!_bossCharacterEntity.IsBeganAction)
+            {
+                _bossCharacterEntity.BeginAction();
+                return NodeCondition.Success;
+            }
+
+            return NodeCondition.Failure;
+        }
+    }
+
+    [Serializable]
+    public class CurrentCharacterActionDecoratorNode : DecoratorNode
+    {
+        public void SetCanEntryCondition(CharacterAction canEntryArmorConditions)
+        {
+            _canEntryArmorCondition = canEntryArmorConditions;
+        }
+
+        public override NodeCondition TryEntry()
+        {
+            if(_bossCharacterEntity.CurrentAction.Value == _canEntryArmorCondition)
+            {
+                return NodeCondition.Success;
+            }
+
+            return NodeCondition.Failure;
+        }
+
+        [SerializeField] private CharacterAction _canEntryArmorCondition;
+    }
+
+    [Serializable]
+    public class BreakingArmorDecoratorNode : DecoratorNode
+    {
+        public override NodeCondition TryEntry()
+        {
+            if(_bossCharacterEntity.BreakingArmorAttachmentType.Value != ArmorAttachmentType.None)
+            {
+                return NodeCondition.Success;
+            }
+
             return NodeCondition.Failure;
         }
     }
@@ -85,7 +137,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override NodeCondition TryEntry()
         {
-            if(_canEntryPosture == _bossCharacterEntity.CurrentCharacterPostureType.Value)
+            if(_canEntryPosture == _bossCharacterEntity.CurrentCharacterPostureType)
             {
                 return NodeCondition.Success;
             }
