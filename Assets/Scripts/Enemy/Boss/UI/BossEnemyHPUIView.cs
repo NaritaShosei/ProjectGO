@@ -78,7 +78,7 @@ namespace BossEnemy.UI
 
         public void OnRelease()
         {
-            
+            _presenter.Dispose();
         }
 
         /// <summary> 初期化 </summary>
@@ -110,6 +110,8 @@ namespace BossEnemy.UI
 
         public async UniTask TakeDamage(int currentHP)
         {
+            if (_currentHPBar == null) return;
+
             Debug.Log($"HP減少 現在のHP: {currentHP}");
             await _currentHPBar.TakeDamage(currentHP);
         }
