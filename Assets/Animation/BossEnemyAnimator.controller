@@ -194,7 +194,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 1
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 0.5
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -599,7 +598,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 6
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 2
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -940,7 +938,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 8
-  _exitTransitionStateName: BrokenLeftLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -1164,7 +1161,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 11
-  _exitTransitionStateName: BrokenLeftLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -1699,7 +1695,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
   _attackID: 13
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -1825,7 +1820,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.HeavyPunchSMB
   _attackID: 9
-  _exitTransitionStateName: BrokenLeftLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -1870,7 +1864,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 11
-  _exitTransitionStateName: BrokenRightLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -2079,7 +2072,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
   _attackID: 3
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -2265,7 +2257,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 8
-  _exitTransitionStateName: BrokenRightLegAttackReady
   _attackStartTime: 0.5
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -2719,7 +2710,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
   _attackID: 10
-  _exitTransitionStateName: BrokenRightLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -2857,7 +2847,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
   _attackID: 7
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -2908,7 +2897,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 12
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 2
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -2932,7 +2920,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingLeftSMB
   _attackID: 2
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -3286,7 +3273,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
   _attackID: 10
-  _exitTransitionStateName: BrokenLeftLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -3306,7 +3292,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.ChargeSMB
   _attackID: 5
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 2
   _cameraShakeData:
@@ -3514,7 +3499,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.HeavyPunchSMB
   _attackID: 9
-  _exitTransitionStateName: BrokenRightLegAttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
@@ -4317,7 +4301,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeavyPunchSMB
   _attackID: 4
-  _exitTransitionStateName: AttackReady
   _attackStartTime: 1
   _attackAreaDespawnTime: 1
   _cameraShakeData:
