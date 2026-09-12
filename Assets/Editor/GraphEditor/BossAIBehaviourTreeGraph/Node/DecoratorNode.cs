@@ -49,7 +49,7 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
         }
     }
 
-    
+    [Serializable]
     public class NotBeginActionDecoratorNode : DecoratorNode<BehaviourTree.NotBeginActionDecoratorNode>
     {
         public NotBeginActionDecoratorNode()
