@@ -42,7 +42,6 @@ public class DistanceProfile : ScriptableObject
 
     [Header("Movement")]
     [Tooltip("MoveをやめてAttackに譲る距離（AttackRangeに対する割合。0.8 = 80%地点で停止）")]
-    [Range(0f, 1f)]
     [SerializeField] private float _moveApproachRatio = 0.8f;
 
     [Header("Back Attack")]

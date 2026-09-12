@@ -23,4 +23,41 @@ MonoBehaviour:
   _baseDamage: 10
   _attackRange: 1.5
   _attackRadius: 1
-  _attackTriggerRatio: 1
+  _attackTriggerRatio: 2.5
+  _enableMovement: 1
+  _moveCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _moveDistance: 3
+  _moveDuration: 1
+  _keepDistance: 1.5
+  _enableHoming: 1
+  _homingRadius: 5
+  _homingAngle: 60
+  _homingStrength: 360
+  _homingDuration: 0.75
+  _enableRetreat: 1
+  _recoveryTime: 1
+  _retreatDistance: 5
+  _retreatSpeed: 3
