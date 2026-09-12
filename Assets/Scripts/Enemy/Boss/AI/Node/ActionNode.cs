@@ -38,6 +38,7 @@ namespace BossEnemy.AI.BehaviourTree
         public override void OnEnter()
         {
             _isTimeUp = false;
+            _currentWaitTime = _waitTime;
         }
 
         public override void OnUpdate()
@@ -52,11 +53,6 @@ namespace BossEnemy.AI.BehaviourTree
                     HandleRunningEnd();
                 }
             }
-        }
-
-        public override void OnExit()
-        {
-            _currentWaitTime = _waitTime;
         }
 
         [SerializeField] private float _waitTime;
