@@ -63,11 +63,13 @@ namespace BossEnemy.AI.BehaviourTree
                 runningCondition = currentNode.TryEntryNextNode(out nextNode);
                 count++;
 
-                if (runningCondition == NodeCondition.Failure)
+
+                if (runningCondition == NodeCondition.Failure || nextNode == null)
                 {
                     Debug.Log("行動の切り替えに失敗しました、現在の行動を続行します。");
                     return;
                 }
+                else Debug.Log($"現在探索中のノード：{ currentNode.GetType() }");
             }
 
             ChangeNode(nextNode);
@@ -188,7 +190,11 @@ namespace BossEnemy.AI.BehaviourTree
 
         [SerializeField] private int _runningPriority = 0;
 
-        protected void HandleRunningEnd() => _nodeRunningConditionNotifier.HandleResearchBehaviourTree();
+        protected void HandleRunningEnd()
+        {
+            Debug.Log("EndRunning");
+            _nodeRunningConditionNotifier.HandleResearchBehaviourTree();
+        }
     }
     #endregion
 }
