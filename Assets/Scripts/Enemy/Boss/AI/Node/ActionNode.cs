@@ -88,29 +88,25 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
-            _disposable?.Dispose();
-            _disposable = null;
-
             _bossCharacterEntity.SetCharacterPosture(_changePosture);
-
-            _disposable = _bossCharacterEntity.CurrentAction
-                .SkipLatestValueOnSubscribe()
-                .Subscribe(currentAction =>
-                {
-                    if(currentAction != Character.CharacterAction.PostureChanging) 
-                        HandleRunningEnd();
-                });
+            _isPostureChangeCompleted = false;
         }
 
-        public override void OnExit()
+        public override void OnUpdate()
         {
-            _disposable?.Dispose();
-            _disposable = null;
+            if (_isPostureChangeCompleted) return;
+
+            if (_bossCharacterEntity.CurrentAction.Value
+                != CharacterAction.PostureChanging)
+            {
+                HandleRunningEnd();
+                _isPostureChangeCompleted = true;
+            }
         }
 
         [SerializeField] private PostureType _changePosture;
 
-        private IDisposable _disposable = null;
+        private bool _isPostureChangeCompleted = true;
     }
 
     [Serializable]
