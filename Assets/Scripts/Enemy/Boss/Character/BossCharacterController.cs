@@ -232,7 +232,7 @@ namespace BossEnemy.Character
             if(_characterEntity.ExecutingAttackData.ID != 0)
             {
                 _bossCharacterView.StopActiveAttacks();
-                HandleAttackCompleted();
+                _characterEntity.CancelAttack();
             }
 
             _bossCharacterView.ChangePhase(_characterEntity.CharacterCurrentStats.PhaseNum);
@@ -252,7 +252,7 @@ namespace BossEnemy.Character
                 || posture == PostureType.SpreadEagled)
                 {
                     _bossCharacterView.StopActiveAttacks();
-                    HandleAttackCompleted();
+                    _characterEntity.CancelAttack();
                 }
             }
 
