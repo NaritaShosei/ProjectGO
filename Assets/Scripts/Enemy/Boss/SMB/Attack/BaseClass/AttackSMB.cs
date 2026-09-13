@@ -34,8 +34,6 @@ namespace BossEnemy.SMB
         {
             _animationStateVersion++;
 
-            Debug.Log($"[AttackSMB] Enter: id={_attackID}, version={_animationStateVersion}, layer={layerIndex}");
-
             // アニメーションステート開始フラグ
             _isStopPlayAttack = false;
             _isAttackAnimationEndRequested = false;
@@ -92,8 +90,6 @@ namespace BossEnemy.SMB
 
         public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
-            Debug.Log($"[AttackSMB] Exit: id={_attackID}, version={_animationStateVersion}, layer={layerIndex}");
-
             // Stateを抜けた段階でAnimatorの攻撃解除が間に合っていなければすぐに解除する
             if (!_isAttackAnimationEndRequested)
             {
