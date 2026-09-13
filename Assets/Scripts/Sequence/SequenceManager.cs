@@ -17,12 +17,17 @@ public class SequenceManager : MonoBehaviour
     {
         SequenceLighting settings = state switch
         {
-            SequenceStateType.MobAndSkill => _mobLighting,
-            SequenceStateType.BossBattle => _bossLighting,
+            SequenceStateType.IntroMovie => _mobLighting,
             SequenceStateType.Result => _resultLighting,
             _ => null
         };
         settings?.Apply();
+    }
+
+    /// <summary>TimelineのSignal Receiverから、ムービー中の任意のタイミングで呼び出す。</summary>
+    public void ApplyBossLighting()
+    {
+        _bossLighting?.Apply();
     }
 
     public async UniTask InitializeAsync(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
@@ -103,9 +108,12 @@ public class SequenceManager : MonoBehaviour
     #region　インスペクター
 
     [Header("Sequence設定")]
-    [SerializeField] private SequenceLighting _mobLighting = new();
-    [SerializeField] private SequenceLighting _bossLighting = new();
-    [SerializeField] private SequenceLighting _resultLighting = new();
+    [SerializeField, Tooltip("IntroMovie開始時に適用するモブ戦用Lighting")]
+    private SequenceLighting _mobLighting = new();
+    [SerializeField, Tooltip("Signal ReceiverからApplyBossLightingを呼んだときに適用")]
+    private SequenceLighting _bossLighting = new();
+    [SerializeField, Tooltip("Result開始時に適用するLighting")]
+    private SequenceLighting _resultLighting = new();
 
     [Serializable]
     private sealed class SequenceLighting
