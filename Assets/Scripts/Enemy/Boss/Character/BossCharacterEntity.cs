@@ -16,7 +16,8 @@ namespace BossEnemy.Character
         Attacking,
         PostureChanging,
         PhaseChanging,
-        Dead
+        Dead,
+        Despawn
     }
 
     # region CharacterInterface

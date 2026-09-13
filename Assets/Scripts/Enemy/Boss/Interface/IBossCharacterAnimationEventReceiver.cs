@@ -29,7 +29,7 @@ namespace BossEnemy.Interface
         public event Action OnPostureChangeCompleted;
 
         /// <summary>死亡アニメーション終了のイベント</summary>
-        public event Action OnDeadEnd;
+        public event Action OnDespawn;
 
         /// <summary>AttackSMB から移動開始タイミングで呼ばれる</summary>
         public void AnimEvent_MoveCharacter(Vector3 goal, float time);
@@ -50,6 +50,6 @@ namespace BossEnemy.Interface
         public void AnimEvent_PostureChangeCompleted();
 
         /// <summary>DeadSMB からステート終了時に呼ばれる</summary>
-        public void AnimEvent_DeadEnd();
+        public void AnimEvent_Despawn();
     }
 }

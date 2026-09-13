@@ -71,7 +71,14 @@ namespace BossEnemy.Infrastructure.Repository
                 throw new InvalidOperationException("BossEnemyEntityRepository.Init() が呼ばれていません。");
             }
 
-            if (_bossCharacterEntityDict.TryGetValue(id, out var cachedEntity)) return cachedEntity;
+            if (_bossCharacterEntityDict.TryGetValue(id, out var cachedEntityQueue))
+            {
+                if(cachedEntityQueue.TryDequeue(out var cachedEntity))
+                {
+                    cachedEntity.Init();
+                    return cachedEntity;
+                }
+            }
 
             for (int row = _csvDataSearchStartRow + 1; row < _csvDataSearchEndRow; row++)
             {
@@ -88,7 +95,6 @@ namespace BossEnemy.Infrastructure.Repository
 
                 entity.Init();
 
-                _bossCharacterEntityDict.Add(id, entity);
                 return entity;
             }
 
@@ -96,11 +102,24 @@ namespace BossEnemy.Infrastructure.Repository
             return null;
         }
 
+        public void ReleaseEntity(int id, BossCharacterEntity bossCharacterEntity)
+        {
+            if (_bossCharacterEntityDict.TryGetValue(id, out var cachedEntityQueue))
+            {
+                cachedEntityQueue.Enqueue(bossCharacterEntity);
+                return;
+            }
+
+            Queue<BossCharacterEntity> bossCharacterEntityQueue = new();
+            bossCharacterEntityQueue.Enqueue(bossCharacterEntity);
+            _bossCharacterEntityDict.Add(id, bossCharacterEntityQueue);
+        }
+
         [SerializeField] private TextAsset _masterDataSheet;
         private string[,] _csvMasterData;
         private int _csvDataSearchStartRow;
         private int _csvDataSearchEndRow;
-        private readonly Dictionary<int, BossCharacterEntity> _bossCharacterEntityDict = new();
+        private readonly Dictionary<int, Queue<BossCharacterEntity>> _bossCharacterEntityDict = new();
 
         private BossCharacterEntity CreateEntity(string characterName, int firstDataRow)
         {

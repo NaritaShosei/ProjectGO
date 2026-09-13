@@ -29,6 +29,11 @@ namespace BossEnemy.Character
             RegisterEvents();
         }
 
+        public void Dispose()
+        {
+            
+        }
+
         public void OnUpdate()
         {
             if(_bossAIBehaviourController != null)
@@ -66,10 +71,10 @@ namespace BossEnemy.Character
             // Disposableを初期化
             _deadEventDisposables = new();
 
-            // ビヘイビアツリー探索開始イベント
+            // ビヘイビアツリー探索開始イベント購読開始
             _bossCharacterView.OnBeginsAction += HandleRunningBehaviourTree;
 
-            // 鎧破壊時のイベント登録
+            // 鎧破壊時のイベント購読開始
             _characterEntity.BreakingArmorAttachmentType
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(breakArmor =>
@@ -77,7 +82,7 @@ namespace BossEnemy.Character
                     HandleArmorBreak(breakArmor);
                 }).AddTo(_deadEventDisposables);
 
-            // 鎧修復時のイベント登録
+            // 鎧修復時のイベント購読開始
             _characterEntity.RepairArmorAttachmentType
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(repairArmor =>
@@ -85,7 +90,7 @@ namespace BossEnemy.Character
                     HandleArmorRepair(repairArmor);
                 }).AddTo(_deadEventDisposables);
 
-            // 現在のキャラクターの行動変更時のイベント登録
+            // 現在のキャラクターの行動変更時のイベント購読開始
             _characterEntity.CurrentAction
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(currentAction =>
@@ -107,19 +112,19 @@ namespace BossEnemy.Character
                 }
             }).AddTo(_deadEventDisposables);
 
-            // HPが0になった際のイベント登録
+            // HPが0になった際のイベント購読開始
             _characterEntity.CurrentHP
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(currentHP =>
             { if (currentHP == 0) HandleHPZero(); }).AddTo(_deadEventDisposables);
 
-            // 姿勢切り替え完了イベント登録
+            // 姿勢切り替え完了イベント購読開始
             _animationEventReceiver.OnPostureChangeCompleted += HandlePostureChangeCompleted;
 
-            // 被ダメージイベント登録
+            // 被ダメージイベント購読開始
             _bossCharacterView.OnTakeDamage += HandleTakeDamage;
 
-            // ボスが移動した際のイベント登録
+            // ボスが移動した際のイベント購読開始
             _characterEntity.Position.Subscribe(newPosition => 
             { HandleMovePosition(newPosition); }).AddTo(_deadEventDisposables);
 
@@ -129,23 +134,26 @@ namespace BossEnemy.Character
             _characterEntity.Velocity.Subscribe(newVelocity => 
             { HandleMoveVelocity(newVelocity); }).AddTo(_deadEventDisposables);
 
-            // ボスの攻撃の当たり判定を行うイベント登録
+            // ボスの攻撃の当たり判定を行うイベント購読開始
             _animationEventReceiver.OnCheckHitAttack += HandleCheckHitAttack;
 
-            // ボスの攻撃が当たった際のイベント登録
+            // ボスの攻撃が当たった際のイベント購読開始
             _characterEntity.OnAttackHit += HandleAttackHit;
 
-            // ボスが攻撃を終了したことの通知をアニメーター側から受け取る
+            // ボスが攻撃終了イベント購読開始
             _animationEventReceiver.OnAttackCompleted += HandleAttackCompleted;
 
-            // TimeScale変更時のイベント登録
+            // TimeScale変更時のイベント購読開始
             _bossCharacterView.TimeScaleReactiveProperty
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(timaScale => 
             { HandleChangedTimeScale(timaScale); }).AddTo(_deadEventDisposables);
 
-            // キャラクターの移動イベント登録
+            // キャラクターの移動イベント購読開始
             _animationEventReceiver.OnMoveCharacter += HandleMoveCharacter;
+
+            // デスポーンイベント購読開始
+            _animationEventReceiver.OnDespawn += HandleDespawn;
 
             // 既にイベントの登録が完了しているフラグを立てる
             _isRegisterEvents = true;
@@ -192,6 +200,7 @@ namespace BossEnemy.Character
         {
             _bossCharacterView.StopActiveAttacks();
             _bossAIBehaviourController.StopRunning();
+            _bossAIBehaviourController.Dispose();
             UnregisterEvents();
 
             _bossCharacterView.HandleDead();
@@ -328,6 +337,16 @@ namespace BossEnemy.Character
         {
             Logic.Movement.MoveTargetPositionRightOnTime
                 (_characterEntity, goalPos, moveTime, _characterEntity.TimeScale);
+        }
+
+        /// <summary> デースポーンイベント発火時の処理 </summary>
+        private void HandleDespawn()
+        {
+            Debug.Log("デスポーン");
+            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
+
+            // デスポーンイベント購読解除
+            _animationEventReceiver.OnDespawn -= HandleDespawn;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace BossEnemy.Animation
             if (_receiver == null) return;
 
             _receiver.OnAttackCompleted += HandleAttackEnd;
-            _receiver.OnDeadEnd += HandleDeadEnd;
+            _receiver.OnDespawn += HandleDeadEnd;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace BossEnemy.Animation
             if (_receiver == null) return;
 
             _receiver.OnAttackCompleted -= HandleAttackEnd;
-            _receiver.OnDeadEnd -= HandleDeadEnd;
+            _receiver.OnDespawn -= HandleDeadEnd;
         }
 
         // Animatorパラメータのハッシュ
@@ -127,7 +127,6 @@ namespace BossEnemy.Animation
 
         private void HandleAttackEnd() => OnAttackEnd?.Invoke();
         private void HandleDeadEnd() => OnDeadEnd?.Invoke();
-        private void HandlePhaseChangeEnd() => OnPhaseChangeEnd?.Invoke();
     }
 }
 

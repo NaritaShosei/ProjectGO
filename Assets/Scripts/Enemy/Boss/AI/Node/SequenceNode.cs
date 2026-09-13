@@ -25,6 +25,25 @@ namespace BossEnemy.AI.BehaviourTree
                     InitChildren(child, _sequenceChildNodeRunningEndNotifier);
                 }
             }
+
+            _sequenceChildNodeRunningEndNotifier.OnCancelAsyncAction
+                += _nodeRunningConditionNotifier.HandleCancelAsyncAction;
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction
+                += _sequenceChildNodeRunningEndNotifier.HandleCancelAsyncAction;
+        }
+
+        public override void Dispose()
+        {
+            _sequenceChildNodeRunningEndNotifier.OnCancelAsyncAction
+                -= _nodeRunningConditionNotifier.HandleCancelAsyncAction;
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction
+                -= _sequenceChildNodeRunningEndNotifier.HandleCancelAsyncAction;
+
+            base.Dispose();
+
+            _sequenceChildNodeRunningEndNotifier = null;
         }
 
         public override NodeCondition TryEntry()
