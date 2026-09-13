@@ -111,6 +111,7 @@ public sealed class EnvironmentLightingData : ScriptableObject
         for (int channel = 0; channel < 3; channel++)
             for (int coefficient = 0; coefficient < 9; coefficient++)
                 _ambientProbeCoefficients[channel * 9 + coefficient] = probe[channel, coefficient];
+        _overrideAmbientProbe = true;
         UnityEditor.EditorUtility.SetDirty(this);
     }
 #endif
