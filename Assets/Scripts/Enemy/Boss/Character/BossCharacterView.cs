@@ -164,6 +164,7 @@ namespace BossEnemy.Character
             bool isWeekPoint = false;
             bool isHitArmor = false;
 
+            // アクティブなパーツが無ければ何もしない
             if (_activeCollisionPartsView == null)
             {
                 Debug.LogError("現在の姿勢が設定されていない可能性があります");
@@ -181,13 +182,14 @@ namespace BossEnemy.Character
                     hitParts = bossParts;
                 }
             }
-
+            // 攻撃の当たった部分が鎧付きか判定
             if (hitParts.Armor != null && !hitParts.Armor.IsBroken)
             {
                 isHitArmor = true;
                 armorAttachmentPoint = hitParts.Armor.AttachmentPoints;
             }
 
+            // 当たった位置と弱点かの判定
             hitPos = hitParts.PartsPosition;
             isWeekPoint = IsHitPartsWeekPoint(hitParts);
 
@@ -202,7 +204,7 @@ namespace BossEnemy.Character
             context.OnHitResult?.Invoke(result);
 
             // ダメージのポップアップ
-            DamagePopUp(context, hitParts, isWeekPoint);
+            DamagePopUp(context, hitParts, isWeekPoint, context.IsCritical);
 
             // ダメージを受けた際のイベント発火
             HandleTakeDamage(context, hitParts, armorAttachmentPoint);
@@ -460,11 +462,15 @@ namespace BossEnemy.Character
             OnTakeDamage?.Invoke(damageContext, hitParts.PartsType, armorAttachmentType);
         }
 
-        private void DamagePopUp(DamageContext damageContext, BossCharacterPartsView hitParts, bool isWeekPoint)
+        private void DamagePopUp(DamageContext damageContext, BossCharacterPartsView hitParts, bool isWeekPoint, bool isCritical)
         {
             DamagePopupViewModel damagePopupViewModel;
 
-            damagePopupViewModel = new(DamageSystem.CalculateDamage(damageContext, GetDefenseContext(hitParts)), isWeekPoint, true, hitParts.GetTargetCenter().position);
+            damagePopupViewModel = new(
+                DamageSystem.CalculateDamage(damageContext, GetDefenseContext(hitParts)), 
+                isWeekPoint,
+                isCritical, 
+                hitParts.GetTargetCenter().position);
             OnDamageDealt?.Invoke(damagePopupViewModel);
         }
 
