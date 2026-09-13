@@ -48,7 +48,7 @@ public sealed class GroupFollowBehaviour
     /// <param name="deltaTime"></param>
     public void Tick(float deltaTime)
     {
-        if (!CanFollow()) return;
+        if (!CanFollow() || deltaTime <= 0f) return;
 
         EnemyGroup group = _groupMember.Group;
 
@@ -78,7 +78,8 @@ public sealed class GroupFollowBehaviour
         Vector3 direction = targetPosition - _self.position;
         direction.y = 0f;
 
-        if (direction.sqrMagnitude <= _stopDistance * _stopDistance)
+        float remainingDistance = Mathf.Max(0f, direction.magnitude - _stopDistance);
+        if (remainingDistance <= 0f || _data.ApproachSpeed <= 0f)
         {
             _enemyAnimator?.SetSpeed(0f);
             return;
@@ -97,10 +98,18 @@ public sealed class GroupFollowBehaviour
         }
 
         direction.y = 0f;
-        if (direction.sqrMagnitude < 0.001f) return;
+        if (direction.sqrMagnitude < 0.001f)
+        {
+            _enemyAnimator?.SetSpeed(0f);
+            return;
+        }
 
+        // 目標付近で減速し、停止距離を越えて往復するのを防ぐ。
+        // 移動中の隊列にも小さな移動量で追従し、停止・全速移動の反復を避ける。
+        float speed = Mathf.Min(_data.ApproachSpeed, remainingDistance / ArrivalTime);
+        float moveDistance = Mathf.Min(speed * deltaTime, remainingDistance);
         Vector3 displacement =
-            direction.normalized * _data.ApproachSpeed * deltaTime;
+            direction.normalized * moveDistance;
 
         if (_enemy is Enemy movableEnemy)
             movableEnemy.Move(displacement);
@@ -112,7 +121,10 @@ public sealed class GroupFollowBehaviour
             oldPosition,
             _self.position);
 
-        _enemyAnimator?.SetSpeed(1f);
+        Vector3 actualDisplacement = _self.position - oldPosition;
+        actualDisplacement.y = 0f;
+        _enemyAnimator?.SetSpeed(Mathf.Clamp01(
+            actualDisplacement.magnitude / (_data.ApproachSpeed * deltaTime)));
     }
 
     public void OnExit()
@@ -257,4 +269,5 @@ public sealed class GroupFollowBehaviour
 
     private const float WallDetectDistance = 2f;
     private const float WallAvoidanceStrength = 1.5f;
+    private const float ArrivalTime = 0.15f;
 }
