@@ -5,41 +5,6 @@ using UnityEngine.Rendering;
 [CreateAssetMenu(fileName = "EnvironmentLighting", menuName = "Game/Environment Lighting")]
 public sealed class EnvironmentLightingData : ScriptableObject
 {
-    [Header("Environment")]
-    [SerializeField] private Material _skybox = null;
-    [SerializeField] private Color _subtractiveShadowColor = new Color(0.42f, 0.48f, 0.63f);
-    [Header("Environment Lighting")]
-    [SerializeField] private AmbientMode _ambientMode = AmbientMode.Trilight;
-    [SerializeField, ColorUsage(false, true)] private Color _ambientSkyColor = Color.gray;
-    [SerializeField, ColorUsage(false, true)] private Color _ambientEquatorColor = Color.gray;
-    [SerializeField, ColorUsage(false, true)] private Color _ambientGroundColor = Color.gray;
-    [SerializeField, ColorUsage(false, true)] private Color _ambientLight = Color.gray;
-    [SerializeField, Min(0f)] private float _ambientIntensity = 1f;
-    [Header("Environment Reflections")]
-    [SerializeField] private DefaultReflectionMode _defaultReflectionMode = DefaultReflectionMode.Skybox;
-    [SerializeField] private int _defaultReflectionResolution = 128;
-    [SerializeField] private Cubemap _customReflection = null;
-    [SerializeField, Min(0f)] private float _reflectionIntensity = 1f;
-    [SerializeField, Range(1, 5)] private int _reflectionBounces = 1;
-    [Header("Fog")]
-    [SerializeField] private bool _fog = false;
-    [SerializeField] private Color _fogColor = Color.gray;
-    [SerializeField] private FogMode _fogMode = FogMode.ExponentialSquared;
-    [SerializeField, Min(0f)] private float _fogDensity = 0.01f;
-    [SerializeField, Min(0f)] private float _fogStartDistance = 0f;
-    [SerializeField, Min(0f)] private float _fogEndDistance = 300f;
-    [Header("Other Settings")]
-    [SerializeField, Min(0f)] private float _haloStrength = 0.5f;
-    [SerializeField, Min(0f)] private float _flareStrength = 1f;
-    [SerializeField, Min(0f)] private float _flareFadeSpeed = 3f;
-
-    [Header("Ambient Probe (Advanced)")]
-    [SerializeField, Tooltip("自動生成される環境プローブを27個のSH係数で上書きします")]
-    private bool _overrideAmbientProbe;
-    [SerializeField] private float[] _ambientProbeCoefficients = new float[27];
-    [SerializeField, Tooltip("Skybox変更時に環境更新を要求。反映タイミングは描画環境に依存します")]
-    private bool _updateEnvironment = true;
-
     public void Apply()
     {
         RenderSettings.skybox = _skybox;
@@ -78,6 +43,41 @@ public sealed class EnvironmentLightingData : ScriptableObject
             RenderSettings.ambientProbe = probe;
         }
     }
+
+    [Header("Environment")]
+    [SerializeField] private Material _skybox = null;
+    [SerializeField] private Color _subtractiveShadowColor = new Color(0.42f, 0.48f, 0.63f);
+    [Header("Environment Lighting")]
+    [SerializeField] private AmbientMode _ambientMode = AmbientMode.Trilight;
+    [SerializeField, ColorUsage(false, true)] private Color _ambientSkyColor = Color.gray;
+    [SerializeField, ColorUsage(false, true)] private Color _ambientEquatorColor = Color.gray;
+    [SerializeField, ColorUsage(false, true)] private Color _ambientGroundColor = Color.gray;
+    [SerializeField, ColorUsage(false, true)] private Color _ambientLight = Color.gray;
+    [SerializeField, Min(0f)] private float _ambientIntensity = 1f;
+    [Header("Environment Reflections")]
+    [SerializeField] private DefaultReflectionMode _defaultReflectionMode = DefaultReflectionMode.Skybox;
+    [SerializeField] private int _defaultReflectionResolution = 128;
+    [SerializeField] private Cubemap _customReflection = null;
+    [SerializeField, Min(0f)] private float _reflectionIntensity = 1f;
+    [SerializeField, Range(1, 5)] private int _reflectionBounces = 1;
+    [Header("Fog")]
+    [SerializeField] private bool _fog = false;
+    [SerializeField] private Color _fogColor = Color.gray;
+    [SerializeField] private FogMode _fogMode = FogMode.ExponentialSquared;
+    [SerializeField, Min(0f)] private float _fogDensity = 0.01f;
+    [SerializeField, Min(0f)] private float _fogStartDistance = 0f;
+    [SerializeField, Min(0f)] private float _fogEndDistance = 300f;
+    [Header("Other Settings")]
+    [SerializeField, Min(0f)] private float _haloStrength = 0.5f;
+    [SerializeField, Min(0f)] private float _flareStrength = 1f;
+    [SerializeField, Min(0f)] private float _flareFadeSpeed = 3f;
+
+    [Header("Ambient Probe (Advanced)")]
+    [SerializeField, Tooltip("自動生成される環境プローブを27個のSH係数で上書きします")]
+    private bool _overrideAmbientProbe;
+    [SerializeField] private float[] _ambientProbeCoefficients = new float[27];
+    [SerializeField, Tooltip("Skybox変更時に環境更新を要求。反映タイミングは描画環境に依存します")]
+    private bool _updateEnvironment = true;
 
 #if UNITY_EDITOR
     [ContextMenu("現在のシーンのEnvironment設定をコピー")]
