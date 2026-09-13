@@ -48,7 +48,13 @@ public sealed class GroupFollowBehaviour
     /// <param name="deltaTime"></param>
     public void Tick(float deltaTime)
     {
-        if (!CanFollow() || deltaTime <= 0f) return;
+        if (deltaTime <= 0f)
+        {
+            _enemyAnimator?.SetSpeed(0f);
+            return;
+        }
+
+        if (!CanFollow()) return;
 
         EnemyGroup group = _groupMember.Group;
 
