@@ -315,9 +315,9 @@ namespace BossEnemy.Character
         }
 
         /// <summary> ボスの攻撃がターゲットに当たった際のイベント発火時の処理 </summary>
-        private void HandleCheckHitAttack(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward)
+        private void HandleCheckHitAttack(Attack.AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward)
         {
-            _characterEntity.TryHitAttackDamageToTarget(attackHitAreaType, attackPosition, forward);
+            _characterEntity.TryHitAttackDamageToTarget(tryHitAttackData, attackHitAreaType, attackPosition, forward);
         }
 
         /// <summary> 攻撃が当たった際のイベント </summary>

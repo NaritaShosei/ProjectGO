@@ -19,7 +19,7 @@ namespace BossEnemy.Infrastructure
         public event Action<bool> OnColliderIsTriggerIsEnabled;
 
         /// <summary>攻撃ヒットタイミングのイベント</summary>
-        public event Action<AttackHitAreaType, Vector3, Vector3> OnCheckHitAttack;
+        public event Action<Attack.AttackData, AttackHitAreaType, Vector3, Vector3> OnCheckHitAttack;
 
         /// <summary> 攻撃当たり判定を行うタイミングのイベント </summary>
         public event Action OnHitAttack;
@@ -49,9 +49,9 @@ namespace BossEnemy.Infrastructure
         }
 
         /// <summary>AttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
-        public void AnimEvent_AttackHitCheck(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
+        public void AnimEvent_AttackHitCheck(Attack.AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
-            OnCheckHitAttack?.Invoke(attackHitAreaType, attackPosition, forward);
+            OnCheckHitAttack?.Invoke(tryHitAttackData, attackHitAreaType, attackPosition, forward);
         }
 
         /// <summary> 攻撃が当たった際に呼ばれる </summary>

@@ -62,13 +62,13 @@ namespace BossEnemy.Attack
         }
 
         /// <summary> 攻撃によってダメージが発生したか否かの判定 </summary>
-        public bool TryHitAttack(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
+        public bool TryHitAttack(AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
             if(AttackHitChecker.TryHitAttack
                 (attackHitAreaType, 
                 attackPosition, 
                 _attackTarget,
-                _executingAttackData.AttackHitAreaRadius))
+                tryHitAttackData.AttackHitAreaRadius))
             {
                 AttackHit(_attackTarget);
                 _wasAttackHit = true;

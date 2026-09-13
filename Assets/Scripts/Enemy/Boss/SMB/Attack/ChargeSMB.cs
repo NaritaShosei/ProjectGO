@@ -37,7 +37,7 @@ namespace BossEnemy.SMB
             if (_isAttackHitCheck && !_wasHitAttack)
             {
                 _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (AttackHitAreaType.Circle, _bossCharacterTransform.position);
+                    (_attackData, AttackHitAreaType.Circle, _bossCharacterTransform.position);
             }
 
             // 移動フラグがTrueになっていれば移動を行う

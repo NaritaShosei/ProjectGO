@@ -17,7 +17,7 @@ namespace BossEnemy.Interface
         /// Vector3 = 当たり判定の大きさ
         /// Vector3 = 当たり判定を行う方向
         /// </summary>
-        public event Action<AttackHitAreaType, Vector3, Vector3> OnCheckHitAttack;
+        public event Action<Attack.AttackData, AttackHitAreaType, Vector3, Vector3> OnCheckHitAttack;
 
         /// <summary> 攻撃が当たった際のイベント </summary>
         public event Action OnHitAttack;
@@ -38,7 +38,7 @@ namespace BossEnemy.Interface
         public void AnimEvent_ColliderIsTriggerIsEnabled(bool isTrigger);
 
         /// <summary> AttackSMB から攻撃当たり判定を行うタイミングで呼ばれる </summary>
-        public void AnimEvent_AttackHitCheck(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default);
+        public void AnimEvent_AttackHitCheck(Attack.AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default);
 
         /// <summary> 攻撃が当たった際に呼ばれる </summary>
         public void AnimEvent_HitAttack();

@@ -114,7 +114,7 @@ namespace BossEnemy.Character
         /// <param name="attackHitAreaType"> 当たり判定の形 </param>
         /// <param name="attackPosition"> 当たり判定の中心座標 </param>
         /// <param name="forward"> 必要であれば当たり判定を行う方角を渡す </param>
-        public void TryHitAttackDamageToTarget(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default);
+        public void TryHitAttackDamageToTarget(Attack.AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default);
 
         /// <summary> 攻撃を終了する </summary>
         public void AttackCompleted();
@@ -373,11 +373,9 @@ namespace BossEnemy.Character
         /// <param name="attackHitAreaType"> 当たり判定の形 </param>
         /// <param name="attackPosition"> 当たり判定の中心座標 </param>
         /// <param name="forward"> 必要であれば当たり判定を行う方角を渡す </param>
-        public void TryHitAttackDamageToTarget(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
+        public void TryHitAttackDamageToTarget(Attack.AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
-            if (_currentCharacterAction.Value != CharacterAction.Attacking) return;
-
-            if(_attackExecutor.TryHitAttack(attackHitAreaType, attackPosition, forward))
+            if(_attackExecutor.TryHitAttack(tryHitAttackData ,attackHitAreaType, attackPosition, forward))
             {
                 OnAttackHit?.Invoke();
             }
