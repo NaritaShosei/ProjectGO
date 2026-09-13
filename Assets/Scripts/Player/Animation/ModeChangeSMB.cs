@@ -12,14 +12,17 @@ public class ModeChangeSMB : StateMachineBehaviour
 
         ServiceLocator.TryGet(out _hitStopManager);
 
-        if (animator.TryGetComponent(out IModeChangeAnimationController modeChangeAnimController))
+        if (animator.TryGetComponent(out PlayerAnimationController modeChangeAnimController))
         {
             _modeChangeAnimController = modeChangeAnimController;
+            _animationVersion = modeChangeAnimController.CombatAnimationVersion;
         }
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        if (_modeChangeAnimController == null
+            || _animationVersion != _modeChangeAnimController.CombatAnimationVersion) return;
         float currentTime = stateInfo.normalizedTime * _stateLength;
 
         if (!_slowApplied && currentTime >= _slowStartTime)
@@ -31,8 +34,6 @@ public class ModeChangeSMB : StateMachineBehaviour
         if (!_modeChangeEnded && currentTime >= _modeChangeEndTime)
         {
             _modeChangeEnded = true;
-            // ここでPlayerModeを更新することでBlendTree切り替えをアニメーション完了後に行う
-            animator.SetInteger(Animator.StringToHash("PlayerMode"), 1); // Thunder
             _modeChangeAnimController?.AnimEvent_ModeChangeComplete();
         }
     }
@@ -49,7 +50,8 @@ public class ModeChangeSMB : StateMachineBehaviour
     [SerializeField] private float _modeChangeEndTime = 0.8f;
 
     private HitStopManager _hitStopManager;
-    private IModeChangeAnimationController _modeChangeAnimController;
+    private PlayerAnimationController _modeChangeAnimController;
+    private int _animationVersion;
     private bool _slowApplied;
     private bool _modeChangeEnded;
     private float _stateLength;

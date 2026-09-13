@@ -41,7 +41,14 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public void AnimEvent_ComboWindowStart() => OnComboWindowStart?.Invoke();
     public void AnimEvent_ComboWindowEnd() => OnComboWindowEnd?.Invoke();
     public void AnimEvent_ModeChangeReady() => OnModeChangeReady?.Invoke();
-    public void AnimEvent_ModeChangeComplete() => OnModeChangeComplete?.Invoke();
+    public void AnimEvent_ModeChangeComplete()
+    {
+        if (_stateManager.CurrentState != PlayerState.ModeChanging) return;
+        _animator.SetInteger(AnimParams.PlayerMode, (int)_modeController.CurrentMode);
+        _animator.ResetTrigger(AnimParams.ModeChange);
+        MoveCrossFade();
+        OnModeChangeComplete?.Invoke();
+    }
     public void AnimEvent_ComboTransition() => OnComboTransition?.Invoke();
 
     /// <summary>被弾アニメーション終了をSMBから受け取る</summary>
@@ -321,6 +328,11 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnStateChanged(PlayerState oldState, PlayerState newState)
     {
+        // ヒットストップ中でも、入力が成立した時点で遷移元の通知を無効にする。
+        if (newState is PlayerState.ModeChanging or PlayerState.Dodge
+            or PlayerState.Damaged or PlayerState.Down or PlayerState.Dead)
+            CombatAnimationVersion++;
+
         switch (newState)
         {
             case PlayerState.Charging:
@@ -348,20 +360,22 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        CombatAnimationVersion++;
+        _animator.ResetTrigger(AnimParams.Attack);
+        _animator.ResetTrigger(AnimParams.ModeChange);
         ApplyLockedOnAnimationParameter(newMode);
 
-        // Warrior→Thunderのモードチェンジはアニメーションをスキップ
+        // Thunder→Warriorは演出なし。ゲージ切れでも旧攻撃モーションを残さない。
         if (newMode == PlayerMode.Warrior)
         {
             _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
+            if (_stateManager.CurrentState is PlayerState.Idle or PlayerState.ModeChanging)
+                MoveCrossFade();
             OnModeChangeComplete?.Invoke();
             return;
         }
 
-        // Thunderへの切替: トリガーを先に発火してからPlayerModeを更新しない
-        // PlayerModeの更新はModeChangeSMBのmodeChangeEndTime後に行う
-        _animator.SetTrigger(AnimParams.ModeChange);
-
+        // 直接遷移するためトリガーは残さない。PlayerModeは演出完了時に更新する。
         _animator.CrossFadeInFixedTime(AnimParams.ModeChangeToThunder, 0.1f, 0);
     }
 

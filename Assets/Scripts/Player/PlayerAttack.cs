@@ -505,13 +505,8 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FinishAttack()
     {
-        if (_stateManager.IsDead() || _stateManager.IsDown())
-        {
-            ResetCombo();
-            return;
-        }
-        if (_stateManager.IsDodging() || _stateManager.IsDamaged()) { return; }
-
+        // 中断後の通知は、チャージ・モードチェンジ・回避などの状態を変更しない。
+        if (_stateManager.CurrentState != PlayerState.Attacking) return;
         _isHomingActive = false;
 
         CancelAttackDirectionRotation();
@@ -521,14 +516,6 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = null;
         _activeAttackVariant = null;
         _canModeChangeDuringAttack = false;
-
-        // モードチェンジによって攻撃アニメーションを抜けた場合は、
-        // モードチェンジ完了通知まで ModeChanging を維持する。
-        if (_stateManager.CurrentState == PlayerState.ModeChanging)
-        {
-            ResetCombo();
-            return;
-        }
 
         if (_pendingWarriorCharge)
         {
@@ -794,7 +781,8 @@ public class PlayerAttack : MonoBehaviour
     {
         // 回避などでチャージを中断しても、ChargeReadySMB.OnStateExit から通知が届く。
         // 終了済みのチャージの準備状態と継続振動を再開させない。
-        if (!_isCharging) return;
+        if (!_isCharging || _canStartCharge
+            || _stateManager.CurrentState != PlayerState.Charging) return;
 
         _canStartCharge = true;
         _chargeStartTime = Time.time;
@@ -979,7 +967,13 @@ public class PlayerAttack : MonoBehaviour
     {
         // コンボ中に準備した旧モードのチャージ状態を、モード変更後へ持ち越さない。
         CancelCharge();
+        ClearAttackState();
+        _canModeChangeDuringAttack = false;
+        OnAttackEnded?.Invoke();
         ResetCombo();
+        // ゲージ切れによる強制変更も、旧モードの攻撃終了通知に依存しない。
+        if (_stateManager.CurrentState == PlayerState.Attacking)
+            _stateManager.ChangeState(PlayerState.Idle);
     }
 
     /// <summary>
