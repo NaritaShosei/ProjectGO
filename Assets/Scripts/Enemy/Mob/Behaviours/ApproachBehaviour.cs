@@ -150,9 +150,16 @@ public class ApproachBehaviour : IEnemyBehaviour,IEnemyDataRefreshable
 
     /// <summary>
     /// 接近を停止する距離を返す（AttackRange × MoveApproachRatio）
+    /// ただし、この停止距離が攻撃トリガー距離（AttackRange × AttackTriggerRatio）を超えると
+    /// Approach→Attackへ移行できなくなるため、トリガー距離を上限としてクランプする。
     /// </summary>
     private float CalcStopDistance()
-        => _context.SelectedPattern.AttackRange * _profile.MoveApproachRatio;
+    {
+        var pattern = _context.SelectedPattern;
+        float approachStop = pattern.AttackRange * _profile.MoveApproachRatio;
+        float triggerDist = pattern.AttackRange * pattern.AttackTriggerRatio;
+        return Mathf.Min(approachStop, triggerDist);
+    }
 
     /// <summary>
     /// XZ平面のみの距離の二乗を返す。
