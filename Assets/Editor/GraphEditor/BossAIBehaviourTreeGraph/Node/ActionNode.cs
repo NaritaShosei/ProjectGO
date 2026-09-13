@@ -102,16 +102,26 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
     }
 
     [Serializable]
-    public class PostureRevertInSecondsAction : ActionNode<BehaviourTree.PostureRevertInSecondsAction>
+    public class CancelAsyncAction : ActionNode<BehaviourTree.CancelAsyncAction>
+    {
+        public CancelAsyncAction()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.CancelAsyncAction();
+        }
+    }
+
+    [Serializable]
+    public class RevertPostureInSecondsAsyncAction : ActionNode<BehaviourTree.RevertPostureInSecondsAsyncAction>
     {
         private const string WAIT_TIME = "計測時間";
 
         private const string CHANGE_POSTURE_NAME = "変更する姿勢";
 
-        public PostureRevertInSecondsAction()
+        public RevertPostureInSecondsAsyncAction()
         {
             _nodeAccesskey = CreateUniqueKey();
-            _behaviourTreeNode = new BehaviourTree.PostureRevertInSecondsAction();
+            _behaviourTreeNode = new BehaviourTree.RevertPostureInSecondsAsyncAction();
         }
 
         public override void OnGraphChanged(GraphLogger graphLogger)
