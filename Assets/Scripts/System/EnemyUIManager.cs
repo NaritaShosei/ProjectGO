@@ -81,23 +81,30 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleEnemySpawned(IEnemy enemy)
     {
-        // Gauge
-        var view = _gaugePool.Get();
-        Transform gaugeTarget = enemy is MobEnemy mobEnemy
-            ? mobEnemy.GetUIAnchor()
-            : enemy.GetTargetCenter();
+        // 通常敵だけEnemyDataの設定を参照する
+        bool showHealthGauge = enemy is Enemy configurableEnemy
+            ? configurableEnemy.ShowHealthGauge
+            : true;
 
-        var presenter = new EnemyGaugePresenter(
-            enemy,
-            view,
-            gaugeTarget,
-            enemy.GetTargetCenter(),
-            _playerTransform,
-            _detectionRange,
-            _damagedDisplayDuration
-        );
+        if (showHealthGauge)
+        {
+            var view = _gaugePool.Get();
+            Transform gaugeTarget = enemy is MobEnemy mobEnemy
+                ? mobEnemy.GetUIAnchor()
+                : enemy.GetTargetCenter();
 
-        _gaugePresenters.Add(enemy, presenter);
+            var presenter = new EnemyGaugePresenter(
+                enemy,
+                view,
+                gaugeTarget,
+                enemy.GetTargetCenter(),
+                _playerTransform,
+                _detectionRange,
+                _damagedDisplayDuration
+            );
+
+            _gaugePresenters.Add(enemy, presenter);
+        }
 
         // Damage Popup
         enemy.OnDamageDealt += HandleDamageDealt;

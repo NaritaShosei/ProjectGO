@@ -185,16 +185,6 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         }
         ControllerVibration.PlayTimed(vibration.Low, vibration.High, vibration.Duration);
 
-        //ダメージエフェクトの通知
-        OnDamagedEffect?.Invoke(
-            new PlayerDamageEffectContext
-            {
-                HitPosition = _targetCenter.position,
-                ReactionType = reactionType,
-                // 致死ダメージでは死亡ボイスを優先する。ダウン時は通知前に処理を終了する。
-                SuppressDamageVoice = _playerStateManager.IsDead()
-            });
-
         bool canInterrupt = true;
 
         // Modify を全て確認して、ダメージリアクションを発生させていいか判断する。
@@ -208,14 +198,26 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             }
         }
 
+        bool shouldReact = canInterrupt && !_playerStateManager.IsDead();
+
+        //ダメージエフェクトの通知
+        OnDamagedEffect?.Invoke(
+            new PlayerDamageEffectContext
+            {
+                HitPosition = _targetCenter.position,
+                ReactionType = reactionType,
+                // リアクションしない場合はボイスも抑制する。致死ダメージでは死亡ボイスを優先する。
+                SuppressDamageVoice = !shouldReact
+            });
+
         // ダメージを受けたら、一定時間ダメージ無敵にする。これにより、連続でダメージを受けるのを防ぐ。
         _playerStateManager.AddInvincible(InvincibleType.Damaged);
 
         // ダメージ無敵を解除するタイミングは、プレイヤーデータで設定された時間経過後。これにより、ダメージを受けた後の無敵時間を柔軟に設定できる。
-        HandleDamageInvincibilityEnd().Forget();
+        HandleDamageInvincibilityEnd(_playerData.GetDamageInvincibleDuration(reactionType)).Forget();
 
         // ダメージリアクションを発生させていいと判断された場合、状態をダメージ状態に遷移させる。      
-        if (canInterrupt && !_playerStateManager.IsDead())
+        if (shouldReact)
         {
             _attack?.InterruptByDamage(); // 攻撃内部状態を全てクリア
             _playerAnimationController.SetDamageReaction(reactionType);
@@ -454,7 +456,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     /// <summary>
     /// ダメージ無敵の終了を処理する。プレイヤーデータで設定された時間経過後に、ダメージ無敵を解除する。
     /// </summary>
-    private async UniTaskVoid HandleDamageInvincibilityEnd()
+    private async UniTaskVoid HandleDamageInvincibilityEnd(float duration)
     {
         _damageInvincibilityCts?.Cancel();
         _damageInvincibilityCts?.Dispose();
@@ -466,7 +468,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         float elapsed = 0f;
         try
         {
-            while (elapsed < _playerData.InvincibleDuration)
+            while (elapsed < duration)
             {
                 elapsed += Time.deltaTime * TimeScale;
                 await UniTask.Yield(cts.Token);
