@@ -333,6 +333,8 @@ public class AttackExecutor : MonoBehaviour
 
             if (enemy == null || enemy.IsDead) return;
 
+            HitResult? hitResult = null;
+
             // このTakeDamage内で生成されるダメージポップアップだけ雷色にする。
             using (DamagePopupColorScope.Use(_lightningDamagePopupColor))
             {
@@ -343,6 +345,19 @@ public class AttackExecutor : MonoBehaviour
                     IsCritical = false,
                     CriticalMultiplier = 1f,
                     IsLightningDamage = true,
+                    OnHitResult = result => hitResult = result,
+                });
+            }
+
+            if (hitResult.HasValue)
+            {
+                OnHitResultReady?.Invoke(new HitSoundContext
+                {
+                    IsKill = hitResult.Value.IsKill,
+                    IsArmorBreak = hitResult.Value.IsArmorBreak,
+                    IsWeakPoint = hitResult.Value.IsWeakPoint,
+                    IsArmorHit = hitResult.Value.IsArmorHit,
+                    PlayerMode = mode,
                 });
             }
         }
