@@ -115,14 +115,6 @@ public class MobEnemy : Enemy,IFormationParticipant
 
         bool armorWasAlive = _defenceContext.EnemyType == EnemyDefenceType.Armor;
 
-        // 鎧がダメージを肩代わり
-        if (_defenceContext.EnemyType == EnemyDefenceType.Armor)
-        {
-            if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
-        }
-
-        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyDefenceType.Flesh;
-
         // 弱点ヒットは生身かつ雷神モード攻撃時に有効
         bool isWeakPoint = (!armorWasAlive
             && _defenceContext.EnemyType == EnemyDefenceType.Flesh
@@ -130,10 +122,20 @@ public class MobEnemy : Enemy,IFormationParticipant
             //鎧かつ闘神モードの時に有効
             || (armorWasAlive && context.PlayerMode == PlayerMode.Warrior);
 
+        // ストーンリングは鎧破壊で即死し、UIの購読が解除されるため、
+        // 鎧・HPへのダメージ適用より先に今回のダメージを表示する。
+        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical, context.IsLightningDamage);
+
+        // 鎧がダメージを肩代わり
+        if (armorWasAlive)
+        {
+            if (_armor != null) damage = Mathf.FloorToInt(_armor.AbsorbDamageAndReturnExcess(damage));
+        }
+
+        bool isArmorBreak = armorWasAlive && _defenceContext.EnemyType == EnemyDefenceType.Flesh;
+
         // 鎧に当たったか（鎧が生きていて、かつ鎧破壊が起きていない = 鎧が生き残った）
         bool isArmorHit = armorWasAlive && !isArmorBreak;
-
-        InvokeOnDamageDealt(showDamage, isWeakPoint, context.IsCritical, context.IsLightningDamage);
 
         //ヒットエフェクトの通知
         InvokeOnHitEffect(
