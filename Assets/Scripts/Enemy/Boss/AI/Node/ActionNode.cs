@@ -112,6 +112,11 @@ namespace BossEnemy.AI.BehaviourTree
     [Serializable]
     public class SelectAttackAction : ActionNode
     {
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
+
         public override void OnEnter()
         {
             SelectNextAttackAsync().Forget();
@@ -124,11 +129,13 @@ namespace BossEnemy.AI.BehaviourTree
 
         [SerializeField] private int _attackSelectPoolID;
 
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
         /// <summary> 攻撃の選択を行う </summary>
         private async UniTaskVoid SelectNextAttackAsync()
         {
             await _bossCharacterEntity.SelectNextAttackData(_attackSelectPoolID);
-            HandleRunningEnd();
+            if(_nodeRunningConditionNotifier != null) HandleRunningEnd();
         }
     }
 

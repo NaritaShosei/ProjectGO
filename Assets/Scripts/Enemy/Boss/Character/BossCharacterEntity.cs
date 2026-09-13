@@ -74,6 +74,9 @@ namespace BossEnemy.Character
         /// <summary> 生成(スポーン)された際の処理 </summary>
         public void OnSpawn(IPlayer firstTarget, Vector3 position, Quaternion quaternion);
 
+        /// <summary> デスポーンされた際の処理 </summary>
+        public void OnDespawn();
+
         /// <summary> 装備中の鎧のステータスを取得する </summary>
         /// <param name="armorAttachmentType"> 取得したい鎧の種類 </param>
         public ArmorStatus GetArmorStats(ArmorAttachmentType armorAttachmentType);
@@ -249,6 +252,22 @@ namespace BossEnemy.Character
             SetVelocity(Vector3.zero);
 
             Debug.Log("召喚されました");
+        }
+
+        public void OnDespawn()
+        {
+            // 攻撃実行クラスを破棄
+            _attackExecutor.Dispose();
+            _attackExecutor = null;
+
+            // ReactivePropertyをnullに
+            _currentCharacterAction = null;
+            _breakingArmorAttachmentType = null;
+            _repairArmorAttachmentType = null;
+            _currentHP = null;
+            _position = null;
+            _rotation = null;
+            _velocity = null;
         }
 
         /// <summary> 装備中の鎧のステータスを取得する </summary>

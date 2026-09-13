@@ -96,7 +96,7 @@ namespace BossEnemy.SMB
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 
                 _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (_attackData, AttackHitAreaType.Circle, _attackAreaCenter);
+                    (_attackData, AttackHitAreaType.Circle, attackPos);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_consecutiveAttackInterval), cancellationToken: cancellationToken);
             }

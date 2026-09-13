@@ -175,6 +175,9 @@ namespace BossEnemy.Character
             // ボスの攻撃の当たり判定を行うイベント購読解除
             _animationEventReceiver.OnCheckHitAttack -= HandleCheckHitAttack;
 
+            // ボスの攻撃が当たった際のイベント購読解除
+            _characterEntity.OnAttackHit -= HandleAttackHit;
+
             // ボスが攻撃を終了したことの通知をアニメーター側から受け取るイベント購読解除
             _animationEventReceiver.OnAttackCompleted -= HandleAttackCompleted;
 
@@ -344,6 +347,9 @@ namespace BossEnemy.Character
         {
             Debug.Log("デスポーン");
             _characterEntity.SetCurrentAction(CharacterAction.Despawn);
+
+            // デスポーン時の処理
+            _characterEntity.OnDespawn();
 
             // デスポーンイベント購読解除
             _animationEventReceiver.OnDespawn -= HandleDespawn;
