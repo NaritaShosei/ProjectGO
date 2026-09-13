@@ -777,8 +777,6 @@ PlayableDirector:
     value: {fileID: 0}
   - key: {fileID: 5937327058689759411, guid: 62d955cd5259a884c90cccd088622075, type: 2}
     value: {fileID: 0}
-  - key: {fileID: -991500409040454284, guid: 62d955cd5259a884c90cccd088622075, type: 2}
-    value: {fileID: 0}
   - key: {fileID: 398488990405272111, guid: 62d955cd5259a884c90cccd088622075, type: 2}
     value: {fileID: 0}
   - key: {fileID: -317293922194379199, guid: 62d955cd5259a884c90cccd088622075, type: 2}
@@ -821,6 +819,10 @@ PlayableDirector:
     value: {fileID: 0}
   - key: {fileID: -3011629954452363846, guid: 81f6966490dbdca4a90e90323333b752, type: 2}
     value: {fileID: 7618133072352931599}
+  - key: {fileID: -6594282589552613698, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 3714028307319008100, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+    value: {fileID: 2764426523705728015}
   m_ExposedReferences:
     m_References:
     - 5b20cf9087597b94abe99aeb8f00519f: {fileID: 0}
@@ -1479,6 +1481,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3283935108440922060}
   - component: {fileID: 9128100736884302578}
+  - component: {fileID: 2764426523705728015}
   m_Layer: 0
   m_Name: SequenceManager
   m_TagString: Untagged
@@ -1513,7 +1516,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
-  _subtitleSettingsAddress: SubtitleSettings
   _mobLighting:
     _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e1, type: 2}
     _overrideSun: 0
@@ -1526,18 +1528,19 @@ MonoBehaviour:
     _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e3, type: 2}
     _overrideSun: 0
     _sunSource: {fileID: 0}
+  _subtitleSettingsAddress: SubtitleSettings
   _subtitleView: {fileID: 0}
   _moviePlayer: {fileID: 3281229546311345012}
   _firstSequence: 0
   _sequences:
   - rid: 6731506274227978447
+  - rid: 6731506274227978454
   - rid: 6731506274227978448
   - rid: 6731506274227978449
   - rid: 6731506274227978450
   - rid: 6731506274227978451
   - rid: 6731506274227978452
   - rid: 6731506274227978453
-  - rid: 6731506274227978454
   references:
     version: 2
     RefIds:
@@ -1639,6 +1642,36 @@ MonoBehaviour:
         _skillSelectCount: 3
         _nextSequence: 1
         _pauseTargetGroup: 63
+--- !u!114 &2764426523705728015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4996710551187502800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e52de21a22b6dd44c9cc19f810c65059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.SignalReceiver
+  m_Events:
+    m_Signals:
+    - {fileID: 11400000, guid: 384ec134dbf5c054599ffca79eb45928, type: 2}
+    m_Events:
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 9128100736884302578}
+          m_TargetAssemblyTypeName: SequenceManager, Assembly-CSharp
+          m_MethodName: ApplyBossLighting
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &5368403579476760681
 GameObject:
   m_ObjectHideFlags: 0
@@ -2240,39 +2273,39 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.x
-      value: 0.005754248
+      value: 359.9922
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.y
-      value: 179.57906
+      value: 97.440414
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.z
-      value: 270.00385
+      value: 270.09982
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: 0.44294405
+      value: 0.51739776
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: -0.6538261
+      value: -0.166381
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 14.592317
+      value: 14.636242
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
-      value: 1.0000004
+      value: 0.9999999
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.y
-      value: 1.0000004
+      value: 0.99999994
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.z
-      value: 1.0000006
+      value: 0.9999999
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2413,7 +2446,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: 0.08362
+      value: 0.14262
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
@@ -2441,7 +2474,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[28].m_Value.y
-      value: 0.08362
+      value: 0.14262
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[28].m_Value.z
