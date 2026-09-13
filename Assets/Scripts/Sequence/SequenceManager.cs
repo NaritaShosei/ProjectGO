@@ -33,6 +33,12 @@ public class SequenceManager : MonoBehaviour
     /// <summary>ボス戦開始時にプレイヤーの位置をリセットする</summary>
     public void SetPlayerPosition()
     {
+        if (_playerStartPosition == null)
+        {
+            Debug.LogError("ボス戦開始時のプレイヤー位置が未設定です");
+            return;
+        }
+
         _context?.Player?.SetPositionAndRotation(_playerStartPosition.position, _playerStartPosition.rotation);
     }
 
