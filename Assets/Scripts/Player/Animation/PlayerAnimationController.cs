@@ -13,6 +13,9 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _modeController.OnModeChanged += OnModeChanged;
     }
 
+    // 遷移元の通知が、新しく開始した攻撃やチャージへ混入するのを防ぐ。
+    public int CombatAnimationVersion { get; private set; }
+
     public event Action OnAttackComplete;
     public event Action OnComboWindowStart;
     public event Action OnComboWindowEnd;
@@ -130,12 +133,14 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     public void PlayAttack(int attackId)
     {
+        CombatAnimationVersion++;
         _animator.SetInteger(AnimParams.AttackId, attackId);
         _animator.SetTrigger(AnimParams.Attack);
     }
 
     public void PlayAttackBlend(int attackId, string stateName, float transitionDuration = 0.1f)
     {
+        CombatAnimationVersion++;
         if (!string.IsNullOrEmpty(stateName))
         {
             int stateHash = Animator.StringToHash(stateName);
@@ -167,6 +172,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     public void PlayChargeAnimation(string stateName, float transitionDuration = 0.1f)
     {
         if (string.IsNullOrEmpty(stateName)) return;
+        CombatAnimationVersion++;
         _animator.CrossFadeInFixedTime(stateName, transitionDuration, 0);
     }
 

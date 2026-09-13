@@ -96,6 +96,7 @@ public class PlayerAttack : MonoBehaviour
         _currentAttackId = -1;
         _currentComboStage = 0;
         _bufferedComboInput = null;
+        _isInComboWindow = false;
         ClearHomingLock();
     }
 
@@ -165,7 +166,6 @@ public class PlayerAttack : MonoBehaviour
     private bool _isInComboWindow;
     private bool _canModeChangeDuringAttack;
     private bool _tutorialModeChangeEnabled;
-    private bool _isComboTransitioned;
 
     private bool _isHomingActive;
     private float _homingStrength;
@@ -473,7 +473,6 @@ public class PlayerAttack : MonoBehaviour
         AttackData nextAttack = GetNextAttack(bufferedInput, allowCombo: true);
         if (nextAttack == null) { return; }
 
-        _isComboTransitioned = true;
         _currentAttackId = nextAttack.AttackId;
         _pendingAttackData = nextAttack;
         _pendingAttackInput = bufferedInput;
@@ -514,12 +513,6 @@ public class PlayerAttack : MonoBehaviour
         if (_stateManager.IsDodging() || _stateManager.IsDamaged()) { return; }
 
         _isHomingActive = false;
-
-        if (_isComboTransitioned)
-        {
-            _isComboTransitioned = false;
-            return;
-        }
 
         CancelAttackDirectionRotation();
         OnAttackEnded?.Invoke();
@@ -629,6 +622,9 @@ public class PlayerAttack : MonoBehaviour
         {
             _pendingWarriorCharge = true;
 
+            // 遷移元の終了通知を待たず、チャージ開始時点で移動を制限する。
+            FinishAttack();
+
             var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
@@ -662,7 +658,6 @@ public class PlayerAttack : MonoBehaviour
         _bufferedComboInput = null;
 
         _isInComboWindow = false;
-        _isComboTransitioned = false;
         _pendingWarriorCharge = false;
 
         _isHomingActive = false;
