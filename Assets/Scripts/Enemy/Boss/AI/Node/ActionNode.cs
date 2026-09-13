@@ -110,64 +110,6 @@ namespace BossEnemy.AI.BehaviourTree
     }
 
     [Serializable]
-    public class PostureRevertInSecondsAction : ActionNode 
-    {
-        public void SetConditions(PostureType postureType, float revertInSeconds)
-        {
-            _changePosture = postureType;
-            _revertInSeconds = revertInSeconds;
-        }
-
-        public override void OnEnter()
-        {
-            CancelRevert();
-
-            var cts = new CancellationTokenSource();
-            _cancellationTokenSource = cts;
-
-            RevertInSecondsAsync(_cancellationTokenSource.Token).Forget();
-
-            HandleRunningEnd();
-        }
-
-        [SerializeField] private PostureType _changePosture;
-
-        [SerializeField] private float _revertInSeconds;
-
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-
-        private void CancelRevert()
-        {
-            _cancellationTokenSource?.Cancel();
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
-        }
-
-        private async UniTaskVoid RevertInSecondsAsync(CancellationToken token)
-        {
-            try
-            {
-                await UniTask.Delay(
-                    TimeSpan.FromSeconds(_revertInSeconds),
-                    cancellationToken: token);
-
-                _bossCharacterEntity.SetCharacterPosture(_changePosture);
-
-                await UniTask.WaitUntil(
-                    () => _bossCharacterEntity.CurrentAction.Value
-                        != CharacterAction.PostureChanging,
-                    cancellationToken: token);
-
-                if (!token.IsCancellationRequested)
-                    HandleRunningEnd();
-            }
-            catch (OperationCanceledException)
-            {
-            }
-        }
-    }
-
-    [Serializable]
     public class SelectAttackAction : ActionNode
     {
         public override void OnEnter()
@@ -316,7 +258,7 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
-            _bossCharacterEntity.SetCurrentAction(Character.CharacterAction.Dead);
+            _bossCharacterEntity.SetCurrentAction(CharacterAction.Dead);
         }
     }
 
@@ -333,7 +275,7 @@ namespace BossEnemy.AI.BehaviourTree
         {
             if (!_isPhaseChangeCompleted 
                 && _bossCharacterEntity.CurrentAction.Value 
-                != Character.CharacterAction.PhaseChanging)
+                != CharacterAction.PhaseChanging)
             {
                 _isPhaseChangeCompleted = true;
                 HandleRunningEnd();
@@ -341,5 +283,93 @@ namespace BossEnemy.AI.BehaviourTree
         }
 
         private bool _isPhaseChangeCompleted = true;
+    }
+
+    [Serializable]
+    public class CancelAsyncAction : ActionNode
+    {
+        public override void OnEnter()
+        {
+            _nodeRunningConditionNotifier.HandleCancelAsyncAction();
+
+            HandleRunningEnd();
+        }
+    }
+
+    [Serializable]
+    public class RevertPostureInSecondsAsyncAction : ActionNode
+    {
+        public override void Dispose()
+        {
+            Cancel();
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction -= Cancel;
+
+            base.Dispose();
+        }
+
+        public void SetConditions(PostureType postureType, float revertInSeconds)
+        {
+            _changePosture = postureType;
+            _revertInSeconds = revertInSeconds;
+        }
+
+        public override void OnEnter()
+        {
+            Cancel();
+
+            var cts = new CancellationTokenSource();
+            _cancellationTokenSource = cts;
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction += Cancel;
+
+            RevertPostureInSecondsAsync(_cancellationTokenSource.Token).Forget();
+
+            HandleRunningEnd();
+        }
+
+        [SerializeField] private PostureType _changePosture;
+
+        [SerializeField] private float _revertInSeconds;
+
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        /// <summary> 時間経過による処理を中断処理 </summary>
+        private void Cancel()
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
+
+        /// <summary> 時間経過で体勢を変える処理 </summary>
+        private async UniTaskVoid RevertPostureInSecondsAsync(CancellationToken token)
+        {
+            try
+            {
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(_revertInSeconds),
+                    cancellationToken: token);
+
+                _bossCharacterEntity.SetCharacterPosture(_changePosture);
+
+                await UniTask.WaitUntil(
+                    () => _bossCharacterEntity.CurrentAction.Value
+                        != CharacterAction.PostureChanging,
+                    cancellationToken: token);
+
+                if (!token.IsCancellationRequested)
+                    HandleRunningEnd();
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+            finally
+            {
+                if(_nodeRunningConditionNotifier != null)
+                    _nodeRunningConditionNotifier.OnCancelAsyncAction -= Cancel;
+            }
+        }
     }
 }

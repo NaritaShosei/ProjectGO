@@ -1,6 +1,7 @@
 using BossEnemy.Character;
 using System;
 using UniRx;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace BossEnemy.AI.BehaviourTree
@@ -17,12 +18,36 @@ namespace BossEnemy.AI.BehaviourTree
     #region ビヘイビアツリーの実行状況通知クラス
     public class NodeRunningConditionNotifier
     {
+        /// <summary> ビヘイビアツリーを再走し次の行動を探すイベント </summary>
         public event Action OnResearchBehaviourTree;
+
+        /// <summary> 非同期処理を行ってる行動のCancelを行うイベント </summary>
+        public event Action OnCancelAsyncAction;
 
         public void HandleResearchBehaviourTree()
         {
             OnResearchBehaviourTree?.Invoke();
         }
+
+        public void HandleCancelAsyncAction()
+        {
+            // 同一通知の処理中に戻ってきた呼び出しは、既に伝播済みなので無視する。
+            if (_isHandlingCancelAsyncAction) return;
+
+            // SequenceNodeなどのノードで親子のNotifierを相互に接続しているため、
+            // キャンセル通知が親子間を往復して再帰しないようにする。
+            _isHandlingCancelAsyncAction = true;
+            try
+            {
+                OnCancelAsyncAction?.Invoke();
+            }
+            finally
+            {
+                _isHandlingCancelAsyncAction = false;
+            }
+        }
+
+        private bool _isHandlingCancelAsyncAction;
     }
     #endregion
 
@@ -31,13 +56,18 @@ namespace BossEnemy.AI.BehaviourTree
     /// <summary>
     /// BehaviourTreeの操作クラス
     /// </summary>
-    public class BehaviourController
+    public class BehaviourController : IDisposable
     {
         public BehaviourController(ITreeNode origin)
         {
             _originNode = origin;
             _nodeRunningEndNotifier = origin.NodeRunningConditionNotifier;
             _nodeRunningEndNotifier.OnResearchBehaviourTree += SearchNextRunningNode;
+        }
+
+        public void Dispose()
+        {
+            _originNode.Dispose();
         }
 
         /// <summary> 毎フレーム実行する処理 </summary>
@@ -110,7 +140,7 @@ namespace BossEnemy.AI.BehaviourTree
 
     #region 各NodeのベースとなるClassとInterface
     /// <summary> TreeNodeのInterface </summary>
-    public interface ITreeNode
+    public interface ITreeNode : IDisposable
     {
         /// <summary> 初期化済み判定フラグ </summary>
         public bool IsInit { get; }
@@ -159,6 +189,12 @@ namespace BossEnemy.AI.BehaviourTree
         {
             _isInit = true;
             _nodeRunningConditionNotifier = nodeRunningEndNotifier;
+        }
+
+        public virtual void Dispose()
+        {
+            _isInit = false;
+            _nodeRunningConditionNotifier = null;
         }
 
         public void SetRunningPriority(int priority) => _runningPriority = priority;
