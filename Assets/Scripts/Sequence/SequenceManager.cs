@@ -30,6 +30,18 @@ public class SequenceManager : MonoBehaviour
         _bossLighting?.Apply();
     }
 
+    /// <summary>ボス戦開始時にプレイヤーの位置をリセットする</summary>
+    public void SetPlayerPosition()
+    {
+        if (_playerStartPosition == null)
+        {
+            Debug.LogError("ボス戦開始時のプレイヤー位置が未設定です");
+            return;
+        }
+
+        _context?.Player?.SetPositionAndRotation(_playerStartPosition.position, _playerStartPosition.rotation);
+    }
+
     public async UniTask InitializeAsync(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
     {
         if (enemyManager == null || skillManager == null || inputHandler == null || player == null)
@@ -114,6 +126,8 @@ public class SequenceManager : MonoBehaviour
     private SequenceLighting _bossLighting = new();
     [SerializeField, Tooltip("Result開始時に適用するLighting")]
     private SequenceLighting _resultLighting = new();
+
+    [SerializeField, Tooltip("ボス戦でプレイヤーがスタートする座標のTransform")] private Transform _playerStartPosition;
 
     [Serializable]
     private sealed class SequenceLighting
