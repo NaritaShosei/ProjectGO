@@ -1,11 +1,13 @@
 using BossEnemy.Attack;
+using BossEnemy.Character;
 using BossEnemy.Enum;
 using BossEnemy.Interface;
 using BossEnemy.Logic;
-using System;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using System;
+using System.Threading;
 using UniRx;
+using UnityEngine;
 
 
 namespace BossEnemy.AI.BehaviourTree
@@ -27,9 +29,53 @@ namespace BossEnemy.AI.BehaviourTree
     }
 
     [Serializable]
-    public class AwaitAction : ActionNode
+    public class WaitForTimeAction : ActionNode
     {
+        public void SetWaitTime(float waitTime)
+        {
+            _waitTime = waitTime;
+        }
 
+        public override void OnEnter()
+        {
+            _isTimeUp = false;
+            _currentWaitTime = _waitTime;
+        }
+
+        public override void OnUpdate()
+        {
+            if (!_isTimeUp)
+            {
+                _currentWaitTime -= Time.deltaTime * _bossCharacterEntity.TimeScale;
+
+                if (_currentWaitTime < 0)
+                {
+                    _isTimeUp = true;
+                    HandleRunningEnd();
+                }
+            }
+        }
+
+        [SerializeField] private float _waitTime;
+
+        private bool _isTimeUp = false;
+
+        private float _currentWaitTime = 0;
+    }
+
+    [Serializable]
+    public class CancelSearchAction : ActionNode
+    {
+        public override NodeCondition TryEntry()
+        {
+            return NodeCondition.Failure;
+        }
+
+        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        {
+            nextNode = null;
+            return NodeCondition.Failure;
+        }
     }
 
     [Serializable]
@@ -43,14 +89,34 @@ namespace BossEnemy.AI.BehaviourTree
         public override void OnEnter()
         {
             _bossCharacterEntity.SetCharacterPosture(_changePosture);
+            _isPostureChangeCompleted = false;
+        }
+
+        public override void OnUpdate()
+        {
+            if (_isPostureChangeCompleted) return;
+
+            if (_bossCharacterEntity.CurrentAction.Value
+                != CharacterAction.PostureChanging)
+            {
+                HandleRunningEnd();
+                _isPostureChangeCompleted = true;
+            }
         }
 
         [SerializeField] private PostureType _changePosture;
+
+        private bool _isPostureChangeCompleted = true;
     }
 
     [Serializable]
     public class SelectAttackAction : ActionNode
     {
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
+
         public override void OnEnter()
         {
             SelectNextAttackAsync().Forget();
@@ -63,10 +129,13 @@ namespace BossEnemy.AI.BehaviourTree
 
         [SerializeField] private int _attackSelectPoolID;
 
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        /// <summary> 攻撃の選択を行う </summary>
         private async UniTaskVoid SelectNextAttackAsync()
         {
             await _bossCharacterEntity.SelectNextAttackData(_attackSelectPoolID);
-            HandleRunningEnd();
+            if(_nodeRunningConditionNotifier != null) HandleRunningEnd();
         }
     }
 
@@ -80,6 +149,8 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            _bossCharacterEntity.SetCurrentAction(Character.CharacterAction.Walking);
+
             Attack.AttackData nextAttackData = _bossCharacterEntity.GetNextAttackData();
             if (nextAttackData.AttackStartDistance == 0)
             {
@@ -120,6 +191,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnExit()
         {
+            _bossCharacterEntity.SetCurrentAction(Character.CharacterAction.Idle);
             _bossCharacterEntity.SetVelocity(Vector3.zero);
         }
 
@@ -165,14 +237,17 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
+            _disposable?.Dispose();
+            _disposable = null;
+
             _bossCharacterEntity.ExecuteAttack();
 
-            _disposable = _bossCharacterEntity.ExecutingAttackData.Subscribe(executingAttackData =>
+            _disposable = _bossCharacterEntity.CurrentAction
+                .SkipLatestValueOnSubscribe()
+                .Subscribe(currentAction =>
             {
-                if(executingAttackData.ID == 0)
-                {
+                if(currentAction != Character.CharacterAction.Attacking)
                     HandleRunningEnd();
-                }
             });
         }
 
@@ -190,7 +265,7 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
-            _bossCharacterEntity.HandleDead();
+            _bossCharacterEntity.SetCurrentAction(CharacterAction.Dead);
         }
     }
 
@@ -199,7 +274,109 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
-            _bossCharacterEntity.PhaseChange();
+            _bossCharacterEntity.StartPhaseChange();
+            _isPhaseChangeCompleted = false;
+        }
+
+        public override void OnUpdate()
+        {
+            if (!_isPhaseChangeCompleted 
+                && _bossCharacterEntity.CurrentAction.Value 
+                != CharacterAction.PhaseChanging)
+            {
+                _isPhaseChangeCompleted = true;
+                HandleRunningEnd();
+            }
+        }
+
+        private bool _isPhaseChangeCompleted = true;
+    }
+
+    [Serializable]
+    public class CancelAsyncAction : ActionNode
+    {
+        public override void OnEnter()
+        {
+            _nodeRunningConditionNotifier.HandleCancelAsyncAction();
+
+            HandleRunningEnd();
+        }
+    }
+
+    [Serializable]
+    public class RevertPostureInSecondsAsyncAction : ActionNode
+    {
+        public override void Dispose()
+        {
+            Cancel();
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction -= Cancel;
+
+            base.Dispose();
+        }
+
+        public void SetConditions(PostureType postureType, float revertInSeconds)
+        {
+            _changePosture = postureType;
+            _revertInSeconds = revertInSeconds;
+        }
+
+        public override void OnEnter()
+        {
+            Cancel();
+
+            var cts = new CancellationTokenSource();
+            _cancellationTokenSource = cts;
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction += Cancel;
+
+            RevertPostureInSecondsAsync(_cancellationTokenSource.Token).Forget();
+
+            HandleRunningEnd();
+        }
+
+        [SerializeField] private PostureType _changePosture;
+
+        [SerializeField] private float _revertInSeconds;
+
+        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        /// <summary> 時間経過による処理を中断処理 </summary>
+        private void Cancel()
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
+
+        /// <summary> 時間経過で体勢を変える処理 </summary>
+        private async UniTaskVoid RevertPostureInSecondsAsync(CancellationToken token)
+        {
+            try
+            {
+                await UniTask.Delay(
+                    TimeSpan.FromSeconds(_revertInSeconds),
+                    cancellationToken: token);
+
+                _bossCharacterEntity.SetCharacterPosture(_changePosture);
+
+                await UniTask.WaitUntil(
+                    () => _bossCharacterEntity.CurrentAction.Value
+                        != CharacterAction.PostureChanging,
+                    cancellationToken: token);
+
+                if (!token.IsCancellationRequested)
+                    HandleRunningEnd();
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+            finally
+            {
+                if(_nodeRunningConditionNotifier != null)
+                    _nodeRunningConditionNotifier.OnCancelAsyncAction -= Cancel;
+            }
         }
     }
 }

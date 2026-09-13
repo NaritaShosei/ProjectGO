@@ -24,7 +24,7 @@ namespace BossEnemy.SMB
             if (_isAttackHitCheck && !_wasHitAttack)
             {
                 _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (AttackHitAreaType.Circle, _attackAreaCenter);
+                    (_attackData, AttackHitAreaType.Circle, _attackAreaCenter);
             }
 
 

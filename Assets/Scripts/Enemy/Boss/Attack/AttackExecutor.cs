@@ -16,7 +16,7 @@ namespace BossEnemy.Attack
             _initializationTask = InitAsync().Preserve();
         }
 
-        public AttackData ExecutingAttack => _executingAttackData;
+        public AttackData NextAttack => _nextAttackData;
 
         public bool WasHitAttack => _wasAttackHit;
 
@@ -45,26 +45,32 @@ namespace BossEnemy.Attack
                 return;
             }
 
-            _executingAttackData = _attackDataRepository.GetData(executeAttackID);
+            _nextAttackData = _attackDataRepository.GetData(executeAttackID);
         }
 
         /// <summary> 攻撃の実行 </summary>
-        public void ExecuteAttack(IPlayer attackTarget)
+        public AttackData ExecuteAttack(IPlayer attackTarget)
         {
+            if (attackTarget == null || _nextAttackData.ID == 0) return default;
+
             _attackTarget = attackTarget;
             _wasAttackHit = false;
+
+            _executingAttackData = _nextAttackData;
+            _nextAttackData = default;
+            return _executingAttackData;
         }
 
         /// <summary> 攻撃によってダメージが発生したか否かの判定 </summary>
-        public bool TryHitAttack(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
+        public bool TryHitAttack(AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
             if(AttackHitChecker.TryHitAttack
                 (attackHitAreaType, 
                 attackPosition, 
                 _attackTarget,
-                _executingAttackData.AttackHitAreaRadius))
+                tryHitAttackData.AttackHitAreaRadius))
             {
-                AttackHit(_attackTarget);
+                AttackHit(tryHitAttackData, _attackTarget);
                 _wasAttackHit = true;
             }
             else _wasAttackHit = false;
@@ -73,10 +79,11 @@ namespace BossEnemy.Attack
         }
 
         /// <summary> 攻撃終了 </summary>
-        public void AttackComplete()
+        public void AttackCompleted()
         {
             _attackCoolTimer.StartCoolTime(_executingAttackData.ID, _executingAttackData.CoolTime).Forget();
             _wasAttackHit = false;
+            _executingAttackData = default;
         }
 
         public void Dispose() 
@@ -85,6 +92,7 @@ namespace BossEnemy.Attack
             AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
         }
 
+        private AttackData _nextAttackData;
         private AttackData _executingAttackData;
 
         // 各種攻撃関連リポジトリ
@@ -114,7 +122,7 @@ namespace BossEnemy.Attack
         }
 
         /// <summary> 攻撃が当たった際のイベント発火時の処理 </summary>
-        private void AttackHit(IPlayer hitTarget)
+        private void AttackHit(AttackData hitAttack, IPlayer hitTarget)
         {
             hitTarget.TakeDamage(_executingAttackData.Damage, _executingAttackData.DamageReaction);
         }
