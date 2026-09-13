@@ -664,6 +664,7 @@ GameObject:
   - component: {fileID: 6581172022573930489}
   - component: {fileID: 7822539410125592448}
   - component: {fileID: 3281229546311345012}
+  - component: {fileID: 6932939989768498628}
   - component: {fileID: 7618133072352931599}
   - component: {fileID: 4147730436920735546}
   - component: {fileID: 8465010678702269419}
@@ -711,7 +712,7 @@ PlayableDirector:
   m_GameObject: {fileID: 3763728631446097578}
   m_Enabled: 1
   serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+  m_PlayableAsset: {fileID: 11400000, guid: e2ff503f367d73346be60652a30c4811, type: 2}
   m_InitialState: 0
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
@@ -819,6 +820,8 @@ PlayableDirector:
     value: {fileID: 0}
   - key: {fileID: -1159432633863630063, guid: 81f6966490dbdca4a90e90323333b752, type: 2}
     value: {fileID: 0}
+  - key: {fileID: -3011629954452363846, guid: 81f6966490dbdca4a90e90323333b752, type: 2}
+    value: {fileID: 7618133072352931599}
   m_ExposedReferences:
     m_References:
     - 5b20cf9087597b94abe99aeb8f00519f: {fileID: 0}
@@ -891,6 +894,63 @@ MonoBehaviour:
     _name: Ending
   - _timelineAsset: {fileID: 11400000, guid: 81f6966490dbdca4a90e90323333b752, type: 2}
     _name: GameOver
+--- !u!114 &6932939989768498628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763728631446097578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91f529aa944b914449d62b8c40f188fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtom
+  acfFile: Audio/ProjectGO.acf
+  cueSheets:
+  - name: Movie_SE
+    acbFile: Audio/Movie_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: BGM
+    acbFile: Audio/BGM.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Boss_SE
+    acbFile: Audio/Boss_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Common_SE
+    acbFile: Audio/Common_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Environment_SE
+    acbFile: Audio/Environment_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Golem_SE
+    acbFile: Audio/Golem_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Mob_SE
+    acbFile: Audio/Mob_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Narration_Voice
+    acbFile: Audio/Narration_Voice.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Player_SE
+    acbFile: Audio/Player_SE.acb
+    awbFile: 
+    loaderStatus: 0
+  - name: Player_Voice
+    acbFile: Audio/Player_Voice.acb
+    awbFile: 
+    loaderStatus: 0
+  dspBusSetting: 
+  dontDestroyOnLoad: 0
+  dontRemoveExistsCueSheet: 0
 --- !u!114 &7618133072352931599
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1096,7 +1156,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3763728631446097578}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
   m_Name: 
@@ -1203,7 +1263,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1219,8 +1279,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossMoveBigMeteor
-  _cueSheet: Move_SE
+  _cueName: BossMovieBigMeteor
+  _cueSheet: Movie_SE
 --- !u!114 &604871475641791459
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1236,7 +1296,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1252,8 +1312,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossMoveMeteor1
-  _cueSheet: Move_SE
+  _cueName: BossMovieMeteor1
+  _cueSheet: Movie_SE
 --- !u!114 &9030907451291199339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1269,7 +1329,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1285,8 +1345,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossMoveMeteor2
-  _cueSheet: Move_SE
+  _cueName: BossMovieMeteor2
+  _cueSheet: Movie_SE
 --- !u!114 &437758387757837285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1302,7 +1362,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1318,8 +1378,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossMoveMeteor3
-  _cueSheet: Move_SE
+  _cueName: BossMovieMeteor3
+  _cueSheet: Movie_SE
 --- !u!114 &8294367783655156282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1335,7 +1395,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1351,8 +1411,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossMovePlayerRun
-  _cueSheet: Move_SE
+  _cueName: BossMoviePlayerRun
+  _cueSheet: Movie_SE
 --- !u!114 &6516203097836577626
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1360,7 +1420,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3763728631446097578}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
   m_Name: 
@@ -1368,7 +1428,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1385,7 +1445,7 @@ MonoBehaviour:
     - 0
     - 0
   _cueName: BossMoveBigMeteor
-  _cueSheet: Move_SE
+  _cueSheet: Movie_SE
 --- !u!114 &6733305200322118793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1401,7 +1461,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -1417,8 +1477,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossMovePlayerStop
-  _cueSheet: Move_SE
+  _cueName: BossMoviePlayerStop
+  _cueSheet: Movie_SE
 --- !u!1 &3913965231841061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -2226,31 +2286,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.x
-      value: 0.2909534
+      value: 0.005754248
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.y
-      value: 179.56996
+      value: 179.57906
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[3].m_Value.z
-      value: 269.99973
+      value: 270.00385
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: 0.45953205
+      value: 0.44294405
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
-      value: -0.059394717
+      value: -0.6538261
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 14.543487
+      value: 14.592317
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
-      value: 1.0000002
+      value: 1.0000004
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.y
@@ -2258,7 +2318,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2864870325628134270, guid: fd0a0d567ddfb6443acccd654c6f8480, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.z
-      value: 1.0000004
+      value: 1.0000006
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2395,7 +2455,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
-      value: 0.16166759
+      value: 0.16396043
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.y
@@ -2403,7 +2463,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.z
-      value: 14.666951
+      value: 14.67066
       objectReference: {fileID: 0}
     - target: {fileID: 5903032592519319047, guid: 216edfa1ecb7b9c4f9ba31e4760ddf67, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[5].m_Value.x
