@@ -39,6 +39,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
     public virtual bool IsBoss => false;
 
+    public bool ShowHealthGauge => _data == null || _data.ShowHealthGauge;
+
     public float TimeScale => _timeScale;
 
     public bool IsDead => _isDead;

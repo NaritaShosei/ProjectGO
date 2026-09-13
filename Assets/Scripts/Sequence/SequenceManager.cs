@@ -13,6 +13,23 @@ public class SequenceManager : MonoBehaviour
     public event Action OnTitleRequested;
     public SubtitleController Subtitles { get; private set; }
 
+    public void ApplyLighting(SequenceStateType state)
+    {
+        SequenceLighting settings = state switch
+        {
+            SequenceStateType.IntroMovie => _mobLighting,
+            SequenceStateType.Result => _resultLighting,
+            _ => null
+        };
+        settings?.Apply();
+    }
+
+    /// <summary>TimelineのSignal Receiverから、ムービー中の任意のタイミングで呼び出す。</summary>
+    public void ApplyBossLighting()
+    {
+        _bossLighting?.Apply();
+    }
+
     public async UniTask InitializeAsync(EnemyManager enemyManager, SkillManager skillManager, InputHandler inputHandler, IPlayer player)
     {
         if (enemyManager == null || skillManager == null || inputHandler == null || player == null)
@@ -91,6 +108,31 @@ public class SequenceManager : MonoBehaviour
     #region　インスペクター
 
     [Header("Sequence設定")]
+    [SerializeField, Tooltip("IntroMovie開始時に適用するモブ戦用Lighting")]
+    private SequenceLighting _mobLighting = new();
+    [SerializeField, Tooltip("Signal ReceiverからApplyBossLightingを呼んだときに適用")]
+    private SequenceLighting _bossLighting = new();
+    [SerializeField, Tooltip("Result開始時に適用するLighting")]
+    private SequenceLighting _resultLighting = new();
+
+    [Serializable]
+    private sealed class SequenceLighting
+    {
+        [SerializeField, Tooltip("直接参照するLightingデータ。未指定なら現在の設定を維持")]
+        private EnvironmentLightingData _data;
+        [SerializeField, Tooltip("Sun Sourceを変更する場合に有効化。NoneならUnityの自動選択")]
+        private bool _overrideSun;
+        [SerializeField] private Light _sunSource;
+
+        public void Apply()
+        {
+            if (_overrideSun)
+                RenderSettings.sun = _sunSource;
+            if (_data != null)
+                _data.Apply();
+        }
+    }
+
     [SerializeField, Tooltip("AssetsLoaderで読み込む字幕設定のAddressablesアドレス")]
     private string _subtitleSettingsAddress = "SubtitleSettings";
     [SerializeField, Tooltip("事前配置した字幕用Text UIを参照するView")]
