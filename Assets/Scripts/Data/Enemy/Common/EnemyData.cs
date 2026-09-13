@@ -9,6 +9,7 @@ public class EnemyData : ScriptableObject
 {
     // ステータス
     public float MaxHP => _maxHP;
+    public bool ShowHealthGauge => !_hideHealthGauge;
 
     // 徘徊速度（RoamBehaviour）
     public float RoamSpeed => _roamSpeed;
@@ -56,6 +57,8 @@ public class EnemyData : ScriptableObject
 
     [Header("Status")]
     [SerializeField, Tooltip("最大HP")] private float _maxHP = 100f;
+    [SerializeField, Tooltip("HPゲージが必要かどうか")]
+    private bool _hideHealthGauge;
 
     [Header("Movement")]
     [Min(0f)]
