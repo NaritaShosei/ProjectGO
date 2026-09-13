@@ -96,6 +96,7 @@ public class PlayerAttack : MonoBehaviour
         _currentAttackId = -1;
         _currentComboStage = 0;
         _bufferedComboInput = null;
+        _isInComboWindow = false;
         ClearHomingLock();
     }
 
@@ -165,7 +166,6 @@ public class PlayerAttack : MonoBehaviour
     private bool _isInComboWindow;
     private bool _canModeChangeDuringAttack;
     private bool _tutorialModeChangeEnabled;
-    private bool _isComboTransitioned;
 
     private bool _isHomingActive;
     private float _homingStrength;
@@ -473,7 +473,6 @@ public class PlayerAttack : MonoBehaviour
         AttackData nextAttack = GetNextAttack(bufferedInput, allowCombo: true);
         if (nextAttack == null) { return; }
 
-        _isComboTransitioned = true;
         _currentAttackId = nextAttack.AttackId;
         _pendingAttackData = nextAttack;
         _pendingAttackInput = bufferedInput;
@@ -506,20 +505,9 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     private void FinishAttack()
     {
-        if (_stateManager.IsDead() || _stateManager.IsDown())
-        {
-            ResetCombo();
-            return;
-        }
-        if (_stateManager.IsDodging() || _stateManager.IsDamaged()) { return; }
-
+        // 中断後の通知は、チャージ・モードチェンジ・回避などの状態を変更しない。
+        if (_stateManager.CurrentState != PlayerState.Attacking) return;
         _isHomingActive = false;
-
-        if (_isComboTransitioned)
-        {
-            _isComboTransitioned = false;
-            return;
-        }
 
         CancelAttackDirectionRotation();
         OnAttackEnded?.Invoke();
@@ -528,14 +516,6 @@ public class PlayerAttack : MonoBehaviour
         _pendingAttackInput = null;
         _activeAttackVariant = null;
         _canModeChangeDuringAttack = false;
-
-        // モードチェンジによって攻撃アニメーションを抜けた場合は、
-        // モードチェンジ完了通知まで ModeChanging を維持する。
-        if (_stateManager.CurrentState == PlayerState.ModeChanging)
-        {
-            ResetCombo();
-            return;
-        }
 
         if (_pendingWarriorCharge)
         {
@@ -629,6 +609,9 @@ public class PlayerAttack : MonoBehaviour
         {
             _pendingWarriorCharge = true;
 
+            // 遷移元の終了通知を待たず、チャージ開始時点で移動を制限する。
+            FinishAttack();
+
             var idleChargeData = GetChargeAttackData().GetVariant(ChargeLevel.None);
             if (idleChargeData != null && !string.IsNullOrEmpty(idleChargeData.ChargeAnimationStateName))
             {
@@ -662,7 +645,6 @@ public class PlayerAttack : MonoBehaviour
         _bufferedComboInput = null;
 
         _isInComboWindow = false;
-        _isComboTransitioned = false;
         _pendingWarriorCharge = false;
 
         _isHomingActive = false;
@@ -799,7 +781,8 @@ public class PlayerAttack : MonoBehaviour
     {
         // 回避などでチャージを中断しても、ChargeReadySMB.OnStateExit から通知が届く。
         // 終了済みのチャージの準備状態と継続振動を再開させない。
-        if (!_isCharging) return;
+        if (!_isCharging || _canStartCharge
+            || _stateManager.CurrentState != PlayerState.Charging) return;
 
         _canStartCharge = true;
         _chargeStartTime = Time.time;
@@ -984,7 +967,13 @@ public class PlayerAttack : MonoBehaviour
     {
         // コンボ中に準備した旧モードのチャージ状態を、モード変更後へ持ち越さない。
         CancelCharge();
+        ClearAttackState();
+        _canModeChangeDuringAttack = false;
+        OnAttackEnded?.Invoke();
         ResetCombo();
+        // ゲージ切れによる強制変更も、旧モードの攻撃終了通知に依存しない。
+        if (_stateManager.CurrentState == PlayerState.Attacking)
+            _stateManager.ChangeState(PlayerState.Idle);
     }
 
     /// <summary>

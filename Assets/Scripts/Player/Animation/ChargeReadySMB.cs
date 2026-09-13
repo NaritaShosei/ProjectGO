@@ -5,6 +5,8 @@ public class ChargeReadySMB : StateMachineBehaviour
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _fired = false;
+        animator.TryGetComponent(out _controller);
+        _animationVersion = _controller != null ? _controller.CombatAnimationVersion : -1;
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -21,10 +23,13 @@ public class ChargeReadySMB : StateMachineBehaviour
     }
 
     private bool _fired;
+    private PlayerAnimationController _controller;
+    private int _animationVersion;
 
     private void FireChargeReady(Animator animator)
     {
-        if (_fired)
+        if (_fired || _controller == null
+            || _animationVersion != _controller.CombatAnimationVersion)
             return;
 
         _fired = true;
