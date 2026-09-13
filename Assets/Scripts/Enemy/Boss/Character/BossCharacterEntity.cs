@@ -312,12 +312,12 @@ namespace BossEnemy.Character
         /// <param name="postureType"> 変更後の姿勢 </param>
         public void SetCharacterPosture(PostureType postureType)
         {
+            if (_currentPostureType == postureType) return;
+
             // 既に現在の姿勢切り替え中だった場合の対策一度CharacterAction.Idleにすることで
             // もう一度現在の行動がPostureChangingに切り替わった際のイベントを発火させる
             if (_currentCharacterAction.Value == CharacterAction.PostureChanging)
                 SetCurrentAction(CharacterAction.Idle);
-
-            if (_currentPostureType == postureType) return;
 
             _currentPostureType = postureType;
 
