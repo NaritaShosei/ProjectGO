@@ -1545,6 +1545,30 @@ MonoBehaviour:
   VirtualCamera:
     exposedName: 28eb930b8e807794496887554b52f9a3
     defaultValue: {fileID: 0}
+--- !u!114 &-3302428207451956785
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec394b19c2203cb44aec13d50aa7361d, type: 3}
+  m_Name: CriAtomClip
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriTimeline.Atom.CriAtomClip
+  stopWithoutRelease: 0
+  muted: 0
+  ignoreBlend: 0
+  loopWithinClip: 0
+  stopAtClipEnd: 1
+  clipDuration: 0
+  cueSheet: Move_SE
+  cueName: WeaponHammerPull
+  templateBehaviour:
+    volume: 0.5
+    pitch: 0
+    AISACValue: 0
 --- !u!114 &-2468345322870550622
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2007,6 +2031,75 @@ MonoBehaviour:
     m_PostExtrapolationTime: 0
     m_PreExtrapolationTime: 0
     m_DisplayName: DraugrBark
+  - m_Version: 1
+    m_Start: 9.9
+    m_ClipIn: 0
+    m_Asset: {fileID: -3302428207451956785}
+    m_Duration: 2
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: 704987338000318268}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: WeaponHammerPull
   m_Markers:
     m_Objects: []
   m_AisacControls: 
@@ -2286,6 +2379,30 @@ MonoBehaviour:
     m_DisplayName: Electric_pulse
   m_Markers:
     m_Objects: []
+--- !u!114 &1452817243434469439
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec394b19c2203cb44aec13d50aa7361d, type: 3}
+  m_Name: CriAtomClip
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriTimeline.Atom.CriAtomClip
+  stopWithoutRelease: 0
+  muted: 0
+  ignoreBlend: 0
+  loopWithinClip: 0
+  stopAtClipEnd: 1
+  clipDuration: 0
+  cueSheet: Move_SE
+  cueName: ChainBreak
+  templateBehaviour:
+    volume: 0.5
+    pitch: 0
+    AISACValue: 0
 --- !u!114 &1684749885460211171
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2918,6 +3035,75 @@ MonoBehaviour:
     m_PostExtrapolationTime: 0
     m_PreExtrapolationTime: 0
     m_DisplayName: WarriorChargeReady
+  - m_Version: 1
+    m_Start: 6.566666666666666
+    m_ClipIn: 0
+    m_Asset: {fileID: 1452817243434469439}
+    m_Duration: 2
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: 5059037039008026862}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: ChainBreak
   m_Markers:
     m_Objects: []
   m_AisacControls: 
@@ -3696,8 +3882,8 @@ MonoBehaviour:
   m_Name: AnimationPlayableAsset(Clone)
   m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.AnimationPlayableAsset
   m_Clip: {fileID: 7400012, guid: ce65fa103f0e84b4289374b2a4bf93f8, type: 3}
-  m_Position: {x: -0.28, y: -0.88, z: -3.6}
-  m_EulerAngles: {x: 0, y: 0, z: 0}
+  m_Position: {x: 0.09, y: -0.88, z: -3.46}
+  m_EulerAngles: {x: 0, y: -6.98, z: 0}
   m_UseTrackMatchFields: 1
   m_MatchTargetFields: 63
   m_RemoveStartOffset: 1
