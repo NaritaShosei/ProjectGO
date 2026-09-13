@@ -57,7 +57,7 @@ public class EnemyData : ScriptableObject
 
     [Header("Status")]
     [SerializeField, Tooltip("最大HP")] private float _maxHP = 100f;
-    [SerializeField, Tooltip("HPゲージを表示するかどうか")]
+    [SerializeField, Tooltip("HPゲージを隠すかどうか")]
     private bool _hideHealthGauge;
 
     [Header("Movement")]
