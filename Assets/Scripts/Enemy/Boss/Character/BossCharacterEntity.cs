@@ -361,8 +361,6 @@ namespace BossEnemy.Character
         {
             _attackExecutor.AttackCompleted();
             _executingAttack = default;
-
-            SetCurrentAction(CharacterAction.Idle);
         }
 
         /// <summary> 攻撃の当たり判定を行う </summary>
