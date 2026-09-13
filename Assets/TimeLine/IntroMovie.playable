@@ -421,25 +421,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     m_MixOutCurve:
       serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
+      m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -466,25 +448,7 @@ MonoBehaviour:
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
+      m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1325,7 +1289,7 @@ MonoBehaviour:
   cueSheet: Player_SE
   cueName: WarriorChargeReady
   templateBehaviour:
-    volume: 1
+    volume: 0.8
     pitch: 0
     AISACValue: 0
 --- !u!114 &-4777241764039034496
@@ -1386,25 +1350,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     m_MixOutCurve:
       serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
+      m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1431,25 +1377,7 @@ MonoBehaviour:
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
+      m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -1562,11 +1490,11 @@ MonoBehaviour:
   ignoreBlend: 0
   loopWithinClip: 0
   stopAtClipEnd: 1
-  clipDuration: 0
-  cueSheet: Move_SE
+  clipDuration: 1.8461678004535147
+  cueSheet: Movie_SE
   cueName: WeaponHammerPull
   templateBehaviour:
-    volume: 0.5
+    volume: 0.6
     pitch: 0
     AISACValue: 0
 --- !u!114 &-2468345322870550622
@@ -2032,7 +1960,7 @@ MonoBehaviour:
     m_PreExtrapolationTime: 0
     m_DisplayName: DraugrBark
   - m_Version: 1
-    m_Start: 9.9
+    m_Start: 10.05
     m_ClipIn: 0
     m_Asset: {fileID: -3302428207451956785}
     m_Duration: 2
@@ -2166,25 +2094,7 @@ MonoBehaviour:
       m_RotationOrder: 4
     m_MixOutCurve:
       serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
+      m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2211,25 +2121,7 @@ MonoBehaviour:
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
+      m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -2396,11 +2288,11 @@ MonoBehaviour:
   ignoreBlend: 0
   loopWithinClip: 0
   stopAtClipEnd: 1
-  clipDuration: 0
-  cueSheet: Move_SE
+  clipDuration: 0.933
+  cueSheet: Movie_SE
   cueName: ChainBreak
   templateBehaviour:
-    volume: 0.5
+    volume: 1
     pitch: 0
     AISACValue: 0
 --- !u!114 &1684749885460211171
@@ -2967,7 +2859,7 @@ MonoBehaviour:
     m_PreExtrapolationTime: 0
     m_DisplayName: ModeChange_Activate
   - m_Version: 1
-    m_Start: 10.2
+    m_Start: 10.333333333333334
     m_ClipIn: 0
     m_Asset: {fileID: -6246722986627622576}
     m_Duration: 2
@@ -3201,7 +3093,7 @@ MonoBehaviour:
     m_Start: 0
     m_ClipIn: 0
     m_Asset: {fileID: -8934150274722999445}
-    m_Duration: 13.433333333333334
+    m_Duration: 13.366666666666667
     m_TimeScale: 1
     m_ParentTrack: {fileID: 6416383160827711482}
     m_EaseInDuration: 0
