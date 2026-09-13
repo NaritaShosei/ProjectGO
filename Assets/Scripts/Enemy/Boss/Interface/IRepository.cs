@@ -25,6 +25,8 @@ namespace BossEnemy.Interface
         public void Init();
 
         public BossCharacterEntity GetEntity(int id);
+
+        public void ReleaseEntity(int id, BossCharacterEntity bossCharacterEntity);
     }
 
     public interface IBossAIBehaviourTreeNodeRepository

@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class BossEnemySpawner : MonoBehaviour
         enemyView.SetSpawner(_attackHitAreaSpawner);
 
         // Entityの取得
-        IBossCharacterEntity characterEntity = _bossCharacterEntityRepository.GetEntity(_id);
+        BossCharacterEntity characterEntity = _bossCharacterEntityRepository.GetEntity(_id);
 
         // AIとなるBehaviourTreeのEntryNode(スタート地点)を取得
         if (!_bossAIBehaviourTreeNodeRepository.TryGetEntryNode(_id, out EntryNode entryNode))
@@ -66,6 +67,17 @@ public class BossEnemySpawner : MonoBehaviour
         // HPUI関連の初期化
         bossEnemyHPUIPresenter.Init();
         bossEnemyHPUI.Init(bossEnemyHPUIPresenter);
+
+        // 死んだ際のイベント登録
+        characterEntity.CurrentAction.Subscribe(currentAction =>
+        {
+            if (currentAction == CharacterAction.Despawn)
+            {
+                if (bossEnemyHPUI is BossEnemyHPUIView hpUI)
+                    HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
+            }
+        });
+
         return enemyView;
     }
 
@@ -87,7 +99,6 @@ public class BossEnemySpawner : MonoBehaviour
     [SerializeField] private AttackHitAreaSpawner _attackHitAreaSpawner;
 
     [SerializeField, Header("スポーンさせるボスのID")]
-
     private int _id;
 
     private bool _isLoadedRepositries = false;
@@ -116,13 +127,14 @@ public class BossEnemySpawner : MonoBehaviour
         ReleaseRepositories();
     }
 
-    /// <summary>
-    /// Enemy死亡時の処理
-    /// </summary>
-    /// <param name="enemy">死亡したEnemy</param>
-    private void HandleEnemyDeath(IEnemy enemy)
+    /// <summary> Enemy死亡時の処理 </summary>
+    private void HandleEnemyDeath(int id, BossCharacterEntity characterEntity, BossCharacterView view, BossEnemyHPUIView bossEnemyHPUIView)
     {
-        
+        _bossCharacterEntityRepository.ReleaseEntity(id, characterEntity);
+
+        _bossEnemyObjectPool.Release(view);
+
+        _enemyUIObjectPool.Release(bossEnemyHPUIView);
     }
 
     private async UniTask LoadRepositories()

@@ -26,7 +26,24 @@ namespace BossEnemy.AI.BehaviourTree
                 }
             }
 
-            Debug.Log("Sequenceの初期化");
+            _sequenceChildNodeRunningEndNotifier.OnCancelAsyncAction
+                += _nodeRunningConditionNotifier.HandleCancelAsyncAction;
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction
+                += _sequenceChildNodeRunningEndNotifier.HandleCancelAsyncAction;
+        }
+
+        public override void Dispose()
+        {
+            _sequenceChildNodeRunningEndNotifier.OnCancelAsyncAction
+                -= _nodeRunningConditionNotifier.HandleCancelAsyncAction;
+
+            _nodeRunningConditionNotifier.OnCancelAsyncAction
+                -= _sequenceChildNodeRunningEndNotifier.HandleCancelAsyncAction;
+
+            base.Dispose();
+
+            _sequenceChildNodeRunningEndNotifier = null;
         }
 
         public override NodeCondition TryEntry()
@@ -42,6 +59,10 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            if(_currentNode != null) _currentNode = null;
+
+            _sequenceCount = 0;
+
             _sequenceChildNodeRunningEndNotifier.OnResearchBehaviourTree += ProceedSequence;
 
             ProceedSequence();
@@ -55,8 +76,6 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnExit()
         {
-            _sequenceCount = 0;
-
             if (_currentNode != null)
                 _currentNode.OnExit();
 
