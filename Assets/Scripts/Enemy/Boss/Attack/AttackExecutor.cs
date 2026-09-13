@@ -70,7 +70,7 @@ namespace BossEnemy.Attack
                 _attackTarget,
                 tryHitAttackData.AttackHitAreaRadius))
             {
-                AttackHit(_attackTarget);
+                AttackHit(tryHitAttackData, _attackTarget);
                 _wasAttackHit = true;
             }
             else _wasAttackHit = false;
@@ -122,7 +122,7 @@ namespace BossEnemy.Attack
         }
 
         /// <summary> 攻撃が当たった際のイベント発火時の処理 </summary>
-        private void AttackHit(IPlayer hitTarget)
+        private void AttackHit(AttackData hitAttack, IPlayer hitTarget)
         {
             hitTarget.TakeDamage(_executingAttackData.Damage, _executingAttackData.DamageReaction);
         }
