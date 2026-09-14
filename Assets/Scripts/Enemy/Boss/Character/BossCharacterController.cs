@@ -36,7 +36,7 @@ namespace BossEnemy.Character
 
         public void OnUpdate()
         {
-            if(_bossAIBehaviourController != null)
+            if (_bossAIBehaviourController != null)
                 _bossAIBehaviourController.OnUpdate();
         }
 
@@ -281,7 +281,7 @@ namespace BossEnemy.Character
         /// <summary> 被ダメージイベント発火時の処理 </summary>
         /// <param name="damageContext"> 被ダメージ状況 </param>
         /// <param name="hitPartsType"> 攻撃被弾ヶ所 </param>
-        /// <param name="scapegoatArmor"> 被弾ヶ所が鎧装着時に身代わりとなる鎧の部位 </param
+        /// <param name="scapegoatArmor"> 被弾ヶ所が鎧装着時に身代わりとなる鎧の部位 </param>
         private void HandleTakeDamage(DamageContext damageContext, TakeDamageType hitPartsType, ArmorAttachmentType scapegoatArmor)
         {
             Logic.Damage.TakeDamage(_characterEntity, damageContext, hitPartsType, scapegoatArmor);

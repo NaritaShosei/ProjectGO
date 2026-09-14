@@ -10,10 +10,11 @@ namespace BossEnemy.Effect
     {
         public override event Action<HitAreaView, AttackHitAreaType> OnDespawn;
 
-        public override void ActiveView(float range, float despawnTime )
+        public override void ActiveView(float radius)
         {
+            // 円の直径を割り出す
+            float range = radius * 2;
             SetRange(range);
-            SetDespawnTime(despawnTime);
         }
 
         public override void SetRange(float range)
@@ -31,19 +32,12 @@ namespace BossEnemy.Effect
             transform.localScale = _initialLocalScale * scale;
         }
 
-        public override void SetDespawnTime(float despawnTime)
-        {
-            _despawnTime = despawnTime;
-        }
-
-        public override void Despawn()
+        public override void InVisible()
         {
             OnDespawn?.Invoke(this, AttackHitAreaType.Circle);
             this.gameObject.SetActive(false);
         }
 
-        private float _despawnTime;
-        private float _elapsedTime;
         private float _initialMeshRadius;
         private Vector3 _initialLocalScale;
 
@@ -54,10 +48,6 @@ namespace BossEnemy.Effect
         [SerializeField] private ProceduralMeshGenerator _lateralGradient;
         [SerializeField] private ProceduralMeshGenerator _sheen;
 
-        private void OnEnable()
-        {
-            _elapsedTime = 0;
-        }
 
         private void Awake()
         {
@@ -113,16 +103,6 @@ namespace BossEnemy.Effect
             Vector3 point = transform.InverseTransformPoint(
                 meshFilter.transform.TransformPoint(meshLocalPoint));
             return new Vector2(point.x, point.z).magnitude;
-        }
-
-        private void Update()
-        {
-            _elapsedTime += Time.deltaTime;
-
-            if (_elapsedTime >= _despawnTime)
-            {
-                Despawn();
-            }
         }
     }
 }
