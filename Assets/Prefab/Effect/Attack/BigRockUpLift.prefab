@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6283333669555658550
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8388286568191686564}
+  - component: {fileID: 5465183140771768722}
+  m_Layer: 0
+  m_Name: BigRockUpLift
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8388286568191686564
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6283333669555658550}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2163640408853449863}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5465183140771768722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6283333669555658550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f83dae22c9ab10418f5ecb7a2520c16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParticleEffect
+  _isSpeedChangeEnabled: 1
+  _rootParticle: {fileID: 2163640408853449856}
+--- !u!1001 &1394243415893393869
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 8388286568191686564}
+    m_Modifications:
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 963651035755498831, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+      propertyPath: m_Name
+      value: GroundPop_Rocky_Void
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+--- !u!198 &2163640408853449856 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 963651035755498829, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+  m_PrefabInstance: {fileID: 1394243415893393869}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2163640408853449863 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 963651035755498826, guid: 24a3c026e775baf46be50177cb46678f, type: 3}
+  m_PrefabInstance: {fileID: 1394243415893393869}
+  m_PrefabAsset: {fileID: 0}

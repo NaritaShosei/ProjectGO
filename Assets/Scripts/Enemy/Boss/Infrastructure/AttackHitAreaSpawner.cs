@@ -9,13 +9,13 @@ namespace BossEnemy.Infrastructure
 {
     public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
     {
-        public HitAreaView Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime, Vector3 forward = default)
+        public HitAreaView Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, Vector3 forward = default)
         {
             HitAreaView hitArea = GetHitArea(hitAreaType);
             hitArea.gameObject.transform.position = spawnCenterPos;
             hitArea.gameObject.transform.forward = forward;
             hitArea.OnDespawn += Release;
-            hitArea.ActiveView(range, despawnTime);
+            hitArea.ActiveView(range);
 
             return hitArea;
         }

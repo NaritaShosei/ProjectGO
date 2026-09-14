@@ -10,13 +10,11 @@ namespace BossEnemy.Effect
     {
         public abstract event Action<HitAreaView, AttackHitAreaType> OnDespawn;
 
-        public abstract void ActiveView(float range, float despawnTime);
+        public abstract void ActiveView(float range);
 
         public abstract void SetRange(float range);
 
-        public abstract void SetDespawnTime(float despawnTime);
-
-        public abstract void Despawn();
+        public abstract void InVisible();
     }
 
 }

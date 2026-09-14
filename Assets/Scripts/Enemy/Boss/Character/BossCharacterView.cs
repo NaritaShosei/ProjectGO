@@ -87,19 +87,29 @@ namespace BossEnemy.Character
         /// <summary> 初期化する </summary>
         public void Init()
         {
+            // 死亡フラグ解除
             _isDead = false;
+
+            // ロックオンを可能に
             _isLockable = true;
+
+            // 攻撃SMBListの初期化
             _attackSMBList = new();
+
+            // Update処理が必要なクラスのListをクリア
+            _updaters.Clear();
 
             // 鎧の初期化
             InitArmor();
 
+            // Camera管理クラスを取得
             if (!ServiceLocator.TryGet(out _cameraManager))
             {
                 Debug.Log("取得失敗");
                 return;
             }
 
+            // Effect管理クラスを取得
             if(!ServiceLocator.TryGet(out _effectManager))
             {
                 Debug.Log("取得失敗");
@@ -130,11 +140,19 @@ namespace BossEnemy.Character
                         _services.PlayerInformationService.Player);
 
                     _attackSMBList.Add(attackSMB);
+                    _updaters.Add(attackSMB);
 
                     continue;
                 }
 
                 bossCharacterSMB.Init(_bossEnemyAnimationEventReceiver, this, GetTargetCenter());
+            }
+
+            // ヒットストップを登録
+            if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+            {
+                hitStopManager.Register(this, HitStopTargetGroup.AllEnemies);
+                hitStopManager.Register(this, HitStopTargetGroup.HitEnemy);
             }
         }
 
@@ -143,6 +161,8 @@ namespace BossEnemy.Character
             Init();
 
             _bossEnemyController = bossEnemyCharacterController;
+
+            _updaters.Add(bossEnemyCharacterController);
         }
 
 
@@ -443,6 +463,9 @@ namespace BossEnemy.Character
         // 攻撃のStateMachineBehaviourList
         private List<AttackSMB> _attackSMBList = new List<AttackSMB>();
 
+        // 舞フレーム処理を行う必要がある機能のリスト
+        private List<IUpdater> _updaters = new List<IUpdater>();
+
         private void Awake()
         {
             _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
@@ -453,7 +476,12 @@ namespace BossEnemy.Character
         {
             if (_bossEnemyController == null) return;
 
-            if (!_isDead) _bossEnemyController.OnUpdate();
+            if (_isDead) return;
+
+            foreach(var updater in _updaters)
+            {
+                updater.OnUpdate();
+            }
         }
 
         #region ダメージを受けた際のメソッド群

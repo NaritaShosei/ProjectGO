@@ -161,6 +161,8 @@ MonoBehaviour:
     _prefab: {fileID: 7530617160647338765, guid: c6ca6326235194944ab29c48ab546f26, type: 3}
   - _key: RockUpLift
     _prefab: {fileID: 8833923644228565619, guid: 2aa072756bb89ba43b4c51482593ab69, type: 3}
+  - _key: BigRockUpLift
+    _prefab: {fileID: 5465183140771768722, guid: 4cbc777c8943d0542a6d508d4091cf1c, type: 3}
   - _key: Meteor
     _prefab: {fileID: 3812723360568179772, guid: b1e7e059141b9b44fa290fda79777263, type: 3}
   - _key: BossArmorHit
@@ -171,6 +173,10 @@ MonoBehaviour:
     _prefab: {fileID: 6943747920440103634, guid: e7853ed4403801b4ba464271b98dd0a0, type: 3}
   - _key: ModeChangeLightning
     _prefab: {fileID: 2910567319473781398, guid: e144ad8ee92500d4a8eac9e83de4b802, type: 3}
+  - _key: Impact
+    _prefab: {fileID: 5758886222543522277, guid: ff712907e269965498c3874a70320b3b, type: 3}
+  - _key: StartMagic
+    _prefab: {fileID: 8674007868422521942, guid: 42c2ac0b755a3be4b86db79d181aca8a, type: 3}
   _preloadCount: 5
 --- !u!1 &1357235700894819526
 GameObject:
