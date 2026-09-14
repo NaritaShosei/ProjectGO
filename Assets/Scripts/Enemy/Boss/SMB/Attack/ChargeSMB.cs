@@ -82,6 +82,8 @@ namespace BossEnemy.SMB
                 _attackData.AttackHitAreaRadius,
                 _bossCharacterTransform.forward);
 
+            _visibleHitAreaList.Add(hitArea);
+
             // 攻撃範囲の大きさを設定
             if (hitArea is SquareHitAreaView squareHitArea)
             {
@@ -105,8 +107,9 @@ namespace BossEnemy.SMB
                 _elapsedTime >= _attackStartTime + _goalTime,
                 cancellationToken: cancellationToken);
 
-            // 移動終了と同時に攻撃範囲を
+            // 移動終了と同時に攻撃範囲を隠す
             hitArea.InVisible();
+            _visibleHitAreaList.Remove(hitArea);
 
             // 移動,攻撃開始フラグをFalseに
             _isMoving = false;

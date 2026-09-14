@@ -6,6 +6,7 @@ using UnityEngine;
 
 using BossEnemy.Enum;
 using BossEnemy.Attack;
+using BossEnemy.Effect;
 
 namespace BossEnemy.SMB
 {
@@ -78,25 +79,23 @@ namespace BossEnemy.SMB
 
             foreach (Vector3 attackPos in attackPosList)
             {
-                float despawnTime =
-                    _attackAreaDespawnAndDisplayAttackEffectTime +
-                    _attackHitTime +
-                    (attackCount * (_attackHitTime + _consecutiveAttackInterval));
-
                 attackCount++;
 
-                _attackHitAreaSpawner.Spawn
+                HitAreaView hitArea =　_attackHitAreaSpawner.Spawn
                     (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius);
+
+                _visibleHitAreaList.Add(hitArea);
 
                 _effectManager.PlayEffect(METEOR_EFFECT_NAME, attackPos);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
 
+                _visibleHitAreaList.Remove(hitArea);
+
                 PlayBossSE(SoundCueNames.Boss.MeteorImpact);
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 
-                _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (_attackData, AttackHitAreaType.Circle, attackPos);
+                StartAttackHitCheck(attackPos);
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_consecutiveAttackInterval), cancellationToken: cancellationToken);
             }
