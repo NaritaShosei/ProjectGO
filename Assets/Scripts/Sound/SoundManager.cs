@@ -101,6 +101,10 @@ public class SoundManager
                     return;
                 }
                 _bgmStopping = false;
+                // CriAtomSourceはStatus.Stopのときだけloopをプレーヤへ反映する。
+                // フェーダ使用時も、次に再生するBGMへ確実にループを指定する。
+                _bgmSource.loop = true;
+                _bgmSource.player.Loop(true);
                 _bgmSource.Play();
                 return;
             }
