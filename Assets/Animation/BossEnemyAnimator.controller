@@ -980,7 +980,7 @@ MonoBehaviour:
   _attackID: 8
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
+  _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 0
   _cameraShakeData:
     _amplitude: 0
@@ -1203,7 +1203,7 @@ MonoBehaviour:
   _attackID: 11
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
+  _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 0
   _cameraShakeData:
     _amplitude: 0
@@ -1867,7 +1867,7 @@ MonoBehaviour:
   _attackID: 9
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
+  _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 0
   _cameraShakeData:
     _amplitude: 0
@@ -1914,8 +1914,8 @@ MonoBehaviour:
   _attackID: 11
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
-  _attackHitCollisionType: 0
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
@@ -2301,8 +2301,8 @@ MonoBehaviour:
   _attackID: 8
   _attackStartTime: 0.5
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
-  _attackHitCollisionType: 0
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
@@ -2604,7 +2604,7 @@ AnimatorStateMachine:
     m_Position: {x: 580, y: 140, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6058405512842583964}
-    m_Position: {x: 570, y: 220, z: 0}
+    m_Position: {x: 580, y: 220, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -2755,8 +2755,8 @@ MonoBehaviour:
   _attackID: 10
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
-  _attackHitCollisionType: 0
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
@@ -3329,7 +3329,7 @@ MonoBehaviour:
   _attackID: 10
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
+  _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 0
   _cameraShakeData:
     _amplitude: 0
@@ -3558,8 +3558,8 @@ MonoBehaviour:
   _attackID: 9
   _attackStartTime: 1
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 0
-  _attackHitCollisionType: 0
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
