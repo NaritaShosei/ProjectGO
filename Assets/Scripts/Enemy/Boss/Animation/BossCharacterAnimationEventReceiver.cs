@@ -19,7 +19,7 @@ namespace BossEnemy.Infrastructure
         public event Action<bool> OnColliderIsTriggerIsEnabled;
 
         /// <summary>攻撃ヒットタイミングのイベント</summary>
-        public event Action<AttackHitAreaType, Vector3, Vector3> OnCheckHitAttack;
+        public event Action<Attack.AttackData, AttackHitAreaType, Vector3, Vector3> OnCheckHitAttack;
 
         /// <summary> 攻撃当たり判定を行うタイミングのイベント </summary>
         public event Action OnHitAttack;
@@ -28,13 +28,13 @@ namespace BossEnemy.Infrastructure
         public event Action OnAttackCompleted;
 
         /// <summary>Phase切り替え終了のイベント</summary>
-        public event Action OnPhaseChangeEnd;
+        public event Action OnPhaseChangeCompleted;
 
         /// <summary> 姿勢の切り替え完了時イベント </summary>
         public event Action OnPostureChangeCompleted;
 
         /// <summary>死亡アニメーション終了のイベント</summary>
-        public event Action OnDeadEnd;
+        public event Action OnDespawn;
 
         /// <summary>AttackSMB から移動開始タイミングで呼ばれる</summary>
         public void AnimEvent_MoveCharacter(Vector3 goal, float time)
@@ -49,9 +49,9 @@ namespace BossEnemy.Infrastructure
         }
 
         /// <summary>AttackSMB から攻撃ヒットタイミングで呼ばれる</summary>
-        public void AnimEvent_AttackHitCheck(AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
+        public void AnimEvent_AttackHitCheck(Attack.AttackData tryHitAttackData, AttackHitAreaType attackHitAreaType, Vector3 attackPosition, Vector3 forward = default)
         {
-            OnCheckHitAttack?.Invoke(attackHitAreaType, attackPosition, forward);
+            OnCheckHitAttack?.Invoke(tryHitAttackData, attackHitAreaType, attackPosition, forward);
         }
 
         /// <summary> 攻撃が当たった際に呼ばれる </summary>
@@ -66,12 +66,6 @@ namespace BossEnemy.Infrastructure
             OnAttackCompleted?.Invoke();
         }
 
-        /// <summary>PhaseChangeSMB からステート終了時に呼ばれる</summary>
-        public void AnimEvent_PhaseChangeEnd()
-        {
-            OnPhaseChangeEnd?.Invoke();
-        }
-
         /// <summary> 姿勢の切り替え完了時に呼ばれる </summary>
         public void AnimEvent_PostureChangeCompleted()
         {
@@ -79,9 +73,9 @@ namespace BossEnemy.Infrastructure
         }
 
         /// <summary>DeadSMB からステート終了時に呼ばれる</summary>
-        public void AnimEvent_DeadEnd()
+        public void AnimEvent_Despawn()
         {
-            OnDeadEnd?.Invoke();
+            OnDespawn?.Invoke();
         }
     }
 

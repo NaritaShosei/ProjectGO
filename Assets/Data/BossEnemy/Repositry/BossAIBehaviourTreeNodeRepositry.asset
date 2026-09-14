@@ -14,485 +14,674 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossAIBehaviourTreeNodeRepositry
   _nodesHolder:
   - _entryNode:
-      rid: 4923627558852886667
+      rid: 4923627668258685163
     _childrenNodes:
-    - rid: 4923627558852886668
-    - rid: 4923627558852886669
-    - rid: 4923627558852886670
-    - rid: 4923627558852886671
-    - rid: 4923627558852886672
-    - rid: 4923627558852886673
-    - rid: 4923627558852886674
-    - rid: 4923627558852886675
-    - rid: 4923627558852886676
-    - rid: 4923627558852886677
-    - rid: 4923627558852886678
-    - rid: 4923627558852886679
-    - rid: 4923627558852886680
-    - rid: 4923627558852886681
-    - rid: 4923627558852886682
-    - rid: 4923627558852886683
-    - rid: 4923627558852886684
-    - rid: 4923627558852886685
-    - rid: 4923627558852886686
-    - rid: 4923627558852886687
-    - rid: 4923627558852886688
-    - rid: 4923627558852886689
-    - rid: 4923627558852886690
-    - rid: 4923627558852886691
-    - rid: 4923627558852886692
-    - rid: 4923627558852886693
-    - rid: 4923627558852886694
-    - rid: 4923627558852886695
-    - rid: 4923627558852886696
-    - rid: 4923627558852886697
-    - rid: 4923627558852886698
-    - rid: 4923627558852886699
-    - rid: 4923627558852886700
-    - rid: 4923627558852886701
-    - rid: 4923627558852886702
-    - rid: 4923627558852886703
-    - rid: 4923627558852886704
-    - rid: 4923627558852886705
-    - rid: 4923627558852886706
-    - rid: 4923627558852886707
-    - rid: 4923627558852886708
-    - rid: 4923627558852886709
-    - rid: 4923627558852886710
-    - rid: 4923627558852886711
-    - rid: 4923627558852886712
-    - rid: 4923627558852886713
-    - rid: 4923627558852886714
-    - rid: 4923627558852886715
-    - rid: 4923627558852886716
-    - rid: 4923627558852886717
-    - rid: 4923627558852886718
-    - rid: 4923627558852886719
-    - rid: 4923627558852886720
-    - rid: 4923627558852886721
-    - rid: 4923627558852886722
-    - rid: 4923627558852886723
-    - rid: 4923627558852886724
-    - rid: 4923627558852886725
-    - rid: 4923627558852886726
-    - rid: 4923627558852886727
-    - rid: 4923627558852886728
-    - rid: 4923627558852886729
+    - rid: 4923627668258685164
+    - rid: 4923627668258685165
+    - rid: 4923627668258685166
+    - rid: 4923627668258685167
+    - rid: 4923627668258685168
+    - rid: 4923627668258685169
+    - rid: 4923627668258685170
+    - rid: 4923627668258685171
+    - rid: 4923627668258685172
+    - rid: 4923627668258685173
+    - rid: 4923627668258685174
+    - rid: 4923627668258685175
+    - rid: 4923627668258685176
+    - rid: 4923627668258685177
+    - rid: 4923627668258685178
+    - rid: 4923627668258685179
+    - rid: 4923627668258685180
+    - rid: 4923627668258685181
+    - rid: 4923627668258685182
+    - rid: 4923627668258685183
+    - rid: 4923627668258685184
+    - rid: 4923627668258685185
+    - rid: 4923627668258685186
+    - rid: 4923627668258685187
+    - rid: 4923627668258685188
+    - rid: 4923627668258685189
+    - rid: 4923627668258685190
+    - rid: 4923627668258685191
+    - rid: 4923627668258685192
+    - rid: 4923627668258685193
+    - rid: 4923627668258685194
+    - rid: 4923627668258685195
+    - rid: 4923627668258685196
+    - rid: 4923627668258685197
+    - rid: 4923627668258685198
+    - rid: 4923627668258685199
+    - rid: 4923627668258685200
+    - rid: 4923627668258685201
+    - rid: 4923627668258685202
+    - rid: 4923627668258685203
+    - rid: 4923627668258685204
+    - rid: 4923627668258685205
+    - rid: 4923627668258685206
+    - rid: 4923627668258685207
+    - rid: 4923627668258685208
+    - rid: 4923627668258685209
+    - rid: 4923627668258685210
+    - rid: 4923627668258685211
+    - rid: 4923627668258685212
+    - rid: 4923627668258685213
+    - rid: 4923627668258685214
+    - rid: 4923627668258685215
+    - rid: 4923627668258685216
+    - rid: 4923627668258685217
+    - rid: 4923627668258685218
+    - rid: 4923627668258685219
+    - rid: 4923627668258685220
+    - rid: 4923627668258685221
+    - rid: 4923627668258685222
+    - rid: 4923627668258685223
+    - rid: 4923627668258685224
+    - rid: 4923627668258685225
+    - rid: 4923627668258685226
+    - rid: 4923627668258685227
+    - rid: 4923627668258685228
+    - rid: 4923627668258685229
+    - rid: 4923627668258685230
+    - rid: 4923627668258685231
+    - rid: 4923627668258685232
+    - rid: 4923627668258685233
+    - rid: 4923627668258685234
+    - rid: 4923627668258685235
+    - rid: 4923627668258685236
+    - rid: 4923627668258685237
+    - rid: 4923627668258685238
+    - rid: 4923627668258685239
+    - rid: 4923627668258685240
+    - rid: 4923627668258685241
+    - rid: 4923627668258685242
+    - rid: 4923627668258685243
+    - rid: 4923627668258685244
+    - rid: 4923627668258685245
+    - rid: 4923627668258685246
+    - rid: 4923627668258685247
+    - rid: 4923627668258685248
+    - rid: 4923627668258685249
+    - rid: 4923627668258685250
   references:
     version: 2
     RefIds:
-    - rid: 4923627558852886667
+    - rid: 4923627668258685163
       type: {class: EntryNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886668
+        - rid: 4923627668258685164
         _runningPriority: 0
         _playableCharactersID: 1
-    - rid: 4923627558852886668
+    - rid: 4923627668258685164
       type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886669
-        - rid: 4923627558852886670
-        - rid: 4923627558852886671
-        - rid: 4923627558852886672
-        - rid: 4923627558852886673
+        - rid: 4923627668258685165
+        - rid: 4923627668258685166
+        - rid: 4923627668258685167
+        - rid: 4923627668258685168
         _runningPriority: 0
-    - rid: 4923627558852886669
+    - rid: 4923627668258685165
+      type: {class: NotBeginActionDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685169
+        _runningPriority: 0
+    - rid: 4923627668258685166
       type: {class: CharacterHPDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886674
-        _runningPriority: 0
+        - rid: 4923627668258685170
+        _runningPriority: 1
         _numericalComparisonType: 2
         _canEntryRemainingHP: 0
-    - rid: 4923627558852886670
-      type: {class: ArmorBrokenDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+    - rid: 4923627668258685167
+      type: {class: BreakingArmorDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886675
+        - rid: 4923627668258685171
         _runningPriority: 2
+    - rid: 4923627668258685168
+      type: {class: CurrentCharacterActionDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685172
+        _runningPriority: 3
+        _canEntryArmorCondition: 0
+    - rid: 4923627668258685169
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685173
+        - rid: 4923627668258685174
+        - rid: 4923627668258685175
+        - rid: 4923627668258685176
+        _runningPriority: 0
+    - rid: 4923627668258685170
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685177
+        - rid: 4923627668258685178
+        _runningPriority: 0
+    - rid: 4923627668258685171
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685179
+        - rid: 4923627668258685180
+        - rid: 4923627668258685181
+        - rid: 4923627668258685182
+        _runningPriority: 0
+    - rid: 4923627668258685172
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685183
+        - rid: 4923627668258685184
+        - rid: 4923627668258685185
+        _runningPriority: 0
+    - rid: 4923627668258685173
+      type: {class: PhaseChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+    - rid: 4923627668258685174
+      type: {class: LookAtTargetAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 1
+        _lookSpeed: 5
+        _finishAngleThreshold: 10
+    - rid: 4923627668258685175
+      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 2
+        _attackSelectPoolID: 9
+    - rid: 4923627668258685176
+      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 3
+    - rid: 4923627668258685177
+      type: {class: CurrentPhaseDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685186
+        _runningPriority: 0
+        _canEntryPhase: 1
+    - rid: 4923627668258685178
+      type: {class: DeadAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 1
+    - rid: 4923627668258685179
+      type: {class: ArmorBrokenDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685187
+        _runningPriority: 1
         _canEntryArmorConditions: 0300000004000000
-    - rid: 4923627558852886671
+    - rid: 4923627668258685180
       type: {class: ArmorBrokenDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886676
-        _runningPriority: 3
+        - rid: 4923627668258685188
+        _runningPriority: 2
         _canEntryArmorConditions: 03000000
-    - rid: 4923627558852886672
+    - rid: 4923627668258685181
       type: {class: ArmorBrokenDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886677
-        _runningPriority: 3
+        - rid: 4923627668258685189
+        _runningPriority: 2
         _canEntryArmorConditions: 04000000
-    - rid: 4923627558852886673
+    - rid: 4923627668258685182
       type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886678
-        - rid: 4923627558852886679
+        - rid: 4923627668258685190
+        - rid: 4923627668258685191
         _runningPriority: 4
-    - rid: 4923627558852886674
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886680
-        - rid: 4923627558852886681
-        _runningPriority: 0
-    - rid: 4923627558852886675
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886682
-        - rid: 4923627558852886683
-        _runningPriority: 0
-    - rid: 4923627558852886676
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886684
-        - rid: 4923627558852886685
-        _runningPriority: 0
-    - rid: 4923627558852886677
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886686
-        - rid: 4923627558852886687
-        _runningPriority: 0
-    - rid: 4923627558852886678
+    - rid: 4923627668258685183
       type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886688
+        - rid: 4923627668258685192
+        _runningPriority: 3
+        _canEntryPosture: 2
+    - rid: 4923627668258685184
+      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685193
+        _runningPriority: 3
+        _canEntryPosture: 3
+    - rid: 4923627668258685185
+      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685194
+        _runningPriority: 4
+        _canEntryPosture: 1
+    - rid: 4923627668258685186
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685195
+        - rid: 4923627668258685196
+        - rid: 4923627668258685197
+        - rid: 4923627668258685198
+        _runningPriority: 0
+    - rid: 4923627668258685187
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685199
+        - rid: 4923627668258685200
+        _runningPriority: 0
+    - rid: 4923627668258685188
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685201
+        - rid: 4923627668258685202
+        _runningPriority: 0
+    - rid: 4923627668258685189
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685203
+        - rid: 4923627668258685204
+        _runningPriority: 0
+    - rid: 4923627668258685190
+      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685205
         _runningPriority: 0
         _canEntryPosture: 1
-    - rid: 4923627558852886679
+    - rid: 4923627668258685191
       type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _changePosture: 1
-    - rid: 4923627558852886680
-      type: {class: CurrentPhaseDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+    - rid: 4923627668258685192
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886689
+        - rid: 4923627668258685206
+        - rid: 4923627668258685207
         _runningPriority: 0
-        _canEntryPhase: 1
-    - rid: 4923627558852886681
-      type: {class: DeadAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+    - rid: 4923627668258685193
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685208
+        - rid: 4923627668258685209
+        _runningPriority: 0
+    - rid: 4923627668258685194
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685210
+        - rid: 4923627668258685211
+        _runningPriority: 0
+    - rid: 4923627668258685195
+      type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+        _changePosture: 1
+    - rid: 4923627668258685196
+      type: {class: PhaseChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
-    - rid: 4923627558852886682
+    - rid: 4923627668258685197
+      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 2
+        _attackSelectPoolID: 10
+    - rid: 4923627668258685198
+      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 3
+    - rid: 4923627668258685199
       type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886690
+        - rid: 4923627668258685212
         _runningPriority: 0
         _canEntryPosture: 4
-    - rid: 4923627558852886683
+    - rid: 4923627668258685200
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685213
+        - rid: 4923627668258685214
+        - rid: 4923627668258685215
+        - rid: 4923627668258685216
+        _runningPriority: 1
+    - rid: 4923627668258685201
+      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685217
+        _runningPriority: 0
+        _canEntryPosture: 2
+    - rid: 4923627668258685202
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685218
+        - rid: 4923627668258685219
+        _runningPriority: 1
+    - rid: 4923627668258685203
+      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685220
+        _runningPriority: 0
+        _canEntryPosture: 3
+    - rid: 4923627668258685204
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685221
+        - rid: 4923627668258685222
+        _runningPriority: 1
+    - rid: 4923627668258685205
+      type: {class: CancelSearchAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+    - rid: 4923627668258685206
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685223
+        - rid: 4923627668258685224
+        _runningPriority: 0
+    - rid: 4923627668258685207
+      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 3
+    - rid: 4923627668258685208
+      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685225
+        - rid: 4923627668258685226
+        _runningPriority: 0
+    - rid: 4923627668258685209
+      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 3
+    - rid: 4923627668258685210
+      type: {class: CurrentPhaseDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685227
+        _runningPriority: 0
+        _canEntryPhase: 1
+    - rid: 4923627668258685211
+      type: {class: CurrentPhaseDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685228
+        _runningPriority: 0
+        _canEntryPhase: 2
+    - rid: 4923627668258685212
+      type: {class: CancelSearchAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+    - rid: 4923627668258685213
+      type: {class: CancelAsyncAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+    - rid: 4923627668258685214
       type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _changePosture: 4
-    - rid: 4923627558852886684
-      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886691
-        _runningPriority: 0
-        _canEntryPosture: 2
-    - rid: 4923627558852886685
-      type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 1
-        _changePosture: 2
-    - rid: 4923627558852886686
-      type: {class: BossCharacterPostureDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886692
-        _runningPriority: 0
-        _canEntryPosture: 3
-    - rid: 4923627558852886687
-      type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 1
-        _changePosture: 3
-    - rid: 4923627558852886688
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886693
-        - rid: 4923627558852886694
-        _runningPriority: 0
-    - rid: 4923627558852886689
-      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886695
-        - rid: 4923627558852886696
-        - rid: 4923627558852886697
-        _runningPriority: 0
-    - rid: 4923627558852886690
-      type: {class: AwaitAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 0
-    - rid: 4923627558852886691
-      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886698
-        - rid: 4923627558852886699
-        _runningPriority: 0
-    - rid: 4923627558852886692
-      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886700
-        - rid: 4923627558852886701
-        _runningPriority: 0
-    - rid: 4923627558852886693
-      type: {class: CurrentPhaseDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886702
-        _runningPriority: 0
-        _canEntryPhase: 1
-    - rid: 4923627558852886694
-      type: {class: CurrentPhaseDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886703
-        _runningPriority: 0
-        _canEntryPhase: 2
-    - rid: 4923627558852886695
-      type: {class: PhaseChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 0
-    - rid: 4923627558852886696
-      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 1
-        _attackSelectPoolID: 9
-    - rid: 4923627558852886697
-      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+    - rid: 4923627668258685215
+      type: {class: WaitForTimeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 2
-    - rid: 4923627558852886698
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886704
-        - rid: 4923627558852886705
-        _runningPriority: 0
-    - rid: 4923627558852886699
-      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+        _waitTime: 10
+    - rid: 4923627668258685216
+      type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 3
-    - rid: 4923627558852886700
-      type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886706
-        - rid: 4923627558852886707
-        _runningPriority: 0
-    - rid: 4923627558852886701
-      type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+        _changePosture: 1
+    - rid: 4923627668258685217
+      type: {class: CancelSearchAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
-        _runningPriority: 3
-    - rid: 4923627558852886702
-      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode:
-        - rid: 4923627558852886708
-        - rid: 4923627558852886709
-        - rid: 4923627558852886710
-        - rid: 4923627558852886711
         _runningPriority: 0
-    - rid: 4923627558852886703
-      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+    - rid: 4923627668258685218
+      type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
-        _childrenNode:
-        - rid: 4923627558852886712
-        - rid: 4923627558852886713
-        - rid: 4923627558852886714
-        - rid: 4923627558852886715
+        _childrenNode: []
         _runningPriority: 0
-    - rid: 4923627558852886704
+        _changePosture: 2
+    - rid: 4923627668258685219
+      type: {class: RevertPostureInSecondsAsyncAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 1
+        _changePosture: 1
+        _revertInSeconds: 10
+    - rid: 4923627668258685220
+      type: {class: CancelSearchAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+    - rid: 4923627668258685221
+      type: {class: PostureChangeAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+        _changePosture: 3
+    - rid: 4923627668258685222
+      type: {class: RevertPostureInSecondsAsyncAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 1
+        _changePosture: 1
+        _revertInSeconds: 10
+    - rid: 4923627668258685223
       type: {class: TargetDistanceDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886716
+        - rid: 4923627668258685229
         _runningPriority: 0
         _canEntryDistance: 5
-    - rid: 4923627558852886705
+    - rid: 4923627668258685224
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _attackSelectPoolID: 8
-    - rid: 4923627558852886706
+    - rid: 4923627668258685225
       type: {class: TargetDistanceDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886717
+        - rid: 4923627668258685230
         _runningPriority: 0
         _canEntryDistance: 5
-    - rid: 4923627558852886707
+    - rid: 4923627668258685226
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _attackSelectPoolID: 8
-    - rid: 4923627558852886708
+    - rid: 4923627668258685227
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685231
+        - rid: 4923627668258685232
+        - rid: 4923627668258685233
+        - rid: 4923627668258685234
+        _runningPriority: 0
+    - rid: 4923627668258685228
+      type: {class: SequenceNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode:
+        - rid: 4923627668258685235
+        - rid: 4923627668258685236
+        - rid: 4923627668258685237
+        - rid: 4923627668258685238
+        _runningPriority: 0
+    - rid: 4923627668258685229
+      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+        _attackSelectPoolID: 7
+    - rid: 4923627668258685230
+      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
+      data:
+        _childrenNode: []
+        _runningPriority: 0
+        _attackSelectPoolID: 7
+    - rid: 4923627668258685231
       type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886718
-        - rid: 4923627558852886719
+        - rid: 4923627668258685239
+        - rid: 4923627668258685240
         _runningPriority: 0
-    - rid: 4923627558852886709
+    - rid: 4923627668258685232
       type: {class: LookAtTargetAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _lookSpeed: 5
         _finishAngleThreshold: 15
-    - rid: 4923627558852886710
+    - rid: 4923627668258685233
       type: {class: TargetChaseAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 2
         _moveSpeed: 5
-    - rid: 4923627558852886711
+    - rid: 4923627668258685234
       type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 3
-    - rid: 4923627558852886712
+    - rid: 4923627668258685235
       type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886720
-        - rid: 4923627558852886721
+        - rid: 4923627668258685241
+        - rid: 4923627668258685242
         _runningPriority: 0
-    - rid: 4923627558852886713
+    - rid: 4923627668258685236
       type: {class: LookAtTargetAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _lookSpeed: 5
         _finishAngleThreshold: 15
-    - rid: 4923627558852886714
+    - rid: 4923627668258685237
       type: {class: TargetChaseAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 2
         _moveSpeed: 1
-    - rid: 4923627558852886715
+    - rid: 4923627668258685238
       type: {class: AttackExecuteAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 3
-    - rid: 4923627558852886716
-      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 0
-        _attackSelectPoolID: 7
-    - rid: 4923627558852886717
-      type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
-      data:
-        _childrenNode: []
-        _runningPriority: 0
-        _attackSelectPoolID: 7
-    - rid: 4923627558852886718
+    - rid: 4923627668258685239
       type: {class: TargetDistanceDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886722
+        - rid: 4923627668258685243
         _runningPriority: 0
         _canEntryDistance: 10
-    - rid: 4923627558852886719
+    - rid: 4923627668258685240
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _attackSelectPoolID: 2
-    - rid: 4923627558852886720
+    - rid: 4923627668258685241
       type: {class: TargetDistanceDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886723
+        - rid: 4923627668258685244
         _runningPriority: 0
         _canEntryDistance: 10
-    - rid: 4923627558852886721
+    - rid: 4923627668258685242
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _attackSelectPoolID: 5
-    - rid: 4923627558852886722
+    - rid: 4923627668258685243
       type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886724
-        - rid: 4923627558852886725
+        - rid: 4923627668258685245
+        - rid: 4923627668258685246
         _runningPriority: 0
-    - rid: 4923627558852886723
+    - rid: 4923627668258685244
       type: {class: SelectorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886726
-        - rid: 4923627558852886727
+        - rid: 4923627668258685247
+        - rid: 4923627668258685248
         _runningPriority: 0
-    - rid: 4923627558852886724
+    - rid: 4923627668258685245
       type: {class: CountDownDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886728
+        - rid: 4923627668258685249
         _runningPriority: 0
         _canEntryCount: 3
-    - rid: 4923627558852886725
+    - rid: 4923627668258685246
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _attackSelectPoolID: 1
-    - rid: 4923627558852886726
+    - rid: 4923627668258685247
       type: {class: CountDownDecoratorNode, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode:
-        - rid: 4923627558852886729
+        - rid: 4923627668258685250
         _runningPriority: 0
         _canEntryCount: 3
-    - rid: 4923627558852886727
+    - rid: 4923627668258685248
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 1
         _attackSelectPoolID: 4
-    - rid: 4923627558852886728
+    - rid: 4923627668258685249
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []
         _runningPriority: 0
         _attackSelectPoolID: 3
-    - rid: 4923627558852886729
+    - rid: 4923627668258685250
       type: {class: SelectAttackAction, ns: BossEnemy.AI.BehaviourTree, asm: Assembly-CSharp}
       data:
         _childrenNode: []

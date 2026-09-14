@@ -75,6 +75,8 @@ public class SequenceStateMachine
         _context.ResetTransitionFlags();
 
         _current = next;
+        _context.SequenceManager?.ApplyLighting(nextType);
+        _context.SequenceManager?.ApplyBGM(nextType);
         _current.OnEnter(_context);
 
         Debug.Log($"[SequenceStateMachine] → {nextType}");

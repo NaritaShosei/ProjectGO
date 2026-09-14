@@ -20,6 +20,9 @@ public interface IPlayer :
     /// ロックオンなどの中心のTransformを取得する
     /// </summary>
     public Transform GetTargetCenter();
+
+    /// <summary> プレイヤーの位置と回転を設定する </summary>
+    public void SetPositionAndRotation(Vector3 position, Quaternion rotation);
 }
 
 public interface IPlayerStats :

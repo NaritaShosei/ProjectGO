@@ -73,7 +73,7 @@ namespace BossEnemy.SMB
                 await UniTask.Delay(waitPlayEffect, cancellationToken: cancellationToken);
 
                 _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (AttackHitAreaType.Circle, _attackPos);
+                    (_attackData, AttackHitAreaType.Circle, _attackPos);
 
                 await UniTask.Delay(_attackIntervalFlame, cancellationToken: cancellationToken);
             }

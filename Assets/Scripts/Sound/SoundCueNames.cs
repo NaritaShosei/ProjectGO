@@ -145,6 +145,8 @@ public static class SoundCueNames
 
     public static class BGM
     {
-        public const string Title = "OutGameIntro";
+        public const string OutGameMobBattle = "OutGame_MobBattle_BGM";
+        public const string Title = OutGameMobBattle;
+        public const string BossBattle = "BossBattle_BGM";
     }
 }

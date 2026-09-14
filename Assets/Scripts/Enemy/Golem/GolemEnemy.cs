@@ -242,7 +242,8 @@ public class GolemEnemy : MobEnemy, IFormationParticipant
                 _services,
                 _animator,
                 _distanceProfile,
-                _attackCooldownOverride);
+                _attackCooldownOverride,
+                DamageReactionType.Medium);
 
             _attack.Init(initCtx);
             _runner.Register(_attack);

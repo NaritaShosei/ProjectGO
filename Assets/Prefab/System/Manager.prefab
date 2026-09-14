@@ -1006,6 +1006,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
   _subtitleSettingsAddress: SubtitleSettings
+  _mobLighting:
+    _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e1, type: 2}
+    _overrideSun: 0
+    _sunSource: {fileID: 0}
+  _bossLighting:
+    _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e2, type: 2}
+    _overrideSun: 0
+    _sunSource: {fileID: 0}
+  _resultLighting:
+    _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e3, type: 2}
+    _overrideSun: 0
+    _sunSource: {fileID: 0}
   _subtitleView: {fileID: 0}
   _moviePlayer: {fileID: 3281229546311345012}
   _firstSequence: 1

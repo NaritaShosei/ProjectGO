@@ -22,6 +22,24 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
         }
     }
 
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        _bossCharacterEntity = null;
+
+        // 子ノードを初期化
+        if (_childrenNode != null && _childrenNode.Length > 0)
+        {
+            foreach (var child in _childrenNode)
+            {
+                if (child == null) continue;
+
+                child.Dispose();
+            }
+        }
+    }
+
     protected IBossCharacterEntity _bossCharacterEntity = null;
 
     /// <summary> 子ノードを初期化 </summary>
@@ -41,4 +59,6 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
 
         treeNode.Init(nodeRunningEndNotifier);
     }
+
+
 }

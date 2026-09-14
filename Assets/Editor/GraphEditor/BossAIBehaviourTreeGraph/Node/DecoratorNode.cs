@@ -1,4 +1,5 @@
 using BossEnemy.AI.BehaviourTree;
+using BossEnemy.Character;
 using BossEnemy.Enum;
 using System;
 using System.Collections.Generic;
@@ -47,6 +48,56 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
                 .Build();
         }
     }
+
+    [Serializable]
+    public class NotBeginActionDecoratorNode : DecoratorNode<BehaviourTree.NotBeginActionDecoratorNode>
+    {
+        public NotBeginActionDecoratorNode()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.NotBeginActionDecoratorNode();
+        }
+    }
+
+    [Serializable]
+    public class CurrentCharacterActionDecoratorNode : DecoratorNode<BehaviourTree.CurrentCharacterActionDecoratorNode>
+    {
+        private const string CAN_ENTRY_ACTION = "Entry条件となるBossの現在の行動";
+
+        public CurrentCharacterActionDecoratorNode()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.CurrentCharacterActionDecoratorNode();
+        }
+
+        public override void OnGraphChanged(GraphLogger graphLogger)
+        {
+            base.OnGraphChanged(graphLogger);
+
+            if (GetNodeOptionByName(CAN_ENTRY_ACTION).TryGetValue(out CharacterAction action))
+            {
+                _behaviourTreeNode.SetCanEntryCondition(action);
+            }
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext context)
+        {
+            base.OnDefineOptions(context);
+
+            context.AddOption<CharacterAction>(CAN_ENTRY_ACTION).Build();
+        }
+    }
+
+    [Serializable]
+    public class BreakingArmorDecoratorNode : DecoratorNode<BehaviourTree.BreakingArmorDecoratorNode>
+    {
+        public BreakingArmorDecoratorNode()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.BreakingArmorDecoratorNode();
+        }
+    }
+
 
     [Serializable]
     public class ArmorBrokenDecoratorNode : DecoratorNode<BehaviourTree.ArmorBrokenDecoratorNode>

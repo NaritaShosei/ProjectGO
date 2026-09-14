@@ -1,11 +1,12 @@
 using BossEnemy.AI.BehaviourTree;
 using BossEnemy.Character;
 using BossEnemy.Enum;
+using System;
 using UnityEngine;
 
 namespace BossEnemy.Interface
 {
-    public interface IBossEnemyCharacterController : IUpdater
+    public interface IBossEnemyCharacterController : IUpdater, IDisposable
     {
         /// <summary> 初期化処理 </summary>
         public void Init(

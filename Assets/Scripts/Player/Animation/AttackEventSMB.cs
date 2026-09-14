@@ -14,13 +14,14 @@ public class AttackEventSMB : StateMachineBehaviour
         _stateLength = stateInfo.length;
 
         animator.TryGetComponent(out _controller);
+        _animationVersion = _controller != null ? _controller.CombatAnimationVersion : -1;
     }
 
     public override void OnStateUpdate(
     Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (animator.speed == 0f) { return; }
-        if (_controller == null) { return; }
+        if (!IsCurrentAnimation) { return; }
 
         float currentTime = stateInfo.normalizedTime * _stateLength;
 
@@ -30,25 +31,30 @@ public class AttackEventSMB : StateMachineBehaviour
 
             _attackExecuted[i] = true;
             _controller.AnimEvent_AttackExecute(i, _attackExecuteTimes.Length);
+            if (!IsCurrentAnimation) return;
         }
 
         if (!_comboStarted && currentTime >= _comboWindowStartTime)
         {
             _comboStarted = true;
             _controller.AnimEvent_ComboWindowStart();
+            if (!IsCurrentAnimation) return;
         }
 
         if (!_comboEnded && currentTime >= _comboWindowEndTime)
         {
             _comboEnded = true;
             _controller.AnimEvent_ComboWindowEnd();
+            if (!IsCurrentAnimation) return;
             _controller.AnimEvent_ComboTransition();
+            if (!IsCurrentAnimation) return;
         }
 
         if (!_modeChangeReady && currentTime >= _modeChangeTime)
         {
             _modeChangeReady = true;
             _controller.AnimEvent_ModeChangeReady();
+            if (!IsCurrentAnimation) return;
         }
 
         if (!_attackCompleted && currentTime >= _attackCompleteTime)
@@ -60,10 +66,13 @@ public class AttackEventSMB : StateMachineBehaviour
 
     public override void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (_controller == null) { return; }
+        if (!IsCurrentAnimation) { return; }
 
         if (!_attackCompleted)
+        {
+            _attackCompleted = true;
             _controller.AnimEvent_AttackComplete();
+        }
     }
 
     [Header("Timings (seconds)")]
@@ -74,7 +83,10 @@ public class AttackEventSMB : StateMachineBehaviour
     [SerializeField] private float _modeChangeTime = 0.7f;
     [SerializeField] private float _attackCompleteTime = 999f;
 
-    private IAnimationController _controller;
+    private PlayerAnimationController _controller;
+    private int _animationVersion;
+    private bool IsCurrentAnimation => _controller != null
+        && _animationVersion == _controller.CombatAnimationVersion;
 
     private bool[] _attackExecuted;
     private bool _comboStarted;
