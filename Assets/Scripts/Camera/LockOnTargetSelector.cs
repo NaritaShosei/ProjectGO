@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -64,6 +65,24 @@ public class LockOnTargetSelector
         _camera = camera;
     }
 
+    /// <summary>
+    /// EnemyManager以外から供給する追加のロックオン候補ソースを設定します（ボスの脚/頭など）。
+    /// 呼び出すたびに現在の候補一覧を取得するため、対象の増減にもそのまま追従します。
+    /// </summary>
+    public void SetExternalCandidateSource(Func<IReadOnlyList<ILockOnTarget>> source)
+    {
+        _externalCandidateSource = source;
+    }
+
+    /// <summary>
+    /// EnemyManager由来の候補から除外する条件を設定します。
+    /// 外部候補ソースと役割が重複する対象（例：ボスの姿勢連動パーツ）を弾いて二重登録を防ぐために使います。
+    /// </summary>
+    public void SetDefaultPoolExclusion(Func<ILockOnTarget, bool> shouldExclude)
+    {
+        _defaultPoolExclusion = shouldExclude;
+    }
+
     /// <summary>手動ロックオン時の初回ターゲット選択。スコア最小の候補を返す（いなければnull）。</summary>
     public ILockOnTarget SelectInitialTarget()
     {
@@ -127,6 +146,8 @@ public class LockOnTargetSelector
     private readonly EnemyManager _enemyManager;
     private readonly LockOnScoreWeights _weights;
     private Camera _camera;
+    private Func<IReadOnlyList<ILockOnTarget>> _externalCandidateSource;
+    private Func<ILockOnTarget, bool> _defaultPoolExclusion;
 
     #endregion
 
@@ -138,22 +159,44 @@ public class LockOnTargetSelector
     /// </summary>
     private List<ILockOnTarget> GetValidCandidates(ILockOnTarget excludeTarget = null)
     {
-        IReadOnlyList<ILockOnTarget> inRange = _enemyManager.GetLockOnTarget(
-            _playerTransform.position,
-            _lockOnRange);
-
         var result = new List<ILockOnTarget>();
 
-        foreach (var target in inRange)
-        {
-            if (target == excludeTarget) continue;
-            if (!target.IsLockable) continue;
-            if (target.GetTargetCenter() == null) continue;
+        AppendValidCandidates(
+            _enemyManager.GetLockOnTarget(_playerTransform.position, _lockOnRange),
+            excludeTarget,
+            _defaultPoolExclusion,
+            result);
 
-            result.Add(target);
+        if (_externalCandidateSource != null)
+        {
+            // EnemyManager.GetLockOnTarget と異なり距離での事前絞り込みがされていないため、ここで揃える
+            AppendValidCandidates(_externalCandidateSource(), excludeTarget, null, result);
         }
 
         return result;
+    }
+
+    /// <summary>候補ソース1件分を有効性・距離チェックしつつ結果へ追加する。</summary>
+    private void AppendValidCandidates(
+        IReadOnlyList<ILockOnTarget> source,
+        ILockOnTarget excludeTarget,
+        Func<ILockOnTarget, bool> extraExclusion,
+        List<ILockOnTarget> result)
+    {
+        if (source == null) return;
+
+        foreach (var target in source)
+        {
+            if (target == excludeTarget) continue;
+            if (!target.IsLockable) continue;
+            if (extraExclusion != null && extraExclusion(target)) continue;
+
+            Transform center = target.GetTargetCenter();
+            if (center == null) continue;
+            if (Vector3.Distance(_playerTransform.position, center.position) > _lockOnRange) continue;
+
+            result.Add(target);
+        }
     }
 
     /// <summary>候補の中からスコア最小のものを返す。同スコアはリスト順で先勝ち。いなければnull。</summary>

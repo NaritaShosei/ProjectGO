@@ -45,8 +45,8 @@ public sealed class LockOnCameraState : ICameraState
 
     public void Enter()
     {
-        // 初回は通常カメラ姿勢から、切り替えは現在のロックオン姿勢からブレンド
-        _motionController.BeginLockOnBlend(snapToNormalCamera: _isInitialLockOn);
+        // 初回は現在実際に表示されているカメラ（通常 or ボス）姿勢から、切り替えは現在のロックオン姿勢からブレンド
+        _motionController.BeginLockOnBlend(snapToNormalCamera: _isInitialLockOn, currentMainCamera: _mainCamera);
     }
 
     public void Tick(float timeScale, Vector2 cameraInput)

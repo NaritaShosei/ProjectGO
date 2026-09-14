@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Enemyの基底クラス
 /// </summary>
-public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEnemySpawnState
+public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IEnemySpawnState
 {
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnDamaged;
@@ -73,7 +73,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     /// </summary>
     public virtual void Init()
     {
-        
+
         if (IsInitialized) return;
 
         IsInitialized = true;
@@ -105,6 +105,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
         _useSpawnAnimation = true;
         // TODO(済み): _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
+
+        _movementCollider.enabled = true;
     }
 
     /// <summary>
@@ -360,7 +362,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     {
     }
 
- 
+
 
     // overrideData未指定時に復元するため保持する。
     private EnemyData _defaultData;
@@ -379,13 +381,13 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
     [SerializeField] private EnemyAnimationEventReceiver _animationEventReceiver;
 
     //SEのハンドラー
-    [SerializeField]private EnemySoundHandler _soundHandler;
+    [SerializeField] private EnemySoundHandler _soundHandler;
 
-    [SerializeField]private EnemyType _enemyType;
+    [SerializeField] private EnemyType _enemyType;
 
     [Header("演出関係")]
-    [SerializeField,Tooltip("スポーンエフェクトを適応の可否")]private bool _useSpawnEffect = true;
-    [SerializeField,Tooltip("スポーンエフェクトのKey")] private string _spawnEffectKey = "スポーンエフェクト";
+    [SerializeField, Tooltip("スポーンエフェクトを適応の可否")] private bool _useSpawnEffect = true;
+    [SerializeField, Tooltip("スポーンエフェクトのKey")] private string _spawnEffectKey = "スポーンエフェクト";
 
     private float _timeScale = 1f;
 
@@ -518,6 +520,9 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable,IEn
 
         _isDead = true;
         OnDead?.Invoke(this);
+
+        _movementCollider.enabled = false;
+
         OnDeathInternal();
     }
 
