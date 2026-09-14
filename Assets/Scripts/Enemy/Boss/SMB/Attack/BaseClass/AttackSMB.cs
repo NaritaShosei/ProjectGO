@@ -32,11 +32,26 @@ namespace BossEnemy.SMB
 
         public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
         {
+            // 同じSMBが前回の非同期攻撃の完了前に再入した場合、前回の処理は
+            // 現在の経過時間・判定情報を上書きしてしまう。そのため、先に実行世代を
+            // 更新して前回の後始末を無効化してから、実行中の処理を中断する。
+            _attackExecutionVersion++;
+            CancelActivePlayAttacks();
+
             // アニメーションステート開始フラグ
             _isStopPlayAttack = false;
             _isAttackAnimationEndRequested = false;
             _isAttackCompletionNotified = false;
             _isAttackCompleted = false;
+
+            // 早期終了時も含め、前回攻撃の判定状態を持ち越さない。
+            ResetAttackHitCheckState();
+
+            // 経過時間をリセット
+            _elapsedTime = 0;
+
+            // 攻撃開始済みフラグ
+            _isAttackPlayed = false;
 
             // 攻撃発動時間がAnimationの時間より長い場合攻撃を取りやめる
             if ( _attackStartTime >= stateInfo.length)
@@ -45,21 +60,6 @@ namespace BossEnemy.SMB
                 NotifyAttackAnimCompleted();
                 return;
             }
-
-            // 攻撃の重複数を増やす
-            _attackDuplicateCount++;
-
-            // 経過時間をリセット
-            _elapsedTime = 0;
-
-            // 攻撃命中済みフラグをfalseに
-            _wasHitAttack = false;
-
-            // 攻撃の当たり判定フラグをFalseに
-            _isAttackHitCheck = false;
-
-            // 攻撃開始済みフラグ
-            _isAttackPlayed = false;
 
             // 攻撃ごとにトークンを保持する。通常のアニメーション終了では
             // 既存の PlayAttack を中断しない。
@@ -112,7 +112,7 @@ namespace BossEnemy.SMB
             if(_elapsedTime >= _attackStartTime && !_isAttackPlayed && _currentPlayAttackCts != null)
             {
                 // 攻撃を開始する
-                PlayAttackAsync(_currentPlayAttackCts).Forget();
+                PlayAttackAsync(_currentPlayAttackCts, _attackExecutionVersion).Forget();
 
                 // 攻撃開始済みフラグをTrueにする
                 _isAttackPlayed = true;
@@ -171,15 +171,11 @@ namespace BossEnemy.SMB
         /// <summary> 攻撃中断メソッド </summary>
         public void StopPlayAttack()
         {
-            // すべての攻撃を強制的に終了させる
-            foreach (CancellationTokenSource cts in _playAttackCancellationTokenSources.ToArray())
-            {
-                cts.Cancel();
-                cts.Dispose();
-            }
-
-            _playAttackCancellationTokenSources.Clear();
-            _currentPlayAttackCts = null;
+            // 以後に実行される finally がこの攻撃の状態を変更しないようにする。
+            _attackExecutionVersion++;
+            CancelActivePlayAttacks();
+            ResetAttackHitCheckState();
+            _isAttackCompleted = true;
 
             // 攻撃中断フラグをTrueに
             _isStopPlayAttack = true;
@@ -264,8 +260,8 @@ namespace BossEnemy.SMB
         // 攻撃クリップ終端でAnimatorの攻撃フラグを解除済みか。
         private bool _isAttackAnimationEndRequested;
 
-        // 攻撃重複数
-        private int _attackDuplicateCount = 0;
+        // 同じSMBが再入した際に、古い非同期処理の後始末を識別する実行世代番号。
+        private int _attackExecutionVersion;
 
         // 攻撃が当たった際のイベント発火時の処理
         protected virtual void HandleAttackHit() => _wasHitAttack = true;
@@ -297,7 +293,7 @@ namespace BossEnemy.SMB
         /// 攻撃終了イベントそのものは Idle への遷移完了後に送るため、
         /// Animator の遷移条件と攻撃終了通知が相互待ちにならない。
         /// </summary>
-        private async UniTaskVoid PlayAttackAsync(CancellationTokenSource cts)
+        private async UniTaskVoid PlayAttackAsync(CancellationTokenSource cts, int executionVersion)
         {
             try
             {
@@ -310,10 +306,8 @@ namespace BossEnemy.SMB
             }
             finally
             {
-                _attackDuplicateCount--;
-
-                // 攻撃の重複数が0なら他に同じ攻撃が発動されていないので攻撃を完全終了する
-                if (_attackDuplicateCount == 0)
+                // 同じSMBが再入済みなら、この古い処理は現行攻撃の状態に触れない。
+                if (executionVersion == _attackExecutionVersion)
                 {
                     // 攻撃が完全終了したので攻撃終了フラグをTrueにする
                     _isAttackCompleted = true;
@@ -334,6 +328,35 @@ namespace BossEnemy.SMB
                 _playAttackCancellationTokenSources.Remove(cts);
                 cts.Dispose(); 
             }
+        }
+
+        /// <summary> 前回実行中の攻撃を中断し、残った範囲表示を回収する </summary>
+        private void CancelActivePlayAttacks()
+        {
+            foreach (CancellationTokenSource cts in _playAttackCancellationTokenSources.ToArray())
+            {
+                cts.Cancel();
+                cts.Dispose();
+            }
+
+            _playAttackCancellationTokenSources.Clear();
+            _currentPlayAttackCts = null;
+
+            foreach (HitAreaView hitArea in _visibleHitAreaList.ToArray())
+            {
+                hitArea.InVisible();
+            }
+
+            _visibleHitAreaList.Clear();
+        }
+
+        /// <summary> 攻撃判定に関する共有状態を初期化する </summary>
+        private void ResetAttackHitCheckState()
+        {
+            _wasHitAttack = false;
+            _isAttackHitCheck = false;
+            _currentHitCheckCount = 0;
+            _attackCenterPos = Vector3.zero;
         }
 
         /// <summary> 攻撃アニメーション終了通知 </summary>
