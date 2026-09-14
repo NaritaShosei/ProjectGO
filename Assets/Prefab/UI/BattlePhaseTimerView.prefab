@@ -26,7 +26,7 @@ RectTransform:
   m_GameObject: {fileID: 8655939266878905147}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 4, y: 4, z: 4}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8659281031479807816}
@@ -50,6 +50,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TextCountDownTimerView
   _timerText: {fileID: 492242463749214196}
+  _timerEmphasisThreshold: 10
+  _emphasisPanel: {fileID: 0}
+  _targetPos: {x: 12.6, y: -980.8369}
+  _emphasisDuration: 0.5
+  _returnDelay: 1
+  _returnDuration: 0.5
+  _emphasisEase: 4
+  _emphasisColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &8982610680681613715
 GameObject:
   m_ObjectHideFlags: 0
@@ -84,7 +92,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: -7.07, y: 3.9}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1879815076157409242
@@ -115,10 +123,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 
+  m_text: 00:00.00
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -142,8 +150,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50
-  m_fontSizeBase: 50
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
