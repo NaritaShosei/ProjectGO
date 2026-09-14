@@ -38,6 +38,8 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            if(_repairArmor == ArmorAttachmentType.None) HandleRunningEnd();
+
             _bossCharacterEntity.RepairArmor(_repairArmor);
         }
 
