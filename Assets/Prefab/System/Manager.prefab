@@ -821,8 +821,6 @@ PlayableDirector:
     value: {fileID: 7618133072352931599}
   - key: {fileID: -6594282589552613698, guid: 62d955cd5259a884c90cccd088622075, type: 2}
     value: {fileID: 0}
-  - key: {fileID: 3714028307319008100, guid: 62d955cd5259a884c90cccd088622075, type: 2}
-    value: {fileID: 2764426523705728015}
   m_ExposedReferences:
     m_References:
     - 5b20cf9087597b94abe99aeb8f00519f: {fileID: 0}
@@ -1516,6 +1514,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2db600787e57a2f41a611003d68c688f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseManager
+  _introMovieBGM: 1
+  _tutorialBGM: 1
+  _mobAndSkillBGM: 1
+  _bossIntroMovieBGM: 0
+  _bossBattleBGM: 2
+  _endingMovieBGM: 0
+  _resultBGM: 0
+  _gameOverBGM: 0
   _mobLighting:
     _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e1, type: 2}
     _overrideSun: 0
@@ -1528,6 +1534,7 @@ MonoBehaviour:
     _data: {fileID: 11400000, guid: b8d4a163ef674eab9bdab7d228a893e3, type: 2}
     _overrideSun: 0
     _sunSource: {fileID: 0}
+  _playerStartPosition: {fileID: 0}
   _subtitleSettingsAddress: SubtitleSettings
   _subtitleView: {fileID: 0}
   _moviePlayer: {fileID: 3281229546311345012}
