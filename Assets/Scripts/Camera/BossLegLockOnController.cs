@@ -32,6 +32,17 @@ public sealed class BossLegLockOnController
         _enemyManager.OnEnemyForceRemoved += HandleEnemyForceRemoved;
     }
 
+    /// <summary>イベント購読を解除する。</summary>
+    public void Dispose()
+    {
+        if (_enemyManager != null)
+        {
+            _enemyManager.OnEnemySpawned -= HandleEnemySpawned;
+            _enemyManager.OnBossDefeated -= HandleBossGone;
+            _enemyManager.OnEnemyForceRemoved -= HandleEnemyForceRemoved;
+        }
+    }
+
     /// <summary>右足/左足の鎧の生死から、右足/左足/頭のロック可否を毎Tick再計算する。</summary>
     public void Tick()
     {

@@ -512,6 +512,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraPresentationController?.ResetZoom();
         _cameraPresentationController?.Dispose();
         _bossCameraController?.Dispose();
+        _bossLegLockOnController?.Dispose();
         _effectCameraProximityController?.Dispose();
         _occlusionTransparencyController?.Dispose();
 
