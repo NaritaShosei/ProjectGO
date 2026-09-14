@@ -98,7 +98,15 @@ namespace BossEnemy.SMB
 
                 StartAttackHitCheck(attackPos);
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_consecutiveAttackInterval), cancellationToken: cancellationToken);
+                var consecutiveAttackInterval = _elapsedTime + _consecutiveAttackInterval;
+
+                await UniTask.WaitUntil(() =>
+                    !_isAttackHitCheck,
+                    cancellationToken: cancellationToken);
+
+                await UniTask.WaitUntil(() =>
+                    _elapsedTime >= consecutiveAttackInterval, 
+                    cancellationToken: cancellationToken);
             }
         }
     }
