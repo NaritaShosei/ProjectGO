@@ -41,9 +41,13 @@ namespace BossEnemy.SMB
             // 攻撃発動時間がAnimationの時間より長い場合攻撃を取りやめる
             if ( _attackStartTime >= stateInfo.length)
             {
+                _isAttackCompleted = true;
                 NotifyAttackAnimCompleted();
                 return;
             }
+
+            // 攻撃の重複数を増やす
+            _attackDuplicateCount++;
 
             // 経過時間をリセット
             _elapsedTime = 0;
@@ -260,6 +264,9 @@ namespace BossEnemy.SMB
         // 攻撃クリップ終端でAnimatorの攻撃フラグを解除済みか。
         private bool _isAttackAnimationEndRequested;
 
+        // 攻撃重複数
+        private int _attackDuplicateCount = 0;
+
         // 攻撃が当たった際のイベント発火時の処理
         protected virtual void HandleAttackHit() => _wasHitAttack = true;
 
@@ -303,18 +310,24 @@ namespace BossEnemy.SMB
             }
             finally
             {
-                // 攻撃が完全終了したので攻撃終了フラグをTrueにする
-                _isAttackCompleted = true;
+                _attackDuplicateCount--;
 
-                // 実行中の攻撃範囲が残っていれば見えないようにする
-                if (_visibleHitAreaList.Count > 0)
+                // 攻撃の重複数が0なら他に同じ攻撃が発動されていないので攻撃を完全終了する
+                if (_attackDuplicateCount == 0)
                 {
-                    foreach (var hitArea in _visibleHitAreaList)
-                    {
-                        hitArea.InVisible();
-                    }
+                    // 攻撃が完全終了したので攻撃終了フラグをTrueにする
+                    _isAttackCompleted = true;
 
-                    _visibleHitAreaList.Clear();
+                    // 実行中の攻撃範囲が残っていれば見えないようにする
+                    if (_visibleHitAreaList.Count > 0)
+                    {
+                        foreach (var hitArea in _visibleHitAreaList)
+                        {
+                            hitArea.InVisible();
+                        }
+
+                        _visibleHitAreaList.Clear();
+                    }
                 }
 
                 // 攻撃の完全終了とみなしCancellationTokenSourcesを開放
