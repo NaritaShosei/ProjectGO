@@ -76,14 +76,17 @@ namespace BossEnemy.SMB
             _elapsedTime += Time.deltaTime * _timeScale;
 
             // 攻撃の当たり判定フラグがTrueなら当たり判定イベントを発火する
-            if (_isAttackHitCheck && !_wasHitAttack)
+            if (_isAttackHitCheck)
             {
                 // 判定回数を1フレームごとに増加
                 _currentHitCheckCount++;
 
-                // 攻撃の当たり判定イベントの発火
-                _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (_attackData, _attackHitCollisionType, _attackCenterPos);
+                if (!_wasHitAttack)
+                {
+                    // 攻撃の当たり判定イベントの発火
+                    _animationEventReceiver.AnimEvent_AttackHitCheck
+                        (_attackData, _attackHitCollisionType, _attackCenterPos);
+                }
 
                 // もし攻撃の当たり判定を行うフレーム数が設定されていなければ
                 // 当たり判定情報の初期化を行わない
