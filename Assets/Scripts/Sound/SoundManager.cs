@@ -52,16 +52,15 @@ public class SoundManager
         string sheet = sheetType == CueSheetType.None
             ? _defaultBGMCueSheet
             : _cueSheetPathHolder.CueSheetPathDict[sheetType];
-        // 同じ曲はロード待ち・再生準備中も含め、先頭へ戻さない。
-        if (_bgmSource.cueSheet == sheet && _bgmSource.cueName == cueName &&
-            (_bgmPending || (!_bgmStopping &&
-             (_bgmSource.status == CriAtomSource.Status.Playing ||
-              _bgmSource.status == CriAtomSource.Status.Prep)))) return;
+        // CRIのstatus反映前に再要求されても、同じ曲は停止・再生し直さない。
+        // ロード待ち・フェードイン・一時停止中も同じ再生要求を維持する。
+        if (_requestedBGMSheet == sheet && _requestedBGMCue == cueName) return;
 
         StopBGM();
+        _requestedBGMSheet = sheet;
+        _requestedBGMCue = cueName;
         _bgmSource.cueSheet = sheet;
         _bgmSource.cueName = cueName;
-        _bgmPending = true;
         PlayBGMWhenReadyAsync(_bgmRequestVersion, sheet, cueName).Forget();
     }
 
@@ -69,7 +68,8 @@ public class SoundManager
     public void StopBGM()
     {
         ++_bgmRequestVersion;
-        _bgmPending = false;
+        _requestedBGMSheet = null;
+        _requestedBGMCue = null;
         if (_bgmSource == null) return;
         // フェードアウト中にStopを再発行するとCRIが即時停止するため、一度だけ呼ぶ。
         if (_bgmStopping) return;
@@ -93,13 +93,18 @@ public class SoundManager
             var acb = CriAtom.GetAcb(sheet);
             if (acb != null)
             {
-                _bgmPending = false;
                 if (!acb.GetCueInfo(cue, out _))
                 {
+                    _requestedBGMSheet = null;
+                    _requestedBGMCue = null;
                     Debug.LogWarning($"[SoundManager] BGMキューが見つかりません: {sheet}/{cue}");
                     return;
                 }
                 _bgmStopping = false;
+                // CriAtomSourceはStatus.Stopのときだけloopをプレーヤへ反映する。
+                // フェーダ使用時も、次に再生するBGMへ確実にループを指定する。
+                _bgmSource.loop = true;
+                _bgmSource.player.Loop(true);
                 _bgmSource.Play();
                 return;
             }
@@ -264,7 +269,8 @@ public class SoundManager
     // BGM用のソース
     private CriAtomSource _bgmSource;
     private int _bgmRequestVersion;
-    private bool _bgmPending;
+    private string _requestedBGMSheet;
+    private string _requestedBGMCue;
     private bool _bgmStopping;
 
     // 通常SE用のソースを管理するDictionary
