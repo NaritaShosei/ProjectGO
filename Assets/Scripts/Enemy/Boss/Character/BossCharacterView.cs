@@ -87,9 +87,15 @@ namespace BossEnemy.Character
         /// <summary> 初期化する </summary>
         public void Init()
         {
+            // 死亡フラグ解除
             _isDead = false;
+
+            // ロックオンを可能に
             _isLockable = true;
             _attackSMBList = new();
+
+            // Update処理が必要なクラスのListをクリア
+            _updaters.Clear();
 
             // 鎧の初期化
             InitArmor();
