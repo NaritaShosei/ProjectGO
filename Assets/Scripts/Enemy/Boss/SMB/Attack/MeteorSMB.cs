@@ -74,7 +74,11 @@ namespace BossEnemy.SMB
                 attackPosList.Add(attackCenter);
             }
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnAndDisplayAttackEffectTime), cancellationToken: cancellationToken);
+            var attackAreaDespawnAndDisplayAttackEffectTime = _elapsedTime + _attackAreaDespawnAndDisplayAttackEffectTime;
+
+            await UniTask.WaitUntil(() =>
+                _elapsedTime >= attackAreaDespawnAndDisplayAttackEffectTime,
+                cancellationToken: cancellationToken);
             int attackCount = 0;
 
             foreach (Vector3 attackPos in attackPosList)
@@ -88,8 +92,10 @@ namespace BossEnemy.SMB
 
                 _effectManager.PlayEffect(METEOR_EFFECT_NAME, attackPos);
 
+                var hitTime = _elapsedTime + _attackHitTime;
+
                 await UniTask.WaitUntil(() =>
-                    _elapsedTime >= _elapsedTime + _attackHitTime,
+                    _elapsedTime >= hitTime,
                     cancellationToken: cancellationToken);
 
                 hitArea.InVisible();

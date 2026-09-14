@@ -107,9 +107,13 @@ namespace BossEnemy.SMB
                 // 次の攻撃があれば次の攻撃までのインターバルを行う
                 if (count < _maxAttackCount - 1)
                 {
-                    await UniTask.Delay(
-                    TimeSpan.FromSeconds(_attackIntervalTime),
-                    cancellationToken: cancellationToken);
+                    // 攻撃の当たり判定が開始されるまでの時間
+                    var attackIntervalTime = _elapsedTime + _attackIntervalTime;
+
+                    // 攻撃のEffect再生から当たり判定を開始するまでの遅延
+                    await UniTask.WaitUntil(() =>
+                        _elapsedTime >= attackIntervalTime,
+                        cancellationToken: cancellationToken);
                 }
                 else
                 {
