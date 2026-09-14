@@ -5,11 +5,14 @@ using UnityEngine;
 
 using BossEnemy.Enum;
 using BossEnemy.Attack;
+using BossEnemy.Effect;
 
 namespace BossEnemy.SMB
 {
     public class RockUpliftSMB : AttackSMB
     {
+        private const string START_MAGIC_EFFECT = "StartMagic";
+
         private const string ROCK_UP_LIFT_EFFECT_NAME = "RockUpLift";
 
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.RockEruptionVoice;
@@ -29,53 +32,92 @@ namespace BossEnemy.SMB
             base.OnStateExit(animator, stateInfo, layerIndex);
         }
 
-        [Header("攻撃ダメージ判定開始時間")]
-        [SerializeField] private float _startAttackTime = 1f;
+        [Header("攻撃の間隔を開ける時間")]
+        [SerializeField] private float _attackIntervalTime;
 
+        [Header("攻撃のEffect再生から当たり判定を開始するまでの時間")]
+        [SerializeField] private float _attackHitTimingDelayTime;
 
-        [Header("攻撃の間隔を開けるフレーム数")]
-        [SerializeField] private int _attackIntervalFlame;
-
-        [Header("攻撃の範囲エフェクトの生成の高さ")]
+        [Header("攻撃の範囲エフェクトの生成位置の高さ")]
         [SerializeField] private float _attackAreaCircleGeneratePosY = 0.2f;
 
         [Header("攻撃の回数")]
         [SerializeField] private int _maxAttackCount = 4;
 
-        Vector3 _attackPos = Vector3.zero;
-
-        private bool _isAttackHitCheck = false;
-
-        private void Awake()
-        {
-            _effectManager = FindFirstObjectByType<EffectManager>();
-        }
+        [Header("魔法攻撃の発動Effect発生位置")]
+        [SerializeField] private Vector3 _magicStartEffectPlayOffset;
 
         protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(_startAttackTime), cancellationToken: cancellationToken);
+            if (_maxAttackCount == 0) return;
+
+            // 魔法攻撃の発動Effect発生位置を取得
+            var magicStartEffectPlayPos = _bossCharacterTransform.TransformPoint(_magicStartEffectPlayOffset);
+
+            // 魔法攻撃の発動Effectを再生
+            _effectManager.PlayEffect(START_MAGIC_EFFECT, magicStartEffectPlayPos);
 
             for (int count = 0; count < _maxAttackCount; count++)
             {
-                _isAttackHitCheck = true;
-                _attackPos = _attackTarget.GetTargetCenter().position;
-                _attackPos.y = _attackAreaCircleGeneratePosY;
-                _attackHitAreaSpawner.Spawn(AttackHitAreaType.Circle, _attackPos, _attackData.AttackHitAreaRadius, _attackAreaDespawnTime);
+                // 攻撃位置を取得
+                var attackCenterPos = _attackTarget.GetTargetCenter().position;
+                attackCenterPos.y = _attackAreaCircleGeneratePosY;
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnTime), cancellationToken: cancellationToken);
+                // 攻撃範囲を表示
+                HitAreaView hitArea = _attackHitAreaSpawner.Spawn(
+                    AttackHitAreaType.Circle,
+                    attackCenterPos, 
+                    _attackData.AttackHitAreaRadius);
 
+                _visibleHitAreaList.Add(hitArea);
+
+                // 攻撃のEffectは発生するまでの時間
+                var playEffectStartTime = _elapsedTime + _attackAreaDespawnAndDisplayAttackEffectTime;
+
+                // 攻撃範囲が生成されてから攻撃が行われるまでの時間待機
+                await UniTask.WaitUntil(() =>
+                    _elapsedTime >= playEffectStartTime, 
+                    cancellationToken: cancellationToken);
+
+                // 攻撃範囲を見えなくする
+                hitArea.InVisible();
+
+                _visibleHitAreaList.Remove(hitArea);
+
+                // 攻撃音の再生
                 PlayBossSE(SoundCueNames.Boss.RockEruption);
-                _effectManager.PlayEffect(ROCK_UP_LIFT_EFFECT_NAME, _attackPos);
 
+                // 攻撃Effectを再生
+                _effectManager.PlayEffect(ROCK_UP_LIFT_EFFECT_NAME, attackCenterPos);
+
+                // カメラの振動効果
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 
-                int waitPlayEffect = 40;
-                await UniTask.Delay(waitPlayEffect, cancellationToken: cancellationToken);
+                // 攻撃の当たり判定が開始されるまでの時間
+                var attackHitCheckStartTime = _elapsedTime + _attackHitTimingDelayTime;
 
-                _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (_attackData, AttackHitAreaType.Circle, _attackPos);
+                // 攻撃のEffect再生から当たり判定を開始するまでの遅延
+                await UniTask.WaitUntil(() =>
+                    _elapsedTime >= attackHitCheckStartTime,
+                    cancellationToken: cancellationToken);
 
-                await UniTask.Delay(_attackIntervalFlame, cancellationToken: cancellationToken);
+                // 攻撃の当たり判定を開始
+                StartAttackHitCheck(attackCenterPos);
+
+                // 次の攻撃があれば次の攻撃までのインターバルを行う
+                if (count < _maxAttackCount)
+                {
+                    await UniTask.Delay(
+                    TimeSpan.FromSeconds(_attackIntervalTime),
+                    cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    // 攻撃の当たり判定が終了するまで待機
+                    await UniTask.WaitUntil(() =>
+                        !_isAttackHitCheck,
+                        cancellationToken: cancellationToken);
+                }
             }
         }
     }

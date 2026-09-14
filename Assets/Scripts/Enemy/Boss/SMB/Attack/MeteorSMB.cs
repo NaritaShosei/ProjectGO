@@ -73,20 +73,20 @@ namespace BossEnemy.SMB
                 attackPosList.Add(attackCenter);
             }
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnTime), cancellationToken: cancellationToken);
+            await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnAndDisplayAttackEffectTime), cancellationToken: cancellationToken);
             int attackCount = 0;
 
             foreach (Vector3 attackPos in attackPosList)
             {
                 float despawnTime =
-                    _attackAreaDespawnTime +
+                    _attackAreaDespawnAndDisplayAttackEffectTime +
                     _attackHitTime +
                     (attackCount * (_attackHitTime + _consecutiveAttackInterval));
 
                 attackCount++;
 
                 _attackHitAreaSpawner.Spawn
-                    (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius, despawnTime);
+                    (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius);
 
                 _effectManager.PlayEffect(METEOR_EFFECT_NAME, attackPos);
 
