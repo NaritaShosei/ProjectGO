@@ -132,6 +132,10 @@ public sealed class BossLegLockOnController
     /// <summary>保持している鎧・ターゲット参照と候補一覧をすべて空へ戻す。</summary>
     private void Reset()
     {
+        _rightLegTarget?.SetLockable(false);
+        _leftLegTarget?.SetLockable(false);
+        _headTarget?.SetLockable(false);
+
         _rightLegArmor = null;
         _leftLegArmor = null;
         _rightLegTarget = null;
