@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 戦闘を止めずに、基本操作の達成状況を画面端へ表示するチェックリスト。
+/// 1つのViewで基本操作UIとモードチェンジUIを切り替えるチェックリスト。
 /// 位置と大きさはPrefab側で調整し、実行中には変更しない。
 /// </summary>
 public sealed class TutorialChecklistView : MonoBehaviour
@@ -24,8 +24,8 @@ public sealed class TutorialChecklistView : MonoBehaviour
 
     public void ShowModeChange(string title, string description)
     {
-        if (_titleText != null)
-            _titleText.text = title;
+        if (_modeChangeTitleText != null)
+            _modeChangeTitleText.text = title;
         if (_modeChangeDescriptionText != null)
             _modeChangeDescriptionText.text = $"{description}{MODE_CHANGE_INPUT_TEXT}";
 
@@ -58,6 +58,7 @@ public sealed class TutorialChecklistView : MonoBehaviour
     [SerializeField] private TMP_Text _titleText;
     [SerializeField] private GameObject _basicOperationGroup;
     [SerializeField] private GameObject _modeChangeGroup;
+    [SerializeField] private TMP_Text _modeChangeTitleText;
     [SerializeField] private TMP_Text _modeChangeDescriptionText;
     [SerializeField] private Toggle _moveToggle;
     [SerializeField] private Toggle _cameraMoveToggle;
