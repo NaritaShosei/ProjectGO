@@ -88,7 +88,9 @@ namespace BossEnemy.SMB
 
                 _effectManager.PlayEffect(METEOR_EFFECT_NAME, attackPos);
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
+                await UniTask.WaitUntil(() =>
+                    _elapsedTime >= _elapsedTime + _attackHitTime,
+                    cancellationToken: cancellationToken);
 
                 hitArea.InVisible();
                 _visibleHitAreaList.Remove(hitArea);
