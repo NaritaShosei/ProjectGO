@@ -1,6 +1,7 @@
 using UnityEngine;
 using CriWare;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 
 public class SoundManager
 {
@@ -33,6 +34,13 @@ public class SoundManager
         ApplyCategoryVolume(VoiceCategoryName, settings.VoiceVolume);
     }
 
+    public void SetBGMFadeDurations(float fadeInSeconds, float fadeOutSeconds)
+    {
+        if (_bgmSource == null) return;
+        _bgmSource.player.SetFadeInTime(Mathf.RoundToInt(Mathf.Clamp(fadeInSeconds, 0f, 3600f) * 1000f));
+        _bgmSource.player.SetFadeOutTime(Mathf.RoundToInt(Mathf.Clamp(fadeOutSeconds, 0f, 3600f) * 1000f));
+    }
+
     // ── BGM ──────────────────────────────────────────────
 
     /// <summary> BGM再生 </summary>
@@ -40,17 +48,65 @@ public class SoundManager
     /// <param name="sheetType">再生するBGMのシートの種類</param>
     public void PlayBGM(string cueName, CueSheetType sheetType = CueSheetType.None)
     {
-        _bgmSource.Stop();
+        if (_bgmSource == null || string.IsNullOrWhiteSpace(cueName)) return;
+        string sheet = sheetType == CueSheetType.None
+            ? _defaultBGMCueSheet
+            : _cueSheetPathHolder.CueSheetPathDict[sheetType];
+        // 同じ曲はロード待ち・再生準備中も含め、先頭へ戻さない。
+        if (_bgmSource.cueSheet == sheet && _bgmSource.cueName == cueName &&
+            (_bgmPending || (!_bgmStopping &&
+             (_bgmSource.status == CriAtomSource.Status.Playing ||
+              _bgmSource.status == CriAtomSource.Status.Prep)))) return;
 
-        if (sheetType != CueSheetType.None)
-            _bgmSource.cueSheet = _cueSheetPathHolder.CueSheetPathDict[sheetType];
-
+        StopBGM();
+        _bgmSource.cueSheet = sheet;
         _bgmSource.cueName = cueName;
-        _bgmSource.Play();
+        _bgmPending = true;
+        PlayBGMWhenReadyAsync(_bgmRequestVersion, sheet, cueName).Forget();
     }
 
     /// <summary> BGM停止 </summary>
-    public void StopBGM() => _bgmSource.Stop();
+    public void StopBGM()
+    {
+        ++_bgmRequestVersion;
+        _bgmPending = false;
+        if (_bgmSource == null) return;
+        // フェードアウト中にStopを再発行するとCRIが即時停止するため、一度だけ呼ぶ。
+        if (_bgmStopping) return;
+        _bgmStopping = true;
+        _bgmSource.Stop();
+        _bgmSource.Pause(false);
+    }
+
+    private async UniTask PlayBGMWhenReadyAsync(int version, string sheet, string cue)
+    {
+        while (_bgmSource != null && version == _bgmRequestVersion)
+        {
+            // 前の曲の停止完了を待つ。連続した切り替え要求は最新の曲だけを再生する。
+            if (_bgmStopping && (_bgmSource.player.IsFading() ||
+                _bgmSource.status == CriAtomSource.Status.Playing ||
+                _bgmSource.status == CriAtomSource.Status.Prep))
+            {
+                await UniTask.Yield();
+                continue;
+            }
+            var acb = CriAtom.GetAcb(sheet);
+            if (acb != null)
+            {
+                _bgmPending = false;
+                if (!acb.GetCueInfo(cue, out _))
+                {
+                    Debug.LogWarning($"[SoundManager] BGMキューが見つかりません: {sheet}/{cue}");
+                    return;
+                }
+                _bgmStopping = false;
+                _bgmSource.Play();
+                return;
+            }
+            // ロード画面のTime.timeScale=0でも待機を進める。
+            await UniTask.Delay(100, ignoreTimeScale: true);
+        }
+    }
 
     /// <summary> BGM一時停止 </summary>
     public void PauseBGM() => _bgmSource.Pause(true);
@@ -207,6 +263,9 @@ public class SoundManager
 
     // BGM用のソース
     private CriAtomSource _bgmSource;
+    private int _bgmRequestVersion;
+    private bool _bgmPending;
+    private bool _bgmStopping;
 
     // 通常SE用のソースを管理するDictionary
     private Dictionary<GameObject, List<CriAtomSource>> _seSourcesDict
@@ -224,6 +283,12 @@ public class SoundManager
             _bgmSource = bgmPlayer.AddComponent<CriAtomSource>();
 
         _bgmSource.cueSheet = _defaultBGMCueSheet;
+        _bgmSource.playOnStart = false;
+        _bgmSource.loop = true;
+        _bgmSource.use3dPositioning = false;
+        // CRI側でフェードするため、Time.timeScaleやカテゴリ音量の変更に依存しない。
+        _bgmSource.player.AttachFader();
+        SetBGMFadeDurations(1f, 1f);
     }
 
     /// <summary> 新たに通常SE用のSourceを作る処理 </summary>

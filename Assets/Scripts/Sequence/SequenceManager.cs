@@ -13,6 +13,34 @@ public class SequenceManager : MonoBehaviour
     public event Action OnTitleRequested;
     public SubtitleController Subtitles { get; private set; }
 
+    public void ApplyBGM(SequenceStateType state)
+    {
+        BGMType bgm = state switch
+        {
+            SequenceStateType.IntroMovie => _introMovieBGM,
+            SequenceStateType.Tutorial => _tutorialBGM,
+            SequenceStateType.MobAndSkill => _mobAndSkillBGM,
+            SequenceStateType.BossIntroMovie => _bossIntroMovieBGM,
+            SequenceStateType.BossBattle => _bossBattleBGM,
+            SequenceStateType.EndingMovie => _endingMovieBGM,
+            SequenceStateType.Result => _resultBGM,
+            SequenceStateType.GameOver => _gameOverBGM,
+            _ => BGMType.Silence
+        };
+        switch (bgm)
+        {
+            case BGMType.OutGameMobBattle:
+                Sound.PlayBGM(SoundCueNames.BGM.OutGameMobBattle, CueSheetType.BGM);
+                break;
+            case BGMType.BossBattle:
+                Sound.PlayBGM(SoundCueNames.BGM.BossBattle, CueSheetType.BGM);
+                break;
+            default:
+                Sound.StopBGM();
+                break;
+        }
+    }
+
     public void ApplyLighting(SequenceStateType state)
     {
         SequenceLighting settings = state switch
@@ -118,6 +146,23 @@ public class SequenceManager : MonoBehaviour
     #endregion
 
     #region　インスペクター
+
+    public enum BGMType
+    {
+        [InspectorName("無音")] Silence = 0,
+        [InspectorName("共通BGM（タイトル・モブ戦）")] OutGameMobBattle = 1,
+        [InspectorName("ボス戦BGM")] BossBattle = 2
+    }
+
+    [Header("シークエンス別BGM（各シークエンス開始時に適用）")]
+    [SerializeField, InspectorName("導入ムービー")] private BGMType _introMovieBGM = BGMType.OutGameMobBattle;
+    [SerializeField, InspectorName("チュートリアル")] private BGMType _tutorialBGM = BGMType.OutGameMobBattle;
+    [SerializeField, InspectorName("モブ戦・スキル選択")] private BGMType _mobAndSkillBGM = BGMType.OutGameMobBattle;
+    [SerializeField, InspectorName("ボス登場ムービー")] private BGMType _bossIntroMovieBGM = BGMType.Silence;
+    [SerializeField, InspectorName("ボス戦")] private BGMType _bossBattleBGM = BGMType.BossBattle;
+    [SerializeField, InspectorName("エンディングムービー")] private BGMType _endingMovieBGM = BGMType.Silence;
+    [SerializeField, InspectorName("リザルト")] private BGMType _resultBGM = BGMType.Silence;
+    [SerializeField, InspectorName("ゲームオーバー")] private BGMType _gameOverBGM = BGMType.Silence;
 
     [Header("Sequence設定")]
     [SerializeField, Tooltip("IntroMovie開始時に適用するモブ戦用Lighting")]
