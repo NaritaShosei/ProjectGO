@@ -11,7 +11,7 @@
 
 カメラシステムの初期化・更新統括を担当する`MonoBehaviour`です。シーン上に配置され、次の処理を担当します。
 
-- 通常カメラ・ロックオンカメラ・ボスカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` / `SetBossCameraActive` による切り替え
+- 通常カメラ・ロックオンカメラ・ボスカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` / `SetBossCameraActive` による切り替え。Priorityは既定で 通常(`_normalPriority`=10) < ロックオン(`_lockOnPriority`=20) < ボス(`_bossPriority`=30) の順で、ボス戦中は常にボスカメラが最前面になるよう設計されている。ただし `SetLockOnCameraActive(true)` は `_bossBodyCamera` が設定されている場合、ロックオンカメラのPriorityを `_bossPriority + 1` 以上へ引き上げる（ボスの脚/頭など、ボス戦中のロックオンが最前面になるようにするため。これをしないとボスカメラのPriorityが常に勝ち、ロックオン状態になっても視点が全く切り替わらない）
 - `CameraMotionController` / `CameraPresentationController` / `BossCameraController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し（`BossCameraController` は `_bossBodyCamera` 設定時のみ）
 - 毎 `FixedUpdate` での `CameraPresentationController.Tick` / `BossCameraController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）。ボスカメラ有効中は `CameraController.Tick` を止める
 - `CameraController.OnTargetChanged` を `OnLockOnTargetChanged` として中継
@@ -43,7 +43,7 @@
 - 通常カメラの入力回転と仮想アンカーの遅延追従
 - ロックオンカメラの位置追従と画面上のデッドゾーン判定に基づく回転
 - ロックオン開始時の位置・回転ブレンド（`BeginLockOnBlend` / `UpdateBlend`）
-  - 起点：初回ロックオンは通常カメラ姿勢へスナップしてから、対象切り替えは現在のロックオンカメラ姿勢から。判定は `CameraController.LockOn` が `wasLockedOn` から求め `LockOnCameraState.SetTarget(target, isInitialLockOn)` で渡す
+  - 起点：初回ロックオンは**現在実際に表示されているカメラ**（`LockOnCameraState` が保持する `_mainCamera`＝Cinemachine Brainの出力Camera）の姿勢へスナップしてから、対象切り替えは現在のロックオンカメラ姿勢から。判定は `CameraController.LockOn` が `wasLockedOn` から求め `LockOnCameraState.SetTarget(target, isInitialLockOn)` で渡す。ボス戦中は通常カメラのTickが止まり `_normalCamera`（vcamそのもの）の姿勢が古いまま固定されるため、`_normalCamera.transform` ではなく実際の表示カメラをスナップ元にしている（`BeginLockOnBlend` の `currentMainCamera` 引数。未指定時のみ `_normalCamera` にフォールバック）
   - 補間：位置・回転ともイージング目標（`_lockOnBlendDuration` で到達）へ寄せつつ、移動を `_lockOnBlendMaxLinearSpeed`（m/秒）、回転を `_lockOnBlendMaxAngularSpeed`（度/秒）でクランプ。対象が近ければ上限に当たらず従来と同じ
   - 終了：位置・回転が収束したら完了。上限で間に合わなければ延長し、`_lockOnBlendDuration + _lockOnBlendMaxExtraTime` 超過で強制終了
 - ロックオン解除時の角度を通常カメラへ引き継ぎ
@@ -69,6 +69,19 @@
 - 無効化時：Priorityを待機位置へ戻し、`CameraManager.SetBaseZoom(1, ...)` でベース層だけ等倍へ戻す（エフェクト層はそのまま）
 
 切り替えブレンドは Cinemachine Brain（`Main Camera Custom Blends`）に任せ、ロックオン用のイージング（`BeginLockOnBlend`）は使いません。チューニング値はすべて `CameraManager` の `[SerializeField]`（`_bossXXX`）から `BossCameraSettings` 構造体（`BossCameraSettings.cs`）へ詰め替えて渡します。
+
+### BossLegLockOnController
+
+ボスの右足/左足/頭を、通常の `LockOnTargetSelector` の選定基準（画面中心近さ・プレイヤー距離など）に乗せてロックオンできるようにする候補プロバイダです。`MonoBehaviour` ではなく、`CameraManager.Init` 時に生成され、`LockOnTargetSelector.SetExternalCandidateSource` へ接続されます。Boss側のスクリプト・プレハブは一切変更せず、既存の公開APIだけを参照します。
+
+- `EnemyManager.OnEnemySpawned` でボス出現を検知し、`IBossEnemyCharacterView.ActiveBossEnemyPartsView`（既存公開API）から鎧の装着部位（`ArmorAttachmentType.RightLeg` / `LeftLeg`）で右足・左足パーツを特定して `BossArmorView`（`.IsBroken`）とTransformを保持する
+- 頭のロックオン中心は、ボス子階層に既にある `CameraAnglePoint`（`AnglePoint == Top`。`BossCameraController` が注視に使うものと同じコンポーネント）のTransformをそのまま流用する
+- 毎Tickで右足/左足の鎧の `IsBroken` を見て、右足/左足/頭それぞれの `IsLockable` を再計算するだけ（右足鎧が生きていれば右足ロック可、両足とも壊れていれば頭のみロック可）。`LockOnTargetSelector` 側は候補を取得するたびに `IsLockable` をその場で見るだけなので、`EnemyManager._lockOnTargets` への登録操作は不要
+- `OnBossDefeated` / `OnEnemyForceRemoved`（現在のボス）で候補をクリアする
+
+候補として提供する3つの対象（`BossPartLockOnTarget`）は、`BossCharacterPartsView` 等のBoss側クラスに依存しない、Camera側だけで完結する軽量な `ILockOnTarget` 実装です。対象の選定自体（スコア計算・切り替え・自動解除）は一切変更せず、既存の `LockOnTargetSelector` / `CameraController.TryHandleInvalidTarget` の仕組みにそのまま乗ります（現在ロック中のパーツが `IsLockable = false` になれば、既存の仕組みが自動で次の候補へ切り替えます）。
+
+**`ShouldExcludeFromDefaultPool`**: ボス本体は姿勢(Posture)が変わるたびに `BossCharacterView.ChangeLockOnParts` が独自に `BossCharacterPartsView`（腕/脚/胴体の弱点パーツ）を `EnemyManager._lockOnTargets` へ登録・解除しており、これは鎧の生死ではなく姿勢（AIのビヘイビアツリーが決定）に連動する、本クラスとは無関係な既存の仕組みです。これをそのままにすると、右足/左足/頭の3候補と役割が重複し、かつ鎧が壊れても`IsLockable`が変わらない古い候補が混ざって意図しない対象（姿勢によっては腕や胴体の弱点パーツ）へ切り替わってしまいます。そのため `LockOnTargetSelector.SetDefaultPoolExclusion` 経由で `BossCharacterPartsView` 型の候補を常に除外し、ボスの部位ロックオンは本クラスが供給する3対象だけに一本化しています。
 
 ### CameraZoomController
 
@@ -99,6 +112,7 @@
   - ロックオン開始時はラッチ未武装で始め、入力がニュートラルに戻ってから受け付ける
 - `EnemyManager.OnEnemyForceRemoved` を購読し、削除されたのが現在の対象なら次へ切り替え（なければ解除）
 - 遷移結果を `CameraManager.SetLockOnCameraActive` でPriorityへ反映し、`OnTargetChanged` で `CameraManager` へ通知
+- `SetExternalLockOnCandidateSource` / `SetLockOnDefaultPoolExclusion` で `LockOnTargetSelector` へ外部候補ソース・除外条件（`BossLegLockOnController` 等）を設定する薄いパススルーを提供
 
 対象切り替えの入力は `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（変更を Camera フォルダ内に閉じるための割り切り。`InputHandler` は経由しない）。マウス横移動量は取りこぼし防止のため `Update` でフレーム精度で蓄積し `Tick` で消費します。ただし**ヒットストップ中（`CameraManager.TimeScale ≈ 0` で `Tick` が止まる間）は蓄積せずゼロクリア**します。溜め込むと再開フレームで一括放出され、意図しない対象切り替え（撃破の瞬間に無関係な敵へロックオンが飛ぶ）が起きるためです。スティック・マウスとも入力がニュートラルに戻った Tick で蓄積・ラッチを初期化します。閾値は `CameraController` の `[SerializeField]`（`_switchStickOnThreshold` / `_switchStickOffThreshold` / `_switchMouseThreshold` / `_switchMouseMinStep` / `_switchMouseIdleTime`）で調整します。
 
@@ -108,11 +122,12 @@
 
 ロックオン候補の取得と、候補の中から対象を選ぶ純粋な選定ロジックを担当します。`MonoBehaviour` ではなく、`LockOnController.Init` 時に生成されます。
 
-候補は `EnemyManager.GetLockOnTarget` から取得し、次の条件で絞り込みます。
+候補は `EnemyManager.GetLockOnTarget` に加え、`SetExternalCandidateSource`（`CameraController.SetExternalLockOnCandidateSource` 経由。`CameraManager` が `BossLegLockOnController` を接続する）で設定した外部ソースからも取得し、次の条件で絞り込みます。
 
 - ロックオン可能である
 - ターゲット中心のTransformが存在する
-- プレイヤーからロックオン可能距離（`_lockOnRange`）以内である
+- プレイヤーからロックオン可能距離（`_lockOnRange`）以内である（外部ソースの候補にも同じ距離条件を適用する）
+- `SetDefaultPoolExclusion` で設定した除外条件に一致しない（`EnemyManager` 由来の候補のみに適用。外部ソースの候補が担う役割と重複するものを弾く用途。`CameraManager` は `BossLegLockOnController.ShouldExcludeFromDefaultPool` を接続し、ボス本体の姿勢(Posture)連動パーツ〈`BossCharacterPartsView`〉を除外する。詳細は後述の `BossLegLockOnController` の節を参照）
 - 必要に応じて現在の対象を除外する
 
 遮蔽は選定に使いません。画面内外も足切りしません（画面外の候補はスコアで自然に後回しになる）。
@@ -174,6 +189,9 @@ flowchart TD
     Manager --> Boss[BossCameraController]
     Enemy --> Boss
     Boss --> BossCam[Cinemachineボスカメラ]
+    Manager --> BossLeg[BossLegLockOnController]
+    Enemy --> BossLeg
+    BossLeg --> Selector
     Manager --> Presentation[CameraPresentationController]
     PlayerAttack[PlayerAttack] --> Presentation
     ModeController[PlayerModeController] --> Presentation
@@ -195,19 +213,22 @@ flowchart TD
 7. `CameraController.Tick` 内の `TryHandleInvalidTarget` が対象を監視します。自動解除距離超過なら解除。対象が無効化（撃破・削除・`IsLockable=false` 化）されたら `SelectNextTarget` で次へ切り替え、いなければ解除。対象でない敵の撃破では何も起きません。`OnEnemyForceRemoved` のみイベント購読で、現在の対象が削除されたときだけ同様に処理します。
 8. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
 
+ボスの脚/頭（`BossLegLockOnController` が供給する候補）も、上記と全く同じ流れでロックオンされます。`CameraManager.FixedUpdate` は通常ボスカメラ有効中 `CameraController.Tick` を止めますが、`CameraController.IsLockedOn` が true の間は止めないため、ボス戦中でもロックオン開始後は通常どおり対象切り替え・自動解除が機能します。
+
 ## 参照関係と責務の境界
 
 | クラス | 主な責務 | 主な依存先 |
 | --- | --- | --- |
-| `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraPresentationController |
+| `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraPresentationController、BossLegLockOnController |
 | `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド。追従アンカーを `FollowAnchor` で公開 | Cinemachine、Player、InputHandler |
 | `BossCameraController` | ボス戦中の専用カメラ（定位置のボス正対追従・注視点の左右スイベル・姿勢連動ズーム）の有効化と駆動 | Cinemachine、EnemyManager（Spawned/BossDefeated/ForceRemoved）、InputHandler、CameraManager、CameraAnglePoint、IBossEnemyCharacterView（OnChangedPosture） |
 | `BossCameraSettings` | `BossCameraController` へ渡すチューニング値の組（`CameraManager` の Inspector 値から詰め替え） | なし |
+| `BossLegLockOnController` | ボスの右足/左足/頭をロックオン候補として供給（鎧の生死で `IsLockable` を切り替えるだけ） | EnemyManager（Spawned/BossDefeated/ForceRemoved）、IBossEnemyCharacterView（ActiveBossEnemyPartsView）、BossArmorView（IsBroken）、CameraAnglePoint |
 | `CameraPresentationController` | ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火 | CameraZoomController、CameraShake、PlayerAttack、PlayerModeController、PlayerAnimationController |
 | `CameraZoomController` | FOV倍率の時間ベース補間。ベース層（体制連動）×エフェクト層（チャージ等）の2段を通常・ロックオン・ボスの3カメラへ毎フレーム適用 | Cinemachine |
 | `CameraController` | ロックオン状態の保持、対象の遷移・自動解除判定、切り替え入力 | InputHandler、EnemyManager（ForceRemovedのみ）、LockOnTargetSelector、CameraManager、Unity Input System（Gamepad/Mouse直接参照） |
 | `LockOnController` | 既存Prefab向けの互換コンポーネント | CameraController |
-| `LockOnTargetSelector` | ロックオン候補の絞り込みと選定 | EnemyManager、Camera、Player |
+| `LockOnTargetSelector` | ロックオン候補の絞り込みと選定（EnemyManager＋外部候補ソースをマージ） | EnemyManager、Camera、Player、外部候補ソース（BossLegLockOnController 等） |
 | `CameraShake` | Cinemachine Noiseの一時操作 | Cinemachine、UniTask |
 | `LockOnAreaVisualizer` | デッドゾーンの画面表示 | CameraManager、Unity UI |
 | `ILockOnTarget` | ロックオン対象の共通契約 | 実装側のターゲット中心Transform |
@@ -220,3 +241,4 @@ flowchart TD
 - `LockOnTargetSelector` は選定スコアと左右判定に `_camera`（Cinemachine Brain 出力のメインカメラ）の `transform` と `WorldToScreenPoint` を使うため、カメラが未準備の場合は正しく選定できません。
 - 対象切り替えは `CameraController` が `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（`InputHandler` を経由しない割り切り）。`LockOnChange` アクションや矢印キーは対象切り替えには使いません。
 - `LockOnController.cs` はクラス名とファイル名を一致させています。Unityスクリプトをリネームする場合は、既存のMetaファイルのGUIDを維持してください。
+- `BossLegLockOnController` は、ボスの`ActiveBossEnemyPartsView`（初期姿勢＝`Standing`時点）に右足・左足の鎧付きパーツが含まれていることを前提にしています。ボス側で姿勢（Posture）が `Standing` 以外に切り替わっても、一度取得した `BossArmorView`／Transform参照はそのまま保持し続けるため、脚パーツ自体が破棄されない限り機能し続けます。該当パーツが見つからない場合は警告ログを出して脚/頭ロックオンを無効化します。

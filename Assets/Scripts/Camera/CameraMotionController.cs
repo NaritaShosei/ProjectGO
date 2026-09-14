@@ -188,15 +188,24 @@ public sealed class CameraMotionController
     }
 
     /// <summary>ロックオン開始・対象切り替え時のブレンドを開始する。</summary>
-    /// <param name="snapToNormalCamera">初回ロックオンは true（通常カメラ姿勢から）、対象切り替えは false（現在のロックオン姿勢から）。</param>
-    public void BeginLockOnBlend(bool snapToNormalCamera)
+    /// <param name="snapToNormalCamera">初回ロックオンは true（現在表示中のカメラ姿勢から）、対象切り替えは false（現在のロックオン姿勢から）。</param>
+    /// <param name="currentMainCamera">
+    /// スナップ元にする実際の表示カメラ（Cinemachine Brainの出力Camera）。
+    /// ボス戦中は通常カメラのTickが止まり `_normalCamera` の姿勢が古いまま固定されるため、
+    /// 未指定時のフォールバックとしてのみ `_normalCamera` を使う。
+    /// </param>
+    public void BeginLockOnBlend(bool snapToNormalCamera, Camera currentMainCamera = null)
     {
-        // 初回ロックオンのみ、通常カメラの現在姿勢へスナップ（古い姿勢から飛ぶのを防ぐ）
+        // 初回ロックオンのみ、現在実際に表示されているカメラの姿勢へスナップ（古い姿勢から飛ぶのを防ぐ）
         if (snapToNormalCamera)
         {
+            Transform snapFrom = currentMainCamera != null
+                ? currentMainCamera.transform
+                : _normalCamera.transform;
+
             _lockOnCamera.transform.SetPositionAndRotation(
-                _normalCamera.transform.position,
-                _normalCamera.transform.rotation);
+                snapFrom.position,
+                snapFrom.rotation);
         }
 
         // 現在のロックオンカメラ姿勢をブレンド起点として記録
