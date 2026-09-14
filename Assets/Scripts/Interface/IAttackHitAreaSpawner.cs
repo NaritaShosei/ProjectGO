@@ -9,5 +9,5 @@ public interface IAttackHitAreaSpawner
     /// <param name="spawnCenterPos"> エフェクトの中心座標 </param>
     /// <param name="range"> 当たり判定の半分の大きさ </param>
     /// <param name="despawnTime"> エフェクト消滅までの時間 </param>
-    public HitAreaView Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, float despawnTime, Vector3 forward = default);
+    public HitAreaView Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, Vector3 forward = default);
 }

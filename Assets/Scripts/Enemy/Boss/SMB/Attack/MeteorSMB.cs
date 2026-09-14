@@ -6,6 +6,7 @@ using UnityEngine;
 
 using BossEnemy.Enum;
 using BossEnemy.Attack;
+using BossEnemy.Effect;
 
 namespace BossEnemy.SMB
 {
@@ -42,9 +43,6 @@ namespace BossEnemy.SMB
         [Header("攻撃の範囲エフェクトの生成の高さ")]
         [SerializeField] private float _attackAreaEffectPosY = 0.2f;
 
-        [Header("攻撃着弾地点の高さ")]
-        [SerializeField] private float _meteorEffectPosY = -1f;
-
         [Header("隕石発射から到達までの秒数")]
         [SerializeField] private float _attackHitTime = 1.05f;
 
@@ -69,36 +67,50 @@ namespace BossEnemy.SMB
 
                 Vector3 attackCenter = new Vector3(attackAreaX, _attackAreaEffectPosY, attackAreaZ);
 
-                attackCenter.y = _meteorEffectPosY;
                 attackPosList.Add(attackCenter);
             }
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_attackAreaDespawnTime), cancellationToken: cancellationToken);
+            var attackAreaDespawnAndDisplayAttackEffectTime = _elapsedTime + _attackAreaDespawnAndDisplayAttackEffectTime;
+
+            await UniTask.WaitUntil(() =>
+                _elapsedTime >= attackAreaDespawnAndDisplayAttackEffectTime,
+                cancellationToken: cancellationToken);
             int attackCount = 0;
 
             foreach (Vector3 attackPos in attackPosList)
             {
-                float despawnTime =
-                    _attackAreaDespawnTime +
-                    _attackHitTime +
-                    (attackCount * (_attackHitTime + _consecutiveAttackInterval));
-
                 attackCount++;
 
-                _attackHitAreaSpawner.Spawn
-                    (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius, despawnTime);
+                HitAreaView hitArea =　_attackHitAreaSpawner.Spawn
+                    (AttackHitAreaType.Circle, attackPos, _attackData.AttackHitAreaRadius);
+
+                _visibleHitAreaList.Add(hitArea);
 
                 _effectManager.PlayEffect(METEOR_EFFECT_NAME, attackPos);
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
+                var hitTime = _elapsedTime + _attackHitTime;
+
+                await UniTask.WaitUntil(() =>
+                    _elapsedTime >= hitTime,
+                    cancellationToken: cancellationToken);
+
+                hitArea.InVisible();
+                _visibleHitAreaList.Remove(hitArea);
 
                 PlayBossSE(SoundCueNames.Boss.MeteorImpact);
                 _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();
 
-                _animationEventReceiver.AnimEvent_AttackHitCheck
-                    (_attackData, AttackHitAreaType.Circle, attackPos);
+                StartAttackHitCheck(attackPos);
 
-                await UniTask.Delay(TimeSpan.FromSeconds(_consecutiveAttackInterval), cancellationToken: cancellationToken);
+                var consecutiveAttackInterval = _elapsedTime + _consecutiveAttackInterval;
+
+                await UniTask.WaitUntil(() =>
+                    !_isAttackHitCheck,
+                    cancellationToken: cancellationToken);
+
+                await UniTask.WaitUntil(() =>
+                    _elapsedTime >= consecutiveAttackInterval, 
+                    cancellationToken: cancellationToken);
             }
         }
     }

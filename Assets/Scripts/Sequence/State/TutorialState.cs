@@ -41,10 +41,10 @@ public sealed class TutorialState : ISequenceState
         }
 
         if (_panelView != null)
-            _panelView.OnNextRequested += HandleNextRequested;
+            _panelView.OnConfirmRequested += AdvanceModalPage;
 
         StartTutorialWave();
-        ShowRealtimePage(TutorialTrigger.BattleStarted);
+        ShowBasicOperationGuide();
     }
 
     /// <summary>戦闘、基本操作チェック、ウェーブ終了を更新する。</summary>
@@ -65,7 +65,7 @@ public sealed class TutorialState : ISequenceState
         {
             _waveClearDetected = false;
             _phase = Phase.WaitingForSkillGuide;
-            ShowModalPages(TutorialTrigger.WaveCleared);
+            ShowModalPages(ModalGuide.SkillSelect);
         }
 
         return null;
@@ -89,7 +89,7 @@ public sealed class TutorialState : ISequenceState
 
         if (_panelView != null)
         {
-            _panelView.OnNextRequested -= HandleNextRequested;
+            _panelView.OnConfirmRequested -= AdvanceModalPage;
             _panelView.Hide();
         }
 
@@ -112,15 +112,16 @@ public sealed class TutorialState : ISequenceState
     [Header("チュートリアルUI")]
     [SerializeField] private TutorialChecklistView _checklistView;
     [SerializeField] private TutorialPanelView _panelView;
-    [SerializeField] private List<TutorialPage> _pages = new()
-    {
-        new TutorialPage(TutorialTrigger.BattleStarted, "基本操作", "各操作を試しましょう。"),
-        new TutorialPage(TutorialTrigger.ModeChange, "闘神モード", "RT長押しで強力な広範囲チャージ攻撃ができます。\n鎧をまとった敵には闘神モードが有効です。"),
-        new TutorialPage(TutorialTrigger.LockOn, "モードチェンジ", "敵の鎧を破壊しました。\nLBで雷神モードへ切り替えてください。"),
-        new TutorialPage(TutorialTrigger.FirstEnemyDefeated, "レベルアップ", "敵を倒すと経験値を獲得できます。\n経験値が一定量たまると、攻撃力・HP・雷神ゲージ・クリティカル率のいずれかが上昇します。"),
-        new TutorialPage(TutorialTrigger.WaveCleared, "トールの加護", "ウェーブをクリアすると3つのスキルが提示されます。\n3つの中から1つを選んで獲得できます。"),
-        new TutorialPage(TutorialTrigger.ThunderModeChanged, "雷神モード", "RT連打による連撃を得意とする高速戦闘スタイルです。\n雷神ゲージを消費しますが、鎧が剥がれた敵に強力です。\n攻撃に合わせて回避するとジャスト回避が発生します。"),
-    };
+
+    [Header("説明画像（決定ボタンで順番に進む）")]
+    [SerializeField, InspectorName("闘神モードの説明"), Tooltip("最初の攻撃命中後に表示するSprite。")]
+    private Sprite[] _warriorGuideSprites = new Sprite[1];
+    [SerializeField, InspectorName("雷神モードの説明"), Tooltip("雷神モードへの切り替え演出後に表示するSprite。")]
+    private Sprite[] _thunderGuideSprites = new Sprite[1];
+    [SerializeField, InspectorName("レベルアップの説明"), Tooltip("敵撃破後に表示するSprite。")]
+    private Sprite[] _levelUpGuideSprites = new Sprite[1];
+    [SerializeField, InspectorName("スキル選択の説明"), Tooltip("ウェーブクリア後に表示するSprite。")]
+    private Sprite[] _skillGuideSprites = new Sprite[1];
 
     [Header("チュートリアル戦闘")]
     [SerializeField] private SpawnPointSelector _spawnPointSelector;
@@ -140,10 +141,11 @@ public sealed class TutorialState : ISequenceState
     [Header("パネル表示中に停止する対象")]
     [SerializeField] private HitStopTargetGroup _pauseTargetGroup = HitStopTargetGroup.All;
 
+    private enum ModalGuide { Warrior, Thunder, LevelUp, SkillSelect }
     private enum Phase { Battle, WaitingForSkillGuide, SkillSelect }
     private enum TutorialStep { BasicOperations, WarriorExplanation, WarriorCombat, WaitingModeChange, WaitingModeChangeComplete, ThunderExplanation, ThunderCombat }
 
-    private readonly Queue<TutorialPage> _pagesToShow = new();
+    private readonly Queue<Sprite> _pagesToShow = new();
     private SequenceStateContext _context;
     private WaveController _waveController;
     private SkillSelectPresenter _skillSelectPresenter;
@@ -151,7 +153,7 @@ public sealed class TutorialState : ISequenceState
     private IDisposable _pauseHandle;
     private Phase _phase;
     private TutorialStep _step;
-    private TutorialTrigger _activeTrigger;
+    private ModalGuide _activeTrigger;
     private bool _panelIsOpen;
     private bool _waveClearDetected;
     private bool _defeatGuideShown;
@@ -196,25 +198,24 @@ public sealed class TutorialState : ISequenceState
     }
 
     /// <summary>画面端の非モーダルパネルを表示する。</summary>
-    private void ShowRealtimePage(TutorialTrigger trigger)
+    private void ShowBasicOperationGuide()
     {
-        TutorialPage page = GetPage(trigger);
-        if (_checklistView == null || page == null)
+        if (_checklistView == null)
             return;
-        _checklistView.ShowBasicOperations(page.Title);
+        _checklistView.ShowBasicOperations();
         UpdateBasicOperationProgress();
     }
 
     /// <summary>ゲームを停止する説明ページをインスペクター設定のまま表示する。</summary>
-    private void ShowModalPages(TutorialTrigger trigger)
+    private void ShowModalPages(ModalGuide trigger)
     {
         _pagesToShow.Clear();
         _activeTrigger = trigger;
-        if (_pages != null)
+        Sprite[] sprites = GetGuideSprites(trigger);
+        if (sprites != null)
         {
-            foreach (TutorialPage page in _pages)
-                if (page != null && page.Trigger == trigger)
-                    _pagesToShow.Enqueue(page);
+            foreach (Sprite sprite in sprites)
+                _pagesToShow.Enqueue(sprite);
         }
 
         if (_panelView == null || _pagesToShow.Count == 0)
@@ -228,8 +229,8 @@ public sealed class TutorialState : ISequenceState
         _panelView.Show(_pagesToShow.Dequeue(), true);
     }
 
-    /// <summary>時間停止パネルの次へボタンを処理する。</summary>
-    private void HandleNextRequested()
+    /// <summary>表示中の説明を進め、最終ページなら時間停止を解除する。</summary>
+    private void AdvanceModalPage()
     {
         if (!_panelIsOpen)
             return;
@@ -245,30 +246,30 @@ public sealed class TutorialState : ISequenceState
     }
 
     /// <summary>説明を閉じた後、仕様上の次段階へ移る。</summary>
-    private void CompleteModalGuide(TutorialTrigger trigger)
+    private void CompleteModalGuide(ModalGuide trigger)
     {
         switch (trigger)
         {
-            case TutorialTrigger.ModeChange:
+            case ModalGuide.Warrior:
                 _step = TutorialStep.WarriorCombat;
                 ResumeBattle();
                 if (_armorBrokenWhilePanelOpen)
                     StartModeChangeGuide();
                 break;
-            case TutorialTrigger.ThunderModeChanged:
+            case ModalGuide.Thunder:
                 _step = TutorialStep.ThunderCombat;
                 ResumeBattle();
                 if (_defeatGuidePending)
                 {
                     _defeatGuidePending = false;
-                    ShowModalPages(TutorialTrigger.FirstEnemyDefeated);
+                    ShowModalPages(ModalGuide.LevelUp);
                 }
                 break;
-            case TutorialTrigger.FirstEnemyDefeated:
+            case ModalGuide.LevelUp:
                 _defeatGuideShown = true;
                 ResumeBattle();
                 break;
-            case TutorialTrigger.WaveCleared:
+            case ModalGuide.SkillSelect:
                 StartSkillSelect();
                 break;
         }
@@ -292,7 +293,7 @@ public sealed class TutorialState : ISequenceState
         UpdateBasicOperationProgress();
         _checklistView?.Hide();
         _step = TutorialStep.WarriorExplanation;
-        ShowModalPages(TutorialTrigger.ModeChange);
+        ShowModalPages(ModalGuide.Warrior);
     }
 
     /// <summary>鎧破壊後、モードチェンジ専用の操作待ちへ移る。</summary>
@@ -311,9 +312,7 @@ public sealed class TutorialState : ISequenceState
     private void StartModeChangeGuide()
     {
         _step = TutorialStep.WaitingModeChange;
-        TutorialPage page = GetPage(TutorialTrigger.LockOn);
-        if (_checklistView != null && page != null)
-            _checklistView.ShowModeChange(page.Title, page.Description);
+        _checklistView?.ShowModeChange();
         BeginModeChangePause();
     }
 
@@ -336,7 +335,7 @@ public sealed class TutorialState : ISequenceState
             return;
 
         _step = TutorialStep.ThunderExplanation;
-        ShowModalPages(TutorialTrigger.ThunderModeChanged);
+        ShowModalPages(ModalGuide.Thunder);
     }
 
     /// <summary>ロックオン成立を基本操作チェックへ反映する。</summary>
@@ -359,7 +358,7 @@ public sealed class TutorialState : ISequenceState
             return;
 
         if (_step == TutorialStep.ThunderCombat)
-            ShowModalPages(TutorialTrigger.FirstEnemyDefeated);
+            ShowModalPages(ModalGuide.LevelUp);
         else
             _defeatGuidePending = true;
     }
@@ -470,15 +469,17 @@ public sealed class TutorialState : ISequenceState
         _armorBrokenWhilePanelOpen = false;
     }
 
-    /// <summary>指定トリガーに対応する最初の設定ページを取得する。</summary>
-    private TutorialPage GetPage(TutorialTrigger trigger)
+    /// <summary>説明の種類に対応する画像だけを取得する。</summary>
+    private Sprite[] GetGuideSprites(ModalGuide trigger)
     {
-        if (_pages == null)
-            return null;
-        foreach (TutorialPage page in _pages)
-            if (page != null && page.Trigger == trigger)
-                return page;
-        return null;
+        return trigger switch
+        {
+            ModalGuide.Warrior => _warriorGuideSprites,
+            ModalGuide.Thunder => _thunderGuideSprites,
+            ModalGuide.LevelUp => _levelUpGuideSprites,
+            ModalGuide.SkillSelect => _skillGuideSprites,
+            _ => null,
+        };
     }
 
     private static void HideCursor() => Cursor.visible = false;

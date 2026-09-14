@@ -1,20 +1,14 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 戦闘を止めずに、基本操作の達成状況を画面端へ表示するチェックリスト。
-/// 位置と大きさはPrefab側で調整し、実行中には変更しない。
+/// 1つのViewで基本操作UIとモードチェンジUIを切り替えるチェックリスト。
+/// タイトル・本文・位置・大きさはPrefab側で事前設定する。
 /// </summary>
 public sealed class TutorialChecklistView : MonoBehaviour
 {
-    private const string MODE_CHANGE_INPUT_TEXT = "\n\n<size=32><color=#FFD447><b>LB　モードチェンジ</b></color></size>";
-
-    public void ShowBasicOperations(string title)
+    public void ShowBasicOperations()
     {
-        if (_titleText != null)
-            _titleText.text = title;
-
         SetGroupVisible(true);
         SetModeChangeVisible(false);
         SetVisible(true);
@@ -22,13 +16,8 @@ public sealed class TutorialChecklistView : MonoBehaviour
 
     public void Hide() => SetVisible(false);
 
-    public void ShowModeChange(string title, string description)
+    public void ShowModeChange()
     {
-        if (_titleText != null)
-            _titleText.text = title;
-        if (_modeChangeDescriptionText != null)
-            _modeChangeDescriptionText.text = $"{description}{MODE_CHANGE_INPUT_TEXT}";
-
         SetGroupVisible(false);
         SetModeChangeVisible(true);
         SetToggleValue(_modeChangeToggle, false);
@@ -55,10 +44,8 @@ public sealed class TutorialChecklistView : MonoBehaviour
     }
 
     [SerializeField] private CanvasGroup _canvasGroup;
-    [SerializeField] private TMP_Text _titleText;
     [SerializeField] private GameObject _basicOperationGroup;
     [SerializeField] private GameObject _modeChangeGroup;
-    [SerializeField] private TMP_Text _modeChangeDescriptionText;
     [SerializeField] private Toggle _moveToggle;
     [SerializeField] private Toggle _cameraMoveToggle;
     [SerializeField] private Toggle _lockOnToggle;
