@@ -14,6 +14,13 @@ public class CRIAudioInitializer : MonoBehaviour
     [SerializeField, Min(0f), Tooltip("0で即時停止")]
     private float _bgmFadeOutSeconds = 1f;
 
+    [SerializeField, Range(0f, 1f), Header("音量（Play中の動作確認用・セーブされません）")]
+    private float _bgmVolume = 0.5f;
+    [SerializeField, Range(0f, 1f)]
+    private float _seVolume = 0.5f;
+    [SerializeField, Range(0f, 1f)]
+    private float _voiceVolume = 0.5f;
+
     private SoundManager _soundManager;
 
     private void Awake()
@@ -28,6 +35,14 @@ public class CRIAudioInitializer : MonoBehaviour
     {
         _bgmFadeInSeconds = Mathf.Clamp(_bgmFadeInSeconds, 0f, 3600f);
         _bgmFadeOutSeconds = Mathf.Clamp(_bgmFadeOutSeconds, 0f, 3600f);
+
+        // Play中にInspectorで動かした値をその場で反映する（設定画面の値とは別系統）
+        if (Application.isPlaying && _soundManager != null)
+        {
+            _soundManager.SetBGMVolume(_bgmVolume);
+            _soundManager.SetSEVolume(_seVolume);
+            _soundManager.SetVoiceVolume(_voiceVolume);
+        }
     }
 
     private void OnDestroy()

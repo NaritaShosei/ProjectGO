@@ -14,6 +14,7 @@ public class EndingMovieState : ISequenceState
         _context = context;
 
         context.InputHandler?.EnableInput(false);
+        context.Player?.ForceWarriorMode();
 
         var moviePlayer = context.MoviePlayer;
 

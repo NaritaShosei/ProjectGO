@@ -277,6 +277,15 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     }
 
     /// <summary>
+    /// ムービー再生前など、雷神モードを維持できない場面で戦神モードへ強制的に戻す。
+    /// </summary>
+    public void ForceWarriorMode()
+    {
+        if (_modeController.CurrentMode == PlayerMode.Thunder)
+            _modeController.SwitchMode(PlayerMode.Warrior);
+    }
+
+    /// <summary>
     /// ダウン状態からの回復を開始する
     /// </summary>
     public void StartDownRecovery()
