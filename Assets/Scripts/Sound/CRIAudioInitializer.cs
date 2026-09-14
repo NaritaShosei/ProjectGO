@@ -22,6 +22,9 @@ public class CRIAudioInitializer : MonoBehaviour
     private float _voiceVolume = 0.5f;
 
     private SoundManager _soundManager;
+    private float _appliedBgmVolume;
+    private float _appliedSeVolume;
+    private float _appliedVoiceVolume;
 
     private void Awake()
     {
@@ -29,6 +32,11 @@ public class CRIAudioInitializer : MonoBehaviour
         _soundManager = new SoundManager(_bgmPlayer, _deaultBGMCueSheet);
         _soundManager.SetBGMFadeDurations(_bgmFadeInSeconds, _bgmFadeOutSeconds);
         ServiceLocator.Register(_soundManager);
+
+        // OnValidateでの差分検知用に初期値をキャッシュ
+        _appliedBgmVolume = _bgmVolume;
+        _appliedSeVolume = _seVolume;
+        _appliedVoiceVolume = _voiceVolume;
     }
 
     private void OnValidate()
@@ -36,12 +44,26 @@ public class CRIAudioInitializer : MonoBehaviour
         _bgmFadeInSeconds = Mathf.Clamp(_bgmFadeInSeconds, 0f, 3600f);
         _bgmFadeOutSeconds = Mathf.Clamp(_bgmFadeOutSeconds, 0f, 3600f);
 
-        // Play中にInspectorで動かした値をその場で反映する（設定画面の値とは別系統）
-        if (Application.isPlaying && _soundManager != null)
+        if (!Application.isPlaying || _soundManager == null) return;
+
+        // Play中にInspectorで動かした値をその場で反映する（設定画面の値とは別系統）。
+        // 音量以外のフィールド変更で無関係な音量が再適用されないよう、変化した項目のみ反映する。
+        if (!Mathf.Approximately(_bgmVolume, _appliedBgmVolume))
         {
             _soundManager.SetBGMVolume(_bgmVolume);
+            _appliedBgmVolume = _bgmVolume;
+        }
+
+        if (!Mathf.Approximately(_seVolume, _appliedSeVolume))
+        {
             _soundManager.SetSEVolume(_seVolume);
+            _appliedSeVolume = _seVolume;
+        }
+
+        if (!Mathf.Approximately(_voiceVolume, _appliedVoiceVolume))
+        {
             _soundManager.SetVoiceVolume(_voiceVolume);
+            _appliedVoiceVolume = _voiceVolume;
         }
     }
 

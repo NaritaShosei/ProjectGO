@@ -86,6 +86,8 @@ public class SoundManager
         // 何も鳴っていない状態からのStopでは、次の再生を待たせる必要がない。
         _bgmStopping = _bgmSource.status == CriAtomSource.Status.Playing ||
             _bgmSource.status == CriAtomSource.Status.Prep;
+        if (_bgmStopping)
+            _bgmStopRequestedAt = Time.unscaledTime;
         _bgmSource.Stop();
         _bgmSource.Pause(false);
     }
@@ -250,6 +252,7 @@ public class SoundManager
     private string _requestedBGMCue;
     private bool _bgmStopping;
     private float _bgmFadeOutSeconds;
+    private float _bgmStopRequestedAt;
 
     // 通常SE用のソースを管理するDictionary
     private Dictionary<GameObject, List<CriAtomSource>> _seSourcesDict
@@ -265,7 +268,11 @@ public class SoundManager
         {
             // statusやIsFading()はフェードアウトの余韻が終わるより先に変化することがあり、
             // ポーリングで判定すると新旧のBGMが重なって二重に聞こえる。設定した秒数を確実に待つ。
-            await UniTask.Delay(Mathf.RoundToInt(_bgmFadeOutSeconds * 1000f), ignoreTimeScale: true);
+            // 経過時間は実際のフェードアウト開始時刻からの差分で計算し、
+            // リクエストが連続しても待機しすぎないようにする。
+            float elapsedSeconds = Time.unscaledTime - _bgmStopRequestedAt;
+            float remainingSeconds = Mathf.Max(0f, _bgmFadeOutSeconds - elapsedSeconds);
+            await UniTask.Delay(Mathf.RoundToInt(remainingSeconds * 1000f), ignoreTimeScale: true);
             _bgmStopping = false;
         }
 
