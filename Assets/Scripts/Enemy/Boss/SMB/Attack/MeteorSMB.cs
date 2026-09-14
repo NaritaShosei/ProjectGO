@@ -43,9 +43,6 @@ namespace BossEnemy.SMB
         [Header("攻撃の範囲エフェクトの生成の高さ")]
         [SerializeField] private float _attackAreaEffectPosY = 0.2f;
 
-        [Header("攻撃着弾地点の高さ")]
-        [SerializeField] private float _meteorEffectPosY = -1f;
-
         [Header("隕石発射から到達までの秒数")]
         [SerializeField] private float _attackHitTime = 1.05f;
 
@@ -70,7 +67,6 @@ namespace BossEnemy.SMB
 
                 Vector3 attackCenter = new Vector3(attackAreaX, _attackAreaEffectPosY, attackAreaZ);
 
-                attackCenter.y = _meteorEffectPosY;
                 attackPosList.Add(attackCenter);
             }
 
