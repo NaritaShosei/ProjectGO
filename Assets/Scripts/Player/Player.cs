@@ -293,6 +293,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _playerStateManager.ChangeState(PlayerState.Down);
     }
 
+    /// <summary> プレイヤーの位置と回転を設定する </summary>
+    public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
+    {
+        transform.SetPositionAndRotation(position, rotation);
+    }
+
     [Header("Data")]
     [SerializeField] private PlayerData _playerData;
     [SerializeField] private MoveData _moveData;
