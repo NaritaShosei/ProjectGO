@@ -23,6 +23,7 @@ public sealed class BossLegLockOnController
     /// </summary>
     public bool ShouldExcludeFromDefaultPool(ILockOnTarget target) => target is BossCharacterPartsView;
 
+    /// <summary>ボスの脚/頭ロックオン候補プロバイダを生成し、敵スポーン・ボス撃破・強制削除イベントを購読する。</summary>
     public BossLegLockOnController(EnemyManager enemyManager)
     {
         _enemyManager = enemyManager;
@@ -44,6 +45,21 @@ public sealed class BossLegLockOnController
         _headTarget.SetLockable(!isRightLegArmorAlive && !isLeftLegArmorAlive);
     }
 
+    private static readonly IReadOnlyList<ILockOnTarget> _emptyCandidates = new List<ILockOnTarget>();
+
+    private readonly EnemyManager _enemyManager;
+    private IReadOnlyList<ILockOnTarget> _candidates = _emptyCandidates;
+
+    private BossArmorView _rightLegArmor;
+    private BossArmorView _leftLegArmor;
+    private BossPartLockOnTarget _rightLegTarget;
+    private BossPartLockOnTarget _leftLegTarget;
+    private BossPartLockOnTarget _headTarget;
+
+    /// <summary>
+    /// スポーンした敵がボスなら、右足/左足の鎧と頭のCameraAnglePointを取得して候補一覧を組み立てる。
+    /// 必要な参照が1つでも揃わなければ、脚/頭ロックオン自体を無効化する。
+    /// </summary>
     private void HandleEnemySpawned(IEnemy enemy)
     {
         if (enemy is not IBossEnemyCharacterView bossView) return;
@@ -55,6 +71,7 @@ public sealed class BossLegLockOnController
         Transform rightLegTransform = null;
         Transform leftLegTransform = null;
 
+        // 現在アクティブな部位から右足/左足の鎧を探す
         foreach (var parts in bossView.ActiveBossEnemyPartsView)
         {
             if (parts?.Armor == null) continue;
@@ -92,13 +109,16 @@ public sealed class BossLegLockOnController
         Tick();
     }
 
+    /// <summary>ボス撃破で候補をクリアする。</summary>
     private void HandleBossGone() => Reset();
 
+    /// <summary>現在のボスが強制削除されたら候補をクリアする。</summary>
     private void HandleEnemyForceRemoved(IEnemy enemy)
     {
         if (enemy is IBossEnemyCharacterView) Reset();
     }
 
+    /// <summary>保持している鎧・ターゲット参照と候補一覧をすべて空へ戻す。</summary>
     private void Reset()
     {
         _rightLegArmor = null;
@@ -119,17 +139,6 @@ public sealed class BossLegLockOnController
 
         return null;
     }
-
-    private static readonly IReadOnlyList<ILockOnTarget> _emptyCandidates = new List<ILockOnTarget>();
-
-    private readonly EnemyManager _enemyManager;
-    private IReadOnlyList<ILockOnTarget> _candidates = _emptyCandidates;
-
-    private BossArmorView _rightLegArmor;
-    private BossArmorView _leftLegArmor;
-    private BossPartLockOnTarget _rightLegTarget;
-    private BossPartLockOnTarget _leftLegTarget;
-    private BossPartLockOnTarget _headTarget;
 }
 
 /// <summary>
@@ -137,12 +146,16 @@ public sealed class BossLegLockOnController
 /// </summary>
 public sealed class BossPartLockOnTarget : ILockOnTarget
 {
+    /// <summary>ロックオン可能か。</summary>
     public bool IsLockable { get; private set; }
 
+    /// <summary>ロックオンの中心Transformを取得する。</summary>
     public Transform GetTargetCenter() => _center;
 
+    /// <summary>注視中心のTransformを指定して生成する。</summary>
     public BossPartLockOnTarget(Transform center) => _center = center;
 
+    /// <summary>ロック可否を設定する。</summary>
     public void SetLockable(bool lockable) => IsLockable = lockable;
 
     private readonly Transform _center;
