@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -116,6 +118,18 @@ public class CameraController : MonoBehaviour
 
         _lockOnState?.SetMainCamera(mainCamera);
         _selector?.SetMainCamera(mainCamera);
+    }
+
+    /// <summary>EnemyManager以外から供給する追加のロックオン候補ソースを設定します（ボスの脚/頭など）。</summary>
+    public void SetExternalLockOnCandidateSource(Func<IReadOnlyList<ILockOnTarget>> source)
+    {
+        _selector?.SetExternalCandidateSource(source);
+    }
+
+    /// <summary>EnemyManager由来の候補から除外する条件を設定します（外部候補ソースと役割が重複する対象を弾く）。</summary>
+    public void SetLockOnDefaultPoolExclusion(Func<ILockOnTarget, bool> shouldExclude)
+    {
+        _selector?.SetDefaultPoolExclusion(shouldExclude);
     }
 
     /// <summary>指定した対象へロックオンします。</summary>

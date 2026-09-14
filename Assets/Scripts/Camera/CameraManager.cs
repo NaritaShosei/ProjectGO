@@ -118,6 +118,12 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform, _cameraMotionController);
             _lockOnController.OnTargetChanged += HandleTargetChanged;
 
+            // ボスの脚/頭ロックオン候補（右足/左足の鎧の生死で切り替わる）を通常のロックオン選定へ接続する
+            _bossLegLockOnController = new BossLegLockOnController(enemyManager);
+            _lockOnController.SetExternalLockOnCandidateSource(() => _bossLegLockOnController.Candidates);
+            // ボス本体の姿勢連動パーツ（役割が重複し、鎧の生死と無関係にロック可否が変わる）はEnemyManager側の候補から除外する
+            _lockOnController.SetLockOnDefaultPoolExclusion(_bossLegLockOnController.ShouldExcludeFromDefaultPool);
+
             // ボスカメラはカメラ参照がある場合のみ生成する
             if (_bossBodyCamera != null)
             {
@@ -370,6 +376,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private CameraMotionController _cameraMotionController;
     private CameraPresentationController _cameraPresentationController;
     private BossCameraController _bossCameraController;
+    private BossLegLockOnController _bossLegLockOnController;
     private EffectCameraProximityController _effectCameraProximityController;
     private CameraOcclusionTransparencyController _occlusionTransparencyController;
 
@@ -433,10 +440,12 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         if (Mathf.Approximately(TimeScale, 0f)) return;
 
         _cameraPresentationController?.Tick(Time.fixedDeltaTime * TimeScale);
+        _bossLegLockOnController?.Tick();
         _bossCameraController?.Tick(Time.fixedDeltaTime * TimeScale);
 
-        // ボスカメラ有効中は通常・ロックオンのTickを止める（入力の二重適用防止）
-        if (_bossCameraController == null || !_bossCameraController.IsActive)
+        // ボスカメラ有効中は通常・ロックオンのTickを止める（入力の二重適用防止）。
+        // ただし実際にロックオン中（ボスの脚/頭など）は止めず、ロックオンカメラを優先する
+        if (_bossCameraController == null || !_bossCameraController.IsActive || (_lockOnController != null && _lockOnController.IsLockedOn))
         {
             _lockOnController?.Tick(TimeScale);
         }
@@ -503,6 +512,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraPresentationController?.ResetZoom();
         _cameraPresentationController?.Dispose();
         _bossCameraController?.Dispose();
+        _bossLegLockOnController?.Dispose();
         _effectCameraProximityController?.Dispose();
         _occlusionTransparencyController?.Dispose();
 
@@ -563,7 +573,14 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     internal void SetLockOnCameraActive(bool isActive)
     {
         _normalCamera.Priority = isActive ? _normalPriority - 1 : _normalPriority;
-        _lockOnCamera.Priority = isActive ? _lockOnPriority : _normalPriority - 1;
+
+        // ボス戦中（_bossBodyCamera が最前面）でもロックオンが勝てるよう、
+        // ボスカメラのPriorityより確実に高い値を使う（ボス不在時は _lockOnPriority のまま）
+        int activeLockOnPriority = _bossBodyCamera != null
+            ? Mathf.Max(_lockOnPriority, _bossPriority + 1)
+            : _lockOnPriority;
+
+        _lockOnCamera.Priority = isActive ? activeLockOnPriority : _normalPriority - 1;
     }
 
     /// <summary>ボス戦カメラのPriorityを切り替える。有効化時はロックオンを解除する。</summary>

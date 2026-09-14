@@ -360,6 +360,10 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
+        // Dodge中にバージョンを更新するとDodgeSMBから終了通知が来なくなるため、先に回避を終了させる
+        if (_stateManager.CurrentState == PlayerState.Dodge)
+            AnimEvent_DodgeEnd();
+
         CombatAnimationVersion++;
         _animator.ResetTrigger(AnimParams.Attack);
         _animator.ResetTrigger(AnimParams.ModeChange);
