@@ -90,6 +90,7 @@ namespace BossEnemy.SMB
 
                 await UniTask.Delay(TimeSpan.FromSeconds(_attackHitTime), cancellationToken: cancellationToken);
 
+                hitArea.InVisible();
                 _visibleHitAreaList.Remove(hitArea);
 
                 PlayBossSE(SoundCueNames.Boss.MeteorImpact);

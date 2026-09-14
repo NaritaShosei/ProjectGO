@@ -92,6 +92,8 @@ namespace BossEnemy.Character
 
             // ロックオンを可能に
             _isLockable = true;
+
+            // 攻撃SMBListの初期化
             _attackSMBList = new();
 
             // Update処理が必要なクラスのListをクリア
@@ -238,7 +240,6 @@ namespace BossEnemy.Character
                 if(attack.AttackID == bossEnemyAttackData.ID)
                 {
                     attack.SetAttackData(bossEnemyAttackData);
-                    break;
                 }
             }
 
