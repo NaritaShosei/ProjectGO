@@ -12,6 +12,7 @@ namespace BossEnemy.Effect
 
         public override void ActiveView(float radius)
         {
+            // 円の直径を割り出す
             float range = radius * 2;
             SetRange(range);
         }
