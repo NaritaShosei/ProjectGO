@@ -24,7 +24,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     /// <summary>
     /// AttackerSlot・Animator・DistanceProfileはMeleeAttackBehaviour固有の依存のためコンストラクタで受け取る
     /// </summary>
-    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null, float _enemyCooldown = 0f)
+    public MeleeAttackBehaviour(EnemyServices services, Animator animator, DistanceProfile profile = null, float _enemyCooldown = 0f, DamageReactionType damageReactionType = DamageReactionType.Small)
     {
         _enemyServices = services;
         _animator = animator;
@@ -34,6 +34,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             ? Mathf.Cos(profile.BackAttackAngle * Mathf.Deg2Rad)
             : -1f;
         _cooldownOverride = _enemyCooldown;
+        _reactionType = damageReactionType;
     }
 
     public void Init(BehaviourInitContext ctx)
@@ -183,6 +184,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
     private EnemyStateContext _state;
     private IEnemyAnimator _enemyAnimator;
     private Animator _animator;
+    private readonly DamageReactionType _reactionType;
 
     private readonly EnemyServices _enemyServices;
     private readonly DistanceProfile _profile;
@@ -225,9 +227,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
         foreach (var hit in hits)
         {
-            if (hit.TryGetComponent(out IPlayer player))
+            if (hit.TryGetComponent<IPlayer>(out _))
             {
-                player.TakeDamage(pattern.BaseDamage);
+                _enemyServices.PlayerInformationService.TakeDamage(pattern.BaseDamage,_reactionType);
             }
         }
 
