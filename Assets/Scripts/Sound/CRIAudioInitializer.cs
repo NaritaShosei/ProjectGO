@@ -14,17 +14,20 @@ public class CRIAudioInitializer : MonoBehaviour
     [SerializeField, Min(0f), Tooltip("0で即時停止")]
     private float _bgmFadeOutSeconds = 1f;
 
-    [SerializeField, Range(0f, 1f), Header("音量（Play中の動作確認用・セーブされません）")]
+#if UNITY_EDITOR
+    [SerializeField, Range(0f, 1f), Header("音量（Play中の動作確認用・セーブされません・エディタ専用）")]
     private float _bgmVolume = 0.5f;
     [SerializeField, Range(0f, 1f)]
     private float _seVolume = 0.5f;
     [SerializeField, Range(0f, 1f)]
     private float _voiceVolume = 0.5f;
 
-    private SoundManager _soundManager;
     private float _appliedBgmVolume;
     private float _appliedSeVolume;
     private float _appliedVoiceVolume;
+#endif
+
+    private SoundManager _soundManager;
 
     private void Awake()
     {
@@ -33,10 +36,18 @@ public class CRIAudioInitializer : MonoBehaviour
         _soundManager.SetBGMFadeDurations(_bgmFadeInSeconds, _bgmFadeOutSeconds);
         ServiceLocator.Register(_soundManager);
 
+#if UNITY_EDITOR
+        // OnValidateはPlay開始時に確実に呼ばれるとは限らないため、起動時の反映はここで行う。
+        // 実機ビルドには含めず、GameSettingService経由の正規の音量だけが反映されるようにする。
+        _soundManager.SetBGMVolume(_bgmVolume);
+        _soundManager.SetSEVolume(_seVolume);
+        _soundManager.SetVoiceVolume(_voiceVolume);
+
         // OnValidateでの差分検知用に初期値をキャッシュ
         _appliedBgmVolume = _bgmVolume;
         _appliedSeVolume = _seVolume;
         _appliedVoiceVolume = _voiceVolume;
+#endif
     }
 
     private void OnValidate()
@@ -44,6 +55,7 @@ public class CRIAudioInitializer : MonoBehaviour
         _bgmFadeInSeconds = Mathf.Clamp(_bgmFadeInSeconds, 0f, 3600f);
         _bgmFadeOutSeconds = Mathf.Clamp(_bgmFadeOutSeconds, 0f, 3600f);
 
+#if UNITY_EDITOR
         if (!Application.isPlaying || _soundManager == null) return;
 
         // Play中にInspectorで動かした値をその場で反映する（設定画面の値とは別系統）。
@@ -65,6 +77,7 @@ public class CRIAudioInitializer : MonoBehaviour
             _soundManager.SetVoiceVolume(_voiceVolume);
             _appliedVoiceVolume = _voiceVolume;
         }
+#endif
     }
 
     private void OnDestroy()
