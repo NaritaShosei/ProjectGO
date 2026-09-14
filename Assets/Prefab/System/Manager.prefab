@@ -1663,13 +1663,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.SignalReceiver
   m_Events:
     m_Signals:
-    - {fileID: 11400000, guid: 384ec134dbf5c054599ffca79eb45928, type: 2}
+    - {fileID: 11400000, guid: ffe51c732a13fac4ba9f4cc6578531e5, type: 2}
+    - {fileID: 11400000, guid: 191a25487374b9e4c924e83fb2854a16, type: 2}
     m_Events:
     - m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 9128100736884302578}
           m_TargetAssemblyTypeName: SequenceManager, Assembly-CSharp
-          m_MethodName: ApplyBossLighting
+          m_MethodName: SetPlayerPosition
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -1679,9 +1680,11 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
         - m_Target: {fileID: 9128100736884302578}
           m_TargetAssemblyTypeName: SequenceManager, Assembly-CSharp
-          m_MethodName: SetPlayerPosition
+          m_MethodName: ApplyBossLighting
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
