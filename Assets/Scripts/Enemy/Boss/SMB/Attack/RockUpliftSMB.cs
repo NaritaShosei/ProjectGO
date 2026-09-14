@@ -105,7 +105,7 @@ namespace BossEnemy.SMB
                 StartAttackHitCheck(attackCenterPos);
 
                 // 次の攻撃があれば次の攻撃までのインターバルを行う
-                if (count < _maxAttackCount)
+                if (count < _maxAttackCount - 1)
                 {
                     await UniTask.Delay(
                     TimeSpan.FromSeconds(_attackIntervalTime),
