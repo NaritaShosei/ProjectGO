@@ -50,17 +50,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResultPanelView
   _root: {fileID: 200000}
+  _titleButton: {fileID: 114003}
+  _background: {fileID: 178904364689781275}
+  _title: {fileID: 8919428258786243142}
+  _rankRow: {fileID: 6800433030212866528}
+  _scoreRow: {fileID: 54300938288156779}
+  _timeRow: {fileID: 2516175190944708895}
+  _levelRow: {fileID: 7840535070762318806}
+  _returnToTitleButton: {fileID: 224003}
+  _scoreValue: {fileID: 900003}
   _clearTimeValue: {fileID: 700003}
   _levelValue: {fileID: 1000003}
-  _titleButton: {fileID: 114003}
+  _rankImage: {fileID: 5532851904839940095}
+  _moveDistance: 1200
+  _backgroundMoveDuration: 0.3
+  _titleMoveDuration: 0.3
+  _rowMoveDuration: 0.25
+  _returnButtonMoveDuration: 0.25
+  _moveInterval: 0.05
+  _moveEase: 9
+  _numberDuration: 0.7
+  _numberInterval: 0.15
+  _rankStartScaleMultiplier: 8
+  _rankScaleDuration: 0.5
+  _rankScaleEase: 9
   _sMinimumScore: 25000
   _aMinimumScore: 20000
   _bMinimumScore: 15000
-  _rankImage: {fileID: 5532851904839940095}
   _sRankSprite: {fileID: 21300000, guid: 652f659073951cd439dc819489eb58fb, type: 3}
   _aRankSprite: {fileID: 21300000, guid: 0af275fcfa11c594398582be56b7a046, type: 3}
   _bRankSprite: {fileID: 21300000, guid: 874d44de688678b45b05994c7b8ac86a, type: 3}
   _cRankSprite: {fileID: 21300000, guid: 8c4352cd3ba0f9841969124587cf56e2, type: 3}
+  _sRankScale: 0.75
+  _aRankScale: 0.6
+  _bRankScale: 0.5
+  _cRankScale: 0.4
+  _numberStopAtNextMoveProgress: 0.9
 --- !u!1 &100003
 GameObject:
   m_ObjectHideFlags: 0
