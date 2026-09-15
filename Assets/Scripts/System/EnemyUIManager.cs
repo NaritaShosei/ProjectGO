@@ -1,10 +1,11 @@
-using System.Collections.Generic;
-using System;
-using Cysharp.Threading.Tasks;
-using System.Threading;
-using UnityEngine;
 using BossEnemy.Character;
 using BossEnemy.Interface;
+using Cysharp.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
+using static SoundCueNames;
 
 public class EnemyUIManager : MonoBehaviour
 {
@@ -57,6 +58,8 @@ public class EnemyUIManager : MonoBehaviour
     private GenericObjectPool<EnemyGaugeView> _armerGaugePool;
     private GenericObjectPool<DamagePopupView> _popupPool;
     private DamagePopupPresenter _popupPresenter;
+
+    private IBossEnemyCharacterView _bossCharacter = null;
 
     private CancellationTokenSource _cts;
 
@@ -139,9 +142,16 @@ public class EnemyUIManager : MonoBehaviour
         enemy.OnDead += HandleEnemyDead;
     }
 
-    private void HandleBossSpawned(IBossEnemyCharacterView characterView)
+    private void HandleBossSpawned(IBossEnemyCharacterView enemy)
     {
         // ToDo：Bossの鎧にHPゲージをつける
+
+        // Damage Popup
+        enemy.OnDamageDealt += HandleDamageDealt;
+
+        enemy.OnDead += HandleEnemyDead;
+
+        _bossCharacter = enemy;
     }
 
     private void HandleDamageDealt(DamagePopupViewModel viewModel)
@@ -165,6 +175,16 @@ public class EnemyUIManager : MonoBehaviour
 
         enemy.OnDamageDealt -= HandleDamageDealt;
         enemy.OnDead -= HandleEnemyDead;
+
+        if (enemy.IsBoss)
+        {
+            if (enemy is BossCharacterView characterView)
+            {
+                _bossCharacter = null;
+            }
+
+            return;
+        }
 
         if (enemy is MobEnemy mob)
         {
@@ -296,6 +316,13 @@ public class EnemyUIManager : MonoBehaviour
         _armorPresenters.Clear();
 
         _popupPresenter.Dispose();
+
+        if(_bossCharacter != null)
+        {
+            _bossCharacter.OnDamageDealt -= HandleDamageDealt;
+            _bossCharacter.OnDead -= HandleEnemyDead;
+            _bossCharacter = null;
+        }
     }
 
     /// <summary>
