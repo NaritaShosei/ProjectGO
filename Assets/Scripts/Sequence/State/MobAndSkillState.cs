@@ -118,9 +118,9 @@ public class MobAndSkillState : ISequenceState
         ShowCursor();
 
 
-        // ボス戦への移行時に、残っている経験値オーブを消しておく
+        // ボス戦への移行時に、残っている経験値オーブを全て取得しておく
         if (ServiceLocator.TryGet(out EXPItemManager expItemManager))
-            expItemManager.ClearAllItems();
+            expItemManager.CollectAllItems();
 
         _context = null;
     }

@@ -29,11 +29,12 @@ public class EXPItemManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 稼働中の経験値アイテムを全て即時消去する。
+    /// 稼働中の経験値アイテムを全て即時取得する。
     /// </summary>
-    public void ClearAllItems()
+    public void CollectAllItems()
     {
-        _expDropper?.ReleaseAll(_activeItems.ToArray());
+        foreach (var item in _activeItems.ToArray())
+            item.Interact();
     }
 
     [Header("EXP Item Pool Settings")]
