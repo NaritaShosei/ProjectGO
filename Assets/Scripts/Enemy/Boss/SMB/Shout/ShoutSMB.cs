@@ -6,6 +6,7 @@ using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.PostProcessing;
 
 public class ShoutSMB : BossCharacterSMB
 {
@@ -31,16 +32,16 @@ public class ShoutSMB : BossCharacterSMB
     {
         _shoutVersion++;
         CancelShout();
-        _elapsedTime = 0;
+        _currentNormalizedTime = 0;
         _isShoutRunning = false;
         _cts = new CancellationTokenSource();
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        _elapsedTime += Time.deltaTime * _timeScale;
+        _currentNormalizedTime = stateInfo.normalizedTime;
 
-        if(_elapsedTime >= _shoutStartTime && !_isShoutRunning)
+        if(_currentNormalizedTime >= _shoutStartTime && !_isShoutRunning)
         {
             CancellationTokenSource cts = _cts;
             if (cts == null)
@@ -59,10 +60,10 @@ public class ShoutSMB : BossCharacterSMB
         DisableRadialBlur();
     }
 
-    [Header("シャウト開始時間")]
+    [Range(0, 1), Header("アニメーターの長さに対するシャウト開始時間")]
     [SerializeField] private float _shoutStartTime = 0;
 
-    [Header("シャウト終了時間")]
+    [Range(0, 1), Header("アニメーターの長さに対するシャウト終了時間")]
     [SerializeField] private float _shoutEndTime = 0;
 
     [Tooltip("ぼかしの強度。値が大きいほど、より多くのシステムリソースを必要とします。")]
@@ -73,7 +74,7 @@ public class ShoutSMB : BossCharacterSMB
 
     private Volume _shoutVolume = null;
     private bool _isShoutRunning = false;
-    private float _elapsedTime = 0f;
+    private float _currentNormalizedTime = 0f;
     private CancellationTokenSource _cts = null;
     private int _shoutVersion;
 
@@ -95,12 +96,12 @@ public class ShoutSMB : BossCharacterSMB
             }
 
             float releaseEndTime = _shoutStartTime + _shoutEndTime;
-            while (_elapsedTime < releaseEndTime)
+            while (_currentNormalizedTime < releaseEndTime)
             {
                 float progress = Mathf.InverseLerp(
                     _shoutStartTime,
                     releaseEndTime,
-                    _elapsedTime);
+                    _currentNormalizedTime);
                 FadeOutRadialBlur(Mathf.Clamp01(progress));
 
                 await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
