@@ -9,10 +9,10 @@ public class CRIAudioInitializer : MonoBehaviour
     [SerializeField, Header("デフォルトのBGMシート名")] 
     private string _deaultBGMCueSheet = "BGM";
 
-    [SerializeField, Min(0f), Header("BGMフェード設定（秒・起動時に適用）"), Tooltip("0で即時再生")]
-    private float _bgmFadeInSeconds = 1f;
-    [SerializeField, Min(0f), Tooltip("0で即時停止")]
-    private float _bgmFadeOutSeconds = 1f;
+    [SerializeField, Range(0f, 1f), Header("スヴァナのセリフ再生中のダッキング音量（元の音量に対する倍率）")]
+    private float _bgmDuckVolume = 0.3f;
+    [SerializeField, Range(0f, 1f)]
+    private float _seDuckVolume = 0.3f;
 
 #if UNITY_EDITOR
     [SerializeField, Range(0f, 1f), Header("音量（Play中の動作確認用・セーブされません・エディタ専用）")]
@@ -28,13 +28,19 @@ public class CRIAudioInitializer : MonoBehaviour
 #endif
 
     private SoundManager _soundManager;
+    private float _appliedBgmDuckVolume;
+    private float _appliedSeDuckVolume;
 
     private void Awake()
     {
         // SoundManagerをServiceLocatorに登録
         _soundManager = new SoundManager(_bgmPlayer, _deaultBGMCueSheet);
-        _soundManager.SetBGMFadeDurations(_bgmFadeInSeconds, _bgmFadeOutSeconds);
+        _soundManager.SetVoiceDuckRatios(_bgmDuckVolume, _seDuckVolume);
         ServiceLocator.Register(_soundManager);
+
+        // OnValidateでの差分検知用に初期値をキャッシュ
+        _appliedBgmDuckVolume = _bgmDuckVolume;
+        _appliedSeDuckVolume = _seDuckVolume;
 
 #if UNITY_EDITOR
         // OnValidateはPlay開始時に確実に呼ばれるとは限らないため、起動時の反映はここで行う。
@@ -52,11 +58,19 @@ public class CRIAudioInitializer : MonoBehaviour
 
     private void OnValidate()
     {
-        _bgmFadeInSeconds = Mathf.Clamp(_bgmFadeInSeconds, 0f, 3600f);
-        _bgmFadeOutSeconds = Mathf.Clamp(_bgmFadeOutSeconds, 0f, 3600f);
+        if (_soundManager == null) return;
+
+        // Play中にInspectorで動かしたダック音量をその場で反映する。
+        if (!Mathf.Approximately(_bgmDuckVolume, _appliedBgmDuckVolume) ||
+            !Mathf.Approximately(_seDuckVolume, _appliedSeDuckVolume))
+        {
+            _soundManager.SetVoiceDuckRatios(_bgmDuckVolume, _seDuckVolume);
+            _appliedBgmDuckVolume = _bgmDuckVolume;
+            _appliedSeDuckVolume = _seDuckVolume;
+        }
 
 #if UNITY_EDITOR
-        if (!Application.isPlaying || _soundManager == null) return;
+        if (!Application.isPlaying) return;
 
         // Play中にInspectorで動かした値をその場で反映する（設定画面の値とは別系統）。
         // 音量以外のフィールド変更で無関係な音量が再適用されないよう、変化した項目のみ反映する。

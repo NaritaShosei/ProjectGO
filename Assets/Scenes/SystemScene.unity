@@ -137,11 +137,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 724932070489243200, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
       propertyPath: _voiceVolume
-      value: 0.13
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 724932070489243200, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
+      propertyPath: _seDuckVolume
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 724932070489243200, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
+      propertyPath: _bgmDuckVolume
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 724932070489243200, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
       propertyPath: _bgmFadeInSeconds
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 724932070489243200, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
+      propertyPath: _bgmFadeOutSeconds
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3340519450909893722, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
       propertyPath: m_LocalPosition.x

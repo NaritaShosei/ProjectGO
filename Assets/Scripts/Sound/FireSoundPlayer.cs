@@ -26,12 +26,13 @@ public class FireSoundPlayer : MonoBehaviour
         _loadCancellation?.Cancel();
         _loadCancellation?.Dispose();
         _loadCancellation = null;
-        if (_source != null) _source.Stop();
+        Sound.StopLoopSE(gameObject, SoundCueNames.Environment.VillageFire);
     }
 
     [SerializeField] private bool _playOnEnable = true;
+    // TODO: Atom Craft側でVillageFireがSEカテゴリ未割り当てのため、暫定的にここで直接音量調整する。
+    // カテゴリ割り当てが直ったらSEカテゴリの音量・ダッキングに委ねてこのフィールドは削除する。
     [SerializeField, Range(0f, 1f)] private float _volume = 0.25f;
-    private CriAtomSource _source;
     private CancellationTokenSource _loadCancellation;
     private bool _isRequested;
 
@@ -68,19 +69,8 @@ public class FireSoundPlayer : MonoBehaviour
             return;
         }
 
-        if (_source == null)
-        {
-            // 他の音源を上書きせず、再開始時にもこの専用音源1つを再利用する。
-            _source = gameObject.AddComponent<CriAtomSource>();
-            _source.playOnStart = false;
-            _source.cueSheet = CueSheetName;
-            _source.cueName = SoundCueNames.Environment.VillageFire;
-            _source.loop = true;
-            _source.use3dPositioning = false;
-            // キュー側が3D設定でも距離減衰しないよう、再生方式を明示する。
-            _source.player.SetPanType(CriAtomEx.PanType.Pan3d);
-        }
-        _source.volume = _volume;
-        _source.Play();
+        // SoundManager経由で再生し、SEカテゴリの音量・ダッキングを他のSEと同様に受けられるようにする。
+        var source = Sound.PlayLoopSE(gameObject, SoundCueNames.Environment.VillageFire, CueSheetType.Environment, use3dPositioning: false);
+        if (source != null) source.volume = _volume;
     }
 }
