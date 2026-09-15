@@ -36,13 +36,6 @@ namespace BossEnemy.Character
             {
                 HandleDead();
             }
-            else
-            {
-                _bossAIBehaviourController.StopRunning();
-                _bossAIBehaviourController.Dispose();
-
-                UnregisterEvents();
-            }
         }
 
         public void OnUpdate()
