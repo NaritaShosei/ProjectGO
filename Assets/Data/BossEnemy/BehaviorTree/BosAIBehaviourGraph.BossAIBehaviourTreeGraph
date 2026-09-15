@@ -230,9 +230,9 @@ MonoBehaviour:
         m_LocalSubgraphs: []
         m_LastKnownBounds:
           serializedVersion: 2
-          x: -1225
+          x: -942
           y: -4067
-          width: 5192
+          width: 4909
           height: 6743
         m_GraphElementMetaData:
         - m_Guid:
@@ -1775,7 +1775,7 @@ MonoBehaviour:
           - rid: 4501582532454908321
           - rid: 4501582532454908322
           - rid: 4501582557481533745
-          - rid: 4923627709150003677
+          - rid: 4923627714320793600
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -1972,10 +1972,12 @@ MonoBehaviour:
           - "__option_\u6B21\u306E\u59FF\u52E2"
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 90dab874-4391-4478-876d-4a381629046c
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4501582710844424939
           - rid: 4501582710844424940
           - rid: 4501582710844424941
+          - rid: 4923627714320793985
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -2016,10 +2018,12 @@ MonoBehaviour:
           - "__option_\u6B21\u306E\u59FF\u52E2"
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 8ccd60f5-1c84-46cf-bad8-2b6549d21a40
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4501582710844424942
           - rid: 4501582710844424943
           - rid: 4501582710844424944
+          - rid: 4923627714320793986
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -2060,10 +2064,12 @@ MonoBehaviour:
           - "__option_\u6B21\u306E\u59FF\u52E2"
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - c854c7a2-39e4-4191-aeb1-0b63707e9900
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4501582710844424945
           - rid: 4501582710844424946
           - rid: 4501582710844424947
+          - rid: 4923627714320793987
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -2120,7 +2126,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 9ed161e81024f4c35ed5b19dd000c9bb
         m_Version: 2
-        m_Position: {x: -1225.3767, y: -2782.1584}
+        m_Position: {x: -904.0092, y: -2704.131}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -2163,7 +2169,7 @@ MonoBehaviour:
     - rid: 4501582557481533753
       type: {class: 'Constant`1[[System.Boolean, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 0
+        m_Value: 1
     - rid: 4501582710844424939
       type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -2589,7 +2595,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 1128bbb518f96c1c3aadbb1501673713
         m_Version: 2
-        m_Position: {x: 764.7955, y: -2396.8442}
+        m_Position: {x: 801.6164, y: -2389.6116}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -2599,9 +2605,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - d85f285b-0d24-4ba8-8b8d-7e2c777333a1
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627466142778309
           - rid: 4923627466142778310
+          - rid: 4923627714320793988
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -2683,9 +2691,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 8ddb5aff-01a9-4af6-b2fb-bca33974ffbc
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627466142778359
           - rid: 4923627466142778360
+          - rid: 4923627714320793989
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3436,10 +3446,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 327711dc-6a31-46fc-8696-5ace3690cd79
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627469228736732
           - rid: 4923627469228736734
           - rid: 4923627479480926574
+          - rid: 4923627714320793990
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3490,10 +3502,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 2dc53d7c-24b8-4b32-8b4d-4601e5dad8fc
           - "__option_\u8FFD\u3044\u304B\u3051\u308B\u901F\u5EA6"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926214
           - rid: 4923627479480926215
           - rid: 4923627479480926474
+          - rid: 4923627714320793991
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3543,9 +3557,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 7123ce9d-0aba-4f15-ba2d-1ef07d5acbb8
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926218
           - rid: 4923627479480926219
+          - rid: 4923627714320793992
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3601,11 +3617,13 @@ MonoBehaviour:
           - cdf4583d-f764-42a3-851c-a3469989623d
           - "__option_\u632F\u308A\u5411\u304D\u901F\u5EA6"
           - "__option_\u8A31\u3055\u308C\u308B\u632F\u308A\u5411\u304D\u8AA4\u5DEE"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926504
           - rid: 4923627479480926507
           - rid: 4923627479480926515
           - rid: 4923627479480926516
+          - rid: 4923627714320793993
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3749,7 +3767,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: f9fb6ac7857000496f7a2e10ab6ffa35
         m_Version: 2
-        m_Position: {x: 3674.8008, y: 1053.6426}
+        m_Position: {x: 3672.7896, y: 1053.6426}
         m_Title: SelectAttackAction
         m_Tooltip: 
         m_NodePreviewModel:
@@ -3760,10 +3778,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 327711dc-6a31-46fc-8696-5ace3690cd79
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926548
           - rid: 4923627479480926550
           - rid: 4923627479480926575
+          - rid: 4923627714320793994
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3838,10 +3858,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 2dc53d7c-24b8-4b32-8b4d-4601e5dad8fc
           - "__option_\u8FFD\u3044\u304B\u3051\u308B\u901F\u5EA6"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926555
           - rid: 4923627479480926556
           - rid: 4923627479480926557
+          - rid: 4923627714320793995
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3879,11 +3901,13 @@ MonoBehaviour:
           - cdf4583d-f764-42a3-851c-a3469989623d
           - "__option_\u632F\u308A\u5411\u304D\u901F\u5EA6"
           - "__option_\u8A31\u3055\u308C\u308B\u632F\u308A\u5411\u304D\u8AA4\u5DEE"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926559
           - rid: 4923627479480926560
           - rid: 4923627479480926561
           - rid: 4923627479480926562
+          - rid: 4923627714320793996
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3919,9 +3943,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 7123ce9d-0aba-4f15-ba2d-1ef07d5acbb8
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926564
           - rid: 4923627479480926565
+          - rid: 4923627714320793997
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -4176,10 +4202,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 327711dc-6a31-46fc-8696-5ace3690cd79
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926604
           - rid: 4923627479480926605
           - rid: 4923627479480926606
+          - rid: 4923627714320793998
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -4253,9 +4281,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 7123ce9d-0aba-4f15-ba2d-1ef07d5acbb8
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926620
           - rid: 4923627479480926621
+          - rid: 4923627714320793999
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -4440,10 +4470,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 327711dc-6a31-46fc-8696-5ace3690cd79
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926642
           - rid: 4923627479480926643
           - rid: 4923627479480926644
+          - rid: 4923627714320794000
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -4479,9 +4511,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 7123ce9d-0aba-4f15-ba2d-1ef07d5acbb8
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926646
           - rid: 4923627479480926647
+          - rid: 4923627714320794001
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -4628,10 +4662,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u6B21\u306E\u59FF\u52E2"
           - f6200a90-b6d2-4211-81fc-22504c0a3c5c
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627479480926735
           - rid: 4923627479480926736
           - rid: 4923627479480926737
+          - rid: 4923627714320794002
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -4856,7 +4892,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 02c12bc6f4d7480e41673812aefd3a2d
         m_Version: 2
-        m_Position: {x: 2765.0825, y: 1203.4585}
+        m_Position: {x: 2903.254, y: 1227.9446}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -4867,10 +4903,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - 89da0e3c-7569-465e-a250-522e3caa2c7e
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627482050986100
           - rid: 4923627482050986101
           - rid: 4923627482050986102
+          - rid: 4923627714320794003
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -5210,7 +5248,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: cc1d229bc73c5f0660bd5645f23bdbd2
         m_Version: 2
-        m_Position: {x: 3323.3022, y: 1205.4705}
+        m_Position: {x: 3323.3022, y: 1237.8533}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -5221,10 +5259,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - c126fe43-855b-4482-9c13-bfb7b49e67f4
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627482050986219
           - rid: 4923627482050986220
           - rid: 4923627482050986221
+          - rid: 4923627714320794004
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -5395,10 +5435,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - fc26ae34-eb6f-4283-82f1-a260730602ed
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627482050986235
           - rid: 4923627482050986236
           - rid: 4923627482050986237
+          - rid: 4923627714320794005
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -5723,10 +5765,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - 17353feb-da02-4006-813d-4e6f02bb9be0
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627482050986260
           - rid: 4923627482050986261
           - rid: 4923627482050986262
+          - rid: 4923627714320794006
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6225,10 +6269,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - 38e006d3-e4f1-404e-8ce7-954a1f30b58b
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627482050986355
           - rid: 4923627482050986356
           - rid: 4923627482050986357
+          - rid: 4923627714320794007
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6315,10 +6361,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - 05da7962-65d3-4708-a55c-237bf82df61b
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627482050986362
           - rid: 4923627482050986363
           - rid: 4923627482050986364
+          - rid: 4923627714320794008
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6521,10 +6569,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - bcbc0c16-a69a-4823-8589-c0ff4325925b
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627547877704144
           - rid: 4923627547877704145
           - rid: 4923627547877704146
+          - rid: 4923627714320794009
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6610,9 +6660,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 60c65383-0850-4062-9c9f-ddfd1c6352b0
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627547877704150
           - rid: 4923627547877704151
+          - rid: 4923627714320794010
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6684,7 +6736,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: e7a97ca5ae62509482fa688c6b53fc9a
         m_Version: 2
-        m_Position: {x: 2360.1562, y: -1891.2412}
+        m_Position: {x: 2408.4287, y: -1883.1958}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -6695,10 +6747,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u8A08\u6E2C\u6642\u9593"
           - 861bebf1-b9e8-45e7-acca-0d8ca174e872
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627626083909846
           - rid: 4923627626083909847
           - rid: 4923627626083909848
+          - rid: 4923627714320794011
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6753,10 +6807,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u6B21\u306E\u59FF\u52E2"
           - dc4c59af-cdc7-4b35-bddc-2495b505a610
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627626083910184
           - rid: 4923627626083910185
           - rid: 4923627626083910186
+          - rid: 4923627714320794012
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -6876,10 +6932,10 @@ MonoBehaviour:
         m_TitleAlignment: 0
         m_Position:
           serializedVersion: 2
-          x: 45.954468
-          y: -1995.4387
-          width: 2523
-          height: 1519.8964
+          x: 46
+          y: -1995
+          width: 2593.3975
+          height: 1519
         m_Comment: 
         m_ElementColor:
           m_Color: {r: 0.20784314, g: 0.22745098, b: 0.2784314, a: 1}
@@ -7623,9 +7679,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - e2e23b40-5245-47f1-a5ba-e9aa29186b4a
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691032
           - rid: 4923627647967691033
+          - rid: 4923627714320794013
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -7813,7 +7871,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 64169275d3b1cbf0c0adfd9edaa871db
         m_Version: 2
-        m_Position: {x: 1680.0972, y: -1444.739}
+        m_Position: {x: 1640.5544, y: -1532.9498}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -7910,7 +7968,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: c1afe2ce460cc6921ce2d33f392850d4
         m_Version: 2
-        m_Position: {x: 2036.8416, y: -1386.0068}
+        m_Position: {x: 1989.6946, y: -1413.3826}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -7920,9 +7978,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - bb24fe6c-df1c-444c-b29a-4c6742fdce66
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691049
           - rid: 4923627647967691050
+          - rid: 4923627714320794014
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -8217,9 +8277,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 5fc59e72-07da-4ea5-9f05-c8051ebf784b
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691066
           - rid: 4923627647967691067
+          - rid: 4923627714320794015
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -8366,9 +8428,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - a771bf5e-40c9-4a7d-be43-61416cdb56c7
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691076
           - rid: 4923627647967691077
+          - rid: 4923627714320794016
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -8825,9 +8889,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - 4b2ff2c3-cc8b-46d9-bd37-d21669a8f2df
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691704
           - rid: 4923627647967691705
+          - rid: 4923627714320794017
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -8878,10 +8944,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u653B\u6483\u306E\u9078\u629E\u80A2ID"
           - 08472aa4-d4ce-4099-856b-6792d63782cf
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691708
           - rid: 4923627647967691709
           - rid: 4923627647967691710
+          - rid: 4923627714320794018
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -8935,9 +9003,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - b134e14d-bfa9-418b-9c99-9fca9acd2294
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627647967691713
           - rid: 4923627647967691714
+          - rid: 4923627714320794019
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9169,11 +9239,13 @@ MonoBehaviour:
           - "__option_\u632F\u308A\u5411\u304D\u901F\u5EA6"
           - "__option_\u8A31\u3055\u308C\u308B\u632F\u308A\u5411\u304D\u8AA4\u5DEE"
           - 4065cb48-1845-421f-8f05-d1e4a2dbf5b0
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627652401856514
           - rid: 4923627652401856515
           - rid: 4923627652401856516
           - rid: 4923627652401856517
+          - rid: 4923627714320794020
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9444,10 +9516,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u6B21\u306E\u59FF\u52E2"
           - e914e145-c460-4e05-a9d8-27be128f3b59
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627666347655318
           - rid: 4923627666347655319
           - rid: 4923627666347655320
+          - rid: 4923627714320794021
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9540,9 +9614,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - ef6f0529-e7d0-48d6-a173-97431a97ab17
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627668258685145
           - rid: 4923627668258685146
+          - rid: 4923627714320794022
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9626,11 +9702,13 @@ MonoBehaviour:
           - "__option_\u5909\u66F4\u3059\u308B\u59FF\u52E2"
           - "__option_\u8A08\u6E2C\u6642\u9593"
           - 1628d006-3d68-49d9-b607-8226bfd06f0e
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627668258685150
           - rid: 4923627668258685151
           - rid: 4923627668258685152
           - rid: 4923627668258685153
+          - rid: 4923627714320794023
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9697,11 +9775,13 @@ MonoBehaviour:
           - "__option_\u5909\u66F4\u3059\u308B\u59FF\u52E2"
           - "__option_\u8A08\u6E2C\u6642\u9593"
           - bf115892-37a1-4014-8280-c2a49a66aa01
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627668258685156
           - rid: 4923627668258685157
           - rid: 4923627668258685158
           - rid: 4923627668258685159
+          - rid: 4923627714320794024
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9830,9 +9910,11 @@ MonoBehaviour:
           m_KeyList:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - ca13f1a0-b0d4-407c-b137-94c859a42770
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627695886042061
           - rid: 4923627695886042062
+          - rid: 4923627714320794025
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9904,7 +9986,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: f558fe6981e9116dd49457017407a42c
         m_Version: 2
-        m_Position: {x: 2285.1885, y: -1701.719}
+        m_Position: {x: 2283.1772, y: -1681.6053}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -9915,10 +9997,12 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_\u4FEE\u5FA9\u7B87\u6240"
           - 4da5b929-4f09-46a1-ac82-d6ef5204ea3b
+          - "__option_\u30BF\u30A4\u30E0\u30A2\u30A6\u30C8\u6642\u9593"
           m_ValueList:
           - rid: 4923627699223920973
           - rid: 4923627699223920974
           - rid: 4923627699223920975
+          - rid: 4923627714320794026
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -9991,7 +10075,7 @@ MonoBehaviour:
           m_PortDirection: 1
           m_PortOrientation: 0
           m_Title: "\u89AA\u30CE\u30FC\u30C9\u63A5\u7D9A"
-    - rid: 4923627709150003677
+    - rid: 4923627714320793600
       type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
         m_Value:
@@ -10002,3 +10086,171 @@ MonoBehaviour:
         m_EnumType:
           m_Identification: BossEnemy.Enum.ArmorAttachmentType, Assembly-CSharp,
             Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    - rid: 4923627714320793985
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793986
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793987
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793988
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793989
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793990
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793991
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793992
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 15
+    - rid: 4923627714320793993
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793994
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793995
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793996
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793997
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 15
+    - rid: 4923627714320793998
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320793999
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 15
+    - rid: 4923627714320794000
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794001
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 15
+    - rid: 4923627714320794002
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794003
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794004
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794005
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794006
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794007
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794008
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794009
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794010
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794011
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794012
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794013
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794014
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794015
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794016
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794017
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794018
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794019
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 15
+    - rid: 4923627714320794020
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794021
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794022
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794023
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794024
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794025
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10
+    - rid: 4923627714320794026
+      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 10

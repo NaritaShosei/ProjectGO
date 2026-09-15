@@ -10,9 +10,21 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
     [Serializable]
     public class ActionNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : ActionNode
     {
+        private const string TIME_OUT_TIME = "タイムアウト時間";
+
         public ActionNode()
         {
             _nodeAccesskey = CreateUniqueKey();
+        }
+
+        public override void OnGraphChanged(GraphLogger graphLogger)
+        {
+            base.OnGraphChanged(graphLogger);
+
+            if (GetNodeOptionByName(TIME_OUT_TIME).TryGetValue(out float timeOutValue))
+            {
+                _behaviourTreeNode.SetTimeOutValue(timeOutValue);
+            }
         }
 
         // ポートの定義
@@ -23,6 +35,16 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             context
                 .AddInputPort<TreeNode>(_nodeAccesskey)
                 .WithDisplayName(ENTRY_PORT_NAME)
+                .Build();
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext context)
+        {
+            base.OnDefineOptions(context);
+
+            context
+                .AddOption<float>(TIME_OUT_TIME)
+                .WithDisplayName(TIME_OUT_TIME)
                 .Build();
         }
     }

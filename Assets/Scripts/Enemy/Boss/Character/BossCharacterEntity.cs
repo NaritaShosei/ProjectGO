@@ -25,6 +25,9 @@ namespace BossEnemy.Character
     {
         /// <summary> ボスの攻撃命中時イベント </summary>
         public event Action OnAttackHit;
+        
+        /// <summary> 攻撃中止処理 </summary>
+        public event Action OnAttackCancel;
 
         /// <summary> 行動開始済みフラグ </summary>
         public bool IsBeganAction { get; }
@@ -153,6 +156,8 @@ namespace BossEnemy.Character
     public class BossCharacterEntity : IBossCharacterEntity
     {
         public event Action OnAttackHit;
+
+        public event Action OnAttackCancel;
 
         public BossCharacterEntity(string name, CharacterStatus[] characterStatus)
         {
@@ -386,6 +391,8 @@ namespace BossEnemy.Character
         {
             _attackExecutor.AttackCompleted();
             _executingAttack = default;
+
+            OnAttackCancel?.Invoke();
         }
 
         /// <summary> 攻撃の当たり判定を行う </summary>

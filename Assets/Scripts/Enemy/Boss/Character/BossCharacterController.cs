@@ -27,11 +27,22 @@ namespace BossEnemy.Character
             _characterEntity = bossCharacterEntity;
 
             RegisterEvents();
+
+            _isDispose = false;
         }
 
         public void Dispose()
         {
-            
+            if(_isDispose) return;
+
+            if (_characterEntity.ExecutingAttackData.ID != 0)
+                _characterEntity.CancelAttack();
+
+            _bossAIBehaviourController.StopRunning();
+            _bossAIBehaviourController.Dispose();
+            UnregisterEvents();
+
+            _isDispose = true;
         }
 
         public void OnUpdate()
@@ -39,6 +50,9 @@ namespace BossEnemy.Character
             if (_bossAIBehaviourController != null)
                 _bossAIBehaviourController.OnUpdate();
         }
+
+        // Dispose済みフラグ
+        private bool _isDispose = true;
 
         // イベントの登録処理をすでに行っているか
         private bool _isRegisterEvents = false;
@@ -140,12 +154,14 @@ namespace BossEnemy.Character
             // ボスの攻撃が当たった際のイベント購読開始
             _characterEntity.OnAttackHit += HandleAttackHit;
 
+            // 攻撃中止イベント購読開始
+            _characterEntity.OnAttackCancel += HandleAttackCancel;
+
             // ボスが攻撃終了イベント購読開始
             _animationEventReceiver.OnAttackCompleted += HandleAttackCompleted;
 
             // TimeScale変更時のイベント購読開始
             _bossCharacterView.TimeScaleReactiveProperty
-                .SkipLatestValueOnSubscribe()
                 .Subscribe(timaScale => 
             { HandleChangedTimeScale(timaScale); }).AddTo(_deadEventDisposables);
 
@@ -165,6 +181,9 @@ namespace BossEnemy.Character
 
             // ビヘイビアツリー探索開始イベント購読解除
             _bossCharacterView.OnBeginsAction -= HandleRunningBehaviourTree;
+
+            // 攻撃中止イベント購読解除
+            _characterEntity.OnAttackCancel -= HandleAttackCancel;
 
             // 姿勢切り替え完了イベント購読解除
             _animationEventReceiver.OnPostureChangeCompleted -= HandlePostureChangeCompleted;
@@ -201,12 +220,18 @@ namespace BossEnemy.Character
         /// <summary> 死亡イベント発火時の処理 </summary>
         private void HandleDead()
         {
-            _bossCharacterView.StopActiveAttacks();
+            if (_isDispose) return;
+
+            if (_characterEntity.ExecutingAttackData.ID != 0)
+                _characterEntity.CancelAttack();
+
             _bossAIBehaviourController.StopRunning();
             _bossAIBehaviourController.Dispose();
             UnregisterEvents();
 
             _bossCharacterView.HandleDead();
+
+            _isDispose = true;
         }
 
         /// <summary> 鎧破壊イベント発火時の処理 </summary>
@@ -243,7 +268,6 @@ namespace BossEnemy.Character
             // もし攻撃実行中であったのであれば攻撃を中断する
             if(_characterEntity.ExecutingAttackData.ID != 0)
             {
-                _bossCharacterView.StopActiveAttacks();
                 _characterEntity.CancelAttack();
             }
 
@@ -263,7 +287,6 @@ namespace BossEnemy.Character
                 || posture == PostureType.RightHalfKneel
                 || posture == PostureType.SpreadEagled)
                 {
-                    _bossCharacterView.StopActiveAttacks();
                     _characterEntity.CancelAttack();
                 }
             }
@@ -309,6 +332,12 @@ namespace BossEnemy.Character
         private void HandleExecuteAttack(Attack.AttackData executingAttackData)
         {
             _bossCharacterView.ExecuteAttack(executingAttackData);
+        }
+
+        /// <summary> ボスの攻撃が終了した際のイベント発火時の処理 </summary>
+        private void HandleAttackCancel()
+        {
+            _bossCharacterView.StopActiveAttacks();
         }
 
         /// <summary> ボスの攻撃が終了した際のイベント発火時の処理 </summary>

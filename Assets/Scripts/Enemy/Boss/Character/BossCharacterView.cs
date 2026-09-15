@@ -88,6 +88,9 @@ namespace BossEnemy.Character
         /// <summary> 初期化する </summary>
         public void Init()
         {
+            // タイムスケール初期化
+            _timeScale = new(1.0f);
+
             // 死亡フラグ解除
             _isDead = false;
 
@@ -367,6 +370,8 @@ namespace BossEnemy.Character
         public void OnRelease()
         {
             _isLockable = false;
+
+            _bossEnemyController.Dispose();
         }
 
         /// <summary> 死んだ際の処理 </summary>
