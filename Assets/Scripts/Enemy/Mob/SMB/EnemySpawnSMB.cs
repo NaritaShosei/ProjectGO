@@ -2,13 +2,6 @@ using UnityEngine;
 
 public class EnemySpawnSMB : StateMachineBehaviour
 {
-    [Header("Effect Timing (normalized 0-1)")]
-    [SerializeField, Range(0f, 1f)] private float _firstEffectTiming = 0f;
-    [SerializeField, Range(0f, 1f)] private float _secondEffectTiming = 0.6f;
-
-    private bool _firstFired;
-    private bool _secondFired;
-
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         _firstFired = false;
@@ -39,6 +32,13 @@ public class EnemySpawnSMB : StateMachineBehaviour
             controller.AnimEvent_SpawnEnd();
         }
     }
+
+    [Header("Effect Timing (normalized 0-1)")]
+    [SerializeField, Range(0f, 1f)] private float _firstEffectTiming = 0f;
+    [SerializeField, Range(0f, 1f)] private float _secondEffectTiming = 0.6f;
+
+    private bool _firstFired;
+    private bool _secondFired;
 
     private void Fire(Animator animator)
     {
