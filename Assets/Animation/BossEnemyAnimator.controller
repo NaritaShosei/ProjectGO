@@ -288,9 +288,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25000003
+  m_TransitionDuration: 0.25000048
   m_TransitionOffset: 0
-  m_ExitTime: 0.017965842
+  m_ExitTime: 0.033896144
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1377,9 +1377,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.69109154
   m_TransitionOffset: 0
-  m_ExitTime: 0.94718313
+  m_ExitTime: 0.8559227
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1547,9 +1547,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.85
+  m_TransitionDuration: 0.24999996
+  m_TransitionOffset: 0.0038848957
+  m_ExitTime: 0
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1656,9 +1656,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.83611083
   m_TransitionOffset: 0
-  m_ExitTime: 0.75
+  m_ExitTime: 0.8272205
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -2858,8 +2858,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32450c99717f2174b9b5ebd12e00d59e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShoutSMB
-  _shoutStartTime: 2
-  _shoutEndTime: 2
+  _shoutStartTime: 0.277
+  _shoutEndTime: 0.969
   _strength:
     m_OverrideState: 1
     m_Value: 25
@@ -4262,8 +4262,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32450c99717f2174b9b5ebd12e00d59e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShoutSMB
-  _shoutStartTime: 2
-  _shoutEndTime: 2
+  _shoutStartTime: 0.403
+  _shoutEndTime: 0.956
   _strength:
     m_OverrideState: 1
     m_Value: 48
