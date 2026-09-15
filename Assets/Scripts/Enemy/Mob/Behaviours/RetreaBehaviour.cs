@@ -50,11 +50,17 @@ public class RetreatBehaviour : IEnemyBehaviour
 
         if (request.RetreatSpeed <= 0f) return false;
 
-        return CalcXZSqrDist() < request.RetreatDistance * request.RetreatDistance;
+        if (request.MaxDuration > 0f && _elapsed >= request.MaxDuration) return false;
+
+        return _movedDistance < request.RetreatDistance;
     }
 
     public void OnEnter()
     {
+        _retreatStartPos = _self.position;
+        _movedDistance = 0f;
+        _elapsed = 0f;
+
         _state.ChangeState(EnemyState.Move);
         //負のSpeedを渡すことでIdleからBackStepへ
         _enemyAnimator?.SetSpeed(-1f);
@@ -120,6 +126,8 @@ public class RetreatBehaviour : IEnemyBehaviour
         else
             _self.position += displacement;
 
+        _movedDistance += Vector3.Distance(oldPos, _self.position);
+
         Vector3 newPos = _self.position;
         if (_spatialHashGrid != null)
         {
@@ -139,6 +147,10 @@ public class RetreatBehaviour : IEnemyBehaviour
     private readonly ISeparationService _separationService;
     private readonly IWallAvoidanceService _wallAvoidanceService;
     private readonly ISpatialHashGrid _spatialHashGrid;
+
+    private Vector3 _retreatStartPos;
+    private float _movedDistance;
+    private float _elapsed;
 
     /// <summary>
     /// XZ平面のみの距離の二乗を返す

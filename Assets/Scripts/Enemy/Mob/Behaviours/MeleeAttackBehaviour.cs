@@ -307,6 +307,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
                 RecoveryRemaining = pattern.RecoveryTime,
                 RetreatDistance = pattern.RetreatDistance,
                 RetreatSpeed = pattern.RetreatSpeed,
+                MaxDuration = pattern.MaxRetreatDuration,
             }
             : RetreatRequest.None;
 
