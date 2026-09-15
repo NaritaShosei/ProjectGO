@@ -128,6 +128,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     {
         if (_playerStateManager.IsDead()) return;
         _playerStats.Heal(amount);
+        Sound.PlaySE(gameObject, SoundCueNames.Common.ItemHealPickup, CueSheetType.Common);
     }
 
     /// <summary>
@@ -317,11 +318,14 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
     private float _downRecoveryHealthRate = 1f;
 
     [Header("被弾時のコントローラーの振動")]
-    [SerializeField] private ControllerVibrationData _smallDamageVibration =
+    [SerializeField]
+    private ControllerVibrationData _smallDamageVibration =
         new(0.20f, 0.15f, 0.1f);
-    [SerializeField] private ControllerVibrationData _mediumDamageVibration =
+    [SerializeField]
+    private ControllerVibrationData _mediumDamageVibration =
         new(0.40f, 0.25f, 0.2f);
-    [SerializeField] private ControllerVibrationData _largeDamageVibration =
+    [SerializeField]
+    private ControllerVibrationData _largeDamageVibration =
         new(1.00f, 0.70f, 0.3f);
 
     [Header("参照")]
