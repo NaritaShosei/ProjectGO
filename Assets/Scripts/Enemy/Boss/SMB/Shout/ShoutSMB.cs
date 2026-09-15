@@ -1,4 +1,3 @@
-using BlurShadersPro.BuiltIn;
 using BlurShadersPro.URP;
 using BossEnemy.Interface;
 using Cysharp.Threading.Tasks;
@@ -6,7 +5,6 @@ using System;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.PostProcessing;
 
 public class ShoutSMB : BossCharacterSMB
 {
