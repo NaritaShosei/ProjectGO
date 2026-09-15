@@ -12,6 +12,11 @@ namespace BossEnemy.Attack
         {
             _attackCoolTimer = new();
 
+            // AssetsLoader はアドレスごとにハンドルを共有するため、生成済みの
+            // Executor 数で所有期間を管理する。初期化中に Dispose されても、
+            // 初期化タスクの完了後に必ず対応するハンドルを解放できる。
+            _repositoryLoadCount++;
+
             // 複数回の攻撃選択から待機されるため、await可能なTaskを保持する。
             _initializationTask = InitAsync().Preserve();
         }
@@ -72,12 +77,13 @@ namespace BossEnemy.Attack
 
             _isDisposed = true;
             _selectionVersion++; // 待機中の全選択要求を無効化
+            _nextAttackData = default;
+            _executingAttackData = default;
 
             ReleaseRepositoriesAfterInitializationAsync().Forget();
         }
 
         private static uint _repositoryLoadCount = 0;
-        private bool _isSuccessRepositoryLoad = false;
 
         private AttackData _nextAttackData;
         private AttackData _executingAttackData;
@@ -104,8 +110,6 @@ namespace BossEnemy.Attack
                 await AssetsLoader.LoadAssetAsync<AttackDataRepositry>
                 (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
 
-            if (_isDisposed) return;
-
             var selectionPoolRepository =
                 await AssetsLoader.LoadAssetAsync<AttackDataSelectionPoolRepository>
                 (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
@@ -115,13 +119,8 @@ namespace BossEnemy.Attack
             attackDataRepository.Init();
             selectionPoolRepository.Init();
 
-            if (_isDisposed) return;
-
             _attackDataRepository = attackDataRepository;
             _bossEnemyAttackSelectionPoolRepository = selectionPoolRepository;
-
-            _repositoryLoadCount++;
-            _isSuccessRepositoryLoad = true;
         }
 
         private async UniTaskVoid ReleaseRepositoriesAfterInitializationAsync()
@@ -136,10 +135,10 @@ namespace BossEnemy.Attack
             }
             finally
             {
-                if (_isSuccessRepositoryLoad)
+                // Dispose を含む全経路で 1 回だけ返却する。
+                if (_repositoryLoadCount > 0)
                 {
                     _repositoryLoadCount--;
-                    _isSuccessRepositoryLoad = false;
 
                     if (_repositoryLoadCount == 0)
                     {

@@ -455,6 +455,8 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void Dispose()
         {
+            if (_nodeRunningConditionNotifier == null) return;
+
             Cancel();
 
             _nodeRunningConditionNotifier.OnCancelAsyncAction -= Cancel;
