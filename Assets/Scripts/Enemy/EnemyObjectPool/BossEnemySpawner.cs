@@ -1,5 +1,7 @@
 using BossEnemy.AI.BehaviourTree;
+using BossEnemy.Armor;
 using BossEnemy.Character;
+using BossEnemy.Enum;
 using BossEnemy.Infrastructure;
 using BossEnemy.Infrastructure.Repository;
 using BossEnemy.Interface;
@@ -81,6 +83,9 @@ public class BossEnemySpawner : MonoBehaviour
             }
         });
 
+        // 足鎧のUIゲージが実耐久値を読めるようにEntityを渡す
+        RegisterLegArmorEntity(enemyView, characterEntity);
+
         return enemyView;
     }
 
@@ -148,6 +153,34 @@ public class BossEnemySpawner : MonoBehaviour
     private void OnDestroy()
     {
         ReleaseRepositories();
+    }
+
+    /// <summary> 右足・左足のBossArmorViewに実耐久値を持つEntityを登録する </summary>
+    private void RegisterLegArmorEntity(BossCharacterView enemyView, BossCharacterEntity characterEntity)
+    {
+        if (enemyView.ActiveBossEnemyPartsView == null)
+        {
+            Debug.LogWarning("[BossEnemySpawner] ActiveBossEnemyPartsViewがnullのため足鎧のEntity登録をスキップしました");
+            return;
+        }
+
+        int registeredCount = 0;
+
+        foreach (var parts in enemyView.ActiveBossEnemyPartsView)
+        {
+            if (parts?.Armor == null) continue;
+
+            bool isLegArmor = parts.Armor.AttachmentPoints == ArmorAttachmentType.RightLeg
+                || parts.Armor.AttachmentPoints == ArmorAttachmentType.LeftLeg;
+
+            if (!isLegArmor) continue;
+
+            parts.Armor.SetEntity(characterEntity);
+            registeredCount++;
+            Debug.Log($"[BossEnemySpawner] 足鎧にEntityを登録: {parts.Armor.AttachmentPoints} / {parts.Armor.gameObject.name}");
+        }
+
+        Debug.Log($"[BossEnemySpawner] 足鎧Entity登録数: {registeredCount}");
     }
 
     /// <summary> Enemy死亡時の処理 </summary>

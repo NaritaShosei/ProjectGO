@@ -49,6 +49,9 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     /// <summary>ロックオン対象が変更された際の通知</summary>
     public event Action<ILockOnTarget> OnLockOnTargetChanged;
 
+    /// <summary>ボスの脚ロックオン候補を管理するコントローラ（ボス不在時はnull）</summary>
+    public BossLegLockOnController BossLegLockOnController => _bossLegLockOnController;
+
     #endregion
 
     #region パブリックメソッド

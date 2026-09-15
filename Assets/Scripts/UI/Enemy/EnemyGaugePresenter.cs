@@ -114,6 +114,9 @@ public class ArmorGaugePresenter : IDisposable
         _visibility.SetInRange(sqrDist <= _detectionRange * _detectionRange);
     }
 
+    /// <summary> ロックオン状態を反映する </summary>
+    public void SetLockedOn(bool isLockedOn) => _visibility.SetLockedOn(isLockedOn);
+
     public void ResetView() => View.ResetView();
 
     public void Dispose()
