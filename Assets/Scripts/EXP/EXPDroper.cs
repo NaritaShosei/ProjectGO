@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EXPDropper
@@ -36,6 +37,18 @@ public class EXPDropper
             expItem.transform.position = new Vector3(randomPos.x, position.y, randomPos.z);
 
             OnDropAction?.Invoke(expItem);
+        }
+    }
+
+    /// <summary>
+    /// 渡された経験値アイテムを全て即時リリースする。
+    /// </summary>
+    public void ReleaseAll(IReadOnlyList<EXPItem> items)
+    {
+        foreach (var item in items)
+        {
+            if (item != null)
+                OnReleased(item);
         }
     }
 

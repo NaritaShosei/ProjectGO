@@ -53,11 +53,21 @@ public class GenericObjectPool<T> where T : Component, IPoolable
         _inPool.Add(instance);
     }
 
+    /// <summary>貸出中の全インスタンスをプールへ返却する。</summary>
+    public void ReleaseAll()
+    {
+        foreach (var instance in _created)
+        {
+            Release(instance);
+        }
+    }
+
     private readonly T _prefab;
     private readonly Transform _parent;
 
     private readonly Stack<T> _pool = new();
     private readonly HashSet<T> _inPool = new();
+    private readonly List<T> _created = new();
 
     private T CreateNew()
     {
@@ -73,8 +83,12 @@ public class GenericObjectPool<T> where T : Component, IPoolable
 
     private T CreateInstance()
     {
-        return _parent != null
+        var instance = _parent != null
             ? Object.Instantiate(_prefab, _parent)
             : Object.Instantiate(_prefab);
+
+        _created.Add(instance);
+
+        return instance;
     }
 }
