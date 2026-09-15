@@ -59,6 +59,8 @@ public class EnemyUIManager : MonoBehaviour
     private GenericObjectPool<DamagePopupView> _popupPool;
     private DamagePopupPresenter _popupPresenter;
 
+    private readonly List<BossCharacterView> _bossCharacters = new();
+
     private CancellationTokenSource _cts;
 
     private async UniTaskVoid RangeCheckLoopAsync(CancellationToken ct)
@@ -302,6 +304,13 @@ public class EnemyUIManager : MonoBehaviour
         _armorPresenters.Clear();
 
         _popupPresenter.Dispose();
+
+        foreach (var boss in _bossCharacters)
+        {
+            boss.OnDamageDealt -= HandleDamageDealt;
+            boss.OnDead -= HandleEnemyDead;
+        }
+        _bossCharacters.Clear();
     }
 
     /// <summary>
