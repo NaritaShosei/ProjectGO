@@ -18,6 +18,7 @@ public class GameOverState : ISequenceState
         _isCleanedUp = false;
         _isTransitionRequested = false;
         context.InputHandler?.EnableInput(false);
+        context.Player?.ForceWarriorMode();
 
         // 既存シーンに設定済みのUIも表示しない。
         _gameOverView?.Hide();

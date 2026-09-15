@@ -15,6 +15,8 @@ public interface IPlayer :
 
     /// <summary>チュートリアル中に限り、現在のプレイヤー状態に関係なくモードチェンジを許可する。</summary>
     public void SetTutorialModeChangeEnabled(bool enabled);
+    /// <summary>ムービー再生前など、雷神モードを維持できない場面で戦神モードへ強制的に戻す。</summary>
+    public void ForceWarriorMode();
     public void StartDownRecovery();
     /// <summary>
     /// ロックオンなどの中心のTransformを取得する
