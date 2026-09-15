@@ -7,6 +7,27 @@ public class CreditView : MonoBehaviour
 {
     public event Action OnBackButtonClicked;
 
+    public void Show()
+    {
+        gameObject.SetActive(true);
+
+        ShowDevelopers();
+
+        if (EventSystem.current == null)
+        {
+            return;
+        }
+
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(
+            _developersButton.gameObject);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
     [Header("ボタン")]
     [SerializeField]
     private Button _developersButton;
@@ -41,27 +62,6 @@ public class CreditView : MonoBehaviour
         _developersButton.onClick.RemoveListener(ShowDevelopers);
         _assetCreditsButton.onClick.RemoveListener(ShowAssetCredits);
         _backButton.onClick.RemoveListener(HandleBackButtonClicked);
-    }
-
-    public void Show()
-    {
-        gameObject.SetActive(true);
-
-        ShowDevelopers();
-
-        if (EventSystem.current == null)
-        {
-            return;
-        }
-
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(
-            _developersButton.gameObject);
-    }
-
-    public void Hide()
-    {
-        gameObject.SetActive(false);
     }
 
     private void ShowDevelopers()
