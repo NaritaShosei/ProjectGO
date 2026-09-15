@@ -4,6 +4,7 @@ using BossEnemy.Infrastructure;
 using BossEnemy.Infrastructure.Repository;
 using BossEnemy.Interface;
 using BossEnemy.UI;
+using BlurShadersPro.URP;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -122,7 +123,20 @@ public class BossEnemySpawner : MonoBehaviour
 
     private void Awake()
     {
-        _volum = FindFirstObjectByType<Volume>();
+        foreach (var volume in FindObjectsByType<Volume>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (!volume.isGlobal || volume.sharedProfile == null)
+                continue;
+
+            if (volume.sharedProfile.TryGet(out RadialBlurSettings _))
+            {
+                _volum = volume;
+                break;
+            }
+        }
+
+        if (_volum == null)
+            Debug.LogError("[BossEnemySpawner] RadialBlurSettings を含むGlobal Volumeが見つかりません。");
 
         LoadRepositories().Forget();
     }
