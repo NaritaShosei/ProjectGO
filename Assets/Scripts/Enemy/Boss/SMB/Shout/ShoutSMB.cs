@@ -95,12 +95,11 @@ public class ShoutSMB : BossCharacterSMB
                 radialBlurSettings.strength.overrideState = true;
             }
 
-            float releaseEndTime = _shoutStartTime + _shoutEndTime;
-            while (_currentNormalizedTime < releaseEndTime)
+            while (_currentNormalizedTime < _shoutEndTime)
             {
                 float progress = Mathf.InverseLerp(
                     _shoutStartTime,
-                    releaseEndTime,
+                    _shoutEndTime,
                     _currentNormalizedTime);
                 FadeOutRadialBlur(Mathf.Clamp01(progress));
 
