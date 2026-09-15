@@ -17,6 +17,11 @@ public class BossBattleState : ISequenceState
     {
         _context = context;
 
+        // プレイヤーHPを全回復
+        var player = context.Player;
+        if (player != null)
+            player.Healing(player.MaxHealth - player.CurrentHealth);
+
         _bossBattleTimer = new CountDownTimer();
 
         if (_bossBattleTimerView != null)
