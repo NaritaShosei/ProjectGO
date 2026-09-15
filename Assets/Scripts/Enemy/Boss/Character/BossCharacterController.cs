@@ -35,11 +35,14 @@ namespace BossEnemy.Character
         {
             if(_isDispose) return;
 
-            if (_characterEntity.CurrentAction.Value != CharacterAction.Dead
-               && _characterEntity.CurrentAction.Value != CharacterAction.Despawn)
-            {
-                HandleDead();
-            }
+            if (_characterEntity.ExecutingAttackData.ID != 0)
+                _characterEntity.CancelAttack();
+
+            _bossAIBehaviourController.StopRunning();
+            _bossAIBehaviourController.Dispose();
+            UnregisterEvents();
+
+            _isDispose = true;
         }
 
         public void OnUpdate()
@@ -217,7 +220,9 @@ namespace BossEnemy.Character
         /// <summary> 死亡イベント発火時の処理 </summary>
         private void HandleDead()
         {
-            if(_characterEntity.ExecutingAttackData.ID != 0)
+            if (_isDispose) return;
+
+            if (_characterEntity.ExecutingAttackData.ID != 0)
                 _characterEntity.CancelAttack();
 
             _bossAIBehaviourController.StopRunning();
