@@ -1,4 +1,5 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class TitleUIManager : MonoBehaviour
@@ -33,6 +34,10 @@ public class TitleUIManager : MonoBehaviour
     private SceneTransitionManager _sceneTransitionManager;
     private OptionPresenter _optionPresenter;
 
+    [Header("クレジット画面設定")]
+    [SerializeField]
+    private CreditView _creditView;
+
 
     private void Start()
     {
@@ -52,6 +57,9 @@ public class TitleUIManager : MonoBehaviour
         // イベントハンドラの登録
         _titlePanelView.OnModeSelectButton += OpenModeSelectPanel;
         _titlePanelView.OnOptionButton += OpenOptionPanel;
+        _titlePanelView.OnCreditButton += OpenCreditPanel;
+
+        _creditView.OnBackButtonClicked += CloseCreditPanel;
 
         // CanvasGroupの取得
         if (!_titlePanelView.TryGetComponent (out _titleCanvasGroup))
@@ -78,6 +86,8 @@ public class TitleUIManager : MonoBehaviour
             // イベントハンドラの登録解除
             _titlePanelView.OnModeSelectButton -= OpenModeSelectPanel;
             _titlePanelView.OnOptionButton -= OpenOptionPanel;
+            _titlePanelView.OnCreditButton -= OpenCreditPanel;
+            _creditView.OnBackButtonClicked -= CloseCreditPanel;
         }
     }
 
@@ -169,6 +179,25 @@ public class TitleUIManager : MonoBehaviour
         }
         _optionCanvasGroup.interactable = false;
         _optionUIPanel.SetActive(false);
+        _titleCanvasGroup.interactable = true;
+        _titlePanelView.ShowThisPanel();
+    }
+
+    /// <summary>
+    /// クレジット画面を開く
+    /// </summary>
+    private void OpenCreditPanel()
+    {
+        _titleCanvasGroup.interactable = false;
+        _creditView.Show();
+    }
+
+    /// <summary>
+    /// クレジット画面を閉じる
+    /// </summary>
+    private void CloseCreditPanel()
+    {
+        _creditView.Hide();
         _titleCanvasGroup.interactable = true;
         _titlePanelView.ShowThisPanel();
     }
