@@ -201,8 +201,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: GAME OVER
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
-  m_sharedMaterial: {fileID: 2649257169248792476, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -413,6 +413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d98366068afe4b829bcd8dc655207502, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
+  _buttonConfirmSoundType: 0
 --- !u!1 &100004
 GameObject:
   m_ObjectHideFlags: 0
@@ -472,8 +473,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: TITLE
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
-  m_sharedMaterial: {fileID: 2649257169248792476, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

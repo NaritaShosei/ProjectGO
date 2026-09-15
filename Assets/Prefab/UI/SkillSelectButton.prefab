@@ -216,6 +216,12 @@ MonoBehaviour:
   _nameText: {fileID: 7976138078936933813}
   _explanationText: {fileID: 1547844184850086249}
   _icon: {fileID: 4504881381310910438}
+  _hoveredScale: 1.1
+  _hoveredDuration: 0.1
+  _animationScale: 1.2
+  _highlightDuration: 1
+  _clickScale: 1.5
+  _clickDuration: 0.1
 --- !u!225 &3362318229775376690
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -295,8 +301,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u3053\u308C\u306F\u30C6\u30B9\u30C8\u7528\u306E\u30C6\u30AD\u30B9\u30C8\u3067\u8AAC\u660E\u6587\u3092\u304B\u3044\u3066\u3044\u308B\u305E\u3044"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
-  m_sharedMaterial: {fileID: 2649257169248792476, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -432,8 +438,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u30B9\u30AD\u30EB\u540D\u524D"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
-  m_sharedMaterial: {fileID: 2649257169248792476, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
