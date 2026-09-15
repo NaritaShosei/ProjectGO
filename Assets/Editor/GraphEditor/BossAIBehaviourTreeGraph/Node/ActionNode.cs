@@ -57,8 +57,6 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
                 .WithDisplayName(REPAIR_ARMOR)
                 .Build();
         }
-
-        [SerializeField] private ArmorAttachmentType _repairArmor;
     }
 
     [Serializable]
