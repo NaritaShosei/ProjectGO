@@ -4,11 +4,13 @@ using BossEnemy.Infrastructure;
 using BossEnemy.Infrastructure.Repository;
 using BossEnemy.Interface;
 using BossEnemy.UI;
+using BlurShadersPro.URP;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
+using UnityEngine.Rendering;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -57,7 +59,7 @@ public class BossEnemySpawner : MonoBehaviour
         entryNode.Init(characterEntity, nodeRunningConditionNotifier);
 
         BossCharacterController bossEnemyController = new BossCharacterController();
-        enemyView.Init(bossEnemyController);
+        enemyView.Init(bossEnemyController, _volum);
 
         Quaternion quaternion = Quaternion.LookRotation(position - _rotate);
         characterEntity.OnSpawn(attackTarget, position, quaternion);
@@ -100,6 +102,8 @@ public class BossEnemySpawner : MonoBehaviour
 
     [SerializeField, Header("スポーンさせるボスのID")]
     private int _id;
+    
+    private Volume _volum;
 
     private bool _isLoadedRepositries = false;
     private EnemyServices _services;
@@ -119,6 +123,21 @@ public class BossEnemySpawner : MonoBehaviour
 
     private void Awake()
     {
+        foreach (var volume in FindObjectsByType<Volume>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+        {
+            if (!volume.isGlobal || volume.sharedProfile == null)
+                continue;
+
+            if (volume.sharedProfile.TryGet(out RadialBlurSettings _))
+            {
+                _volum = volume;
+                break;
+            }
+        }
+
+        if (_volum == null)
+            Debug.LogError("[BossEnemySpawner] RadialBlurSettings を含むGlobal Volumeが見つかりません。");
+
         LoadRepositories().Forget();
     }
 

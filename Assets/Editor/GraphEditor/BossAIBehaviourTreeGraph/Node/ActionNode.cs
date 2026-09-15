@@ -28,6 +28,38 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
     }
 
     [Serializable]
+    public class ArmorRepairAction : ActionNode<BehaviourTree.ArmorRepairAction>
+    {
+        private const string REPAIR_ARMOR = "修復箇所";
+
+        public ArmorRepairAction()
+        {
+            _nodeAccesskey = CreateUniqueKey();
+            _behaviourTreeNode = new BehaviourTree.ArmorRepairAction();
+        }
+
+        public override void OnGraphChanged(GraphLogger graphLogger)
+        {
+            base.OnGraphChanged(graphLogger);
+
+            if (GetNodeOptionByName(REPAIR_ARMOR).TryGetValue(out ArmorAttachmentType repairArmor))
+            {
+                _behaviourTreeNode.SetRepairArmor(repairArmor);
+            }
+        }
+
+        protected override void OnDefineOptions(IOptionDefinitionContext context)
+        {
+            base.OnDefineOptions(context);
+
+            context
+                .AddOption<ArmorAttachmentType>(REPAIR_ARMOR)
+                .WithDisplayName(REPAIR_ARMOR)
+                .Build();
+        }
+    }
+
+    [Serializable]
     public class WaitForTimeAction : ActionNode<BehaviourTree.WaitForTimeAction>
     {
         private const string WAIT_TIME = "計測時間";
