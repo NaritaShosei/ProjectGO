@@ -71,6 +71,7 @@ public sealed class EnemyAttackPattern : ScriptableObject
     public float RetreatDistance => _retreatDistance;
     // 距離を取り直す際の移動速度
     public float RetreatSpeed => _retreatSpeed;
+    public float MaxRetreatDuration => _maxRetreatDuration;
 
     [SerializeField] private string _patternName;
 
@@ -162,6 +163,10 @@ public sealed class EnemyAttackPattern : ScriptableObject
     [Tooltip("距離を取り直す際の移動速度")]
     [Min(0f)]
     [SerializeField] private float _retreatSpeed = 3f;
+    [Tooltip("後退の最大継続時間（秒）の保険。RetreatDistanceに到達しなくてもこの時間で強制終了する。0以下で無制限")]
+    [Min(0f)]
+    [SerializeField] private float _maxRetreatDuration = 5f;
+    
 
 #if UNITY_EDITOR
     private void OnValidate()
