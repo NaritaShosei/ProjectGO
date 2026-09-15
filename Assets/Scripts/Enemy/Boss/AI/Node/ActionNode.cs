@@ -69,6 +69,8 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            base.OnEnter();
+
             if (_repairArmor == ArmorAttachmentType.None)
             {
                 HandleRunningEnd();
@@ -102,6 +104,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            base.OnEnter();
             _isTimeUp = false;
             _currentWaitTime = _waitTime;
         }
@@ -152,6 +155,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            base.OnEnter();
             _bossCharacterEntity.SetCharacterPosture(_changePosture);
             _isPostureChangeCompleted = false;
         }
@@ -187,6 +191,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            base.OnEnter();
             int selectionVersion = ++_selectionVersion;
             SelectNextAttackAsync(selectionVersion).Forget();
         }
@@ -233,6 +238,8 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
+            base.OnEnter();
+
             Attack.AttackData nextAttackData = _bossCharacterEntity.GetNextAttackData();
 
             if (nextAttackData.AttackStartDistance == 0)
@@ -404,6 +411,7 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
+            base.OnEnter();
             _bossCharacterEntity.StartPhaseChange();
             _isPhaseChangeCompleted = false;
         }
