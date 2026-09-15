@@ -10,10 +10,9 @@ namespace BossEnemy.Effect
     {
         public override event Action<HitAreaView, AttackHitAreaType> OnDespawn;
 
-        public override void ActiveView(float range, float despawnTime)
+        public override void ActiveView(float range)
         {
             SetRange(range);
-            SetDespawnTime(despawnTime);
         }
 
         public override void SetRange(float range)
@@ -42,19 +41,12 @@ namespace BossEnemy.Effect
                 _initialLocalScale.z * lengthScale);
         }
 
-        public override void SetDespawnTime(float despawnTime)
-        {
-            _despawnTime = despawnTime;
-        }
-
-        public override void Despawn()
+        public override void InVisible()
         {
             OnDespawn?.Invoke(this, AttackHitAreaType.Square);
             this.gameObject.SetActive(false);
         }
 
-        private float _despawnTime;
-        private float _elapsedTime;
         private Vector2 _initialMeshSize;
         private Vector3 _initialLocalScale;
 
@@ -77,21 +69,5 @@ namespace BossEnemy.Effect
         [SerializeField] private ProceduralMeshGenerator _squareFangsSheen1;
         [SerializeField] private ProceduralMeshGenerator _squareFangsSheen2;
         [SerializeField] private ProceduralMeshGenerator _simpleSquareLateralGradient;
-
-
-        private void OnEnable()
-        {
-            _elapsedTime = 0;
-        }
-
-        private void Update()
-        {
-            _elapsedTime += Time.deltaTime;
-
-            if (_elapsedTime >= _despawnTime)
-            {
-                Despawn();
-            }
-        }
     }
 }

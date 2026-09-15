@@ -1,67 +1,64 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// チュートリアルの1ページを表示するパネル。
+/// チュートリアルの1ページを、文字や背景を含む1枚のSpriteで表示する。
 /// 表示内容やページ送りの判断は State 側が担当する。
 /// </summary>
 public sealed class TutorialPanelView : MonoBehaviour
 {
-    public event Action OnNextRequested;
+    public event Action OnConfirmRequested;
 
-    public void Show(TutorialPage page, bool modal = true)
+    public void Show(Sprite sprite, bool modal = true)
     {
-        if (page == null)
-            return;
-
-        if (_titleText != null)
-            _titleText.text = page.Title;
-
-        if (_descriptionText != null)
-            _descriptionText.text = page.Description;
-
         if (_illustration != null)
         {
-            _illustration.sprite = page.Illustration;
-            _illustration.gameObject.SetActive(page.Illustration != null);
+            _illustration.sprite = sprite;
+            _illustration.preserveAspect = true;
+            _illustration.enabled = sprite != null;
         }
+
+        if (sprite == null)
+            Debug.LogWarning("[TutorialPanelView] ページSpriteが未設定です。", this);
 
         ApplyPresentation(modal);
         SetVisible(true, modal);
+        _shownFrame = Time.frameCount;
     }
 
     public void Hide() => SetVisible(false, false);
 
-    public void SetProgress(string progress)
-    {
-        if (_descriptionText != null)
-            _descriptionText.text = progress;
-    }
-
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private GameObject _backdrop;
-    [SerializeField] private TMP_Text _titleText;
-    [SerializeField] private TMP_Text _descriptionText;
-    [SerializeField] private Image _illustration;
-    [SerializeField] private Button _nextButton;
+    [SerializeField, Tooltip("ページ全体のSpriteを表示するImage。位置と大きさはPrefabで調整します。")]
+    private Image _illustration;
+    private PlayerInput _input;
+    private int _shownFrame;
 
     private void Awake()
     {
-        if (_nextButton != null)
-            _nextButton.onClick.AddListener(HandleNextClicked);
-
+        _input = new PlayerInput();
         SetVisible(false, false);
     }
 
-    private void OnDestroy()
+    // EventSystemの処理後に進め、同じ決定入力が遷移先のスキル選択へ流れるのを防ぐ。
+    private void LateUpdate()
     {
-        if (_nextButton != null)
-            _nextButton.onClick.RemoveListener(HandleNextClicked);
+        if (_input != null && _input.UI.Submit.enabled &&
+            Time.frameCount > _shownFrame && _input.UI.Submit.WasPressedThisFrame())
+            OnConfirmRequested?.Invoke();
     }
 
-    private void HandleNextClicked() => OnNextRequested?.Invoke();
+    private void OnDisable() => _input?.UI.Submit.Disable();
+
+    private void OnDestroy()
+    {
+        if (_input == null)
+            return;
+        _input.Disable();
+        _input.Dispose();
+    }
 
     /// <summary>
     /// パネルの位置と大きさはPrefabで調整した値を維持し、用途に応じた部品だけを切り替える。
@@ -70,13 +67,18 @@ public sealed class TutorialPanelView : MonoBehaviour
     {
         if (_backdrop != null)
             _backdrop.SetActive(modal);
-
-        if (_nextButton != null)
-            _nextButton.gameObject.SetActive(modal);
     }
 
     private void SetVisible(bool visible, bool blocksInput)
     {
+        if (_input != null)
+        {
+            if (visible && blocksInput)
+                _input.UI.Submit.Enable();
+            else
+                _input.UI.Submit.Disable();
+        }
+
         if (_canvasGroup == null)
         {
             gameObject.SetActive(visible);
@@ -87,42 +89,4 @@ public sealed class TutorialPanelView : MonoBehaviour
         _canvasGroup.interactable = visible && blocksInput;
         _canvasGroup.blocksRaycasts = visible && blocksInput;
     }
-}
-
-public enum TutorialTrigger
-{
-    BattleStarted,
-    ModeChange,
-    LockOn,
-    FirstEnemyDefeated,
-    WaveCleared,
-    ThunderModeChanged,
-}
-
-[Serializable]
-public sealed class TutorialPage
-{
-    public TutorialTrigger Trigger => _trigger;
-    public string Title => _title;
-    public string Description => _description;
-    public Sprite Illustration => _illustration;
-    public float Duration => Mathf.Max(0.1f, _duration);
-
-    public TutorialPage(
-        TutorialTrigger trigger,
-        string title,
-        string description,
-        float duration = 6f)
-    {
-        _trigger = trigger;
-        _title = title;
-        _description = description;
-        _duration = duration;
-    }
-
-    [SerializeField] private TutorialTrigger _trigger;
-    [SerializeField] private string _title;
-    [SerializeField, TextArea(3, 8)] private string _description;
-    [SerializeField] private Sprite _illustration;
-    [SerializeField, Min(0.1f)] private float _duration = 6f;
 }

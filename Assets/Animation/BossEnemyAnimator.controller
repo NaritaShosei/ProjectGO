@@ -206,15 +206,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 1
-  _attackStartTime: 0.5
-  _attackAreaDespawnTime: 1
+  _attackStartTime: 3
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
     _duration: 0
-  _attackDistance: 2
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 0.1
+  _attackPointDistance: 2
 --- !u!1101 &-8512754007252017794
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -611,16 +611,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 6
-  _attackStartTime: 2
-  _attackAreaDespawnTime: 1
+  _attackStartTime: 3.3
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 2.2
     _frequency: 1.8
     _duration: 0.18
-  _startAttackTime: 1
-  _attackIntervalFlame: 100
+  _attackIntervalTime: 1.5
+  _attackHitTimingDelayTime: 0.3
   _attackAreaCircleGeneratePosY: 0.2
   _maxAttackCount: 4
+  _magicStartEffectPlayOffset: {x: 10, y: 0, z: 10}
 --- !u!1102 &-7142586009534698118
 AnimatorState:
   serializedVersion: 6
@@ -976,14 +979,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 8
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
     _duration: 0
-  _attackDistance: 0
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 1
+  _attackPointDistance: 0
 --- !u!1102 &-5788214727961184165
 AnimatorState:
   serializedVersion: 6
@@ -1199,15 +1202,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 11
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
-  _startAttackTime: 1
-  _attackIntervalFlame: 0
+    _amplitude: 3
+    _frequency: 2
+    _duration: 1
+  _attackIntervalTime: 1.5
+  _attackHitTimingDelayTime: 0.2
   _attackAreaCircleGeneratePosY: 0.2
   _maxAttackCount: 4
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
 --- !u!1101 &-4668098060198359337
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1733,16 +1739,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
   _attackID: 13
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 4
     _frequency: 1.2
     _duration: 0.48
-  _consecutiveAttackInterval: 0
+  _consecutiveAttackInterval: 1.5
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
   _attackAreaEffectPosY: 0.2
-  _meteorEffectPosY: -1
+  _meteorEffectPosY: 0.2
   _attackHitTime: 1.05
 --- !u!1101 &-1680677634452769343
 AnimatorStateTransition:
@@ -1858,14 +1866,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.HeavyPunchSMB
   _attackID: 9
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
     _duration: 0
-  _spawnDistance: 0
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 1
+  _attackHitTimingDelayTime: 0
+  _attackAreaCircleGeneratePosY: 0.2
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
+  _attackPointDistance: 0
 --- !u!1101 &-928170174063221020
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1902,15 +1913,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 11
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
-  _startAttackTime: 1
-  _attackIntervalFlame: 0
+    _amplitude: 2.94
+    _frequency: 2
+    _duration: 1
+  _attackIntervalTime: 1.5
+  _attackHitTimingDelayTime: 0.2
   _attackAreaCircleGeneratePosY: 0.2
   _maxAttackCount: 4
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
 --- !u!1101 &-879088540828779516
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2097,15 +2111,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
   _attackID: 3
-  _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackStartTime: 3
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 3.5
     _frequency: 1.5
     _duration: 0.25
-  _attackDistance: 2
-  _startAttackHitTiming: 2
-  _endAttackHitTiming: 1
+  _attackHitTimingDelayTime: 0.3
+  _attackAreaCircleGeneratePosY: 0.2
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
+  _attackPointDistance: 3
 --- !u!1102 &-324155300534404492
 AnimatorState:
   serializedVersion: 6
@@ -2283,14 +2300,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 8
   _attackStartTime: 0.5
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
     _duration: 0
-  _attackDistance: 0
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 1
+  _attackPointDistance: 0
 --- !u!1101 &-116788342441944738
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2578,16 +2595,16 @@ AnimatorStateMachine:
     m_Position: {x: 270, y: 90, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7452281038287288523}
-    m_Position: {x: 480, y: 0, z: 0}
+    m_Position: {x: 560, y: -10, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7631892115851761343}
-    m_Position: {x: 560, y: 70, z: 0}
+    m_Position: {x: 560, y: 60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 9019623883209432096}
-    m_Position: {x: 580, y: 140, z: 0}
+    m_Position: {x: 560, y: 130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6058405512842583964}
-    m_Position: {x: 570, y: 220, z: 0}
+    m_Position: {x: 560, y: 200, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -2737,7 +2754,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
   _attackID: 10
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
@@ -2840,7 +2859,7 @@ AnimatorStateMachine:
     m_Position: {x: 270, y: 90, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7462028388753480653}
-    m_Position: {x: 240, y: 0, z: 0}
+    m_Position: {x: 250, y: 0, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6779888127852869895}
     m_Position: {x: 460, y: 0, z: 0}
@@ -2874,7 +2893,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
   _attackID: 7
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 4
     _frequency: 1.2
@@ -2924,15 +2945,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 12
   _attackStartTime: 2
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 2.2
     _frequency: 1.8
     _duration: 0.18
-  _startAttackTime: 1
-  _attackIntervalFlame: 100
+  _attackIntervalTime: 1.5
+  _attackHitTimingDelayTime: 0
   _attackAreaCircleGeneratePosY: 0.2
-  _maxAttackCount: 4
+  _maxAttackCount: 0
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
 --- !u!114 &1688821259855040997
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2946,15 +2970,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingLeftSMB
   _attackID: 2
-  _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackStartTime: 3
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 3.5
     _frequency: 1.5
     _duration: 0.25
-  _attackDistance: 2
-  _startAttackHitTiming: 2
-  _endAttackHitTiming: 1
+  _attackHitTimingDelayTime: 0.3
+  _attackAreaCircleGeneratePosY: 0.2
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
+  _attackPointDistance: 3
 --- !u!1102 &1995479366855597398
 AnimatorState:
   serializedVersion: 6
@@ -3301,7 +3328,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
   _attackID: 10
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
@@ -3319,15 +3348,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.ChargeSMB
   _attackID: 5
-  _attackStartTime: 1
-  _attackAreaDespawnTime: 2
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 0
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 2.5
     _frequency: 2.5
     _duration: 0.4
   _moveDistance: 20
-  _startMoveTime: 0
-  _endMoveTime: 0.7
+  _goalTime: 4
 --- !u!1101 &3516473906035181070
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -3380,7 +3410,7 @@ AnimatorStateMachine:
   m_ChildStateMachines:
   - serializedVersion: 1
     m_StateMachine: {fileID: 588216187551254637}
-    m_Position: {x: 450, y: -50, z: 0}
+    m_Position: {x: 460, y: -40, z: 0}
   m_AnyStateTransitions: []
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
@@ -3527,14 +3557,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.HeavyPunchSMB
   _attackID: 9
   _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 0
     _frequency: 0
     _duration: 0
-  _spawnDistance: 0
-  _startAttackHitTiming: 1
-  _endAttackHitTiming: 1
+  _attackHitTimingDelayTime: 0
+  _attackAreaCircleGeneratePosY: 0.2
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
+  _attackPointDistance: 0
 --- !u!114 &4567494591603859569
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3988,22 +4021,22 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 8805771252905067955}
-    m_Position: {x: -360, y: -140, z: 0}
+    m_Position: {x: -370, y: -150, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3158497122056379763}
-    m_Position: {x: -180, y: -90, z: 0}
+    m_Position: {x: -190, y: -100, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7937429894567203005}
-    m_Position: {x: -80, y: -40, z: 0}
+    m_Position: {x: -70, y: -40, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -181589887419665542}
     m_Position: {x: -180, y: 20, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -7142586009534698118}
-    m_Position: {x: -320, y: 80, z: 0}
+    m_Position: {x: -300, y: 70, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6628811051747405274}
-    m_Position: {x: -470, y: 130, z: 0}
+    m_Position: {x: -480, y: 130, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7018468052547485821}
     m_Position: {x: -620, y: 70, z: 0}
@@ -4341,15 +4374,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeavyPunchSMB
   _attackID: 4
-  _attackStartTime: 1
-  _attackAreaDespawnTime: 1
+  _attackStartTime: 3
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
   _cameraShakeData:
     _amplitude: 5
     _frequency: 1
     _duration: 0.35
-  _spawnDistance: 1
-  _startAttackHitTiming: 1.7
-  _endAttackHitTiming: 0.3
+  _attackHitTimingDelayTime: 0.1
+  _attackAreaCircleGeneratePosY: 0.2
+  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
+  _attackPointDistance: 2
 --- !u!1102 &7937429894567203005
 AnimatorState:
   serializedVersion: 6
