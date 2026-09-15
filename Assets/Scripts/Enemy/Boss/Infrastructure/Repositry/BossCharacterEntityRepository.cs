@@ -16,6 +16,12 @@ namespace BossEnemy.Infrastructure.Repository
 
         public void Init(ICanMoveAreaChecker canMoveAreaChecker)
         {
+            if(_masterDataSheet == null)
+            {
+                Debug.LogError("_masterDataSheetがNullです");
+                return;
+            }
+
             if(canMoveAreaChecker == null)
             {
                 Debug.LogError("移動可能範囲判定判定機能がNullです");

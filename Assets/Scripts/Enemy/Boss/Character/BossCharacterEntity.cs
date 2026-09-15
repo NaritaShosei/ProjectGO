@@ -258,7 +258,7 @@ namespace BossEnemy.Character
         public void OnSpawn(IPlayer firstTarget, Vector3 position, Quaternion quaternion)
         {
             _attackTarget = firstTarget;
-            SetPosition(position);
+            _position.Value = position;
             SetRotation(quaternion);
             SetVelocity(Vector3.zero);
 
@@ -327,9 +327,15 @@ namespace BossEnemy.Character
         public void SetPosition(Vector3 position)
         {
             // 移動可能かどうか判定を行い可能なら位置を代入
-            if (_canMoveAreaChecker.CanMove(position))
+            if (_canMoveAreaChecker.CanMove(position, _position.Value, out Vector3 newPosition))
             {
                 _position.Value = position;
+            }
+            else
+            {
+                if (_position.Value == newPosition) return;
+
+                _position.Value = newPosition;
             }
         }
 

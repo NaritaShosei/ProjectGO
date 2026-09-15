@@ -7,8 +7,17 @@ namespace BossEnemy.Movement
     public class BossMoveAreaCreater : MonoBehaviour, ICanMoveAreaChecker
     {
         /// <summary> 移動可能判定 </summary>
-        public bool CanMove(Vector3 movePos)
+        public bool CanMove(Vector3 movePos, Vector3 currentPos, out Vector3 newMovePos)
         {
+            newMovePos = currentPos;
+            newMovePos.y = 0f;
+
+            if(_center == null)
+            {
+                Debug.LogError("中心地点が指定されていません");
+                return false;
+            }
+
             movePos.y = 0f;
             var center = new Vector3()
             {
@@ -20,11 +29,22 @@ namespace BossEnemy.Movement
             float movePosDistance = Vector3.Distance(center, movePos);
 
             // 半径のほうが移動場所より中心地点から遠ければ移動可能
-            if (_radius >= movePosDistance)
-            {
-                return true;
-            }
+            if (_radius >= movePosDistance) return true;
 
+            newMovePos.x = movePos.x; 
+            movePosDistance = Vector3.Distance(center, newMovePos);
+
+            // 半径のほうが移動場所より中心地点から遠ければ移動可能
+            if (_radius >= movePosDistance) return false;
+
+            newMovePos.x = currentPos.x;
+            newMovePos.z = movePos.z;
+            movePosDistance = Vector3.Distance(center, newMovePos);
+
+            // 半径のほうが移動場所より中心地点から遠ければ移動可能
+            if (_radius >= movePosDistance) return false;
+
+            newMovePos = currentPos;
             return false;
         }
 
