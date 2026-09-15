@@ -9,7 +9,15 @@ namespace BossEnemy.Movement
         /// <summary> 移動可能判定 </summary>
         public bool CanMove(Vector3 movePos)
         {
-            float movePosDistance = Vector3.Distance(_center.position, movePos);
+            movePos.y = 0f;
+            var center = new Vector3()
+            {
+                x = _center.position.x,
+                y = 0f,
+                z = _center.position.z
+            };
+
+            float movePosDistance = Vector3.Distance(center, movePos);
 
             // 半径のほうが移動場所より中心地点から遠ければ移動可能
             if (_radius >= movePosDistance)

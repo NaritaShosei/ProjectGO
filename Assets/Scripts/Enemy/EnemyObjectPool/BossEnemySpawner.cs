@@ -162,6 +162,12 @@ public class BossEnemySpawner : MonoBehaviour
 
     private async UniTask LoadRepositories()
     {
+        if (_canMoveAreaChecker == null)
+        {
+            throw new InvalidOperationException(
+                "[BossEnemySpawner] _canMoveAreaChecker が設定されていません。");
+        }
+
         Debug.Log("RepositryLoad開始");
 
         _bossCharacterEntityRepository = await AssetsLoader.LoadAssetAsync<BossCharacterEntityRepository>
