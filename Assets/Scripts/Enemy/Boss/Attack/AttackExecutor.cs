@@ -77,6 +77,7 @@ namespace BossEnemy.Attack
         }
 
         private static uint _repositoryLoadCount = 0;
+        private bool _isSuccessRepositoryLoad = false;
 
         private AttackData _nextAttackData;
         private AttackData _executingAttackData;
@@ -120,6 +121,7 @@ namespace BossEnemy.Attack
             _bossEnemyAttackSelectionPoolRepository = selectionPoolRepository;
 
             _repositoryLoadCount++;
+            _isSuccessRepositoryLoad = true;
         }
 
         private async UniTaskVoid ReleaseRepositoriesAfterInitializationAsync()
@@ -134,12 +136,16 @@ namespace BossEnemy.Attack
             }
             finally
             {
-                _repositoryLoadCount--;
-
-                if(_repositoryLoadCount == 0)
+                if (_isSuccessRepositoryLoad)
                 {
-                    AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
-                    AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+                    _repositoryLoadCount--;
+                    _isSuccessRepositoryLoad = false;
+
+                    if (_repositoryLoadCount == 0)
+                    {
+                        AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
+                        AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+                    }
                 }
 
                 _attackDataRepository = null;
