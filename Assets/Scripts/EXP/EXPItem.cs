@@ -23,10 +23,8 @@ public class EXPItem : MonoBehaviour, ISpeedChange, IPoolable
 
     // ── 既存 API ─────────────────────────────────────────────
 
-    public void Tick(IPlayer player, float magnetRange)
+    public void Tick(Vector3 playerCenterPos, float magnetRange)
     {
-        Vector3 playerCenterPos = player.GetTargetCenter().position;
-
         float distanceToPlayer = Vector3.Distance(transform.position, playerCenterPos);
         if (distanceToPlayer <= magnetRange)
         {

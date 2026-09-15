@@ -81,7 +81,10 @@ public class EXPItemManager : MonoBehaviour
 
     private void Update()
     {
-        if (_player == null) return;
+        if (_player == null || _activeItems.Count == 0) return;
+
+        // 同じフレーム中は全アイテムが同じプレイヤー中心を参照する。
+        Vector3 playerCenterPosition = _player.GetTargetCenter().position;
 
         // アクティブな経験値アイテムの状態を更新
         for (int i = _activeItems.Count - 1; i >= 0; i--)
@@ -93,7 +96,7 @@ public class EXPItemManager : MonoBehaviour
                 continue;
             }
 
-            item.Tick(_player, _magnetRange);
+            item.Tick(playerCenterPosition, _magnetRange);
         }
     }
 
