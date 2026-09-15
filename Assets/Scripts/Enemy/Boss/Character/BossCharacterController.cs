@@ -214,7 +214,9 @@ namespace BossEnemy.Character
         /// <summary> 死亡イベント発火時の処理 </summary>
         private void HandleDead()
         {
-            _characterEntity.CancelAttack();
+            if(_characterEntity.ExecutingAttackData.ID != 0)
+                _characterEntity.CancelAttack();
+
             _bossAIBehaviourController.StopRunning();
             _bossAIBehaviourController.Dispose();
             UnregisterEvents();

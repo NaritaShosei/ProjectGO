@@ -76,6 +76,8 @@ namespace BossEnemy.Attack
             ReleaseRepositoriesAfterInitializationAsync().Forget();
         }
 
+        private static uint _repositoryLoadCount = 0;
+
         private AttackData _nextAttackData;
         private AttackData _executingAttackData;
 
@@ -116,6 +118,8 @@ namespace BossEnemy.Attack
 
             _attackDataRepository = attackDataRepository;
             _bossEnemyAttackSelectionPoolRepository = selectionPoolRepository;
+
+            _repositoryLoadCount++;
         }
 
         private async UniTaskVoid ReleaseRepositoriesAfterInitializationAsync()
@@ -130,8 +134,13 @@ namespace BossEnemy.Attack
             }
             finally
             {
-                AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
-                AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+                _repositoryLoadCount--;
+
+                if(_repositoryLoadCount == 0)
+                {
+                    AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
+                    AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+                }
 
                 _attackDataRepository = null;
                 _bossEnemyAttackSelectionPoolRepository = null;
@@ -148,6 +157,12 @@ namespace BossEnemy.Attack
                 return;
 
             var pool = _bossEnemyAttackSelectionPoolRepository.GetSelectionPool(attackSelectPoolID);
+
+            if (pool.SelectionPool == null)
+            {
+                Debug.LogError("PoolがNullです");
+                return;
+            }
 
             int attackId = AttackDataSelector.GetRandomSelectAttackDataID(
                 pool, _attackCoolTimer.AttackCoolTimeList);
