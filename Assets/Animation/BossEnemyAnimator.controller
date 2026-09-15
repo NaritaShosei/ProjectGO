@@ -206,7 +206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.DownSweepSMB
   _attackID: 1
-  _attackStartTime: 3
+  _attackStartTime: 2
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
@@ -288,9 +288,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25000003
+  m_TransitionDuration: 0.25000048
   m_TransitionOffset: 0
-  m_ExitTime: 0.017965842
+  m_ExitTime: 0.033896144
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1377,9 +1377,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.69109154
   m_TransitionOffset: 0
-  m_ExitTime: 0.94718313
+  m_ExitTime: 0.8559227
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1487,6 +1487,7 @@ AnimatorState:
   - {fileID: 7701047125836247044}
   m_StateMachineBehaviours:
   - {fileID: 1555536973330970652}
+  - {fileID: 7453043894274169224}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -1546,9 +1547,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
-  m_TransitionOffset: 0
-  m_ExitTime: 0.85
+  m_TransitionDuration: 0.24999996
+  m_TransitionOffset: 0.0038848957
+  m_ExitTime: 0
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1655,9 +1656,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.83611083
   m_TransitionOffset: 0
-  m_ExitTime: 0.75
+  m_ExitTime: 0.8272205
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -1750,7 +1751,6 @@ MonoBehaviour:
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
   _attackAreaEffectPosY: 0.2
-  _meteorEffectPosY: 0.2
   _attackHitTime: 1.05
 --- !u!1101 &-1680677634452769343
 AnimatorStateTransition:
@@ -2111,7 +2111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
   _attackID: 3
-  _attackStartTime: 3
+  _attackStartTime: 2
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
@@ -2139,6 +2139,7 @@ AnimatorState:
   - {fileID: 6616022721204723585}
   m_StateMachineBehaviours:
   - {fileID: -1692041898509714901}
+  - {fileID: 1273822574978294736}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -2845,6 +2846,26 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &1273822574978294736
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32450c99717f2174b9b5ebd12e00d59e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShoutSMB
+  _shoutStartTime: 0.277
+  _shoutEndTime: 0.969
+  _strength:
+    m_OverrideState: 1
+    m_Value: 25
+  _stepSize:
+    m_OverrideState: 1
+    m_Value: 10
 --- !u!1107 &1505482479443905136
 AnimatorStateMachine:
   serializedVersion: 6
@@ -2904,7 +2925,6 @@ MonoBehaviour:
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
   _attackAreaEffectPosY: 0.2
-  _meteorEffectPosY: 0.41
   _attackHitTime: 1.05
 --- !u!1101 &1552869534088903262
 AnimatorStateTransition:
@@ -2970,7 +2990,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingLeftSMB
   _attackID: 2
-  _attackStartTime: 3
+  _attackStartTime: 2
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
@@ -4057,7 +4077,7 @@ AnimatorStateMachine:
   m_AnyStatePosition: {x: 60, y: -320, z: 0}
   m_EntryPosition: {x: -390, y: -220, z: 0}
   m_ExitPosition: {x: 860, y: 50, z: 0}
-  m_ParentStateMachinePosition: {x: -730, y: -170, z: 0}
+  m_ParentStateMachinePosition: {x: -770, y: -160, z: 0}
   m_DefaultState: {fileID: 8805771252905067955}
 --- !u!1101 &6616022721204723585
 AnimatorStateTransition:
@@ -4230,6 +4250,26 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &7453043894274169224
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32450c99717f2174b9b5ebd12e00d59e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShoutSMB
+  _shoutStartTime: 0.403
+  _shoutEndTime: 0.956
+  _strength:
+    m_OverrideState: 1
+    m_Value: 48
+  _stepSize:
+    m_OverrideState: 1
+    m_Value: 17
 --- !u!1101 &7511669079611949748
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -4374,7 +4414,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HeavyPunchSMB
   _attackID: 4
-  _attackStartTime: 3
+  _attackStartTime: 2
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1

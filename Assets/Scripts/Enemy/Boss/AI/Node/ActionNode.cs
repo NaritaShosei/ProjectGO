@@ -29,6 +29,37 @@ namespace BossEnemy.AI.BehaviourTree
     }
 
     [Serializable]
+    public class ArmorRepairAction : ActionNode
+    {
+        public void SetRepairArmor(ArmorAttachmentType repairArmor)
+        {
+            _repairArmor = repairArmor;
+        }
+
+        public override void OnEnter()
+        {
+            if (_repairArmor == ArmorAttachmentType.None)
+            {
+                HandleRunningEnd();
+                return;
+            }
+
+            _bossCharacterEntity.RepairArmor(_repairArmor);
+        }
+
+        public override void OnUpdate()
+        {
+            if(_bossCharacterEntity.RepairArmorAttachmentType.Value
+                == ArmorAttachmentType.None)
+            {
+                HandleRunningEnd();
+            }
+        }
+
+        [SerializeField] private ArmorAttachmentType _repairArmor;
+    }
+
+    [Serializable]
     public class WaitForTimeAction : ActionNode
     {
         public void SetWaitTime(float waitTime)
