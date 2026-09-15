@@ -22,7 +22,7 @@ namespace BossEnemy.Interface
 
     public interface IBossCharacterEntityRepository : ICSVDataLoadRepository
     {
-        public void Init();
+        public void Init(ICanMoveAreaChecker canMoveAreaChecker);
 
         public BossCharacterEntity GetEntity(int id);
 

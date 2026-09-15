@@ -1,0 +1,29 @@
+using UnityEngine;
+using BossEnemy.Interface;
+
+namespace BossEnemy.Movement
+{
+    /// <summary> ボスの移動範囲を作るクラス </summary>
+    public class BossMoveAreaCreater : MonoBehaviour, ICanMoveAreaChecker
+    {
+        /// <summary> 移動可能判定 </summary>
+        public bool CanMove(Vector3 movePos)
+        {
+            float movePosDistance = Vector3.Distance(_center.position, movePos);
+
+            // 半径のほうが移動場所より中心地点から遠ければ移動可能
+            if (_radius >= movePosDistance)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        [Header("動ける範囲の中心地点")]
+        [SerializeField] private Transform _center;
+
+        [Header("中心地点から円形を描く際実際に動ける範囲の大きさを決める半径")]
+        [SerializeField] private float _radius;
+    }
+}

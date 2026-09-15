@@ -1,5 +1,6 @@
 using BossEnemy.Armor;
 using BossEnemy.Enum;
+using BossEnemy.Interface;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using UnityEngine;
 // BossEnemyに関するData
 namespace BossEnemy.Character
 {
+    #region キャラクターの行動列挙型
     public enum CharacterAction
     {
         Idle,
@@ -19,8 +21,9 @@ namespace BossEnemy.Character
         Dead,
         Despawn
     }
+    #endregion
 
-    # region CharacterInterface
+    #region CharacterInterface
     public interface IBossCharacterEntity : IMovement
     {
         /// <summary> ボスの攻撃命中時イベント </summary>
@@ -69,7 +72,7 @@ namespace BossEnemy.Character
         public IReadOnlyDictionary<ArmorAttachmentType, int> ArmorCurrentHPDict { get; }
 
         /// <summary> 初期化 </summary>
-        public void Init();
+        public void Init(ICanMoveAreaChecker canMoveAreaChecker);
 
         /// <summary> 行動開始処理 </summary>
         public void BeginAction();
@@ -214,7 +217,7 @@ namespace BossEnemy.Character
         public IReadOnlyDictionary<ArmorAttachmentType, int> ArmorCurrentHPDict => _armorCurrentHPDict;
 
         /// <summary> 初期化 </summary>
-        public void Init()
+        public void Init(ICanMoveAreaChecker canMoveAreaChecker)
         {
             // 行動開始済みフラグを初期化
             _isBeganAction = false;
@@ -240,6 +243,9 @@ namespace BossEnemy.Character
 
             // タイムスケールを初期化
             _timeScale = 1.0f;
+
+            // ボスの移動範囲判定機能を設定
+            _canMoveAreaChecker = canMoveAreaChecker;
         }
 
         /// <summary> 行動開始済みフラグをTrueにする </summary>
@@ -318,7 +324,14 @@ namespace BossEnemy.Character
 
         /// <summary> BossEnemyの座標を設定する </summary>
         /// <param name="position"> 新しい座標 </param>
-        public void SetPosition(Vector3 position) => _position.Value = position;
+        public void SetPosition(Vector3 position)
+        {
+            // 移動可能かどうか判定を行い可能なら位置を代入
+            if (_canMoveAreaChecker.CanMove(position))
+            {
+                _position.Value = position;
+            }
+        }
 
         /// <summary> BossEnemyの回転を設定する </summary>
         /// <param name="rotation"> 新しい回転 </param>
@@ -564,6 +577,9 @@ namespace BossEnemy.Character
 
         // 攻撃実行クラス
         private Attack.AttackExecutor _attackExecutor;
+
+        // 移動可能範囲判定機能
+        private ICanMoveAreaChecker _canMoveAreaChecker = null;
 
         private bool TryTakeDamageArmor(ArmorAttachmentType scapegoatArmor, int damage)
         {
