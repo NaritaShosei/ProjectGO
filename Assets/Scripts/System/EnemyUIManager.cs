@@ -3,6 +3,8 @@ using System;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
+using BossEnemy.Character;
+using BossEnemy.Interface;
 
 public class EnemyUIManager : MonoBehaviour
 {
@@ -81,6 +83,17 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleEnemySpawned(IEnemy enemy)
     {
+        if (enemy.IsBoss)
+        {
+            if (enemy is BossCharacterView characterView)
+            {
+                HandleBossSpawned(characterView);
+            }
+            else Debug.LogError("ボスのViewクラスへの変換を失敗しました");
+
+            return;
+        }
+
         // 通常敵だけEnemyDataの設定を参照する
         bool showHealthGauge = enemy is Enemy configurableEnemy
             ? configurableEnemy.ShowHealthGauge
@@ -124,6 +137,11 @@ public class EnemyUIManager : MonoBehaviour
         }
 
         enemy.OnDead += HandleEnemyDead;
+    }
+
+    private void HandleBossSpawned(IBossEnemyCharacterView characterView)
+    {
+        // ToDo：Bossの鎧にHPゲージをつける
     }
 
     private void HandleDamageDealt(DamagePopupViewModel viewModel)
