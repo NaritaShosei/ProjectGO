@@ -159,7 +159,7 @@ public class ShoutSMB : BossCharacterSMB
         radialBlurSettings.stepSize.overrideState = true;
         radialBlurSettings.strength.value = Mathf.RoundToInt(Mathf.Lerp(
             _strength.value,
-            1f,
+            _saveStrength.value,
             progress));
         radialBlurSettings.strength.overrideState = true;
     }
