@@ -277,7 +277,9 @@ namespace BossEnemy.AI.BehaviourTree
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(currentAction =>
             {
-                if(currentAction != Character.CharacterAction.Attacking)
+                // 特定の行動中でなければビヘイビアツリーを再走する
+                if (currentAction != Character.CharacterAction.Attacking
+                    && currentAction != Character.CharacterAction.PostureChanging)
                     HandleRunningEnd();
             });
         }
