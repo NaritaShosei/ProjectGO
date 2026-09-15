@@ -27,11 +27,15 @@ namespace BossEnemy.Character
             _characterEntity = bossCharacterEntity;
 
             RegisterEvents();
+
+            _isDispose = false;
         }
 
         public void Dispose()
         {
-            if(_characterEntity.CurrentAction.Value != CharacterAction.Dead
+            if(_isDispose) return;
+
+            if (_characterEntity.CurrentAction.Value != CharacterAction.Dead
                && _characterEntity.CurrentAction.Value != CharacterAction.Despawn)
             {
                 HandleDead();
@@ -43,6 +47,9 @@ namespace BossEnemy.Character
             if (_bossAIBehaviourController != null)
                 _bossAIBehaviourController.OnUpdate();
         }
+
+        // Dispose済みフラグ
+        private bool _isDispose = true;
 
         // イベントの登録処理をすでに行っているか
         private bool _isRegisterEvents = false;
@@ -218,6 +225,8 @@ namespace BossEnemy.Character
             UnregisterEvents();
 
             _bossCharacterView.HandleDead();
+
+            _isDispose = true;
         }
 
         /// <summary> 鎧破壊イベント発火時の処理 </summary>
