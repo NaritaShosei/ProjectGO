@@ -31,7 +31,7 @@ namespace BossEnemy.Character
 
         public void Dispose()
         {
-            
+            UnregisterEvents();
         }
 
         public void OnUpdate()
@@ -145,7 +145,6 @@ namespace BossEnemy.Character
 
             // TimeScale変更時のイベント購読開始
             _bossCharacterView.TimeScaleReactiveProperty
-                .SkipLatestValueOnSubscribe()
                 .Subscribe(timaScale => 
             { HandleChangedTimeScale(timaScale); }).AddTo(_deadEventDisposables);
 

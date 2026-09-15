@@ -367,6 +367,8 @@ namespace BossEnemy.Character
         public void OnRelease()
         {
             _isLockable = false;
+
+            _bossEnemyController.Dispose();
         }
 
         /// <summary> 死んだ際の処理 </summary>
