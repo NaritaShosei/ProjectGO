@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
+using UnityEngine.Rendering;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -57,7 +58,7 @@ public class BossEnemySpawner : MonoBehaviour
         entryNode.Init(characterEntity, nodeRunningConditionNotifier);
 
         BossCharacterController bossEnemyController = new BossCharacterController();
-        enemyView.Init(bossEnemyController);
+        enemyView.Init(bossEnemyController, _volum);
 
         Quaternion quaternion = Quaternion.LookRotation(position - _rotate);
         characterEntity.OnSpawn(attackTarget, position, quaternion);
@@ -100,6 +101,8 @@ public class BossEnemySpawner : MonoBehaviour
 
     [SerializeField, Header("スポーンさせるボスのID")]
     private int _id;
+
+    [SerializeField] private Volume _volum;
 
     private bool _isLoadedRepositries = false;
     private EnemyServices _services;

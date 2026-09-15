@@ -8,6 +8,7 @@ using BossEnemy.Animation;
 using BossEnemy.Interface;
 using BossEnemy.Enum;
 using BossEnemy.SMB;
+using UnityEngine.Rendering;
 
 namespace BossEnemy.Character
 {
@@ -144,8 +145,12 @@ namespace BossEnemy.Character
 
                     continue;
                 }
-
-                bossCharacterSMB.Init(_bossEnemyAnimationEventReceiver, this, GetTargetCenter());
+                else if (bossCharacterSMB is ShoutSMB shoutSMB)
+                {
+                    shoutSMB.Init(_shoutVolume, _bossEnemyAnimationEventReceiver, this, GetTargetCenter());
+                }
+                else 
+                    bossCharacterSMB.Init(_bossEnemyAnimationEventReceiver, this, GetTargetCenter());
             }
 
             // ヒットストップを登録
@@ -156,8 +161,10 @@ namespace BossEnemy.Character
             }
         }
 
-        public void Init(IBossEnemyCharacterController bossEnemyCharacterController)
+        public void Init(IBossEnemyCharacterController bossEnemyCharacterController, Volume volume)
         {
+            _shoutVolume = volume;
+
             Init();
 
             _bossEnemyController = bossEnemyCharacterController;
@@ -465,6 +472,9 @@ namespace BossEnemy.Character
 
         // 舞フレーム処理を行う必要がある機能のリスト
         private List<IUpdater> _updaters = new List<IUpdater>();
+
+        // シャウトの際に使うVolume
+        private Volume _shoutVolume = null;
 
         private void Awake()
         {
