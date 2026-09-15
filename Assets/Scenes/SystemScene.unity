@@ -187,6 +187,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: CRI_Sound_System
       objectReference: {fileID: 0}
+    - target: {fileID: 8086251942596747683, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
+      propertyPath: atomConfig.maxCategories
+      value: 70
+      objectReference: {fileID: 0}
+    - target: {fileID: 8086251942596747683, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
+      propertyPath: atomConfig.maxVirtualVoices
+      value: 70
+      objectReference: {fileID: 0}
+    - target: {fileID: 8086251942596747683, guid: 7ab65d69214e3f34089053ff6cf29b20, type: 3}
+      propertyPath: atomConfig.maxVoiceLimitGroups
+      value: 70
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -686,6 +686,8 @@ GameObject:
   - component: {fileID: 8294367783655156282}
   - component: {fileID: 6516203097836577626}
   - component: {fileID: 6733305200322118793}
+  - component: {fileID: 2323556536481095439}
+  - component: {fileID: 8245007938146475362}
   m_Layer: 0
   m_Name: MoviePlayer
   m_TagString: Untagged
@@ -717,7 +719,7 @@ PlayableDirector:
   m_GameObject: {fileID: 3763728631446097578}
   m_Enabled: 1
   serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: e2ff503f367d73346be60652a30c4811, type: 2}
+  m_PlayableAsset: {fileID: 11400000, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
   m_InitialState: 0
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
@@ -827,12 +829,75 @@ PlayableDirector:
     value: {fileID: 7618133072352931599}
   - key: {fileID: -6594282589552613698, guid: 62d955cd5259a884c90cccd088622075, type: 2}
     value: {fileID: 0}
+  - key: {fileID: -2252816861081451100, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 963463681025775091, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 5233698885776232019, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 8085050495997648624, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 6416078387262720385, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -9023839694120043009, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -7176772233515858279, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 4362428066292508390, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -5230056829454903992, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -4991427186154718849, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 419693489722842203, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 1508062843418417232, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 7004754880821887324, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -4165212709683272475, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 2098173220052381886, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -5398839840152149614, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 2557880682064014488, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -8066535092425557421, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -670683467040667744, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 2665115836969152599, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+    value: {fileID: 2764426523705728015}
+  - key: {fileID: -6645296754487101371, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -663763624020998850, guid: 62d955cd5259a884c90cccd088622075, type: 2}
+    value: {fileID: 2764426523705728015}
+  - key: {fileID: 3487007648121633870, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -8663474463784649314, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -591826221350884533, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 8005380052459283315, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -3721240948802249165, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 2163061701067660261, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: -5454535811476500939, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 0}
+  - key: {fileID: 2551419706700390518, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 7618133072352931599}
+  - key: {fileID: 6643825828458313865, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
+    value: {fileID: 7618133072352931599}
   m_ExposedReferences:
     m_References:
     - 5b20cf9087597b94abe99aeb8f00519f: {fileID: 0}
     - 9597cd8868b440847a3e04454d5a23e7: {fileID: 0}
     - d966275d8250e5f488a45c4c86b79088: {fileID: 0}
     - 34fa928cc4ef7494d8561aa522c1ecaf: {fileID: 0}
+    - de39b04c4a1f034459b14dd6fd39deff: {fileID: 0}
     - 59e3ad62e6cec9646b83b2d235994f23: {fileID: 0}
     - cf050081516570e469417372cbe6a4ad: {fileID: 0}
     - 24ac65cfeaedb3446ab34bb833600861: {fileID: 0}
@@ -843,6 +908,7 @@ PlayableDirector:
     - bda36421f7dac4d429a2bca3027d89ad: {fileID: 0}
     - 136f7727cb231504c95b6c187d3e1584: {fileID: 0}
     - 546445dcb1b724a4f9e352f1e04bb862: {fileID: 0}
+    - 5a1064102a65e7443aba860fa020d6ae: {fileID: 0}
     - 3191f8654c26cdc4281b34ca07690260: {fileID: 0}
     - 37fc5b3c8745b8748bc676739364b72d: {fileID: 0}
     - 827f8fce8e01c664f9c5e2d2b31e9e89: {fileID: 0}
@@ -872,6 +938,7 @@ PlayableDirector:
     - 7580a247f2c8ed545996726c3f977df7: {fileID: 0}
     - a1dfbdafad275d3498b2801bcf437e68: {fileID: 0}
     - fe1551ed8ad14174fb672db2ddf9db70: {fileID: 0}
+    - 52ee6d11bb82cbe48b856c20a95a132a: {fileID: 0}
     - 104d328906170c04bbd7548da1fb5a0b: {fileID: 0}
     - daabbc30e09bf0b42bd070873ce2d649: {fileID: 0}
     - 63cb29c46eaeb114c9020d5dc43ef265: {fileID: 0}
@@ -895,8 +962,10 @@ MonoBehaviour:
     _name: Intro
   - _timelineAsset: {fileID: 11400000, guid: 62d955cd5259a884c90cccd088622075, type: 2}
     _name: Boss
-  - _timelineAsset: {fileID: 11400000, guid: 3c44121e764069846855708757e33cb5, type: 2}
+  - _timelineAsset: {fileID: 11400000, guid: 09c712659aa61594f900d9cfe0813c07, type: 2}
     _name: Ending
+  - _timelineAsset: {fileID: 11400000, guid: 3c44121e764069846855708757e33cb5, type: 2}
+    _name: Result
   - _timelineAsset: {fileID: 11400000, guid: 81f6966490dbdca4a90e90323333b752, type: 2}
     _name: GameOver
 --- !u!114 &7618133072352931599
@@ -1104,7 +1173,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3763728631446097578}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
   m_Name: 
@@ -1128,7 +1197,7 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: BossFootStomp
+  _cueName: BossFootstep
   _cueSheet: Boss_SE
 --- !u!114 &3346738165405245606
 MonoBehaviour:
@@ -1427,6 +1496,72 @@ MonoBehaviour:
     - 0
   _cueName: BossMoviePlayerStop
   _cueSheet: Movie_SE
+--- !u!114 &2323556536481095439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763728631446097578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 0.3
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: BossHandSweep
+  _cueSheet: Boss_SE
+--- !u!114 &8245007938146475362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3763728631446097578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 0.3
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: BossOneLegBreakVoice
+  _cueSheet: Boss_SE
 --- !u!1 &3913965231841061834
 GameObject:
   m_ObjectHideFlags: 0
@@ -2008,7 +2143,47 @@ MonoBehaviour:
   _cameraDistance: 5
   _cameraHeight: 2
   _posSmoothTime: 0.2
-  _cameraProximityEffects: []
+  _cameraProximityEffects:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   _effectCameraRadius: 1.5
   _effectHideStartDistance: 1
   _showEffectProximityGizmos: 1
