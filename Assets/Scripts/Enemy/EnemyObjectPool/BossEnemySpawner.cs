@@ -101,8 +101,8 @@ public class BossEnemySpawner : MonoBehaviour
 
     [SerializeField, Header("スポーンさせるボスのID")]
     private int _id;
-
-    [SerializeField] private Volume _volum;
+    
+    private Volume _volum;
 
     private bool _isLoadedRepositries = false;
     private EnemyServices _services;
@@ -122,6 +122,8 @@ public class BossEnemySpawner : MonoBehaviour
 
     private void Awake()
     {
+        _volum = FindFirstObjectByType<Volume>();
+
         LoadRepositories().Forget();
     }
 
