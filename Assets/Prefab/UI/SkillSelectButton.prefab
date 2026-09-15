@@ -27,14 +27,14 @@ RectTransform:
   m_GameObject: {fileID: 3502431474545070387}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.85, y: 0.85, z: 0.85}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 4292729172323505263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 100}
+  m_AnchoredPosition: {x: 0, y: 139}
   m_SizeDelta: {x: 300, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5063562519427547962
@@ -58,14 +58,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0.9992726, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 0ee05cf1244d18240a7912cda8ddab5a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -89,6 +89,7 @@ GameObject:
   - component: {fileID: 8118476877074417372}
   - component: {fileID: 4502338187059409757}
   - component: {fileID: 3362318229775376690}
+  - component: {fileID: 3764921559902374329}
   m_Layer: 5
   m_Name: SkillSelectButton
   m_TagString: Untagged
@@ -105,8 +106,8 @@ RectTransform:
   m_GameObject: {fileID: 4300584677470297059}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.93000007, y: 0.93000007, z: 0.93000007}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5055914438516524002}
   - {fileID: 6899159279360616864}
@@ -146,7 +147,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f7f681cd213d9a7488500ce745f2d4f8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3906cc1ab1530c14d8018ebb031ec2ad, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -216,11 +217,11 @@ MonoBehaviour:
   _nameText: {fileID: 7976138078936933813}
   _explanationText: {fileID: 1547844184850086249}
   _icon: {fileID: 4504881381310910438}
-  _hoveredScale: 1.1
+  _hoveredScale: 1.05
   _hoveredDuration: 0.1
-  _animationScale: 1.2
+  _animationScale: 1.1
   _highlightDuration: 1
-  _clickScale: 1.5
+  _clickScale: 0.8
   _clickDuration: 0.1
 --- !u!225 &3362318229775376690
 CanvasGroup:
@@ -234,6 +235,19 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &3764921559902374329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4300584677470297059}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d98366068afe4b829bcd8dc655207502, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIButtonSound
+  _buttonConfirmSoundType: 1
 --- !u!1 &5733568176736532682
 GameObject:
   m_ObjectHideFlags: 0
@@ -268,8 +282,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -54}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 11.5, y: -144.24997}
+  m_SizeDelta: {x: -23, y: 11.300034}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6989757424206197914
 CanvasRenderer:
@@ -299,10 +313,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u3053\u308C\u306F\u30C6\u30B9\u30C8\u7528\u306E\u30C6\u30AD\u30B9\u30C8\u3067\u8AAC\u660E\u6587\u3092\u304B\u3044\u3066\u3044\u308B\u305E\u3044"
+  m_text: "\u4E00\u5B9A\u6642\u9593\u3054\u3068\u306B\u843D\u96F7\u304C\u30E9\u30F3\u30C0\u30E0\u306A\u6575\u3092\u653B\u6483"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
-  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2d0999dd52a3e9645b7d09a275ffa840, type: 2}
+  m_sharedMaterial: {fileID: -4927410964594938631, guid: 2d0999dd52a3e9645b7d09a275ffa840, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -326,20 +340,20 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
-  m_characterSpacing: -6.51
+  m_characterSpacing: -7.07
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
-  m_lineSpacing: -44.87
+  m_lineSpacing: -38.29
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
@@ -405,8 +419,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 279.3}
-  m_SizeDelta: {x: 0, y: -657}
+  m_AnchoredPosition: {x: 0, y: -44.12001}
+  m_SizeDelta: {x: 0, y: -663.2399}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4924749508832032279
 CanvasRenderer:
@@ -436,10 +450,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30B9\u30AD\u30EB\u540D\u524D"
+  m_text: "\u5927\u5730\u7C89\u7815\u2160"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
-  m_sharedMaterial: {fileID: 2153627145457860593, guid: f954a23af3e519d4792bf7de5863185b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 2d0999dd52a3e9645b7d09a275ffa840, type: 2}
+  m_sharedMaterial: {fileID: -4927410964594938631, guid: 2d0999dd52a3e9645b7d09a275ffa840, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -463,13 +477,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 35
-  m_fontSizeBase: 35
+  m_fontSize: 30
+  m_fontSizeBase: 30
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535

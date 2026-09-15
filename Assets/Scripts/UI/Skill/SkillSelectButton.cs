@@ -77,6 +77,9 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
     /// </summary>
     public void ForceStopHighlight()
     {
+        if (_highlightedImage != null)
+            _highlightedImage.sprite = _normalSprite;
+
         SetHighlighted(false);
     }
 
@@ -86,6 +89,9 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
     /// </summary>
     public void PlayHighlight()
     {
+        if (_highlightedImage != null)
+            _highlightedImage.sprite = _highlightedSprite;
+
         SetHighlighted(true);
     }
 
@@ -121,6 +127,12 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
         _isClicking = false;
         SetHighlighted(false);
         ResetScale();
+
+        if (_highlightedImageTransform != null)
+            _highlightedImageTransform.gameObject.SetActive(false);
+
+        if (_highlightedImage != null)
+            _highlightedImage.sprite = _normalSprite;
     }
 
     [Header("ボタン設定")]
@@ -144,6 +156,12 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
     [SerializeField] private float _clickScale = 1.5f;
     [Tooltip("クリック演出の時間")]
     [SerializeField] private float _clickDuration = 0.1f;
+
+    [Header("選択中画像")]
+    [SerializeField] private Image _highlightedImage;
+    [SerializeField] private Sprite _normalSprite;
+    [SerializeField] private Sprite _highlightedSprite;
+    [SerializeField] private RectTransform _highlightedImageTransform;
 
     private float _baseScale = 1f;
     private bool _isHighlighted;
@@ -207,6 +225,9 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
     /// </summary>
     private void SetHighlighted(bool isHighlighted)
     {
+        if (_highlightedImageTransform != null)
+            _highlightedImageTransform.gameObject.SetActive(isHighlighted);
+
         if (!isHighlighted)
         {
             DisposeHighlightCts();
