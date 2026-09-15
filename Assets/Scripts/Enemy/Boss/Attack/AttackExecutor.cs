@@ -58,8 +58,6 @@ namespace BossEnemy.Attack
             _nextAttackData = _attackDataRepository.GetData(executeAttackID);
         }
 
-        private int _selectionVersion;
-
         /// <summary> 攻撃の実行 </summary>
         public AttackData ExecuteAttack(IPlayer attackTarget)
         {
@@ -100,6 +98,8 @@ namespace BossEnemy.Attack
 
         public void Dispose() 
         {
+
+
             AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
             AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
         }
@@ -119,6 +119,8 @@ namespace BossEnemy.Attack
 
         // 攻撃対象(今のところPlayer1人のみ)
         private IPlayer _attackTarget;
+
+        private int _selectionVersion;
 
         /// <summary> 攻撃関連のRepositryLoadのため非同期で初期化 </summary>
         private async UniTask InitAsync()
