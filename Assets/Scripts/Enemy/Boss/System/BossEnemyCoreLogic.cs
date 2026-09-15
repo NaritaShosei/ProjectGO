@@ -136,14 +136,17 @@ namespace BossEnemy.Logic
             float timeScale = 1)
         {
             // ターゲットへの方向ベクトルを計算（自身の位置からターゲットの位置を引く）
-            Vector3 direction = targetPos - movementTarget.Position.Value;
+            // 上下の傾き（Y成分）を無視して、水平方向の回転のみにする
+            Vector3 direction = new()
+            {
+                x = targetPos.x - movementTarget.Position.Value.x,
+                y = 0f,
+                z = targetPos.z - movementTarget.Position.Value.z
+            };
 
             // 移動速度設定
-            Vector3 moveVelocity = new Vector3(Mathf.Abs(direction.x), 0, Mathf.Abs(direction.z));
+            Vector3 moveVelocity = new Vector3(Mathf.Abs(direction.x), direction.y, Mathf.Abs(direction.z));
             movementTarget.SetVelocity(moveVelocity);
-
-            // 上下の傾き（Y成分）を無視して、水平方向の回転のみにする
-            direction.y = 0f;
 
             // 方向ベクトルがゼロ（真上や全く同じ位置）でないかチェック
             if (direction.sqrMagnitude > 0.001f)
@@ -152,7 +155,7 @@ namespace BossEnemy.Logic
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
 
                 // 現在の回転から目標の回転へ、Time.deltaTimeをかけてゆっくり補間
-                movementTarget.SetRotation(Quaternion.Slerp(movementTarget.Rotation.Value, targetRotation, lookSpeed * Time.deltaTime * timeScale));
+                movementTarget.SetRotation(Quaternion.Slerp(movementTarget.Rotation.Value, targetRotation, lookSpeed * (Time.deltaTime * timeScale)));
                 float angleDiff = Quaternion.Angle(movementTarget.Rotation.Value, targetRotation);
 
                 // 角度の差がしきい値以下になったかチェック
