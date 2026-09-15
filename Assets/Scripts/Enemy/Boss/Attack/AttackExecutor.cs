@@ -21,10 +21,19 @@ namespace BossEnemy.Attack
         public bool WasHitAttack => _wasAttackHit;
 
         /// <summary> 次の攻撃を確定させる </summary>
-        public async UniTask SetNextAttack(int attackSelectPoolID)
+        public UniTask SetNextAttack(int attackSelectPoolID)
+        {
+            int selectionVersion = ++_selectionVersion;
+            return SetNextAttackAsync(attackSelectPoolID, selectionVersion);
+        }
+
+        private async UniTask SetNextAttackAsync(int attackSelectPoolID, int selectionVersion)
         {
             // Addressablesの非同期ロード完了前にAIが攻撃選択へ進まないよう待機する。
             await _initializationTask;
+
+            // 行動割り込み後に残った古い選択要求は、現在の攻撃候補を上書きしない。
+            if (selectionVersion != _selectionVersion) return;
 
             AttackSelectionPool attackSelectionPool = _bossEnemyAttackSelectionPoolRepository.GetSelectionPool(attackSelectPoolID);
 
@@ -40,13 +49,16 @@ namespace BossEnemy.Attack
 
                 await UniTask.Delay(awaitFrame);
 
-                await SetNextAttack(attackSelectPoolID);
+                await SetNextAttackAsync(attackSelectPoolID, selectionVersion);
 
                 return;
             }
 
+            if (selectionVersion != _selectionVersion) return;
             _nextAttackData = _attackDataRepository.GetData(executeAttackID);
         }
+
+        private int _selectionVersion;
 
         /// <summary> 攻撃の実行 </summary>
         public AttackData ExecuteAttack(IPlayer attackTarget)
