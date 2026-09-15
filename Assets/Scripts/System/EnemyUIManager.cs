@@ -59,7 +59,7 @@ public class EnemyUIManager : MonoBehaviour
     private GenericObjectPool<DamagePopupView> _popupPool;
     private DamagePopupPresenter _popupPresenter;
 
-    private readonly List<BossCharacterView> _bossCharacters = new();
+    private IBossEnemyCharacterView _bossCharacter = null;
 
     private CancellationTokenSource _cts;
 
@@ -150,6 +150,8 @@ public class EnemyUIManager : MonoBehaviour
         enemy.OnDamageDealt += HandleDamageDealt;
 
         enemy.OnDead += HandleEnemyDead;
+
+        _bossCharacter = enemy;
     }
 
     private void HandleDamageDealt(DamagePopupViewModel viewModel)
@@ -173,6 +175,16 @@ public class EnemyUIManager : MonoBehaviour
 
         enemy.OnDamageDealt -= HandleDamageDealt;
         enemy.OnDead -= HandleEnemyDead;
+
+        if (enemy.IsBoss)
+        {
+            if (enemy is BossCharacterView characterView)
+            {
+                _bossCharacter = null;
+            }
+
+            return;
+        }
 
         if (enemy is MobEnemy mob)
         {
@@ -305,12 +317,12 @@ public class EnemyUIManager : MonoBehaviour
 
         _popupPresenter.Dispose();
 
-        foreach (var boss in _bossCharacters)
+        if(_bossCharacter != null)
         {
-            boss.OnDamageDealt -= HandleDamageDealt;
-            boss.OnDead -= HandleEnemyDead;
+            _bossCharacter.OnDamageDealt -= HandleDamageDealt;
+            _bossCharacter.OnDead -= HandleEnemyDead;
+            _bossCharacter = null;
         }
-        _bossCharacters.Clear();
     }
 
     /// <summary>
