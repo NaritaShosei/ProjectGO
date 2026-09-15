@@ -395,6 +395,11 @@ Animator:
   m_CorrespondingSourceObject: {fileID: 8596943536302208667, guid: b6e2187271d7b1143b769d6056597b32, type: 3}
   m_PrefabInstance: {fileID: 1430687172012089337}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &176833351 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4030987089055246129, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+  m_PrefabInstance: {fileID: 650177779}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &177643963 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6306141975075741376, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
@@ -1065,11 +1070,11 @@ PrefabInstance:
     - target: {fileID: 527146034796436033, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_PropertySheet.m_NamedObject.m_Array.Array.data[0].m_Value
       value: 
-      objectReference: {fileID: 1573529288}
+      objectReference: {fileID: 0}
     - target: {fileID: 527146034796436045, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: Target
       value: 
-      objectReference: {fileID: 1966552396}
+      objectReference: {fileID: 0}
     - target: {fileID: 3281229546311345012, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _movieData.Array.size
       value: 5
@@ -1161,7 +1166,7 @@ PrefabInstance:
     - target: {fileID: 7457554239091016243, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: Target
       value: 
-      objectReference: {fileID: 1573529287}
+      objectReference: {fileID: 0}
     - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[4].m_Value.x
       value: 0.16396043
@@ -1173,7 +1178,7 @@ PrefabInstance:
     - target: {fileID: 7457554239091016255, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_PropertySheet.m_NamedObject.m_Array.Array.data[0].m_Value
       value: 
-      objectReference: {fileID: 1573529288}
+      objectReference: {fileID: 0}
     - target: {fileID: 7748896386332537814, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _player
       value: 
@@ -1321,7 +1326,7 @@ PrefabInstance:
     - target: {fileID: 7822539410125592448, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_SceneBindings.Array.data[0].value
       value: 
-      objectReference: {fileID: 1873340561}
+      objectReference: {fileID: 0}
     - target: {fileID: 7822539410125592448, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_SceneBindings.Array.data[1].value
       value: 
@@ -2515,6 +2520,522 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: selectedClipIndex
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: animationClipList.Array.size
+      value: 63
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: animationClipsNames.Array.size
+      value: 63
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: 07e7f2788438d2c449abf9534e6d6fdf, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[1]'
+      value: 
+      objectReference: {fileID: 7400000, guid: ecfa92a8f60ae9c4aa6f43813431d9c4, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[2]'
+      value: 
+      objectReference: {fileID: 7400000, guid: a0cf9d8e1f75fb64592e0527c540e9d7, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[3]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 83c62b6e40242b8448724491a5f1af01, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[4]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 6b1e4ece707c5b64aa8fa28e8f4e28e8, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[5]'
+      value: 
+      objectReference: {fileID: 7400000, guid: c3d579c0bb052db4496b32ed7bb8d312, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[6]'
+      value: 
+      objectReference: {fileID: 7400000, guid: d92ac6f2fa43c9c4d8b2d2f485611bc5, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[7]'
+      value: 
+      objectReference: {fileID: 7400000, guid: d08e60a96c0a95744b7fbaffe1b95e28, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[8]'
+      value: 
+      objectReference: {fileID: 7400000, guid: e56479337735e1a4a93ffc88628cd3c0, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[9]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 5f6cae4706a099245996f5c522796658, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[10]'
+      value: 
+      objectReference: {fileID: 7400000, guid: ea8d7d2c9831eec48a6842adbd5823b4, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[11]'
+      value: 
+      objectReference: {fileID: 7400000, guid: a5bfde3bd74db5c499fa48cfb5034588, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[12]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 81648a52359aab94eb26488d5fb27af9, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[13]'
+      value: 
+      objectReference: {fileID: 7400000, guid: c7da59dd6141cee458e92f6c5ca36dd7, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[14]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 6c908aad5732ac3419f561ce8577edd5, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[15]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 6edf7d74b35031b4197d0a29d5002d0a, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[16]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: dea0632ae86271647ad9dfd18771d53e, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[17]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: a2d083577a5ebe24f9d207230b56645e, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[18]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: 61b7ccfe42771be4c925fba8aea8fc1e, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[19]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: c04c9e9e63c14ca45a4922c34149fcda, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[20]'
+      value: 
+      objectReference: {fileID: 7400000, guid: c768f0fb79b62b2449947184c61dc7e0, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[21]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 5d4fcc4cc8698ad478cc6de939fc9fec, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[22]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 2067697f5c9781b4ea78c07524033812, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[23]'
+      value: 
+      objectReference: {fileID: 7400000, guid: d7af55adb15663e46875c0cc62342162, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[24]'
+      value: 
+      objectReference: {fileID: -5665051857912407913, guid: c581da894357d4542a674e692452924a, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[25]'
+      value: 
+      objectReference: {fileID: -5059006814000262888, guid: 4875df0fed8fba9429e9c747239ef0d9, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[26]'
+      value: 
+      objectReference: {fileID: -5059006814000262888, guid: 0b54e24d58f20cc408a4475e3d2d4485, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[27]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 7c67fa545a62e734390f458052c39c39, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[28]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 149ed173c3c74334b807b79a0146327d, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[29]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 95ba4cab44b6b194da1c6c133dcaa380, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[30]'
+      value: 
+      objectReference: {fileID: 7400000, guid: d5f535174e9208949b2548e89a1ec7d9, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[31]'
+      value: 
+      objectReference: {fileID: 7400000, guid: d2fe8b86ee3b2b241bb60cdfec17a69a, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[32]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 1151856e93f138e43842ecba73ab047d, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[33]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: cb41b1158dbb74045a5e488bdd00e425, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[34]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: 44a75f4a7ea707547ae4a27b4deb6f5b, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[35]'
+      value: 
+      objectReference: {fileID: 9067093048684652814, guid: 44a75f4a7ea707547ae4a27b4deb6f5b, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[36]'
+      value: 
+      objectReference: {fileID: -8481709605947105597, guid: 44a75f4a7ea707547ae4a27b4deb6f5b, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[37]'
+      value: 
+      objectReference: {fileID: 1178167638873134046, guid: 44a75f4a7ea707547ae4a27b4deb6f5b, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[38]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 47b39352ae83e5944a33cdb7386ad0ff, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[39]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 65d70202d527106419d8b494c307e3e8, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[40]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 3184a89d4963ecb42abaf66d450e4174, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[41]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 89a4ed889921e564882f0f9438e5efa2, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[42]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 0076ee3e4153d5c49bbe5ed3672f1b28, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[43]'
+      value: 
+      objectReference: {fileID: 7400000, guid: aef21edbe1fce98478de6f5639766b82, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[44]'
+      value: 
+      objectReference: {fileID: 7400000, guid: d063dfe5378f8aa4f9bfbce268eb68cc, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[45]'
+      value: 
+      objectReference: {fileID: 7400000, guid: e2415071f2fcde649aad1b97bd9b487c, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[46]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 0b348ae590db41c4da0f83498c3f4277, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[47]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 63714854cebbce84b959aa4e17a7efb2, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[48]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 5cd948d3914ac9a4eb78afad41b8a514, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[49]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 9b69847a18ac9d84c841b7def3233d46, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[50]'
+      value: 
+      objectReference: {fileID: 7400000, guid: f3b2cbbc3100efc488199ae4e52bbff2, type: 2}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[51]'
+      value: 
+      objectReference: {fileID: -998496362607748373, guid: c581da894357d4542a674e692452924a, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[52]'
+      value: 
+      objectReference: {fileID: -3291206362154003629, guid: c581da894357d4542a674e692452924a, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[53]'
+      value: 
+      objectReference: {fileID: -1493303027246044120, guid: c581da894357d4542a674e692452924a, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[54]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: c581da894357d4542a674e692452924a, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[55]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: 4875df0fed8fba9429e9c747239ef0d9, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[56]'
+      value: 
+      objectReference: {fileID: 9067093048684652814, guid: 4875df0fed8fba9429e9c747239ef0d9, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[57]'
+      value: 
+      objectReference: {fileID: -8481709605947105597, guid: 4875df0fed8fba9429e9c747239ef0d9, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[58]'
+      value: 
+      objectReference: {fileID: 6641085478485924818, guid: 4875df0fed8fba9429e9c747239ef0d9, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[59]'
+      value: 
+      objectReference: {fileID: 1827226128182048838, guid: 0b54e24d58f20cc408a4475e3d2d4485, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[60]'
+      value: 
+      objectReference: {fileID: 9067093048684652814, guid: 0b54e24d58f20cc408a4475e3d2d4485, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[61]'
+      value: 
+      objectReference: {fileID: 3060872287085348379, guid: 0b54e24d58f20cc408a4475e3d2d4485, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipList.Array.data[62]'
+      value: 
+      objectReference: {fileID: 6641085478485924818, guid: 0b54e24d58f20cc408a4475e3d2d4485, type: 3}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[0]'
+      value: Modechange
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[1]'
+      value: Roll_F_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[2]'
+      value: Roll_B_180
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[3]'
+      value: Roll_R_90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[4]'
+      value: Roll_L_90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[5]'
+      value: Roll_F_R_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[6]'
+      value: Roll_B_R_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[7]'
+      value: Roll_B_L_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[8]'
+      value: Dodge_Combat_L_90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[9]'
+      value: Dodge_Combat_R_90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[10]'
+      value: Dodge_Combat_F_0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[11]'
+      value: Dodge_Combat_B_180
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[12]'
+      value: Dodge_Combat_B_R_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[13]'
+      value: Dodge_Combat_F_R_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[14]'
+      value: Dodge_Combat_F_L_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[15]'
+      value: Dodge_Combat_B_L_45
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[16]'
+      value: Dmg_F
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[17]'
+      value: Dmg_F_Big
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[18]'
+      value: KnockDown_Front
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[19]'
+      value: KnockDown_Front_StandUp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[20]'
+      value: Knock_Down_Start
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[21]'
+      value: Knock_Down_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[22]'
+      value: Knock_Down_End
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[23]'
+      value: Warrior_Combo_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[24]'
+      value: Warrior_Attack_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[25]'
+      value: Warrior_Attack_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[26]'
+      value: Warrior_Attack_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[27]'
+      value: Combo_Attack_01_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[28]'
+      value: Combo_Attack_01_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[29]'
+      value: Combo_Attack_03_02
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[30]'
+      value: Combo_Attack_01_03
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[31]'
+      value: Combo_Attack_01_04
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[32]'
+      value: Combo_Attack_04_04
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[33]'
+      value: warrior_Idle
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[34]'
+      value: warrior_walk_front
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[35]'
+      value: warrior_walk_back
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[36]'
+      value: warrior_walk_left
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[37]'
+      value: warrior_walk_right
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[38]'
+      value: Idle_Combat
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[39]'
+      value: Walk_Combat_F_0_Start
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[40]'
+      value: Walk_Combat_F_0_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[41]'
+      value: Run_Combat_Fast_Start
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[42]'
+      value: Run_Combat_Fast_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[43]'
+      value: Run_Combat_F_0_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[44]'
+      value: Run_Combat_B_180_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[45]'
+      value: Run_Combat_B_L_45_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[46]'
+      value: Run_Combat_B_L_90_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[47]'
+      value: Run_Combat_B_R_45_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[48]'
+      value: Run_Combat_B_R_90_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[49]'
+      value: Run_Combat_F_R_45_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[50]'
+      value: Run_Combat_F_L_45_Loop
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[51]'
+      value: Warrior_Combo_1_charge1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[52]'
+      value: Warrior_Combo_1_charge2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[53]'
+      value: Warrior_Combo_1_charge3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[54]'
+      value: Warrior_Combo_1_set
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[55]'
+      value: Warrior_Combo_2_set
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[56]'
+      value: Warrior_Combo_2_charge1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[57]'
+      value: Warrior_Combo_2_charge2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[58]'
+      value: Warrior_Combo_2_charge3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[59]'
+      value: Warrior_Combo_3_set
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[60]'
+      value: Warrior_Combo_3_charge1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[61]'
+      value: Warrior_Combo_3_charge2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1462180909308548878, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: 'animationClipsNames.Array.data[62]'
+      value: Warrior_Combo_3_charge3
+      objectReference: {fileID: 0}
     - target: {fileID: 3339426191168238841, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: _volume
       value: 
@@ -2567,10 +3088,17 @@ PrefabInstance:
       propertyPath: _volume
       value: 
       objectReference: {fileID: 489875891}
+    - target: {fileID: 9190916359444547524, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      propertyPath: _animator
+      value: 
+      objectReference: {fileID: 1873340560}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4030987089055246129, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 1873340560}
   m_SourcePrefab: {fileID: 100100000, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
 --- !u!4 &650177780 stripped
 Transform:
@@ -8009,16 +8537,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
---- !u!4 &1573529287 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 241827424515321341, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-  m_PrefabInstance: {fileID: 650177779}
-  m_PrefabAsset: {fileID: 0}
---- !u!137 &1573529288 stripped
-SkinnedMeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3759100528694178272, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-  m_PrefabInstance: {fileID: 650177779}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1583544291
 GameObject:
   m_ObjectHideFlags: 0
@@ -8705,11 +9223,28 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5568412256251199811, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
   m_PrefabInstance: {fileID: 5097021403156286286}
   m_PrefabAsset: {fileID: 0}
---- !u!95 &1873340561 stripped
+--- !u!95 &1873340560
 Animator:
-  m_CorrespondingSourceObject: {fileID: 7663733616062457841, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-  m_PrefabInstance: {fileID: 650177779}
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176833351}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: ed4cdbe32d34fd3428e69e238b13db0d, type: 3}
+  m_Controller: {fileID: 9100000, guid: 66ef498077266994281b781896bd19be, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1883941314
 GameObject:
   m_ObjectHideFlags: 0
@@ -8789,11 +9324,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
---- !u!4 &1966552396 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8398789463196591171, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-  m_PrefabInstance: {fileID: 650177779}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1989475090 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7184154176397670188, guid: 8f712953bc32d0c4a91a6c1208f06b66, type: 3}
