@@ -1,10 +1,11 @@
-using System.Collections.Generic;
-using System;
-using Cysharp.Threading.Tasks;
-using System.Threading;
-using UnityEngine;
 using BossEnemy.Character;
 using BossEnemy.Interface;
+using Cysharp.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using UnityEngine;
+using static SoundCueNames;
 
 public class EnemyUIManager : MonoBehaviour
 {
@@ -139,9 +140,14 @@ public class EnemyUIManager : MonoBehaviour
         enemy.OnDead += HandleEnemyDead;
     }
 
-    private void HandleBossSpawned(IBossEnemyCharacterView characterView)
+    private void HandleBossSpawned(IBossEnemyCharacterView enemy)
     {
         // ToDo：Bossの鎧にHPゲージをつける
+
+        // Damage Popup
+        enemy.OnDamageDealt += HandleDamageDealt;
+
+        enemy.OnDead += HandleEnemyDead;
     }
 
     private void HandleDamageDealt(DamagePopupViewModel viewModel)
