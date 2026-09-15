@@ -296,10 +296,6 @@ public class SoundManager
                     Debug.LogWarning($"[SoundManager] BGMキューが見つかりません: {sheet}/{cue}");
                     return;
                 }
-                // CriAtomSourceはStatus.Stopのときだけloopをプレーヤへ反映するため、
-                // Stop直後でまだ遷移し切っていない場合に備えて明示的にも呼んでおく。
-                _bgmSource.loop = true;
-                _bgmSource.player.Loop(true);
                 _bgmSource.Play();
                 return;
             }
@@ -317,7 +313,6 @@ public class SoundManager
 
         _bgmSource.cueSheet = _defaultBGMCueSheet;
         _bgmSource.playOnStart = false;
-        _bgmSource.loop = true;
         _bgmSource.use3dPositioning = false;
     }
 

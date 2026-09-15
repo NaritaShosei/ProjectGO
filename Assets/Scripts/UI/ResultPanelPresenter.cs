@@ -15,9 +15,19 @@ public sealed class ResultPanelPresenter
         int seconds = totalCentiseconds / 100 % 60;
         int centiseconds = totalCentiseconds % 100;
 
-        _view.SetBossClearTime($"{minutes:00}:{seconds:00}.{centiseconds:00}");
-        _view.SetRank(_model.GetRank(_view.SMinimumScore, _view.AMinimumScore, _view.BMinimumScore));
+        _view.SetScore(_model.Score);
+
+        _view.SetBossClearTime(
+            $"{minutes:00}:{seconds:00}.{centiseconds:00}");
+
         _view.SetLevel($"Lv. {_model.Level:00}");
+
+        _view.SetRank(
+            _model.GetRank(
+                _view.SMinimumScore,
+                _view.AMinimumScore,
+                _view.BMinimumScore));
+
         _view.ShowPanel();
     }
 
