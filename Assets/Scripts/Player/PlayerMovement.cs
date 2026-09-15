@@ -796,6 +796,7 @@ public class PlayerMovement : MonoBehaviour
     private void EndAttackMoveState()
     {
         _isAttackMoving = false;
+        _wasMoving = false;
         if (_rb) _rb.linearVelocity = Vector3.zero;
         if (_currentIsPhantom)
         {
