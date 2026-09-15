@@ -48,6 +48,7 @@ public class EnemyRuntimeContext
         public float RecoveryRemaining;
         public float RetreatDistance;
         public float RetreatSpeed;
+        public float MaxDuration;
 
         public static RetreatRequest None => new RetreatRequest { Enabled = false };
     }
