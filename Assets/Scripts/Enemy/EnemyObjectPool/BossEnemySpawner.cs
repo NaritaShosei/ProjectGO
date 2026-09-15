@@ -56,7 +56,7 @@ public class BossEnemySpawner : MonoBehaviour
         NodeRunningConditionNotifier nodeRunningConditionNotifier = new NodeRunningConditionNotifier();
 
         // 各種初期化、生成
-        BossEnemyHPUIPresenter bossEnemyHPUIPresenter = new(characterEntity, bossEnemyHPUI);
+        BossCharacterHPUIPresenter bossEnemyHPUIPresenter = new(characterEntity, bossEnemyHPUI);
         entryNode.Init(characterEntity, nodeRunningConditionNotifier);
 
         BossCharacterController bossEnemyController = new BossCharacterController();
@@ -76,7 +76,7 @@ public class BossEnemySpawner : MonoBehaviour
         {
             if (currentAction == CharacterAction.Despawn)
             {
-                if (bossEnemyHPUI is BossEnemyHPUIView hpUI)
+                if (bossEnemyHPUI is BossCharacterHPUIView hpUI)
                     HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
             }
         });
@@ -112,7 +112,7 @@ public class BossEnemySpawner : MonoBehaviour
     private bool _isLoadedRepositries = false;
     private EnemyServices _services;
     private GenericObjectPool<BossCharacterView> _bossEnemyObjectPool;
-    private GenericObjectPool<BossEnemyHPUIView> _enemyUIObjectPool;
+    private GenericObjectPool<BossCharacterHPUIView> _enemyUIObjectPool;
 
     // 各種リポジトリクラス
     private IBossCharacterEntityRepository _bossCharacterEntityRepository;
@@ -151,7 +151,7 @@ public class BossEnemySpawner : MonoBehaviour
     }
 
     /// <summary> Enemy死亡時の処理 </summary>
-    private void HandleEnemyDeath(int id, BossCharacterEntity characterEntity, BossCharacterView view, BossEnemyHPUIView bossEnemyHPUIView)
+    private void HandleEnemyDeath(int id, BossCharacterEntity characterEntity, BossCharacterView view, BossCharacterHPUIView bossEnemyHPUIView)
     {
         _bossCharacterEntityRepository.ReleaseEntity(id, characterEntity);
 
@@ -196,13 +196,13 @@ public class BossEnemySpawner : MonoBehaviour
     {
         public string Key => _key;
         public BossCharacterView BossPrefab => _bossPrefab;
-        public BossEnemyHPUIView BossUIPrefab => _enemyUIPrefab;
+        public BossCharacterHPUIView BossUIPrefab => _enemyUIPrefab;
 
         [Header("BossEnemyを呼び出すための名前")]
         [SerializeField] private string _key;
 
         [Header("BossEnemyのPrefab")]
         [SerializeField] private BossCharacterView _bossPrefab;
-        [SerializeField] private BossEnemyHPUIView _enemyUIPrefab;
+        [SerializeField] private BossCharacterHPUIView _enemyUIPrefab;
     }
 }
