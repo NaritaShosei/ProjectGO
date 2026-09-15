@@ -28,6 +28,15 @@ public class EXPItemManager : MonoBehaviour
         _expDropper.DropEXP(position, count);
     }
 
+    /// <summary>
+    /// 稼働中の経験値アイテムを全て即時取得する。
+    /// </summary>
+    public void CollectAllItems()
+    {
+        foreach (var item in _activeItems.ToArray())
+            item.Interact();
+    }
+
     [Header("EXP Item Pool Settings")]
     [SerializeField] private EXPItem _itemPrefab;
     [SerializeField] private int _initialPoolSize = 100;

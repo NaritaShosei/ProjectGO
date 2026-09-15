@@ -117,6 +117,11 @@ public class MobAndSkillState : ISequenceState
         context.InputHandler?.EnableInput(false);
         ShowCursor();
 
+
+        // ボス戦への移行時に、残っている経験値オーブを全て取得しておく
+        if (ServiceLocator.TryGet(out EXPItemManager expItemManager))
+            expItemManager.CollectAllItems();
+
         _context = null;
     }
 

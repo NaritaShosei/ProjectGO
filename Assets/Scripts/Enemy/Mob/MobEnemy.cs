@@ -301,13 +301,6 @@ public class MobEnemy : Enemy,IFormationParticipant
         // ApplyImmediate を使い ConditionController 管理下に置く（Clear() でキャンセル可能にするため）
         _conditionController.ApplyImmediate(new DeadCondition(_lastHitDirection, _data, destroyCancellationToken));
 
-        // ヒールアイテムのドロップ抽選を行う
-        if (CheckProbability(_data.HealDropChance)
-            && ServiceLocator.TryGet<ItemPickupManager>(out var itemSpawner))
-        {
-            itemSpawner.Spawn(transform.position);
-        }
-
         base.OnDeathInternal();
     }
 
