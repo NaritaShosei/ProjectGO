@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System;
 using UnityEngine.EventSystems;
@@ -30,7 +30,7 @@ public class OptionView : MonoBehaviour
 
     public void ShowThisPanel()
     {
-        EventSystem.current.SetSelectedGameObject(_controllerVibrationsToggle.gameObject);
+        EventSystem.current.SetSelectedGameObject(_backButton.gameObject);
     }
 
     [Header("戻るボタン回り")]
