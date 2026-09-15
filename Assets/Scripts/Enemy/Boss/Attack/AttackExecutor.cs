@@ -20,42 +20,12 @@ namespace BossEnemy.Attack
 
         public bool WasHitAttack => _wasAttackHit;
 
-        /// <summary> 次の攻撃を確定させる </summary>
         public UniTask SetNextAttack(int attackSelectPoolID)
         {
+            if (_isDisposed) return UniTask.CompletedTask;
+
             int selectionVersion = ++_selectionVersion;
             return SetNextAttackAsync(attackSelectPoolID, selectionVersion);
-        }
-
-        private async UniTask SetNextAttackAsync(int attackSelectPoolID, int selectionVersion)
-        {
-            // Addressablesの非同期ロード完了前にAIが攻撃選択へ進まないよう待機する。
-            await _initializationTask;
-
-            // 行動割り込み後に残った古い選択要求は、現在の攻撃候補を上書きしない。
-            if (selectionVersion != _selectionVersion) return;
-
-            AttackSelectionPool attackSelectionPool = _bossEnemyAttackSelectionPoolRepository.GetSelectionPool(attackSelectPoolID);
-
-            if (attackSelectionPool.SelectionPool == null) Debug.LogError("PoolがNullです");
-
-            int executeAttackID = AttackDataSelector.GetRandomSelectAttackDataID(attackSelectionPool, _attackCoolTimer.AttackCoolTimeList);
-
-            if(executeAttackID == 0)
-            {
-                Debug.Log("選択可能な攻撃がありません、CoolTimeを待ちます");
-
-                int awaitFrame = 100;
-
-                await UniTask.Delay(awaitFrame);
-
-                await SetNextAttackAsync(attackSelectPoolID, selectionVersion);
-
-                return;
-            }
-
-            if (selectionVersion != _selectionVersion) return;
-            _nextAttackData = _attackDataRepository.GetData(executeAttackID);
         }
 
         /// <summary> 攻撃の実行 </summary>
@@ -96,12 +66,14 @@ namespace BossEnemy.Attack
             _executingAttackData = default;
         }
 
-        public void Dispose() 
+        public void Dispose()
         {
+            if (_isDisposed) return;
 
+            _isDisposed = true;
+            _selectionVersion++; // 待機中の全選択要求を無効化
 
-            AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
-            AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+            ReleaseRepositoriesAfterInitializationAsync().Forget();
         }
 
         private AttackData _nextAttackData;
@@ -120,19 +92,81 @@ namespace BossEnemy.Attack
         // 攻撃対象(今のところPlayer1人のみ)
         private IPlayer _attackTarget;
 
+        private bool _isDisposed;
         private int _selectionVersion;
 
-        /// <summary> 攻撃関連のRepositryLoadのため非同期で初期化 </summary>
         private async UniTask InitAsync()
         {
-            _attackDataRepository = await AssetsLoader.LoadAssetAsync<AttackDataRepositry>
+            var attackDataRepository =
+                await AssetsLoader.LoadAssetAsync<AttackDataRepositry>
                 (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
 
-            _bossEnemyAttackSelectionPoolRepository = await AssetsLoader.LoadAssetAsync<AttackDataSelectionPoolRepository>
+            if (_isDisposed) return;
+
+            var selectionPoolRepository =
+                await AssetsLoader.LoadAssetAsync<AttackDataSelectionPoolRepository>
                 (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
 
-            _attackDataRepository.Init();
-            _bossEnemyAttackSelectionPoolRepository.Init();
+            if (_isDisposed) return;
+
+            attackDataRepository.Init();
+            selectionPoolRepository.Init();
+
+            if (_isDisposed) return;
+
+            _attackDataRepository = attackDataRepository;
+            _bossEnemyAttackSelectionPoolRepository = selectionPoolRepository;
+        }
+
+        private async UniTaskVoid ReleaseRepositoriesAfterInitializationAsync()
+        {
+            try
+            {
+                await _initializationTask;
+            }
+            catch (Exception)
+            {
+                // ロード失敗時も finally で解放する
+            }
+            finally
+            {
+                AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAttackDataRepositry);
+                AssetsLoader.Release(AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_AttackDataSelectionPoolRepository);
+
+                _attackDataRepository = null;
+                _bossEnemyAttackSelectionPoolRepository = null;
+                _nextAttackData = default;
+                _executingAttackData = default;
+            }
+        }
+
+        private async UniTask SetNextAttackAsync(int attackSelectPoolID, int selectionVersion)
+        {
+            await _initializationTask;
+
+            if (_isDisposed || selectionVersion != _selectionVersion)
+                return;
+
+            var pool = _bossEnemyAttackSelectionPoolRepository.GetSelectionPool(attackSelectPoolID);
+
+            int attackId = AttackDataSelector.GetRandomSelectAttackDataID(
+                pool, _attackCoolTimer.AttackCoolTimeList);
+
+            if (attackId == 0)
+            {
+                await UniTask.Delay(100);
+
+                if (_isDisposed || selectionVersion != _selectionVersion)
+                    return;
+
+                await SetNextAttackAsync(attackSelectPoolID, selectionVersion);
+                return;
+            }
+
+            if (_isDisposed || selectionVersion != _selectionVersion)
+                return;
+
+            _nextAttackData = _attackDataRepository.GetData(attackId);
         }
 
         /// <summary> 攻撃が当たった際のイベント発火時の処理 </summary>

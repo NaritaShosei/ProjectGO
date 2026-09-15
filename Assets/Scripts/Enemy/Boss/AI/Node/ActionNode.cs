@@ -82,13 +82,14 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnUpdate()
         {
-            base.OnUpdate();
-
             if(_bossCharacterEntity.RepairArmorAttachmentType.Value
                 == ArmorAttachmentType.None)
             {
                 HandleRunningEnd();
+                return;
             }
+
+            base.OnUpdate();
         }
 
         [SerializeField] private ArmorAttachmentType _repairArmor;
@@ -162,8 +163,6 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnUpdate()
         {
-            base.OnUpdate();
-
             if (_isPostureChangeCompleted) return;
 
             if (_bossCharacterEntity.CurrentAction.Value
@@ -171,7 +170,10 @@ namespace BossEnemy.AI.BehaviourTree
             {
                 HandleRunningEnd();
                 _isPostureChangeCompleted = true;
+                return;
             }
+
+            base.OnUpdate();
         }
 
         [SerializeField] private PostureType _changePosture;
@@ -208,8 +210,6 @@ namespace BossEnemy.AI.BehaviourTree
         }
 
         [SerializeField] private int _attackSelectPoolID;
-
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary> 攻撃の選択を行う </summary>
         private async UniTaskVoid SelectNextAttackAsync(int selectionVersion)
@@ -277,6 +277,7 @@ namespace BossEnemy.AI.BehaviourTree
             if (nextAttackData.AttackStartDistance > toTargetDistance)
             {
                 HandleRunningEnd();
+                return;
             }
 
             base.OnUpdate();
@@ -293,7 +294,6 @@ namespace BossEnemy.AI.BehaviourTree
         /// <summary>
         /// ターゲットとの距離を取得
         /// </summary>
-        /// <returns></returns>
         private float GetTargetDistance()
         {
             // ボスの現在地(Y座標は無視する)
@@ -338,7 +338,11 @@ namespace BossEnemy.AI.BehaviourTree
                 out bool isLookAtTarget,
                 _bossCharacterEntity.TimeScale);
 
-            if (isLookAtTarget) _nodeRunningConditionNotifier.HandleResearchBehaviourTree();
+            if (isLookAtTarget)
+            {
+                HandleRunningEnd();
+                return;
+            }
 
             base.OnUpdate();
         }
@@ -424,6 +428,7 @@ namespace BossEnemy.AI.BehaviourTree
             {
                 _isPhaseChangeCompleted = true;
                 HandleRunningEnd();
+                return;
             }
 
             base.OnUpdate();

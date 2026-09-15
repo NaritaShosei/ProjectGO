@@ -155,7 +155,12 @@ namespace BossEnemy.Logic
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
 
                 // 現在の回転から目標の回転へ、Time.deltaTimeをかけてゆっくり補間
-                movementTarget.SetRotation(Quaternion.Slerp(movementTarget.Rotation.Value, targetRotation, lookSpeed * (Time.deltaTime * timeScale)));
+                movementTarget.SetRotation(
+                    Quaternion.Slerp(
+                        movementTarget.Rotation.Value, 
+                        targetRotation, 
+                        lookSpeed * (Time.deltaTime * timeScale)));
+
                 float angleDiff = Quaternion.Angle(movementTarget.Rotation.Value, targetRotation);
 
                 // 角度の差がしきい値以下になったかチェック

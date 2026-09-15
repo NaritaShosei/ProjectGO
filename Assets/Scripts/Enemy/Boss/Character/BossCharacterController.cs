@@ -31,7 +31,15 @@ namespace BossEnemy.Character
 
         public void Dispose()
         {
-            UnregisterEvents();
+            if(_characterEntity.CurrentAction.Value != CharacterAction.Dead
+                || _characterEntity.CurrentAction.Value != CharacterAction.Despawn)
+            {
+                HandleDead();
+            }
+            else
+            {
+                UnregisterEvents();
+            }
         }
 
         public void OnUpdate()
