@@ -124,7 +124,7 @@ public class DamagePopupView : MonoBehaviour, IDamagePopupView, IPoolable
    
     private void OnDisable()
     {
-        bool wasPlaying = _currentTween != null && _currentTween.IsActive();
+        bool wasPlaying = _currentTween != null && _currentTween.IsPlaying();
         _currentTween?.Kill(false);
         _currentTween = null;
 
