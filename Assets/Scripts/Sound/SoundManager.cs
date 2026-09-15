@@ -34,11 +34,21 @@ public class SoundManager
         ApplyCategoryVolume(VoiceCategoryName, settings.VoiceVolume);
     }
 
+    /// <summary> BGM音量を設定（Inspectorからの動作確認用） </summary>
+    public void SetBGMVolume(float volume) => ApplyCategoryVolume(BGMCategoryName, volume);
+
+    /// <summary> SE音量を設定（Inspectorからの動作確認用） </summary>
+    public void SetSEVolume(float volume) => ApplyCategoryVolume(SECategoryName, volume);
+
+    /// <summary> Voice音量を設定（Inspectorからの動作確認用） </summary>
+    public void SetVoiceVolume(float volume) => ApplyCategoryVolume(VoiceCategoryName, volume);
+
     public void SetBGMFadeDurations(float fadeInSeconds, float fadeOutSeconds)
     {
         if (_bgmSource == null) return;
+        _bgmFadeOutSeconds = Mathf.Clamp(fadeOutSeconds, 0f, 3600f);
         _bgmSource.player.SetFadeInTime(Mathf.RoundToInt(Mathf.Clamp(fadeInSeconds, 0f, 3600f) * 1000f));
-        _bgmSource.player.SetFadeOutTime(Mathf.RoundToInt(Mathf.Clamp(fadeOutSeconds, 0f, 3600f) * 1000f));
+        _bgmSource.player.SetFadeOutTime(Mathf.RoundToInt(_bgmFadeOutSeconds * 1000f));
     }
 
     // ── BGM ──────────────────────────────────────────────
@@ -73,44 +83,13 @@ public class SoundManager
         if (_bgmSource == null) return;
         // フェードアウト中にStopを再発行するとCRIが即時停止するため、一度だけ呼ぶ。
         if (_bgmStopping) return;
-        _bgmStopping = true;
+        // 何も鳴っていない状態からのStopでは、次の再生を待たせる必要がない。
+        _bgmStopping = _bgmSource.status == CriAtomSource.Status.Playing ||
+            _bgmSource.status == CriAtomSource.Status.Prep;
+        if (_bgmStopping)
+            _bgmStopRequestedAt = Time.unscaledTime;
         _bgmSource.Stop();
         _bgmSource.Pause(false);
-    }
-
-    private async UniTask PlayBGMWhenReadyAsync(int version, string sheet, string cue)
-    {
-        while (_bgmSource != null && version == _bgmRequestVersion)
-        {
-            // 前の曲の停止完了を待つ。連続した切り替え要求は最新の曲だけを再生する。
-            if (_bgmStopping && (_bgmSource.player.IsFading() ||
-                _bgmSource.status == CriAtomSource.Status.Playing ||
-                _bgmSource.status == CriAtomSource.Status.Prep))
-            {
-                await UniTask.Yield();
-                continue;
-            }
-            var acb = CriAtom.GetAcb(sheet);
-            if (acb != null)
-            {
-                if (!acb.GetCueInfo(cue, out _))
-                {
-                    _requestedBGMSheet = null;
-                    _requestedBGMCue = null;
-                    Debug.LogWarning($"[SoundManager] BGMキューが見つかりません: {sheet}/{cue}");
-                    return;
-                }
-                _bgmStopping = false;
-                // CriAtomSourceはStatus.Stopのときだけloopをプレーヤへ反映する。
-                // フェーダ使用時も、次に再生するBGMへ確実にループを指定する。
-                _bgmSource.loop = true;
-                _bgmSource.player.Loop(true);
-                _bgmSource.Play();
-                return;
-            }
-            // ロード画面のTime.timeScale=0でも待機を進める。
-            await UniTask.Delay(100, ignoreTimeScale: true);
-        }
     }
 
     /// <summary> BGM一時停止 </summary>
@@ -272,6 +251,8 @@ public class SoundManager
     private string _requestedBGMSheet;
     private string _requestedBGMCue;
     private bool _bgmStopping;
+    private float _bgmFadeOutSeconds;
+    private float _bgmStopRequestedAt;
 
     // 通常SE用のソースを管理するDictionary
     private Dictionary<GameObject, List<CriAtomSource>> _seSourcesDict
@@ -280,6 +261,44 @@ public class SoundManager
     // ループSE用のソースを管理するDictionary（GameObject → (cueName → Source)）
     private Dictionary<GameObject, Dictionary<string, CriAtomSource>> _loopSourcesDict
         = new Dictionary<GameObject, Dictionary<string, CriAtomSource>>();
+
+    private async UniTask PlayBGMWhenReadyAsync(int version, string sheet, string cue)
+    {
+        if (_bgmStopping)
+        {
+            // statusやIsFading()はフェードアウトの余韻が終わるより先に変化することがあり、
+            // ポーリングで判定すると新旧のBGMが重なって二重に聞こえる。設定した秒数を確実に待つ。
+            // 経過時間は実際のフェードアウト開始時刻からの差分で計算し、
+            // リクエストが連続しても待機しすぎないようにする。
+            float elapsedSeconds = Time.unscaledTime - _bgmStopRequestedAt;
+            float remainingSeconds = Mathf.Max(0f, _bgmFadeOutSeconds - elapsedSeconds);
+            await UniTask.Delay(Mathf.RoundToInt(remainingSeconds * 1000f), ignoreTimeScale: true);
+            _bgmStopping = false;
+        }
+
+        while (_bgmSource != null && version == _bgmRequestVersion)
+        {
+            var acb = CriAtom.GetAcb(sheet);
+            if (acb != null)
+            {
+                if (!acb.GetCueInfo(cue, out _))
+                {
+                    _requestedBGMSheet = null;
+                    _requestedBGMCue = null;
+                    Debug.LogWarning($"[SoundManager] BGMキューが見つかりません: {sheet}/{cue}");
+                    return;
+                }
+                // CriAtomSourceはStatus.Stopのときだけloopをプレーヤへ反映する。
+                // フェーダ使用時も、次に再生するBGMへ確実にループを指定する。
+                _bgmSource.loop = true;
+                _bgmSource.player.Loop(true);
+                _bgmSource.Play();
+                return;
+            }
+            // ロード画面のTime.timeScale=0でも待機を進める。
+            await UniTask.Delay(100, ignoreTimeScale: true);
+        }
+    }
 
     /// <summary> 初期化 </summary>
     private void Initialize(GameObject bgmPlayer)

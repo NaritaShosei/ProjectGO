@@ -16,6 +16,7 @@ public class IntroMovieState : ISequenceState
         _context = context;
 
         context.InputHandler?.EnableInput(false);
+        context.Player?.ForceWarriorMode();
 
         var moviePlayer = context.MoviePlayer;
 
