@@ -1,4 +1,6 @@
+using BossEnemy.Armor;
 using BossEnemy.Character;
+using BossEnemy.Enum;
 using BossEnemy.Interface;
 using Cysharp.Threading.Tasks;
 using System;
@@ -24,6 +26,12 @@ public class EnemyUIManager : MonoBehaviour
 
         _enemyManager.OnEnemySpawned += HandleEnemySpawned;
         _enemyManager.OnEnemyForceRemoved += HandleEnemyDead;
+
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _cameraManager = cameraManager;
+            _cameraManager.OnLockOnTargetChanged += HandleLockOnTargetChanged;
+        }
 
         _cts = new CancellationTokenSource();
         RangeCheckLoopAsync(_cts.Token).Forget();
@@ -53,6 +61,11 @@ public class EnemyUIManager : MonoBehaviour
     private Dictionary<IArmorHealth, ArmorGaugePresenter> _armorPresenters = new();
     private Dictionary<IEnemy, List<IArmorHealth>> _enemyArmors = new();
     private Dictionary<MobEnemy, Action<IArmorHealth>> _armorRegisteredHandlers = new();
+    private HashSet<IArmorHealth> _bossLegArmors = new();
+    private Dictionary<BossArmorView, Action> _bossLegArmorRepairHandlers = new();
+
+    private CameraManager _cameraManager;
+    private BossArmorView _lockedOnLegArmor;
 
     private GenericObjectPool<EnemyGaugeView> _gaugePool;
     private GenericObjectPool<EnemyGaugeView> _armerGaugePool;
@@ -72,9 +85,10 @@ public class EnemyUIManager : MonoBehaviour
                 presenter.UpdateRangeCheck();
             }
 
-            foreach (var presenter in _armorPresenters.Values)
+            foreach (var pair in _armorPresenters)
             {
-                presenter.UpdateRangeCheck();
+                if (_bossLegArmors.Contains(pair.Key)) continue;
+                pair.Value.UpdateRangeCheck();
             }
 
             await UniTask.Delay(
@@ -144,7 +158,7 @@ public class EnemyUIManager : MonoBehaviour
 
     private void HandleBossSpawned(IBossEnemyCharacterView enemy)
     {
-        // ToDo：Bossの鎧にHPゲージをつける
+        RegisterBossLegArmorGauges(enemy);
 
         // Damage Popup
         enemy.OnDamageDealt += HandleDamageDealt;
@@ -152,6 +166,77 @@ public class EnemyUIManager : MonoBehaviour
         enemy.OnDead += HandleEnemyDead;
 
         _bossCharacter = enemy;
+    }
+
+    /// <summary> ボスの右足・左足のアーマーをゲージ登録する </summary>
+    private void RegisterBossLegArmorGauges(IBossEnemyCharacterView enemy)
+    {
+        if (enemy.ActiveBossEnemyPartsView == null) return;
+
+        foreach (var parts in enemy.ActiveBossEnemyPartsView)
+        {
+            if (parts?.Armor == null) continue;
+
+            bool isLegArmor = parts.Armor.AttachmentPoints == ArmorAttachmentType.RightLeg
+                || parts.Armor.AttachmentPoints == ArmorAttachmentType.LeftLeg;
+
+            if (!isLegArmor) continue;
+
+            RegisterBossLegArmorGauge(enemy, parts.Armor);
+
+            // 破壊済みゲージは登録解除されるため、修復時に再登録できるようにする
+            Action repairedHandler = () => RegisterBossLegArmorGauge(enemy, parts.Armor);
+            parts.Armor.OnRepaired += repairedHandler;
+            _bossLegArmorRepairHandlers.Add(parts.Armor, repairedHandler);
+        }
+    }
+
+    /// <summary> 足鎧のゲージを登録する（検知距離での表示判定は行わず、ロックオン中／被弾直後のみ表示する） </summary>
+    private void RegisterBossLegArmorGauge(IEnemy enemy, BossArmorView armor)
+    {
+        HandleArmorRegistered(enemy, armor);
+
+        if (_armorPresenters.TryGetValue(armor, out var presenter))
+        {
+            _bossLegArmors.Add(armor);
+            Debug.Log($"[EnemyUIManager] 足鎧ゲージ登録: {armor.gameObject.name} / {armor.AttachmentPoints}");
+
+            // 再登録（修復時など）でもロックオン中の状態を引き継ぐ
+            if (armor == _lockedOnLegArmor)
+            {
+                presenter.SetLockedOn(true);
+            }
+        }
+    }
+
+    /// <summary> ロックオン対象が変わった際、対象が足鎧ならそのゲージのロックオン表示を切り替える </summary>
+    private void HandleLockOnTargetChanged(ILockOnTarget target)
+    {
+        BossArmorView newLockedArmor = _cameraManager?.BossLegLockOnController?.GetArmorForTarget(target);
+
+        if (_lockedOnLegArmor == newLockedArmor) return;
+
+        if (_lockedOnLegArmor != null && _armorPresenters.TryGetValue(_lockedOnLegArmor, out var previousPresenter))
+        {
+            previousPresenter.SetLockedOn(false);
+        }
+
+        _lockedOnLegArmor = newLockedArmor;
+
+        if (_lockedOnLegArmor != null && _armorPresenters.TryGetValue(_lockedOnLegArmor, out var newPresenter))
+        {
+            newPresenter.SetLockedOn(true);
+        }
+    }
+
+    /// <summary> 足鎧の修復イベント購読を解除する </summary>
+    private void UnregisterBossLegArmorRepairHandlers()
+    {
+        foreach (var pair in _bossLegArmorRepairHandlers)
+        {
+            pair.Key.OnRepaired -= pair.Value;
+        }
+        _bossLegArmorRepairHandlers.Clear();
     }
 
     private void HandleDamageDealt(DamagePopupViewModel viewModel)
@@ -183,6 +268,7 @@ public class EnemyUIManager : MonoBehaviour
                 _bossCharacter = null;
             }
 
+            UnregisterBossLegArmorRepairHandlers();
             return;
         }
 
@@ -201,7 +287,9 @@ public class EnemyUIManager : MonoBehaviour
         // イベント購読と現在値同期が同じ鎧を通知しても二重生成しない。
         if (armor == null || _armorPresenters.ContainsKey(armor)) return;
 
-        Transform armorGaugeTarget = ResolveArmorGaugeAnchor(enemy);
+        Transform armorGaugeTarget = armor is BossArmorView bossArmor
+            ? bossArmor.GetTargetCenter()
+            : ResolveArmorGaugeAnchor(enemy);
 
         var view = _armerGaugePool.Get();
         var presenter = new ArmorGaugePresenter(
@@ -265,6 +353,12 @@ public class EnemyUIManager : MonoBehaviour
         presenter.Dispose();
 
         _armorPresenters.Remove(armor);
+        _bossLegArmors.Remove(armor);
+
+        if (ReferenceEquals(_lockedOnLegArmor, armor))
+        {
+            _lockedOnLegArmor = null;
+        }
     }
 
     private void RemoveArmorOwnerLink(IArmorHealth armor)
@@ -293,6 +387,11 @@ public class EnemyUIManager : MonoBehaviour
         _enemyManager.OnEnemySpawned -= HandleEnemySpawned;
         _enemyManager.OnEnemyForceRemoved -= HandleEnemyDead;
 
+        if (_cameraManager != null)
+        {
+            _cameraManager.OnLockOnTargetChanged -= HandleLockOnTargetChanged;
+        }
+
         foreach (var pair in _gaugePresenters)
         {
             pair.Key.OnDead -= HandleEnemyDead;
@@ -314,6 +413,10 @@ public class EnemyUIManager : MonoBehaviour
             pair.Value.Dispose();
         }
         _armorPresenters.Clear();
+        _bossLegArmors.Clear();
+        _lockedOnLegArmor = null;
+
+        UnregisterBossLegArmorRepairHandlers();
 
         _popupPresenter.Dispose();
 

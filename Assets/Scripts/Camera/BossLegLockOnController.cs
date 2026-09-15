@@ -43,6 +43,14 @@ public sealed class BossLegLockOnController
         }
     }
 
+    /// <summary>ロックオン対象から、対応する足のBossArmorViewを取得する。右足/左足以外の対象ならnull。</summary>
+    public BossArmorView GetArmorForTarget(ILockOnTarget target)
+    {
+        if (target == _rightLegTarget) return _rightLegArmor;
+        if (target == _leftLegTarget) return _leftLegArmor;
+        return null;
+    }
+
     /// <summary>右足/左足の鎧の生死から、右足/左足/頭のロック可否を毎Tick再計算する。</summary>
     public void Tick()
     {
