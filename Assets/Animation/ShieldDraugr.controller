@@ -1694,6 +1694,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57663d049a1581d458f3abf9e383f10f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnSMB
+  _firstEffectTiming: 0
+  _secondEffectTiming: 0.6
 --- !u!114 &9025874340621633002
 MonoBehaviour:
   m_ObjectHideFlags: 1

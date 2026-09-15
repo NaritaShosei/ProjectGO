@@ -388,6 +388,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
     [Header("演出関係")]
     [SerializeField, Tooltip("スポーンエフェクトを適応の可否")] private bool _useSpawnEffect = true;
     [SerializeField, Tooltip("スポーンエフェクトのKey")] private string _spawnEffectKey = "スポーンエフェクト";
+    [SerializeField,Tooltip("スポーンエフェクトの大きさ")] private Vector3 _spawnEffectScale = Vector3.one;
 
     private float _timeScale = 1f;
 
@@ -564,7 +565,8 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
         Debug.Log("スポーンエフェクト発火");
         effectManager.PlayEffect(
             _spawnEffectKey,
-            transform.position);
+            transform.position,
+            _spawnEffectScale);
     }
 
     /// <summary>
