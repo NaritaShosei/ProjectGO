@@ -38,6 +38,9 @@ namespace BossEnemy.Character
             }
             else
             {
+                _bossAIBehaviourController.StopRunning();
+                _bossAIBehaviourController.Dispose();
+
                 UnregisterEvents();
             }
         }
