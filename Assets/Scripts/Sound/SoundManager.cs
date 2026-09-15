@@ -7,8 +7,12 @@ public class SoundManager
 {
     private const string SECategoryName = "SE";
     private const string VoiceCategoryName = "Voice";
-    // セリフのstatusがPrep等から進まなくなった場合に、ダッキングを強制解除するまでの上限秒数
-    private const float VoiceDuckMaxWaitSeconds = 10f;
+    // Play()直後はstatusがまだPlaying/Prepに遷移していないことがあるため、この間は早期終了と判定しない
+    private const float VoiceDuckStatusGraceSeconds = 0.2f;
+    // キュー長に対して余裕を持たせる秒数
+    private const float VoiceDuckDeadlineMarginSeconds = 1f;
+    // キュー長が取得できなかった場合の上限秒数
+    private const float VoiceDuckFallbackMaxSeconds = 10f;
 
     /// <summary> コンストラクタ </summary>
     /// <param name="bgmPlayer"> BGM用のPlayerObject </param>
@@ -131,7 +135,7 @@ public class SoundManager
 
         ++_activeVoiceDuckCount;
         ApplyDuckableVolumes();
-        WatchVoiceDuckEndAsync(source).Forget();
+        WatchVoiceDuckEndAsync(source, GetCueLengthSeconds(cueName)).Forget();
     }
 
     /// <summary> SE停止。ループSEも併せて停止する </summary>
@@ -292,7 +296,10 @@ public class SoundManager
                     Debug.LogWarning($"[SoundManager] BGMキューが見つかりません: {sheet}/{cue}");
                     return;
                 }
+                // CriAtomSourceはStatus.Stopのときだけloopをプレーヤへ反映するため、
+                // Stop直後でまだ遷移し切っていない場合に備えて明示的にも呼んでおく。
                 _bgmSource.loop = true;
+                _bgmSource.player.Loop(true);
                 _bgmSource.Play();
                 return;
             }
@@ -345,16 +352,35 @@ public class SoundManager
         return CreateNewSESource(seObj, sheetType);
     }
 
-    /// <summary> セリフの再生終了（自然終了・StopSEどちらも含む）を監視し、ダッキングを解除する </summary>
-    private async UniTask WatchVoiceDuckEndAsync(CriAtomSource source)
+    /// <summary> セリフキューの長さを秒で取得する。取得できない場合はフォールバック値を返す </summary>
+    private float GetCueLengthSeconds(string cueName)
     {
-        // statusがボイスプール空き待ち等で進まなくなっても、ダッキングが解除されずに
-        // 固定化しないよう、上限時間で必ず打ち切る。
-        float deadline = Time.unscaledTime + VoiceDuckMaxWaitSeconds;
-        while (source != null &&
-            (source.status == CriAtomSource.Status.Playing || source.status == CriAtomSource.Status.Prep) &&
-            Time.unscaledTime < deadline)
+        var acb = CriAtom.GetAcb(_cueSheetPathHolder.CueSheetPathDict[CueSheetType.PlayerVoice]);
+        if (acb != null && acb.GetCueInfo(cueName, out var cueInfo) && cueInfo.length > 0)
+            return cueInfo.length / 1000f;
+
+        return VoiceDuckFallbackMaxSeconds;
+    }
+
+    /// <summary> セリフの再生終了（自然終了・StopSEどちらも含む）を監視し、ダッキングを解除する </summary>
+    private async UniTask WatchVoiceDuckEndAsync(CriAtomSource source, float cueLengthSeconds)
+    {
+        // ボイスプール空き待ち等でstatusが進まなくなっても固定化しないよう、
+        // キュー長を基準にした上限時間で必ず打ち切る。
+        float startTime = Time.unscaledTime;
+        float deadline = startTime + cueLengthSeconds + VoiceDuckDeadlineMarginSeconds;
+
+        while (source != null && Time.unscaledTime < deadline)
         {
+            // Play()直後はstatusがまだPlaying/Prepに遷移していないことがあるため、
+            // グレース期間中はstatusによる早期終了と判定しない。
+            bool pastGracePeriod = Time.unscaledTime - startTime > VoiceDuckStatusGraceSeconds;
+            if (pastGracePeriod &&
+                source.status != CriAtomSource.Status.Playing &&
+                source.status != CriAtomSource.Status.Prep)
+            {
+                break;
+            }
             await UniTask.Yield();
         }
 
