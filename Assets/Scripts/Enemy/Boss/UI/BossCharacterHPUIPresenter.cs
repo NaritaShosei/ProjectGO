@@ -6,9 +6,9 @@ using UniRx;
 
 namespace BossEnemy.UI
 {
-    public class BossEnemyHPUIPresenter : IDisposable
+    public class BossCharacterHPUIPresenter : IDisposable
     {
-        public BossEnemyHPUIPresenter(IBossCharacterEntity bossCharacterEntity, IBossHPView bossHPUIView)
+        public BossCharacterHPUIPresenter(IBossCharacterEntity bossCharacterEntity, IBossHPView bossHPUIView)
         {
             _bossCharacterEntity = bossCharacterEntity;
             _bossHPUIView = bossHPUIView;
@@ -30,6 +30,8 @@ namespace BossEnemy.UI
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(async hp =>
             {
+                if (_bossHPUIView.IsHPZero) return;
+
                 UniTask takeDamageTask = _bossHPUIView.TakeDamage(hp);
                 _bossHPUIView.SetRunningTask(takeDamageTask);
             });
