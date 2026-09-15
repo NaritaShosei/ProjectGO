@@ -1,3 +1,4 @@
+using CriWare;
 using UnityEngine;
 
 public static class Sound
@@ -36,12 +37,19 @@ public static class Sound
         Resolve()?.PlaySE(obj, cueName, sheet);
     }
 
-    public static void PlayLoopSE(
+    /// <summary> スヴァナのセリフを再生する。再生中はBGM・SEをダッキングする </summary>
+    public static void PlayNarrationVoice(GameObject obj, string cueName)
+    {
+        Resolve()?.PlayNarrationVoice(obj, cueName);
+    }
+
+    public static CriAtomSource PlayLoopSE(
         GameObject obj,
         string cueName,
-        CueSheetType sheet)
+        CueSheetType sheet,
+        bool use3dPositioning = true)
     {
-        Resolve()?.PlayLoopSE(obj, cueName, sheet);
+        return Resolve()?.PlayLoopSE(obj, cueName, sheet, use3dPositioning);
     }
 
     public static void StopSE(GameObject obj)

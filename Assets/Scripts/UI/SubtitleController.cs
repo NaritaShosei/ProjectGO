@@ -40,7 +40,7 @@ public sealed class SubtitleController : MonoBehaviour
         if (line == null)
         {
             // 字幕設定の欠落によって既存ボイスまで失われないようにする。
-            if (voiceOwner != null) Sound.PlaySE(voiceOwner, cueName, CueSheetType.PlayerVoice);
+            if (voiceOwner != null) Sound.PlayNarrationVoice(voiceOwner, cueName);
             return;
         }
         _view?.SetText(line.Text);
@@ -84,7 +84,7 @@ public sealed class SubtitleController : MonoBehaviour
         _timeline.AdvanceTime(deltaTime);
         if (_timeline.HasStarted && _pendingVoiceOwner != null)
         {
-            Sound.PlaySE(_pendingVoiceOwner, _pendingCue, CueSheetType.PlayerVoice);
+            Sound.PlayNarrationVoice(_pendingVoiceOwner, _pendingCue);
             _pendingVoiceOwner = null;
         }
         if (_timeline.IsComplete)
