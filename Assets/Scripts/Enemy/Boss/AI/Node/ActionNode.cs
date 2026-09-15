@@ -16,6 +16,12 @@ namespace BossEnemy.AI.BehaviourTree
     [Serializable]
     public abstract class ActionNode : BossCharacterBehaviourTreeNode
     {
+        /// <summary> 何らかの不具合で処理が詰まった際にツリーを強制再走させる秒数を設定 </summary>
+        public void SetTimeOutValue(float timeOut)
+        {
+            _timeOutValue = timeOut;
+        }
+
         public override NodeCondition TryEntry()
         {
             return NodeCondition.Success;
@@ -25,6 +31,31 @@ namespace BossEnemy.AI.BehaviourTree
         {
             nextNode = this;
             return NodeCondition.Running;
+        }
+
+        public override void OnEnter()
+        {
+            _timeOutTimer = 0f;
+        }
+
+        public override void OnUpdate()
+        {
+            if (IsTimeOut()) HandleRunningEnd();
+        }
+
+        [SerializeField] private float _timeOutValue = 10f;
+
+        protected float _timeOutTimer = 0;
+
+        protected bool IsTimeOut()
+        {
+            _timeOutTimer += Time.deltaTime * _bossCharacterEntity.TimeScale;
+
+            if (_timeOutTimer >= _timeOutValue)
+            {
+                return true;
+            }
+            return false;
         }
     }
 
@@ -49,6 +80,8 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnUpdate()
         {
+            base.OnUpdate();
+
             if(_bossCharacterEntity.RepairArmorAttachmentType.Value
                 == ArmorAttachmentType.None)
             {
@@ -125,6 +158,8 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnUpdate()
         {
+            base.OnUpdate();
+
             if (_isPostureChangeCompleted) return;
 
             if (_bossCharacterEntity.CurrentAction.Value
@@ -145,12 +180,21 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void Dispose()
         {
+            // 完了待ちの選択結果が、破棄済みのシーケンスを進めないよう無効化する。
+            _selectionVersion++;
             base.Dispose();
         }
 
         public override void OnEnter()
         {
-            SelectNextAttackAsync().Forget();
+            int selectionVersion = ++_selectionVersion;
+            SelectNextAttackAsync(selectionVersion).Forget();
+        }
+
+        public override void OnExit()
+        {
+            // 攻撃選択中に別の行動へ割り込まれた場合、古い完了通知を無視する。
+            _selectionVersion++;
         }
 
         public void SetAttackSelectPoolID(int id)
@@ -163,11 +207,20 @@ namespace BossEnemy.AI.BehaviourTree
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary> 攻撃の選択を行う </summary>
-        private async UniTaskVoid SelectNextAttackAsync()
+        private async UniTaskVoid SelectNextAttackAsync(int selectionVersion)
         {
             await _bossCharacterEntity.SelectNextAttackData(_attackSelectPoolID);
-            if(_nodeRunningConditionNotifier != null) HandleRunningEnd();
+
+            if (selectionVersion != _selectionVersion
+                || _nodeRunningConditionNotifier == null)
+            {
+                return;
+            }
+
+            HandleRunningEnd();
         }
+
+        private int _selectionVersion;
     }
 
     [Serializable]
@@ -180,24 +233,25 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnEnter()
         {
-            _bossCharacterEntity.SetCurrentAction(Character.CharacterAction.Walking);
-
             Attack.AttackData nextAttackData = _bossCharacterEntity.GetNextAttackData();
+
             if (nextAttackData.AttackStartDistance == 0)
             {
                 HandleRunningEnd();
                 return;
             }
 
-            var toTargetDistance =
-                Vector3.Distance(_bossCharacterEntity.Position.Value,
-                _bossCharacterEntity.AttackTarget.GetTargetCenter().position);
+            // ターゲットとの距離を取得
+            var toTargetDistance = GetTargetDistance();
 
             // 攻撃開始位置よりも敵が近ければ攻撃を行う
             if (nextAttackData.AttackStartDistance > toTargetDistance)
             {
                 HandleRunningEnd();
+                return;
             }
+
+            _bossCharacterEntity.SetCurrentAction(CharacterAction.Walking);
         }
 
         public override void OnUpdate()
@@ -210,14 +264,15 @@ namespace BossEnemy.AI.BehaviourTree
                 _moveSpeed,
                 _bossCharacterEntity.TimeScale);
 
-            var toTargetDistance =
-                Vector3.Distance(_bossCharacterEntity.Position.Value,
-                _bossCharacterEntity.AttackTarget.GetTargetCenter().position);
+            // ターゲットとの距離を取得
+            var toTargetDistance = GetTargetDistance();
 
             if (nextAttackData.AttackStartDistance > toTargetDistance)
             {
                 HandleRunningEnd();
             }
+
+            base.OnUpdate();
         }
 
         public override void OnExit()
@@ -227,6 +282,34 @@ namespace BossEnemy.AI.BehaviourTree
         }
 
         [SerializeField] private float _moveSpeed = 1.0f;
+
+        /// <summary>
+        /// ターゲットとの距離を取得
+        /// </summary>
+        /// <returns></returns>
+        private float GetTargetDistance()
+        {
+            // ボスの現在地(Y座標は無視する)
+            var bossChracterPos = new Vector3()
+            {
+                x = _bossCharacterEntity.Position.Value.x,
+                y = 0f,
+                z = _bossCharacterEntity.Position.Value.z
+            };
+
+            // 攻撃対象の現在地(Y座標は無視する)
+            var attackTargetPos = new Vector3()
+            {
+                x = _bossCharacterEntity.AttackTarget.GetTargetCenter().position.x,
+                y = 0f,
+                z = _bossCharacterEntity.AttackTarget.GetTargetCenter().position.z
+            };
+
+            // ターゲットとの距離を取得
+            var toTargetDistance = Vector3.Distance(bossChracterPos, attackTargetPos);
+
+            return toTargetDistance;
+        }
     }
 
     [Serializable]
@@ -249,6 +332,8 @@ namespace BossEnemy.AI.BehaviourTree
                 _bossCharacterEntity.TimeScale);
 
             if (isLookAtTarget) _nodeRunningConditionNotifier.HandleResearchBehaviourTree();
+
+            base.OnUpdate();
         }
 
         public override void OnExit()
@@ -268,29 +353,36 @@ namespace BossEnemy.AI.BehaviourTree
     {
         public override void OnEnter()
         {
-            _disposable?.Dispose();
-            _disposable = null;
-
+            // ActionNode が持つタイムアウトを攻撃ごとにリセットする。
+            // これを呼ばないと前回までの経過時間を引き継ぎ、後半の攻撃が即座に中断される。
+            base.OnEnter();
+            _hasFinished = false;
             _bossCharacterEntity.ExecuteAttack();
-
-            _disposable = _bossCharacterEntity.CurrentAction
-                .SkipLatestValueOnSubscribe()
-                .Subscribe(currentAction =>
-            {
-                // 特定の行動中でなければビヘイビアツリーを再走する
-                if (currentAction != Character.CharacterAction.Attacking
-                    && currentAction != Character.CharacterAction.PostureChanging)
-                    HandleRunningEnd();
-            });
         }
 
-        public override void OnExit()
+        public override void OnUpdate()
         {
-            _disposable?.Dispose();
-            _disposable = null;
+            if (_hasFinished) return;
+
+            if (_bossCharacterEntity.CurrentAction.Value != CharacterAction.Attacking
+                && _bossCharacterEntity.CurrentAction.Value != CharacterAction.PostureChanging)
+            {
+                _hasFinished = true;
+                HandleRunningEnd();
+                return;
+            }
+
+            if (IsTimeOut())
+            {
+                _bossCharacterEntity.CancelAttack();
+                _bossCharacterEntity.SetCurrentAction(CharacterAction.Idle);
+
+                _hasFinished = true;
+                HandleRunningEnd();
+            }
         }
 
-        private IDisposable _disposable = null;
+        private bool _hasFinished;
     }
 
     [Serializable]
@@ -299,6 +391,11 @@ namespace BossEnemy.AI.BehaviourTree
         public override void OnEnter()
         {
             _bossCharacterEntity.SetCurrentAction(CharacterAction.Dead);
+        }
+
+        public override void OnUpdate()
+        {
+
         }
     }
 
@@ -320,6 +417,8 @@ namespace BossEnemy.AI.BehaviourTree
                 _isPhaseChangeCompleted = true;
                 HandleRunningEnd();
             }
+
+            base.OnUpdate();
         }
 
         private bool _isPhaseChangeCompleted = true;
@@ -334,6 +433,8 @@ namespace BossEnemy.AI.BehaviourTree
 
             HandleRunningEnd();
         }
+
+        public override void OnUpdate() { }
     }
 
     [Serializable]
@@ -367,6 +468,8 @@ namespace BossEnemy.AI.BehaviourTree
 
             HandleRunningEnd();
         }
+
+        public override void OnUpdate() { }
 
         [SerializeField] private PostureType _changePosture;
 
