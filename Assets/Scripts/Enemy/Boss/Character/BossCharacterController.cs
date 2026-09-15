@@ -32,7 +32,7 @@ namespace BossEnemy.Character
         public void Dispose()
         {
             if(_characterEntity.CurrentAction.Value != CharacterAction.Dead
-                || _characterEntity.CurrentAction.Value != CharacterAction.Despawn)
+               && _characterEntity.CurrentAction.Value != CharacterAction.Despawn)
             {
                 HandleDead();
             }
