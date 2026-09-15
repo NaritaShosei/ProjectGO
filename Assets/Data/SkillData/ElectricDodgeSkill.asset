@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ElectricDodgeSkill
   _id: 56486
   _priority: 0
-  _name: "\u96F7\u8EAB\u56DE\u907F"
-  _explanation: "\u30B8\u30E3\u30B9\u30C8\u56DE\u907F\u306E\u59CB\u70B9\u306B\u611F\u96FB\u5C5E\u6027\u3092\u4ED8\u4E0E\u3059\u308B\u30A8\u30D5\u30A7\u30AF\u30C8\u3092\u767A\u751F\u3055\u305B\u308B"
+  _name: "\u96F7\u798D\u77AC\u907F"
+  _explanation: "\u30B8\u30E3\u30B9\u30C8\u56DE\u907F\u6642\u306B\u3001\u5468\u56F2\u306B\u96F7\u5C5E\u6027\u306E\u7BC4\u56F2\u653B\u6483\u3092\u653E\u3064\u3002"
   _icon: {fileID: 21300000, guid: a08d800019dff24439c852d83074af74, type: 3}
   _timing: 1
   _unlockedSkill: {fileID: 0}
@@ -24,7 +24,7 @@ MonoBehaviour:
   _grantEffectProbability: 0.5
   _durationEffect: 3
   _upDamagePercentage: 1.8
-  _attackRadius: 3
+  _attackRadius: 4.5
   _delaySeconds: 0
   _duration: 2
   _scale: {x: 1, y: 1, z: 1}
