@@ -144,8 +144,13 @@ namespace BossEnemy.Logic
                 z = targetPos.z - movementTarget.Position.Value.z
             };
 
+            int velocitySupplement = 1000;
+
             // 移動速度設定
-            Vector3 moveVelocity = new Vector3(Mathf.Abs(direction.x), direction.y, Mathf.Abs(direction.z));
+            Vector3 moveVelocity = new Vector3(
+                Mathf.Abs(direction.x * velocitySupplement), 
+                direction.y, 
+                Mathf.Abs(direction.z * velocitySupplement));
             movementTarget.SetVelocity(moveVelocity);
 
             // 方向ベクトルがゼロ（真上や全く同じ位置）でないかチェック

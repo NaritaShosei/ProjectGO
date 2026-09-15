@@ -265,7 +265,7 @@ namespace BossEnemy.AI.BehaviourTree
         {
             Attack.AttackData nextAttackData = _bossCharacterEntity.GetNextAttackData();
 
-            Movement.MoveTargetPosition(
+            Logic.Movement.MoveTargetPosition(
                 _bossCharacterEntity,
                 _bossCharacterEntity.AttackTarget.GetTargetCenter().position,
                 _moveSpeed,
@@ -330,7 +330,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         public override void OnUpdate()
         {
-            Movement.LookAtTarget(
+            Logic.Movement.LookAtTarget(
                 _bossCharacterEntity,
                 _bossCharacterEntity.AttackTarget.GetTargetCenter().position,
                 _lookSpeed,

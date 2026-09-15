@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
 using UnityEngine.Rendering;
+using BossEnemy.Movement;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -102,7 +103,10 @@ public class BossEnemySpawner : MonoBehaviour
 
     [SerializeField, Header("スポーンさせるボスのID")]
     private int _id;
-    
+
+    [SerializeField, Header("移動可能範囲判定機能")]
+    private BossMoveAreaCreater _canMoveAreaChecker = null;
+
     private Volume _volum;
 
     private bool _isLoadedRepositries = false;
@@ -158,6 +162,12 @@ public class BossEnemySpawner : MonoBehaviour
 
     private async UniTask LoadRepositories()
     {
+        if (_canMoveAreaChecker == null)
+        {
+            throw new InvalidOperationException(
+                "[BossEnemySpawner] _canMoveAreaChecker が設定されていません。");
+        }
+
         Debug.Log("RepositryLoad開始");
 
         _bossCharacterEntityRepository = await AssetsLoader.LoadAssetAsync<BossCharacterEntityRepository>
@@ -166,7 +176,7 @@ public class BossEnemySpawner : MonoBehaviour
         _bossAIBehaviourTreeNodeRepository = await AssetsLoader.LoadAssetAsync<BossAIBehaviourTreeNodeRepositry>
             (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAIBehaviourTreeNodeRepositry);
 
-        _bossCharacterEntityRepository.Init();
+        _bossCharacterEntityRepository.Init(_canMoveAreaChecker);
 
         _isLoadedRepositries = true;
         Debug.Log("RepositryLoad終了");

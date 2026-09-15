@@ -14,8 +14,16 @@ namespace BossEnemy.Infrastructure.Repository
     {
         public string CSVDataSearchStartKey => "BossStatus";
 
-        public void Init()
+        public void Init(ICanMoveAreaChecker canMoveAreaChecker)
         {
+            if(canMoveAreaChecker == null)
+            {
+                Debug.LogError("移動可能範囲判定判定機能がNullです");
+                return;
+            }
+
+            _canMoveAreaChecker = canMoveAreaChecker;
+
             if (_masterDataSheet == null)
             {
                 throw new InvalidOperationException("MasterDataSheetが設定されていません。");
@@ -75,7 +83,7 @@ namespace BossEnemy.Infrastructure.Repository
             {
                 if(cachedEntityQueue.TryDequeue(out var cachedEntity))
                 {
-                    cachedEntity.Init();
+                    cachedEntity.Init(_canMoveAreaChecker);
                     return cachedEntity;
                 }
             }
@@ -93,7 +101,7 @@ namespace BossEnemy.Infrastructure.Repository
 
                 var entity = CreateEntity(characterName, row + 1);
 
-                entity.Init();
+                entity.Init(_canMoveAreaChecker);
 
                 return entity;
             }
@@ -120,6 +128,7 @@ namespace BossEnemy.Infrastructure.Repository
         private int _csvDataSearchStartRow;
         private int _csvDataSearchEndRow;
         private readonly Dictionary<int, Queue<BossCharacterEntity>> _bossCharacterEntityDict = new();
+        private ICanMoveAreaChecker _canMoveAreaChecker;
 
         private BossCharacterEntity CreateEntity(string characterName, int firstDataRow)
         {
