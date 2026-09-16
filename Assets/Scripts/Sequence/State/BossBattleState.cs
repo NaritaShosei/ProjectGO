@@ -17,6 +17,8 @@ public class BossBattleState : ISequenceState
     {
         _context = context;
 
+        context.Player?.RestoreBattleControl();
+
         // プレイヤーHPを全回復
         var player = context.Player;
         if (player != null)
