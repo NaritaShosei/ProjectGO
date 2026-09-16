@@ -8,9 +8,7 @@ namespace BossEnemy.Animation
     public class BossEnemyAnimator : IBossEnemyAnimator
     {
         // Receiverから中継するイベント（外部への単一エントリポイント）
-        public event Action OnAttackHit;
         public event Action OnAttackEnd;
-        public event Action OnDeadEnd;
 
         /// <summary>
         /// コンストラクタ。ReceiverのイベントをAnimatorへ中継する。
