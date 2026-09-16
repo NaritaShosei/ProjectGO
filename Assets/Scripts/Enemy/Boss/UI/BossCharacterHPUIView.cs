@@ -10,7 +10,7 @@ using BossEnemy.Interface;
 
 namespace BossEnemy.UI
 {
-    public class BossEnemyHPUIView : MonoBehaviour, IBossHPView, IPoolable
+    public class BossCharacterHPUIView : MonoBehaviour, IBossHPView, IPoolable
     {
         #region BossEnemyのHPBarClass
         [Serializable]
@@ -72,7 +72,7 @@ namespace BossEnemy.UI
         }
         #endregion
 
-        public HPBarUI CurrentBar => _currentHPBar;
+        public bool IsHPZero => _isHPZero;
 
         public void OnGet() { }
 
@@ -82,9 +82,10 @@ namespace BossEnemy.UI
         }
 
         /// <summary> 初期化 </summary>
-        public void Init(BossEnemyHPUIPresenter presenter)
+        public void Init(BossCharacterHPUIPresenter presenter)
         {
             _presenter = presenter;
+            _isHPZero = false;
         }
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
@@ -105,12 +106,19 @@ namespace BossEnemy.UI
             _currentHPBar = _bossEnemyAllPhaseHPBarArray[nextHPBarArrNum];
             _currentHPBar.Init(maxHP);
 
+            _isHPZero = false;
             Debug.Log("HPUIの設定が完了しました");
         }
 
         public async UniTask TakeDamage(int currentHP)
         {
-            if (_currentHPBar == null) return;
+            if (_currentHPBar == null || _isHPZero) return;
+
+            if (currentHP <= 0)
+            {
+                Debug.Log("HPが0になりました");
+                _isHPZero = true;
+            }
 
             Debug.Log($"HP減少 現在のHP: {currentHP}");
             await _currentHPBar.TakeDamage(currentHP);
@@ -126,9 +134,11 @@ namespace BossEnemy.UI
 
         private HPBarUI _currentHPBar = null;
 
-        private BossEnemyHPUIPresenter _presenter;
+        private BossCharacterHPUIPresenter _presenter;
 
         private UniTask _runningTask = UniTask.CompletedTask;
+
+        private bool _isHPZero = false;
     }
 
 }

@@ -89,6 +89,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
         // まず指定された座標へ配置し、直後に壁との重なりを解消する。
         // CircleSpawnなどが壁の内側を指定しても、そのまま行動を開始させない。
         transform.position = spawnPosition;
+        _hasWallResolvedPosition = false;
         ResolveSpawnPosition();
         _isDead = false;
         _deadAnimationEnded = false;
@@ -135,10 +136,14 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
         {
             // 前フレームの数値誤差などですでに壁へ食い込んでいると、
             // BoxCastが正しいヒット距離を返せないため、先に壁の外へ戻す。
-            transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
-                _movementCollider,
-                transform.position
-            );
+            // 前回の移動後に確認した座標と同じなら、移動前の重なり確認を繰り返さない。
+            // 座標や姿勢が変わった場合は従来どおり確認する。
+            if (!_hasWallResolvedPosition || transform.position != _lastWallResolvedPosition ||
+                transform.rotation != _lastWallResolvedRotation ||
+                _movementCollider.bounds.size != _lastWallResolvedBoundsSize)
+            {
+                ResolveSpawnPosition();
+            }
 
             // このフレームで進みたい距離を、壁の直前までに制限する。
             // 上下方向はノックバックの放物線に必要なので、水平移動だけが制限される。
@@ -154,10 +159,11 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
         if (_movementCollider != null && _services.WallAvoidanceService != null)
         {
             // 薄い壁や角、浮動小数点誤差によって移動後に重なりが残った場合の最終防御。
-            transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
-                _movementCollider,
-                transform.position
-            );
+            ResolveSpawnPosition();
+        }
+        else
+        {
+            _hasWallResolvedPosition = false;
         }
     }
 
@@ -228,6 +234,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
     public void SetPosition(Vector3 position)
     {
         transform.position = position;
+        _hasWallResolvedPosition = false;
     }
 
     /// <summary>
@@ -341,12 +348,19 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
     public void ResolveSpawnPosition()
     {
         if (_movementCollider == null || _services.WallAvoidanceService == null)
+        {
+            _hasWallResolvedPosition = false;
             return;
+        }
 
         transform.position = _services.WallAvoidanceService.ResolveSpawnPosition(
             _movementCollider,
             transform.position
         );
+        _lastWallResolvedPosition = transform.position;
+        _lastWallResolvedRotation = transform.rotation;
+        _lastWallResolvedBoundsSize = _movementCollider.bounds.size;
+        _hasWallResolvedPosition = true;
     }
 
     public virtual void PlaySpawnAnimation()
@@ -369,6 +383,10 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
     [SerializeField] protected EnemyData _data;
     [SerializeField] private Transform _targetCenter;
     [SerializeField] private Collider _movementCollider;
+    private Vector3 _lastWallResolvedPosition;
+    private Quaternion _lastWallResolvedRotation;
+    private Vector3 _lastWallResolvedBoundsSize;
+    private bool _hasWallResolvedPosition;
     [SerializeField] protected Animator _animator;
 
     // Turn用プロファイル（派生クラスのInspectorから設定する）

@@ -6,8 +6,11 @@ namespace BossEnemy.Interface
 {
     public interface IBossHPView 
     {
+        // HPが0になったときのフラグ
+        public bool IsHPZero { get; }
+
         /// <summary> 初期化 </summary>
-        public void Init(BossEnemyHPUIPresenter presenter);
+        public void Init(BossCharacterHPUIPresenter presenter);
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
         public UniTaskVoid ChangeHPUI(int maxHP, int currentPhase);

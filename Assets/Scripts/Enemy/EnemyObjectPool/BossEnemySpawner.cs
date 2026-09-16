@@ -1,5 +1,7 @@
 using BossEnemy.AI.BehaviourTree;
+using BossEnemy.Armor;
 using BossEnemy.Character;
+using BossEnemy.Enum;
 using BossEnemy.Infrastructure;
 using BossEnemy.Infrastructure.Repository;
 using BossEnemy.Interface;
@@ -11,6 +13,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
 using UnityEngine.Rendering;
+using BossEnemy.Movement;
 
 public class BossEnemySpawner : MonoBehaviour
 {
@@ -55,7 +58,7 @@ public class BossEnemySpawner : MonoBehaviour
         NodeRunningConditionNotifier nodeRunningConditionNotifier = new NodeRunningConditionNotifier();
 
         // 各種初期化、生成
-        BossEnemyHPUIPresenter bossEnemyHPUIPresenter = new(characterEntity, bossEnemyHPUI);
+        BossCharacterHPUIPresenter bossEnemyHPUIPresenter = new(characterEntity, bossEnemyHPUI);
         entryNode.Init(characterEntity, nodeRunningConditionNotifier);
 
         BossCharacterController bossEnemyController = new BossCharacterController();
@@ -75,10 +78,13 @@ public class BossEnemySpawner : MonoBehaviour
         {
             if (currentAction == CharacterAction.Despawn)
             {
-                if (bossEnemyHPUI is BossEnemyHPUIView hpUI)
+                if (bossEnemyHPUI is BossCharacterHPUIView hpUI)
                     HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
             }
         });
+
+        // 足鎧のUIゲージが実耐久値を読めるようにEntityを渡す
+        RegisterLegArmorEntity(enemyView, characterEntity);
 
         return enemyView;
     }
@@ -102,13 +108,16 @@ public class BossEnemySpawner : MonoBehaviour
 
     [SerializeField, Header("スポーンさせるボスのID")]
     private int _id;
-    
+
+    [SerializeField, Header("移動可能範囲判定機能")]
+    private BossMoveAreaCreater _canMoveAreaChecker = null;
+
     private Volume _volum;
 
     private bool _isLoadedRepositries = false;
     private EnemyServices _services;
     private GenericObjectPool<BossCharacterView> _bossEnemyObjectPool;
-    private GenericObjectPool<BossEnemyHPUIView> _enemyUIObjectPool;
+    private GenericObjectPool<BossCharacterHPUIView> _enemyUIObjectPool;
 
     // 各種リポジトリクラス
     private IBossCharacterEntityRepository _bossCharacterEntityRepository;
@@ -146,8 +155,36 @@ public class BossEnemySpawner : MonoBehaviour
         ReleaseRepositories();
     }
 
+    /// <summary> 右足・左足のBossArmorViewに実耐久値を持つEntityを登録する </summary>
+    private void RegisterLegArmorEntity(BossCharacterView enemyView, BossCharacterEntity characterEntity)
+    {
+        if (enemyView.ActiveBossEnemyPartsView == null)
+        {
+            Debug.LogWarning("[BossEnemySpawner] ActiveBossEnemyPartsViewがnullのため足鎧のEntity登録をスキップしました");
+            return;
+        }
+
+        int registeredCount = 0;
+
+        foreach (var parts in enemyView.ActiveBossEnemyPartsView)
+        {
+            if (parts?.Armor == null) continue;
+
+            bool isLegArmor = parts.Armor.AttachmentPoints == ArmorAttachmentType.RightLeg
+                || parts.Armor.AttachmentPoints == ArmorAttachmentType.LeftLeg;
+
+            if (!isLegArmor) continue;
+
+            parts.Armor.SetEntity(characterEntity);
+            registeredCount++;
+            Debug.Log($"[BossEnemySpawner] 足鎧にEntityを登録: {parts.Armor.AttachmentPoints} / {parts.Armor.gameObject.name}");
+        }
+
+        Debug.Log($"[BossEnemySpawner] 足鎧Entity登録数: {registeredCount}");
+    }
+
     /// <summary> Enemy死亡時の処理 </summary>
-    private void HandleEnemyDeath(int id, BossCharacterEntity characterEntity, BossCharacterView view, BossEnemyHPUIView bossEnemyHPUIView)
+    private void HandleEnemyDeath(int id, BossCharacterEntity characterEntity, BossCharacterView view, BossCharacterHPUIView bossEnemyHPUIView)
     {
         _bossCharacterEntityRepository.ReleaseEntity(id, characterEntity);
 
@@ -158,6 +195,12 @@ public class BossEnemySpawner : MonoBehaviour
 
     private async UniTask LoadRepositories()
     {
+        if (_canMoveAreaChecker == null)
+        {
+            throw new InvalidOperationException(
+                "[BossEnemySpawner] _canMoveAreaChecker が設定されていません。");
+        }
+
         Debug.Log("RepositryLoad開始");
 
         _bossCharacterEntityRepository = await AssetsLoader.LoadAssetAsync<BossCharacterEntityRepository>
@@ -166,7 +209,7 @@ public class BossEnemySpawner : MonoBehaviour
         _bossAIBehaviourTreeNodeRepository = await AssetsLoader.LoadAssetAsync<BossAIBehaviourTreeNodeRepositry>
             (AAGBossEnemyGroup.kAssets_Data_BossEnemy_Repositry_BossAIBehaviourTreeNodeRepositry);
 
-        _bossCharacterEntityRepository.Init();
+        _bossCharacterEntityRepository.Init(_canMoveAreaChecker);
 
         _isLoadedRepositries = true;
         Debug.Log("RepositryLoad終了");
@@ -186,13 +229,13 @@ public class BossEnemySpawner : MonoBehaviour
     {
         public string Key => _key;
         public BossCharacterView BossPrefab => _bossPrefab;
-        public BossEnemyHPUIView BossUIPrefab => _enemyUIPrefab;
+        public BossCharacterHPUIView BossUIPrefab => _enemyUIPrefab;
 
         [Header("BossEnemyを呼び出すための名前")]
         [SerializeField] private string _key;
 
         [Header("BossEnemyのPrefab")]
         [SerializeField] private BossCharacterView _bossPrefab;
-        [SerializeField] private BossEnemyHPUIView _enemyUIPrefab;
+        [SerializeField] private BossCharacterHPUIView _enemyUIPrefab;
     }
 }

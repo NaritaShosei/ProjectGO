@@ -51,13 +51,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TextCountDownTimerView
   _timerText: {fileID: 492242463749214196}
   _timerEmphasisThreshold: 10
+  _emphasisColor: {r: 1, g: 0, b: 0, a: 1}
   _emphasisPanel: {fileID: 0}
   _targetPos: {x: 12.6, y: -980.8369}
   _emphasisDuration: 0.5
   _returnDelay: 1
   _returnDuration: 0.5
   _emphasisEase: 4
-  _emphasisColor: {r: 1, g: 0, b: 0, a: 1}
+  _emphasisImage: {fileID: 0}
+  _emphasisImageDuration: 0.5
+  _returnImageDelay: 0.5
+  _returnImageDuration: 0.5
+  _emphasisImageEase: 4
 --- !u!1 &8982610680681613715
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,7 +97,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -7.07, y: 3.9}
+  m_AnchoredPosition: {x: 1.9, y: -1.9}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1879815076157409242

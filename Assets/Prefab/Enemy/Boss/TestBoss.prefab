@@ -1,5 +1,67 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &651010163650270213
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4753985895479307685}
+  m_Layer: 0
+  m_Name: armor_gageUI_right
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4753985895479307685
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 651010163650270213}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.7, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7063641654223528646}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6787255830098921384
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2401919272515200642}
+  m_Layer: 0
+  m_Name: armor_gageUI_left
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2401919272515200642
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6787255830098921384}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.7, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2644834841684685062}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8249150638392747971
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,6 +294,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2343911348025127663, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2390443122594995568, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_DynamicOccludee
       value: 1
@@ -239,6 +305,18 @@ PrefabInstance:
     - target: {fileID: 2390443122594995568, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_SkinnedMotionVectors
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2907517358410163554, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3938485946548637325, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3938485946548637325, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[0]'
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5132970725368736068, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -292,6 +370,10 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.0000063909174
       objectReference: {fileID: 0}
+    - target: {fileID: 7148385828608643181, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7488395180940194410, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.7071068
@@ -307,6 +389,10 @@ PrefabInstance:
     - target: {fileID: 7488395180940194410, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8705515532985349582, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9049153449130073987, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -338,7 +424,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4952492801005314917, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2401919272515200642}
+    - targetCorrespondingSourceObject: {fileID: 146795904329691301, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4753985895479307685}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6777820953315792686, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       insertIndex: -1
@@ -383,6 +475,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
   _armorAttachmentPointsType: 2
+  _gaugeAnchor: {fileID: 0}
 --- !u!1 &351391854704435420 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7273027214671049407, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
@@ -439,6 +532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
   _armorAttachmentPointsType: 4
+  _gaugeAnchor: {fileID: 2401919272515200642}
 --- !u!1 &1792057653310285741 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8705515532985349582, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
@@ -457,6 +551,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
   _armorAttachmentPointsType: 1
+  _gaugeAnchor: {fileID: 0}
+--- !u!4 &2644834841684685062 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4952492801005314917, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+  m_PrefabInstance: {fileID: 6921644156077527651}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &3292826818554440429 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5601605180211198094, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
@@ -539,6 +639,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
   _armorAttachmentPointsType: 3
+  _gaugeAnchor: {fileID: 4753985895479307685}
 --- !u!4 &6473346287059112910 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4169045274194887085, guid: 045887646d2e4f14eb464923fee5194b, type: 3}

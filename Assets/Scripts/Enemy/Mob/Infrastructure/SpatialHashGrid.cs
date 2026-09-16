@@ -54,6 +54,7 @@ public sealed class SpatialHashGrid : ISpatialHashGrid
     {
         int range = Mathf.CeilToInt(radius / _cellSize);
         var center = WorldToCell(position);
+        float radiusSquared = radius * radius;
 
         for (int x = -range; x <= range; x++)
             for (int z = -range; z <= range; z++)
@@ -82,7 +83,7 @@ public sealed class SpatialHashGrid : ISpatialHashGrid
                         continue;
                     }
 
-                    if ((targetCenter.position - position).sqrMagnitude <= radius * radius)
+                    if ((targetCenter.position - position).sqrMagnitude <= radiusSquared)
                         result.Add(enemy);
                 }
             }
