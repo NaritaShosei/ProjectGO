@@ -48,12 +48,12 @@ namespace BossEnemy.Character
 
         /// <summary>
         /// BossBattleState の終了処理から呼ばれる、通常のボス回収入口。
-        /// Dispose と異なり、Spawner がプール返却を行えるよう Entity に通知する。
+        /// Disposeと異なり、Spawnerがプール返却を行えるようEntityに通知する。
         /// </summary>
         public void Despawn()
         {
-            // 死亡処理で Dispose 済みでも、Spawner へのプール返却通知は必要。
-            // 通知済みかどうかは Dispose 状態とは別に管理する。
+            // 死亡処理でDispose済みでも、Spawnerへのプール返却通知は必要。
+            // そのため、通知済みかどうかはDispose状態とは別に管理する。
             if (_isDespawnNotified) return;
 
             if (!_isDispose)
@@ -61,15 +61,13 @@ namespace BossEnemy.Character
 
             if (_characterEntity == null) return;
 
-            // CurrentAction の購読から View.OnRelease が同期的に呼ばれても
-            // 二重で通知しないよう、イベント発火より先に記録する。
+            // OnDespawnCompletedの購読からView.OnReleaseが同期的に呼ばれても
+            // 二重で通知しないよう、破棄処理より先に記録する。
             _isDespawnNotified = true;
 
             Debug.Log("デスポーン");
 
-            // CurrentAction は Spawner がプール返却を開始するための通知経路でもある。
-            // Controller の購読は Dispose で解除済みなので、通知後に Entity の内部状態を破棄する。
-            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
+            // Entityを完全に破棄してからOnDespawnCompletedでSpawnerに返却を通知する。
             _characterEntity.OnDespawn();
         }
 

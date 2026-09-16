@@ -162,6 +162,9 @@ namespace BossEnemy.Character
 
         public event Action OnAttackCancel;
 
+        /// <summary>Entity の内部状態を破棄し終えた際に発火する</summary>
+        public event Action OnDespawnCompleted;
+
         public BossCharacterEntity(string name, CharacterStatus[] characterStatus)
         {
             _bossName = name;
@@ -268,7 +271,7 @@ namespace BossEnemy.Character
         public void OnDespawn()
         {
             // 攻撃実行クラスを破棄
-            _attackExecutor.Dispose();
+            _attackExecutor?.Dispose();
             _attackExecutor = null;
 
             // ReactivePropertyをnullに
@@ -279,6 +282,12 @@ namespace BossEnemy.Character
             _position = null;
             _rotation = null;
             _velocity = null;
+
+            // 再利用キューへ載せる通知は、すべてのフィールドを破棄し終えた後に行う。
+            // 先にイベントを外すことで、プール内に古い購読を持ち越さない。
+            Action despawnCompleted = OnDespawnCompleted;
+            OnDespawnCompleted = null;
+            despawnCompleted?.Invoke();
         }
 
         /// <summary> 装備中の鎧のステータスを取得する </summary>
