@@ -290,16 +290,6 @@ namespace BossEnemy.SMB
             _currentHitCheckCount = 0;
         }
 
-        /// <summary> ボスの音源再生メソッド </summary>
-        protected void PlayBossSE(string cueName)
-        {
-            if (string.IsNullOrEmpty(cueName)) return;
-            if (_bossCharacterTransform == null) return;
-
-            // 再生
-            Sound.PlaySE(_bossCharacterTransform.gameObject, cueName, CueSheetType.Boss);
-        }
-
         /// <summary>
         /// 攻撃固有の演出・判定が完了したら Animator の攻撃パラメータを解除する。
         /// 攻撃終了イベントそのものは Idle への遷移完了後に送るため、

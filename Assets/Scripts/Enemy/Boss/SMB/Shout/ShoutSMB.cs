@@ -33,6 +33,7 @@ public class ShoutSMB : BossCharacterSMB
         _currentNormalizedTime = 0;
         _isShoutRunning = false;
         _cts = new CancellationTokenSource();
+        PlayBossSE(SoundCueNames.Boss.MeteorVoice);
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

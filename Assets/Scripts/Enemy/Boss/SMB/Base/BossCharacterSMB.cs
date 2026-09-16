@@ -58,6 +58,16 @@ public abstract class BossCharacterSMB : StateMachineBehaviour
 
     private bool _isDisposed = true;
 
+    /// <summary> ボスの音源再生メソッド </summary>
+    protected virtual void PlayBossSE(string cueName)
+    {
+        if (string.IsNullOrEmpty(cueName)) return;
+        if (_bossCharacterTransform == null) return;
+
+        // 再生
+        Sound.PlaySE(_bossCharacterTransform.gameObject, cueName, CueSheetType.Boss);
+    }
+
     protected virtual void ChangeTimeScale(float timeScale)
     {
         _timeScale = timeScale;
