@@ -11581,6 +11581,10 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0.01643732
       objectReference: {fileID: 0}
+    - target: {fileID: 2459623394770378340, guid: c24f69d16d6b6e948836d91b314e6778, type: 3}
+      propertyPath: trailEffect
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2482721003249151542, guid: c24f69d16d6b6e948836d91b314e6778, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.070753396
@@ -12305,7 +12309,10 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.16585803
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 505546664762193948, guid: c24f69d16d6b6e948836d91b314e6778, type: 3}
+    - {fileID: 7836848784242763990, guid: c24f69d16d6b6e948836d91b314e6778, type: 3}
+    - {fileID: 2459623394770378340, guid: c24f69d16d6b6e948836d91b314e6778, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5008781219191212422, guid: c24f69d16d6b6e948836d91b314e6778, type: 3}
@@ -18523,7 +18530,14 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9185101026815734130, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
+      propertyPath: trailEffect
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 6511728738120668938, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
+    - {fileID: 3573688461017204672, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
+    - {fileID: 9185101026815734130, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
