@@ -29,6 +29,7 @@ namespace BossEnemy.Character
             RegisterEvents();
 
             _isDispose = false;
+            _isDespawnNotified = false;
         }
 
         public void Dispose()
@@ -51,9 +52,18 @@ namespace BossEnemy.Character
         /// </summary>
         public void Despawn()
         {
-            if (_isDispose) return;
+            // 死亡処理で Dispose 済みでも、Spawner へのプール返却通知は必要。
+            // 通知済みかどうかは Dispose 状態とは別に管理する。
+            if (_isDespawnNotified) return;
 
-            Dispose();
+            if (!_isDispose)
+                Dispose();
+
+            if (_characterEntity == null) return;
+
+            // CurrentAction の購読から View.OnRelease が同期的に呼ばれても
+            // 二重で通知しないよう、イベント発火より先に記録する。
+            _isDespawnNotified = true;
 
             Debug.Log("デスポーン");
             _characterEntity.SetCurrentAction(CharacterAction.Despawn);
@@ -68,6 +78,9 @@ namespace BossEnemy.Character
 
         // Dispose済みフラグ
         private bool _isDispose = true;
+
+        // Spawner へのプール返却通知済みフラグ
+        private bool _isDespawnNotified = false;
 
         // イベントの登録処理をすでに行っているか
         private bool _isRegisterEvents = false;
