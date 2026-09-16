@@ -23,7 +23,7 @@ MonoBehaviour:
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C92-0"
     _requiredCharge: 0
     _hits:
-    - DamageMultiplier: 1.35
+    - DamageMultiplier: 1.25
       AttackRange: 1
       AttackRadius: 1
       EnableKnockback: 1
@@ -115,9 +115,9 @@ MonoBehaviour:
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C92-1"
     _requiredCharge: 1
     _hits:
-    - DamageMultiplier: 1.71
-      AttackRange: 1.2
-      AttackRadius: 2
+    - DamageMultiplier: 1.5
+      AttackRange: 1.5
+      AttackRadius: 2.5
       EnableKnockback: 1
       KnockbackPower: 5
       KnockbackUpward: 2
@@ -207,9 +207,9 @@ MonoBehaviour:
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C92-2"
     _requiredCharge: 2
     _hits:
-    - DamageMultiplier: 2.31
-      AttackRange: 1.4
-      AttackRadius: 2.3
+    - DamageMultiplier: 1.75
+      AttackRange: 1.5
+      AttackRadius: 3
       EnableKnockback: 1
       KnockbackPower: 5
       KnockbackUpward: 2
@@ -299,9 +299,9 @@ MonoBehaviour:
   - _attackName: "\u95D8\u795E\u30E2\u30FC\u30C92-3"
     _requiredCharge: 3
     _hits:
-    - DamageMultiplier: 2.73
-      AttackRange: 1.5
-      AttackRadius: 2.5
+    - DamageMultiplier: 2
+      AttackRange: 2
+      AttackRadius: 3.75
       EnableKnockback: 1
       KnockbackPower: 4
       KnockbackUpward: 2
