@@ -370,6 +370,7 @@ public class EnemyManager : MonoBehaviour
                 enemy.OnDead -= HandleEnemyDead;
                 enemy.OnDamaged -= HandleEnemyDamaged;
                 bossCharacter.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
+                HandleChangeBossEnemyLockOnParts((null, bossCharacter.ActiveBossEnemyPartsView));
 
                 _spatialHashGrid?.Remove(enemy);
                 _enemies.Remove(enemy);
