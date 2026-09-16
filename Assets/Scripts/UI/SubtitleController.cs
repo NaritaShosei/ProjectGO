@@ -56,6 +56,12 @@ public sealed class SubtitleController : MonoBehaviour
         ClearSubtitle();
     }
 
+    /// <summary>字幕・予約ボイスのタイマーを指定秒数分だけ進める（Timelineスキップ時の同期用）</summary>
+    public void AdvanceTimeline(float seconds)
+    {
+        _timeline?.AdvanceTime(seconds);
+    }
+
     private SubtitleSettings _settings;
     private SubtitleView _view;
     private PlayerSoundHandler _soundHandler;
