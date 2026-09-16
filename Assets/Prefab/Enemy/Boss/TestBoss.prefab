@@ -294,6 +294,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2343911348025127663, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2390443122594995568, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_DynamicOccludee
       value: 1
@@ -301,6 +305,18 @@ PrefabInstance:
     - target: {fileID: 2390443122594995568, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_SkinnedMotionVectors
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2907517358410163554, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3938485946548637325, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_UpdateWhenOffscreen
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3938485946548637325, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: 'm_BlendShapeWeights.Array.data[0]'
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5132970725368736068, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -354,6 +370,10 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.0000063909174
       objectReference: {fileID: 0}
+    - target: {fileID: 7148385828608643181, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7488395180940194410, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.7071068
@@ -369,6 +389,10 @@ PrefabInstance:
     - target: {fileID: 7488395180940194410, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8705515532985349582, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9049153449130073987, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       propertyPath: m_LocalPosition.x
