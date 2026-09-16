@@ -445,7 +445,7 @@ AnimatorState:
   - {fileID: -9034961022330590207}
   - {fileID: 5827807746521558405}
   m_StateMachineBehaviours:
-  - {fileID: 881110217911635667}
+  - {fileID: 9019580635131753787}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -941,7 +941,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: RockUpLift_Down
+  m_Name: Meteor_Down
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -949,7 +949,7 @@ AnimatorState:
   - {fileID: 651888406026311286}
   - {fileID: 8835745098887713602}
   m_StateMachineBehaviours:
-  - {fileID: -911649455939748768}
+  - {fileID: -1797969511072065167}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -1187,31 +1187,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &-5019241772743538573
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ee48b8e5d0118847b8b05b56cb0b345, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
-  _attackID: 11
-  _attackStartTime: 1
-  _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 7
-  _attackHitCollisionType: 1
-  _cameraShakeData:
-    _amplitude: 3
-    _frequency: 2
-    _duration: 1
-  _attackIntervalTime: 1.5
-  _attackHitTimingDelayTime: 0.2
-  _attackAreaCircleGeneratePosY: 0.2
-  _maxAttackCount: 4
 --- !u!1101 &-4668098060198359337
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1500,6 +1475,32 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
+--- !u!114 &-2414689967125181122
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19e0d838cd72a8a47be8437d974a841d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
+  _attackID: 11
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
+  _cameraShakeData:
+    _amplitude: 1.84
+    _frequency: 0.87
+    _duration: 1.57
+  _consecutiveAttackInterval: 1
+  _maxAttackFieldHalfRange: 20
+  _maxAttackCount: 20
+  _attackAreaEffectPosY: 0.2
+  _attackHitTime: 1.05
 --- !u!1101 &-2388873810595694893
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1578,6 +1579,30 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &-2249313786194720845
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 178e8826323562c418745349cce5efca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
+  _attackID: 10
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
+  _cameraShakeData:
+    _amplitude: 1.41
+    _frequency: 1.05
+    _duration: 1.11
+  _attackHitTimingDelayTime: 0.1
+  _attackAreaCircleGeneratePosY: 0.2
+  _attackPointDistance: 2
 --- !u!1102 &-2099094422740729497
 AnimatorState:
   serializedVersion: 6
@@ -1696,6 +1721,32 @@ AnimatorStateMachine:
   m_ExitPosition: {x: 1060, y: 250, z: 0}
   m_ParentStateMachinePosition: {x: 200, y: 60, z: 0}
   m_DefaultState: {fileID: -4258494403386785375}
+--- !u!114 &-1797969511072065167
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19e0d838cd72a8a47be8437d974a841d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.MeteorSMB
+  _attackID: 11
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
+  _cameraShakeData:
+    _amplitude: 1.2
+    _frequency: 1.2
+    _duration: 1.08
+  _consecutiveAttackInterval: 1
+  _maxAttackFieldHalfRange: 20
+  _maxAttackCount: 20
+  _attackAreaEffectPosY: 0.2
+  _attackHitTime: 1.05
 --- !u!1101 &-1730570095668115221
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1868,13 +1919,12 @@ MonoBehaviour:
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
   _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
+    _amplitude: 1.06
+    _frequency: 0.73
+    _duration: 0.92
   _attackHitTimingDelayTime: 0
   _attackAreaCircleGeneratePosY: 0.2
-  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
-  _attackPointDistance: 0
+  _attackPointDistance: 0.64
 --- !u!1101 &-928170174063221020
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1897,31 +1947,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &-911649455939748768
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ee48b8e5d0118847b8b05b56cb0b345, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
-  _attackID: 11
-  _attackStartTime: 1
-  _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 7
-  _attackHitCollisionType: 1
-  _cameraShakeData:
-    _amplitude: 2.94
-    _frequency: 2
-    _duration: 1
-  _attackIntervalTime: 1.5
-  _attackHitTimingDelayTime: 0.2
-  _attackAreaCircleGeneratePosY: 0.2
-  _maxAttackCount: 4
 --- !u!1101 &-879088540828779516
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2002,7 +2027,7 @@ AnimatorState:
   - {fileID: -6062427295072742353}
   - {fileID: -286257156576945178}
   m_StateMachineBehaviours:
-  - {fileID: 3342466003928994411}
+  - {fileID: -2249313786194720845}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -2737,27 +2762,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &881110217911635667
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d2c0651f5f14ab46bc0b4a936a9b37f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
-  _attackID: 10
-  _attackStartTime: 1
-  _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 7
-  _attackHitCollisionType: 1
-  _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
 --- !u!1101 &967037244866571294
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -2879,10 +2883,10 @@ AnimatorStateMachine:
     m_Position: {x: 250, y: 0, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6779888127852869895}
-    m_Position: {x: 460, y: 0, z: 0}
+    m_Position: {x: 470, y: 10, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -812563210983846130}
-    m_Position: {x: 540, y: 80, z: 0}
+    m_Position: {x: 540, y: 90, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 2210018754530114918}
     m_Position: {x: 490, y: 180, z: 0}
@@ -3055,7 +3059,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: RockUpLift_Down
+  m_Name: Meteor_Down
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -3063,7 +3067,7 @@ AnimatorState:
   - {fileID: 6550602602207304159}
   - {fileID: -5783925727139201474}
   m_StateMachineBehaviours:
-  - {fileID: -5019241772743538573}
+  - {fileID: -2414689967125181122}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -3327,27 +3331,6 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
---- !u!114 &3342466003928994411
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d2c0651f5f14ab46bc0b4a936a9b37f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.EdwardSMB
-  _attackID: 10
-  _attackStartTime: 1
-  _attackAreaDespawnAndDisplayAttackEffectTime: 1
-  _attackHitCheckFrameCount: 7
-  _attackHitCollisionType: 1
-  _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
 --- !u!114 &3452481721500120313
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3575,13 +3558,12 @@ MonoBehaviour:
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
   _cameraShakeData:
-    _amplitude: 0
-    _frequency: 0
-    _duration: 0
-  _attackHitTimingDelayTime: 0
+    _amplitude: 1.16
+    _frequency: 1.24
+    _duration: 1.06
+  _attackHitTimingDelayTime: 0.16
   _attackAreaCircleGeneratePosY: 0.2
-  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
-  _attackPointDistance: 0
+  _attackPointDistance: 0.99
 --- !u!114 &4567494591603859569
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4418,7 +4400,6 @@ MonoBehaviour:
     _duration: 0.35
   _attackHitTimingDelayTime: 0.1
   _attackAreaCircleGeneratePosY: 0.2
-  _magicStartEffectPlayOffset: {x: 0, y: 0, z: 0}
   _attackPointDistance: 2
 --- !u!1102 &7937429894567203005
 AnimatorState:
@@ -4645,6 +4626,30 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &9019580635131753787
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 178e8826323562c418745349cce5efca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
+  _attackID: 10
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
+  _cameraShakeData:
+    _amplitude: 1.53
+    _frequency: 1.05
+    _duration: 2.22
+  _attackHitTimingDelayTime: 0.1
+  _attackAreaCircleGeneratePosY: 0.2
+  _attackPointDistance: 2
 --- !u!1102 &9019623883209432096
 AnimatorState:
   serializedVersion: 6
