@@ -51,12 +51,6 @@ namespace BossEnemy.SMB
         {
             if (_maxAttackCount == 0) return;
 
-            // 魔法攻撃の発動Effect発生位置を取得
-            var magicStartEffectPlayPos = _bossCharacterTransform.TransformPoint(_magicStartEffectPlayOffset);
-
-            // 魔法攻撃の発動Effectを再生
-            _effectManager.PlayEffect(START_MAGIC_EFFECT, magicStartEffectPlayPos);
-
             for (int count = 0; count < _maxAttackCount; count++)
             {
                 // 攻撃位置を取得
@@ -71,7 +65,7 @@ namespace BossEnemy.SMB
 
                 _visibleHitAreaList.Add(hitArea);
 
-                // 攻撃のEffectは発生するまでの時間
+                // 攻撃のEffectが発生するまでの時間
                 var playEffectStartTime = _elapsedTime + _attackAreaDespawnAndDisplayAttackEffectTime;
 
                 // 攻撃範囲が生成されてから攻撃が行われるまでの時間待機
@@ -86,6 +80,9 @@ namespace BossEnemy.SMB
 
                 // 攻撃音の再生
                 PlayBossSE(SoundCueNames.Boss.RockEruption);
+
+                // 魔法攻撃の発動Effectを再生
+                _effectManager.PlayEffect(START_MAGIC_EFFECT, attackCenterPos);
 
                 // 攻撃Effectを再生
                 _effectManager.PlayEffect(ROCK_UP_LIFT_EFFECT_NAME, attackCenterPos);
