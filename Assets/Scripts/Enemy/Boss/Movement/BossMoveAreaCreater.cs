@@ -10,7 +10,7 @@ namespace BossEnemy.Movement
         public bool CanMove(Vector3 movePos, Vector3 currentPos, out Vector3 newMovePos)
         {
             newMovePos = currentPos;
-            newMovePos.y = 0f;
+            newMovePos.y = currentPos.y;
 
             if(_center == null)
             {
@@ -18,11 +18,11 @@ namespace BossEnemy.Movement
                 return false;
             }
 
-            movePos.y = 0f;
+            movePos.y = currentPos.y;
             var center = new Vector3()
             {
                 x = _center.position.x,
-                y = 0f,
+                y = currentPos.y,
                 z = _center.position.z
             };
 
