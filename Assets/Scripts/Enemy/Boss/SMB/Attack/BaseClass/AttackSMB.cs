@@ -181,6 +181,18 @@ namespace BossEnemy.SMB
             _isStopPlayAttack = true;
         }
 
+        /// <summary>
+        /// プール返却時に進行中の攻撃と購読を確実に終了する。
+        /// </summary>
+        public override void Dispose()
+        {
+            StopPlayAttack();
+            if (_animationEventReceiver != null)
+                _animationEventReceiver.OnHitAttack -= HandleAttackHit;
+
+            base.Dispose();
+        }
+
         /// <summary> 攻撃データを設定 </summary>
         public void SetAttackData(Attack.AttackData attackData)
         {

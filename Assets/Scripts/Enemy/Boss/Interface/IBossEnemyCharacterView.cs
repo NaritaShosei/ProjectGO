@@ -26,6 +26,9 @@ namespace BossEnemy.Interface
         /// <summary> 現在攻撃可能なボスの部位 </summary>
         public BossCharacterPartsView[] ActiveBossEnemyPartsView { get; }
 
+        /// <summary> デスポーン時の処理 </summary>
+        public void Despawn();
+
         /// <summary> 回転をセットする </summary>
         public void SetRotation(Quaternion quaternion);
 
