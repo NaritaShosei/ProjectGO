@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f2e70c0aace43b1911cc119f302085c, type: 3}
   m_Name: ResultLighting
   m_EditorClassIdentifier: Assembly-CSharp::EnvironmentLightingData
-  _skybox: {fileID: 2100000, guid: dae6f9c9bd31af747b4e8613df46d668, type: 2}
-  _subtractiveShadowColor: {r: 0.627451, g: 0.4627451, b: 0.41960785, a: 1}
+  _skybox: {fileID: 2100000, guid: f8e96f28acff55c4cb5e6184a81d7287, type: 2}
+  _subtractiveShadowColor: {r: 0.65882355, g: 0.3137255, b: 0.21960784, a: 1}
   _ambientMode: 1
-  _ambientSkyColor: {r: 0.5764706, g: 0.4509804, b: 0.62352943, a: 1}
-  _ambientEquatorColor: {r: 0.14509805, g: 0.15294118, b: 0.24705882, a: 1}
-  _ambientGroundColor: {r: 0.81960785, g: 0.5058824, b: 0.5176471, a: 1}
+  _ambientSkyColor: {r: 0, g: 0.7137255, b: 1, a: 1}
+  _ambientEquatorColor: {r: 0.6313726, g: 0.78039217, b: 0.83137256, a: 1}
+  _ambientGroundColor: {r: 0.5764706, g: 0.21176471, b: 0.15294118, a: 1}
   _ambientLight: {r: 0.5764706, g: 0.4509804, b: 0.62352943, a: 1}
   _ambientIntensity: 1
   _defaultReflectionMode: 0
@@ -26,9 +26,9 @@ MonoBehaviour:
   _reflectionIntensity: 1
   _reflectionBounces: 1
   _fog: 1
-  _fogColor: {r: 0.62352943, g: 0.32156864, b: 0.45490196, a: 1}
+  _fogColor: {r: 0.5176471, g: 0.7137255, b: 0.99607843, a: 1}
   _fogMode: 3
-  _fogDensity: 0.008
+  _fogDensity: 0.002
   _fogStartDistance: 0
   _fogEndDistance: 300
   _haloStrength: 0.444
