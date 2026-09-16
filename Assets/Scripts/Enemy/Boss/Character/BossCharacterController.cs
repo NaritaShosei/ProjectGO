@@ -66,8 +66,11 @@ namespace BossEnemy.Character
             _isDespawnNotified = true;
 
             Debug.Log("デスポーン");
-            _characterEntity.OnDespawn();
+
+            // CurrentAction は Spawner がプール返却を開始するための通知経路でもある。
+            // Controller の購読は Dispose で解除済みなので、通知後に Entity の内部状態を破棄する。
             _characterEntity.SetCurrentAction(CharacterAction.Despawn);
+            _characterEntity.OnDespawn();
         }
 
         public void OnUpdate()
