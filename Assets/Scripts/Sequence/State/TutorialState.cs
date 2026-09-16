@@ -485,7 +485,7 @@ public sealed class TutorialState : ISequenceState
     }
 
     /// <summary>
-    /// モブ戦中の致死ダメージをダウン復帰に置き換える。
+    /// チュートリアル中の致死ダメージをダウン復帰に置き換える。
     /// true を返し、PlayerStats の通常死亡をキャンセルする。
     /// </summary>
     private bool HandleBeforePlayerDead()
