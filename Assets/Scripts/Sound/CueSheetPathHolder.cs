@@ -19,6 +19,7 @@ public class CueSheetPathHolder
         CueSheetPathDict.Add(CueSheetType.BGM, "BGM");
         CueSheetPathDict.Add(CueSheetType.InGameBGM, "BGM");
         CueSheetPathDict.Add(CueSheetType.PlayerVoice, "Player_Voice");
+        CueSheetPathDict.Add(CueSheetType.BossVoice, "BossVoice");
     }
 }
 
@@ -37,4 +38,5 @@ public enum CueSheetType
     BGM,
     InGameBGM,
     PlayerVoice,
+    BossVoice,
 }
