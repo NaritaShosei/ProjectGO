@@ -11,7 +11,6 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UniRx;
 using UnityEngine.Rendering;
 using BossEnemy.Movement;
 
@@ -73,15 +72,16 @@ public class BossEnemySpawner : MonoBehaviour
         bossEnemyHPUIPresenter.Init();
         bossEnemyHPUI.Init(bossEnemyHPUIPresenter);
 
-        // 死んだ際のイベント登録
-        characterEntity.CurrentAction.Subscribe(currentAction =>
+        // Entity の後始末完了後にプールへ返却する。
+        Action despawnHandler = null;
+        despawnHandler = () =>
         {
-            if (currentAction == CharacterAction.Despawn)
-            {
-                if (bossEnemyHPUI is BossCharacterHPUIView hpUI)
-                    HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
-            }
-        });
+            characterEntity.OnDespawnCompleted -= despawnHandler;
+
+            if (bossEnemyHPUI is BossCharacterHPUIView hpUI)
+                HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
+        };
+        characterEntity.OnDespawnCompleted += despawnHandler;
 
         // 足鎧のUIゲージが実耐久値を読めるようにEntityを渡す
         RegisterLegArmorEntity(enemyView, characterEntity);
