@@ -58,6 +58,19 @@ public class ShoutSMB : BossCharacterSMB
         DisableRadialBlur();
     }
 
+    /// <summary>
+    /// プール返却時にシャウト演出の非同期処理と画面効果を終了する。
+    /// </summary>
+    public override void Dispose()
+    {
+        _shoutVersion++;
+        _isShoutRunning = false;
+        CancelShout();
+        DisableRadialBlur();
+
+        base.Dispose();
+    }
+
     [Range(0, 1), Header("アニメーターの長さに対するシャウト開始時間")]
     [SerializeField] private float _shoutStartTime = 0;
 
