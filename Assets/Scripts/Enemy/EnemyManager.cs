@@ -478,12 +478,6 @@ public class EnemyManager : MonoBehaviour
             _spatialHashGrid?.Remove(enemy);
             OnBossDefeated?.Invoke();
 
-            if (enemy is IBossEnemyCharacterView bossEnemy)
-            {
-                bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
-                HandleChangeBossEnemyLockOnParts((null, bossEnemy.ActiveBossEnemyPartsView));
-            }
-
             return;
         }
 
