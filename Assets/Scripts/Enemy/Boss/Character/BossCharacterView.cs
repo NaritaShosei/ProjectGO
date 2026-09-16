@@ -88,6 +88,8 @@ namespace BossEnemy.Character
         /// <summary> 初期化する </summary>
         public void Init()
         {
+            _isDespawned = false;
+
             // タイムスケール初期化
             _timeScale = new(1.0f);
 
@@ -164,6 +166,7 @@ namespace BossEnemy.Character
             }
         }
 
+        /// <summary> 初期化処理 </summary>
         public void Init(IBossEnemyCharacterController bossEnemyCharacterController, Volume volume)
         {
             _shoutVolume = volume;
@@ -173,6 +176,35 @@ namespace BossEnemy.Character
             _bossEnemyController = bossEnemyCharacterController;
 
             _updaters.Add(bossEnemyCharacterController);
+        }
+
+        /// <summary> デスポーン時の処理 </summary>
+        public void Despawn()
+        {
+            if (_isDespawned) return;
+
+            _isDespawned = true;
+            _isLockable = false;
+
+            // AttackSMB が保持する CTS と攻撃範囲表示を回収する。
+            StopActiveAttacks();
+
+            // 全 SMB の ReactiveProperty 購読を解除し、ShoutSMB の画面効果も停止する。
+            foreach (BossCharacterSMB bossCharacterSMB in _animator.GetBehaviours<BossCharacterSMB>())
+            {
+                bossCharacterSMB?.Dispose();
+            }
+
+            // Controller から Entity にデスポーンを通知し、Spawner がプールへ返却する。
+            _bossEnemyController?.Despawn();
+
+            // HitStopManager に残ったプール済みボスへの参照を解除する。
+            if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+                hitStopManager.UnregisterFromAll(this);
+
+            _timeScale?.Dispose();
+            _updaters.Clear();
+            _attackSMBList.Clear();
         }
 
 
@@ -369,9 +401,7 @@ namespace BossEnemy.Character
         /// </summary>
         public void OnRelease()
         {
-            _isLockable = false;
-
-            _bossEnemyController.Dispose();
+            Despawn();
         }
 
         /// <summary> 死んだ際の処理 </summary>
@@ -464,6 +494,7 @@ namespace BossEnemy.Character
         private IAttackHitAreaSpawner _attackHitAreaSpawner = null;
 
         private bool _isDead = false;
+        private bool _isDespawned = true;
         private bool _isLockable;
 
         // ボスのタイムスケール
@@ -485,6 +516,20 @@ namespace BossEnemy.Character
         {
             _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
             _effectManager = FindFirstObjectByType<EffectManager>();
+        }
+
+        private void OnDestroy()
+        {
+            // シーン破棄中は Spawner が既に破棄され得るため、
+            // CharacterAction.Despawn を発火せずリソースだけ解放する。
+            if (!_isDespawned)
+            {
+                _isDespawned = true;
+                StopActiveAttacks();
+                _bossEnemyController?.Dispose();
+            }
+
+            _bossEnemyAnimator?.Dispose();
         }
 
         private void Update()

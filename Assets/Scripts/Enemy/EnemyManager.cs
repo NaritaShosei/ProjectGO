@@ -1,10 +1,11 @@
+using BossEnemy.Interface;
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using UnityEngine;
-using BossEnemy.Interface;
 using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -322,12 +323,14 @@ public class EnemyManager : MonoBehaviour
         enemy.StartAction();
     }
 
-    /// <summary> スポーン中のモブ敵をプールに返して非有効化する </summary>
-    public void ClearAllMobEnemies()
+    /// <summary> スポーン中の敵をプールに返して非有効化する </summary>
+    public void ClearAllEnemies()
     {
         foreach (var enemy in _enemies.ToArray())
         {
-            if (enemy != null && !enemy.IsBoss && !enemy.IsDead)
+            if (enemy == null) continue;
+
+            if (!enemy.IsBoss && !enemy.IsDead)
             {
                 RemoveDeadEnemyTransform(enemy);
 
@@ -358,6 +361,24 @@ public class EnemyManager : MonoBehaviour
                 {
                     _enemySpawner.Despawn(enemyComponent);
                 }
+
+                continue;
+            }
+
+            if ( enemy is IBossEnemyCharacterView bossCharacter )
+            {
+                RemoveDeadEnemyTransform(enemy);
+
+                enemy.OnDead -= HandleEnemyDead;
+                enemy.OnDamaged -= HandleEnemyDamaged;
+                bossCharacter.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
+
+                _spatialHashGrid?.Remove(enemy);
+                _enemies.Remove(enemy);
+
+                OnEnemyForceRemoved?.Invoke(enemy);
+
+                bossCharacter.Despawn();
             }
         }
     }
@@ -443,33 +464,31 @@ public class EnemyManager : MonoBehaviour
 
     private void HandleEnemyDead(IEnemy enemy)
     {
-        if (enemy != null)
+        if (enemy == null) return;
+
+        enemy.OnDead -= HandleEnemyDead;
+        enemy.OnDamaged -= HandleEnemyDamaged;
+
+        // ボスは BossBattleState.OnExit の ClearAllEnemies で Despawn して回収する。
+        // ここで _enemies から取り除くと、その回収経路に到達できなくなる。
+        if (enemy.IsBoss)
         {
-            RemoveDeadEnemyTransform(enemy);
-
-            enemy.OnDead -= HandleEnemyDead;
-            enemy.OnDamaged -= HandleEnemyDamaged;
-
-            // SpatialHashGridから登録解除
             _spatialHashGrid?.Remove(enemy);
+            OnBossDefeated?.Invoke();
 
-            _enemies.Remove(enemy);
-
-            // ボスかどうか判定
-            if (enemy.IsBoss)
+            if (enemy is IBossEnemyCharacterView bossEnemy)
             {
-                OnBossDefeated?.Invoke();
-            }
-            else
-            {
-                OnEnemyDefeated?.Invoke();
+                bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
+                HandleChangeBossEnemyLockOnParts((null, bossEnemy.ActiveBossEnemyPartsView));
             }
 
-            if (enemy is not IBossEnemyCharacterView bossEnemy) return;
-
-            bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
-            HandleChangeBossEnemyLockOnParts((null, bossEnemy.ActiveBossEnemyPartsView));
+            return;
         }
+
+        RemoveDeadEnemyTransform(enemy);
+        _spatialHashGrid?.Remove(enemy);
+        _enemies.Remove(enemy);
+        OnEnemyDefeated?.Invoke();
     }
 
     private void HandleChangeBossEnemyLockOnParts((IReadOnlyList<ILockOnTarget> newTargets, IReadOnlyList<ILockOnTarget> oldTargets) changedLockOnTargets)

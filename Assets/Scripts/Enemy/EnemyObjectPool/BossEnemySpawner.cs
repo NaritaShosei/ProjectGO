@@ -74,10 +74,13 @@ public class BossEnemySpawner : MonoBehaviour
         bossEnemyHPUI.Init(bossEnemyHPUIPresenter);
 
         // 死んだ際のイベント登録
-        characterEntity.CurrentAction.Subscribe(currentAction =>
+        IDisposable despawnSubscription = null;
+        despawnSubscription = characterEntity.CurrentAction.Subscribe(currentAction =>
         {
             if (currentAction == CharacterAction.Despawn)
             {
+                despawnSubscription?.Dispose();
+
                 if (bossEnemyHPUI is BossCharacterHPUIView hpUI)
                     HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
             }

@@ -45,6 +45,21 @@ namespace BossEnemy.Character
             _isDispose = true;
         }
 
+        /// <summary>
+        /// BossBattleState の終了処理から呼ばれる、通常のボス回収入口。
+        /// Dispose と異なり、Spawner がプール返却を行えるよう Entity に通知する。
+        /// </summary>
+        public void Despawn()
+        {
+            if (_isDispose) return;
+
+            Dispose();
+
+            Debug.Log("デスポーン");
+            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
+            _characterEntity.OnDespawn();
+        }
+
         public void OnUpdate()
         {
             if (_bossAIBehaviourController != null)
@@ -167,9 +182,6 @@ namespace BossEnemy.Character
 
             // キャラクターの移動イベント購読開始
             _animationEventReceiver.OnMoveCharacter += HandleMoveCharacter;
-
-            // デスポーンイベント購読開始
-            _animationEventReceiver.OnDespawn += HandleDespawn;
 
             // 既にイベントの登録が完了しているフラグを立てる
             _isRegisterEvents = true;
@@ -371,17 +383,5 @@ namespace BossEnemy.Character
                 (_characterEntity, goalPos, moveTime, _characterEntity.TimeScale);
         }
 
-        /// <summary> デースポーンイベント発火時の処理 </summary>
-        private void HandleDespawn()
-        {
-            Debug.Log("デスポーン");
-            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
-
-            // デスポーン時の処理
-            _characterEntity.OnDespawn();
-
-            // デスポーンイベント購読解除
-            _animationEventReceiver.OnDespawn -= HandleDespawn;
-        }
     }
 }

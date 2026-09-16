@@ -15,5 +15,10 @@ namespace BossEnemy.Interface
             IBossCharacterAnimationEventReceiver animationEventReceiver,
             ITreeNode entryNode,
             IBossCharacterEntity bossCharacterEntity);
+
+        /// <summary>
+        /// ボスをプールへ返却するため、Entity にデスポーンを通知する。
+        /// </summary>
+        public void Despawn();
     }
 }

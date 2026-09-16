@@ -28,11 +28,17 @@ public abstract class BossCharacterSMB : StateMachineBehaviour
         
     }
 
-    public void OnDisable()
+    /// <summary>
+    /// ボスがプールへ戻るときの後始末を行う。
+    /// View から明示的に呼べるようにし、非アクティブ化より前に購読を解除する。
+    /// </summary>
+    public virtual void Dispose()
     {
         _timeScaleDisposable?.Dispose();
         _timeScaleDisposable = null;
     }
+
+    public void OnDisable() => Dispose();
 
     protected IBossCharacterAnimationEventReceiver _animationEventReceiver = null;
 
