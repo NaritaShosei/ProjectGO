@@ -1778,6 +1778,8 @@ MonoBehaviour:
       type: {class: IntroMovieState, ns: , asm: Assembly-CSharp}
       data:
         _movieName: Intro
+        _skipHoldDuration: 1
+        _skipBoundaryTime: 25.933332
         _nextSequence: 7
     - rid: 6731506274227978448
       type: {class: MobAndSkillState, ns: , asm: Assembly-CSharp}
@@ -1820,6 +1822,7 @@ MonoBehaviour:
         _baseScore: 10000
         _timeScorePerSecond: 100
         _levelScoreMultiplier: 1000
+        _movieName: Result
     - rid: 6731506274227978453
       type: {class: GameOverState, ns: , asm: Assembly-CSharp}
       data:
@@ -2277,6 +2280,8 @@ MonoBehaviour:
   _occlusionFadeSpeed: 5
   _cameraRotationSpeed: {x: 30, y: 20}
   _cameraInputDirection: {x: 1, y: -1}
+  _mouseCameraSensitivityScale: 1
+  _gamepadCameraSensitivityScale: 1
   _lockOnAreaRadius: 150
   _lockOnPositionSpeed: 10
   _lockOnFollowSpeedMin: 1
