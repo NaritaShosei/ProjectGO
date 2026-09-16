@@ -27,9 +27,25 @@ public class ResultState : ISequenceState
             _levelScoreMultiplier);
         _presenter = new ResultPanelPresenter(_view, _model);
         _view.TitleRequested += HandleTitleRequested;
+
+        var moviePlayer = context.MoviePlayer;
+        if (moviePlayer == null)
+        {
+            Debug.LogWarning("[ResultState] MoviePlayer is not assigned.");
+            context.IsMovieCompleted = true;
+        }
+        else
+        {
+            moviePlayer.OnMovieFinished += HandleMovieFinished;
+            if (!moviePlayer.PlayMovie(_movieName))
+            {
+                Debug.LogWarning($"ムービー '{_movieName}' の再生に失敗しました。");
+                context.IsMovieCompleted = true;
+            }
+        }
+
         _presenter.ShowResult();
         context.SequenceManager?.Subtitles?.PlayVoiceSubtitle(SoundCueNames.PlayerVoice.Result);
-
         context.SequenceManager?.NotifyAllSequencesComplete();
     }
 
@@ -37,6 +53,10 @@ public class ResultState : ISequenceState
 
     public void OnExit(SequenceStateContext context)
     {
+        var moviePlayer = context.MoviePlayer;
+        if (moviePlayer != null)
+            moviePlayer.OnMovieFinished -= HandleMovieFinished;
+
         context.SequenceManager?.Subtitles?.HideSubtitle();
         if (_view != null)
             _view.TitleRequested -= HandleTitleRequested;
@@ -54,6 +74,9 @@ public class ResultState : ISequenceState
     [SerializeField, Min(0)] private int _baseScore = 10000;
     [SerializeField, Min(0f)] private float _timeScorePerSecond = 100f;
     [SerializeField, Min(0)] private int _levelScoreMultiplier = 1000;
+
+    [Header("Movie Settings")]
+    [SerializeField] private string _movieName = "Result";
 
     private ResultPanelModel _model;
     private ResultPanelPresenter _presenter;
@@ -73,5 +96,10 @@ public class ResultState : ISequenceState
 
         _context?.SequenceManager?.Subtitles?.HideSubtitle();
         transitionManager.TransitionToTitle().Forget();
+    }
+
+    private void HandleMovieFinished()
+    {
+        _context.IsMovieCompleted = true;
     }
 }
