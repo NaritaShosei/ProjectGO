@@ -19,10 +19,15 @@ namespace BossEnemy.SMB
             // 移動フラグの初期化
             _isMoving = false;
 
-            // 移動先を指定
-            _goalPos =
-                _bossCharacterTransform.position +
-                (_bossCharacterTransform.forward * _moveDistance);
+            // 突進は地面に沿って行う。Animatorのルートモーションなどで
+            // transform.forward にY成分が混ざっても、目標座標へ持ち込まない。
+            Vector3 startPosition = _bossCharacterTransform.position;
+            Vector3 horizontalForward = Vector3.ProjectOnPlane(
+                _bossCharacterTransform.forward,
+                Vector3.up).normalized;
+
+            _goalPos = startPosition + horizontalForward * _moveDistance;
+            _goalPos.y = startPosition.y;
 
             base.OnStateEnter(animator, stateInfo, layerIndex);
         }
@@ -56,6 +61,9 @@ namespace BossEnemy.SMB
         [Header("移動開始から終了までの時間")]
         [SerializeField] private float _goalTime = 1f;
 
+        [Header("攻撃の範囲エフェクトの生成位置の高さ")]
+        [SerializeField] private float _attackAreaCircleGeneratePosY = 0.2f;
+
         // 移動地点とかける時間
         private Vector3 _goalPos = Vector3.zero;
         private bool _isMoving = false;
@@ -65,10 +73,13 @@ namespace BossEnemy.SMB
             // 移動距離の半分の距離を攻撃エリアの中心にする
             float hitAreaSpawnCenterDistance = _moveDistance / 2;
 
-            // transform.position（自身の現在地） + transform.forward（正面方向の単位ベクトル） * 距離
-            Vector3 spawnPosition =
-                _bossCharacterTransform.position +
-                (_bossCharacterTransform.forward * hitAreaSpawnCenterDistance);
+            // 表示範囲も実際の突進と同じく水平面上に作成する。
+            Vector3 horizontalForward = Vector3.ProjectOnPlane(
+                _bossCharacterTransform.forward,
+                Vector3.up).normalized;
+            Vector3 spawnPosition = _bossCharacterTransform.position
+                + horizontalForward * hitAreaSpawnCenterDistance;
+            spawnPosition.y = _attackAreaCircleGeneratePosY;
 
             // 実判定は移動中のボスを中心とした円形範囲の連続判定。
             // その移動軌跡を、幅=円の直径・長さ=移動距離の矩形として表示する。
@@ -80,7 +91,7 @@ namespace BossEnemy.SMB
                 AttackHitAreaType.Square,
                 spawnPosition,
                 _attackData.AttackHitAreaRadius,
-                _bossCharacterTransform.forward);
+                horizontalForward);
 
             _visibleHitAreaList.Add(hitArea);
 

@@ -94,8 +94,12 @@ namespace BossEnemy.Logic
             // 既に目標にいる場合は処理を終了する
             if (time <= 0f) return;
 
+            // 地上移動ではY座標を維持して高さの加算を抑える。
+            Vector3 currentPosition = movementTarget.Position.Value;
+            targetPos.y = currentPosition.y;
+
             // 残りの距離と方向（ベクトル）を計算
-            Vector3 remainingDirection = targetPos - movementTarget.Position.Value;
+            Vector3 remainingDirection = targetPos - currentPosition;
 
             //「残りの距離 ÷ 残りの時間」で、今出すべき速度（秒速ベクトル）を逆算
             Vector3 requiredVelocity = remainingDirection / time;
@@ -104,7 +108,9 @@ namespace BossEnemy.Logic
             Vector3 frameMovement = requiredVelocity * Time.deltaTime * timeScale;
 
             // 現在の座標に移動量を足した「到達すべき座標」を返す
-            movementTarget.SetPosition(movementTarget.Position.Value + frameMovement);
+            Vector3 nextPosition = currentPosition + frameMovement;
+            nextPosition.y = currentPosition.y;
+            movementTarget.SetPosition(nextPosition);
 
             // ターゲット方向への向きを算出
             Vector3 direction = targetPos - movementTarget.Position.Value;
