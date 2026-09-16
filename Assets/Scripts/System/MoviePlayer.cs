@@ -47,6 +47,26 @@ public class MoviePlayer : MonoBehaviour
         _playableDirector.Stop();
     }
 
+    /// <summary>再生中のムービーを指定時刻までスキップする。既に指定時刻を過ぎていれば何もしない。</summary>
+    /// <returns>実際にスキップした秒数。スキップしなかった場合は0</returns>
+    public float SkipTo(float time)
+    {
+        if (_playableDirector.state != PlayState.Playing)
+            return 0f;
+
+        float current = (float)_playableDirector.time;
+
+        // 既に指定時刻を過ぎている場合はスキップ不可（3D区間などの保護に使う）
+        if (current >= time)
+            return 0f;
+
+        float target = Mathf.Min(time, (float)_playableDirector.duration);
+        _playableDirector.time = target;
+        _playableDirector.Evaluate();
+
+        return target - current;
+    }
+
     [SerializeField] private PlayableDirector _playableDirector;
     [SerializeField] private MovieData[] _movieData;
 
