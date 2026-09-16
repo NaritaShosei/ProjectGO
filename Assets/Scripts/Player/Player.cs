@@ -286,6 +286,20 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
             _modeController.SwitchMode(PlayerMode.Warrior);
     }
 
+    public void RestoreBattleControl()
+    {
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        if (_playerStateManager.IsDead() || _playerStateManager.IsDown())
+            return;
+
+        _move?.CancelDodge();
+        _attack?.InterruptByDamage();
+        _playerStateManager.ChangeState(PlayerState.Idle);
+        _playerAnimationController?.MoveCrossFade();
+    }
+
     /// <summary>
     /// ダウン状態からの回復を開始する
     /// </summary>
