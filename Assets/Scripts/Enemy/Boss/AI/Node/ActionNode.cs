@@ -53,6 +53,7 @@ namespace BossEnemy.AI.BehaviourTree
 
             if (_timeOutTimer >= _timeOutValue)
             {
+                Debug.Log("最大行動可能時間を超えましたTimeOutします。");
                 return true;
             }
             return false;
