@@ -31,6 +31,7 @@ namespace BossEnemy.SMB
             }
             else
             {
+                _canCharge = false;
                 _currentHorizontalForward = Vector3.zero;
                 _goalPos = startPosition;
             }
