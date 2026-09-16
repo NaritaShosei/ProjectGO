@@ -224,7 +224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22284876e53ec864d905a56d7f3bfa7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MobEnemy
-  _data: {fileID: 11400000, guid: 5e54c5ca47ea8cd45b9052148ab3e0fa, type: 2}
+  _data: {fileID: 11400000, guid: b2c2fedc4750d4e40bca31fbc8e4d405, type: 2}
   _targetCenter: {fileID: 3965120662585892537}
   _movementCollider: {fileID: 0}
   _animator: {fileID: 8412507901956443196}
@@ -235,6 +235,7 @@ MonoBehaviour:
   _enemyType: 0
   _useSpawnEffect: 1
   _spawnEffectKey: "\u30B9\u30DD\u30FC\u30F3\u30A8\u30D5\u30A7\u30AF\u30C8"
+  _spawnEffectScale: {x: 1, y: 1, z: 1}
   _armor: {fileID: 1373857264693391898}
   _uiAnchor: {fileID: 710000000000000022}
 --- !u!114 &6545287077547287116
