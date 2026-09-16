@@ -8398,6 +8398,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 200000, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 600003, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
       propertyPath: m_fontColor.b
       value: 1
@@ -8429,6 +8433,10 @@ PrefabInstance:
     - target: {fileID: 800003, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 900003, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
+      propertyPath: m_TextWrappingMode
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
