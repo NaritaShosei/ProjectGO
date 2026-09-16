@@ -19,7 +19,6 @@ namespace BossEnemy.Character
         PostureChanging,
         PhaseChanging,
         Dead,
-        Despawn
     }
     #endregion
 
