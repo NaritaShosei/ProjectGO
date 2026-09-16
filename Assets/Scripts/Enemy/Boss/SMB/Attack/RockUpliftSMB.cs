@@ -44,9 +44,6 @@ namespace BossEnemy.SMB
         [Header("攻撃の回数")]
         [SerializeField] private int _maxAttackCount = 4;
 
-        [Header("魔法攻撃の発動Effect発生位置")]
-        [SerializeField] private Vector3 _magicStartEffectPlayOffset;
-
         protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
             if (_maxAttackCount == 0) return;
