@@ -472,6 +472,9 @@ public class EnemyManager : MonoBehaviour
         // ここで _enemies から取り除くと、その回収経路に到達できなくなる。
         if (enemy.IsBoss)
         {
+            // 回収は OnExit で行うが、死亡を検知したこの時点で
+            // 遭遇中の Transform とロックオン候補からは除外する。
+            RemoveDeadEnemyTransform(enemy);
             _spatialHashGrid?.Remove(enemy);
             OnBossDefeated?.Invoke();
 

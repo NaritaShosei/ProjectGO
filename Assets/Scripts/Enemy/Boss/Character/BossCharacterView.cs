@@ -530,6 +530,10 @@ namespace BossEnemy.Character
             }
 
             _bossEnemyAnimator?.Dispose();
+
+            // HitStopManager に残ったプール済みボスへの参照を解除する。
+            if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
+                hitStopManager.UnregisterFromAll(this);
         }
 
         private void Update()

@@ -66,8 +66,8 @@ namespace BossEnemy.Character
             _isDespawnNotified = true;
 
             Debug.Log("デスポーン");
-            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
             _characterEntity.OnDespawn();
+            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
         }
 
         public void OnUpdate()
