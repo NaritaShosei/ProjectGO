@@ -16,14 +16,14 @@ MonoBehaviour:
   _slotCost: 1
   _windUp: 0
   _duration: 3
-  _cooldown: 1.5
+  _cooldown: 2.25
   _maxHitCount: 1
   _hitInterval: 2
   _knockbackPower: 0
   _baseDamage: 10
   _attackRange: 1.5
   _attackRadius: 1
-  _attackTriggerRatio: 2.5
+  _attackTriggerRatio: 2
   _enableMovement: 1
   _moveCurve:
     serializedVersion: 2
@@ -59,5 +59,6 @@ MonoBehaviour:
   _homingDuration: 0.75
   _enableRetreat: 1
   _recoveryTime: 1
-  _retreatDistance: 5
-  _retreatSpeed: 3
+  _retreatDistance: 2
+  _retreatSpeed: 1.5
+  _maxRetreatDuration: 4
