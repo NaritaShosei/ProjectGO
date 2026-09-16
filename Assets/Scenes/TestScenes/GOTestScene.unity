@@ -656,6 +656,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1601856300085949818, guid: 02d16480968999a44834276d5e2a1c78, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 7957217131286916414, guid: 02d16480968999a44834276d5e2a1c78, type: 3}
       propertyPath: m_LocalPosition.x
       value: -52
@@ -10362,6 +10366,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5621182617273004229, guid: 4378b6218659d344094af82f5aad759b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7926875302497351749, guid: 4378b6218659d344094af82f5aad759b, type: 3}
       propertyPath: m_Name
       value: MobBattleMap
@@ -10371,7 +10379,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 7235495289444052935, guid: 4378b6218659d344094af82f5aad759b, type: 3}
+    - {fileID: 2981191865447212962, guid: 4378b6218659d344094af82f5aad759b, type: 3}
+    - {fileID: 5397294949471026084, guid: 4378b6218659d344094af82f5aad759b, type: 3}
+    - {fileID: 5921940753682175371, guid: 4378b6218659d344094af82f5aad759b, type: 3}
+    - {fileID: 7765362565688925657, guid: 4378b6218659d344094af82f5aad759b, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4378b6218659d344094af82f5aad759b, type: 3}
