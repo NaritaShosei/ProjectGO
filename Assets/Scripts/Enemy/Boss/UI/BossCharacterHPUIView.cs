@@ -91,6 +91,8 @@ namespace BossEnemy.UI
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
         public async UniTaskVoid ChangeHPUI(int maxHP, int currentPhase)
         {
+            _isHPZero = false;
+
             int nextHPBarArrNum = currentPhase - 1;
             if (nextHPBarArrNum >= _bossEnemyAllPhaseHPBarArray.Length)
             {
@@ -106,7 +108,6 @@ namespace BossEnemy.UI
             _currentHPBar = _bossEnemyAllPhaseHPBarArray[nextHPBarArrNum];
             _currentHPBar.Init(maxHP);
 
-            _isHPZero = false;
             Debug.Log("HPUIの設定が完了しました");
         }
 
