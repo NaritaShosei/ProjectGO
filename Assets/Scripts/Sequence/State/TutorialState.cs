@@ -32,6 +32,7 @@ public sealed class TutorialState : ISequenceState
         context.Player.OnArmorBroken += HandleArmorBroken;
         context.Player.OnModeChanged += HandleModeChanged;
         context.Player.OnModeChangeCompleted += HandleModeChangeCompleted;
+        context.Player.OnBeforeDead += HandleBeforePlayerDead;
         context.EnemyManager.OnEnemyDefeated += HandleEnemyDefeated;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -79,6 +80,7 @@ public sealed class TutorialState : ISequenceState
         context.Player.OnArmorBroken -= HandleArmorBroken;
         context.Player.OnModeChanged -= HandleModeChanged;
         context.Player.OnModeChangeCompleted -= HandleModeChangeCompleted;
+        context.Player.OnBeforeDead -= HandleBeforePlayerDead;
         context.EnemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
         context.InputHandler.SetModeChangeEnabled(true);
         context.InputHandler.SetLockOnEnabled(true);
@@ -480,6 +482,20 @@ public sealed class TutorialState : ISequenceState
             ModalGuide.SkillSelect => _skillGuideSprites,
             _ => null,
         };
+    }
+
+    /// <summary>
+    /// チュートリアル中の致死ダメージをダウン復帰に置き換える。
+    /// true を返し、PlayerStats の通常死亡をキャンセルする。
+    /// </summary>
+    private bool HandleBeforePlayerDead()
+    {
+        if (_context?.Player == null)
+            return false;
+
+        _context.InputHandler?.EnableInput(false);
+        _context.Player.StartDownRecovery();
+        return true;
     }
 
     private static void HideCursor() => Cursor.visible = false;
