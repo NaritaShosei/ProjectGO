@@ -369,8 +369,13 @@ public class EnemyManager : MonoBehaviour
 
                 enemy.OnDead -= HandleEnemyDead;
                 enemy.OnDamaged -= HandleEnemyDamaged;
-                bossCharacter.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
-                HandleChangeBossEnemyLockOnParts((null, bossCharacter.ActiveBossEnemyPartsView));
+
+                // 死亡した状態で回収されていなければロックオンを外す
+                if (!enemy.IsDead)
+                {
+                    bossCharacter.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
+                    HandleChangeBossEnemyLockOnParts((null, bossCharacter.ActiveBossEnemyPartsView));
+                }
 
                 _spatialHashGrid?.Remove(enemy);
                 _enemies.Remove(enemy);
@@ -477,6 +482,12 @@ public class EnemyManager : MonoBehaviour
             RemoveDeadEnemyTransform(enemy);
             _spatialHashGrid?.Remove(enemy);
             OnBossDefeated?.Invoke();
+
+            if (enemy is IBossEnemyCharacterView bossEnemy)
+            {
+                bossEnemy.OnChangeLockOnParts -= HandleChangeBossEnemyLockOnParts;
+                HandleChangeBossEnemyLockOnParts((null, bossEnemy.ActiveBossEnemyPartsView));
+            }
 
             return;
         }
