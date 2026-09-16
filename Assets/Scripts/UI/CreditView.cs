@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class CreditView : MonoBehaviour
@@ -13,18 +14,15 @@ public class CreditView : MonoBehaviour
 
         ShowDevelopers();
 
-        if (EventSystem.current == null)
-        {
-            return;
-        }
+        // Showを呼んだフレームの入力を無視する
+        _inputStartFrame = Time.frameCount + 1;
 
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(
-            _developersButton.gameObject);
+        ClearSelection();
     }
 
     public void Hide()
     {
+        ClearSelection();
         gameObject.SetActive(false);
     }
 
@@ -48,78 +46,103 @@ public class CreditView : MonoBehaviour
     [SerializeField]
     private Sprite _assetCreditsImage;
 
+    private bool _showingDevelopers;
+    private int _inputStartFrame;
+
     private void Awake()
     {
         _developersButton.onClick.AddListener(ShowDevelopers);
         _assetCreditsButton.onClick.AddListener(ShowAssetCredits);
         _backButton.onClick.AddListener(HandleBackButtonClicked);
 
-        SetupNavigation();
+        DisableButtonNavigation(_developersButton);
+        DisableButtonNavigation(_assetCreditsButton);
+        DisableButtonNavigation(_backButton);
     }
+
+    private void Update()
+    {
+        if (Time.frameCount < _inputStartFrame)
+        {
+            return;
+        }
+
+        bool backPressed =
+            Keyboard.current?.escapeKey.wasPressedThisFrame == true ||
+            Gamepad.current?.buttonSouth.wasPressedThisFrame == true;
+
+        bool nextPressed =
+            Keyboard.current?.enterKey.wasPressedThisFrame == true ||
+            Keyboard.current?.numpadEnterKey.wasPressedThisFrame == true ||
+            Gamepad.current?.buttonEast.wasPressedThisFrame == true;
+
+        if (backPressed)
+        {
+            HandleBackButtonClicked();
+        }
+        else if (nextPressed)
+        {
+            ShowNextCredit();
+        }
+    }
+
+    private static void DisableButtonNavigation(Selectable selectable)
+    {
+        Navigation navigation = selectable.navigation;
+        navigation.mode = Navigation.Mode.None;
+        selectable.navigation = navigation;
+    }
+
+    private static void ClearSelection()
+    {
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+    }
+
+    // 次のクレジットを表示する
+    private void ShowNextCredit()
+    {
+        if (_showingDevelopers)
+        {
+            ShowAssetCredits();
+        }
+        else
+        {
+            ShowDevelopers();
+        }
+    }
+
+    // 開発者クレジットを表示する
+    private void ShowDevelopers()
+    {
+        _showingDevelopers = true;
+        _creditImage.sprite = _developersImage;
+
+        ClearSelection();
+    }
+
+    //アセットクレジットを表示する
+    private void ShowAssetCredits()
+    {
+        _showingDevelopers = false;
+        _creditImage.sprite = _assetCreditsImage;
+
+        ClearSelection();
+    }
+
+    private void HandleBackButtonClicked()
+    {
+        ClearSelection();
+        OnBackButtonClicked?.Invoke();
+    }
+
 
     private void OnDestroy()
     {
         _developersButton.onClick.RemoveListener(ShowDevelopers);
         _assetCreditsButton.onClick.RemoveListener(ShowAssetCredits);
         _backButton.onClick.RemoveListener(HandleBackButtonClicked);
-    }
-
-    private void ShowDevelopers()
-    {
-        _creditImage.sprite = _developersImage;
-    }
-
-    private void ShowAssetCredits()
-    {
-        _creditImage.sprite = _assetCreditsImage;
-    }
-
-    private void HandleBackButtonClicked()
-    {
-        OnBackButtonClicked?.Invoke();
-    }
-
-    /// <summary>
-    /// ボタンのナビゲーション
-    /// </summary>
-    private void SetupNavigation()
-    {
-        SetHorizontalNavigation(
-            _developersButton,
-            _backButton,
-            _assetCreditsButton);
-
-        SetHorizontalNavigation(
-            _assetCreditsButton,
-            _developersButton,
-            _backButton);
-
-        SetHorizontalNavigation(
-            _backButton,
-            _assetCreditsButton,
-            _developersButton);
-    }
-
-    /// <summary>
-    /// ボタンの水平方向のナビゲーションを設定する
-    /// </summary>
-    /// <param name="selectable"></param>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    private static void SetHorizontalNavigation(
-        Selectable selectable,
-        Selectable left,
-        Selectable right)
-    {
-        Navigation navigation = selectable.navigation;
-
-        navigation.mode = Navigation.Mode.Explicit;
-        navigation.selectOnLeft = left;
-        navigation.selectOnRight = right;
-
-        navigation.selectOnUp = null;
-        navigation.selectOnDown = null;
-
-        selectable.navigation = navigation;
     }
 }
