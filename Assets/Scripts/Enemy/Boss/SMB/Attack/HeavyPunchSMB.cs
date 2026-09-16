@@ -35,9 +35,6 @@ namespace BossEnemy.SMB
         [Header("攻撃の範囲エフェクトの生成位置の高さ")]
         [SerializeField] private float _attackAreaCircleGeneratePosY = 0.2f;
 
-        [Header("魔法攻撃の発動Effect発生位置")]
-        [SerializeField] private Vector3 _magicStartEffectPlayOffset;
-
         [Header("ボスから正面の攻撃位置までの距離")]
         [SerializeField] private float _attackPointDistance;
 
@@ -62,9 +59,6 @@ namespace BossEnemy.SMB
             await UniTask.WaitUntil(() =>
                 _elapsedTime >= playEffectStartTime,
                 cancellationToken: cancellationToken);
-
-            // 魔法攻撃の発動Effect発生位置を取得
-            var magicStartEffectPlayPos = _bossCharacterTransform.TransformPoint(_magicStartEffectPlayOffset);
 
             // 攻撃範囲を見えなくする
             hitArea.InVisible();
