@@ -611,7 +611,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.RockUpliftSMB
   _attackID: 6
-  _attackStartTime: 3.3
+  _attackStartTime: 2
   _attackAreaDespawnAndDisplayAttackEffectTime: 1
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
@@ -619,10 +619,10 @@ MonoBehaviour:
     _amplitude: 2.2
     _frequency: 1.8
     _duration: 0.18
-  _attackIntervalTime: 1.5
+  _attackIntervalTime: 0.15
   _attackHitTimingDelayTime: 0.1
   _attackAreaCircleGeneratePosY: 0.2
-  _maxAttackCount: 4
+  _maxAttackCount: 3
 --- !u!1102 &-7142586009534698118
 AnimatorState:
   serializedVersion: 6
@@ -2133,8 +2133,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingRightSMB
   _attackID: 3
-  _attackStartTime: 1
-  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackStartTime: 0.8
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1.2
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
   _cameraShakeData:
@@ -2989,8 +2989,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.SMB.StompingLeftSMB
   _attackID: 2
-  _attackStartTime: 1
-  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackStartTime: 0.8
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1.2
   _attackHitCheckFrameCount: 7
   _attackHitCollisionType: 1
   _cameraShakeData:
