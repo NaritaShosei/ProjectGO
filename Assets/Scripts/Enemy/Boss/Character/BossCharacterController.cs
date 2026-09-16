@@ -29,6 +29,7 @@ namespace BossEnemy.Character
             RegisterEvents();
 
             _isDispose = false;
+            _isDespawnNotified = false;
         }
 
         public void Dispose()
@@ -45,6 +46,31 @@ namespace BossEnemy.Character
             _isDispose = true;
         }
 
+        /// <summary>
+        /// BossBattleState の終了処理から呼ばれる、通常のボス回収入口。
+        /// Disposeと異なり、Spawnerがプール返却を行えるようEntityに通知する。
+        /// </summary>
+        public void Despawn()
+        {
+            // 死亡処理でDispose済みでも、Spawnerへのプール返却通知は必要。
+            // そのため、通知済みかどうかはDispose状態とは別に管理する。
+            if (_isDespawnNotified) return;
+
+            if (!_isDispose)
+                Dispose();
+
+            if (_characterEntity == null) return;
+
+            // OnDespawnCompletedの購読からView.OnReleaseが同期的に呼ばれても
+            // 二重で通知しないよう、破棄処理より先に記録する。
+            _isDespawnNotified = true;
+
+            Debug.Log("デスポーン");
+
+            // Entityを完全に破棄してからOnDespawnCompletedでSpawnerに返却を通知する。
+            _characterEntity.OnDespawn();
+        }
+
         public void OnUpdate()
         {
             if (_bossAIBehaviourController != null)
@@ -53,6 +79,9 @@ namespace BossEnemy.Character
 
         // Dispose済みフラグ
         private bool _isDispose = true;
+
+        // Spawner へのプール返却通知済みフラグ
+        private bool _isDespawnNotified = false;
 
         // イベントの登録処理をすでに行っているか
         private bool _isRegisterEvents = false;
@@ -167,9 +196,6 @@ namespace BossEnemy.Character
 
             // キャラクターの移動イベント購読開始
             _animationEventReceiver.OnMoveCharacter += HandleMoveCharacter;
-
-            // デスポーンイベント購読開始
-            _animationEventReceiver.OnDespawn += HandleDespawn;
 
             // 既にイベントの登録が完了しているフラグを立てる
             _isRegisterEvents = true;
@@ -371,17 +397,5 @@ namespace BossEnemy.Character
                 (_characterEntity, goalPos, moveTime, _characterEntity.TimeScale);
         }
 
-        /// <summary> デースポーンイベント発火時の処理 </summary>
-        private void HandleDespawn()
-        {
-            Debug.Log("デスポーン");
-            _characterEntity.SetCurrentAction(CharacterAction.Despawn);
-
-            // デスポーン時の処理
-            _characterEntity.OnDespawn();
-
-            // デスポーンイベント購読解除
-            _animationEventReceiver.OnDespawn -= HandleDespawn;
-        }
     }
 }

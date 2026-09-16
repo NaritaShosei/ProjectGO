@@ -21,6 +21,8 @@ public abstract class BossCharacterSMB : StateMachineBehaviour
         {
             ChangeTimeScale(timeScale);
         });
+
+        _isDisposed = false;
     }
 
     public override void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -28,11 +30,21 @@ public abstract class BossCharacterSMB : StateMachineBehaviour
         
     }
 
-    public void OnDisable()
+    /// <summary>
+    /// ボスがプールへ戻るときの後始末を行う。
+    /// View から明示的に呼べるようにし、非アクティブ化より前に購読を解除する。
+    /// </summary>
+    public virtual void Dispose()
     {
+        if(_isDisposed) return;
+
         _timeScaleDisposable?.Dispose();
         _timeScaleDisposable = null;
+
+        _isDisposed = true;
     }
+
+    public void OnDisable() => Dispose();
 
     protected IBossCharacterAnimationEventReceiver _animationEventReceiver = null;
 
@@ -43,6 +55,8 @@ public abstract class BossCharacterSMB : StateMachineBehaviour
     protected IDisposable _timeScaleDisposable = null;
 
     protected float _timeScale = 1.0f;
+
+    private bool _isDisposed = true;
 
     protected virtual void ChangeTimeScale(float timeScale)
     {

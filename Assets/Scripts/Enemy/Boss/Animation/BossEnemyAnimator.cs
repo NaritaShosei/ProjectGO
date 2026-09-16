@@ -8,11 +8,7 @@ namespace BossEnemy.Animation
     public class BossEnemyAnimator : IBossEnemyAnimator
     {
         // Receiverから中継するイベント（外部への単一エントリポイント）
-        public event Action OnAttackHit;
         public event Action OnAttackEnd;
-        public event Action OnDownEnd;
-        public event Action OnDeadEnd;
-        public event Action OnPhaseChangeEnd;
 
         /// <summary>
         /// コンストラクタ。ReceiverのイベントをAnimatorへ中継する。
@@ -25,7 +21,6 @@ namespace BossEnemy.Animation
             if (_receiver == null) return;
 
             _receiver.OnAttackCompleted += HandleAttackEnd;
-            _receiver.OnDespawn += HandleDeadEnd;
         }
 
         /// <summary>
@@ -107,7 +102,6 @@ namespace BossEnemy.Animation
             if (_receiver == null) return;
 
             _receiver.OnAttackCompleted -= HandleAttackEnd;
-            _receiver.OnDespawn -= HandleDeadEnd;
         }
 
         // Animatorパラメータのハッシュ
@@ -126,7 +120,6 @@ namespace BossEnemy.Animation
         private readonly IBossCharacterAnimationEventReceiver _receiver;
 
         private void HandleAttackEnd() => OnAttackEnd?.Invoke();
-        private void HandleDeadEnd() => OnDeadEnd?.Invoke();
     }
 }
 

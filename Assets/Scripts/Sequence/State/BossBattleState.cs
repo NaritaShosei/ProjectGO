@@ -84,6 +84,8 @@ public class BossBattleState : ISequenceState
             context.Result = new ResultData(clearTime, _bossBattleTimeLimit, level);
         }
 
+        context.EnemyManager.ClearAllEnemies();
+
         _context = null;
     }
 
