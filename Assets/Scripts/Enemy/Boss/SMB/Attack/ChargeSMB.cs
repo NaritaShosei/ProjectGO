@@ -22,12 +22,18 @@ namespace BossEnemy.SMB
             // 突進は地面に沿って行う。Animatorのルートモーションなどで
             // transform.forward にY成分が混ざっても、目標座標へ持ち込まない。
             Vector3 startPosition = _bossCharacterTransform.position;
-            Vector3 horizontalForward = Vector3.ProjectOnPlane(
-                _bossCharacterTransform.forward,
-                Vector3.up).normalized;
-
-            _goalPos = startPosition + horizontalForward * _moveDistance;
-            _goalPos.y = startPosition.y;
+            if(TryGetHorizontalForward(_bossCharacterTransform.forward, out Vector3 result))
+            {
+                _canCharge = true;
+                _currentHorizontalForward = result;
+                _goalPos = startPosition + result * _moveDistance;
+                _goalPos.y = startPosition.y;
+            }
+            else
+            {
+                _currentHorizontalForward = Vector3.zero;
+                _goalPos = startPosition;
+            }
 
             base.OnStateEnter(animator, stateInfo, layerIndex);
         }
@@ -53,6 +59,7 @@ namespace BossEnemy.SMB
             base.OnStateExit(animator, stateInfo, layerIndex);
 
             _goalPos = Vector3.zero;
+            _canCharge = false;
         }
 
         [Header("移動距離")]
@@ -67,6 +74,8 @@ namespace BossEnemy.SMB
         // 移動地点とかける時間
         private Vector3 _goalPos = Vector3.zero;
         private bool _isMoving = false;
+        private Vector3 _currentHorizontalForward;
+        private bool _canCharge = false;
 
         protected async override UniTask PlayAttack(CancellationToken cancellationToken)
         {
@@ -74,11 +83,8 @@ namespace BossEnemy.SMB
             float hitAreaSpawnCenterDistance = _moveDistance / 2;
 
             // 表示範囲も実際の突進と同じく水平面上に作成する。
-            Vector3 horizontalForward = Vector3.ProjectOnPlane(
-                _bossCharacterTransform.forward,
-                Vector3.up).normalized;
             Vector3 spawnPosition = _bossCharacterTransform.position
-                + horizontalForward * hitAreaSpawnCenterDistance;
+                + _currentHorizontalForward * hitAreaSpawnCenterDistance;
             spawnPosition.y = _attackAreaCircleGeneratePosY;
 
             // 実判定は移動中のボスを中心とした円形範囲の連続判定。
@@ -87,21 +93,26 @@ namespace BossEnemy.SMB
             float displayDuration = _attackStartTime + _goalTime;
 
             // 移動直線状に攻撃範囲を表示する
-            HitAreaView hitArea = _attackHitAreaSpawner.Spawn(
-                AttackHitAreaType.Square,
-                spawnPosition,
-                _attackData.AttackHitAreaRadius,
-                horizontalForward);
-
-            _visibleHitAreaList.Add(hitArea);
-
-            // 攻撃範囲の大きさを設定
-            if (hitArea is SquareHitAreaView squareHitArea)
+            HitAreaView hitArea = null;
+            if (_canCharge)
             {
-                // SquareHitAreaView は width をローカル X（ボスの横幅）、
-                // length をローカル Z（transform.forward の進行方向）として扱う。
-                // 進行距離を width に渡すと、範囲表示がボスの横方向に伸びてしまう。
-                squareHitArea.SetSize(displayWidth, _moveDistance);
+                // 移動直線状に攻撃範囲を表示する
+                hitArea = _attackHitAreaSpawner.Spawn(
+                    AttackHitAreaType.Square,
+                    spawnPosition,
+                    _attackData.AttackHitAreaRadius,
+                    _currentHorizontalForward);
+
+                _visibleHitAreaList.Add(hitArea);
+
+                // 攻撃範囲の大きさを設定
+                if (hitArea is SquareHitAreaView squareHitArea)
+                {
+                    // SquareHitAreaView は width をローカル X（ボスの横幅）、
+                    // length をローカル Z（transform.forward の進行方向）として扱う。
+                    // 進行距離を width に渡すと、範囲表示がボスの横方向に伸びてしまう。
+                    squareHitArea.SetSize(displayWidth, _moveDistance);
+                }
             }
 
             // 移動開始までの待機
@@ -118,9 +129,12 @@ namespace BossEnemy.SMB
                 _elapsedTime >= _attackStartTime + _goalTime,
                 cancellationToken: cancellationToken);
 
-            // 移動終了と同時に攻撃範囲を隠す
-            hitArea.InVisible();
-            _visibleHitAreaList.Remove(hitArea);
+            if (hitArea != null)
+            {
+                // 移動終了と同時に攻撃範囲を隠す
+                hitArea.InVisible();
+                _visibleHitAreaList.Remove(hitArea);
+            }
 
             // 移動,攻撃開始フラグをFalseに
             _isMoving = false;
@@ -131,6 +145,16 @@ namespace BossEnemy.SMB
         protected override void StartAttackHitCheck(Vector3 attackCenterPos)
         {
             _attackCenterPos = attackCenterPos;
+        }
+
+        protected bool TryGetHorizontalForward(Vector3 forward, out Vector3 result)
+        {
+            result = Vector3.ProjectOnPlane(forward, Vector3.up);
+            if (result.sqrMagnitude < 0.0001f)
+                return false;
+
+            result.Normalize();
+            return true;
         }
     }
 }
