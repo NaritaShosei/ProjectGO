@@ -298,6 +298,7 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         _attack?.InterruptByDamage();
         _playerStateManager.ChangeState(PlayerState.Idle);
         _playerAnimationController?.MoveCrossFade();
+        _playerStats?.RestoreThunderGauge();
     }
 
     /// <summary>

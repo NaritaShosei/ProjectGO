@@ -174,6 +174,23 @@ public class PlayerStats
         }
     }
 
+    /// <summary>
+    /// 雷ゲージを最大値まで回復する。
+    /// </summary>
+    public void RestoreThunderGauge()
+    {
+        if (Mathf.Approximately(_currentThunderGauge, MaxThunderGauge))
+            return;
+
+        _currentThunderGauge = MaxThunderGauge;
+
+        OnThunderGaugeChanged?.Invoke(
+            _currentThunderGauge,
+            MaxThunderGauge,
+            InitialMaxThunderGauge
+        );
+    }
+
     // --- モディファイア操作 ----
     public void AddModifier(IStatModifier modifier)
     {
