@@ -1946,7 +1946,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &457765923
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4214,7 +4214,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 9831470861ea55b448baf6315c9f18e9, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 81c574572114546408a55223969931a3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4244,12 +4244,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa2845bb80ecd9240bd864aebf51046c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CreditView
-  _developersButton: {fileID: 457765925}
-  _assetCreditsButton: {fileID: 1399274349}
-  _backButton: {fileID: 1935414188}
   _creditImage: {fileID: 1196031792}
-  _developersImage: {fileID: 21300000, guid: 9831470861ea55b448baf6315c9f18e9, type: 3}
-  _assetCreditsImage: {fileID: 21300000, guid: f0781438dfc42bf43ba8ee9d937c25bc, type: 3}
+  _developersImage: {fileID: 21300000, guid: 3a70a8930b108384fab89717c59843a9, type: 3}
+  _assetCreditsImage: {fileID: 21300000, guid: 81c574572114546408a55223969931a3, type: 3}
 --- !u!1 &1211331344
 GameObject:
   m_ObjectHideFlags: 0
@@ -5058,7 +5055,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1399274347
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7076,7 +7073,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1935414186
 RectTransform:
   m_ObjectHideFlags: 0

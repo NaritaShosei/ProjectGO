@@ -26,15 +26,15 @@ public class CreditView : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    [Header("ボタン")]
-    [SerializeField]
-    private Button _developersButton;
+    //[Header("ボタン")]
+    //[SerializeField]
+    //private Button _developersButton;
 
-    [SerializeField]
-    private Button _assetCreditsButton;
+    //[SerializeField]
+    //private Button _assetCreditsButton;
 
-    [SerializeField]
-    private Button _backButton;
+    //[SerializeField]
+    //private Button _backButton;
 
     [Header("クレジット画像")]
     [SerializeField]
@@ -51,13 +51,13 @@ public class CreditView : MonoBehaviour
 
     private void Awake()
     {
-        _developersButton.onClick.AddListener(ShowDevelopers);
-        _assetCreditsButton.onClick.AddListener(ShowAssetCredits);
-        _backButton.onClick.AddListener(HandleBackButtonClicked);
+        //_developersButton.onClick.AddListener(ShowDevelopers);
+        //_assetCreditsButton.onClick.AddListener(ShowAssetCredits);
+        //_backButton.onClick.AddListener(HandleBackButtonClicked);
 
-        DisableButtonNavigation(_developersButton);
-        DisableButtonNavigation(_assetCreditsButton);
-        DisableButtonNavigation(_backButton);
+        //DisableButtonNavigation(_developersButton);
+        //DisableButtonNavigation(_assetCreditsButton);
+        //DisableButtonNavigation(_backButton);
     }
 
     private void Update()
@@ -141,8 +141,8 @@ public class CreditView : MonoBehaviour
 
     private void OnDestroy()
     {
-        _developersButton.onClick.RemoveListener(ShowDevelopers);
-        _assetCreditsButton.onClick.RemoveListener(ShowAssetCredits);
-        _backButton.onClick.RemoveListener(HandleBackButtonClicked);
+        //_developersButton.onClick.RemoveListener(ShowDevelopers);
+        //_assetCreditsButton.onClick.RemoveListener(ShowAssetCredits);
+        //_backButton.onClick.RemoveListener(HandleBackButtonClicked);
     }
 }
