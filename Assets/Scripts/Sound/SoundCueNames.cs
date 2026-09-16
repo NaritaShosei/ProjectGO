@@ -77,6 +77,23 @@ public static class SoundCueNames
         public const string MeteorVoice = "BossMeteorImpactVoice";
         public const string OneLegBreakVoice = "BossOneLegBreakVoice";
         public const string TwoLegBreakDownVoice = "BossTwoLegBreakDownVoice";
+
+
+        public const string ShoutVoice = "Shout";
+        public const string MovieVoice = "Movie"; 
+        public const string AttackShortVoice = "AttackShort";
+        public const string AttackLongVoice = "AttackLong";
+        public const string AttackMidiumVoice = "AttackMidium";
+        public const string DownAttackShortVoice = "DownAttack1";
+        public const string DownAttackMidiumVoice = "DownAttack2";
+        public const string TiredVoice = "Tired";
+        public const string OneLegDownVoice = "OneLegDown";
+        public const string AllLegDownVoice = "AllLegDown";
+        public const string MagicDestroyVoice = "Magic1";
+        public const string MagicBreakVoice = "Magic2";
+        public const string DeadShortVoice = "Dead1";
+        public const string DeadMidiumVoice = "Dead2";
+        public const string DeadLongVoice = "Dead3";
     }
 
     // Player_Voiceキューシート専用。SEとは異なるシートを指定して再生する。
