@@ -54,10 +54,19 @@ public class InputHandler : MonoBehaviour
         ApplyTutorialInputRestrictions();
     }
 
+    /// <summary>マウス操作時・ゲームパッド操作時のカメラ入力倍率を設定します（CameraManagerのInspector値を反映）。</summary>
+    public void SetCameraDeviceSensitivity(float mouseScale, float gamepadScale)
+    {
+        _mouseCameraSensitivityScale = mouseScale;
+        _gamepadCameraSensitivityScale = gamepadScale;
+    }
+
     private PlayerInput _input;
     private bool _isDisablingInput;
     private bool _modeChangeEnabled = true;
     private bool _lockOnEnabled = true;
+    private float _mouseCameraSensitivityScale = 1f;
+    private float _gamepadCameraSensitivityScale = 1f;
 
     private void ApplyTutorialInputRestrictions()
     {
@@ -148,11 +157,17 @@ public class InputHandler : MonoBehaviour
 
     private void OnCameraMovePerformed(InputAction.CallbackContext context)
     {
-        CameraMoveInput = context.ReadValue<Vector2>();
+        // マウスとゲームパッドで入力の値域が異なるため、デバイス別の倍率で揃える
+        float scale = IsMouseDevice(context.control.device)
+            ? _mouseCameraSensitivityScale
+            : _gamepadCameraSensitivityScale;
+        CameraMoveInput = context.ReadValue<Vector2>() * scale;
     }
 
     private void OnCameraMoveCanceled(InputAction.CallbackContext _)
     {
         CameraMoveInput = Vector2.zero;
     }
+
+    private static bool IsMouseDevice(InputDevice device) => device is Mouse;
 }

@@ -222,19 +222,19 @@ public sealed class EnemyAttackPattern : ScriptableObject
             );
         }
 
-        // RetreatDistanceがトリガー距離以下だと後退直後に再び攻撃判定に入りバタつく
-        if (_enableRetreat)
-        {
-            float triggerRange = _attackRange * _attackTriggerRatio;
-            if (_retreatDistance < triggerRange)
-            {
-                _retreatDistance = triggerRange;
-                Debug.LogWarning(
-                    "[EnemyAttackPattern] RetreatDistance がトリガー距離未満です。トリガー距離に補正しました。",
-                    this
-                );
-            }
-        }
+        //// RetreatDistanceがトリガー距離以下だと後退直後に再び攻撃判定に入りバタつく
+        //if (_enableRetreat)
+        //{
+        //    float triggerRange = _attackRange * _attackTriggerRatio;
+        //    if (_retreatDistance < triggerRange)
+        //    {
+        //        _retreatDistance = triggerRange;
+        //        Debug.LogWarning(
+        //            "[EnemyAttackPattern] RetreatDistance がトリガー距離未満です。トリガー距離に補正しました。",
+        //            this
+        //        );
+        //    }
+        //}
     }
 #endif
 }

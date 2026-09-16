@@ -5,12 +5,8 @@ using UnityEngine;
 
 public interface IBossEnemyAnimator
 {
-    /// <summary>攻撃ヒットタイミングのイベント</summary>
-    public event Action OnAttackHit;
     /// <summary>攻撃アニメーション終了のイベント</summary>
     public event Action OnAttackEnd;
-    /// <summary>死亡アニメーション終了のイベント</summary>
-    public event Action OnDeadEnd;
 
     /// <summary>
     /// 移動速度を設定する（Idle / Move の切り替えに使用）

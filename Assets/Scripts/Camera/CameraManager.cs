@@ -118,6 +118,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         if (ServiceLocator.TryGet(out InputHandler inputHandler) && ServiceLocator.TryGet(out EnemyManager enemyManager))
         {
+            inputHandler.SetCameraDeviceSensitivity(_mouseCameraSensitivityScale, _gamepadCameraSensitivityScale);
+
             _lockOnController.Init(this, inputHandler, enemyManager, _playerTransform, _cameraMotionController);
             _lockOnController.OnTargetChanged += HandleTargetChanged;
 
@@ -303,6 +305,10 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [Header("フリーカメラ入力")]
     [SerializeField] private Vector2 _cameraRotationSpeed = new(120f, 80f);
     [SerializeField] private Vector2 _cameraInputDirection = new(1f, -1f);
+    [Tooltip("マウス操作時のカメラ入力に掛ける倍率")]
+    [SerializeField] private float _mouseCameraSensitivityScale = 1f;
+    [Tooltip("ゲームパッド操作時のカメラ入力に掛ける倍率")]
+    [SerializeField] private float _gamepadCameraSensitivityScale = 1f;
 
     [Header("ロックオン設定")]
     [Tooltip("ターゲットがこの半径（px）内に収まっている間はカメラが回転しないデッドゾーン")]
