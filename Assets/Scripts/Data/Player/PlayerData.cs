@@ -36,12 +36,12 @@ public class PlayerData : ScriptableObject
     [Min(0f)]
     [SerializeField] private float _thunderRecoverPerSecond = 100f / 3f;
 
-    [Header("ダメージを受けた際の無敵時間（被弾時からの秒数）")]
+    [Header("ダメージを受けた際の無敵時間（安全網用の最大時間。通常は被弾硬直アニメーション終了と同時に解除される）")]
     [UnityEngine.Serialization.FormerlySerializedAs("_invincibleDuration")]
-    [SerializeField, Min(0f), Tooltip("小ダメージの無敵時間")]
-    private float _smallDamageInvincibleDuration = 0.5f;
-    [SerializeField, Min(0f), Tooltip("中ダメージの無敵時間")]
-    private float _mediumDamageInvincibleDuration = 0.5f;
-    [SerializeField, Min(0f), Tooltip("大ダメージの無敵時間")]
-    private float _largeDamageInvincibleDuration = 0.5f;
+    [SerializeField, Min(0f), Tooltip("小ダメージの無敵時間（安全網用の最大値）")]
+    private float _smallDamageInvincibleDuration = 1.5f;
+    [SerializeField, Min(0f), Tooltip("中ダメージの無敵時間（安全網用の最大値）")]
+    private float _mediumDamageInvincibleDuration = 2.5f;
+    [SerializeField, Min(0f), Tooltip("大ダメージの無敵時間（安全網用の最大値）")]
+    private float _largeDamageInvincibleDuration = 4f;
 }

@@ -211,10 +211,11 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
                 SuppressDamageVoice = !shouldReact
             });
 
-        // ダメージを受けたら、一定時間ダメージ無敵にする。これにより、連続でダメージを受けるのを防ぐ。
+        // ダメージを受けたら、被弾硬直中はダメージ無敵にする。これにより、連続でダメージを受けるのを防ぐ。
+        // 通常は被弾硬直アニメーション終了時(HandleDamagedEnd)に解除される。
         _playerStateManager.AddInvincible(InvincibleType.Damaged);
 
-        // ダメージ無敵を解除するタイミングは、プレイヤーデータで設定された時間経過後。これにより、ダメージを受けた後の無敵時間を柔軟に設定できる。
+        // アニメーションイベントが発火しなかった場合に無敵が残り続けないための安全網。
         HandleDamageInvincibilityEnd(_playerData.GetDamageInvincibleDuration(reactionType)).Forget();
 
         // ダメージリアクションを発生させていいと判断された場合、状態をダメージ状態に遷移させる。      
@@ -489,6 +490,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     /// <summary>
     /// ダメージ無敵の終了を処理する。プレイヤーデータで設定された時間経過後に、ダメージ無敵を解除する。
+    /// 被弾アニメーション終了イベントが発火せずDamaged状態が残り続けた場合の安全網として、
+    /// この時点でもまだDamagedならIdleへ強制的に戻す。
     /// </summary>
     private async UniTaskVoid HandleDamageInvincibilityEnd(float duration)
     {
@@ -515,6 +518,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         finally
         {
             _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
+
+            if (_playerStateManager.IsDamaged())
+                _playerStateManager.ChangeState(PlayerState.Idle);
         }
     }
 
