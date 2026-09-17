@@ -65,6 +65,13 @@ public class MobAndSkillState : ISequenceState
     {
         // 死亡はStateMachineが外部から強制遷移させるため、ここでは見ない
 
+        // デバッグコマンドでモブ戦スキップが要求された場合はボス登場へ
+        if (context.DebugMobBattleSkipRequested)
+        {
+            context.EnemyManager.ClearAllEnemies();
+            return _nextSequence;
+        }
+
         // タイマー切れ → ボス登場へ
         if (context.IsTimeUp)
         {

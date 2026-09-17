@@ -44,6 +44,9 @@ public class SequenceStateContext
     /// <summary>スキル選択が完了したか</summary>
     public bool IsSkillSelected;
 
+    /// <summary>デバッグコマンドでモブ戦スキップが要求されたか</summary>
+    public bool DebugMobBattleSkipRequested;
+
     #endregion
 
     #region リザルト
@@ -61,6 +64,7 @@ public class SequenceStateContext
         IsSkillSelected = false;
         IsRestartRequested = false;
         IsTitleRequested = false;
+        DebugMobBattleSkipRequested = false;
     }
 
     #endregion
