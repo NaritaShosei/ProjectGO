@@ -542,7 +542,7 @@ MonoBehaviour:
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
   _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
+  _use3dPositioning: 0
   _freezeOrientation: 0
   _loop: 0
   _volume: 1
@@ -559,7 +559,7 @@ MonoBehaviour:
     - 0
     - 0
   _cueName: NarrationVoice2
-  _cueSheet: Narration_Voice
+  _cueSheet: NarrationVoice
 --- !u!1001 &407685497
 PrefabInstance:
   m_ObjectHideFlags: 0
