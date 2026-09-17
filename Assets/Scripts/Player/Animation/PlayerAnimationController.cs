@@ -54,6 +54,16 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     /// <summary>被弾アニメーション終了をSMBから受け取る</summary>
     public void AnimEvent_DamagedEnd() => OnDamagedEnd?.Invoke();
 
+    public void RecoverCompletedDamageReaction()
+    {
+        // 死亡・ダウンへの移行後に、古い被弾ステートから操作を復帰させない。
+        if (_stateManager == null || !_stateManager.IsDamaged()) return;
+
+        _animator.ResetTrigger(AnimParams.Damaged);
+        MoveCrossFade();
+        AnimEvent_DamagedEnd();
+    }
+
     public void SetDamageReaction(DamageReactionType reactionType)
     {
         _animator.SetInteger(AnimParams.DamageReaction, (int)reactionType);

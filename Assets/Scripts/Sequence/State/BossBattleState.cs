@@ -1,6 +1,8 @@
+using DG.Tweening;
 using System;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UI;
 
 /// <summary>
 /// ボス戦のState。制限時間2分。
@@ -15,6 +17,8 @@ public class BossBattleState : ISequenceState
 
     public void OnEnter(SequenceStateContext context)
     {
+        _fadePanel.DOFade(0f, _fadeDuration);
+
         _context = context;
 
         context.Player?.RestoreBattleControl();
@@ -103,6 +107,8 @@ public class BossBattleState : ISequenceState
     [SerializeField, Tooltip("タイムアップ時に遷移するシークエンス")] private SequenceStateType _timeUpSequence = SequenceStateType.GameOver;
     [SerializeField, Tooltip("ボス撃破時に遷移するシークエンス")] private SequenceStateType _bossDefeatedSequence = SequenceStateType.EndingMovie;
 
+    [SerializeField] private Image _fadePanel;
+    [SerializeField] private float _fadeDuration = 0.5f;
     #endregion
 
     #region プライベート
