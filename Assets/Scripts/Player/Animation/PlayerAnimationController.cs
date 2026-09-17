@@ -61,7 +61,6 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
         _animator.ResetTrigger(AnimParams.Damaged);
         MoveCrossFade();
-        AnimEvent_DamagedEnd();
     }
 
     public void SetDamageReaction(DamageReactionType reactionType)

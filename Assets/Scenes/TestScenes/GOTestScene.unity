@@ -1529,7 +1529,7 @@ PrefabInstance:
       objectReference: {fileID: 1933081294}
     - target: {fileID: 7822539410125592448, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_SceneBindings.Array.data[84].value
-      value:
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7822539410125592448, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_SceneBindings.Array.data[85].value
@@ -10869,6 +10869,18 @@ PrefabInstance:
     - target: {fileID: 100001, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100005, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
+      propertyPath: _aMinimumScore
+      value: 25000
+      objectReference: {fileID: 0}
+    - target: {fileID: 100005, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
+      propertyPath: _bMinimumScore
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 100005, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
+      propertyPath: _sMinimumScore
+      value: 30000
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
