@@ -52,5 +52,17 @@ namespace BossEnemy.Movement
 
         [Header("中心地点から円形を描く際実際に動ける範囲の大きさを決める半径")]
         [SerializeField] private float _radius;
+
+#if UNITY_EDITOR
+        /// <summary> 選択時に移動可能範囲の円をシーンビューに描画 </summary>
+        private void OnDrawGizmosSelected()
+        {
+            if (_center == null) return;
+
+            Gizmos.color = Color.cyan;
+            UnityEditor.Handles.color = Color.cyan;
+            UnityEditor.Handles.DrawWireDisc(_center.position, Vector3.up, _radius);
+        }
+#endif
     }
 }
