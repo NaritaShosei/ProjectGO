@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -7.35, y: 0.61500025}
-  m_SizeDelta: {x: 13.299999, y: 19.189999}
+  m_AnchoredPosition: {x: -9.43, y: 0.61500025}
+  m_SizeDelta: {x: 15.38, y: 19.189999}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &786832218009057355
 CanvasRenderer:
@@ -165,7 +165,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5995988843454613346, guid: 29ea739b7ca14da9accb1cb9021206cf, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 2.7
       objectReference: {fileID: 0}
     - target: {fileID: 5995988843454613346, guid: 29ea739b7ca14da9accb1cb9021206cf, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -206,6 +206,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 5461140824779768405, guid: 29ea739b7ca14da9accb1cb9021206cf, type: 3}
+    - {fileID: 3675399309859696368, guid: 29ea739b7ca14da9accb1cb9021206cf, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5995988843454613346, guid: 29ea739b7ca14da9accb1cb9021206cf, type: 3}
       insertIndex: -1
