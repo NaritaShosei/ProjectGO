@@ -10,6 +10,9 @@ public readonly struct BossCameraSettings
     /// <summary>カメラの定位置（プレイヤーから見てボスの反対側）へ向け直す最大回転速度(度/秒)。</summary>
     public readonly float OrbitTrackSpeed;
 
+    /// <summary>カメラの定位置追従にかける滑らかさ(秒)。大きいほど急な方位変化にも慣性を持って緩やかに追従する。通常ロックオンとは独立したボス専用の値。</summary>
+    public readonly float OrbitSmoothTime;
+
     /// <summary>入力で注視点を左右へずらせる最大量(m)。オービット位置は動かさず視線だけ振る。</summary>
     public readonly float SwivelRange;
 
@@ -29,6 +32,7 @@ public readonly struct BossCameraSettings
         float framingNearDistance,
         float framingFarDistance,
         float orbitTrackSpeed,
+        float orbitSmoothTime,
         float swivelRange,
         float swivelSpeed,
         float swivelReturnSpeed,
@@ -38,6 +42,7 @@ public readonly struct BossCameraSettings
         FramingNearDistance = framingNearDistance;
         FramingFarDistance = framingFarDistance;
         OrbitTrackSpeed = orbitTrackSpeed;
+        OrbitSmoothTime = orbitSmoothTime;
         SwivelRange = swivelRange;
         SwivelSpeed = swivelSpeed;
         SwivelReturnSpeed = swivelReturnSpeed;
