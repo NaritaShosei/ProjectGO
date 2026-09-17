@@ -1499,7 +1499,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 1
   _maxAttackFieldHalfRange: 20
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &-2388873810595694893
 AnimatorStateTransition:
@@ -1601,7 +1601,7 @@ MonoBehaviour:
     _frequency: 1.05
     _duration: 1.11
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 2
 --- !u!1102 &-2099094422740729497
 AnimatorState:
@@ -1745,7 +1745,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 1
   _maxAttackFieldHalfRange: 20
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &-1730570095668115221
 AnimatorStateTransition:
@@ -1923,7 +1923,7 @@ MonoBehaviour:
     _frequency: 0.73
     _duration: 0.92
   _attackHitTimingDelayTime: 0
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 0.64
 --- !u!1101 &-928170174063221020
 AnimatorStateTransition:
@@ -3562,7 +3562,7 @@ MonoBehaviour:
     _frequency: 1.24
     _duration: 1.06
   _attackHitTimingDelayTime: 0.16
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 0.99
 --- !u!114 &4567494591603859569
 MonoBehaviour:
@@ -4648,7 +4648,7 @@ MonoBehaviour:
     _frequency: 1.05
     _duration: 2.22
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 2
 --- !u!1102 &9019623883209432096
 AnimatorState:
