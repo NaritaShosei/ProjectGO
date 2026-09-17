@@ -621,7 +621,7 @@ MonoBehaviour:
     _duration: 0.18
   _attackIntervalTime: 0.15
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _maxAttackCount: 3
 --- !u!1102 &-7142586009534698118
 AnimatorState:
@@ -1799,7 +1799,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 1.5
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &-1680677634452769343
 AnimatorStateTransition:
@@ -2142,7 +2142,7 @@ MonoBehaviour:
     _frequency: 1.5
     _duration: 0.25
   _attackHitTimingDelayTime: 0.3
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 3
 --- !u!1102 &-324155300534404492
 AnimatorState:
@@ -2924,7 +2924,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 0
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &1552869534088903262
 AnimatorStateTransition:
@@ -2974,7 +2974,7 @@ MonoBehaviour:
     _duration: 0.18
   _attackIntervalTime: 1.5
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _maxAttackCount: 0
 --- !u!114 &1688821259855040997
 MonoBehaviour:
@@ -2998,7 +2998,7 @@ MonoBehaviour:
     _frequency: 1.5
     _duration: 0.25
   _attackHitTimingDelayTime: 0.3
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 3
 --- !u!1102 &1995479366855597398
 AnimatorState:
@@ -3354,7 +3354,7 @@ MonoBehaviour:
     _duration: 0.4
   _moveDistance: 20
   _goalTime: 3
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
 --- !u!1101 &3516473906035181070
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -4399,7 +4399,7 @@ MonoBehaviour:
     _frequency: 1
     _duration: 0.35
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 2
 --- !u!1102 &7937429894567203005
 AnimatorState:
