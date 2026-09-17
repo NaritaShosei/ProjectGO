@@ -111,6 +111,7 @@ public sealed class BossCameraController
     private Transform _angleUnder;
     private bool _isActive;
     private float _swivelOffset;
+    private float _orbitYawVelocity;
 
     /// <summary>スポーンした敵がボスなら参照・頭足アンカー・姿勢イベントを保持し、ボスカメラを有効化する。</summary>
     private void HandleEnemySpawned(IEnemy enemy)
@@ -172,6 +173,7 @@ public sealed class BossCameraController
 
         _isActive = true;
         _swivelOffset = 0f;
+        _orbitYawVelocity = 0f;
         _cameraManager.SetBossCameraActive(true);
 
         // 現在値のgetterが無いので初期姿勢はStanding想定でズームを当て、以降はイベントで補正する
@@ -245,10 +247,10 @@ public sealed class BossCameraController
         toBoss.y = 0f;
         if (toBoss.sqrMagnitude <= 0.0001f) return;
 
-        // カメラがボスへ正対する方位角へ、上限速度で寄せる
+        // カメラがボスへ正対する方位角へ、上限速度を保ちつつ滑らかに寄せる（急な切り返しでも振り回されないように減衰させる）
         float baseYaw = Mathf.Atan2(toBoss.x, toBoss.z) * Mathf.Rad2Deg;
-        _orbitalFollow.HorizontalAxis.Value = Mathf.MoveTowardsAngle(
-            _orbitalFollow.HorizontalAxis.Value, baseYaw, _settings.OrbitTrackSpeed * deltaTime);
+        _orbitalFollow.HorizontalAxis.Value = Mathf.SmoothDampAngle(
+            _orbitalFollow.HorizontalAxis.Value, baseYaw, ref _orbitYawVelocity, _settings.OrbitSmoothTime, _settings.OrbitTrackSpeed, deltaTime);
     }
 
     /// <summary>入力で注視点の左右オフセットを一定範囲だけ動かす。入力が無ければ中央へ戻す。</summary>

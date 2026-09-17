@@ -144,6 +144,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
                         _bossFramingNearDistance,
                         _bossFramingFarDistance,
                         _bossOrbitTrackSpeed,
+                        _bossOrbitSmoothTime,
                         _bossSwivelRange,
                         _bossSwivelSpeed,
                         _bossSwivelReturnSpeed,
@@ -353,6 +354,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _bossFramingFarDistance = 18f;
     [Tooltip("カメラを常に『プレイヤーから見てボスの反対側』へ向け直す最大回転速度（度/秒）。入力ではなくプレイヤー・ボスの位置関係から自動で決まる。\n増やすと：ボスが回り込んでもすぐ背後に付く（キビキビ／速い動きだとやや固い）\n減らすと：追従が遅れ、ボスを横〜前から見る時間が増える。0だとカメラ角度が固定され不自然になりうる")]
     [SerializeField] private float _bossOrbitTrackSpeed = 180f;
+    [Tooltip("カメラの定位置追従にかける滑らかさ（秒）。ボスが素早く方向転換しても急な切り返しを緩和する（通常ロックオンとは独立したボス専用の値）。\n増やすと：追従が滑らかになる代わりに遅れが増える\n減らすと：追従が機敏になる代わりに振り回される感じが出やすい")]
+    [SerializeField] private float _bossOrbitSmoothTime = 0.2f;
     [Tooltip("カメラ移動入力で注視点を左右へずらせる最大量（m）。オービット位置は動かさず視線だけ振る。\n増やすと：ボスを画面端寄りまで動かせて見回し幅が広い\n減らすと：ほぼ正面固定。0で入力による振りは無効")]
     [SerializeField] private float _bossSwivelRange = 1.5f;
     [Tooltip("入力を入れている間に注視点オフセットが伸びる速さ（m/秒、スティック全倒し時）。\n増やすと：倒した瞬間にサッと横へ振れる\n減らすと：じわっと横へ寄っていく")]
