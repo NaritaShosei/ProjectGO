@@ -490,6 +490,8 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
 
     /// <summary>
     /// ダメージ無敵の終了を処理する。プレイヤーデータで設定された時間経過後に、ダメージ無敵を解除する。
+    /// 被弾アニメーション終了イベントが発火せずDamaged状態が残り続けた場合の安全網として、
+    /// この時点でもまだDamagedならIdleへ強制的に戻す。
     /// </summary>
     private async UniTaskVoid HandleDamageInvincibilityEnd(float duration)
     {
@@ -516,6 +518,9 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         finally
         {
             _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
+
+            if (_playerStateManager.IsDamaged())
+                _playerStateManager.ChangeState(PlayerState.Idle);
         }
     }
 
