@@ -143,6 +143,18 @@ public class SequenceManager : MonoBehaviour
         OnTitleRequested?.Invoke();
     }
 
+    /// <summary>DebugCommandControllerから呼ばれる。モブ戦の強制スキップを要求する。</summary>
+    public void RequestDebugMobBattleSkip()
+    {
+        if (_context == null)
+        {
+            Debug.LogWarning("[SequenceManager] シークエンス初期化前のためモブ戦スキップ要求を無視しました。", this);
+            return;
+        }
+
+        _context.DebugMobBattleSkipRequested = true;
+    }
+
     #endregion
 
     #region　インスペクター
@@ -223,6 +235,11 @@ public class SequenceManager : MonoBehaviour
 
     #region Unityイベント
 
+    private void Awake()
+    {
+        ServiceLocator.Register(this);
+    }
+
     private void OnValidate()
     {
         if (_sequences != null) return;
@@ -247,6 +264,8 @@ public class SequenceManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        ServiceLocator.Unregister<SequenceManager>();
+
         if (_context?.Player != null)
             _context.Player.OnDead -= HandlePlayerDead;
         if (!_isLoadingSubtitleSettings)
