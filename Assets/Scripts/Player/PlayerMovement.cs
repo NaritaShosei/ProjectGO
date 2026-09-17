@@ -469,14 +469,11 @@ public class PlayerMovement : MonoBehaviour
 
     /// <summary>
     /// 被弾アニメーション終了時にDamaged状態を解除する。
-    /// 起き上がり完了と同時に無敵も解除し、固定タイマーより先に確実に解除する。
     /// </summary>
     private void HandleDamagedEnd()
     {
         if (_playerStateManager.IsDamaged())
             _playerStateManager.ChangeState(PlayerState.Idle);
-
-        _playerStateManager.RemoveInvincible(InvincibleType.Damaged);
     }
 
     private async UniTaskVoid PerformDamageReactionMove(
