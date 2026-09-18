@@ -27,9 +27,6 @@ namespace BossEnemy.Infrastructure
         /// <summary>攻撃アニメーション終了のイベント</summary>
         public event Action OnAttackCompleted;
 
-        /// <summary>Phase切り替え終了のイベント</summary>
-        public event Action OnPhaseChangeCompleted;
-
         /// <summary> 姿勢の切り替え完了時イベント </summary>
         public event Action OnPostureChangeCompleted;
 
