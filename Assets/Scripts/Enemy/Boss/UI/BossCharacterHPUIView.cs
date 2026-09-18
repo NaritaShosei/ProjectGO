@@ -49,15 +49,12 @@ namespace BossEnemy.UI
 
                 float endValue = (float)currentHP / (float)_maxHP;
 
-                bool isSequenceCompleted = false;
-
                 _takeDamageSequence = DOTween.Sequence()
                     .Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration))
                     .AppendInterval(_finishDamageDuration)
-                    .Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration))
-                    .OnComplete(() => { isSequenceCompleted = true; } );
+                    .Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
 
-                await UniTask.WaitUntil(() => isSequenceCompleted);
+                await _takeDamageSequence.AsyncWaitForCompletion();
             }
 
             [Header("現在のHPを表すUI")]
