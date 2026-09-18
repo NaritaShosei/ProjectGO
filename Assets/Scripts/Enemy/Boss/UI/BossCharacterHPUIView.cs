@@ -110,9 +110,10 @@ namespace BossEnemy.UI
             _currentHPBar = _bossEnemyAllPhaseHPBarArray[nextHPBarArrNum];
             _currentHPBar.Init(maxHP);
 
+            OnChangeHPBarCompleted?.Invoke();
             Debug.Log("HPUIの設定が完了しました");
         }
-
+        
         public async UniTask TakeDamage(int currentHP)
         {
             if (_currentHPBar == null || _isHPZero) return;
