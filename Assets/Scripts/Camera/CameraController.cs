@@ -14,10 +14,10 @@ public class CameraController : MonoBehaviour
     #region パブリックプロパティ・イベント
 
     /// <summary>現在ロックオンしている対象を取得します。</summary>
-    public ILockOnTarget CurrentTarget => _lockOnState?.Target;
+    public ILockOnTarget CurrentTarget => _cameraState?.Target;
 
     /// <summary>現在ロックオン中か取得します。</summary>
-    public bool IsLockedOn => _currentState == _lockOnState;
+    public bool IsLockedOn => _cameraState?.Target != null;
 
     /// <summary>ロックオン対象が変更されたときに通知します。</summary>
     public event System.Action<ILockOnTarget> OnTargetChanged;
@@ -46,14 +46,8 @@ public class CameraController : MonoBehaviour
         _inputHandler = inputHandler;
         _motionController = motionController;
 
-        _normalState = new NormalCameraState(_motionController);
-        _lockOnState = new LockOnCameraState(
-            _motionController,
-            _cameraManager.MainCamera,
-            playerTransform,
-            _cameraManager.AutoUnlockRange);
-        _currentState = _normalState;
-        _currentState.Enter();
+        _cameraState = new FollowCameraState(_motionController, _cameraManager.MainCamera);
+        _cameraState.Enter();
 
         _selector = new LockOnTargetSelector(
             playerTransform,
@@ -76,39 +70,20 @@ public class CameraController : MonoBehaviour
     /// <summary>現在のカメラ状態を更新します。</summary>
     public void Tick(float timeScale)
     {
-        if (_currentState == null) return;
+        if (_cameraState == null) return;
 
-        if (_currentState == _lockOnState && TryHandleInvalidTarget())
+        if (IsLockedOn && TryHandleInvalidTarget())
         {
             return;
         }
 
+        if (_isSearchingForTarget && !IsLockedOn)
+        {
+            TryResumeLockOnSearch();
+        }
+
         UpdateTargetSwitch();
-        _currentState.Tick(timeScale, _inputHandler.CameraMoveInput);
-    }
-
-    /// <summary>
-    /// ロックオン対象が無効になっていないか確認する。
-    /// 自動解除距離を超えた → 解除。撃破・削除・非ロック化 → 次の対象へ、いなければ解除。
-    /// </summary>
-    /// <returns>解除または切り替えを行った場合 true（このフレームの以降の更新はスキップ）。</returns>
-    private bool TryHandleInvalidTarget()
-    {
-        if (_lockOnState.IsTargetOutOfRange)
-        {
-            Unlock();
-            return true;
-        }
-
-        if (!_lockOnState.IsTargetValid)
-        {
-            var next = _selector.SelectNextTarget(_lockOnState.Target);
-            if (next != null) LockOn(next);
-            else Unlock();
-            return true;
-        }
-
-        return false;
+        _cameraState.Tick(timeScale, _inputHandler.CameraMoveInput);
     }
 
     /// <summary>ロックオン処理で使用するメインカメラを更新します。</summary>
@@ -116,7 +91,7 @@ public class CameraController : MonoBehaviour
     {
         if (mainCamera == null) return;
 
-        _lockOnState?.SetMainCamera(mainCamera);
+        _cameraState?.SetMainCamera(mainCamera);
         _selector?.SetMainCamera(mainCamera);
     }
 
@@ -141,17 +116,11 @@ public class CameraController : MonoBehaviour
         if (CurrentTarget == target) return;
 
         bool wasLockedOn = IsLockedOn;
-
-        if (_currentState != _normalState)
-        {
-            _currentState.Exit();
-        }
+        _isSearchingForTarget = false;
 
         // 初回か対象切り替えかでブレンド起点が変わる
-        _lockOnState.SetTarget(target, isInitialLockOn: !wasLockedOn);
-        _currentState = _lockOnState;
+        _cameraState.SetTarget(target, isInitialLockOn: !wasLockedOn);
         _cameraManager.SetLockOnCameraActive(true);
-        _currentState.Enter();
 
         // 初回のみ、ロックオン前に溜まった切り替え入力を捨てる
         if (!wasLockedOn) ResetSwitchState();
@@ -159,15 +128,17 @@ public class CameraController : MonoBehaviour
         OnTargetChanged?.Invoke(target);
     }
 
-    /// <summary>ロックオンを解除して通常状態へ戻します。</summary>
+    /// <summary>
+    /// ロックオンを解除します。ロックオンは対象がいる限り強制なので、解除後は必ず再探索を再開します
+    /// （手動での「ロックオンしない」選択肢は無いため、Unlock呼び出し元は再探索の有無を意識しなくてよい）。
+    /// </summary>
     public void Unlock()
     {
         if (!IsLockedOn) return;
 
-        _currentState.Exit();
-        _currentState = _normalState;
+        _cameraState.ClearTarget();
         _cameraManager.SetLockOnCameraActive(false);
-        _currentState.Enter();
+        _isSearchingForTarget = true;
         OnTargetChanged?.Invoke(null);
     }
 
@@ -206,9 +177,12 @@ public class CameraController : MonoBehaviour
     private InputHandler _inputHandler;
     private LockOnTargetSelector _selector;
     private CameraMotionController _motionController;
-    private NormalCameraState _normalState;
-    private LockOnCameraState _lockOnState;
-    private ICameraState _currentState;
+    private FollowCameraState _cameraState;
+
+    // ロックオンしたい意思を保持するフラグ。trueの間はTickで毎回SelectInitialTargetを試み、
+    // 見つかったら通常のロックオンと同じ手順で入る。起動直後も敵がいれば確実にロックオンしてほしいため、
+    // 初期値はtrue（対象を見失った後の再探索だけでなく、ゲーム開始直後の初回探索もこれでカバーする）。
+    private bool _isSearchingForTarget = true;
 
     // 1入力につき1回だけ切り替えるためのラッチ。ニュートラル復帰／スワイプ終了で再武装する
     private bool _stickSwitchArmed;
@@ -266,21 +240,15 @@ public class CameraController : MonoBehaviour
 
     /// <summary>
     /// ロックオンボタン入力。
-    /// ロックオン中は解除、未ロックオン時は手動ロックオン開始。
+    /// 対象がいる限りロックオンは強制なので、未ロックオン時の手動ロックオン開始のみ受け付ける
+    /// （ロックオン中の押下では解除しない）。
     /// </summary>
     private void HandleLockOnInput()
     {
         if (_cameraManager == null || _selector == null) return;
+        if (IsLockedOn) return;
 
-        if (IsLockedOn)
-        {
-            // 自動ロックオン中に手動ロックオンボタンを押した場合も解除
-            Unlock();
-        }
-        else
-        {
-            TryManualLockOn();
-        }
+        TryManualLockOn();
     }
     /// <summary>切り替え入力を判定する。1入力（1プッシュ／1スワイプ）につき1回だけ切り替える。</summary>
     private void UpdateTargetSwitch()
@@ -387,6 +355,41 @@ public class CameraController : MonoBehaviour
         if (target == null) return;
 
         LockOn(target);
+    }
+
+    /// <summary>対象を失って再探索中の場合に呼ぶ。見つかったら通常のロックオンと同じ手順で入る。</summary>
+    private void TryResumeLockOnSearch()
+    {
+        if (_selector == null) return;
+
+        var target = _selector.SelectInitialTarget();
+        if (target == null) return;
+
+        LockOn(target);
+    }
+
+    /// <summary>
+    /// ロックオン対象が無効になっていないか確認する。
+    /// 撃破・削除・非ロック化 → 次の対象へ、いなければ解除して再探索を継続する。
+    /// </summary>
+    /// <returns>解除または切り替えを行った場合 true（このフレームの以降の更新はスキップ）。</returns>
+    private bool TryHandleInvalidTarget()
+    {
+        if (!_cameraState.IsTargetValid)
+        {
+            var next = _selector.SelectNextTarget(_cameraState.Target);
+            if (next != null)
+            {
+                LockOn(next);
+            }
+            else
+            {
+                Unlock();
+            }
+            return true;
+        }
+
+        return false;
     }
 
     #endregion
