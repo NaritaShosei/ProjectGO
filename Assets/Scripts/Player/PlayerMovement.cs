@@ -503,25 +503,18 @@ public class PlayerMovement : MonoBehaviour
             while (elapsed < duration)
             {
                 elapsed += Time.fixedDeltaTime * _timeScale;
-
                 float normalizedTime = Mathf.Clamp01(elapsed / duration);
                 float horizontalDistance = moveCurve.Evaluate(normalizedTime) * distance;
-
                 Vector3 candidate = startPosition + backward * horizontalDistance;
 
-                // Largeの場合は、壁判定より先に今回のY座標を決定する。
+                candidate = ResolveDamageReactionWall(_rb.position, candidate);
                 candidate.y = isLarge
                     ? startPosition.y
                       + _largeReactionHeightCurve.Evaluate(normalizedTime) * _largeReactionHeight
                     : startPosition.y;
 
-                candidate = ResolveDamageReactionWall(_rb.position, candidate);
-
                 _rb.MovePosition(candidate);
-
-                await UniTask.Yield(
-                    PlayerLoopTiming.FixedUpdate,
-                    cancellationToken);
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -543,54 +536,30 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 ResolveDamageReactionWall(Vector3 currentPosition, Vector3 candidatePosition)
     {
-        // 今回の移動量。
-        // LargeではY方向にも移動するが、壁との衝突判定には3次元の移動方向を使用する。
-        Vector3 delta = candidatePosition - currentPosition;
-        float distance = delta.magnitude;
+        Vector3 horizontalDelta = candidatePosition - currentPosition;
+        horizontalDelta.y = 0f;
+        float distance = horizontalDelta.magnitude;
+        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE) return candidatePosition;
 
-        if (distance <= ATTACK_MOVE_MIN_CAST_DISTANCE)
-            return candidatePosition;
-
-        Vector3 direction = delta / distance;
-
-        // Rigidbodyに付いているCollider形状そのものを進行方向へSweepする。
-        // MovePositionする前に調べることで、1FixedUpdateで壁を跨いでも貫通させない。
         RaycastHit[] hits = _rb.SweepTestAll(
-            direction,
+            horizontalDelta / distance,
             distance + DAMAGE_MOVE_CAST_SKIN,
             QueryTriggerInteraction.Ignore);
 
         float nearestDistance = float.MaxValue;
-
         foreach (RaycastHit hit in hits)
         {
-            if (!hit.collider)
-                continue;
-
-            // 自分自身に属するColliderは無視。
-            if (hit.rigidbody == _rb)
-                continue;
-
-            // 床や緩い坂の上面は壁として扱わない。
-            if (hit.normal.y > 0.5f)
-                continue;
-
-            nearestDistance = Mathf.Min(
-                nearestDistance,
-                hit.distance);
+            if (!hit.collider || hit.normal.y > 0.5f) continue;
+            nearestDistance = Mathf.Min(nearestDistance, hit.distance);
         }
 
-        // 壁が存在しない。
-        if (nearestDistance == float.MaxValue)
-            return candidatePosition;
+        if (nearestDistance == float.MaxValue) return candidatePosition;
 
-        // Colliderが壁へめり込まないよう、接触位置より少し手前で停止する。
-        float safeDistance = Mathf.Max(
-            0f,
-            nearestDistance - DAMAGE_MOVE_CAST_SKIN);
-
-        return currentPosition
-            + direction * Mathf.Min(safeDistance, distance);
+        float safeDistance = Mathf.Max(0f, nearestDistance - DAMAGE_MOVE_CAST_SKIN);
+        Vector3 resolved = currentPosition
+            + horizontalDelta.normalized * Mathf.Min(safeDistance, distance);
+        resolved.y = candidatePosition.y;
+        return resolved;
     }
 
     // ── 攻撃移動 ─────────────────────────────────────────────
