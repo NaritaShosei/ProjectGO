@@ -1,4 +1,3 @@
-using Unity.AppUI.UI;
 using UnityEngine;
 
 namespace BossEnemy.Attack
