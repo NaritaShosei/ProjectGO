@@ -1142,6 +1142,14 @@ PrefabInstance:
       propertyPath: Target
       value: 
       objectReference: {fileID: 1848956063}
+    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _initialSkills.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: '_initialSkills.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: d851a226d8589b94fbafee1c953fd338, type: 2}
     - target: {fileID: 3281229546311345012, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _movieData.Array.size
       value: 5
@@ -5927,7 +5935,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &728091136
 RectTransform:
   m_ObjectHideFlags: 0
