@@ -91,7 +91,6 @@ namespace BossEnemy.SMB
             // 実判定は移動中のボスを中心とした円形範囲の連続判定。
             // その移動軌跡を、幅=円の直径・長さ=移動距離の矩形として表示する。
             float displayLength = _attackData.AttackHitAreaRadius * 2f;
-            float displayDuration = _attackStartTime + _goalTime;
 
             // 移動直線状に攻撃範囲を表示する
             HitAreaView hitArea = null;
