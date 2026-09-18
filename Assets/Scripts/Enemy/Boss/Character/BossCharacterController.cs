@@ -298,8 +298,6 @@ namespace BossEnemy.Character
             }
 
             _bossCharacterView.ChangePhase(_characterEntity.CharacterCurrentStats.PhaseNum);
-
-            _characterEntity.PhaseChangeCompleted();
         }
 
         /// <summary> ボスの体勢が変わった際のイベント発火時の処理 </summary>

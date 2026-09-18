@@ -417,16 +417,16 @@ namespace BossEnemy.AI.BehaviourTree
         {
             base.OnEnter();
             _bossCharacterEntity.StartPhaseChange();
-            _isPhaseChangeCompleted = false;
+            _isFinishAction = false;
         }
 
         public override void OnUpdate()
         {
-            if (!_isPhaseChangeCompleted 
+            if (!_isFinishAction 
                 && _bossCharacterEntity.CurrentAction.Value 
                 != CharacterAction.PhaseChanging)
             {
-                _isPhaseChangeCompleted = true;
+                _isFinishAction = true;
                 HandleRunningEnd();
                 return;
             }
@@ -434,7 +434,12 @@ namespace BossEnemy.AI.BehaviourTree
             base.OnUpdate();
         }
 
-        private bool _isPhaseChangeCompleted = true;
+        public override void OnExit()
+        {
+            _isFinishAction = true;
+        }
+
+        private bool _isFinishAction = true;
     }
 
     [Serializable]
