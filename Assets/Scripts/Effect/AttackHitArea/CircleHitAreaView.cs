@@ -12,24 +12,21 @@ namespace BossEnemy.Effect
 
         public override void ActiveView(float radius)
         {
-            // 円の直径を割り出す
-            float range = radius * 2;
-            SetRange(range);
+            SetRange(radius);
         }
 
-        public override void SetRange(float range)
+        public override void SetRange(float radius)
         {
             // AttackHitAreaRadius は実際の円形当たり判定の半径。
             // 表示側も同じ半径を使う。
-            _simpleRedLoop.outerRadius = range;
-            _lateralGradient.outerRadius = range;
-            _sheen.outerRadius = range;
+            GenerateRadialMesh(_simpleRedLoop, radius, false);
+            GenerateRadialMesh(_lateralGradient, radius, true);
+            GenerateRadialMesh(_sheen, radius, true);
 
-            // ProceduralMeshGenerator は outerRadius の変更だけでは、生成済みの
-            // メッシュを再生成しない。そのため、プレハブの描画済み半径を基準に
-            // ルートを拡縮して、見た目を実判定半径へ一致させる。
-            float scale = _initialMeshRadius > 0f ? range / _initialMeshRadius : 1f;
-            transform.localScale = _initialLocalScale * scale;
+            // Build では Disabled の ProceduralMeshGenerator が OnEnable されず、
+            // ParticleSystemRenderer.m_Mesh が未設定になる。明示生成した実寸 Mesh を
+            // 使うため、ルートの拡縮は行わない。
+            transform.localScale = _initialLocalScale;
         }
 
         public override void InVisible()
@@ -38,11 +35,7 @@ namespace BossEnemy.Effect
             this.gameObject.SetActive(false);
         }
 
-        private float _initialMeshRadius;
         private Vector3 _initialLocalScale;
-
-        private const float _minInnerRadius = 0.001f;
-        private const float _minOuterRadius = 0.002f;
 
         [SerializeField] private ProceduralMeshGenerator _simpleRedLoop;
         [SerializeField] private ProceduralMeshGenerator _lateralGradient;
@@ -52,57 +45,27 @@ namespace BossEnemy.Effect
         private void Awake()
         {
             _initialLocalScale = transform.localScale;
-            _initialMeshRadius = GetInitialMeshRadius();
-
-            _simpleRedLoop.innerRadius = _minInnerRadius;
-            _lateralGradient.innerRadius = _minInnerRadius;
-            _sheen.innerRadius = _minInnerRadius;
-
-            _simpleRedLoop.outerRadius = _minOuterRadius;
-            _lateralGradient.outerRadius = _minOuterRadius;
-            _sheen.outerRadius = _minOuterRadius;
         }
 
-        /// <summary>
-        /// 外部の ProceduralMeshGenerator は実行時の半径変更でメッシュを作り直さない。
-        /// そのため設定値ではなく、実際に描画されている MeshFilter の頂点範囲から
-        /// プレハブ固有の円半径を取得する。
-        /// </summary>
-        private float GetInitialMeshRadius()
+        private static void GenerateRadialMesh(
+            ProceduralMeshGenerator generator,
+            float radius,
+            bool compensateParticleSize)
         {
-            float radius = 0f;
+            if (generator == null) return;
 
-            foreach (MeshFilter meshFilter in GetComponentsInChildren<MeshFilter>(true))
+            // LateralGradient / Sheen は ParticleSystem の startSize が 0.49 のため、
+            // Mesh 半径をそのまま設定すると Outline より小さく描画される。
+            float meshRadius = radius;
+            if (compensateParticleSize && generator.TryGetComponent(out ParticleSystem particleSystem))
             {
-                Mesh mesh = meshFilter.sharedMesh;
-                if (mesh == null) continue;
-
-                Bounds bounds = mesh.bounds;
-                Vector3 center = bounds.center;
-                Vector3 extents = bounds.extents;
-
-                // 円形メッシュの四方の端をルートローカル座標へ変換し、XZ 平面の
-                // 実半径を測る。子 Transform の拡縮・回転にも対応する。
-                radius = Mathf.Max(radius, GetLocalXZDistance(meshFilter, center + Vector3.right * extents.x));
-                radius = Mathf.Max(radius, GetLocalXZDistance(meshFilter, center - Vector3.right * extents.x));
-                radius = Mathf.Max(radius, GetLocalXZDistance(meshFilter, center + Vector3.forward * extents.z));
-                radius = Mathf.Max(radius, GetLocalXZDistance(meshFilter, center - Vector3.forward * extents.z));
+                float startSize = particleSystem.main.startSize.constant;
+                if (startSize > 0.0001f)
+                    meshRadius /= startSize;
             }
 
-            if (radius > 0f) return radius;
-
-            // メッシュが未生成の場合だけ、プレハブ設定値を安全な代替値にする。
-            return Mathf.Max(
-                _simpleRedLoop.outerRadius,
-                _lateralGradient.outerRadius,
-                _sheen.outerRadius);
-        }
-
-        private float GetLocalXZDistance(MeshFilter meshFilter, Vector3 meshLocalPoint)
-        {
-            Vector3 point = transform.InverseTransformPoint(
-                meshFilter.transform.TransformPoint(meshLocalPoint));
-            return new Vector2(point.x, point.z).magnitude;
+            generator.outerRadius = meshRadius;
+            generator.GenerateMesh();
         }
     }
 }
