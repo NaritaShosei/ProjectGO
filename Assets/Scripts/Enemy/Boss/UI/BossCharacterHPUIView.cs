@@ -12,6 +12,8 @@ namespace BossEnemy.UI
 {
     public class BossCharacterHPUIView : MonoBehaviour, IBossHPView, IPoolable
     {
+        public event Action OnChangeHPBarCompleted;
+
         #region BossEnemyのHPBarClass
         [Serializable]
         public class HPBarUI
@@ -89,7 +91,7 @@ namespace BossEnemy.UI
         }
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
-        public async UniTaskVoid ChangeHPUI(int maxHP, int currentPhase)
+        public async UniTaskVoid ChangeHPBar(int maxHP, int currentPhase)
         {
             _isHPZero = false;
 

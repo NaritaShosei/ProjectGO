@@ -16,12 +16,14 @@ namespace BossEnemy.UI
 
         public void Init()
         {
+            _bossHPUIView.OnChangeHPBarCompleted += _bossCharacterEntity.PhaseChangeCompleted;
+
             _phaseChangeSubscription = _bossCharacterEntity.CurrentAction
                 .SkipLatestValueOnSubscribe()
                 .Subscribe(currentAction =>
             {
                 if (currentAction == CharacterAction.PhaseChanging) 
-                    _bossHPUIView.ChangeHPUI(
+                    _bossHPUIView.ChangeHPBar(
                     _bossCharacterEntity.CharacterCurrentStats.MaxHP,
                     _bossCharacterEntity.CharacterCurrentStats.PhaseNum);
             });
@@ -39,6 +41,8 @@ namespace BossEnemy.UI
 
         public void Dispose()
         {
+            _bossHPUIView.OnChangeHPBarCompleted -= _bossCharacterEntity.PhaseChangeCompleted;
+
             // 個別に購読を解除
             _bossHPSubscription?.Dispose();
             _phaseChangeSubscription?.Dispose();
