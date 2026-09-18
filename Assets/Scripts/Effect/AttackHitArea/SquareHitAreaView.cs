@@ -17,7 +17,7 @@ namespace BossEnemy.Effect
 
         public override void SetRange(float range)
         {
-            SetSize(_squareFangsLoop.quadSize.x, range);
+            SetSize(_initialWidth, range);
         }
 
         /// <summary>
@@ -60,11 +60,13 @@ namespace BossEnemy.Effect
         [SerializeField, Range(0f, 1f)] private float _outlineOpacity = 1f;
 
         private Vector3 _initialLocalScale;
+        private float _initialWidth;
         private LineRenderer _outlineRenderer;
 
         private void Awake()
         {
             _initialLocalScale = transform.localScale;
+            _initialWidth = _squareFangsLoop != null ? _squareFangsLoop.quadSize.y : 1f;
             CreateOutlineRenderer();
         }
 

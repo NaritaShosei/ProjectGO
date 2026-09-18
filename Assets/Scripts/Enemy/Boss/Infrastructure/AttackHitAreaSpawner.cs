@@ -11,18 +11,25 @@ namespace BossEnemy.Infrastructure
     {
         public HitAreaView Spawn(AttackHitAreaType hitAreaType, Vector3 spawnCenterPos, float range, Vector3 forward = default)
         {
-            HitAreaView hitArea = GetHitArea(hitAreaType);
-            Transform hitAreaTransform = hitArea.transform;
+            if (hitAreaType == AttackHitAreaType.None)
+            {
+                Debug.LogError("HitAreaが設定されていません");
+                return null;
+            }
 
-            // プールから返却された直後は非アクティブのままにし、ParticleSystem の
-            // OnEnable より先に今回の位置と向きを設定する。
-            hitAreaTransform.position = spawnCenterPos;
-            if (forward.sqrMagnitude > 0.0001f)
-                hitAreaTransform.rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
-
-            hitArea.gameObject.SetActive(true);
-            hitArea.OnDespawn += Release;
+            HitAreaView hitArea = PrepareHitArea(hitAreaType, spawnCenterPos, forward);
             hitArea.ActiveView(range);
+
+            return hitArea;
+        }
+
+        public HitAreaView SpawnSquare(Vector3 spawnCenterPos, float width, float length, Vector3 forward)
+        {
+            HitAreaView hitArea = PrepareHitArea(AttackHitAreaType.Square, spawnCenterPos, forward);
+            if (hitArea is SquareHitAreaView squareHitArea)
+                squareHitArea.SetSize(width, length);
+            else
+                Debug.LogError("SquareHitAreaView を取得できませんでした。");
 
             return hitArea;
         }
@@ -34,6 +41,25 @@ namespace BossEnemy.Infrastructure
         [SerializeField] private SquareHitAreaView _squareHitEffect;
 
         private Dictionary<AttackHitAreaType, Queue<HitAreaView>> _pool = new();
+
+        private HitAreaView PrepareHitArea(
+            AttackHitAreaType hitAreaType,
+            Vector3 spawnCenterPos,
+            Vector3 forward)
+        {
+            HitAreaView hitArea = GetHitArea(hitAreaType);
+            Transform hitAreaTransform = hitArea.transform;
+
+            // プールから返却された直後は非アクティブのままにし、ParticleSystem の
+            // OnEnable より先に今回の位置と向きを設定する。
+            hitAreaTransform.position = spawnCenterPos;
+            if (forward.sqrMagnitude > 0.0001f)
+                hitAreaTransform.rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
+
+            hitArea.gameObject.SetActive(true);
+            hitArea.OnDespawn += Release;
+            return hitArea;
+        }
 
         private HitAreaView GetHitArea(AttackHitAreaType hitAreaType)
         {
