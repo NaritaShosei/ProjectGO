@@ -1,7 +1,10 @@
 # カメラシステム概要
 
-このフォルダには、通常時の追従カメラ、ロックオンカメラ、カメラシェイク、ロックオンUIを構成するクラスが含まれています。
-ロックオン状態（通常/ロックオン中）の保持と対象の遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当し、`CameraManager` はカメラ参照の初期化、各サブコントローラーの生成・Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定、ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火は、それぞれ専用クラスへ分離されています。
+このフォルダには、常時アクティブな1台のプレイヤー追従カメラ、カメラシェイク、ロックオンUIを構成するクラスが含まれています。カメラは常に「ロックオン対象がいれば追従、いなければスティック/マウス操作によるフリールック」の1状態で動作します（通常/ロックオンで別カメラに切り替える仕組みはありません）。
+フリールックは、対象追従と同じ1台のカメラ（`_lockOnCamera`）に付けた `CinemachineOrbitalFollow` / `CinemachineRotationComposer` / `CinemachineDecollider` に完全に委ねています（元々別カメラ「FreeLook Camera」に付いていたコンポーネントをそのまま移設したもので、3段リングのオービット・デッドゾーン付きの見た目・障害物回避まで含む本格的な設定です）。ロックオン中はこれら3コンポーネントを無効化し、位置・回転を直接Transformへ書き込むハンドロールドのロジック（`UpdateLockOn`）に切り替えます。1台のカメラの上で「Cinemachineが動かす」「スクリプトが直接動かす」を排他的に切り替える構成のため、両者が同時に有効になることはありません。
+ロックオン対象の保持と遷移は `CameraController`（シーン上では互換コンポーネントの `LockOnController` として配置）が担当し、`CameraManager` はカメラ参照の初期化、各サブコントローラーの生成・Tick統括、イベントの委譲を担当します。カメラの位置・回転計算、ロックオン対象の選定、ゲームイベントを受けた演出（ズーム・カメラシェイク）の発火は、それぞれ専用クラスへ分離されています。
+
+将来、探索専用カメラやイベント専用カメラなど別の状態を追加する可能性に備え、状態切り替えの拡張点として `ICameraState` インターフェースは維持しています（現在の実装は `FollowCameraState` の1つのみ）。
 
 > **ドキュメント更新ルール**: クラス間で責務（状態の所有、遷移の実行主体、イベントの発行/購読の向きなど）を移動するリファクタリングを行った場合は、**同じ変更の中で**このドキュメントも更新してください。特に各クラスの担当箇所（`## クラス一覧`）と [参照関係と責務の境界](#参照関係と責務の境界) の表は実装との食い違いが起きやすい箇所です。実装だけ変更してドキュメントを古いまま残すと、後から読む人（人間・AI問わず）が誤った前提でコードを触ってしまいます。
 
@@ -11,16 +14,16 @@
 
 カメラシステムの初期化・更新統括を担当する`MonoBehaviour`です。シーン上に配置され、次の処理を担当します。
 
-- 通常カメラ・ロックオンカメラ・ボスカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` / `SetBossCameraActive` による切り替え。Priorityは既定で 通常(`_normalPriority`=10) < ロックオン(`_lockOnPriority`=20) < ボス(`_bossPriority`=30) の順で、ボス戦中は常にボスカメラが最前面になるよう設計されている。ただし `SetLockOnCameraActive(true)` は `_bossBodyCamera` が設定されている場合、ロックオンカメラのPriorityを `_bossPriority + 1` 以上へ引き上げる（ボスの脚/頭など、ボス戦中のロックオンが最前面になるようにするため。これをしないとボスカメラのPriorityが常に勝ち、ロックオン状態になっても視点が全く切り替わらない）
+- メインカメラ（`_lockOnCamera`。常時アクティブ）・ボスカメラの参照保持、Priorityの初期設定と `SetLockOnCameraActive` / `SetBossCameraActive` による切り替え。Priorityは既定で メイン(`_normalPriority`=10) < ロックオン中(`_lockOnPriority`=20) < ボス(`_bossPriority`=30) の順で、ボス戦中は常にボスカメラが最前面になるよう設計されている。ただし `SetLockOnCameraActive(true)` は `_bossBodyCamera` が設定されている場合、メインカメラのPriorityを `_bossPriority + 1` 以上へ引き上げる（ボスの脚/頭など、ボス戦中のロックオンが最前面になるようにするため。これをしないとボスカメラのPriorityが常に勝ち、ロックオン状態になっても視点が全く切り替わらない）
 - `CameraMotionController` / `CameraPresentationController` / `BossCameraController` / `CameraController`（`LockOnController`）の生成と初期化引数の受け渡し（`BossCameraController` は `_bossBodyCamera` 設定時のみ）
-- 毎 `FixedUpdate` での `CameraPresentationController.Tick` / `BossCameraController.Tick` / `CameraController.Tick` の呼び出し（TimeScaleの伝播を含む）。ボスカメラ有効中は `CameraController.Tick` を止める
+- 毎 `FixedUpdate` での `CameraPresentationController.Tick` / `CameraController.Tick` / `BossCameraController.Tick` の呼び出し（TimeScaleの伝播を含む）。ボスカメラ有効中でも `CameraController.Tick` は止めない（対象なし時の自動探索＝強制ロックオンをボス戦中でも機能させるため）。共有の追従アンカーへの書き込みが競合しないよう、`BossCameraController.Tick` を必ず後に呼ぶ（ボス側の直接スナップが最後に勝つ）
 - `CameraController.OnTargetChanged` を `OnLockOnTargetChanged` として中継
-- ゲーム設定によるカメラ移動速度・回転感度の反映
+- ゲーム設定によるカメラ位置追従速度・（対象なし時の）フリールック回転速度の反映
 - シーン切り替え後のMain Camera再取得
 - 外部から `LockOn` / `Unlock` / ズーム操作 / カメラシェイクを呼べる薄い委譲メソッドを提供（実行本体はそれぞれ `CameraController` / `CameraPresentationController`）
 
-カメラの位置・回転計算と通常カメラへの角度引き継ぎは `CameraMotionController` に委譲します。
-ロックオン状態の保持・遷移、対象の自動解除判定は `CameraController` に、ゲームイベントを受けた演出の発火は `CameraPresentationController` に委ねています。
+カメラの位置・回転計算（対象追従／対象なし時のフリールック）は `CameraMotionController` に委譲します。
+ロックオン対象の保持・遷移は `CameraController` に、ゲームイベントを受けた演出の発火は `CameraPresentationController` に委ねています。
 
 ### CameraPresentationController
 
@@ -38,22 +41,24 @@
 
 ### CameraMotionController
 
-通常カメラとロックオンカメラの動きだけを担当する内部制御クラスです。`MonoBehaviour` ではなく、プレイヤー初期化時に `CameraManager` が生成します。
+常時アクティブな1台のカメラ（`_followCamera`。シーン上は旧名の `_lockOnCamera`）の動きだけを担当する内部制御クラスです。`MonoBehaviour` ではなく、プレイヤー初期化時に `CameraManager` が生成します。
 
-- 通常カメラの入力回転と仮想アンカーの遅延追従
-- ロックオンカメラの位置追従と画面上のデッドゾーン判定に基づく回転
+- コンストラクタで`_followCamera`（＝`_lockOnCamera`）から`CinemachineOrbitalFollow`・`CinemachineRotationComposer`・`CinemachineDecollider`を`GetComponent`し、`Follow`（TrackingTarget）を内部生成の追従アンカー（`_cameraFollowTarget`）に設定。初期状態はフリールック側を有効化
+- 対象なし時（`UpdateFreeLook`）：仮想アンカーの遅延追従（`SmoothDamp`）と、スティック/マウス入力（`InputHandler.CameraMoveInput`）による`CinemachineOrbitalFollow`のAxis値駆動（`HorizontalAxis.Value`に加算、`VerticalAxis.Value`を`VerticalAxis.Range`でクランプしながら加算）。入力が無ければAxis値は変わらない（自動で正面に戻ったりはしない）。実際の位置・回転計算自体（3段リングのオービット、デッドゾーン付きの見た目、障害物回避）は`CinemachineOrbitalFollow`/`CinemachineRotationComposer`/`CinemachineDecollider`が毎フレーム自動で行う（Cinemachine自身の更新経路によるため、`Tick`から明示的に呼ばなくても機能する）
+  - 感度は`_freeLookInputDirection`（軸の符号反転）と`_freeLookRotationSpeed`（度/秒、ゲーム設定の「カメラ回転感度」で補正）。マウス/ゲームパッドの感度統一のため、カメラ側の`CinemachineInputAxisController`は使わず、このクラスが`InputHandler.CameraMoveInput`から直接Axis値を書き込む
+- 対象あり時（`UpdateLockOn`）：`EnterLockOn`でフリールック用3コンポーネントを無効化してから、位置追従と画面上のデッドゾーン判定に基づく回転を直接Transformへ書き込む（従来通りのハンドロールド実装）
 - ロックオン開始時の位置・回転ブレンド（`BeginLockOnBlend` / `UpdateBlend`）
-  - 起点：初回ロックオンは**現在実際に表示されているカメラ**（`LockOnCameraState` が保持する `_mainCamera`＝Cinemachine Brainの出力Camera）の姿勢へスナップしてから、対象切り替えは現在のロックオンカメラ姿勢から。判定は `CameraController.LockOn` が `wasLockedOn` から求め `LockOnCameraState.SetTarget(target, isInitialLockOn)` で渡す。ボス戦中は通常カメラのTickが止まり `_normalCamera`（vcamそのもの）の姿勢が古いまま固定されるため、`_normalCamera.transform` ではなく実際の表示カメラをスナップ元にしている（`BeginLockOnBlend` の `currentMainCamera` 引数。未指定時のみ `_normalCamera` にフォールバック）
+  - 起点：初回ロックオンは**現在実際に表示されているカメラ**（`FollowCameraState` が保持する `_mainCamera`＝Cinemachine Brainの出力Camera）の姿勢へスナップしてから、対象切り替えは現在のカメラ姿勢から。判定は `CameraController.LockOn` が `wasLockedOn` から求め `FollowCameraState.SetTarget(target, isInitialLockOn)` で渡す。ボス戦中はこのカメラのTickが止まり姿勢が古いまま固定されるため、実際の表示カメラをスナップ元にしている（`BeginLockOnBlend` の `currentMainCamera` 引数。未指定時のみ `_followCamera` 自身にフォールバック＝実質スナップなし）
   - 補間：位置・回転ともイージング目標（`_lockOnBlendDuration` で到達）へ寄せつつ、移動を `_lockOnBlendMaxLinearSpeed`（m/秒）、回転を `_lockOnBlendMaxAngularSpeed`（度/秒）でクランプ。対象が近ければ上限に当たらず従来と同じ
   - 終了：位置・回転が収束したら完了。上限で間に合わなければ延長し、`_lockOnBlendDuration + _lockOnBlendMaxExtraTime` 超過で強制終了
-- ロックオン解除時の角度を通常カメラへ引き継ぎ
-- ゲーム設定変更後の通常カメラ速度更新
+  - 対象を解除する際（`FollowCameraState.ClearTarget`）は必ずブレンドをキャンセルし（`CancelLockOnBlend`）、`ExitLockOn`で`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してからフリールック用3コンポーネントを再有効化する（解除直後に古い向きへ飛ばないようにするため）
+- ゲーム設定変更後の位置追従・フリールック回転速度の更新（`SetFreeLookSettings`）
 
-コンストラクタは用途別にまとめた4つの構造体（`CameraReferences` / `NormalCameraSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
+コンストラクタは用途別にまとめた3つの構造体（`CameraReferences` / `FreeLookSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
 
 ロックオン対象の有効性、距離、現在のロックオン状態は保持せず、`CameraManager` から更新指示と対象Transformを受け取ります。
 
-通常カメラがFollowするプレイヤー追従アンカー（内部生成の `CameraFollowTarget`）は `FollowAnchor` プロパティで公開しており、`BossCameraController` がボスカメラのFollowにそのまま流用します。ボスカメラ有効中は `CameraMotionController` のTickが止まるため、アンカーの位置更新は `BossCameraController` 側が肩代わりします。
+このカメラがFollowするプレイヤー追従アンカー（内部生成の `CameraFollowTarget`）は `FollowAnchor` プロパティで公開しており、`BossCameraController` がボスカメラのFollowにそのまま流用します。ボスカメラ有効中も `CameraMotionController` はアンカーを更新し続けますが（フリールック時は`_positionSmoothTime`でSmoothDamp）、`BossCameraController` はスムージング無しで直接プレイヤー位置へスナップしたい（滑らかさはオービット側で別途かける）ため、`CameraManager.FixedUpdate` の呼び出し順で `BossCameraController.Tick` を後に呼び、ボス側の値を必ず最後に勝たせています。
 
 ### BossCameraController
 
@@ -85,7 +90,7 @@
 
 ### CameraZoomController
 
-通常カメラ・ロックオンカメラ・ボスカメラ（`_bossBodyCamera`、未設定シーンではnull可）のField of Viewをまとめて補間するズーム専用クラスです。`CameraPresentationController` が生成し、チャージ段階やモードといったゲーム側の意味は一切知りません。倍率と時間だけを扱う低レベルな補間エンジンです。3台とも毎フレーム FOV を書き込むため、どのカメラがアクティブでもズームが効きます。
+メインカメラ（`_lockOnCamera`）・ボスカメラ（`_bossBodyCamera`、未設定シーンではnull可）のField of Viewをまとめて補間するズーム専用クラスです。`CameraPresentationController` が生成し、チャージ段階やモードといったゲーム側の意味は一切知りません。倍率と時間だけを扱う低レベルな補間エンジンです。2台とも毎フレーム FOV を書き込むため、どちらがアクティブでもズームが効きます。
 
 倍率は**ベース層とエフェクト層の2段**で、実FOV = `基準FOV × ベース倍率 × エフェクト倍率`。それぞれ独立に時間ベース補間します。
 
@@ -101,11 +106,13 @@
 
 ### CameraController / LockOnController
 
-`CameraController` は**ロックオン状態と対象の遷移を担当する実行主体**です。`_currentState`（`NormalCameraState` / `LockOnCameraState`）を自身で保持し、`LockOn` / `Unlock` の状態遷移そのものを実行します。既存Prefabの参照を維持するため、現在のシーン上のコンポーネント型は `LockOnController : CameraController` として残しています。
+`CameraController` は**ロックオン対象の遷移を担当する実行主体**です。常時アクティブな `_cameraState`（`FollowCameraState` 1つのみ。`ICameraState` 実装）を保持し、`LockOn` / `Unlock` では対象の設定・解除だけを行います（カメラそのものの切り替えは発生しない）。既存Prefabの参照を維持するため、現在のシーン上のコンポーネント型は `LockOnController : CameraController` として残しています。
 
-- `_currentState` の保持と `NormalCameraState` / `LockOnCameraState` 間の遷移実行（`LockOn` / `Unlock`）
-- `Tick` 内の `TryHandleInvalidTarget` で対象を監視：自動解除距離を超えたら解除、対象が無効化（撃破・削除・非ロック化）されたら次の対象へ、いなければ解除。通常の敵撃破はこの経路で拾う（`OnEnemyDefeated` は購読しない）
-- ロックオンボタンによる開始・解除
+- `_cameraState`（`FollowCameraState`）の保持。`LockOn` は `SetTarget`、`Unlock` は `ClearTarget` を呼ぶだけで、状態そのものの遷移（Enter/Exit呼び直し）は発生しない
+- `Tick` 内の `TryHandleInvalidTarget` で対象を監視：対象が無効化（撃破・削除・非ロック化）されたら次の対象へ、いなければ`Unlock`。通常の敵撃破はこの経路で拾う（`OnEnemyDefeated` は購読しない）。距離による自動解除は行わない
+- `Unlock`は「ロックオンをやめる」選択肢が無い（対象がいる限り強制ロックオンの）設計なので、呼ばれると必ず`_isSearchingForTarget`を立てて再探索を再開する。呼び出し元（`TryHandleInvalidTarget`／`HandleEnemyForceRemoved`／`CameraManager.SetBossCameraActive`）は再探索の有無を個別に意識しなくてよい。特に`SetBossCameraActive(true)`はボス出現時に既存のロックオン対象を強制解除するが、この仕組みにより解除直後から自動でボスの脚/頭への再ロックオンが機能する
+- `_isSearchingForTarget`（ロックオンしたい意思を表すフラグ。初期値`true`）が立っている間、`Tick`は未ロックオン中でも毎回`SelectInitialTarget`を試み、見つかれば`LockOn`で通常の初回ロックオンと全く同じ手順（ブレンド含む）で再突入する。初期値がtrueなので**起動直後で一度もロックオンしていない状態でも**、敵がいれば確実にロックオンする。`LockOn`成功時にフラグをクリアする
+- ロックオンは対象がいる限り強制。`HandleLockOnInput`はロックオン中は何もしない（`IsLockedOn`なら早期return）ため、ロックオンボタン（右クリック等）を押してもロックオン⇔フリールックを手動で切り替えることはできない。未ロックオン時のみ`TryManualLockOn`で手動ロックオンを試みる（実際は`_isSearchingForTarget`の自動探索が同じことを毎Tickやっているため、ボタンでの手動トリガーはほぼ補助的）
 - 対象切り替え判定（`Tick` 内の `UpdateTargetSwitch`）。**1入力につき1回だけ**切り替える（意図しない連続切り替えを防ぐ）
   - スティック：横成分が `_switchStickOnThreshold` を超えたら1回切り替え。`_switchStickOffThreshold` 以下に戻るまで再切り替えしない（ヒステリシス）
   - マウス：連続した横スワイプの移動量が `_switchMouseThreshold` を超えたら1回切り替え。有意な移動（1フレーム `_switchMouseMinStep` px 以上）が `_switchMouseIdleTime` 秒ないとスワイプ終了とみなし蓄積をリセット。逆方向へ振り直しても再武装。スワイプ終了の判定は per-Tick ではなく時間で行う（低FPSで Update が挟まらない Tick でも誤ってリセットしない）
@@ -159,7 +166,7 @@
 - `ForceStopCameraShake`: 実行中のシェイクをキャンセルし、Noiseの値をゼロに戻す
 - 新しいシェイクを開始すると、実行中のシェイクを停止してから置き換えます
 
-処理時間の待機にはUniTaskとCancellationTokenを使います。`CameraManager` がロックオン状態に応じて通常カメラまたはロックオンカメラを選び、`CameraPresentationController` 経由で渡します。
+処理時間の待機にはUniTaskとCancellationTokenを使います。`CameraManager` がボスカメラ有効中かどうかでボスカメラかメインカメラ（`_lockOnCamera`）を選び、`CameraPresentationController` 経由で渡します。
 
 ### LockOnAreaVisualizer
 
@@ -184,8 +191,7 @@ flowchart TD
     Controller --> Manager[CameraManager]
     Player[Player] --> Manager
     Manager --> Motion[CameraMotionController]
-    Motion --> Normal[Cinemachine通常カメラ]
-    Motion --> Lock[Cinemachineロックオンカメラ]
+    Motion --> Lock[Cinemachineメインカメラ（常時アクティブ）]
     Manager --> Boss[BossCameraController]
     Enemy --> Boss
     Boss --> BossCam[Cinemachineボスカメラ]
@@ -204,23 +210,28 @@ flowchart TD
 
 ## ロックオン開始から解除まで
 
+対象がいない間、カメラはスティック/マウス操作によるフリールックです（`FollowCameraState.Tick` → `CameraMotionController.UpdateFreeLook`）。ロックオン開始・切り替え・解除は、この同じカメラの追従先を切り替えるだけの操作です。
+
+`_isSearchingForTarget` の初期値が `true` なので、**ロックオンボタンを押さなくても**、ロック可能な敵が存在する限り起動直後から自動でロックオンします（下記8番の経路）。ボタン入力（1〜3番）は、既に敵がいるのに手動で対象を選び直したい場合や、`_isSearchingForTarget` が明示的解除でfalseになっている場合に使う経路です。
+
 1. `InputHandler` がロックオン入力イベントを発行します。
 2. `LockOnController`（`CameraController`）が `LockOnTargetSelector.SelectInitialTarget` を呼び出します。
-3. `LockOnController` が自身の `LockOn`（`CameraController.LockOn`）を実行し、選ばれた対象を `_lockOnState` に設定して状態を `LockOnCameraState` へ遷移します。
-4. `CameraManager.SetLockOnCameraActive(true)` によりロックオンカメラのPriorityが上がり、ブレンドが開始します。
+3. `LockOnController` が自身の `LockOn`（`CameraController.LockOn`）を実行し、選ばれた対象を `FollowCameraState.SetTarget` で設定します（カメラの切り替えは発生しない。以後 `Tick` が対象追従の計算へ切り替わるだけ）。
+4. `CameraManager.SetLockOnCameraActive(true)` によりメインカメラのPriorityが（ボス戦中はボスカメラより高く）上がり、`SetTarget` 内で開始されたブレンドが進行します。
 5. ブレンド完了後、対象の画面位置に応じてカメラを回転し、プレイヤーを基準に位置を追従します。
 6. ロックオン中は `CameraController.Tick` 内の `UpdateTargetSwitch` が切り替え入力を判定し、1入力につき1回だけ `SelectSwitchTarget` で対象を切り替えます。
-7. `CameraController.Tick` 内の `TryHandleInvalidTarget` が対象を監視します。自動解除距離超過なら解除。対象が無効化（撃破・削除・`IsLockable=false` 化）されたら `SelectNextTarget` で次へ切り替え、いなければ解除。対象でない敵の撃破では何も起きません。`OnEnemyForceRemoved` のみイベント購読で、現在の対象が削除されたときだけ同様に処理します。
-8. `CameraController.Unlock` が状態を `NormalCameraState` へ戻し、`CameraMotionController` が現在のカメラ角度を通常カメラへ引き継ぎます。`CameraManager.SetLockOnCameraActive(false)` によりロックオンカメラのPriorityが下がります。
+7. `CameraController.Tick` 内の `TryHandleInvalidTarget` が対象を監視します。対象が無効化（撃破・削除・`IsLockable=false` 化）されたら `SelectNextTarget` で次へ切り替え、いなければ解除して`_isSearchingForTarget`を立てます。対象でない敵の撃破では何も起きません。`OnEnemyForceRemoved` のみイベント購読で、現在の対象が削除されたときだけ同様に処理します。距離による自動解除は行いません。
+8. `_isSearchingForTarget` が立っている間は未ロックオン状態でも毎Tick `SelectInitialTarget` を試み、新しい候補が見つかれば通常のロックオン開始と同じ手順（ブレンド含む）でそのまま再突入します。プレイヤーが明示的にロックオンボタンで解除した場合はこの再探索を行いません。
+9. `CameraController.Unlock` が `FollowCameraState.ClearTarget` を呼び、対象を外してブレンドをキャンセルし、`ExitLockOn`で`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してからフリールック用3コンポーネントを再有効化します。以後 `Tick` は次のフレームからフリールック（Cinemachine任せ）に戻り、外れた瞬間の向きからそのまま手動操作を継続できます。`CameraManager.SetLockOnCameraActive(false)` によりPriorityが基準値へ下がります。
 
-ボスの脚/頭（`BossLegLockOnController` が供給する候補）も、上記と全く同じ流れでロックオンされます。`CameraManager.FixedUpdate` は通常ボスカメラ有効中 `CameraController.Tick` を止めますが、`CameraController.IsLockedOn` が true の間は止めないため、ボス戦中でもロックオン開始後は通常どおり対象切り替え・自動解除が機能します。
+ボスの脚/頭（`BossLegLockOnController` が供給する候補）も、上記と全く同じ流れでロックオンされます。`CameraManager.FixedUpdate` は通常ボスカメラ有効中 `CameraController.Tick` を止めますが、`CameraController.IsLockedOn` が true の間は止めないため、ボス戦中でもロックオン開始後は通常どおり対象切り替えが機能します。
 
 ## 参照関係と責務の境界
 
 | クラス | 主な責務 | 主な依存先 |
 | --- | --- | --- |
 | `CameraManager` | 初期化・Tick統括・イベント委譲・ライフサイクル | Cinemachine、Player、InputHandler、CameraController、CameraMotionController、CameraPresentationController、BossLegLockOnController |
-| `CameraMotionController` | 通常・ロックオンカメラの位置、回転、ブレンド。追従アンカーを `FollowAnchor` で公開 | Cinemachine、Player、InputHandler |
+| `CameraMotionController` | 常時アクティブな1台のカメラの位置・回転、ブレンド。対象なし時は`CinemachineOrbitalFollow`/`RotationComposer`/`Decollider`のAxis値を駆動するだけでCinemachine本体に処理を委ね、対象あり時はこれらを無効化してTransformを直接操作する。追従アンカーを `FollowAnchor` で公開 | Cinemachine、Player、InputHandler（`CameraMoveInput`を引数で受け取るのみ） |
 | `BossCameraController` | ボス戦中の専用カメラ（定位置のボス正対追従・注視点の左右スイベル・姿勢連動ズーム）の有効化と駆動 | Cinemachine、EnemyManager（Spawned/BossDefeated/ForceRemoved）、InputHandler、CameraManager、CameraAnglePoint、IBossEnemyCharacterView（OnChangedPosture） |
 | `BossCameraSettings` | `BossCameraController` へ渡すチューニング値の組（`CameraManager` の Inspector 値から詰め替え） | なし |
 | `BossLegLockOnController` | ボスの右足/左足/頭をロックオン候補として供給（鎧の生死で `IsLockable` を切り替えるだけ） | EnemyManager（Spawned/BossDefeated/ForceRemoved）、IBossEnemyCharacterView（ActiveBossEnemyPartsView）、BossArmorView（IsBroken）、CameraAnglePoint |
@@ -236,9 +247,12 @@ flowchart TD
 ## 実装上の注意
 
 - シーン上の初期化順に依存するため、`CameraManager.Init(Player)` が呼ばれてからロックオン入力を扱える状態になります。
-- `CameraManager` は通常カメラ、ロックオンカメラ、ロックオンコントローラーの参照が不足すると初期化を中断します。
+- `CameraManager` はメインカメラ（`_lockOnCamera`）・ロックオンコントローラーの参照が不足すると初期化を中断します。
+- `InputHandler.CameraMoveInput`（`CameraMove` アクション）は2箇所から参照されますが、`CameraManager.FixedUpdate`がボスカメラ有効時に`CameraController.Tick`（ロックオン中を除く）を止める仕組みにより、同時に動くことはありません：メインカメラ側（`FollowCameraState.UpdateFreeLook`、対象なし時のみ）と、`BossCameraController`の左右スイベル操作（ボスカメラ有効時、注視点オフセット）。
 - `LockOnController` は `EnemyManager.OnEnemyForceRemoved` と `InputHandler.OnLockOn` を購読するため、`OnDestroy` での購読解除が必要です。
 - `LockOnTargetSelector` は選定スコアと左右判定に `_camera`（Cinemachine Brain 出力のメインカメラ）の `transform` と `WorldToScreenPoint` を使うため、カメラが未準備の場合は正しく選定できません。
 - 対象切り替えは `CameraController` が `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（`InputHandler` を経由しない割り切り）。`LockOnChange` アクションや矢印キーは対象切り替えには使いません。
 - `LockOnController.cs` はクラス名とファイル名を一致させています。Unityスクリプトをリネームする場合は、既存のMetaファイルのGUIDを維持してください。
 - `BossLegLockOnController` は、ボスの`ActiveBossEnemyPartsView`（初期姿勢＝`Standing`時点）に右足・左足の鎧付きパーツが含まれていることを前提にしています。ボス側で姿勢（Posture）が `Standing` 以外に切り替わっても、一度取得した `BossArmorView`／Transform参照はそのまま保持し続けるため、脚パーツ自体が破棄されない限り機能し続けます。該当パーツが見つからない場合は警告ログを出して脚/頭ロックオンを無効化します。
+- フリールックの`CinemachineOrbitalFollow`/`CinemachineRotationComposer`/`CinemachineDecollider`は、元は別カメラ「FreeLook Camera」に付いていたコンポーネントを`_lockOnCamera`のGameObjectへ移設したものです（値はCopy Component/Paste Component As Newでそのまま引き継いでいるため再チューニング不要）。空になった元の「FreeLook Camera」GameObjectはシーン上に残っていても参照されないため、削除して構いません。
+- 上記3コンポーネントの`enabled`切り替え（`CameraMotionController.EnterLockOn`/`ExitLockOn`）は、ロックオン中に直接Transformを書き込むハンドロールド処理とCinemachine自身の更新が同時に同じTransformへ競合しないようにするための排他制御です。両方を同時に有効化しないこと。

@@ -2,7 +2,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 
 /// <summary>
-/// 通常カメラ・ロックオンカメラ・ボスカメラ（任意）の視野角(FOV)をまとめて制御するズーム専用クラスです。
+/// メインカメラ・ボスカメラ（任意）の視野角(FOV)をまとめて制御するズーム専用クラスです。
 /// ズーム倍率1.0が通常視野、1未満でズームイン（画角が狭まる）、1より大きい値でズームアウト
 /// （通常視野より画角が広がる）を表します。
 /// 倍率はベース層とエフェクト層の2段で、実FOV = 基準FOV × ベース倍率 × エフェクト倍率。
@@ -22,14 +22,11 @@ public sealed class CameraZoomController
     /// </summary>
     /// <param name="bossCamera">ボス戦用カメラ。未使用のシーンではnull可。</param>
     public CameraZoomController(
-        CinemachineCamera normalCamera,
         CinemachineCamera lockOnCamera,
         CinemachineCamera bossCamera)
     {
-        _normalCamera = normalCamera;
         _lockOnCamera = lockOnCamera;
         _bossCamera = bossCamera;
-        _normalFieldOfView = normalCamera.Lens.FieldOfView;
         _lockOnFieldOfView = lockOnCamera.Lens.FieldOfView;
         _bossFieldOfView = bossCamera != null ? bossCamera.Lens.FieldOfView : 0f;
         _currentZoom = 1f;
@@ -117,15 +114,12 @@ public sealed class CameraZoomController
 
         // 実FOV = 基準FOV × ベース倍率 × エフェクト倍率
         float applied = _baseCurrentZoom * _currentZoom;
-        SetFieldOfView(_normalCamera, _normalFieldOfView * applied);
         SetFieldOfView(_lockOnCamera, _lockOnFieldOfView * applied);
         if (_bossCamera != null) SetFieldOfView(_bossCamera, _bossFieldOfView * applied);
     }
 
-    private readonly CinemachineCamera _normalCamera;
     private readonly CinemachineCamera _lockOnCamera;
     private readonly CinemachineCamera _bossCamera;
-    private readonly float _normalFieldOfView;
     private readonly float _lockOnFieldOfView;
     private readonly float _bossFieldOfView;
 
