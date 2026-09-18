@@ -12,6 +12,8 @@ namespace BossEnemy.UI
 {
     public class BossCharacterHPUIView : MonoBehaviour, IBossHPView, IPoolable
     {
+        public event Action OnChangeHPBarCompleted;
+
         #region BossEnemyのHPBarClass
         [Serializable]
         public class HPBarUI
@@ -44,13 +46,15 @@ namespace BossEnemy.UI
             public async UniTask TakeDamage(int currentHP)
             {
                 _takeDamageSequence?.Kill();
-                _takeDamageSequence = DOTween.Sequence();
 
                 float endValue = (float)currentHP / (float)_maxHP;
 
-                await _takeDamageSequence.Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration));
-                await UniTask.Delay(_finishDamageDuration);
-                await _takeDamageSequence.Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
+                _takeDamageSequence = DOTween.Sequence()
+                    .Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration))
+                    .AppendInterval(_finishDamageDuration)
+                    .Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
+
+                await _takeDamageSequence.AsyncWaitForCompletion();
             }
 
             [Header("現在のHPを表すUI")]
@@ -89,8 +93,14 @@ namespace BossEnemy.UI
         }
 
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
-        public async UniTaskVoid ChangeHPUI(int maxHP, int currentPhase)
+        public async UniTaskVoid ChangeHPBar(int maxHP, int currentPhase)
         {
+            if(currentPhase <= 0)
+            {
+                Debug.LogError($"現在のフェーズがあり得ない数値です:{ currentPhase }");
+                return;
+            }
+
             _isHPZero = false;
 
             int nextHPBarArrNum = currentPhase - 1;
@@ -108,9 +118,10 @@ namespace BossEnemy.UI
             _currentHPBar = _bossEnemyAllPhaseHPBarArray[nextHPBarArrNum];
             _currentHPBar.Init(maxHP);
 
+            OnChangeHPBarCompleted?.Invoke();
             Debug.Log("HPUIの設定が完了しました");
         }
-
+        
         public async UniTask TakeDamage(int currentHP)
         {
             if (_currentHPBar == null || _isHPZero) return;
