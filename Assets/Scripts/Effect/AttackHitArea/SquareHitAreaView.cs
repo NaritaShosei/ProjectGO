@@ -17,7 +17,7 @@ namespace BossEnemy.Effect
 
         public override void SetRange(float range)
         {
-            SetSize(_squareFangsLoop.quadSize.x, range);
+            SetSize(_initialWidth, range);
         }
 
         /// <summary>
@@ -25,20 +25,23 @@ namespace BossEnemy.Effect
         /// </summary>
         public void SetSize(float width, float length)
         {
-            SetQuadSize(_squareFangsLoop, width, length);
-            SetQuadSize(_squareFangsGlow, width, length);
-            SetQuadSize(_squareFangsSheen1, width, length);
-            SetQuadSize(_squareFangsSheen2, width, length);
-            SetQuadSize(_simpleSquareLateralGradient, width, length);
+            // 描画用ネストPrefabはローカルYで90°回転している。
+            // その座標系ではquadSize.xが攻撃方向、quadSize.yが横幅になる。
+            SetQuadSize(_squareFangsLoop, length, width);
+            SetQuadSize(_squareFangsGlow, length, width);
+            SetQuadSize(_squareFangsSheen1, length, width);
+            SetQuadSize(_squareFangsSheen2, length, width);
+            SetQuadSize(_simpleSquareLateralGradient, length, width);
 
-            // ProceduralMeshGenerator は実行中に quadSize を変更しても、メッシュを自動で再生成しない。
-            // 描画済みメッシュを確実に範囲へ追従させるため、初期メッシュ寸法に対する比率でルートを拡縮する。
-            float widthScale = _initialMeshSize.x > 0f ? width / _initialMeshSize.x : 1f;
-            float lengthScale = _initialMeshSize.y > 0f ? length / _initialMeshSize.y : 1f;
-            transform.localScale = new Vector3(
-                _initialLocalScale.x * widthScale,
-                _initialLocalScale.y,
-                _initialLocalScale.z * lengthScale);
+            // quadSize の変更を描画用 Mesh へ反映する。
+            GenerateMesh(_squareFangsLoop);
+            GenerateMesh(_squareFangsGlow);
+            GenerateMesh(_squareFangsSheen1);
+            GenerateMesh(_squareFangsSheen2);
+            GenerateMesh(_simpleSquareLateralGradient);
+            transform.localScale = _initialLocalScale;
+            UpdateOutline(width, length);
+            RestartParticleSystems();
         }
 
         public override void InVisible()
@@ -47,27 +50,106 @@ namespace BossEnemy.Effect
             this.gameObject.SetActive(false);
         }
 
-        private Vector2 _initialMeshSize;
+        [SerializeField] private ProceduralMeshGenerator _squareFangsLoop;
+        [SerializeField] private ProceduralMeshGenerator _squareFangsGlow;
+        [SerializeField] private ProceduralMeshGenerator _squareFangsSheen1;
+        [SerializeField] private ProceduralMeshGenerator _squareFangsSheen2;
+        [SerializeField] private ProceduralMeshGenerator _simpleSquareLateralGradient;
+        [SerializeField, Min(0.001f)] private float _outlineWidth = 0.04f;
+        [SerializeField] private Color _outlineColor = new Color(1f, 0.05f, 0.05f, 1f);
+        [SerializeField, Range(0f, 1f)] private float _outlineOpacity = 1f;
+
         private Vector3 _initialLocalScale;
+        private float _initialWidth;
+        private LineRenderer _outlineRenderer;
 
         private void Awake()
         {
-            _initialMeshSize = _squareFangsLoop.quadSize;
             _initialLocalScale = transform.localScale;
+            _initialWidth = _squareFangsLoop != null ? _squareFangsLoop.quadSize.y : 1f;
+            CreateOutlineRenderer();
         }
 
         private static void SetQuadSize(ProceduralMeshGenerator mesh, float width, float length)
         {
+            if (mesh == null) return;
+
             Vector2 size = mesh.quadSize;
             size.x = width;
             size.y = length;
             mesh.quadSize = size;
         }
 
-        [SerializeField] private ProceduralMeshGenerator _squareFangsLoop;
-        [SerializeField] private ProceduralMeshGenerator _squareFangsGlow;
-        [SerializeField] private ProceduralMeshGenerator _squareFangsSheen1;
-        [SerializeField] private ProceduralMeshGenerator _squareFangsSheen2;
-        [SerializeField] private ProceduralMeshGenerator _simpleSquareLateralGradient;
+        private static void GenerateMesh(ProceduralMeshGenerator generator)
+        {
+            if (generator == null) return;
+            generator.GenerateMesh();
+        }
+
+        /// <summary>
+        /// Square のみ、範囲の外周を常に視認できるように矩形アウトラインを重ねる。
+        /// Square Fangs の既存マテリアルを使うため、Build に新しい Shader 依存を増やさない。
+        /// </summary>
+        private void CreateOutlineRenderer()
+        {
+            GameObject outlineObject = new GameObject("SquareHitAreaOutline");
+            outlineObject.transform.SetParent(transform, false);
+
+            _outlineRenderer = outlineObject.AddComponent<LineRenderer>();
+            _outlineRenderer.useWorldSpace = false;
+            _outlineRenderer.loop = true;
+            _outlineRenderer.positionCount = 4;
+            _outlineRenderer.widthMultiplier = _outlineWidth;
+            _outlineRenderer.numCornerVertices = 2;
+            _outlineRenderer.numCapVertices = 0;
+            ApplyOutlineColor();
+
+            if (_squareFangsLoop != null &&
+                _squareFangsLoop.TryGetComponent(out ParticleSystemRenderer particleRenderer))
+            {
+                _outlineRenderer.sharedMaterial = particleRenderer.sharedMaterial;
+            }
+        }
+
+        private void UpdateOutline(float width, float length)
+        {
+            if (_outlineRenderer == null) return;
+
+            float halfWidth = width * 0.5f;
+            float halfLength = length * 0.5f;
+            const float outlineHeight = 0.01f;
+
+            _outlineRenderer.SetPositions(new[]
+            {
+                new Vector3(-halfWidth, outlineHeight, -halfLength),
+                new Vector3(-halfWidth, outlineHeight, halfLength),
+                new Vector3(halfWidth, outlineHeight, halfLength),
+                new Vector3(halfWidth, outlineHeight, -halfLength),
+            });
+            ApplyOutlineColor();
+        }
+
+        private void ApplyOutlineColor()
+        {
+            if (_outlineRenderer == null) return;
+
+            Color color = _outlineColor;
+            color.a *= _outlineOpacity;
+            _outlineRenderer.startColor = color;
+            _outlineRenderer.endColor = color;
+        }
+
+        /// <summary>
+        /// プールから再利用した際、古い座標・向きの World Space 粒子を残さず、
+        /// Spawn 後に設定された Transform で生成し直す。
+        /// </summary>
+        private void RestartParticleSystems()
+        {
+            foreach (ParticleSystem particleSystem in GetComponentsInChildren<ParticleSystem>(true))
+            {
+                particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                particleSystem.Play(true);
+            }
+        }
     }
 }

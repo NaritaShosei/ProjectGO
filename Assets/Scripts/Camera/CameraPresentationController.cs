@@ -58,7 +58,6 @@ public sealed class CameraPresentationController
     public float CurrentZoom => _zoomController?.CurrentZoom ?? 1f;
 
     public CameraPresentationController(
-        CinemachineCamera normalCamera,
         CinemachineCamera lockOnCamera,
         CinemachineCamera bossBodyCamera,
         PlayerAttack playerAttack,
@@ -69,7 +68,7 @@ public sealed class CameraPresentationController
         ReleaseZoomSetting releaseZoom,
         ModeChangeZoomSetting thunderModeZoom)
     {
-        _zoomController = new CameraZoomController(normalCamera, lockOnCamera, bossBodyCamera);
+        _zoomController = new CameraZoomController(lockOnCamera, bossBodyCamera);
         _cameraShake = new CameraShake();
 
         _level2Zoom = level2Zoom;

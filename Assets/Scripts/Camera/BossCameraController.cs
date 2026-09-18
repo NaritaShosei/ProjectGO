@@ -71,7 +71,9 @@ public sealed class BossCameraController
             return;
         }
 
-        // 通常カメラのTickは停止中なので追従アンカーを自前でプレイヤーへ寄せる
+        // 追従アンカーはCameraMotionController（フリールック時はSmoothDamp）も更新するが、
+        // CameraManager.FixedUpdateの呼び出し順によりこちらが必ず最後に勝つ。
+        // ボス追従はスムージング無しの直接スナップにしたいため（滑らかさはオービット側の設定で別途かける）
         _followAnchor.position = _playerTransform.position;
 
         UpdateOrbitTracking(deltaTime);

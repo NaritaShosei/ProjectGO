@@ -7,38 +7,30 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public readonly struct CameraReferences
 {
-    public readonly CinemachineCamera NormalCamera;
-    public readonly CinemachineCamera LockOnCamera;
-    public readonly CinemachineOrbitalFollow NormalOrbitalFollow;
-    public readonly CinemachineInputAxisController NormalInputAxisController;
+    public readonly CinemachineCamera FollowCamera;
     public readonly Transform PlayerTransform;
 
-    public CameraReferences(
-        CinemachineCamera normalCamera,
-        CinemachineCamera lockOnCamera,
-        CinemachineOrbitalFollow normalOrbitalFollow,
-        CinemachineInputAxisController normalInputAxisController,
-        Transform playerTransform)
+    public CameraReferences(CinemachineCamera followCamera, Transform playerTransform)
     {
-        NormalCamera = normalCamera;
-        LockOnCamera = lockOnCamera;
-        NormalOrbitalFollow = normalOrbitalFollow;
-        NormalInputAxisController = normalInputAxisController;
+        FollowCamera = followCamera;
         PlayerTransform = playerTransform;
     }
 }
 
-/// <summary>通常カメラの入力回転・追従に関する設定値。</summary>
-public readonly struct NormalCameraSettings
+/// <summary>ロックオン対象がいない間の、スティック/マウス操作によるフリールックに関する設定値。</summary>
+public readonly struct FreeLookSettings
 {
-    public readonly Vector2 InputDirection;
     public readonly float PositionSmoothTime;
+    public readonly Vector2 InputDirection;
     public readonly Vector2 RotationSpeed;
 
-    public NormalCameraSettings(Vector2 inputDirection, float positionSmoothTime, Vector2 rotationSpeed)
+    public FreeLookSettings(
+        float positionSmoothTime,
+        Vector2 inputDirection,
+        Vector2 rotationSpeed)
     {
-        InputDirection = inputDirection;
         PositionSmoothTime = positionSmoothTime;
+        InputDirection = inputDirection;
         RotationSpeed = rotationSpeed;
     }
 }
@@ -107,29 +99,34 @@ public readonly struct LockOnBlendSettings
 }
 
 /// <summary>
-/// 通常カメラとロックオンカメラの位置・回転更新を担当します。
+/// 常時アクティブな1台のカメラの位置・回転更新を担当します。
+/// ロックオン対象がいる間はその対象を追従し、いない間はスティック/マウス操作によるフリールックに戻ります。
 /// カメラの状態やロックオン対象の選定は保持しません。
 /// </summary>
 public sealed class CameraMotionController
 {
+    // ブレンド完了とみなす残り誤差
+    private const float BlendCompleteAngle = 1f;      // 度
+    private const float BlendCompleteDistance = 0.05f; // m
+
     /// <summary>
-    /// 通常カメラとロックオンカメラの動作を初期化します。
+    /// カメラの動作を初期化します。
     /// </summary>
     public CameraMotionController(
         CameraReferences references,
-        NormalCameraSettings normalSettings,
+        FreeLookSettings freeLookSettings,
         LockOnSettings lockOnSettings,
         LockOnBlendSettings blendSettings)
     {
-        _normalCamera = references.NormalCamera;
-        _lockOnCamera = references.LockOnCamera;
-        _normalOrbitalFollow = references.NormalOrbitalFollow;
-        _normalInputAxisController = references.NormalInputAxisController;
+        _followCamera = references.FollowCamera;
         _playerTransform = references.PlayerTransform;
+        _orbitalFollow = _followCamera.GetComponent<CinemachineOrbitalFollow>();
+        _rotationComposer = _followCamera.GetComponent<CinemachineRotationComposer>();
+        _decollider = _followCamera.GetComponent<CinemachineDecollider>();
 
-        _cameraInputDirection = normalSettings.InputDirection;
-        _positionSmoothTime = normalSettings.PositionSmoothTime;
-        _rotationSpeed = normalSettings.RotationSpeed;
+        _positionSmoothTime = freeLookSettings.PositionSmoothTime;
+        _freeLookInputDirection = freeLookSettings.InputDirection;
+        _freeLookRotationSpeed = freeLookSettings.RotationSpeed;
 
         _cameraDistance = lockOnSettings.CameraDistance;
         _cameraHeight = lockOnSettings.CameraHeight;
@@ -147,35 +144,72 @@ public sealed class CameraMotionController
 
         _cameraFollowTarget = new GameObject("CameraFollowTarget").transform;
         _cameraFollowTarget.position = _playerTransform.position;
-        _normalCamera.Follow = _cameraFollowTarget;
 
         SceneManager.MoveGameObjectToScene(
             _cameraFollowTarget.gameObject,
-            _normalCamera.gameObject.scene);
+            _followCamera.gameObject.scene);
 
-        if (_normalInputAxisController != null)
-        {
-            _normalInputAxisController.enabled = false;
-        }
+        _followCamera.Follow = _cameraFollowTarget;
+        SetFreeLookComponentsEnabled(true);
     }
 
-    /// <summary>通常カメラがFollowするプレイヤー追従アンカー。ボス用カメラのFollowにも流用する。</summary>
+    /// <summary>カメラがFollowするプレイヤー追従アンカー。ボス用カメラのFollowにも流用する。</summary>
     public Transform FollowAnchor => _cameraFollowTarget;
 
-    /// <summary>通常カメラの入力回転とプレイヤー追従を更新します。</summary>
-    public void UpdateNormal(float timeScale, Vector2 input)
+    /// <summary>
+    /// ロックオン対象がいない間の更新。追従アンカーの遅延追従と、
+    /// スティック/マウス入力によるフリールック（`CinemachineOrbitalFollow`のAxis値駆動）を行う。
+    /// 位置・回転自体はCinemachine（OrbitalFollow/RotationComposer/Decollider）に委ねる。
+    /// </summary>
+    public void UpdateFreeLook(float timeScale, Vector2 input)
     {
-        UpdateFreeCameraRotation(timeScale, input);
         _cameraFollowTarget.position = Vector3.SmoothDamp(
             _cameraFollowTarget.position,
             _playerTransform.position,
-            ref _normalFollowVelocity,
+            ref _followVelocity,
             _positionSmoothTime);
+
+        if (_orbitalFollow == null) return;
+        if (input.sqrMagnitude <= 0.0001f) return;
+
+        float deltaTime = Time.fixedDeltaTime * timeScale;
+        _orbitalFollow.HorizontalAxis.Value += input.x * _freeLookInputDirection.x * _freeLookRotationSpeed.x * deltaTime;
+        _orbitalFollow.VerticalAxis.Value = Mathf.Clamp(
+            _orbitalFollow.VerticalAxis.Value + input.y * _freeLookInputDirection.y * _freeLookRotationSpeed.y * deltaTime,
+            _orbitalFollow.VerticalAxis.Range.x,
+            _orbitalFollow.VerticalAxis.Range.y);
+    }
+
+    /// <summary>ロックオン対象を設定した際に呼ぶ。フリールック用コンポーネントを無効化し、直接Transform操作へ切り替える。</summary>
+    public void EnterLockOn()
+    {
+        SetFreeLookComponentsEnabled(false);
+    }
+
+    /// <summary>
+    /// ロックオン解除時に呼ぶ。`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してから
+    /// フリールック用コンポーネントを再有効化する。解除直後に古い向きへ飛ばないようにするため。
+    /// </summary>
+    public void ExitLockOn()
+    {
+        if (_orbitalFollow != null)
+        {
+            Vector3 euler = _followCamera.transform.eulerAngles;
+            _orbitalFollow.HorizontalAxis.Value = euler.y;
+            _orbitalFollow.VerticalAxis.Value = Mathf.Clamp(
+                GetSignedPitch(euler.x),
+                _orbitalFollow.VerticalAxis.Range.x,
+                _orbitalFollow.VerticalAxis.Range.y);
+        }
+
+        SetFreeLookComponentsEnabled(true);
     }
 
     /// <summary>ロックオンカメラの位置と対象追従回転を更新します。</summary>
     public void UpdateLockOn(Camera mainCamera, Transform targetCenter)
     {
+        _cameraFollowTarget.position = _playerTransform.position;
+
         if (_isBlending)
         {
             UpdateBlend(targetCenter);
@@ -184,56 +218,45 @@ public sealed class CameraMotionController
 
         UpdateCameraPosition();
         UpdateCameraRotation(mainCamera, targetCenter);
-        _cameraFollowTarget.position = _playerTransform.position;
     }
 
     /// <summary>ロックオン開始・対象切り替え時のブレンドを開始する。</summary>
-    /// <param name="snapToNormalCamera">初回ロックオンは true（現在表示中のカメラ姿勢から）、対象切り替えは false（現在のロックオン姿勢から）。</param>
+    /// <param name="snapFromCurrentCamera">初回ロックオンは true（現在表示中のカメラ姿勢から）、対象切り替えは false（現在のカメラ姿勢から）。</param>
     /// <param name="currentMainCamera">
     /// スナップ元にする実際の表示カメラ（Cinemachine Brainの出力Camera）。
-    /// ボス戦中は通常カメラのTickが止まり `_normalCamera` の姿勢が古いまま固定されるため、
-    /// 未指定時のフォールバックとしてのみ `_normalCamera` を使う。
+    /// ボス戦中はこのカメラのTickが止まり `_followCamera` の姿勢が古いまま固定されるため、
+    /// 未指定時のフォールバックとしてのみ `_followCamera` 自身を使う（実質スナップなし）。
     /// </param>
-    public void BeginLockOnBlend(bool snapToNormalCamera, Camera currentMainCamera = null)
+    public void BeginLockOnBlend(bool snapFromCurrentCamera, Camera currentMainCamera = null)
     {
         // 初回ロックオンのみ、現在実際に表示されているカメラの姿勢へスナップ（古い姿勢から飛ぶのを防ぐ）
-        if (snapToNormalCamera)
+        if (snapFromCurrentCamera)
         {
             Transform snapFrom = currentMainCamera != null
                 ? currentMainCamera.transform
-                : _normalCamera.transform;
+                : _followCamera.transform;
 
-            _lockOnCamera.transform.SetPositionAndRotation(
+            _followCamera.transform.SetPositionAndRotation(
                 snapFrom.position,
                 snapFrom.rotation);
         }
 
-        // 現在のロックオンカメラ姿勢をブレンド起点として記録
-        _blendStartPosition = _lockOnCamera.transform.position;
-        _blendStartRotation = _lockOnCamera.transform.rotation;
+        // 現在のカメラ姿勢をブレンド起点として記録
+        _blendStartPosition = _followCamera.transform.position;
+        _blendStartRotation = _followCamera.transform.rotation;
         _blendT = 0f;
         _blendElapsed = 0f;
         _isBlending = true;
     }
 
-    /// <summary>実行中のロックオンブレンドを中止します。</summary>
+    /// <summary>実行中のブレンドを中止します。</summary>
     public void CancelLockOnBlend() => _isBlending = false;
 
-    /// <summary>ロックオンカメラの角度を通常カメラへ引き継ぎます。</summary>
-    public void ApplyRotationToNormalCamera()
-    {
-        if (_normalOrbitalFollow == null) return;
-
-        Vector3 euler = _lockOnCamera.transform.rotation.eulerAngles;
-        _normalOrbitalFollow.HorizontalAxis.Value = euler.y;
-        _normalOrbitalFollow.VerticalAxis.Value = euler.x;
-    }
-
-    /// <summary>通常カメラの移動遅延と回転速度を更新します。</summary>
-    public void SetNormalSettings(float positionSmoothTime, Vector2 rotationSpeed)
+    /// <summary>フリールックの位置追従の遅延・回転速度を更新します。</summary>
+    public void SetFreeLookSettings(float positionSmoothTime, Vector2 rotationSpeed)
     {
         _positionSmoothTime = positionSmoothTime;
-        _rotationSpeed = rotationSpeed;
+        _freeLookRotationSpeed = rotationSpeed;
     }
 
     /// <summary>生成したカメラ追従アンカーを破棄します。</summary>
@@ -245,13 +268,13 @@ public sealed class CameraMotionController
         }
     }
 
-    private readonly CinemachineCamera _normalCamera;
-    private readonly CinemachineCamera _lockOnCamera;
-    private readonly CinemachineOrbitalFollow _normalOrbitalFollow;
-    private readonly CinemachineInputAxisController _normalInputAxisController;
+    private readonly CinemachineCamera _followCamera;
+    private readonly CinemachineOrbitalFollow _orbitalFollow;
+    private readonly CinemachineRotationComposer _rotationComposer;
+    private readonly CinemachineDecollider _decollider;
     private readonly Transform _playerTransform;
     private readonly Transform _cameraFollowTarget;
-    private readonly Vector2 _cameraInputDirection;
+    private readonly Vector2 _freeLookInputDirection;
     private readonly float _cameraDistance;
     private readonly float _cameraHeight;
     private readonly float _lockOnAreaRadius;
@@ -265,13 +288,9 @@ public sealed class CameraMotionController
     private readonly float _lockOnBlendMaxLinearSpeed;
     private readonly float _lockOnBlendMaxExtraTime;
 
-    // ブレンド完了とみなす残り誤差
-    private const float BlendCompleteAngle = 1f;      // 度
-    private const float BlendCompleteDistance = 0.05f; // m
-
     private float _positionSmoothTime;
-    private Vector2 _rotationSpeed;
-    private Vector3 _normalFollowVelocity;
+    private Vector2 _freeLookRotationSpeed;
+    private Vector3 _followVelocity;
 
     // ロックオン開始ブレンドの実行時状態
     private bool _isBlending;
@@ -279,23 +298,6 @@ public sealed class CameraMotionController
     private float _blendElapsed;   // 開始からの経過秒（タイムアウト判定用）
     private Vector3 _blendStartPosition;
     private Quaternion _blendStartRotation;
-
-    private void UpdateFreeCameraRotation(float timeScale, Vector2 input)
-    {
-        if (_normalOrbitalFollow == null) return;
-        if (input.sqrMagnitude <= 0.0001f) return;
-
-        Vector2 rotationDelta = new(
-            input.x * _cameraInputDirection.x * _rotationSpeed.x,
-            input.y * _cameraInputDirection.y * _rotationSpeed.y);
-        float deltaTime = Time.fixedDeltaTime * timeScale;
-
-        _normalOrbitalFollow.HorizontalAxis.Value += rotationDelta.x * deltaTime;
-        _normalOrbitalFollow.VerticalAxis.Value = Mathf.Clamp(
-            _normalOrbitalFollow.VerticalAxis.Value + rotationDelta.y * deltaTime,
-            _normalOrbitalFollow.VerticalAxis.Range.x,
-            _normalOrbitalFollow.VerticalAxis.Range.y);
-    }
 
     /// <summary>ロックオン開始ブレンドの1フレーム分の更新。イージング目標へ寄せつつ移動・回転速度を上限でクランプする。</summary>
     private void UpdateBlend(Transform targetCenter)
@@ -314,21 +316,21 @@ public sealed class CameraMotionController
         // 位置：イージング目標へ、最大移動速度でクランプしながら寄せる
         Vector3 easedPosition = Vector3.Lerp(_blendStartPosition, desiredPosition, eased);
         float maxStepDistance = _lockOnBlendMaxLinearSpeed * Time.fixedDeltaTime;
-        _lockOnCamera.transform.position = Vector3.MoveTowards(
-            _lockOnCamera.transform.position, easedPosition, maxStepDistance);
+        _followCamera.transform.position = Vector3.MoveTowards(
+            _followCamera.transform.position, easedPosition, maxStepDistance);
 
         // 回転：イージング目標へ、最大角速度でクランプしながら回す
         Quaternion easedRotation = Quaternion.Slerp(_blendStartRotation, desiredRotation, eased);
         float maxStepDegrees = _lockOnBlendMaxAngularSpeed * Time.fixedDeltaTime;
-        _lockOnCamera.transform.rotation = Quaternion.RotateTowards(
-            _lockOnCamera.transform.rotation, easedRotation, maxStepDegrees);
+        _followCamera.transform.rotation = Quaternion.RotateTowards(
+            _followCamera.transform.rotation, easedRotation, maxStepDegrees);
 
         // 終了：基準時間経過＋位置・回転が収束、または追加許容時間を超過で強制終了
         bool durationElapsed = _blendT >= 1f;
         bool positionSettled =
-            Vector3.Distance(_lockOnCamera.transform.position, desiredPosition) <= BlendCompleteDistance;
+            Vector3.Distance(_followCamera.transform.position, desiredPosition) <= BlendCompleteDistance;
         bool rotationSettled =
-            Quaternion.Angle(_lockOnCamera.transform.rotation, desiredRotation) <= BlendCompleteAngle;
+            Quaternion.Angle(_followCamera.transform.rotation, desiredRotation) <= BlendCompleteAngle;
         bool timedOut = _blendElapsed >= _lockOnBlendDuration + _lockOnBlendMaxExtraTime;
 
         if ((durationElapsed && positionSettled && rotationSettled) || timedOut)
@@ -339,8 +341,8 @@ public sealed class CameraMotionController
 
     private void UpdateCameraPosition()
     {
-        _lockOnCamera.transform.position = Vector3.MoveTowards(
-            _lockOnCamera.transform.position,
+        _followCamera.transform.position = Vector3.MoveTowards(
+            _followCamera.transform.position,
             CalculateDesiredPosition(),
             _lockOnPositionSpeed * Time.fixedDeltaTime);
     }
@@ -371,16 +373,16 @@ public sealed class CameraMotionController
     {
         Quaternion targetRotation = CalculateDesiredRotation(
             targetCenter,
-            _lockOnCamera.transform.position);
-        _lockOnCamera.transform.rotation = Quaternion.Slerp(
-            _lockOnCamera.transform.rotation,
+            _followCamera.transform.position);
+        _followCamera.transform.rotation = Quaternion.Slerp(
+            _followCamera.transform.rotation,
             targetRotation,
             Time.fixedDeltaTime * speed);
     }
 
     private Vector3 CalculateDesiredPosition()
     {
-        Vector3 back = -_lockOnCamera.transform.forward;
+        Vector3 back = -_followCamera.transform.forward;
         back.y = 0f;
         back.Normalize();
 
@@ -398,9 +400,23 @@ public sealed class CameraMotionController
         Vector3 direction = lookAtPoint - fromPosition;
         if (direction.sqrMagnitude < 0.001f)
         {
-            return _lockOnCamera.transform.rotation;
+            return _followCamera.transform.rotation;
         }
 
         return Quaternion.LookRotation(direction);
+    }
+
+    /// <summary>Euler角のX成分（0..360）を、符号付きのピッチ角（-180..180）へ変換する。</summary>
+    private static float GetSignedPitch(float rawXEuler)
+    {
+        return rawXEuler > 180f ? rawXEuler - 360f : rawXEuler;
+    }
+
+    /// <summary>フリールック用3コンポーネント（OrbitalFollow/RotationComposer/Decollider）の有効/無効を切り替える。</summary>
+    private void SetFreeLookComponentsEnabled(bool isEnabled)
+    {
+        if (_orbitalFollow != null) _orbitalFollow.enabled = isEnabled;
+        if (_rotationComposer != null) _rotationComposer.enabled = isEnabled;
+        if (_decollider != null) _decollider.enabled = isEnabled;
     }
 }

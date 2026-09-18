@@ -90,30 +90,20 @@ namespace BossEnemy.SMB
 
             // 実判定は移動中のボスを中心とした円形範囲の連続判定。
             // その移動軌跡を、幅=円の直径・長さ=移動距離の矩形として表示する。
-            float displayWidth = _attackData.AttackHitAreaRadius * 2f;
-            float displayDuration = _attackStartTime + _goalTime;
+            float displayLength = _attackData.AttackHitAreaRadius * 2f;
 
             // 移動直線状に攻撃範囲を表示する
             HitAreaView hitArea = null;
             if (_canCharge)
             {
                 // 移動直線状に攻撃範囲を表示する
-                hitArea = _attackHitAreaSpawner.Spawn(
-                    AttackHitAreaType.Square,
+                hitArea = _attackHitAreaSpawner.SpawnSquare(
                     spawnPosition,
-                    _attackData.AttackHitAreaRadius,
+                    displayLength,
+                    _moveDistance,
                     _currentHorizontalForward);
 
                 _visibleHitAreaList.Add(hitArea);
-
-                // 攻撃範囲の大きさを設定
-                if (hitArea is SquareHitAreaView squareHitArea)
-                {
-                    // SquareHitAreaView は width をローカル X（ボスの横幅）、
-                    // length をローカル Z（transform.forward の進行方向）として扱う。
-                    // 進行距離を width に渡すと、範囲表示がボスの横方向に伸びてしまう。
-                    squareHitArea.SetSize(displayWidth, _moveDistance);
-                }
             }
 
             // 移動開始までの待機

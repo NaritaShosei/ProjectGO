@@ -7,7 +7,8 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// カメラの挙動を管理するクラス。
-/// 通常時の追従遅延およびロックオン時のターゲット追従を制御します。
+/// 常時アクティブな1台のメインカメラの、対象がいない間の背後追従遅延およびロックオン時の
+/// ターゲット追従を制御します。
 /// ターゲット選定はLockOnControllerに、演出（ズーム・カメラシェイク）の発火は
 /// CameraPresentationControllerに委譲しています。
 /// </summary>
@@ -40,9 +41,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     /// <summary>ロックオンエリアの半径（px）</summary>
     public float LockOnAreaRadius => _lockOnAreaRadius;
 
-    /// <summary>ロックオンを自動解除する距離を取得します。</summary>
-    public float AutoUnlockRange => _autoUnlockRange;
-
     /// <summary>現在のズームFOV倍率。1で通常視野、1未満でズームイン、1より大きい値でズームアウト。</summary>
     public float CurrentZoom => _cameraPresentationController?.CurrentZoom ?? 1f;
 
@@ -58,7 +56,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     /// <summary>
     /// カメラマネージャーの初期化。
-    /// 追従対象のプレイヤーを登録し、通常カメラのFollowターゲットを設定します。
+    /// 追従対象のプレイヤーを登録します。
     /// </summary>
     public void Init(Player player)
     {
@@ -68,7 +66,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             return;
         }
 
-        if (_normalCamera == null || _lockOnCamera == null || _lockOnController == null)
+        if (_lockOnCamera == null || _lockOnController == null)
         {
             Debug.LogError("[CameraManager] Required camera references are missing.", this);
             return;
@@ -91,15 +89,10 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         }
 
         _cameraMotionController = new CameraMotionController(
-            new CameraReferences(
-                _normalCamera,
-                _lockOnCamera,
-                _normalOrbitalFollow,
-                _normalInputAxisController,
-                _playerTransform),
-            new NormalCameraSettings(
-                _cameraInputDirection,
+            new CameraReferences(_lockOnCamera, _playerTransform),
+            new FreeLookSettings(
                 _posSmoothTime,
+                _cameraInputDirection,
                 _cameraRotationSpeed),
             new LockOnSettings(
                 _cameraDistance,
@@ -158,7 +151,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         }
 
         _cameraPresentationController = new CameraPresentationController(
-            _normalCamera,
             _lockOnCamera,
             _bossBodyCamera,
             player.GetComponent<PlayerAttack>(),
@@ -180,8 +172,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     }
 
     /// <summary>
-    /// ロックオンを解除し、通常カメラに戻します。
-    /// 解除時は現在のカメラ角度を通常カメラに引き継ぎます。
+    /// ロックオンを解除します。以後は対象を探しつつプレイヤーの背後追従に戻ります。
     /// </summary>
     public void Unlock()
     {
@@ -242,9 +233,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         var camera = _bossCameraController?.IsActive == true
             ? _bossBodyCamera
-            : IsLockedOn
-                ? _lockOnCamera
-                : _normalCamera;
+            : _lockOnCamera;
         await _cameraPresentationController.Shake(camera, data);
     }
 
@@ -254,23 +243,59 @@ public class CameraManager : MonoBehaviour, ISpeedChange
         _cameraPresentationController?.ForceStopShake();
     }
 
+    /// <summary>ゲーム全体の再生速度変更を受け取り、カメラのTimeScaleへ反映します。</summary>
+    public void OnSpeedChange(float scale)
+    {
+        _timeScale = scale;
+    }
+
+    #endregion
+
+    #region 内部メソッド
+
+    internal void SetLockOnCameraActive(bool isActive)
+    {
+        // ボス戦中（_bossBodyCamera が最前面）でもロックオンが勝てるよう、
+        // ボスカメラのPriorityより確実に高い値を使う（ボス不在時は _lockOnPriority のまま）
+        int activeLockOnPriority = _bossBodyCamera != null
+            ? Mathf.Max(_lockOnPriority, _bossPriority + 1)
+            : _lockOnPriority;
+
+        _lockOnCamera.Priority = isActive ? activeLockOnPriority : _normalPriority;
+    }
+
+    /// <summary>ボス戦カメラのPriorityを切り替える。有効化時はロックオンを解除する。</summary>
+    internal void SetBossCameraActive(bool isActive)
+    {
+        if (_bossBodyCamera == null) return;
+
+        // 有効化時はロックオンを解除してから最前面へ、無効化時は待機位置へ戻す
+        if (isActive)
+        {
+            _lockOnController?.Unlock();
+            _bossBodyCamera.Priority = _bossPriority;
+        }
+        else
+        {
+            _bossBodyCamera.Priority = BossIdlePriority;
+        }
+    }
+
     #endregion
 
     #region Inspectorフィールド
 
     [Header("カメラ参照")]
     [SerializeField] private Camera _mainCamera;
-    [Tooltip("通常時に使用するCinemachineカメラ")]
-    [SerializeField] private CinemachineCamera _normalCamera;
-    [Tooltip("ロックオン時に使用するCinemachineカメラ")]
+    [Tooltip("常時アクティブなメインカメラ。対象がいる間は追従し、いない間はプレイヤーの背後へ自動追従する")]
     [SerializeField] private CinemachineCamera _lockOnCamera;
     [Tooltip("ボス戦時に使用するCinemachineカメラ（未設定ならボスカメラ機能は無効）")]
     [SerializeField] private CinemachineCamera _bossBodyCamera;
 
     [Header("優先度設定")]
-    [Tooltip("通常カメラのPriority。ロックオンカメラはこれより低い値で待機する")]
+    [Tooltip("メインカメラの基本Priority。ボス戦中はこれより高い_bossPriorityが優先される")]
     [SerializeField] private int _normalPriority = 10;
-    [Tooltip("ロックオン時に設定するPriority。通常カメラより高くする必要がある")]
+    [Tooltip("ロックオン対象がいる間に設定するPriority。ボス戦中でもボスカメラより優先させる")]
     [SerializeField] private int _lockOnPriority = 20;
     [Tooltip("ボス戦中に _bossBodyCamera へ設定するPriority。通常(10)・ロックオン(20)より高い必要がある。待機中は自動で最下位へ下がる。基本いじらない")]
     [SerializeField] private int _bossPriority = 30;
@@ -280,7 +305,7 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _cameraDistance = 5f;
     [Tooltip("プレイヤーからのカメラの高さ（m）")]
     [SerializeField] private float _cameraHeight = 2f;
-    [Tooltip("通常時のカメラ位置追従の遅延時間（秒）。大きいほど追従がゆっくりになる")]
+    [Tooltip("ロックオン対象がいない時のカメラ位置追従の遅延時間（秒）。大きいほど追従がゆっくりになる")]
     [SerializeField] private float _posSmoothTime = 0.2f;
 
     [Header("カメラ近接エフェクト非表示設定")]
@@ -303,7 +328,8 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [Tooltip("1秒あたりの不透明度変化量")]
     [SerializeField, Min(0.01f)] private float _occlusionFadeSpeed = 5f;
 
-    [Header("フリーカメラ入力")]
+    [Header("フリーカメラ入力（ロックオン対象がいない時）")]
+    [Tooltip("上下の可動範囲は _lockOnCamera に付けた CinemachineOrbitalFollow の VerticalAxis.Range で設定する")]
     [SerializeField] private Vector2 _cameraRotationSpeed = new(120f, 80f);
     [SerializeField] private Vector2 _cameraInputDirection = new(1f, -1f);
     [Tooltip("マウス操作時のカメラ入力に掛ける倍率")]
@@ -322,8 +348,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     [SerializeField] private float _lockOnFollowSpeedMax = 10f;
     [Tooltip("デッドゾーン境界から最大速度に達するまでの距離（px）。小さいほど速度の上がり方が急になる")]
     [SerializeField] private float _lockOnDeadzone = 150f;
-    [Tooltip("ターゲットがこの距離（m）を超えると自動でロックオン解除する")]
-    [SerializeField] private float _autoUnlockRange = 25f;
 
     [Header("ロックオン開始ブレンド")]
     [Tooltip("ロックオン開始ブレンドの基準時間（秒）")]
@@ -383,8 +407,6 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
     private Transform _playerTransform;
 
-    private CinemachineOrbitalFollow _normalOrbitalFollow;
-    private CinemachineInputAxisController _normalInputAxisController;
     private CameraMotionController _cameraMotionController;
     private CameraPresentationController _cameraPresentationController;
     private BossCameraController _bossCameraController;
@@ -396,6 +418,10 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     private float _basePositionSmoothTime;
     private Vector2 _baseRotationSpeed;
     private GameSettingService _gameSettingService;
+
+    /// <summary>ボスカメラの待機時Priority。通常・ロックオンより下に置く。</summary>
+    private int BossIdlePriority => _normalPriority - 2;
+
     #endregion
 
     #region Unityライフサイクル
@@ -419,23 +445,15 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             _gameSettingService.OnSettingsChanged += ApplyGameSettings;
         }
 
-        if (_normalCamera == null || _lockOnCamera == null)
+        if (_lockOnCamera == null)
         {
             Debug.LogError("[CameraManager] CinemachineCamera reference is missing.", this);
             return;
         }
 
-        _normalCamera.Priority = _normalPriority;
-        _lockOnCamera.Priority = _normalPriority - 1;
+        _lockOnCamera.Priority = _normalPriority;
         // ボスカメラは待機時は全カメラより下に置く
         if (_bossBodyCamera != null) _bossBodyCamera.Priority = BossIdlePriority;
-
-        _normalOrbitalFollow = _normalCamera.GetComponent<CinemachineOrbitalFollow>();
-        _normalInputAxisController = _normalCamera.GetComponent<CinemachineInputAxisController>();
-        if (_normalInputAxisController != null)
-        {
-            _normalInputAxisController.enabled = false;
-        }
     }
 
     private void Start()
@@ -453,14 +471,14 @@ public class CameraManager : MonoBehaviour, ISpeedChange
 
         _cameraPresentationController?.Tick(Time.fixedDeltaTime * TimeScale);
         _bossLegLockOnController?.Tick();
-        _bossCameraController?.Tick(Time.fixedDeltaTime * TimeScale);
 
-        // ボスカメラ有効中は通常・ロックオンのTickを止める（入力の二重適用防止）。
-        // ただし実際にロックオン中（ボスの脚/頭など）は止めず、ロックオンカメラを優先する
-        if (_bossCameraController == null || !_bossCameraController.IsActive || (_lockOnController != null && _lockOnController.IsLockedOn))
-        {
-            _lockOnController?.Tick(TimeScale);
-        }
+        // ボスカメラ有効中でも_lockOnControllerは常にTickする。対象なし時のフリールック駆動先は非表示の
+        // _lockOnCamera自身なので表示中のボスカメラとは干渉しない。むしろここを止めるとボス戦中に
+        // 自動探索（強制ロックオン）が働かなくなる。
+        // ただし両者は共有の追従アンカー（FollowAnchor）へ書き込むため、ボス側の直接スナップが
+        // 必ず最後に勝つよう、_bossCameraController.Tick を後に呼ぶ。
+        _lockOnController?.Tick(TimeScale);
+        _bossCameraController?.Tick(Time.fixedDeltaTime * TimeScale);
     }
 
     private void LateUpdate()
@@ -572,51 +590,14 @@ public class CameraManager : MonoBehaviour, ISpeedChange
             * Mathf.Lerp(2f, 0.5f, settings.CameraMoveSpeed);
         _cameraRotationSpeed = _baseRotationSpeed
             * Mathf.Lerp(0.25f, 2f, settings.CameraRotationSensitivity);
-        _cameraMotionController?.SetNormalSettings(_posSmoothTime, _cameraRotationSpeed);
+        _cameraMotionController?.SetFreeLookSettings(_posSmoothTime, _cameraRotationSpeed);
     }
 
-    public void OnSpeedChange(float scale)
-    {
-        _timeScale = scale;
-    }
-
-    #endregion
-
-    internal void SetLockOnCameraActive(bool isActive)
-    {
-        _normalCamera.Priority = isActive ? _normalPriority - 1 : _normalPriority;
-
-        // ボス戦中（_bossBodyCamera が最前面）でもロックオンが勝てるよう、
-        // ボスカメラのPriorityより確実に高い値を使う（ボス不在時は _lockOnPriority のまま）
-        int activeLockOnPriority = _bossBodyCamera != null
-            ? Mathf.Max(_lockOnPriority, _bossPriority + 1)
-            : _lockOnPriority;
-
-        _lockOnCamera.Priority = isActive ? activeLockOnPriority : _normalPriority - 1;
-    }
-
-    /// <summary>ボス戦カメラのPriorityを切り替える。有効化時はロックオンを解除する。</summary>
-    internal void SetBossCameraActive(bool isActive)
-    {
-        if (_bossBodyCamera == null) return;
-
-        // 有効化時はロックオンを解除してから最前面へ、無効化時は待機位置へ戻す
-        if (isActive)
-        {
-            _lockOnController?.Unlock();
-            _bossBodyCamera.Priority = _bossPriority;
-        }
-        else
-        {
-            _bossBodyCamera.Priority = BossIdlePriority;
-        }
-    }
-
-    /// <summary>ボスカメラの待機時Priority。通常・ロックオンより下に置く。</summary>
-    private int BossIdlePriority => _normalPriority - 2;
-
+    /// <summary>ロックオン対象変更をイベントとして中継します。</summary>
     private void HandleTargetChanged(ILockOnTarget target)
     {
         OnLockOnTargetChanged?.Invoke(target);
     }
+
+    #endregion
 }
