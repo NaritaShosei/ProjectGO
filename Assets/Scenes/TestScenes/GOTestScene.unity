@@ -5828,10 +5828,6 @@ PrefabInstance:
       propertyPath: serializeData2.initData.clothSetupDataList.Array.data[0].transformRotations.Array.data[31].value.z
       value: -0.685723
       objectReference: {fileID: 0}
-    - target: {fileID: 6126189937113880516, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-      propertyPath: _justDodgeFrame
-      value: 35
-      objectReference: {fileID: 0}
     - target: {fileID: 6265858459617693970, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: _capsule
       value: 
@@ -5839,14 +5835,6 @@ PrefabInstance:
     - target: {fileID: 6265858459617693970, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: _wallMask.m_Bits
       value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 8032022217022596462, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-      propertyPath: m_Interpolate
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8032022217022596462, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
-      propertyPath: m_CollisionDetection
-      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8062396401831231828, guid: ba5622985db033b4a902f3bb3f63548c, type: 3}
       propertyPath: m_WarningMessage
@@ -10697,7 +10685,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2228108133039262262, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_text
-      value: BOSS BATTLE
+      value: TUTORIAL
       objectReference: {fileID: 0}
     - target: {fileID: 2228108133039262262, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_fontSize
@@ -10736,12 +10724,16 @@ PrefabInstance:
       value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 2228108133039262262, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2228108133039262262, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5968926680171919441, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -202
+      value: -184
       objectReference: {fileID: 0}
     - target: {fileID: 5968926680171919441, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_AnchoredPosition.y
