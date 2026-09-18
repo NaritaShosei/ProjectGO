@@ -46,13 +46,13 @@ namespace BossEnemy.UI
             public async UniTask TakeDamage(int currentHP)
             {
                 _takeDamageSequence?.Kill();
-                _takeDamageSequence = DOTween.Sequence();
 
                 float endValue = (float)currentHP / (float)_maxHP;
 
-                await _takeDamageSequence.Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration));
-                await UniTask.Delay(_finishDamageDuration);
-                await _takeDamageSequence.Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
+                _takeDamageSequence = DOTween.Sequence()
+                    .Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration))
+                    .AppendInterval(_finishDamageDuration)
+                    .Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
             }
 
             [Header("現在のHPを表すUI")]
