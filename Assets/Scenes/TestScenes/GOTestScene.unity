@@ -255,6 +255,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ThunderGauge
       objectReference: {fileID: 0}
+    - target: {fileID: 5722453716084609631, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7238458640552067971, guid: 6fde06172538c6e4eb91b4b932686258, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2312,6 +2316,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1504407408}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: managedReferences[6731506274227978450]._bossSequenceName
+      value: BOSS BATTLE
+      objectReference: {fileID: 0}
+    - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: managedReferences[6731506274227978451]._deactivateObject
       value: 
       objectReference: {fileID: 728091135}
@@ -2399,6 +2407,10 @@ PrefabInstance:
     - target: {fileID: 2088440848212763654, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
       propertyPath: m_Name
       value: HPGauge
+      objectReference: {fileID: 0}
+    - target: {fileID: 2088440848212763654, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4027827199007782362, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
       propertyPath: m_Pivot.x
@@ -6901,6 +6913,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1020085241}
     m_Modifications:
+    - target: {fileID: 492242463749214196, guid: 55041d558fe7af84dae8e2b81f3d6022, type: 3}
+      propertyPath: m_fontSize
+      value: 55.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 492242463749214196, guid: 55041d558fe7af84dae8e2b81f3d6022, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 55.1
+      objectReference: {fileID: 0}
     - target: {fileID: 2212382496065667846, guid: 55041d558fe7af84dae8e2b81f3d6022, type: 3}
       propertyPath: _emphasisImage
       value: 
@@ -6993,6 +7013,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: BattlePhaseTimerView
       objectReference: {fileID: 0}
+    - target: {fileID: 8659281031479807816, guid: 55041d558fe7af84dae8e2b81f3d6022, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -48.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8659281031479807816, guid: 55041d558fe7af84dae8e2b81f3d6022, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 40.4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7039,8 +7067,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -750.5, y: 475}
-  m_SizeDelta: {x: 1725, y: 260}
+  m_AnchoredPosition: {x: -750.5, y: 445}
+  m_SizeDelta: {x: 1725, y: 544.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1020085242
 MonoBehaviour:
@@ -7062,7 +7090,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8e5ba1a06198471408efbded2336a487, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 220cd40bcfb3839499bdf1becbcc8d7b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7548,9 +7576,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: SequenceStatusView
       objectReference: {fileID: 0}
+    - target: {fileID: 1403273919883159010, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1743539532231757341, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2228108133039262262, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_text
-      value: wave1
+      value: BOSS BATTLE
       objectReference: {fileID: 0}
     - target: {fileID: 2228108133039262262, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_fontSize
@@ -7594,11 +7630,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5968926680171919441, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -105.8
+      value: -202
       objectReference: {fileID: 0}
     - target: {fileID: 5968926680171919441, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -169.2
+      value: -168
       objectReference: {fileID: 0}
     - target: {fileID: 6306141975075741376, guid: 5f42b4a09d597a64b91ed36254f8d071, type: 3}
       propertyPath: m_Pivot.x
@@ -7955,7 +7991,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 501372511643203817, guid: f41ef287c2d98be428ca43d259e3fa28, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5445814974707988006, guid: f41ef287c2d98be428ca43d259e3fa28, type: 3}
       propertyPath: m_AnchorMax.y
@@ -8383,7 +8419,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1700981379}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -8905,6 +8941,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ResultPanel
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 100001, guid: b7c4a176d9e74da88aab2f0467d74f2c, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -9050,6 +9090,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameOverView
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 224000, guid: b28d9da53545433983c83569dff27e8f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -9100,6 +9144,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TutorialPanelView
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 224000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -9149,6 +9197,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
       propertyPath: m_Name
       value: TutorialChecklistView
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114002, guid: 54da68d9a18a4f94b5f922fcbeeb8169, type: 3}
       propertyPath: m_TextStyleHashCode
