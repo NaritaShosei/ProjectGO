@@ -49,10 +49,15 @@ namespace BossEnemy.UI
 
                 float endValue = (float)currentHP / (float)_maxHP;
 
+                bool isSequenceCompleted = false;
+
                 _takeDamageSequence = DOTween.Sequence()
                     .Append(_currentHPBar.DOFillAmount(endValue, _takeDamageAnimDuration))
                     .AppendInterval(_finishDamageDuration)
-                    .Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration));
+                    .Append(_damageBar.DOFillAmount(endValue, _takeDamageAnimDuration))
+                    .OnComplete(() => { isSequenceCompleted = true; } );
+
+                await UniTask.WaitUntil(() => isSequenceCompleted);
             }
 
             [Header("現在のHPを表すUI")]
@@ -93,6 +98,12 @@ namespace BossEnemy.UI
         /// <summary> 次のPhaseのHPBarに切り替える処理 </summary>
         public async UniTaskVoid ChangeHPBar(int maxHP, int currentPhase)
         {
+            if(currentPhase <= 0)
+            {
+                Debug.LogError($"現在のフェーズがあり得ない数値です:{ currentPhase }");
+                return;
+            }
+
             _isHPZero = false;
 
             int nextHPBarArrNum = currentPhase - 1;
