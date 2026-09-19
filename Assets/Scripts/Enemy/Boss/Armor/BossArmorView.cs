@@ -3,11 +3,12 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using BossEnemy.Character;
 using BossEnemy.Enum;
+using System.Threading;
 
 namespace BossEnemy.Armor
 {
     /// <summary> ボスの装備するアーマー </summary>
-    public class BossArmorView : MonoBehaviour, IArmorHealth
+    public class BossArmorView : MonoBehaviour, IArmorHealth, IDisposable
     {
         public ArmorAttachmentType AttachmentPoints => _armorAttachmentPointsType;
 
@@ -35,6 +36,13 @@ namespace BossEnemy.Armor
             RepairArmor().Forget();
         }
 
+        public void Dispose()
+        {
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
+            _repairCancellationTokenSource = null;
+        }
+
         /// <summary> 実際の耐久値を持つEntityを登録する（未登録なら2値表示にフォールバック） </summary>
         public void SetEntity(IBossCharacterEntity entity)
         {
@@ -47,28 +55,53 @@ namespace BossEnemy.Armor
         public Transform GetTargetCenter() => _gaugeAnchor != null ? _gaugeAnchor : transform;
 
         /// <summary> アーマー修復時の処理 </summary>
-        public async UniTask RepairArmor()
+        public async UniTaskVoid RepairArmor()
         {
             if (_isBreak == false) return;
 
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
+            var repairCancellationTokenSource = new CancellationTokenSource();
+            _repairCancellationTokenSource = repairCancellationTokenSource;
 
+            try
+            {
+                await UniTask.Delay(
+                TimeSpan.FromSeconds(_repairDelayTime),
+                cancellationToken: repairCancellationTokenSource.Token);
 
-            this.gameObject.SetActive(true);
-            _isBreak = false;
+                this.gameObject.SetActive(true);
+                _isBreak = false;
 
-            Debug.Log($"[BossArmorView] RepairArmor: {gameObject.name} / {AttachmentPoints}");
+                Debug.Log($"[BossArmorView] RepairArmor: {gameObject.name} / {AttachmentPoints}");
 
-            // 修復をUI等の購読者に通知
-            OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
-            OnRepaired?.Invoke();
+                // 修復をUI等の購読者に通知
+                OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+                OnRepaired?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+            finally
+            {
+                // 後から始まった修復のCTSを、古い処理のfinallyで破棄しない。
+                if (_repairCancellationTokenSource == repairCancellationTokenSource)
+                {
+                    repairCancellationTokenSource.Dispose();
+                    _repairCancellationTokenSource = null;
+                }
+            }
         }
 
         /// <summary> アーマー破壊時の処理 </summary>
-        public async UniTask BreakArmor()
+        public async UniTaskVoid BreakArmor()
         {
             if (_isBreak == true) return;
 
-
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
+            _repairCancellationTokenSource = null;
 
             this.gameObject.SetActive(false);
             _isBreak = true;
@@ -88,9 +121,10 @@ namespace BossEnemy.Armor
         [SerializeField, Tooltip("ゲージ表示位置（未設定ならこのオブジェクトの位置を使用）")]
         private Transform _gaugeAnchor;
 
-        private bool _isBreak = false;
+        [Header("アーマーの修理終了までの時間")]
+        [SerializeField] private float _repairDelayTime = 1;
 
-        private EffectManager _effectManager;
+        private bool _isBreak = false;
 
         private IBossCharacterEntity _entity;
 
@@ -98,10 +132,7 @@ namespace BossEnemy.Armor
 
         private bool _hasSyncedInitialHP = false;
 
-        private void Awake()
-        {
-            _effectManager = FindFirstObjectByType<EffectManager>();
-        }
+        private CancellationTokenSource _repairCancellationTokenSource = null;
 
         /// <summary> Entity側は1発ごとのダメージで通知を出さないため、ここでHP変化を検知する </summary>
         private void Update()

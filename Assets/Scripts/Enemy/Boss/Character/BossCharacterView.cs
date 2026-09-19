@@ -105,23 +105,21 @@ namespace BossEnemy.Character
             // Update処理が必要なクラスのListをクリア
             _updaters.Clear();
 
-            // 鎧の初期化
-            InitArmor();
-
             // Camera管理クラスを取得
             if (!ServiceLocator.TryGet(out _cameraManager))
             {
-                Debug.Log("取得失敗");
+                Debug.LogError("取得失敗");
                 return;
             }
 
             // Effect管理クラスを取得
             if(!ServiceLocator.TryGet(out _effectManager))
             {
-                Debug.Log("取得失敗");
+                Debug.LogError("取得失敗");
                 return;
             }
 
+            // 各パーツの初期化
             foreach (var collisionDetection in _collisionDetections)
             {
                 foreach(var parts in collisionDetection.BossEnemyPartsView)
@@ -205,6 +203,15 @@ namespace BossEnemy.Character
             _timeScale?.Dispose();
             _updaters.Clear();
             _attackSMBList.Clear();
+
+            // 各パーツの破棄
+            foreach (var collisionDetection in _collisionDetections)
+            {
+                foreach (var parts in collisionDetection.BossEnemyPartsView)
+                {
+                    parts.Dispose();
+                }
+            }
         }
 
 
@@ -315,9 +322,9 @@ namespace BossEnemy.Character
 
         public void ChangePhase(int nextPhase)
         {
-            RepairArmor();
-
             _bossEnemyAnimator.SetPhaseChange(nextPhase);
+
+            RepairArmor();
         }
 
         /// <summary> キャラクターの姿勢を変更 </summary>
@@ -416,13 +423,6 @@ namespace BossEnemy.Character
         }
 
         #region 鎧関連の処理
-        public void InitArmor()
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                bossArmor.Init();
-            }
-        }
 
         public void BreakArmor(ArmorAttachmentType attachmentPointsType)
         {
@@ -477,6 +477,8 @@ namespace BossEnemy.Character
         [SerializeReference, SubclassSelector]
         private IBossCharacterAnimationEventReceiver _bossEnemyAnimationEventReceiver;
 
+
+
         // ボスエネミーのController
         private IBossEnemyCharacterController _bossEnemyController;
 
@@ -515,7 +517,6 @@ namespace BossEnemy.Character
         private void Awake()
         {
             _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
-            _effectManager = FindFirstObjectByType<EffectManager>();
         }
 
         private void OnDestroy()
@@ -527,6 +528,15 @@ namespace BossEnemy.Character
                 _isDespawned = true;
                 StopActiveAttacks();
                 _bossEnemyController?.Dispose();
+
+                // 各パーツの破棄
+                foreach (var collisionDetection in _collisionDetections)
+                {
+                    foreach (var parts in collisionDetection.BossEnemyPartsView)
+                    {
+                        parts.Dispose();
+                    }
+                }
             }
 
             _bossEnemyAnimator?.Dispose();
@@ -715,6 +725,11 @@ namespace BossEnemy.Character
             _bossEnemyView = bossEnemyView;
 
             if (_thisPartsArmer != null) _thisPartsArmer.Init();
+        }
+
+        public void Dispose()
+        {
+            if (_thisPartsArmer != null) _thisPartsArmer.Dispose();
         }
 
         public void SetLockable(bool lockable) => _isLockable = lockable;
