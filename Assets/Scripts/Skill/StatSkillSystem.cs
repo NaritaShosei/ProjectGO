@@ -97,7 +97,6 @@ public class StatSkillSystem
             {
                 StatSkillType.HP => _stats.MaxHealth,
                 StatSkillType.Attack => _stats.AttackPower,
-                StatSkillType.Defense => _stats.DefensePower,
                 StatSkillType.Critical => _stats.CriticalRate,
                 StatSkillType.Thunder => _stats.MaxThunderGauge,
                 _ => 0f
@@ -119,7 +118,6 @@ public class StatSkillSystem
         {
             StatSkillType.HP => _stats.BaseMaxHealth,
             StatSkillType.Attack => _stats.BaseAttackPower,
-            StatSkillType.Defense => _stats.BaseDefensePower,
             StatSkillType.Critical => _stats.BaseCriticalRate,
             StatSkillType.Thunder => _stats.BaseMaxThunderGauge,
             _ => 0f
@@ -135,7 +133,6 @@ public class StatSkillSystem
         {
             case StatSkillType.HP: _stats.AddModifier(new DefaultModifier(amount, StatType.Health)); break;
             case StatSkillType.Attack: _stats.AddModifier(new DefaultModifier(amount, StatType.Attack)); break;
-            case StatSkillType.Defense: _stats.AddModifier(new DefaultModifier(amount, StatType.Defense)); break;
             case StatSkillType.Critical: _stats.AddModifier(new DefaultModifier(amount, StatType.CriticalRate)); break;
             case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount, StatType.ThunderGauge)); break;
         }
