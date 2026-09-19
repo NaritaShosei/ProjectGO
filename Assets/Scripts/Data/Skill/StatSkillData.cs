@@ -6,8 +6,6 @@ public enum StatSkillType
     HP,
     [InspectorName("攻撃力")]
     Attack,
-    [InspectorName("防御力")]
-    Defense,
     [InspectorName("クリティカル率")]
     Critical,
     [InspectorName("雷ゲージ")]

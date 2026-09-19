@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -7,6 +9,8 @@ using UnityEngine;
 /// </summary>
 public class StatSkillSystem
 {
+    private const int MAX_ACQUIRE_COUNT = 2;
+
     public event Action<StatSkillType> OnApply;
 
     /// <summary>
@@ -33,45 +37,70 @@ public class StatSkillSystem
             _expManager.OnLevelUp -= AcquireRandom;
     }
 
-    [SerializeField] private StatSkillData[] _statSkillDataArray;
+    private StatSkillData[] _statSkillDataArray;
     private readonly IPlayerStats _stats;
     private readonly EXPManager _expManager;
 
     /// <summary>
-    /// レベルアップのたびに、_statSkillDataArray からランダムに1つ選んでパラメーターを増加させる。
-    /// 上昇量は、選ばれたスキルの CalculateAmount() を呼び出して決定する。
+    /// レベルアップのたびに、_statSkillDataArray からランダムに2つ選んでパラメーターを増加させる。
+    /// 同じスキルは重複して選ばれない。
     /// </summary>
     private void AcquireRandom(int level)
     {
-        if (_statSkillDataArray == null || _statSkillDataArray.Length == 0) return;
-
-        var data = _statSkillDataArray[UnityEngine.Random.Range(0, _statSkillDataArray.Length)];
-
-        if (data == null)
-        {
-            Debug.LogWarning("[StatSkill] StatSkillData に null 要素があります。設定を確認してください。");
+        if (_statSkillDataArray == null || _statSkillDataArray.Length == 0)
             return;
+
+        // 取得数は最大2個
+        // データが1個しかない場合は1個だけ取得
+        int acquireCount = Mathf.Min(MAX_ACQUIRE_COUNT, _statSkillDataArray.Length);
+
+        // 重複なし抽選用のインデックス配列
+        int[] indices = new int[_statSkillDataArray.Length];
+
+        for (int i = 0; i < indices.Length; i++)
+        {
+            indices[i] = i;
         }
 
-        float baseValue = GetBaseValue(data.StatType);
-        float amount = data.CalculateAmount(baseValue);
+        List<int> indicesList = indices.ToList();
 
-        Apply(data.StatType, amount);
+        // インデックスをシャッフルしてランダムにする
+        ListExtensions.Shuffle(indicesList);
 
-        #region Debug
-
-        float value = data.StatType switch
+        // 選ばれたスキルを適用
+        for (int i = 0; i < acquireCount; i++)
         {
-            StatSkillType.HP => _stats.MaxHealth,
-            StatSkillType.Attack => _stats.AttackPower,
-            StatSkillType.Defense => _stats.DefensePower,
-            StatSkillType.Critical => _stats.CriticalRate,
-            StatSkillType.Thunder => _stats.MaxThunderGauge,
-            _ => 0f
-        };
+            var data = _statSkillDataArray[indicesList[i]];
 
-        Debug.Log($"[StatSkill] {data.DisplayName} +{amount:F3} = {value} 自動取得");
-        #endregion
+            if (data == null)
+            {
+                Debug.LogWarning(
+                    "[StatSkill] StatSkillData に null 要素があります。設定を確認してください。");
+
+                continue;
+            }
+
+            float baseValue = GetBaseValue(data.StatType);
+            float amount = data.CalculateAmount(baseValue);
+
+            Apply(data.StatType, amount);
+
+            #region Debug
+
+            float value = data.StatType switch
+            {
+                StatSkillType.HP => _stats.MaxHealth,
+                StatSkillType.Attack => _stats.AttackPower,
+                StatSkillType.Critical => _stats.CriticalRate,
+                StatSkillType.Thunder => _stats.MaxThunderGauge,
+                _ => 0f
+            };
+
+            Debug.Log(
+                $"[StatSkill] {data.DisplayName} +{amount:F3} = {value} 自動取得");
+
+            #endregion
+        }
     }
 
     /// <summary>
@@ -83,7 +112,6 @@ public class StatSkillSystem
         {
             StatSkillType.HP => _stats.BaseMaxHealth,
             StatSkillType.Attack => _stats.BaseAttackPower,
-            StatSkillType.Defense => _stats.BaseDefensePower,
             StatSkillType.Critical => _stats.BaseCriticalRate,
             StatSkillType.Thunder => _stats.BaseMaxThunderGauge,
             _ => 0f
@@ -99,7 +127,6 @@ public class StatSkillSystem
         {
             case StatSkillType.HP: _stats.AddModifier(new DefaultModifier(amount, StatType.Health)); break;
             case StatSkillType.Attack: _stats.AddModifier(new DefaultModifier(amount, StatType.Attack)); break;
-            case StatSkillType.Defense: _stats.AddModifier(new DefaultModifier(amount, StatType.Defense)); break;
             case StatSkillType.Critical: _stats.AddModifier(new DefaultModifier(amount, StatType.CriticalRate)); break;
             case StatSkillType.Thunder: _stats.AddModifier(new DefaultModifier(amount, StatType.ThunderGauge)); break;
         }

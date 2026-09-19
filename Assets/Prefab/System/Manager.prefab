@@ -1993,7 +1993,6 @@ MonoBehaviour:
   _statSkillDataArray:
   - {fileID: 11400000, guid: fd62ccfdccf3db44499ea60afb3b81a2, type: 2}
   - {fileID: 11400000, guid: d67079c9793378c46a3c561628d5d523, type: 2}
-  - {fileID: 11400000, guid: cdd70c5089849144796ad90dd35a5120, type: 2}
   - {fileID: 11400000, guid: 3336e1da02a5ba546bf36ed3dc4c8ce8, type: 2}
   - {fileID: 11400000, guid: 37ca213cabe23b34a9deb1fe862cd85f, type: 2}
   _chargeLevelSkillMap:
@@ -2221,7 +2220,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraManager
   _mainCamera: {fileID: 0}
-  _normalCamera: {fileID: 0}
   _lockOnCamera: {fileID: 0}
   _bossBodyCamera: {fileID: 0}
   _normalPriority: 10
@@ -2289,7 +2287,6 @@ MonoBehaviour:
   _lockOnFollowSpeedMin: 1
   _lockOnFollowSpeedMax: 50
   _lockOnDeadzone: 150
-  _autoUnlockRange: 25
   _lockOnBlendDuration: 0.4
   _lockOnBlendExponent: 3
   _lockOnBlendMaxAngularSpeed: 240
@@ -2314,6 +2311,7 @@ MonoBehaviour:
   _bossFramingNearDistance: 6
   _bossFramingFarDistance: 18
   _bossOrbitTrackSpeed: 180
+  _bossOrbitSmoothTime: 0.2
   _bossSwivelRange: 1.5
   _bossSwivelSpeed: 3
   _bossSwivelReturnSpeed: 2

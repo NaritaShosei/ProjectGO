@@ -149,10 +149,10 @@ namespace BossEnemy.Infrastructure.Repository
                 }
 
                 int maxHp = ParseInt(row, 2, "最大HP");
-                int hardDef = ParseInt(row, 3, "急所(超柔らかい)の肉質");
-                int normalDef = ParseInt(row, 4, "弱点の肉質");
-                int weakPointDef = ParseInt(row, 5, "通常の肉質");
-                int vitalPointDef = ParseInt(row, 6, "硬い肉質");
+                int vitalPointDef = ParseInt(row, 3, "急所(超柔らかい)の肉質");
+                int weakPointDef = ParseInt(row, 4, "弱点の肉質");
+                int normalDef = ParseInt(row, 5, "通常の肉質");
+                int hardDef = ParseInt(row, 6, "硬い肉質");
                 float walkSpeed = ParseFloat(row, 7, "移動速度");
 
                 var bodyPartsDefense = new Dictionary<TakeDamageType, int>
