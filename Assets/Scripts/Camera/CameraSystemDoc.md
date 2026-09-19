@@ -54,7 +54,7 @@
   - 終了：位置・回転が収束したら完了。上限で間に合わなければ延長し、`_lockOnBlendDuration + _lockOnBlendMaxExtraTime` 超過で強制終了
   - 対象を解除する際（`FollowCameraState.ClearTarget`）は必ずブレンドをキャンセルし（`CancelLockOnBlend`）、`ExitLockOn`で`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してからフリールック用3コンポーネントを再有効化する（解除直後に古い向きへ飛ばないようにするため）
 - ゲーム設定変更後の位置追従・フリールック回転速度の更新（`SetFreeLookSettings`）
-- `ResetFreeLookBehindPlayer`：フリールックの追従アンカーとOrbitalFollowのAxis値をプレイヤーの現在位置・向き基準へ強制的に合わせ直す。ロックオン一時停止中（`CameraController.SetLockOnSuspended(true)`）はこのカメラがCinemachine上非ライブになり得て姿勢更新が保証されないため、`CameraManager.SetLockOnSuspended(false)`（再開時）に呼び、古い姿勢のまま急に映るのを防ぐ
+- `ResetFreeLookBehindPlayer`：フリールックの追従アンカーとOrbitalFollowのAxis値をプレイヤーの現在位置・向き基準へ強制的に合わせ直す。ロックオン一時停止中（`CameraController.SetLockOnSuspended(true)`）はこのカメラがCinemachine上非ライブになり得て姿勢更新が保証されないため、`CameraManager.SetLockOnSuspended(false)`（再開時）に呼び、古い姿勢のまま急に映るのを防ぐ。位置・軸を書き換えた直後に`_followCamera.CancelDamping(true)`も呼び、`RotationComposer`/`Decollider`のダンピングによる向きの遅れを同フレームで解消する。これをしないと、直後に自動探索で初回ロックオンが始まった際、`BeginLockOnBlend`のスナップ元（`snapFromCurrentCamera`時の実カメラ姿勢）がダンピング遅れ中の古い向き（例：一瞬の見下ろし姿勢）を掴んでしまい、そこから緩やかにブレンドして戻る不自然な動きになる
 
 コンストラクタは用途別にまとめた3つの構造体（`CameraReferences` / `FreeLookSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
 
@@ -67,7 +67,7 @@
 ボス戦中だけ有効化する専用カメラの制御クラスです。`MonoBehaviour` ではなく、`_bossBodyCamera` が設定されている場合のみプレイヤー初期化時に `CameraManager` が生成します。ボス側からは `IEnemy` / `IBossEnemyCharacterView`（`OnChangedPosture`）と、ボスの子階層に置かれた `CameraAnglePoint` だけを参照します（ボス側のメソッドは呼ばず、購読のみ）。
 
 - `EnemyManager.OnEnemySpawned` を購読し、`IEnemy.IsBoss` の敵が出現したらボスカメラを有効化。`OnBossDefeated` / `OnEnemyForceRemoved`（現在のボス）で無効化
-- 有効化時：`_bossBodyCamera` の Follow に `CameraMotionController.FollowAnchor`、LookAt に内部生成の注視プロキシを設定し、`CameraManager.SetBossCameraActive(true)` でPriorityを最前面へ。水平軸を現在のメインカメラ方位へ合わせて切り替えの飛びを抑える
+- 有効化時：`_bossBodyCamera` の Follow に `CameraMotionController.FollowAnchor`、LookAt に内部生成の注視プロキシを設定し、水平軸は現在のメインカメラ方位をコピーするのではなく、プレイヤー→ボス方向から直接「反対側」の角度を計算してスナップする（`AlignHorizontalAxisToBossOpposite`）。さらに `CinemachineVirtualCameraBase.CancelDamping(true)` を呼んでから `CameraManager.SetBossCameraActive(true)` でPriorityを最前面へ上げる。`_bossBodyCamera` はシーン上の待機位置（Priorityが低い間の固定座標）から`PositionDamping`付きで追従するため、`CancelDamping`を挟まずに有効化すると、待機位置から正しい位置まで減衰移動する様子がそのまま映り込んでしまう
 - 注視（体をむく）：ボスの子から `CameraAnglePoint`（`Top`＝頭側 / `Under`＝足元側）を集め、プレイヤー↔ボス距離を `_bossFramingNearDistance`〜`_bossFramingFarDistance` で 0..1 に正規化し、その比率で注視プロキシを `Under`→`Top` で線形補間（`Near`以下＝足元、`Far`以上＝頭）。アンカーが無ければ `IEnemy.GetTargetCenter()` へフォールバック
 - カメラの定位置：プレイヤー→ボス方向から求めた方位角（プレイヤーから見てボスの反対側にカメラが来る角度）へ、`CinemachineOrbitalFollow.HorizontalAxis` を `_bossOrbitTrackSpeed`（度/秒）で追従させる。プレイヤー・ボスが動くたびに毎フレーム再計算するので、カメラは常にボスへ正対する側へ収束する（vcam の `CinemachineInputAxisController` は無効化し、このオービット自体は入力で動かさない）
 - 左右スイベル：`InputHandler.CameraMoveInput.x` で注視プロキシをカメラ右方向へ `_bossSwivelRange`（m）を上限に `_bossSwivelSpeed` でオフセットし、入力が無ければ `_bossSwivelReturnSpeed` で中央へ戻す。オービット位置は動かさず注視点だけをずらすため、カメラは大きく回り込まずボスを画面内に保ったまま少しだけ振れる
@@ -75,7 +75,13 @@
 - スポーンイベントは既存ボス数を確認しないため、`HandleEnemySpawned` は毎回 `UnsubscribePosture()` してから購読し直す（旧ボスの姿勢変化が `SetBaseZoom` を呼び続けるのを防ぐ）
 - 無効化時：Priorityを待機位置へ戻し、`CameraManager.SetBaseZoom(1, ...)` でベース層だけ等倍へ戻す（エフェクト層はそのまま）
 
-切り替えブレンドは Cinemachine Brain（`Main Camera Custom Blends`）に任せ、ロックオン用のイージング（`BeginLockOnBlend`）は使いません。チューニング値はすべて `CameraManager` の `[SerializeField]`（`_bossXXX`）から `BossCameraSettings` 構造体（`BossCameraSettings.cs`）へ詰め替えて渡します。
+切り替えブレンドは Cinemachine Brain（[Assets/Data/Main Camera Custom Blends.asset](../../Data/Main%20Camera%20Custom%20Blends.asset)）に任せ、ロックオン用のイージング（`BeginLockOnBlend`）は使いません。チューニング値はすべて `CameraManager` の `[SerializeField]`（`_bossXXX`）から `BossCameraSettings` 構造体（`BossCameraSettings.cs`）へ詰め替えて渡します。
+
+`'**ANY CAMERA**' → BossCamera` は `Style: Cut` で登録済み。ボス登場ムービー（`BossIntroMovieState`、`Assets/TimeLine/BossIntroMovie.playable` の Cinemachine Track）が終わってから `BossCameraController.Activate()` が呼ばれるまでには数フレームの間隔があり、その間 Brain は一旦ムービー用vcamから`LockOnCamera`へ戻るが、直後に`BossCameraController.Activate()`が`BossCamera`のPriorityを上げるため、このワイルドカードで即カットされる。
+
+`LockOnCamera`への遷移（導入ムービー・ボス登場ムービーの終わり、`IntroMovieState`/`BossIntroMovieState`→`MobAndSkill`/`BossBattle`）は意図的にCutにしていない。ムービーの余韻からゆるやかに繋がる見た目を保ちたいため、`'FreeLook Camera ' → LockOnCamera`と同様、指定が無い組み合わせはBrainの`DefaultBlend`（Style EaseInOut・2秒）に任せている。
+
+ただし、ブレンドの開始点（ムービー中に凍結されていた`LockOnCamera`自身の姿勢）が正しくないと、そこから2秒かけて誤った位置から正しい位置へ動く不自然な絵になる。そのため`CameraMotionController.ResetFreeLookBehindPlayer`（`CameraManager.SetLockOnSuspended(false)`で呼ばれる）で、位置・軸を合わせた直後に`_followCamera.CancelDamping(true)`を呼び、ブレンドが始まる前の時点で`LockOnCamera`自身の姿勢をあらかじめ正しくしておく（詳細は`CameraMotionController`の項を参照）。`Assets/Prefab/CatSceneAsset/BossIntroMovieAssets.prefab`内のムービー専用vcam（元は全て同名`CinemachineCamera`）は`BossIntroCam_01`〜`_08`へリネーム済み（`Assets/Prefab/CatSceneAsset/IntroMovieAsset.prefab`側は元々`CinemachineCamera (1)`〜`(6)`で一意だったためそのまま）。これは`'**ANY CAMERA**' → BossCamera`のような個別カット指定が今後必要になった場合に、同名で対象を絞れないという問題を避けるための整理で、現状はブレンド指定には使っていない。
 
 ### BossLegLockOnController
 

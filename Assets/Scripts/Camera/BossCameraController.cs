@@ -167,15 +167,19 @@ public sealed class BossCameraController
         // 追従はプレイヤー中心アンカー、注視はプロキシ
         _bossBodyCamera.Follow = _followAnchor;
         _bossBodyCamera.LookAt = _lookAtProxy;
+        _followAnchor.position = _playerTransform.position;
 
         // 注視点を現在の距離で初期化
         UpdateLookAtProxy();
-        // 現在のメインカメラ方位へ水平軸を合わせて切り替えの飛びを抑える
-        AlignHorizontalAxisToCurrentView();
+        // メインカメラの向き（不定になり得る）に頼らず、プレイヤー→ボス方向から直接「反対側」の角度へスナップする
+        AlignHorizontalAxisToBossOpposite();
 
         _isActive = true;
         _swivelOffset = 0f;
         _orbitYawVelocity = 0f;
+
+        // 優先度を上げて映り始める前に、待機位置からのダンピング移動を飛ばしてその場へスナップさせる
+        _bossBodyCamera.CancelDamping(true);
         _cameraManager.SetBossCameraActive(true);
 
         // 現在値のgetterが無いので初期姿勢はStanding想定でズームを当て、以降はイベントで補正する
@@ -272,10 +276,15 @@ public sealed class BossCameraController
             _settings.SwivelRange);
     }
 
-    /// <summary>ボスカメラの水平軸を現在のメインカメラ方位に合わせる。</summary>
-    private void AlignHorizontalAxisToCurrentView()
+    /// <summary>ボスカメラの水平軸を、プレイヤーから見てボスの反対側の方位へ直接スナップする。</summary>
+    private void AlignHorizontalAxisToBossOpposite()
     {
-        if (_orbitalFollow == null || _mainCamera == null) return;
-        _orbitalFollow.HorizontalAxis.Value = _mainCamera.transform.eulerAngles.y;
+        if (_orbitalFollow == null) return;
+
+        Vector3 toBoss = _boss.Self.position - _playerTransform.position;
+        toBoss.y = 0f;
+        if (toBoss.sqrMagnitude <= 0.0001f) return;
+
+        _orbitalFollow.HorizontalAxis.Value = Mathf.Atan2(toBoss.x, toBoss.z) * Mathf.Rad2Deg;
     }
 }
