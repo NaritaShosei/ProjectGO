@@ -79,7 +79,13 @@ namespace BossEnemy.Animation
         public void SetPhaseChange(int nextPhase)
         {
             if (_animator == null) return;
+
             _animator.SetInteger(_hashCurrentPhase, nextPhase);
+
+            // PhaseChangeAttackSMB が設定されている MeteorShout ステートへ遷移させる。
+            // CurrentPhase は現在のフェーズ情報の保持に使い、アニメーション遷移は
+            // IsAttacking と ExecutingAttackID の組み合わせで行われる。
+            SetAttacking(true, PHASE_CHANGE_ATTACK_ID);
         }
 
         /// <summary>
@@ -113,6 +119,9 @@ namespace BossEnemy.Animation
         private readonly int _hashIsElectrified = Animator.StringToHash("IsElectrified");
         private readonly int _hashIsDead = Animator.StringToHash("IsDead");
         private readonly int _hashCurrentPhase = Animator.StringToHash("CurrentPhase");
+
+        // Animator Controller 内で PhaseChangeAttackSMB を持つ MeteorShout の攻撃ID。
+        private const int PHASE_CHANGE_ATTACK_ID = 13;
 
         private readonly Animator _animator;
 
