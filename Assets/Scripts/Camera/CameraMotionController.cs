@@ -222,6 +222,11 @@ public sealed class CameraMotionController
             0f,
             _orbitalFollow.VerticalAxis.Range.x,
             _orbitalFollow.VerticalAxis.Range.y);
+
+        // 位置・軸だけでなく実際の向き（RotationComposer/Deolliderのダンピング）も同フレームで追いつかせる。
+        // ここを瞬時にしておかないと、直後にロックオンが始まった際のBeginLockOnBlendが
+        // まだ古い向きのままの姿勢をブレンド開始点として掴んでしまう
+        _followCamera.CancelDamping(true);
     }
 
     /// <summary>ロックオンカメラの位置と対象追従回転を更新します。</summary>
