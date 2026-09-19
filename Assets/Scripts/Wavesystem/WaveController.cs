@@ -99,6 +99,7 @@ public class WaveController
     private int _groupKillCount;
 
     private int _waveKillCount;
+    private int _experienceEnemyIndex;
 
     private int _groupSpawnCount;
 
@@ -375,13 +376,15 @@ public class WaveController
         {
             SpawnRequest request =
                 _pendingSpawns.Dequeue();
+            int? experience = _currentWave.GetExperienceForEnemy(_experienceEnemyIndex++);
 
             if (request.IsMidBoss)
             {
                 _enemyManager.SpawnMidBoss(
                     request.EnemyTypeKey,
                     request.Position,
-                    request.MidBossLevelTable);
+                    request.MidBossLevelTable,
+                    experience);
 
                 RegisterGroupMember(null, request);
                 continue;
@@ -391,6 +394,8 @@ public class WaveController
                 _enemyManager.Spawn(
                     request.EnemyTypeKey,
                     request.Position);
+
+            spawnedEnemy?.SetExperienceOverride(experience);
 
             RegisterGroupMember(
                 spawnedEnemy,
@@ -482,6 +487,7 @@ public class WaveController
         _groupKillCount = 0;
         _groupSpawnCount = 0;
         _waveKillCount = 0;
+        _experienceEnemyIndex = 0;
         _groupStartTime = 0f;
         IsComplete = false;
         _pendingSpawns.Clear();

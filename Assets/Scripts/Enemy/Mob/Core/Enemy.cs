@@ -8,6 +8,10 @@ using UnityEngine;
 /// </summary>
 public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IEnemySpawnState
 {
+    private int? _experienceOverride;
+
+    public void SetExperienceOverride(int? amount) => _experienceOverride = amount;
+
     public event Action<IEnemy> OnDead;
     public event Action<IEnemy> OnDamaged;
     public event Action<IEnemy> OnArmorBroken;
@@ -86,6 +90,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
     /// </summary>
     public virtual void ReInitialize(Vector3 spawnPosition)
     {
+        _experienceOverride = null;
         // まず指定された座標へ配置し、直後に壁との重なりを解消する。
         // CircleSpawnなどが壁の内側を指定しても、そのまま行動を開始させない。
         transform.position = spawnPosition;
@@ -657,7 +662,7 @@ public abstract class Enemy : MonoBehaviour, IEnemy, ISpeedChange, IPoolable, IE
             return;
         }
 
-        expManager?.DropEXP(Self.position, _data.ExpDropAmount);
+        expManager?.DropEXP(Self.position, _data.ExpDropAmount, _experienceOverride);
 
         if (this == null) return;
         ReleaseToPool();

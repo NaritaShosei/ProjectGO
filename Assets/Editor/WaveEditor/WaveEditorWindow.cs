@@ -23,6 +23,10 @@ public class WaveEditorWindow : EditorWindow
     private WaveData _wave;
     private SerializedObject _waveSO;
     private Vector2 _scroll;
+    [SerializeField] private int _predictionStartLevel = 1;
+    [SerializeField] private float _predictionStartExperience;
+    [SerializeField] private float _predictionLevelExperience = 100f;
+    [SerializeField] private GameObject _predictionManager;
 
     private readonly Dictionary<string, bool> _foldouts = new();
     private static List<string> _enemyKeyCache = new();
@@ -88,11 +92,16 @@ public class WaveEditorWindow : EditorWindow
 
         if (_sequence == null || _sequenceSO == null) return;
 
+        DrawLevelPredictionSettings();
+
         _sequenceSO.Update();
         var waves = _sequenceSO.FindProperty("Waves");
 
         var pendingOp = ListOp.None;
         var pendingIndex = -1;
+
+        double cumulativeExperience = 0;
+        bool hasDefaultExperience = false;
 
         for (int i = 0; i < waves.arraySize; i++)
         {
@@ -123,6 +132,30 @@ public class WaveEditorWindow : EditorWindow
             if (GUILayout.Button("削除", GUILayout.Width(40))) { pendingOp = ListOp.Delete; pendingIndex = i; }
 
             EditorGUILayout.EndHorizontal();
+            waveAsset = element.objectReferenceValue as WaveData;
+            if (waveAsset != null)
+            {
+                DrawSequenceWaveExperience(waveAsset, i);
+                bool knownExperience = TryGetWaveExperience(waveAsset, out double waveExperience);
+                cumulativeExperience += waveExperience;
+                if (!knownExperience)
+                    hasDefaultExperience = true;
+                string reward = knownExperience ? $"{waveExperience:0.##} EXP" : "算出不可";
+                EditorGUILayout.LabelField($"    Wave {i + 1}: {reward} / 累計EXP: {cumulativeExperience:0.##}" +
+                    (hasDefaultExperience ? " ＋ 未算出分" : ""), EditorStyles.miniLabel);
+                if (!hasDefaultExperience)
+                {
+                    double experience = _predictionStartExperience + cumulativeExperience;
+                    double levelUps = System.Math.Floor(experience / _predictionLevelExperience);
+                    double remaining = experience % _predictionLevelExperience;
+                    EditorGUILayout.LabelField(
+                        $"    完了後の予測PlayerLevel: Lv.{_predictionStartLevel + levelUps:0}  " +
+                        $"（次Lvまで {_predictionLevelExperience - remaining:0.##} EXP）", EditorStyles.boldLabel);
+                }
+                else
+                    EditorGUILayout.LabelField("    予測PlayerLevel: 算出不可（未設定・未解決のWaveあり）", EditorStyles.miniLabel);
+            }
+            else hasDefaultExperience = true;
         }
 
         EditorGUILayout.BeginHorizontal();
@@ -140,6 +173,97 @@ public class WaveEditorWindow : EditorWindow
             ApplySequenceListOp(waves, pendingIndex, pendingOp);
 
         _sequenceSO.ApplyModifiedProperties();
+    }
+
+    private void DrawSequenceWaveExperience(WaveData wave, int index)
+    {
+        bool hasEstimate = TryGetWaveExperience(wave, out double estimatedExperience);
+        int displayedExperience = wave.OverrideExperience
+            ? wave.TotalExperience
+            : hasEstimate ? (int)System.Math.Min(int.MaxValue, System.Math.Round(estimatedExperience)) : 0;
+
+        EditorGUILayout.BeginHorizontal();
+        EditorGUI.BeginChangeCheck();
+        bool overrideExperience = EditorGUILayout.ToggleLeft(
+            new GUIContent("Wave別に指定", "OFFでは敵別設定を使用。EXP欄に入力すると自動でONになります。"),
+            wave.OverrideExperience, GUILayout.Width(110));
+        bool modeChanged = EditorGUI.EndChangeCheck();
+        EditorGUI.BeginChangeCheck();
+        int experience = Mathf.Max(0, EditorGUILayout.IntField(
+            new GUIContent($"Wave {index + 1} 合計EXP", "このWaveDataに保存します。同じアセットを参照するWaveには共通で反映されます。"),
+            displayedExperience));
+        bool amountChanged = EditorGUI.EndChangeCheck();
+        EditorGUILayout.EndHorizontal();
+
+        if (!modeChanged && !amountChanged) return;
+        var serializedWave = new SerializedObject(wave);
+        serializedWave.FindProperty("OverrideExperience").boolValue = amountChanged || overrideExperience;
+        serializedWave.FindProperty("TotalExperience").intValue = experience;
+        serializedWave.ApplyModifiedProperties();
+        Repaint();
+    }
+
+    private void DrawLevelPredictionSettings()
+    {
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        EditorGUILayout.LabelField("到達レベル予測", EditorStyles.boldLabel);
+        if (_predictionManager == null)
+            _predictionManager = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/System/Manager.prefab");
+        _predictionManager = (GameObject)EditorGUILayout.ObjectField(
+            "敵・EXP設定の参照元", _predictionManager, typeof(GameObject), true);
+        _predictionStartLevel = Mathf.Max(1, EditorGUILayout.IntField("開始PlayerLevel", _predictionStartLevel));
+        _predictionStartExperience = Mathf.Max(0, EditorGUILayout.FloatField("開始Lv内の持ち込みEXP", _predictionStartExperience));
+        _predictionLevelExperience = Mathf.Max(0.001f, EditorGUILayout.FloatField("1Lvに必要なEXP", _predictionLevelExperience));
+        if (GUILayout.Button("参照元から必要EXPを取得"))
+        {
+            var manager = _predictionManager != null ? _predictionManager.GetComponentInChildren<EXPManager>(true) : null;
+            if (manager != null)
+                _predictionLevelExperience = Mathf.Max(0.001f,
+                    new SerializedObject(manager).FindProperty("_levelUpEXP").floatValue);
+        }
+        EditorGUILayout.HelpBox("1周目を順番に全撃破・全オーブ回収した場合の予測です。時間内の到達を保証する値ではありません。敵別設定は参照元のPrefabから算出し、レベル依存の中ボスは合計EXP指定時のみ算出します。", MessageType.Info);
+        EditorGUILayout.EndVertical();
+    }
+
+    private bool TryGetWaveExperience(WaveData wave, out double experience)
+    {
+        experience = 0;
+        if (wave.OverrideExperience)
+        {
+            if (wave.GetEnemyCount() > 0) experience = Mathf.Max(0, wave.TotalExperience);
+            return true;
+        }
+        if (_predictionManager == null) return false;
+        var spawner = _predictionManager.GetComponentInChildren<EnemySpawner>(true);
+        var items = _predictionManager.GetComponentInChildren<EXPItemManager>(true);
+        if (spawner == null || items == null) return false;
+        var item = new SerializedObject(items).FindProperty("_itemPrefab").objectReferenceValue;
+        if (item == null) return false;
+        float orbExperience = new SerializedObject(item).FindProperty("_expValue").floatValue;
+        var registry = new SerializedObject(spawner).FindProperty("_enemyData");
+        double total = 0;
+        foreach (var group in wave.SpawnGroups)
+        foreach (var entry in group.SpawnEntries)
+        {
+            if (entry.SpawnCount <= 0) continue;
+            if (entry.IsMidBoss) return false;
+            Enemy enemy = null;
+            for (int i = 0; i < registry.arraySize; i++)
+            {
+                var candidate = registry.GetArrayElementAtIndex(i);
+                if (candidate.FindPropertyRelative("_key").stringValue != entry.EnemyTypeKey) continue;
+                var prefab = candidate.FindPropertyRelative("_prefab").objectReferenceValue;
+                if (prefab is GameObject obj) enemy = obj.GetComponent<Enemy>();
+                else if (prefab is Component component) enemy = component.GetComponent<Enemy>();
+                break;
+            }
+            if (enemy == null) return false;
+            var data = new SerializedObject(enemy).FindProperty("_data").objectReferenceValue as EnemyData;
+            if (data == null) return false;
+            total += (double)entry.SpawnCount * data.ExpDropAmount * orbExperience;
+        }
+        experience = total;
+        return true;
     }
 
     /// <summary> Wave一覧に対するMove/Duplicate/Deleteを1件適用する </summary>
@@ -182,6 +306,7 @@ public class WaveEditorWindow : EditorWindow
         }
 
         _waveSO.Update();
+        DrawExperienceSettings();
         var groups = _waveSO.FindProperty("SpawnGroups");
 
         var pendingOp = ListOp.None;
@@ -202,6 +327,56 @@ public class WaveEditorWindow : EditorWindow
             ApplyGenericListOp(groups, pendingIndex, pendingOp);
 
         _waveSO.ApplyModifiedProperties();
+    }
+
+    private void DrawExperienceSettings()
+    {
+        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+        EditorGUILayout.LabelField("経験値", EditorStyles.boldLabel);
+        var enabled = _waveSO.FindProperty("OverrideExperience");
+        var total = _waveSO.FindProperty("TotalExperience");
+        EditorGUILayout.PropertyField(enabled, new GUIContent("Wave合計EXPを指定"));
+        using (new EditorGUI.DisabledScope(!enabled.boolValue))
+        {
+            EditorGUILayout.PropertyField(total, new GUIContent("合計EXP"));
+            total.intValue = Mathf.Max(0, total.intValue);
+        }
+        if (enabled.boolValue)
+        {
+            int count = _wave.GetEnemyCount();
+            string distribution = count > 0
+                ? $"敵 {count} 体に配分ウェイトで分配します（1体あたりの比率）。"
+                : "敵が設定されていないため、経験値はドロップしません。";
+            EditorGUILayout.HelpBox(distribution + "\n全撃破・全オーブ回収時の合計です。途中終了では倒した敵の分だけ獲得します。", MessageType.Info);
+            int enemyIndex = 0;
+            int groupIndex = 0;
+            foreach (var group in _wave.SpawnGroups)
+            {
+                groupIndex++;
+                foreach (var entry in group.SpawnEntries)
+                {
+                    int entryExperience = 0;
+                    int min = int.MaxValue;
+                    int max = 0;
+                    for (int i = 0; i < entry.SpawnCount; i++)
+                    {
+                        int amount = _wave.GetExperienceForEnemy(enemyIndex++) ?? 0;
+                        entryExperience += amount;
+                        min = Mathf.Min(min, amount);
+                        max = Mathf.Max(max, amount);
+                    }
+                    if (entry.SpawnCount <= 0) continue;
+                    string perEnemy = min == max ? $"{min}" : $"{min}〜{max}";
+                    EditorGUILayout.LabelField($"G{groupIndex} {entry.EnemyTypeKey} ×{entry.SpawnCount}",
+                        $"計 {entryExperience} EXP / 1体 {perEnemy}");
+                }
+            }
+        }
+        else
+        {
+            EditorGUILayout.HelpBox("敵のドロップ数とオーブの経験値設定を使用します。", MessageType.Info);
+        }
+        EditorGUILayout.EndVertical();
     }
 
     /// <summary> 1つのSpawnGroupのヘッダーと中身を描画する </summary>
@@ -291,6 +466,9 @@ public class WaveEditorWindow : EditorWindow
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.PropertyField(entry.FindPropertyRelative("MidBossLevelTable"), new GUIContent("MidBoss Table"));
+            var experienceWeight = entry.FindPropertyRelative("ExperienceWeight");
+            EditorGUILayout.PropertyField(experienceWeight, new GUIContent("EXP配分ウェイト（1体）"));
+            experienceWeight.intValue = Mathf.Max(1, experienceWeight.intValue);
         }
 
         if (GUILayout.Button("敵を追加", GUILayout.Width(80)))

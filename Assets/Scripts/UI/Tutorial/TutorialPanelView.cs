@@ -45,12 +45,12 @@ public sealed class TutorialPanelView : MonoBehaviour
     // EventSystemの処理後に進め、同じ決定入力が遷移先のスキル選択へ流れるのを防ぐ。
     private void LateUpdate()
     {
-        if (_input != null && _input.UI.Submit.enabled &&
-            Time.frameCount > _shownFrame && _input.UI.Submit.WasPressedThisFrame())
+        if (_input != null && _input.UI.Cancel.enabled &&
+            Time.frameCount > _shownFrame && _input.UI.Cancel.WasPressedThisFrame())
             OnConfirmRequested?.Invoke();
     }
 
-    private void OnDisable() => _input?.UI.Submit.Disable();
+    private void OnDisable() => _input?.UI.Cancel.Disable();
 
     private void OnDestroy()
     {
@@ -74,9 +74,9 @@ public sealed class TutorialPanelView : MonoBehaviour
         if (_input != null)
         {
             if (visible && blocksInput)
-                _input.UI.Submit.Enable();
+                _input.UI.Cancel.Enable();
             else
-                _input.UI.Submit.Disable();
+                _input.UI.Cancel.Disable();
         }
 
         if (_canvasGroup == null)
