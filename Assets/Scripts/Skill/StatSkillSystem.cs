@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -60,14 +61,8 @@ public class StatSkillSystem
             indices[i] = i;
         }
 
-        // 必要な数だけシャッフル
-        for (int i = 0; i < acquireCount; i++)
-        {
-            int randomIndex = UnityEngine.Random.Range(i, indices.Length);
-
-            (indices[i], indices[randomIndex]) =
-                (indices[randomIndex], indices[i]);
-        }
+        // インデックスをシャッフルしてランダムにする
+        ListExtensions.Shuffle(indices.ToList());
 
         // 選ばれたスキルを適用
         for (int i = 0; i < acquireCount; i++)

@@ -1479,25 +1479,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1848956063}
     - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: _initialSkills.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: '_initialSkills.Array.data[2]'
       value: 
       objectReference: {fileID: 11400000, guid: d851a226d8589b94fbafee1c953fd338, type: 2}
-    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: _statSkillDataArray.Array.size
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: '_statSkillDataArray.Array.data[2]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 3336e1da02a5ba546bf36ed3dc4c8ce8, type: 2}
-    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: '_statSkillDataArray.Array.data[3]'
-      value: 
-      objectReference: {fileID: 11400000, guid: 37ca213cabe23b34a9deb1fe862cd85f, type: 2}
     - target: {fileID: 3281229546311345012, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _movieData.Array.size
       value: 5
@@ -1550,6 +1534,10 @@ PrefabInstance:
       propertyPath: _lockOnMarkerView
       value: 
       objectReference: {fileID: 727144983}
+    - target: {fileID: 4773163649764372864, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _statUpgradeIconView
+      value: 
+      objectReference: {fileID: 523226736}
     - target: {fileID: 7036861525032570302, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2884,6 +2872,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c7b18a0c327a324aad7405a9dbc16ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GaugeView
+--- !u!114 &523226736 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9055750930138658691, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
+  m_PrefabInstance: {fileID: 523226733}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7a5d31e70b14da68b4d8d604d4e1c80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatUpgradeIconView
 --- !u!114 &526572076 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1226753402798715077, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
