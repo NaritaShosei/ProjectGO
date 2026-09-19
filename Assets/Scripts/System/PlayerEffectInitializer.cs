@@ -52,9 +52,11 @@ public class PlayerEffectInitializer : MonoBehaviour
 
             if (_modeChangeEffectPlayer != null)
             {
+                player.TryGetComponent(out JustDodgeEffectPlayer justDodgeEffectPlayer);
                 _modeChangeEffectPresenter = new ModeChangePostProcessEffectPresenter(
                     _modeChangeEffectPlayer,
-                    modeController);
+                    modeController,
+                    justDodgeEffectPlayer);
             }
             else
             {

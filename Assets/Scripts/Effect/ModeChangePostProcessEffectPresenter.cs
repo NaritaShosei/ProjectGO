@@ -7,11 +7,16 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
 {
     public ModeChangePostProcessEffectPresenter(
         ModeChangePostProcessEffectPlayer effectPlayer,
-        IModeController modeController)
+        IModeController modeController,
+        JustDodgeEffectPlayer justDodgeEffectPlayer)
     {
         _effectPlayer = effectPlayer ?? throw new ArgumentNullException(nameof(effectPlayer));
         _modeController = modeController ?? throw new ArgumentNullException(nameof(modeController));
         _previousMode = modeController.CurrentMode;
+        _justDodgeEffectPlayer = justDodgeEffectPlayer;
+
+        if (_justDodgeEffectPlayer != null)
+            _justDodgeEffectPlayer.OnEffectPlaying += _effectPlayer.StopPostProcess;
 
         _modeController.OnModeChanged += OnModeChanged;
         _effectPlayer.OnEffectEnabled += HandleEffectEnabled;
@@ -20,6 +25,12 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
 
     public void Dispose()
     {
+        if (_justDodgeEffectPlayer != null)
+        {
+            _justDodgeEffectPlayer.OnEffectPlaying -= _effectPlayer.StopPostProcess;
+            _justDodgeEffectPlayer.Stop();
+        }
+
         _modeController.OnModeChanged -= OnModeChanged;
         _effectPlayer.OnEffectEnabled -= HandleEffectEnabled;
         _effectPlayer.Stop();
@@ -27,6 +38,7 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
 
     private readonly ModeChangePostProcessEffectPlayer _effectPlayer;
     private readonly IModeController _modeController;
+    private readonly JustDodgeEffectPlayer _justDodgeEffectPlayer;
     private PlayerMode _previousMode;
 
     private void OnModeChanged(PlayerMode newMode)
@@ -37,6 +49,10 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
             && newMode == PlayerMode.Warrior;
 
         _previousMode = newMode;
+
+        // 共用 Vignette の一時値を次の演出の復元先として保存しない。
+        if (_justDodgeEffectPlayer != null)
+            _justDodgeEffectPlayer.Stop();
 
         // Playerが無効な間は状態だけ追跡し、演出の再生やマテリアル操作を行わない。
         if (!_effectPlayer.isActiveAndEnabled) return;
@@ -50,7 +66,10 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
         }
 
         if (shouldRevertTint)
+        {
+            _effectPlayer.StopPostProcess();
             _effectPlayer.StopColorTint().Forget();
+        }
     }
 
     private void HandleEffectEnabled()
