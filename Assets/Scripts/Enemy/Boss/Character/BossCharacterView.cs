@@ -108,14 +108,14 @@ namespace BossEnemy.Character
             // Camera管理クラスを取得
             if (!ServiceLocator.TryGet(out _cameraManager))
             {
-                Debug.Log("取得失敗");
+                Debug.LogError("取得失敗");
                 return;
             }
 
             // Effect管理クラスを取得
             if(!ServiceLocator.TryGet(out _effectManager))
             {
-                Debug.Log("取得失敗");
+                Debug.LogError("取得失敗");
                 return;
             }
 
@@ -204,7 +204,7 @@ namespace BossEnemy.Character
             _updaters.Clear();
             _attackSMBList.Clear();
 
-            // 各パーツの初期化
+            // 各パーツの破棄
             foreach (var collisionDetection in _collisionDetections)
             {
                 foreach (var parts in collisionDetection.BossEnemyPartsView)
@@ -535,6 +535,15 @@ namespace BossEnemy.Character
             // HitStopManager に残ったプール済みボスへの参照を解除する。
             if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
                 hitStopManager.UnregisterFromAll(this);
+
+            // 各パーツの破棄
+            foreach (var collisionDetection in _collisionDetections)
+            {
+                foreach (var parts in collisionDetection.BossEnemyPartsView)
+                {
+                    parts.Dispose();
+                }
+            }
         }
 
         private void Update()

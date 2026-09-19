@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
-namespace BossEnemy.Logic
+namespace BossEnemy.Attack
 {
     public class PhaseChangeAttackSMB : AttackSMB
     {

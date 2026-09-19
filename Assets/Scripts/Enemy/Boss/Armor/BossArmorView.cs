@@ -67,6 +67,8 @@ namespace BossEnemy.Armor
                 TimeSpan.FromSeconds(_repairDelayTime),
                 cancellationToken:_repairCancellationTokenSource.Token);
 
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
             _repairCancellationTokenSource = null;
 
             this.gameObject.SetActive(true);
