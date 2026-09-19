@@ -19,16 +19,19 @@ MonoBehaviour:
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
-    - WaveConditionType: 0
-      Threshold: 0.1
+    - WaveConditionType: 1
+      Threshold: 2
     SpawnPointKey: 3
     _spawnSetSize: 3
     _spawnSetInterval: 0.5
     _placementMode: 1
     _clusterRadius: 2
   - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 3
+    - EnemyTypeKey: Enemy_Armor_Medium
+      SpawnCount: 1
+      MidBossLevelTable: {fileID: 0}
+    - EnemyTypeKey: ShiledDraugr
+      SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
