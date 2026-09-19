@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class StatSkillSystem
 {
+    private const int MAX_ACQUIRE_COUNT = 2;
+
     public event Action<StatSkillType> OnApply;
 
     /// <summary>
@@ -52,7 +54,7 @@ public class StatSkillSystem
 
         // 取得数は最大2個
         // データが1個しかない場合は1個だけ取得
-        int acquireCount = Mathf.Min(2, _statSkillDataArray.Length);
+        int acquireCount = Mathf.Min(MAX_ACQUIRE_COUNT, _statSkillDataArray.Length);
 
         // 重複なし抽選用のインデックス配列
         int[] indices = new int[_statSkillDataArray.Length];
