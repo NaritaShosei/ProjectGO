@@ -16,7 +16,7 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
     public async UniTaskVoid Play()
     {
         // 前回演出の停止と復元を先に完了させてから、次のスナップショットを取る。
-        StopEffect(restore: true);
+        StopPostProcess();
 
         _effectCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
         _effectPlayVersion++;
@@ -47,11 +47,16 @@ public class ModeChangePostProcessEffectPlayer : MonoBehaviour
 
     public void Stop()
     {
+        StopPostProcess();
+        StopEmissionChange();
+        CancelColorTint(restoreImmediate: true);
+    }
+
+    public void StopPostProcess()
+    {
         // キャンセルされた古い演出が finally でスナップショットを再適用しないよう、先に世代を無効化する。
         _effectPlayVersion++;
         StopEffect(restore: true);
-        StopEmissionChange();
-        CancelColorTint(restoreImmediate: true);
     }
 
     /// <summary>

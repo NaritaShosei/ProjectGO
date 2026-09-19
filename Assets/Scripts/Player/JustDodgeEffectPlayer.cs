@@ -11,6 +11,8 @@ using UnityEngine.Rendering.Universal;
 /// </summary>
 public class JustDodgeEffectPlayer : MonoBehaviour
 {
+    public event Action OnEffectPlaying;
+
     public void Play(JustDodgeContext context)
     {
         if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
@@ -18,12 +20,20 @@ public class JustDodgeEffectPlayer : MonoBehaviour
             hitStopManager.Trigger(_hitStopData);
         }
 
-        StopVignette(restore: true);
+        Stop();
+        OnEffectPlaying?.Invoke();
 
         _vignetteCts = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
         _vignettePlayVersion++;
 
         PlayVignette(_vignetteCts.Token, _vignettePlayVersion).Forget();
+    }
+
+    public void Stop()
+    {
+        // キャンセル後に古い finally が次の演出の値を上書きしないようにする。
+        _vignettePlayVersion++;
+        StopVignette(restore: true);
     }
 
     [Header("ヒットストップ設定")]
@@ -119,9 +129,14 @@ public class JustDodgeEffectPlayer : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        Stop();
+    }
+
     private void OnDestroy()
     {
-        StopVignette(restore: true);
+        Stop();
     }
 
     private VignetteSnapshot CaptureSnapshot()
