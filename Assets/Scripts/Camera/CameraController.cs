@@ -153,14 +153,14 @@ public class CameraController : MonoBehaviour
     {
         if (_isLockOnSuspended == isSuspended) return;
 
-        _isLockOnSuspended = isSuspended;
-
         if (isSuspended)
         {
             Unlock();
+            _isLockOnSuspended = true;
         }
         else
         {
+            _isLockOnSuspended = false;
             _isSearchingForTarget = true;
         }
     }
