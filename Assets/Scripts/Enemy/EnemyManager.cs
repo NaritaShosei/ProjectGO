@@ -258,7 +258,8 @@ public class EnemyManager : MonoBehaviour
     /// <param name="poolKey"></param>
     /// <param name="pos"></param>
     /// <param name="midBossLevelTable"></param>
-    public void SpawnMidBoss(string poolKey, Vector3 pos, MidBossLevelTable midBossLevelTable)
+    public void SpawnMidBoss(string poolKey, Vector3 pos, MidBossLevelTable midBossLevelTable,
+        int? experienceOverride = null)
     {
         if (_player == null)
         {
@@ -289,7 +290,7 @@ public class EnemyManager : MonoBehaviour
         }
 
         // 選択したEnemyDataで中ボスを生成
-        Spawn(poolKey, pos, enemyData);
+        Spawn(poolKey, pos, enemyData)?.SetExperienceOverride(experienceOverride);
     }
 
     /// <summary> ボスを生成 </summary>
