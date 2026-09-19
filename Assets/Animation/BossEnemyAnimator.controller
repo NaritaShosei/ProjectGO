@@ -647,7 +647,7 @@ MonoBehaviour:
     _duration: 0.18
   _attackIntervalTime: 0.15
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _maxAttackCount: 3
 --- !u!1102 &-7142586009534698118
 AnimatorState:
@@ -1238,6 +1238,33 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &-4801266157624868690
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 502c8f7e58ddacf49aa047b2327a6233, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Attack.PhaseChangeAttackSMB
+  _attackID: 13
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
+  _cameraShakeData:
+    _amplitude: 0
+    _frequency: 0
+    _duration: 0
+  _attackHitTimingDelayTime: 1
+  _attackAreaCircleGeneratePosY: 0.2
+  _attackPointDistance: 0
+  _phaseChangeEffectNum: 6
+  _phaseChangeEffectSpawnDistance: 6
+  _attackAreaCircleRadius: 6
 --- !u!1101 &-4668098060198359337
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -1576,7 +1603,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 1
   _maxAttackFieldHalfRange: 20
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &-2388873810595694893
 AnimatorStateTransition:
@@ -1653,7 +1680,7 @@ MonoBehaviour:
     _frequency: 1.05
     _duration: 1.11
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 4
 --- !u!1102 &-2099094422740729497
 AnimatorState:
@@ -1798,7 +1825,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 1
   _maxAttackFieldHalfRange: 20
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &-1730570095668115221
 AnimatorStateTransition:
@@ -1852,7 +1879,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 1.5
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!1101 &-1680677634452769343
 AnimatorStateTransition:
@@ -1976,7 +2003,7 @@ MonoBehaviour:
     _frequency: 0.73
     _duration: 0.92
   _attackHitTimingDelayTime: 0
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 0.64
 --- !u!1101 &-928170174063221020
 AnimatorStateTransition:
@@ -2195,7 +2222,7 @@ MonoBehaviour:
     _frequency: 1.5
     _duration: 0.25
   _attackHitTimingDelayTime: 0.3
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 3
 --- !u!1102 &-324155300534404492
 AnimatorState:
@@ -2214,7 +2241,7 @@ AnimatorState:
   m_StateMachineBehaviours:
   - {fileID: -1692041898509714901}
   - {fileID: 1273822574978294736}
-  - {fileID: 9126968015464412352}
+  - {fileID: -4801266157624868690}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -3004,7 +3031,7 @@ MonoBehaviour:
   _consecutiveAttackInterval: 0
   _maxAttackFieldHalfRange: 10.04
   _maxAttackCount: 20
-  _attackAreaEffectPosY: 0.2
+  _attackAreaEffectPosY: 0.5
   _attackHitTime: 1.05
 --- !u!114 &1555536973330970652
 MonoBehaviour:
@@ -3053,7 +3080,7 @@ MonoBehaviour:
     _frequency: 1.5
     _duration: 0.25
   _attackHitTimingDelayTime: 0.3
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 3
 --- !u!1102 &1995479366855597398
 AnimatorState:
@@ -3434,7 +3461,7 @@ MonoBehaviour:
     _duration: 0.4
   _moveDistance: 20
   _goalTime: 3
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
 --- !u!1101 &3516473906035181070
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
@@ -3667,7 +3694,7 @@ MonoBehaviour:
     _frequency: 1.24
     _duration: 1.06
   _attackHitTimingDelayTime: 0.16
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 0.99
 --- !u!114 &4567494591603859569
 MonoBehaviour:
@@ -4172,10 +4199,10 @@ AnimatorStateMachine:
     m_Position: {x: -510, y: -60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -324155300534404492}
-    m_Position: {x: -850, y: -60, z: 0}
+    m_Position: {x: -840, y: -60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -2576002220132205082}
-    m_Position: {x: -770, y: 20, z: 0}
+    m_Position: {x: -770, y: 10, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -4505,7 +4532,7 @@ MonoBehaviour:
     _frequency: 1
     _duration: 0.35
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 2
 --- !u!1102 &7937429894567203005
 AnimatorState:
@@ -4753,7 +4780,7 @@ MonoBehaviour:
     _frequency: 1.05
     _duration: 2.22
   _attackHitTimingDelayTime: 0.1
-  _attackAreaCircleGeneratePosY: 0.2
+  _attackAreaCircleGeneratePosY: 0.5
   _attackPointDistance: 4
 --- !u!1102 &9019623883209432096
 AnimatorState:
