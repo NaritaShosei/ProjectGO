@@ -1532,8 +1532,8 @@ MonoBehaviour:
   _attackAreaCircleGeneratePosY: 0.2
   _attackPointDistance: 0
   _phaseChangeEffectNum: 6
-  _phaseChangeEffectSpawnDistance: 6
-  _attackAreaCircleRadius: 6
+  _phaseChangeEffectSpawnDistance: 3
+  _attackAreaCircleRadius: 5
 --- !u!1109 &-2983369104460112047
 AnimatorTransition:
   m_ObjectHideFlags: 1
@@ -4199,7 +4199,7 @@ AnimatorStateMachine:
     m_Position: {x: -510, y: -60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -324155300534404492}
-    m_Position: {x: -840, y: -60, z: 0}
+    m_Position: {x: -860, y: -60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -2576002220132205082}
     m_Position: {x: -770, y: 10, z: 0}
