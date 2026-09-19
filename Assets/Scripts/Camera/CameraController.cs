@@ -71,6 +71,7 @@ public class CameraController : MonoBehaviour
     public void Tick(float timeScale)
     {
         if (_cameraState == null) return;
+        if (_isLockOnSuspended) return;
 
         if (IsLockedOn && TryHandleInvalidTarget())
         {
@@ -142,6 +143,28 @@ public class CameraController : MonoBehaviour
         OnTargetChanged?.Invoke(null);
     }
 
+    /// <summary>
+    /// ロックオン（自動探索・対象切り替え）を一時停止/再開します。
+    /// ムービー再生中やリザルト表示中など、ロジック側の都合でロックオンが働くと不都合な間に呼びます
+    /// （プレイヤー操作でロックオンをOFFにする手段は無いため、この一時停止のみが唯一の抑止経路です）。
+    /// </summary>
+    /// <param name="isSuspended">trueで停止（ロックオン中なら即解除）、falseで再開（自動探索を再開）。</param>
+    public void SetLockOnSuspended(bool isSuspended)
+    {
+        if (_isLockOnSuspended == isSuspended) return;
+
+        _isLockOnSuspended = isSuspended;
+
+        if (isSuspended)
+        {
+            Unlock();
+        }
+        else
+        {
+            _isSearchingForTarget = true;
+        }
+    }
+
     #endregion
 
     #region プライベートフィールド
@@ -183,6 +206,9 @@ public class CameraController : MonoBehaviour
     // 見つかったら通常のロックオンと同じ手順で入る。起動直後も敵がいれば確実にロックオンしてほしいため、
     // 初期値はtrue（対象を見失った後の再探索だけでなく、ゲーム開始直後の初回探索もこれでカバーする）。
     private bool _isSearchingForTarget = true;
+
+    // ロジック側の都合でロックオンを一時停止中かどうか（ムービー再生中など）。trueの間はTickが丸ごと止まる
+    private bool _isLockOnSuspended;
 
     // 1入力につき1回だけ切り替えるためのラッチ。ニュートラル復帰／スワイプ終了で再武装する
     private bool _stickSwitchArmed;
