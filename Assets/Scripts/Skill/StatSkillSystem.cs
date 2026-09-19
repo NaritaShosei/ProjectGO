@@ -65,7 +65,7 @@ public class StatSkillSystem
         List<int> indicesList = indices.ToList();
 
         // インデックスをシャッフルしてランダムにする
-        ListExtensions.Shuffle(indicesList.ToList());
+        ListExtensions.Shuffle(indicesList);
 
         // 選ばれたスキルを適用
         for (int i = 0; i < acquireCount; i++)
