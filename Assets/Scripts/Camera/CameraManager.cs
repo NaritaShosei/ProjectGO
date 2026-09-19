@@ -180,6 +180,21 @@ public class CameraManager : MonoBehaviour, ISpeedChange
     }
 
     /// <summary>
+    /// ロックオン（自動探索・対象切り替え）を一時停止/再開します。
+    /// ムービー再生中やリザルト表示中など、ロックオンが働くと不都合な間だけ呼び出し元が停止し、
+    /// 終わったら再開してください。再開時はムービー中に古くなったフリールックの姿勢をプレイヤー基準へ合わせ直します。
+    /// </summary>
+    public void SetLockOnSuspended(bool isSuspended)
+    {
+        _lockOnController?.SetLockOnSuspended(isSuspended);
+
+        if (!isSuspended)
+        {
+            _cameraMotionController?.ResetFreeLookBehindPlayer();
+        }
+    }
+
+    /// <summary>
     /// ズームのFOV倍率を設定します。1は変化なし、1未満でズームイン、1より大きい値でズームアウトです。
     /// 現在値からの移動距離に関わらず、必ずduration秒かけて到達します。
     /// </summary>

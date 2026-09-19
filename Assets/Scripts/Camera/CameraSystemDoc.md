@@ -21,6 +21,7 @@
 - ゲーム設定によるカメラ位置追従速度・（対象なし時の）フリールック回転速度の反映
 - シーン切り替え後のMain Camera再取得
 - 外部から `LockOn` / `Unlock` / ズーム操作 / カメラシェイクを呼べる薄い委譲メソッドを提供（実行本体はそれぞれ `CameraController` / `CameraPresentationController`）
+- `SetLockOnSuspended(bool)`：ムービー再生中・リザルト表示中など、ロジック側の都合でロックオンを一時停止/再開させる薄い委譲メソッド。`CameraController.SetLockOnSuspended` を呼び、再開時（`false`）は`CameraMotionController.ResetFreeLookBehindPlayer` でフリールックの姿勢もプレイヤー基準へ合わせ直す
 
 カメラの位置・回転計算（対象追従／対象なし時のフリールック）は `CameraMotionController` に委譲します。
 ロックオン対象の保持・遷移は `CameraController` に、ゲームイベントを受けた演出の発火は `CameraPresentationController` に委ねています。
@@ -53,6 +54,7 @@
   - 終了：位置・回転が収束したら完了。上限で間に合わなければ延長し、`_lockOnBlendDuration + _lockOnBlendMaxExtraTime` 超過で強制終了
   - 対象を解除する際（`FollowCameraState.ClearTarget`）は必ずブレンドをキャンセルし（`CancelLockOnBlend`）、`ExitLockOn`で`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してからフリールック用3コンポーネントを再有効化する（解除直後に古い向きへ飛ばないようにするため）
 - ゲーム設定変更後の位置追従・フリールック回転速度の更新（`SetFreeLookSettings`）
+- `ResetFreeLookBehindPlayer`：フリールックの追従アンカーとOrbitalFollowのAxis値をプレイヤーの現在位置・向き基準へ強制的に合わせ直す。ロックオン一時停止中（`CameraController.SetLockOnSuspended(true)`）はこのカメラがCinemachine上非ライブになり得て姿勢更新が保証されないため、`CameraManager.SetLockOnSuspended(false)`（再開時）に呼び、古い姿勢のまま急に映るのを防ぐ
 
 コンストラクタは用途別にまとめた3つの構造体（`CameraReferences` / `FreeLookSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
 
@@ -111,6 +113,7 @@
 - `_cameraState`（`FollowCameraState`）の保持。`LockOn` は `SetTarget`、`Unlock` は `ClearTarget` を呼ぶだけで、状態そのものの遷移（Enter/Exit呼び直し）は発生しない
 - `Tick` 内の `TryHandleInvalidTarget` で対象を監視：対象が無効化（撃破・削除・非ロック化）されたら次の対象へ、いなければ`Unlock`。通常の敵撃破はこの経路で拾う（`OnEnemyDefeated` は購読しない）。距離による自動解除は行わない
 - `Unlock`は「ロックオンをやめる」選択肢が無い（対象がいる限り強制ロックオンの）設計なので、呼ばれると必ず`_isSearchingForTarget`を立てて再探索を再開する。呼び出し元（`TryHandleInvalidTarget`／`HandleEnemyForceRemoved`／`CameraManager.SetBossCameraActive`）は再探索の有無を個別に意識しなくてよい。特に`SetBossCameraActive(true)`はボス出現時に既存のロックオン対象を強制解除するが、この仕組みにより解除直後から自動でボスの脚/頭への再ロックオンが機能する
+- `SetLockOnSuspended(bool)`：プレイヤー操作でロックオンをOFFにする手段は無い（常に強制探索）ため、ロジック側（`SequenceState`）が「ロックオンが働くと不都合な間」だけ自動探索・切り替え入力を止めるための唯一の抑止経路。`true`で停止（ロックオン中なら`Unlock`してから停止）、`false`で`_isSearchingForTarget`を立てて再探索を再開する。停止中は`Tick`が丸ごと早期returnする。`IntroMovieState`／`BossIntroMovieState`／`ResultState`が`OnEnter`/`OnExit`で呼ぶ（`CameraManager.SetLockOnSuspended`経由）
 - `_isSearchingForTarget`（ロックオンしたい意思を表すフラグ。初期値`true`）が立っている間、`Tick`は未ロックオン中でも毎回`SelectInitialTarget`を試み、見つかれば`LockOn`で通常の初回ロックオンと全く同じ手順（ブレンド含む）で再突入する。初期値がtrueなので**起動直後で一度もロックオンしていない状態でも**、敵がいれば確実にロックオンする。`LockOn`成功時にフラグをクリアする
 - ロックオンは対象がいる限り強制。`HandleLockOnInput`はロックオン中は何もしない（`IsLockedOn`なら早期return）ため、ロックオンボタン（右クリック等）を押してもロックオン⇔フリールックを手動で切り替えることはできない。未ロックオン時のみ`TryManualLockOn`で手動ロックオンを試みる（実際は`_isSearchingForTarget`の自動探索が同じことを毎Tickやっているため、ボタンでの手動トリガーはほぼ補助的）
 - 対象切り替え判定（`Tick` 内の `UpdateTargetSwitch`）。**1入力につき1回だけ**切り替える（意図しない連続切り替えを防ぐ）
@@ -212,7 +215,7 @@ flowchart TD
 
 対象がいない間、カメラはスティック/マウス操作によるフリールックです（`FollowCameraState.Tick` → `CameraMotionController.UpdateFreeLook`）。ロックオン開始・切り替え・解除は、この同じカメラの追従先を切り替えるだけの操作です。
 
-`_isSearchingForTarget` の初期値が `true` なので、**ロックオンボタンを押さなくても**、ロック可能な敵が存在する限り起動直後から自動でロックオンします（下記8番の経路）。ボタン入力（1〜3番）は、既に敵がいるのに手動で対象を選び直したい場合や、`_isSearchingForTarget` が明示的解除でfalseになっている場合に使う経路です。
+`_isSearchingForTarget` の初期値が `true` なので、**ロックオンボタンを押さなくても**、ロック可能な敵が存在する限り起動直後から自動でロックオンします（下記8番の経路）。ボタン入力（1〜3番）は、既に敵がいるのに手動で対象を選び直したい場合や、`_isSearchingForTarget` が明示的解除でfalseになっている場合に使う経路です。プレイヤー操作でロックオンをOFFにする手段は無いため、ムービー再生中・リザルト表示中など自動探索が働くと不都合な場面では、`SequenceState` 側が `CameraManager.SetLockOnSuspended(true/false)` で一時停止/再開します（`IntroMovieState`／`BossIntroMovieState`／`ResultState` が使用）。
 
 1. `InputHandler` がロックオン入力イベントを発行します。
 2. `LockOnController`（`CameraController`）が `LockOnTargetSelector.SelectInitialTarget` を呼び出します。
@@ -224,7 +227,7 @@ flowchart TD
 8. `_isSearchingForTarget` が立っている間は未ロックオン状態でも毎Tick `SelectInitialTarget` を試み、新しい候補が見つかれば通常のロックオン開始と同じ手順（ブレンド含む）でそのまま再突入します。プレイヤーが明示的にロックオンボタンで解除した場合はこの再探索を行いません。
 9. `CameraController.Unlock` が `FollowCameraState.ClearTarget` を呼び、対象を外してブレンドをキャンセルし、`ExitLockOn`で`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してからフリールック用3コンポーネントを再有効化します。以後 `Tick` は次のフレームからフリールック（Cinemachine任せ）に戻り、外れた瞬間の向きからそのまま手動操作を継続できます。`CameraManager.SetLockOnCameraActive(false)` によりPriorityが基準値へ下がります。
 
-ボスの脚/頭（`BossLegLockOnController` が供給する候補）も、上記と全く同じ流れでロックオンされます。`CameraManager.FixedUpdate` は通常ボスカメラ有効中 `CameraController.Tick` を止めますが、`CameraController.IsLockedOn` が true の間は止めないため、ボス戦中でもロックオン開始後は通常どおり対象切り替えが機能します。
+ボスの脚/頭（`BossLegLockOnController` が供給する候補）も、上記と全く同じ流れでロックオンされます。`CameraManager.FixedUpdate` はボスカメラ有効中でも `CameraController.Tick` を止めないため、ボス戦中でも対象なし時の自動探索・ロックオン開始後の対象切り替えとも通常どおり機能します。
 
 ## 参照関係と責務の境界
 
@@ -248,7 +251,8 @@ flowchart TD
 
 - シーン上の初期化順に依存するため、`CameraManager.Init(Player)` が呼ばれてからロックオン入力を扱える状態になります。
 - `CameraManager` はメインカメラ（`_lockOnCamera`）・ロックオンコントローラーの参照が不足すると初期化を中断します。
-- `InputHandler.CameraMoveInput`（`CameraMove` アクション）は2箇所から参照されますが、`CameraManager.FixedUpdate`がボスカメラ有効時に`CameraController.Tick`（ロックオン中を除く）を止める仕組みにより、同時に動くことはありません：メインカメラ側（`FollowCameraState.UpdateFreeLook`、対象なし時のみ）と、`BossCameraController`の左右スイベル操作（ボスカメラ有効時、注視点オフセット）。
+- `InputHandler.CameraMoveInput`（`CameraMove` アクション）は2箇所から参照されます：メインカメラ側（`FollowCameraState.UpdateFreeLook`、対象なし時のみ）と、`BossCameraController`の左右スイベル操作（ボスカメラ有効時、注視点オフセット）。`CameraManager.FixedUpdate`は`CameraController.Tick`を常に呼ぶため、ボス戦中かつ未ロックオン（探索中）の間はどちらも同時に動きえます。
+- `CameraController.SetLockOnSuspended(true)` の間は `Tick` が丸ごと早期returnするため、`FollowCameraState.UpdateFreeLook` も止まります（フリールックの位置追従・回転が更新されない）。ムービー再生中などカメラが非表示の間だけ使う想定で、表示中のカメラに対して呼ぶと入力を受け付けなくなります。
 - `LockOnController` は `EnemyManager.OnEnemyForceRemoved` と `InputHandler.OnLockOn` を購読するため、`OnDestroy` での購読解除が必要です。
 - `LockOnTargetSelector` は選定スコアと左右判定に `_camera`（Cinemachine Brain 出力のメインカメラ）の `transform` と `WorldToScreenPoint` を使うため、カメラが未準備の場合は正しく選定できません。
 - 対象切り替えは `CameraController` が `Gamepad.current.rightStick` と `Mouse.current.delta` を直接参照します（`InputHandler` を経由しない割り切り）。`LockOnChange` アクションや矢印キーは対象切り替えには使いません。

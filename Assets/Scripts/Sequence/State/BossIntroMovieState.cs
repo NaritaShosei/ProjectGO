@@ -16,6 +16,12 @@ public class BossIntroMovieState : ISequenceState
         context.InputHandler?.EnableInput(false);
         context.Player?.ForceWarriorMode();
 
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _cameraManager = cameraManager;
+            _cameraManager.SetLockOnSuspended(true);
+        }
+
         var moviePlayer = context.MoviePlayer;
 
         if (moviePlayer == null)
@@ -46,6 +52,9 @@ public class BossIntroMovieState : ISequenceState
     {
         var moviePlayer = context.MoviePlayer;
         moviePlayer.OnMovieFinished -= HandleMovieFinished;
+
+        _cameraManager?.SetLockOnSuspended(false);
+        _cameraManager = null;
     }
 
     [Header("Movie Settings")]
@@ -54,6 +63,7 @@ public class BossIntroMovieState : ISequenceState
     [SerializeField] private SequenceStateType _nextSequence = SequenceStateType.BossBattle;
 
     private SequenceStateContext _context;
+    private CameraManager _cameraManager;
 
     private void HandleMovieFinished()
     {

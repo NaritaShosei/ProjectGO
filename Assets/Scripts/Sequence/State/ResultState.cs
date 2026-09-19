@@ -14,6 +14,12 @@ public class ResultState : ISequenceState
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _cameraManager = cameraManager;
+            _cameraManager.SetLockOnSuspended(true);
+        }
+
         if (_view == null)
         {
             Debug.LogError("[ResultState] ResultPanelView is not assigned.");
@@ -65,6 +71,9 @@ public class ResultState : ISequenceState
         _model = null;
         _presenter = null;
         _context = null;
+
+        _cameraManager?.SetLockOnSuspended(false);
+        _cameraManager = null;
     }
 
     [Header("Result UI")]
@@ -81,6 +90,7 @@ public class ResultState : ISequenceState
     private ResultPanelModel _model;
     private ResultPanelPresenter _presenter;
     private SequenceStateContext _context;
+    private CameraManager _cameraManager;
 
     private void HandleTitleRequested()
     {
