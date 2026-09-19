@@ -61,13 +61,14 @@ namespace BossEnemy.Armor
 
             _repairCancellationTokenSource?.Cancel();
             _repairCancellationTokenSource?.Dispose();
-            _repairCancellationTokenSource = new();
+            var repairCancellationTokenSource = new CancellationTokenSource();
+            _repairCancellationTokenSource = repairCancellationTokenSource;
 
             try
             {
                 await UniTask.Delay(
                 TimeSpan.FromSeconds(_repairDelayTime),
-                cancellationToken:_repairCancellationTokenSource.Token);
+                cancellationToken: repairCancellationTokenSource.Token);
 
                 this.gameObject.SetActive(true);
                 _isBreak = false;
@@ -84,9 +85,12 @@ namespace BossEnemy.Armor
             }
             finally
             {
-                _repairCancellationTokenSource?.Cancel();
-                _repairCancellationTokenSource?.Dispose();
-                _repairCancellationTokenSource = null;
+                // 後から始まった修復のCTSを、古い処理のfinallyで破棄しない。
+                if (_repairCancellationTokenSource == repairCancellationTokenSource)
+                {
+                    repairCancellationTokenSource.Dispose();
+                    _repairCancellationTokenSource = null;
+                }
             }
         }
 
