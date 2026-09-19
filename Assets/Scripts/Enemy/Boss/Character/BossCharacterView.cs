@@ -99,14 +99,14 @@ namespace BossEnemy.Character
             // ロックオンを可能に
             _isLockable = true;
 
+            // 最初のPhase切替
+            _isFirstPhaseGange = true;
+
             // 攻撃SMBListの初期化
             _attackSMBList = new();
 
             // Update処理が必要なクラスのListをクリア
             _updaters.Clear();
-
-            // 鎧の初期化
-            InitArmor();
 
             // Camera管理クラスを取得
             if (!ServiceLocator.TryGet(out _cameraManager))
@@ -122,11 +122,12 @@ namespace BossEnemy.Character
                 return;
             }
 
+            // 各パーツの初期化
             foreach (var collisionDetection in _collisionDetections)
             {
                 foreach(var parts in collisionDetection.BossEnemyPartsView)
                 {
-                    parts.Init(this);
+                    parts.Init(this, _effectManager);
                 }
             }
 
@@ -315,6 +316,24 @@ namespace BossEnemy.Character
 
         public void ChangePhase(int nextPhase)
         {
+            if (!_isFirstPhaseGange)
+            {
+                string effectName = "BigRockUpLift";
+
+                Vector3[] effectSpawnPosArray =
+                Logic.CirclePositionGenerator.GetPositionsOnCircle3D(
+                        transform.position,
+                        _phaseChangeEffectSpawnDistance,
+                        _phaseChangeEffectNum);
+
+                foreach (var effectPos in effectSpawnPosArray)
+                {
+                    _effectManager.PlayEffect(effectName, effectPos);
+                }
+            }
+            else _isFirstPhaseGange = false;
+            PlayBossSE(SoundCueNames.Boss.RockEruption);
+
             RepairArmor();
 
             _bossEnemyAnimator.SetPhaseChange(nextPhase);
@@ -416,13 +435,6 @@ namespace BossEnemy.Character
         }
 
         #region 鎧関連の処理
-        public void InitArmor()
-        {
-            foreach (var bossArmor in _bossArmorViews)
-            {
-                bossArmor.Init();
-            }
-        }
 
         public void BreakArmor(ArmorAttachmentType attachmentPointsType)
         {
@@ -473,9 +485,17 @@ namespace BossEnemy.Character
         [Header("ボスエネミーの当たり判定")]
         [SerializeField] private BoxCollider _bossCollider;
 
+        [Header("ボスエネミーのPhaseChangeEffectの個数")]
+        [SerializeField] private int _phaseChangeEffectNum = 6;
+
+        [Header("ボスエネミーのPhaseChangeEffectのボスからの距離")]
+        [SerializeField] private int _phaseChangeEffectSpawnDistance = 6;
+
         [Header("ボスエネミーのAnimationEventReceiver")]
         [SerializeReference, SubclassSelector]
         private IBossCharacterAnimationEventReceiver _bossEnemyAnimationEventReceiver;
+
+
 
         // ボスエネミーのController
         private IBossEnemyCharacterController _bossEnemyController;
@@ -496,6 +516,7 @@ namespace BossEnemy.Character
         private bool _isDead = false;
         private bool _isDespawned = true;
         private bool _isLockable;
+        private bool _isFirstPhaseGange = true;
 
         // ボスのタイムスケール
         private ReactiveProperty<float> _timeScale = new(1.0f);
@@ -710,11 +731,11 @@ namespace BossEnemy.Character
         /// </summary>
         public TakeDamageType PartsType => _bossEnemyPartsType;
 
-        public void Init(BossCharacterView bossEnemyView)
+        public void Init(BossCharacterView bossEnemyView, EffectManager effectManager)
         {
             _bossEnemyView = bossEnemyView;
 
-            if (_thisPartsArmer != null) _thisPartsArmer.Init();
+            if (_thisPartsArmer != null) _thisPartsArmer.Init(effectManager);
         }
 
         public void SetLockable(bool lockable) => _isLockable = lockable;

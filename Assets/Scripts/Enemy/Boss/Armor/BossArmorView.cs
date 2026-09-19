@@ -9,6 +9,8 @@ namespace BossEnemy.Armor
     /// <summary> ボスの装備するアーマー </summary>
     public class BossArmorView : MonoBehaviour, IArmorHealth
     {
+        private const string RepairArmorEffectKey = "BigRockUpLift";
+
         public ArmorAttachmentType AttachmentPoints => _armorAttachmentPointsType;
 
         public bool IsBroken => _isBreak;
@@ -30,8 +32,9 @@ namespace BossEnemy.Armor
         /// <summary> 修復時に発火するイベント </summary>
         public event Action OnRepaired;
 
-        public void Init()
+        public void Init(EffectManager effectManager)
         {
+            _effectManager = effectManager;
             RepairArmor().Forget();
         }
 
@@ -51,8 +54,6 @@ namespace BossEnemy.Armor
         {
             if (_isBreak == false) return;
 
-
-
             this.gameObject.SetActive(true);
             _isBreak = false;
 
@@ -67,8 +68,6 @@ namespace BossEnemy.Armor
         public async UniTask BreakArmor()
         {
             if (_isBreak == true) return;
-
-
 
             this.gameObject.SetActive(false);
             _isBreak = true;
@@ -97,11 +96,6 @@ namespace BossEnemy.Armor
         private int _lastKnownHP = int.MinValue;
 
         private bool _hasSyncedInitialHP = false;
-
-        private void Awake()
-        {
-            _effectManager = FindFirstObjectByType<EffectManager>();
-        }
 
         /// <summary> Entity側は1発ごとのダメージで通知を出さないため、ここでHP変化を検知する </summary>
         private void Update()
