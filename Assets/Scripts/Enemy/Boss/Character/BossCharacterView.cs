@@ -99,9 +99,6 @@ namespace BossEnemy.Character
             // ロックオンを可能に
             _isLockable = true;
 
-            // 最初のPhase切替
-            _isFirstPhaseGange = true;
-
             // 攻撃SMBListの初期化
             _attackSMBList = new();
 
@@ -316,27 +313,9 @@ namespace BossEnemy.Character
 
         public void ChangePhase(int nextPhase)
         {
-            if (!_isFirstPhaseGange)
-            {
-                string effectName = "BigRockUpLift";
-
-                Vector3[] effectSpawnPosArray =
-                Logic.CirclePositionGenerator.GetPositionsOnCircle3D(
-                        transform.position,
-                        _phaseChangeEffectSpawnDistance,
-                        _phaseChangeEffectNum);
-
-                foreach (var effectPos in effectSpawnPosArray)
-                {
-                    _effectManager.PlayEffect(effectName, effectPos);
-                }
-            }
-            else _isFirstPhaseGange = false;
-            PlayBossSE(SoundCueNames.Boss.RockEruption);
+            _bossEnemyAnimator.SetPhaseChange(nextPhase);
 
             RepairArmor();
-
-            _bossEnemyAnimator.SetPhaseChange(nextPhase);
         }
 
         /// <summary> キャラクターの姿勢を変更 </summary>
@@ -516,7 +495,6 @@ namespace BossEnemy.Character
         private bool _isDead = false;
         private bool _isDespawned = true;
         private bool _isLockable;
-        private bool _isFirstPhaseGange = true;
 
         // ボスのタイムスケール
         private ReactiveProperty<float> _timeScale = new(1.0f);

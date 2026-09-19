@@ -617,6 +617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
   _armorAttachmentPointsType: 4
   _gaugeAnchor: {fileID: 2401919272515200642}
+  _repairDelayTime: 1.5
 --- !u!1 &1744857497410092107 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8662783929778368040, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
@@ -815,6 +816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
   _armorAttachmentPointsType: 3
   _gaugeAnchor: {fileID: 4753985895479307685}
+  _repairDelayTime: 1.5
 --- !u!4 &6473346287059112910 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4169045274194887085, guid: 045887646d2e4f14eb464923fee5194b, type: 3}

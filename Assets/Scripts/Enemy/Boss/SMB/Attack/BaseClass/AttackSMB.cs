@@ -194,7 +194,7 @@ namespace BossEnemy.SMB
         }
 
         /// <summary> 攻撃データを設定 </summary>
-        public void SetAttackData(Attack.AttackData attackData)
+        public virtual void SetAttackData(Attack.AttackData attackData)
         {
             _attackData = attackData;
         }

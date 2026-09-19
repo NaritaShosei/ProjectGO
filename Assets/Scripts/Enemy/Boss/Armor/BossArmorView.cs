@@ -50,9 +50,11 @@ namespace BossEnemy.Armor
         public Transform GetTargetCenter() => _gaugeAnchor != null ? _gaugeAnchor : transform;
 
         /// <summary> アーマー修復時の処理 </summary>
-        public async UniTask RepairArmor()
+        public async UniTaskVoid RepairArmor()
         {
             if (_isBreak == false) return;
+
+            await UniTask.Delay(TimeSpan.FromSeconds(_repairDelayTime));
 
             this.gameObject.SetActive(true);
             _isBreak = false;
@@ -65,7 +67,7 @@ namespace BossEnemy.Armor
         }
 
         /// <summary> アーマー破壊時の処理 </summary>
-        public async UniTask BreakArmor()
+        public async UniTaskVoid BreakArmor()
         {
             if (_isBreak == true) return;
 
@@ -86,6 +88,9 @@ namespace BossEnemy.Armor
         [Header("ゲージ表示位置（未設定ならこのオブジェクトの位置を使用）")]
         [SerializeField, Tooltip("ゲージ表示位置（未設定ならこのオブジェクトの位置を使用）")]
         private Transform _gaugeAnchor;
+
+        [Header("アーマーの修理終了までの時間")]
+        [SerializeField] private float _repairDelayTime = 1;
 
         private bool _isBreak = false;
 
