@@ -54,7 +54,7 @@
   - 終了：位置・回転が収束したら完了。上限で間に合わなければ延長し、`_lockOnBlendDuration + _lockOnBlendMaxExtraTime` 超過で強制終了
   - 対象を解除する際（`FollowCameraState.ClearTarget`）は必ずブレンドをキャンセルし（`CancelLockOnBlend`）、`ExitLockOn`で`CinemachineOrbitalFollow`のAxis値を現在のカメラ姿勢へ同期してからフリールック用3コンポーネントを再有効化する（解除直後に古い向きへ飛ばないようにするため）
 - ゲーム設定変更後の位置追従・フリールック回転速度の更新（`SetFreeLookSettings`）
-- `ResetFreeLookBehindPlayer`：フリールックの追従アンカーとOrbitalFollowのAxis値をプレイヤーの現在位置・向き基準へ強制的に合わせ直す。ロックオン一時停止中（`CameraController.SetLockOnSuspended(true)`）はこのカメラがCinemachine上非ライブになり得て姿勢更新が保証されないため、`CameraManager.SetLockOnSuspended(false)`（再開時）に呼び、古い姿勢のまま急に映るのを防ぐ
+- `ResetFreeLookBehindPlayer`：フリールックの追従アンカーとOrbitalFollowのAxis値をプレイヤーの現在位置・向き基準へ強制的に合わせ直す。ロックオン一時停止中（`CameraController.SetLockOnSuspended(true)`）はこのカメラがCinemachine上非ライブになり得て姿勢更新が保証されないため、`CameraManager.SetLockOnSuspended(false)`（再開時）に呼び、古い姿勢のまま急に映るのを防ぐ。位置・軸を書き換えた直後に`_followCamera.CancelDamping(true)`も呼び、`RotationComposer`/`Decollider`のダンピングによる向きの遅れを同フレームで解消する。これをしないと、直後に自動探索で初回ロックオンが始まった際、`BeginLockOnBlend`のスナップ元（`snapFromCurrentCamera`時の実カメラ姿勢）がダンピング遅れ中の古い向き（例：一瞬の見下ろし姿勢）を掴んでしまい、そこから緩やかにブレンドして戻る不自然な動きになる
 
 コンストラクタは用途別にまとめた3つの構造体（`CameraReferences` / `FreeLookSettings` / `LockOnSettings` / `LockOnBlendSettings`。いずれも`CameraMotionController.cs`内で定義）を受け取ります。`CameraManager`のInspectorフィールドはフラットな個別フィールドとして保持され、`Init()`内でこれらの構造体へ詰め替えられます。
 
@@ -77,11 +77,11 @@
 
 切り替えブレンドは Cinemachine Brain（[Assets/Data/Main Camera Custom Blends.asset](../../Data/Main%20Camera%20Custom%20Blends.asset)）に任せ、ロックオン用のイージング（`BeginLockOnBlend`）は使いません。チューニング値はすべて `CameraManager` の `[SerializeField]`（`_bossXXX`）から `BossCameraSettings` 構造体（`BossCameraSettings.cs`）へ詰め替えて渡します。
 
-`'**ANY CAMERA**' → BossCamera` は `Style: Cut` で登録済みだが、ボス登場ムービー（`BossIntroMovieState`、`Assets/TimeLine/BossIntroMovie.playable` の Cinemachine Track）が終わってから `BossCameraController.Activate()` が呼ばれるまでには数フレームの間隔があり、その間 Brain は一旦ムービー用vcamから`LockOnCamera`へ戻る。ここに個別のカット指定が無いと Brain の `DefaultBlend`（2秒イージング）が使われてしまい、「ムービーの位置から正しい位置へゆっくり動く」ように見える。
+`'**ANY CAMERA**' → BossCamera` は `Style: Cut` で登録済み。ボス登場ムービー（`BossIntroMovieState`、`Assets/TimeLine/BossIntroMovie.playable` の Cinemachine Track）が終わってから `BossCameraController.Activate()` が呼ばれるまでには数フレームの間隔があり、その間 Brain は一旦ムービー用vcamから`LockOnCamera`へ戻るが、直後に`BossCameraController.Activate()`が`BossCamera`のPriorityを上げるため、このワイルドカードで即カットされる。
 
-これに対処するため、`Assets/Prefab/CatSceneAsset/BossIntroMovieAssets.prefab` 内のムービー専用vcam（元は全て同名`CinemachineCamera`だったため`BossIntroCam_01`〜`_08`へリネーム済み）ごとに、`BossIntroCam_0X → LockOnCamera: Style Cut` を個別登録している。`'**ANY CAMERA**' → LockOnCamera` のような包括的なワイルドカードにはしていない（他の場面でLockOnCameraへ入ってくる別のカメラ、例えばリザルトから戻る場合などのブレンドまで巻き込んで一律カットになってしまうため）。`'FreeLook Camera ' → LockOnCamera` の既存の0.2秒ブレンドは、より具体的な組み合わせとして優先されるため影響しない。
+`LockOnCamera`への遷移（導入ムービー・ボス登場ムービーの終わり、`IntroMovieState`/`BossIntroMovieState`→`MobAndSkill`/`BossBattle`）は意図的にCutにしていない。ムービーの余韻からゆるやかに繋がる見た目を保ちたいため、`'FreeLook Camera ' → LockOnCamera`と同様、指定が無い組み合わせはBrainの`DefaultBlend`（Style EaseInOut・2秒）に任せている。
 
-同じ構造の問題が、ゲーム開始時の導入ムービー（`IntroMovieState`、`Assets/TimeLine/IntroMovie.playable` → `MobAndSkill` へ遷移）でも発生する。`Assets/Prefab/CatSceneAsset/IntroMovieAsset.prefab` 内のムービー専用vcamは元々 `CinemachineCamera (1)`〜`(6)`（Unityの自動採番で既に一意）だったため、リネームはせずそのまま `CinemachineCamera (1)`〜`(6) → LockOnCamera: Style Cut` を追加している。対処しないと、モブ戦開始直後にムービー最後のカット（見下ろし構図など）から `LockOnCamera` へ`DefaultBlend`の2秒イージングで戻ってしまい、一瞬不自然な見下ろし姿勢を経由して見える。
+ただし、ブレンドの開始点（ムービー中に凍結されていた`LockOnCamera`自身の姿勢）が正しくないと、そこから2秒かけて誤った位置から正しい位置へ動く不自然な絵になる。そのため`CameraMotionController.ResetFreeLookBehindPlayer`（`CameraManager.SetLockOnSuspended(false)`で呼ばれる）で、位置・軸を合わせた直後に`_followCamera.CancelDamping(true)`を呼び、ブレンドが始まる前の時点で`LockOnCamera`自身の姿勢をあらかじめ正しくしておく（詳細は`CameraMotionController`の項を参照）。`Assets/Prefab/CatSceneAsset/BossIntroMovieAssets.prefab`内のムービー専用vcam（元は全て同名`CinemachineCamera`）は`BossIntroCam_01`〜`_08`へリネーム済み（`Assets/Prefab/CatSceneAsset/IntroMovieAsset.prefab`側は元々`CinemachineCamera (1)`〜`(6)`で一意だったためそのまま）。これは`'**ANY CAMERA**' → BossCamera`のような個別カット指定が今後必要になった場合に、同名で対象を絞れないという問題を避けるための整理で、現状はブレンド指定には使っていない。
 
 ### BossLegLockOnController
 
