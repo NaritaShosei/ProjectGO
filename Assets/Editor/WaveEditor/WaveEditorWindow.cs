@@ -198,7 +198,8 @@ public class WaveEditorWindow : EditorWindow
         if (!modeChanged && !amountChanged) return;
         var serializedWave = new SerializedObject(wave);
         serializedWave.FindProperty("OverrideExperience").boolValue = amountChanged || overrideExperience;
-        serializedWave.FindProperty("TotalExperience").intValue = experience;
+        if (amountChanged)
+            serializedWave.FindProperty("TotalExperience").intValue = experience;
         serializedWave.ApplyModifiedProperties();
         Repaint();
     }
