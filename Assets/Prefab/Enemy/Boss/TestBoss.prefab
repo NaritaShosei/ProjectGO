@@ -159,25 +159,25 @@ MonoBehaviour:
     - _partsTransform: {fileID: 6298560754203755573}
       _thisPartsArmer: {fileID: 7981192630919767337}
       _bossEnemyPartsType: 3
-    - _partsTransform: {fileID: 686426526543147735}
-      _thisPartsArmer: {fileID: 944183011892863270}
+    - _partsTransform: {fileID: 616460657023965751}
+      _thisPartsArmer: {fileID: 3114951823738040070}
       _bossEnemyPartsType: 3
-    - _partsTransform: {fileID: 6110441742380642608}
+    - _partsTransform: {fileID: 686426526543147735}
       _thisPartsArmer: {fileID: 0}
-      _bossEnemyPartsType: 2
+      _bossEnemyPartsType: 3
   - _postureType: 3
     _center: {x: 0, y: 1.8, z: 0}
     _size: {x: 3.5, y: 4, z: 4}
     _bossEnemyPartsView:
-    - _partsTransform: {fileID: 7063641654223528646}
+    - _partsTransform: {fileID: 6298560754203755573}
+      _thisPartsArmer: {fileID: 7981192630919767337}
+      _bossEnemyPartsType: 3
+    - _partsTransform: {fileID: 616460657023965751}
       _thisPartsArmer: {fileID: 3114951823738040070}
       _bossEnemyPartsType: 3
     - _partsTransform: {fileID: 4266486389957228556}
-      _thisPartsArmer: {fileID: 3567100854127715380}
-      _bossEnemyPartsType: 3
-    - _partsTransform: {fileID: 6110441742380642608}
       _thisPartsArmer: {fileID: 0}
-      _bossEnemyPartsType: 2
+      _bossEnemyPartsType: 3
   - _postureType: 4
     _center: {x: 0, y: 1, z: 0}
     _size: {x: 2.8, y: 3, z: 6.5}
@@ -189,8 +189,6 @@ MonoBehaviour:
       _thisPartsArmer: {fileID: 0}
       _bossEnemyPartsType: 3
   _bossArmorViews:
-  - {fileID: 944183011892863270}
-  - {fileID: 3567100854127715380}
   - {fileID: 7981192630919767337}
   - {fileID: 3114951823738040070}
   _targetCenterTransform: {fileID: 4797193011136017608}
@@ -501,12 +499,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5008646759539336105, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4038328648950774085}
-    - targetCorrespondingSourceObject: {fileID: 7148385828608643181, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3567100854127715380}
-    - targetCorrespondingSourceObject: {fileID: 8705515532985349582, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 944183011892863270}
     - targetCorrespondingSourceObject: {fileID: 8446748700559837706, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7981192630919767337}
@@ -514,25 +506,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 3114951823738040070}
   m_SourcePrefab: {fileID: 100100000, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
---- !u!1 &232698139336720910 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7148385828608643181, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
-  m_PrefabInstance: {fileID: 6921644156077527651}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &3567100854127715380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 232698139336720910}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f385d59466a0bb42855c4b16d6532f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
-  _armorAttachmentPointsType: 2
-  _gaugeAnchor: {fileID: 0}
 --- !u!1 &351391854704435420 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7273027214671049407, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
@@ -670,25 +643,6 @@ CapsuleCollider:
   m_Height: 1.1268268
   m_Direction: 1
   m_Center: {x: 0.0000000127568125, y: 0.06341285, z: -0.11766277}
---- !u!1 &1792057653310285741 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8705515532985349582, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
-  m_PrefabInstance: {fileID: 6921644156077527651}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &944183011892863270
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1792057653310285741}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f385d59466a0bb42855c4b16d6532f5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Armor.BossArmorView
-  _armorAttachmentPointsType: 1
-  _gaugeAnchor: {fileID: 0}
 --- !u!4 &2644834841684685062 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4952492801005314917, guid: 045887646d2e4f14eb464923fee5194b, type: 3}
