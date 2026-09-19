@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace BossEnemy.Logic
 {
-    public class CirclePositionGenerator : MonoBehaviour
+    public class CirclePositionGenerator
     {
         /// <summary>
         /// 3D空間（XZ平面：地面に平行な円）の円周上に均等配置された位置を取得します。

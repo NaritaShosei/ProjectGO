@@ -3,14 +3,13 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using BossEnemy.Character;
 using BossEnemy.Enum;
+using System.Threading;
 
 namespace BossEnemy.Armor
 {
     /// <summary> ボスの装備するアーマー </summary>
-    public class BossArmorView : MonoBehaviour, IArmorHealth
+    public class BossArmorView : MonoBehaviour, IArmorHealth, IDisposable
     {
-        private const string RepairArmorEffectKey = "BigRockUpLift";
-
         public ArmorAttachmentType AttachmentPoints => _armorAttachmentPointsType;
 
         public bool IsBroken => _isBreak;
@@ -32,10 +31,16 @@ namespace BossEnemy.Armor
         /// <summary> 修復時に発火するイベント </summary>
         public event Action OnRepaired;
 
-        public void Init(EffectManager effectManager)
+        public void Init()
         {
-            _effectManager = effectManager;
             RepairArmor().Forget();
+        }
+
+        public void Dispose()
+        {
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
+            _repairCancellationTokenSource = null;
         }
 
         /// <summary> 実際の耐久値を持つEntityを登録する（未登録なら2値表示にフォールバック） </summary>
@@ -54,7 +59,15 @@ namespace BossEnemy.Armor
         {
             if (_isBreak == false) return;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(_repairDelayTime));
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
+            _repairCancellationTokenSource = new();
+
+            await UniTask.Delay(
+                TimeSpan.FromSeconds(_repairDelayTime),
+                cancellationToken:_repairCancellationTokenSource.Token);
+
+            _repairCancellationTokenSource = null;
 
             this.gameObject.SetActive(true);
             _isBreak = false;
@@ -94,13 +107,13 @@ namespace BossEnemy.Armor
 
         private bool _isBreak = false;
 
-        private EffectManager _effectManager;
-
         private IBossCharacterEntity _entity;
 
         private int _lastKnownHP = int.MinValue;
 
         private bool _hasSyncedInitialHP = false;
+
+        private CancellationTokenSource _repairCancellationTokenSource = null;
 
         /// <summary> Entity側は1発ごとのダメージで通知を出さないため、ここでHP変化を検知する </summary>
         private void Update()

@@ -9,7 +9,9 @@ namespace BossEnemy.Logic
 {
     public class PhaseChangeAttackSMB : AttackSMB
     {
-        private const string PLAY_EFFECT_NAME = "Impact";
+        private const string IMPACT_EFFECT = "Impact";
+
+        private const string BIG_ROCK_UP_LIFT_NAME = "BigRockUpLift";
 
         protected override string AttackStartVoiceCueName => SoundCueNames.Boss.ChargePunchVoice;
 
@@ -89,8 +91,6 @@ namespace BossEnemy.Logic
             // 攻撃音の再生
             PlayBossSE(SoundCueNames.Boss.RockEruption);
 
-            string effectName = "BigRockUpLift";
-
             var effectCenterPos = _bossCharacterTransform.position;
             effectCenterPos.y = _attackAreaCircleGeneratePosY;
 
@@ -102,11 +102,11 @@ namespace BossEnemy.Logic
 
             foreach (var effectPos in effectSpawnPosArray)
             {
-                _effectManager.PlayEffect(effectName, effectPos);
+                _effectManager.PlayEffect(BIG_ROCK_UP_LIFT_NAME, effectPos);
             }
 
             // 攻撃Effectを再生
-            _effectManager.PlayEffect(PLAY_EFFECT_NAME, attackCenterPos);
+            _effectManager.PlayEffect(IMPACT_EFFECT, attackCenterPos);
 
             // カメラの振動効果
             _cameraManager.ExecutionCameraShake(_cameraShakeData).Forget();

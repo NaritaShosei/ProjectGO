@@ -124,7 +124,7 @@ namespace BossEnemy.Character
             {
                 foreach(var parts in collisionDetection.BossEnemyPartsView)
                 {
-                    parts.Init(this, _effectManager);
+                    parts.Init(this);
                 }
             }
 
@@ -203,6 +203,15 @@ namespace BossEnemy.Character
             _timeScale?.Dispose();
             _updaters.Clear();
             _attackSMBList.Clear();
+
+            // 各パーツの初期化
+            foreach (var collisionDetection in _collisionDetections)
+            {
+                foreach (var parts in collisionDetection.BossEnemyPartsView)
+                {
+                    parts.Dispose();
+                }
+            }
         }
 
 
@@ -464,12 +473,6 @@ namespace BossEnemy.Character
         [Header("ボスエネミーの当たり判定")]
         [SerializeField] private BoxCollider _bossCollider;
 
-        [Header("ボスエネミーのPhaseChangeEffectの個数")]
-        [SerializeField] private int _phaseChangeEffectNum = 6;
-
-        [Header("ボスエネミーのPhaseChangeEffectのボスからの距離")]
-        [SerializeField] private int _phaseChangeEffectSpawnDistance = 6;
-
         [Header("ボスエネミーのAnimationEventReceiver")]
         [SerializeReference, SubclassSelector]
         private IBossCharacterAnimationEventReceiver _bossEnemyAnimationEventReceiver;
@@ -514,7 +517,6 @@ namespace BossEnemy.Character
         private void Awake()
         {
             _bossEnemyAnimator = new BossEnemyAnimator(_animator, _bossEnemyAnimationEventReceiver);
-            _effectManager = FindFirstObjectByType<EffectManager>();
         }
 
         private void OnDestroy()
@@ -709,11 +711,16 @@ namespace BossEnemy.Character
         /// </summary>
         public TakeDamageType PartsType => _bossEnemyPartsType;
 
-        public void Init(BossCharacterView bossEnemyView, EffectManager effectManager)
+        public void Init(BossCharacterView bossEnemyView)
         {
             _bossEnemyView = bossEnemyView;
 
-            if (_thisPartsArmer != null) _thisPartsArmer.Init(effectManager);
+            if (_thisPartsArmer != null) _thisPartsArmer.Init();
+        }
+
+        public void Dispose()
+        {
+            if (_thisPartsArmer != null) _thisPartsArmer.Dispose();
         }
 
         public void SetLockable(bool lockable) => _isLockable = lockable;
