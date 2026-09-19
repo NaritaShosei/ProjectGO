@@ -1507,6 +1507,33 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &-3080440614656081930
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 502c8f7e58ddacf49aa047b2327a6233, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossEnemy.Attack.PhaseChangeAttackSMB
+  _attackID: 13
+  _attackStartTime: 0.5
+  _attackAreaDespawnAndDisplayAttackEffectTime: 1
+  _attackHitCheckFrameCount: 7
+  _attackHitCollisionType: 1
+  _cameraShakeData:
+    _amplitude: 0
+    _frequency: 0
+    _duration: 0
+  _attackHitTimingDelayTime: 1
+  _attackAreaCircleGeneratePosY: 0.2
+  _attackPointDistance: 0
+  _phaseChangeEffectNum: 6
+  _phaseChangeEffectSpawnDistance: 6
+  _attackAreaCircleRadius: 6
 --- !u!1109 &-2983369104460112047
 AnimatorTransition:
   m_ObjectHideFlags: 1
@@ -2214,6 +2241,7 @@ AnimatorState:
   m_StateMachineBehaviours:
   - {fileID: -1692041898509714901}
   - {fileID: 1273822574978294736}
+  - {fileID: -3080440614656081930}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
