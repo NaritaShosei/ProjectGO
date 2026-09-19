@@ -40,10 +40,6 @@ public class StatSkillSystem
     private readonly EXPManager _expManager;
 
     /// <summary>
-    /// レベルアップのたびに、_statSkillDataArray からランダムに1つ選んでパラメーターを増加させる。
-    /// 上昇量は、選ばれたスキルの CalculateAmount() を呼び出して決定する。
-    /// </summary>
-    /// <summary>
     /// レベルアップのたびに、_statSkillDataArray からランダムに2つ選んでパラメーターを増加させる。
     /// 同じスキルは重複して選ばれない。
     /// </summary>
