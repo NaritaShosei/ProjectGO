@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
   m_Name: WaveData_1
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
+  OverrideExperience: 1
+  TotalExperience: 203
   SpawnGroups:
   - SpawnEntries:
     - EnemyTypeKey: StoneRing
       SpawnCount: 3
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
@@ -29,9 +32,11 @@ MonoBehaviour:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Medium
       SpawnCount: 1
+      ExperienceWeight: 2
       MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: ShiledDraugr
       SpawnCount: 1
+      ExperienceWeight: 2
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:

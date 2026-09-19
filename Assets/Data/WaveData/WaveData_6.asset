@@ -12,49 +12,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
   m_Name: WaveData_6
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
+  OverrideExperience: 1
+  TotalExperience: 163
   SpawnGroups:
   - SpawnEntries:
-    - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 2
+    - EnemyTypeKey: Enemy_Medium
+      SpawnCount: 3
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 0
-    NextWaveConditions:
-    - WaveConditionType: 0
-      Threshold: 1
-    SpawnPointKey: 
-    _spawnSetSize: 3
-    _spawnSetInterval: 0.5
-    _placementMode: 0
-    _clusterRadius: 2
-  - SpawnEntries:
-    - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 2
-      MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Armor_Heavy
-      SpawnCount: 2
-      MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 0
+    ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 0
       Threshold: 0
-    SpawnPointKey: 
+    SpawnPointKey: 2
     _spawnSetSize: 3
-    _spawnSetInterval: 0.5
+    _spawnSetInterval: 0.2
     _placementMode: 0
     _clusterRadius: 2
   - SpawnEntries:
+    - EnemyTypeKey: Enemy_Light
+      SpawnCount: 2
+      ExperienceWeight: 1
+      MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: Enemy_Heavy
-      SpawnCount: 2
+      SpawnCount: 1
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Armor_Heavy
-      SpawnCount: 2
+    - EnemyTypeKey: Enemy_Armor_Medium
+      SpawnCount: 1
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 0
+    ExclusionRadius: 5
     NextWaveConditions:
     - WaveConditionType: 2
       Threshold: 0
-    SpawnPointKey: 
+    SpawnPointKey: 4
     _spawnSetSize: 3
-    _spawnSetInterval: 0.5
+    _spawnSetInterval: 0.2
     _placementMode: 0
     _clusterRadius: 2

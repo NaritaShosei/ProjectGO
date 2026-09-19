@@ -12,16 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
   m_Name: WaveData_2
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
+  OverrideExperience: 1
+  TotalExperience: 163
   SpawnGroups:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Heavy
       SpawnCount: 1
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: Enemy_Light
       SpawnCount: 1
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: Enemy_Medium
       SpawnCount: 2
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 1
     NextWaveConditions:
