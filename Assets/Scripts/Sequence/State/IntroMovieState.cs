@@ -19,6 +19,12 @@ public class IntroMovieState : ISequenceState
         context.InputHandler?.EnableInput(false);
         context.Player?.ForceWarriorMode();
 
+        if (ServiceLocator.TryGet(out CameraManager cameraManager))
+        {
+            _cameraManager = cameraManager;
+            _cameraManager.SetLockOnSuspended(true);
+        }
+
         // スキップ長押し判定用に、Player入力とは独立したUIアクションマップを有効化する。
         _skipInput = new PlayerInput();
         _skipInput.UI.Enable();
@@ -66,6 +72,9 @@ public class IntroMovieState : ISequenceState
         _skipInput?.UI.Disable();
         _skipInput?.Dispose();
         _skipInput = null;
+
+        _cameraManager?.SetLockOnSuspended(false);
+        _cameraManager = null;
     }
 
     [Header("Movie Settings")]
@@ -80,6 +89,7 @@ public class IntroMovieState : ISequenceState
     private SequenceStateContext _context;
     private PlayerInput _skipInput;
     private float _skipHoldTime;
+    private CameraManager _cameraManager;
 
     private void HandleMovieFinished()
     {

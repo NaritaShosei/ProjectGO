@@ -205,6 +205,25 @@ public sealed class CameraMotionController
         SetFreeLookComponentsEnabled(true);
     }
 
+    /// <summary>
+    /// フリールックのカメラ姿勢をプレイヤーの現在位置・向き基準へ強制的に合わせ直す。
+    /// ロックオン一時停止（ムービー再生中など）の間はカメラが非表示のまま更新が保証されないため、
+    /// 再開直後に古い姿勢のまま急に映って見えるのを防ぐために呼ぶ。
+    /// </summary>
+    public void ResetFreeLookBehindPlayer()
+    {
+        _cameraFollowTarget.position = _playerTransform.position;
+        _followVelocity = Vector3.zero;
+
+        if (_orbitalFollow == null) return;
+
+        _orbitalFollow.HorizontalAxis.Value = _playerTransform.eulerAngles.y;
+        _orbitalFollow.VerticalAxis.Value = Mathf.Clamp(
+            0f,
+            _orbitalFollow.VerticalAxis.Range.x,
+            _orbitalFollow.VerticalAxis.Range.y);
+    }
+
     /// <summary>ロックオンカメラの位置と対象追従回転を更新します。</summary>
     public void UpdateLockOn(Camera mainCamera, Transform targetCenter)
     {
