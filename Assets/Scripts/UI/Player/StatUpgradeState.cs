@@ -9,7 +9,6 @@ public sealed class StatUpgradeState
 
     public static int GetStatIndex(StatSkillType type)
     {
-        // enumには表示対象外のDefenseがあるため、enum値を配列添字にしない。
         return type switch
         {
             StatSkillType.Attack => 0,

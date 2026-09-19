@@ -1479,10 +1479,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1848956063}
     - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
-      propertyPath: _initialSkills.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 2881409127565757846, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: '_initialSkills.Array.data[2]'
       value: 
       objectReference: {fileID: 11400000, guid: d851a226d8589b94fbafee1c953fd338, type: 2}
@@ -1538,6 +1534,10 @@ PrefabInstance:
       propertyPath: _lockOnMarkerView
       value: 
       objectReference: {fileID: 727144983}
+    - target: {fileID: 4773163649764372864, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _statUpgradeIconView
+      value: 
+      objectReference: {fileID: 523226736}
     - target: {fileID: 7036861525032570302, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2771,10 +2771,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: HPGauge
       objectReference: {fileID: 0}
-    - target: {fileID: 2088440848212763654, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4027827199007782362, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2876,6 +2872,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c7b18a0c327a324aad7405a9dbc16ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GaugeView
+--- !u!114 &523226736 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9055750930138658691, guid: 5af8ef2a9aba5384abf2bdb272c10dff, type: 3}
+  m_PrefabInstance: {fileID: 523226733}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7a5d31e70b14da68b4d8d604d4e1c80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatUpgradeIconView
 --- !u!114 &526572076 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1226753402798715077, guid: 886c61593342d23498935c8e2f2cd553, type: 3}
@@ -10989,6 +10996,86 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 396129334472459972, guid: 53598e6629a141a4885b7995e7822c27, type: 3}
   m_PrefabInstance: {fileID: 1418050750}
   m_PrefabAsset: {fileID: 0}
+--- !u!224 &1373136533 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 224002, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
+  m_PrefabInstance: {fileID: 2200000000}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1402382097
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1402382098}
+  - component: {fileID: 1402382100}
+  - component: {fileID: 1402382099}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1402382098
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402382097}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1373136533}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 327.01, y: -272.9}
+  m_SizeDelta: {x: 20, y: 20}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1402382099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402382097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 779f676110617c348b779ca2042c82f1, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1402382100
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1402382097}
+  m_CullTransparentMesh: 1
 --- !u!1 &1409320126 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2924410211550736267, guid: adf514174bc89f64599f1916e6075933, type: 3}
@@ -12595,6 +12682,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114002, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 4614a7297bbcb96479a9eb50c4e52846, type: 3}
     - target: {fileID: 224000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -12607,9 +12698,16 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 225000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
+      propertyPath: m_Alpha
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 224002, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1402382098}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c1bd290a471e48e185fd48ee635e249a, type: 3}
 --- !u!224 &2200000001 stripped
