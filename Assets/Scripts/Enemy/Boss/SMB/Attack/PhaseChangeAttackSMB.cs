@@ -95,7 +95,7 @@ namespace BossEnemy.Attack
             effectCenterPos.y = _attackAreaCircleGeneratePosY;
 
             Vector3[] effectSpawnPosArray =
-            CirclePositionGenerator.GetPositionsOnCircle3D(
+            Logic.CirclePositionGenerator.GetPositionsOnCircle3D(
                     effectCenterPos,
                     _phaseChangeEffectSpawnDistance,
                     _phaseChangeEffectNum);

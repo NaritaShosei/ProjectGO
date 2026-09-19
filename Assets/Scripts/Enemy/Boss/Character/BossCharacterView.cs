@@ -528,6 +528,15 @@ namespace BossEnemy.Character
                 _isDespawned = true;
                 StopActiveAttacks();
                 _bossEnemyController?.Dispose();
+
+                // 各パーツの破棄
+                foreach (var collisionDetection in _collisionDetections)
+                {
+                    foreach (var parts in collisionDetection.BossEnemyPartsView)
+                    {
+                        parts.Dispose();
+                    }
+                }
             }
 
             _bossEnemyAnimator?.Dispose();
@@ -535,15 +544,6 @@ namespace BossEnemy.Character
             // HitStopManager に残ったプール済みボスへの参照を解除する。
             if (ServiceLocator.TryGet(out HitStopManager hitStopManager))
                 hitStopManager.UnregisterFromAll(this);
-
-            // 各パーツの破棄
-            foreach (var collisionDetection in _collisionDetections)
-            {
-                foreach (var parts in collisionDetection.BossEnemyPartsView)
-                {
-                    parts.Dispose();
-                }
-            }
         }
 
         private void Update()

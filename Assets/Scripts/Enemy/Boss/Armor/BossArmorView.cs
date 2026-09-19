@@ -63,28 +63,41 @@ namespace BossEnemy.Armor
             _repairCancellationTokenSource?.Dispose();
             _repairCancellationTokenSource = new();
 
-            await UniTask.Delay(
+            try
+            {
+                await UniTask.Delay(
                 TimeSpan.FromSeconds(_repairDelayTime),
                 cancellationToken:_repairCancellationTokenSource.Token);
 
-            _repairCancellationTokenSource?.Cancel();
-            _repairCancellationTokenSource?.Dispose();
-            _repairCancellationTokenSource = null;
+                this.gameObject.SetActive(true);
+                _isBreak = false;
 
-            this.gameObject.SetActive(true);
-            _isBreak = false;
+                Debug.Log($"[BossArmorView] RepairArmor: {gameObject.name} / {AttachmentPoints}");
 
-            Debug.Log($"[BossArmorView] RepairArmor: {gameObject.name} / {AttachmentPoints}");
+                // 修復をUI等の購読者に通知
+                OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+                OnRepaired?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
 
-            // 修復をUI等の購読者に通知
-            OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
-            OnRepaired?.Invoke();
+            }
+            finally
+            {
+                _repairCancellationTokenSource?.Cancel();
+                _repairCancellationTokenSource?.Dispose();
+                _repairCancellationTokenSource = null;
+            }
         }
 
         /// <summary> アーマー破壊時の処理 </summary>
         public async UniTaskVoid BreakArmor()
         {
             if (_isBreak == true) return;
+
+            _repairCancellationTokenSource?.Cancel();
+            _repairCancellationTokenSource?.Dispose();
+            _repairCancellationTokenSource = null;
 
             this.gameObject.SetActive(false);
             _isBreak = true;
