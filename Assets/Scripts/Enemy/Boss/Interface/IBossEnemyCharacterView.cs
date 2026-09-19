@@ -61,7 +61,6 @@ namespace BossEnemy.Interface
         public void HandleDead();
 
         #region 鎧関連の処理
-        public void InitArmor();
 
         public void BreakArmor(ArmorAttachmentType attachmentPointsType);
 
