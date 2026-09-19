@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
-    - EnemyTypeKey: ShiledDraugr
-      SpawnCount: 2
-      MidBossLevelTable: {fileID: 0}
-    - EnemyTypeKey: Enemy_Armor_Medium
-      SpawnCount: 2
+    - EnemyTypeKey: Enemy_Heavy
+      SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
     - EnemyTypeKey: Enemy_Light
+      SpawnCount: 1
+      MidBossLevelTable: {fileID: 0}
+    - EnemyTypeKey: Enemy_Medium
       SpawnCount: 2
       MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 0
+    ExclusionRadius: 1
     NextWaveConditions:
-    - WaveConditionType: 1
+    - WaveConditionType: 2
       Threshold: 3
     SpawnPointKey: 
     _spawnSetSize: 3

@@ -14,28 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
   SpawnGroups:
   - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 6
+    - EnemyTypeKey: StoneGolem
+      SpawnCount: 1
       MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 0
+    - EnemyTypeKey: ShiledDraugr
+      SpawnCount: 2
+      MidBossLevelTable: {fileID: 0}
+    ExclusionRadius: 0.88
     NextWaveConditions:
-    - WaveConditionType: 1
+    - WaveConditionType: 2
       Threshold: 3
     SpawnPointKey: 5
     _spawnSetSize: 3
     _spawnSetInterval: 0.5
-    _placementMode: 1
-    _clusterRadius: 6
-  - SpawnEntries:
-    - EnemyTypeKey: StoneRing
-      SpawnCount: 9
-      MidBossLevelTable: {fileID: 0}
-    ExclusionRadius: 0
-    NextWaveConditions:
-    - WaveConditionType: 2
-      Threshold: 0
-    SpawnPointKey: 5
-    _spawnSetSize: 3
-    _spawnSetInterval: 0.5
-    _placementMode: 1
+    _placementMode: 0
     _clusterRadius: 6
