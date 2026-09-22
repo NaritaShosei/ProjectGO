@@ -12,10 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf96f5149c8068b48ac385275e8f7005, type: 3}
   m_Name: TutorialWave
   m_EditorClassIdentifier: Assembly-CSharp::WaveData
+  OverrideExperience: 1
+  TotalExperience: 100
   SpawnGroups:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Light
       SpawnCount: 1
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
@@ -29,6 +32,7 @@ MonoBehaviour:
   - SpawnEntries:
     - EnemyTypeKey: Enemy_Armor_Light
       SpawnCount: 1
+      ExperienceWeight: 1
       MidBossLevelTable: {fileID: 0}
     ExclusionRadius: 5
     NextWaveConditions:
