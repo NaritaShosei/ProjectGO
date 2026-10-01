@@ -8,6 +8,9 @@ public class EXPItem : MonoBehaviour, ISpeedChange, IPoolable
     public event Action<EXPItem> OnReleased;
 
     public float TimeScale => _timeScale;
+    private float? _experienceOverride;
+
+    public void SetExperience(int amount) => _experienceOverride = Mathf.Max(0, amount);
 
     // ── IPoolable ────────────────────────────────────────────
 
@@ -15,6 +18,7 @@ public class EXPItem : MonoBehaviour, ISpeedChange, IPoolable
     public void OnGet()
     {
         _timeScale = 1f;
+        _experienceOverride = null;
         OnReleased = null;
     }
 
@@ -45,7 +49,7 @@ public class EXPItem : MonoBehaviour, ISpeedChange, IPoolable
     {
         if (ServiceLocator.TryGet(out EXPManager expManager))
         {
-            expManager.AddEXP(_expValue);
+            expManager.AddEXP(_experienceOverride ?? _expValue);
         }
 
         OnReleased?.Invoke(this);

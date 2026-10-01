@@ -24,11 +24,19 @@ public class EXPDropper
     /// <summary>
     /// 経験値アイテムをドロップするメソッド。引数にはドロップする位置とドロップするアイテムの数が渡される。
     /// </summary>
-    public void DropEXP(Vector3 position, int count)
+    public void DropEXP(Vector3 position, int count, int? totalExperience = null)
     {
+        if (totalExperience.HasValue)
+        {
+            if (totalExperience.Value <= 0) return;
+            count = Mathf.Clamp(count, 1, totalExperience.Value);
+        }
         for (int i = 0; i < count; i++)
         {
             var expItem = _pool.Get();
+            if (totalExperience.HasValue)
+                expItem.SetExperience(totalExperience.Value / count +
+                    (i < totalExperience.Value % count ? 1 : 0));
             expItem.OnReleased += OnReleased;
 
             // ドロップ位置の周囲にランダムに配置

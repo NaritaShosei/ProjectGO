@@ -17,7 +17,7 @@ public class EXPItemManager : MonoBehaviour
     /// <summary>
     /// 経験値アイテムをドロップするメソッド。引数にはドロップする位置とドロップするアイテムの数が渡される。
     /// </summary>
-    public void DropEXP(Vector3 position, int count)
+    public void DropEXP(Vector3 position, int count, int? totalExperience = null)
     {
         if (_expDropper == null)
         {
@@ -25,7 +25,7 @@ public class EXPItemManager : MonoBehaviour
             return;
         }
 
-        _expDropper.DropEXP(position, count);
+        _expDropper.DropEXP(position, count, totalExperience);
     }
 
     /// <summary>

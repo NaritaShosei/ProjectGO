@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum StatSkillType
 {
@@ -15,7 +16,7 @@ public enum StatSkillType
 
 /// <summary>
 /// パラメーター増加スキルの定義。
-/// 基礎値 × ランダム割合で上昇量を決定する。
+/// 基礎値 × 割合で上昇量を決定する。
 /// </summary>
 [CreateAssetMenu(fileName = "StatSkillData", menuName = "GameData/StatSkill/StatSkillData")]
 public class StatSkillData : ScriptableObject
@@ -24,21 +25,19 @@ public class StatSkillData : ScriptableObject
     public string DisplayName => _displayName;
 
     /// <summary>
-    /// baseValue × ランダム割合 の上昇量を返す
+    /// baseValue × 割合 の上昇量を返す
     /// </summary>
     public float CalculateAmount(float baseValue)
     {
-        float ratio = Random.Range(_minRatio, _maxRatio);
-        return baseValue * ratio;
+        return baseValue * _ratio;
     }
 
     [SerializeField] private StatSkillType _statType;
     [SerializeField] private string _displayName;
 
     [Header("上昇割合（基礎値に対する割合）")]
-    [Range(0f, 2f)]
-    [SerializeField] private float _minRatio = 0.25f;
 
     [Range(0f, 2f)]
-    [SerializeField] private float _maxRatio = 0.50f;
+    [FormerlySerializedAs("_maxRatio")]
+    [SerializeField] private float _ratio = 0.50f;
 }

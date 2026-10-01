@@ -12,6 +12,9 @@ public class WaveSpawnEnemy
     [Min(1)]
     public int SpawnCount;
 
+    [Min(1), Tooltip("Wave合計EXP指定時の1体あたりの配分ウェイト。3ならウェイト1の敵の約3倍。")]
+    public int ExperienceWeight = 1;
+
     [Tooltip("中ボスの場合のみ設定。プレイヤーレベルに応じたEnemyDataの切り替えテーブル")]
     public MidBossLevelTable MidBossLevelTable;
 
