@@ -172,9 +172,9 @@ MonoBehaviour:
   _enemyType: 0
   _useSpawnEffect: 1
   _spawnEffectKey: "\u30B9\u30DD\u30FC\u30F3\u30A8\u30D5\u30A7\u30AF\u30C8"
+  _spawnEffectScale: {x: 1, y: 1, z: 1}
   _armor: {fileID: 2639588683607213416}
   _uiAnchor: {fileID: 0}
-  _postAttackRecoveryDuration: 0.1
   _groupFollowDistance: 0.8
   _groupFormationHalfWidth: 0.8
   _groupRearDistance: 1.5
@@ -295,6 +295,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3207514931574581577, guid: f709f7f04c8b2ce45b91549924dddaa6, type: 3}
+      propertyPath: _data
+      value: 
+      objectReference: {fileID: 11400000, guid: 83ca074ce915a604dad8dc3259fbc0e4, type: 2}
     - target: {fileID: 3413042657038700062, guid: f709f7f04c8b2ce45b91549924dddaa6, type: 3}
       propertyPath: m_IsTrigger
       value: 1
