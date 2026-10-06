@@ -2432,6 +2432,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 338659595}
     - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
+      propertyPath: _detectionRange
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7908005230863849075, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: _armerGaugeParent
       value: 
       objectReference: {fileID: 1291428025}
@@ -2726,7 +2730,7 @@ PrefabInstance:
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: 'managedReferences[6731506274227978454]._thunderGuideSprites.Array.data[0]'
       value: 
-      objectReference: {fileID: 21300000, guid: a422a8690bce7bc408fd5780db25a75d, type: 3}
+      objectReference: {fileID: 21300000, guid: 4ebfc5224e5f2494b9e41770cf789b08, type: 3}
     - target: {fileID: 9128100736884302578, guid: dffdac0096150b34bb48d124ac240ea0, type: 3}
       propertyPath: 'managedReferences[6731506274227978454]._warriorGuideSprites.Array.data[0]'
       value: 
