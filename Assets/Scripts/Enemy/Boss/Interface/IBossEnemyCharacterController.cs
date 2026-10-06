@@ -1,10 +1,10 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.AI.BehaviourTree;
+using Boss.Character;
+using Boss.Enum;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface IBossEnemyCharacterController : IUpdater, IDisposable
     {

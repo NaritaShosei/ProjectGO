@@ -3,11 +3,11 @@ using System;
 using System.Threading;
 using UnityEngine;
 
-using BossEnemy.Enum;
-using BossEnemy.Attack;
-using BossEnemy.Effect;
+using Boss.Enum;
+using Boss.Attack;
+using Boss.Effect;
 
-namespace BossEnemy.SMB
+namespace Boss.SMB
 {
     public class RockUpliftSMB : AttackSMB
     {

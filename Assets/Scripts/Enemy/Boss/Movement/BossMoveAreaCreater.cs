@@ -1,7 +1,7 @@
 using UnityEngine;
-using BossEnemy.Interface;
+using Boss.Interface;
 
-namespace BossEnemy.Movement
+namespace Boss.Movement
 {
     /// <summary> ボスの移動範囲を作るクラス </summary>
     public class BossMoveAreaCreater : MonoBehaviour, ICanMoveAreaChecker

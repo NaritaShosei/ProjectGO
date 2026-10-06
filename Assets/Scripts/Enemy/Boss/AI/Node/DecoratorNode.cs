@@ -1,10 +1,10 @@
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.Character;
+using Boss.Enum;
 using System;
 using UniRx;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     /// <summary> 通ったら子Nodeを実行して、通らなければFailureを返すNode </summary>
     [Serializable]

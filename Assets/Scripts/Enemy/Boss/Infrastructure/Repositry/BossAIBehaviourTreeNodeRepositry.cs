@@ -1,5 +1,5 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Interface;
+using Boss.AI.BehaviourTree;
+using Boss.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-namespace BossEnemy.Infrastructure.Repository
+namespace Boss.Infrastructure.Repository
 {
     /// <summary> 構築したビヘイビアツリーのNodeを管理するリポジトリクラス </summary>
     [CreateAssetMenu(fileName = "BossAIBehaviourTreeNodeRepositry", menuName = "Repository/BossAIBehaviourTreeNodeRepositry")]

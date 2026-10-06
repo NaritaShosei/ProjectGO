@@ -2,7 +2,7 @@ using System;
 using UniRx;
 using UnityEngine;
 
-namespace BossEnemy.Armor
+namespace Boss.Armor
 {
     /// <summary> BossEnemyが装着するArmerの実体 </summary>
     public struct ArmorStatus

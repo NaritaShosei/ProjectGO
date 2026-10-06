@@ -1,6 +1,6 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Infrastructure.Repository;
-using BossEnemy.Interface;
+using Boss.AI.BehaviourTree;
+using Boss.Infrastructure.Repository;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using System;
@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     #region BehaviorTreeを構築するTreeGraph生成用のEditor拡張
     /// <summary> BehaviorTreeを構築するGraphView </summary>

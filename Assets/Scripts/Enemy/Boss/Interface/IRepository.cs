@@ -1,10 +1,10 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Attack;
-using BossEnemy.Character;
+using Boss.AI.BehaviourTree;
+using Boss.Attack;
+using Boss.Character;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface IBossEnemyAttackDataRepository : ICSVDataLoadRepository
     {

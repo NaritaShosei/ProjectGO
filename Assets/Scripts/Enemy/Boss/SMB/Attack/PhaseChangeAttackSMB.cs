@@ -1,11 +1,11 @@
-using BossEnemy.Attack;
-using BossEnemy.Effect;
-using BossEnemy.SMB;
+using Boss.Attack;
+using Boss.Effect;
+using Boss.SMB;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 using UnityEngine;
 
-namespace BossEnemy.Attack
+namespace Boss.Attack
 {
     public class PhaseChangeAttackSMB : AttackSMB
     {
@@ -32,9 +32,9 @@ namespace BossEnemy.Attack
             base.OnStateExit(animator, stateInfo, layerIndex);
         }
 
-        public override void SetAttackData(BossEnemy.Attack.AttackData attackData)
+        public override void SetAttackData(Boss.Attack.AttackData attackData)
         {
-            _attackData = new BossEnemy.Attack.AttackData(
+            _attackData = new Boss.Attack.AttackData(
                         attackData.ID,
                         attackData.Name,
                         attackData.Damage,

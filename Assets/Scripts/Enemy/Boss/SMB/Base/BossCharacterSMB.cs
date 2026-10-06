@@ -1,5 +1,5 @@
-using BossEnemy.Infrastructure;
-using BossEnemy.Interface;
+using Boss.Infrastructure;
+using Boss.Interface;
 using System;
 using UnityEngine;
 using UniRx;

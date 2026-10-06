@@ -1,11 +1,11 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Enum;
-using BossEnemy.Interface;
+using Boss.AI.BehaviourTree;
+using Boss.Enum;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using UniRx;
 using UnityEngine;
 
-namespace BossEnemy.Character
+namespace Boss.Character
 {
     public class BossCharacterController : IBossEnemyCharacterController 
     {

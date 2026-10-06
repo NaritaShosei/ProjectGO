@@ -1,8 +1,8 @@
-using BossEnemy.Attack;
-using BossEnemy.Character;
-using BossEnemy.Enum;
-using BossEnemy.Interface;
-using BossEnemy.Logic;
+using Boss.Attack;
+using Boss.Character;
+using Boss.Enum;
+using Boss.Interface;
+using Boss.Logic;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
@@ -10,7 +10,7 @@ using UniRx;
 using UnityEngine;
 
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部) </summary>
     [Serializable]

@@ -1,10 +1,10 @@
-using BossEnemy.Character;
+using Boss.Character;
 using System;
 using UniRx;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     /// <summary> Nodeへの遷移結果 </summary>
     public enum NodeCondition

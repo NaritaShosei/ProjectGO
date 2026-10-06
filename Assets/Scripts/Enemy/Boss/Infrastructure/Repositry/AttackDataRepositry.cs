@@ -1,10 +1,10 @@
-using BossEnemy.Interface;
+using Boss.Interface;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-namespace BossEnemy.Infrastructure.Repository
+namespace Boss.Infrastructure.Repository
 {
     [CreateAssetMenu(fileName = "BossAttackDataRepositry", menuName = "Repository/BossAttackDataRepositry")]
     public class AttackDataRepositry : ScriptableObject ,IBossEnemyAttackDataRepository

@@ -1,5 +1,5 @@
-using BossEnemy.Enum;
-using BossEnemy.Interface;
+using Boss.Enum;
+using Boss.Interface;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;

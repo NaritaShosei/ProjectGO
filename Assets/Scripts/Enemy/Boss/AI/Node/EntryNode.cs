@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     [Serializable]
     public class EntryNode : BossCharacterBehaviourTreeNode

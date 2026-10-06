@@ -1,9 +1,9 @@
 
-using BossEnemy.Character;
+using Boss.Character;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     #region 子ノードをすべて順番に実行するSequenceNode
     /// <summary> 子ノードをすべて順番に実行する </summary>

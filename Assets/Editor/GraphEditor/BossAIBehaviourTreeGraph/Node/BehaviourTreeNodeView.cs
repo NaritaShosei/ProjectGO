@@ -1,10 +1,10 @@
-using BossEnemy.AI.BehaviourTree;
+using Boss.AI.BehaviourTree;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 using UnityEngine;
 
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     public interface IBehaviourTreeGraphNode
     {

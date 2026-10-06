@@ -1,5 +1,5 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Character;
+using Boss.AI.BehaviourTree;
+using Boss.Character;
 using System;
 using UnityEngine;
 

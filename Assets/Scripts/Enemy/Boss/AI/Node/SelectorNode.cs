@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     #region 子ノードを順番に実行して一番最初にSuccessになったNodeを実行するSelectorNode
     /// <summary> 子ノードを順番に実行して一番最初にSuccessになったNodeを実行する </summary>

@@ -4,7 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-namespace BossEnemy.Attack
+namespace Boss.Attack
 {
     public class AttackCoolTimer
     {

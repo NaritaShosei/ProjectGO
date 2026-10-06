@@ -5,10 +5,10 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
-using BossEnemy.Character;
-using BossEnemy.Interface;
+using Boss.Character;
+using Boss.Interface;
 
-namespace BossEnemy.UI
+namespace Boss.UI
 {
     public class BossCharacterHPUIView : MonoBehaviour, IBossHPView, IPoolable
     {

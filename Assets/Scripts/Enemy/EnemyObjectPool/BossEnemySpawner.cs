@@ -1,18 +1,18 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Armor;
-using BossEnemy.Character;
-using BossEnemy.Enum;
-using BossEnemy.Infrastructure;
-using BossEnemy.Infrastructure.Repository;
-using BossEnemy.Interface;
-using BossEnemy.UI;
+using Boss.AI.BehaviourTree;
+using Boss.Armor;
+using Boss.Character;
+using Boss.Enum;
+using Boss.Infrastructure;
+using Boss.Infrastructure.Repository;
+using Boss.Interface;
+using Boss.UI;
 using BlurShadersPro.URP;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using BossEnemy.Movement;
+using Boss.Movement;
 
 public class BossEnemySpawner : MonoBehaviour
 {

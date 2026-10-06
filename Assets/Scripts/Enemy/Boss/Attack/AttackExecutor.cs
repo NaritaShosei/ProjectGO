@@ -1,10 +1,10 @@
-using BossEnemy.Infrastructure.Repository;
-using BossEnemy.Interface;
+using Boss.Infrastructure.Repository;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.Attack
+namespace Boss.Attack
 {
     public class AttackExecutor : IDisposable
     {

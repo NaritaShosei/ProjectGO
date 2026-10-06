@@ -1,11 +1,11 @@
-using BossEnemy.Attack;
-using BossEnemy.Interface;
+using Boss.Attack;
+using Boss.Interface;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-namespace BossEnemy.Infrastructure.Repository
+namespace Boss.Infrastructure.Repository
 {
     [CreateAssetMenu(fileName = "AttackDataSelectionPoolRepository", menuName = "Repository/AttackDataSelectionPoolRepository")]
     public class AttackDataSelectionPoolRepository : ScriptableObject, IBossEnemyAttackSelectionPoolRepository

@@ -1,13 +1,13 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.AI.BehaviourTree;
+using Boss.Character;
+using Boss.Enum;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 using UnityEngine;
 using static Unity.GraphToolkit.Editor.Node;
 
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     [Serializable]
     public class DecoratorNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : BehaviourTree.DecoratorNode

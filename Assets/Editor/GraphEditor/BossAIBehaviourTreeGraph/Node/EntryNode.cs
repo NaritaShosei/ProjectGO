@@ -1,9 +1,9 @@
-using BossEnemy.AI.BehaviourTree;
+using Boss.AI.BehaviourTree;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     [Serializable]
     public class EntryNode : BehaviourTreeNodeView<BehaviourTree.EntryNode>

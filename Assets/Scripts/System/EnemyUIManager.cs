@@ -1,7 +1,7 @@
-using BossEnemy.Armor;
-using BossEnemy.Character;
-using BossEnemy.Enum;
-using BossEnemy.Interface;
+using Boss.Armor;
+using Boss.Character;
+using Boss.Enum;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;

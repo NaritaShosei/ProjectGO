@@ -1,13 +1,13 @@
-using BossEnemy.Animation;
-using BossEnemy.Armor;
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.Animation;
+using Boss.Armor;
+using Boss.Character;
+using Boss.Enum;
 using System;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface IBossEnemyCharacterView : IEnemy, IPoolable, ISpeedChange
     {
