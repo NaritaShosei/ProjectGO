@@ -1,11 +1,11 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Attack;
-using BossEnemy.Enum;
+using Boss.AI.BehaviourTree;
+using Boss.Attack;
+using Boss.Enum;
 using System;
 using Unity.GraphToolkit.Editor;
 using UnityEngine;
 
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     [Serializable]
     public class ActionNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : ActionNode
