@@ -1,18 +1,15 @@
-using Boss.Attack;
 using Boss.Character;
 using Boss.Enum;
-using Boss.Interface;
-using Boss.Logic;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
-using UniRx;
 using UnityEngine;
 
 
 namespace Boss.AI.BehaviourTree
 {
-    /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部) </summary>
+    /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部となるノード) </summary>
+    #region ActionNode
     [Serializable]
     public abstract class ActionNode : BossCharacterBehaviourTreeNode
     {
@@ -58,7 +55,10 @@ namespace Boss.AI.BehaviourTree
             return false;
         }
     }
+    #endregion
 
+    /// <summary> 鎧が壊れた際に行う行動ノード </summary>
+    #region ArmorRepairAction
     [Serializable]
     public class ArmorRepairAction : ActionNode
     {
@@ -94,7 +94,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private ArmorAttachmentType _repairArmor;
     }
+    #endregion
 
+    /// <summary> 時間を計測し、規定時間でツリーの再走を行う行動ノード(時間計測中は何もしない) </summary>
+    #region WaitForTimeAction
     [Serializable]
     public class WaitForTimeAction : ActionNode
     {
@@ -130,7 +133,10 @@ namespace Boss.AI.BehaviourTree
 
         private float _currentWaitTime = 0;
     }
+    #endregion
 
+    /// <summary> ツリーのエントリー挑戦時に探索を打ち切り現在の行動を続行させる行動ノード </summary>
+    #region CancelSearchAction
     [Serializable]
     public class CancelSearchAction : ActionNode
     {
@@ -145,7 +151,10 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
     }
+    #endregion
 
+    /// <summary> 姿勢変更を行う行動ノード </summary>
+    #region PostureChangeAction
     [Serializable]
     public class PostureChangeAction : ActionNode
     {
@@ -180,7 +189,10 @@ namespace Boss.AI.BehaviourTree
 
         private bool _isPostureChangeCompleted = true;
     }
+    #endregion
 
+    /// <summary> 攻撃の選択を行う行動ノード </summary>
+    #region SelectAttackAction
     [Serializable]
     public class SelectAttackAction : ActionNode
     {
@@ -227,7 +239,10 @@ namespace Boss.AI.BehaviourTree
 
         private int _selectionVersion;
     }
+    #endregion
 
+    /// <summary> ターゲットを一定距離に近づくまで追跡する行動ノード </summary>
+    #region TargetChaseAction
     [Serializable]
     public class TargetChaseAction : ActionNode
     {
@@ -318,7 +333,10 @@ namespace Boss.AI.BehaviourTree
             return toTargetDistance;
         }
     }
+    #endregion
 
+    /// <summary> ターゲットの方向を振り返る行動ノード </summary>
+    #region LookAtTargetAction
     [Serializable]
     public class LookAtTargetAction : ActionNode
     {
@@ -358,7 +376,10 @@ namespace Boss.AI.BehaviourTree
         [Header("Targetの方向を向いていると判定できる振り向き方向の最小誤差")]
         [SerializeField] private float _finishAngleThreshold;
     }
+    #endregion
 
+    /// <summary> 攻撃選択後に攻撃を実行する行動ノード(選択後前提) </summary>
+    #region AttackExecuteAction
     [Serializable]
     public class AttackExecuteAction : ActionNode
     {
@@ -395,7 +416,10 @@ namespace Boss.AI.BehaviourTree
 
         private bool _hasFinished;
     }
+    #endregion
 
+    /// <summary> 死亡した際の行動ノード </summary>
+    #region DeadAction
     [Serializable]
     public class DeadAction : ActionNode
     {
@@ -409,7 +433,10 @@ namespace Boss.AI.BehaviourTree
 
         }
     }
+    #endregion
 
+    /// <summary> フェーズ切り替え行動ノード </summary>
+    #region PhaseChangeAction
     [Serializable]
     public class PhaseChangeAction : ActionNode
     {
@@ -441,7 +468,10 @@ namespace Boss.AI.BehaviourTree
 
         private bool _isFinishAction = true;
     }
+    #endregion
 
+    /// <summary> ノードを抜けた後も動き続ける非同期処理を停止させるための非同期停止用行動ノード </summary>
+    #region CancelAsyncAction
     [Serializable]
     public class CancelAsyncAction : ActionNode
     {
@@ -454,7 +484,10 @@ namespace Boss.AI.BehaviourTree
 
         public override void OnUpdate() { }
     }
+    #endregion
 
+    /// <summary> ノードエントリー後に一定時間経過で姿勢を変更する行動ノード(時間計測を開始したら即座にツリーの再走を行う) </summary>
+    #region RevertPostureInSecondsAsyncAction
     [Serializable]
     public class RevertPostureInSecondsAsyncAction : ActionNode
     {
@@ -535,4 +568,5 @@ namespace Boss.AI.BehaviourTree
             }
         }
     }
+    #endregion
 }

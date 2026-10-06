@@ -6,7 +6,8 @@ using UnityEngine;
 
 namespace Boss.AI.BehaviourTree
 {
-    /// <summary> 通ったら子Nodeを実行して、通らなければFailureを返すNode </summary>
+    /// <summary> 条件判定を行い、通過した際に子ノードを実行するデコレーターノードの基底クラス </summary>
+    #region DecoratorNode
     [Serializable]
     public abstract class DecoratorNode : BossCharacterBehaviourTreeNode
     {
@@ -39,7 +40,10 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
     }
+    #endregion
 
+    /// <summary> 初回行動が未開始の場合にエントリーを許可し行動を開始させるデコレーターノード </summary>
+    #region NotBeginActionDecoratorNode
     [Serializable]
     public class NotBeginActionDecoratorNode : DecoratorNode
     {
@@ -55,7 +59,10 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
     }
+    #endregion
 
+    /// <summary> 現在のボスの行動状態が指定条件と一致する場合にエントリーを許可するデコレーターノード </summary>
+    #region CurrentCharacterActionDecoratorNode
     [Serializable]
     public class CurrentCharacterActionDecoratorNode : DecoratorNode
     {
@@ -76,7 +83,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private CharacterAction _canEntryArmorCondition;
     }
+    #endregion
 
+    /// <summary> 鎧が破損中である場合にエントリーを許可するデコレーターノード </summary>
+    #region BreakingArmorDecoratorNode
     [Serializable]
     public class BreakingArmorDecoratorNode : DecoratorNode
     {
@@ -90,7 +100,10 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
     }
+    #endregion
 
+    /// <summary> 指定した鎧部位がすべて破壊されている場合にエントリーを許可するデコレーターノード </summary>
+    #region ArmorBrokenDecoratorNode
     [Serializable]
     public class ArmorBrokenDecoratorNode : DecoratorNode
     {
@@ -125,7 +138,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private ArmorAttachmentType[] _canEntryArmorConditions = null;
     }
+    #endregion
 
+    /// <summary> 現在のボスの姿勢が指定条件と一致する場合にエントリーを許可するデコレーターノード </summary>
+    #region BossCharacterPostureDecoratorNode
     [Serializable]
     public class BossCharacterPostureDecoratorNode : DecoratorNode
     {
@@ -147,7 +163,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private PostureType _canEntryPosture;
     }
+    #endregion
 
+    /// <summary> ターゲットとの距離が指定距離未満の場合にエントリーを許可するデコレーターノード </summary>
+    #region TargetDistanceDecoratorNode
     [Serializable]
     public class TargetDistanceDecoratorNode : DecoratorNode
     {
@@ -174,7 +193,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private float _canEntryDistance;
     }
+    #endregion
 
+    /// <summary> 現在のフェーズ数が指定フェーズと一致する場合にエントリーを許可するデコレーターノード </summary>
+    #region CurrentPhaseDecoratorNode
     [Serializable]
     public class CurrentPhaseDecoratorNode : DecoratorNode
     {
@@ -195,7 +217,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private int _canEntryPhase;
     }
+    #endregion
 
+    /// <summary> 現在のボスのHPが指定した比較条件を満たす場合にエントリーを許可するデコレーターノード </summary>
+    #region CharacterHPDecoratorNode
     [Serializable]
     public class CharacterHPDecoratorNode : DecoratorNode
     {
@@ -243,7 +268,10 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeField] private int _canEntryRemainingHP;
     }
+    #endregion
 
+    /// <summary> 指定回数の試行ごとにエントリーを許可するカウントダウン式デコレーターノード </summary>
+    #region CountDownDecoratorNode
     [Serializable]
     public class CountDownDecoratorNode : DecoratorNode
     {
@@ -268,4 +296,5 @@ namespace Boss.AI.BehaviourTree
 
         private int _currentCount = 0;
     }
+    #endregion
 }
