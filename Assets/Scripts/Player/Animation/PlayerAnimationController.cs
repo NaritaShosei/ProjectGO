@@ -215,6 +215,15 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.SetTrigger(AnimParams.Dodge);
     }
 
+    /// <summary>回避終了通知が欠落した場合、古い通知を無効にして移動へ戻す。</summary>
+    public void RecoverInterruptedDodge()
+    {
+        if (_stateManager == null || !_stateManager.IsDodging()) return;
+        CombatAnimationVersion++;
+        _animator.ResetTrigger(AnimParams.Dodge);
+        MoveCrossFade();
+    }
+
     // ── ヒットストップ ───────────────────────────────────────
 
     public void SetAnimSpeed(float speed)
@@ -285,6 +294,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     private float _beforeAnimSpeed = 1f;
     private bool _isSpeedChanging = false;
     private bool _isLockedOn = false;
+    private bool _modeChangePendingDuringDodge;
 
     private static class AnimParams
     {
@@ -342,6 +352,15 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
             or PlayerState.Damaged or PlayerState.Down or PlayerState.Dead)
             CombatAnimationVersion++;
 
+        if (oldState == PlayerState.Dodge && _modeChangePendingDuringDodge)
+        {
+            _modeChangePendingDuringDodge = false;
+            _animator.SetInteger(AnimParams.PlayerMode, (int)_modeController.CurrentMode);
+            ApplyLockedOnAnimationParameter(_modeController.CurrentMode);
+            if (newState == PlayerState.Idle)
+                MoveCrossFade();
+        }
+
         switch (newState)
         {
             case PlayerState.Charging:
@@ -369,9 +388,13 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
-        // Dodge中にバージョンを更新するとDodgeSMBから終了通知が来なくなるため、先に回避を終了させる
-        if (_stateManager.CurrentState == PlayerState.Dodge)
-            AnimEvent_DodgeEnd();
+        // 回避は現在のモーションのまま完了させる。バージョンも維持して終了通知を受け取る。
+        // モードの見た目の反映は回避終了・中断時まで保留する。
+        if (_stateManager.IsDodging())
+        {
+            _modeChangePendingDuringDodge = true;
+            return;
+        }
 
         CombatAnimationVersion++;
         _animator.ResetTrigger(AnimParams.Attack);
