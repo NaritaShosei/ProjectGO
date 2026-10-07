@@ -145,6 +145,12 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
     [Tooltip("クリック演出の時間")]
     [SerializeField] private float _clickDuration = 0.1f;
 
+    [Header("選択中の見た目")]
+    [SerializeField] private Image _cardImage;
+    [SerializeField] private Image _selectionArrow;
+    [SerializeField] private Sprite _normalCardSprite;
+    [SerializeField] private Sprite _highlightedCardSprite;
+
     private float _baseScale = 1f;
     private bool _isHighlighted;
     private bool _isClicking;
@@ -211,6 +217,12 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
         {
             DisposeHighlightCts();
             _isHighlighted = false;
+
+            //非選択中のスプライト入れ替え
+            _cardImage.sprite = _normalCardSprite;
+            //矢印非表示
+            _selectionArrow.gameObject.SetActive(false);
+            
             ResetScale();
             return;
         }
@@ -219,6 +231,11 @@ public class SkillSelectButton : MonoBehaviour, IPointerEnterHandler, ISelectHan
         {
             return;
         }
+
+        //選択中のスプライト切り替え
+        _cardImage.sprite = _highlightedCardSprite;
+        // 選択時
+        _selectionArrow.gameObject.SetActive(true);
 
         DisposeHighlightCts();
         _isHighlighted = true;
