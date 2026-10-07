@@ -988,6 +988,10 @@ public class PlayerAttack : MonoBehaviour
 
         var newMode = _modeController.CurrentMode == PlayerMode.Warrior ? PlayerMode.Thunder : PlayerMode.Warrior;
 
+        // ゲージ不足で切替が拒否される場合、完了通知は発火しない。
+        // ModeChangingへ先に入ると操作不能になるため、元の行動状態を維持する。
+        if (!_modeController.CanSwitchMode(newMode)) return;
+
         _stateManager.ChangeState(PlayerState.ModeChanging);
         _modeController.SwitchMode(newMode);
     }
