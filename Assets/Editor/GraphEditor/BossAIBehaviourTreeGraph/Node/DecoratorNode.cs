@@ -116,6 +116,8 @@ namespace Boss.AI.Editor.BehaviourGraph
         {
             base.OnEnable();
 
+            if (GetNodeOptionByName(BROKEN_ARMOR_COUNT) == null) return;
+
             if (GetNodeOptionByName(BROKEN_ARMOR_COUNT).TryGetValue(out int brokenArmorCount))
             {
                 _brokenArmorCount = brokenArmorCount;
@@ -135,6 +137,8 @@ namespace Boss.AI.Editor.BehaviourGraph
 
             for (int i = 0; i < _brokenArmorCount; i++)
             {
+                if (GetNodeOptionByName(BROKEN_ARMOR_ATTACHMENT_NAME + "_" + i) == null) return;
+
                 if (GetNodeOptionByName(BROKEN_ARMOR_ATTACHMENT_NAME + "_" + i).TryGetValue(out ArmorAttachmentType brokenConditionArmor))
                 {
                     brokenConditionArmorArray[i] = brokenConditionArmor;
@@ -144,7 +148,7 @@ namespace Boss.AI.Editor.BehaviourGraph
             _behaviourTreeNode.SetCanEntryCondition(brokenConditionArmorArray);
         }
 
-        private int _brokenArmorCount = 1;
+        private int _brokenArmorCount = 0;
 
         protected override void OnDefineOptions(IOptionDefinitionContext context)
         {

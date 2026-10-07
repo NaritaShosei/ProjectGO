@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Boss.AI.BehaviourTree
 {
-    /// <summary> 条件判定を行い、通過した際に子ノードを実行するデコレーターノードの基底クラス </summary>
+    /// <summary> 条件判定を行い、通過した際に子ノードを実行する機能装飾ノードの基底クラス </summary>
     #region DecoratorNode
     [Serializable]
     public abstract class DecoratorNode : BossCharacterBehaviourTreeNode
@@ -42,7 +42,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 初回行動が未開始の場合にエントリーを許可し行動を開始させるデコレーターノード </summary>
+    /// <summary> 初回行動が未開始の場合にエントリーを許可し行動を開始させる機能装飾ノード </summary>
     #region NotBeginActionDecoratorNode
     [Serializable]
     public class NotBeginActionDecoratorNode : DecoratorNode
@@ -61,7 +61,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 現在のボスの行動状態が指定条件と一致する場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> 現在のボスの行動状態が指定条件と一致する場合にエントリーを許可する機能装飾ノード </summary>
     #region CurrentCharacterActionDecoratorNode
     [Serializable]
     public class CurrentCharacterActionDecoratorNode : DecoratorNode
@@ -85,7 +85,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 鎧が破損中である場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> 鎧が破損中である場合にエントリーを許可する機能装飾ノード </summary>
     #region BreakingArmorDecoratorNode
     [Serializable]
     public class BreakingArmorDecoratorNode : DecoratorNode
@@ -102,7 +102,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 指定した鎧部位がすべて破壊されている場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> 指定した鎧部位がすべて破壊されている場合にエントリーを許可する機能装飾ノード </summary>
     #region ArmorBrokenDecoratorNode
     [Serializable]
     public class ArmorBrokenDecoratorNode : DecoratorNode
@@ -140,7 +140,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 現在のボスの姿勢が指定条件と一致する場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> 現在のボスの姿勢が指定条件と一致する場合にエントリーを許可する機能装飾ノード </summary>
     #region BossCharacterPostureDecoratorNode
     [Serializable]
     public class BossCharacterPostureDecoratorNode : DecoratorNode
@@ -165,7 +165,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> ターゲットとの距離が指定距離未満の場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> ターゲットとの距離が指定距離未満の場合にエントリーを許可する機能装飾ノード </summary>
     #region TargetDistanceDecoratorNode
     [Serializable]
     public class TargetDistanceDecoratorNode : DecoratorNode
@@ -195,7 +195,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 現在のフェーズ数が指定フェーズと一致する場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> 現在のフェーズ数が指定フェーズと一致する場合にエントリーを許可する機能装飾ノード </summary>
     #region CurrentPhaseDecoratorNode
     [Serializable]
     public class CurrentPhaseDecoratorNode : DecoratorNode
@@ -219,7 +219,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 現在のボスのHPが指定した比較条件を満たす場合にエントリーを許可するデコレーターノード </summary>
+    /// <summary> 現在のボスのHPが指定した比較条件を満たす場合にエントリーを許可する機能装飾ノード </summary>
     #region CharacterHPDecoratorNode
     [Serializable]
     public class CharacterHPDecoratorNode : DecoratorNode
@@ -270,7 +270,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    /// <summary> 指定回数の試行ごとにエントリーを許可するカウントダウン式デコレーターノード </summary>
+    /// <summary> 指定回数の試行ごとにエントリーを許可するカウントダウン式機能装飾ノード </summary>
     #region CountDownDecoratorNode
     [Serializable]
     public class CountDownDecoratorNode : DecoratorNode
