@@ -138,7 +138,7 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    #region 各NodeのベースとなるClassとInterface
+    #region 各BehaviourTreeNodeの基本機能のInterface
     /// <summary> TreeNodeのInterface </summary>
     public interface ITreeNode : IDisposable
     {
@@ -174,7 +174,9 @@ namespace Boss.AI.BehaviourTree
         /// <summary> このNodeを離れる際の処理 </summary>
         void OnExit();
     }
+    #endregion
 
+    #region 各NodeのベースとなるClass
     /// <summary> BehaviorTreeのNodeの基底クラス </summary>
     [Serializable]
     public class TreeNode : ITreeNode

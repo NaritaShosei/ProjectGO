@@ -1,10 +1,12 @@
 using Boss.AI.BehaviourTree;
 using Boss.Character;
+using Boss.Interface;
 using System;
 using UnityEngine;
 
 [Serializable]
-public abstract class BossCharacterBehaviourTreeNode : TreeNode
+public abstract class BossCharacterAIBehaviourTreeNode<T> : 
+    TreeNode, IBossAIBehaviourTreeNode, IPrototype<T> where T : TreeNode
 {
     public virtual void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
     {
@@ -40,6 +42,12 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
         }
     }
 
+    public virtual T Clone()
+    {
+        Debug.LogError($"{ typeof(T) } クラス内でCloneメソッドが正しく実装されていません");
+        return default;
+    }
+
     protected IBossCharacterEntity _bossCharacterEntity = null;
 
     /// <summary> 子ノードを初期化 </summary>
@@ -51,7 +59,7 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
             return;
         }
 
-        if (treeNode is BossCharacterBehaviourTreeNode bossCharacterBehaviourTreeNode)
+        if (treeNode is IBossAIBehaviourTreeNode bossCharacterBehaviourTreeNode)
         {
             bossCharacterBehaviourTreeNode.Init(_bossCharacterEntity, nodeRunningEndNotifier);
             return;
@@ -59,6 +67,4 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
 
         treeNode.Init(nodeRunningEndNotifier);
     }
-
-
 }
