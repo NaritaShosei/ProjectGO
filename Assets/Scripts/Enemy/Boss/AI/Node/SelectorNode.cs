@@ -6,7 +6,7 @@ namespace Boss.AI.BehaviourTree
     #region 子ノードを順番に実行して一番最初にSuccessになったNodeを実行するSelectorNode
     /// <summary> 子ノードを順番に実行して一番最初にSuccessになったNodeを実行する </summary>
     [Serializable]
-    public class SelectorNode : BossCharacterBehaviourTreeNode
+    public class SelectorNode : BossCharacterAIBehaviourTreeNode<SelectorNode>
     {
         public override NodeCondition TryEntry()
         {
@@ -35,6 +35,11 @@ namespace Boss.AI.BehaviourTree
             Debug.LogError("ノードの選択に失敗しました");
             nextNode = null;
             return NodeCondition.Failure;
+        }
+
+        public override SelectorNode Clone()
+        {
+            return new SelectorNode();
         }
     }
     #endregion

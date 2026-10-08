@@ -1,10 +1,11 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Boss.AI.BehaviourTree
 {
     [Serializable]
-    public class EntryNode : BossCharacterBehaviourTreeNode
+    public class EntryNode : BossCharacterAIBehaviourTreeNode<EntryNode>
     {
         public int PlayableCharactersID => _playableCharactersID;
 
@@ -24,6 +25,13 @@ namespace Boss.AI.BehaviourTree
 
             nextNode = _childrenNode[0];
             return NodeCondition.Success;
+        }
+
+        public override EntryNode Clone()
+        {
+            var clone = new EntryNode();
+            clone.SetPlayableCharacterID(PlayableCharactersID);
+            return clone;
         }
 
         /// <summary> 操作対象となるキャラクターのIDを設定する </summary>

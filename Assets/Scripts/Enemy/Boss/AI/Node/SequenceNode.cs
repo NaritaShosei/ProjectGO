@@ -8,7 +8,7 @@ namespace Boss.AI.BehaviourTree
     #region 子ノードをすべて順番に実行するSequenceNode
     /// <summary> 子ノードをすべて順番に実行する </summary>
     [Serializable]
-    public class SequenceNode : BossCharacterBehaviourTreeNode
+    public class SequenceNode : BossCharacterAIBehaviourTreeNode<SequenceNode>
     {
         public override void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
         {
@@ -82,6 +82,11 @@ namespace Boss.AI.BehaviourTree
             _currentNode = null;
 
             _sequenceChildNodeRunningEndNotifier.OnResearchBehaviourTree -= ProceedSequence;
+        }
+
+        public override SequenceNode Clone()
+        {
+            return new SequenceNode();
         }
 
         private int _sequenceCount = 0;
