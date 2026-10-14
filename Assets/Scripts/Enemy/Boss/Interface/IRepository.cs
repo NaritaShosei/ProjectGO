@@ -31,17 +31,26 @@ namespace Boss.Interface
 
     public interface IBossAIBehaviourTreeNodeRepository
     {
+        /// <summary> 指定したIDのビヘイビアツリーのエントリーノード取得 </summary>
         public bool TryGetEntryNode(int id, out EntryNode entryNode);
 
+        /// <summary> 使用したノードの返却 </summary>
+        public void ReleaseNode(EntryNode entryNode);
+
+        // -------------- Editor限定機能 -----------------------------------------------
+#if UNITY_EDITOR
         /// <summary> 新しいBehaviourTreeのEntryNodeを保存する </summary>
         public void SaveEntryNode(EntryNode newEntryNode);
 
+        /// <summary> 新たなノードを追加する </summary>
         public void AddTreeNode(EntryNode entryNode, TreeNode node);
 
+        /// <summary> 不要なノードを削除する </summary>
         public void RemoveTreeNode(EntryNode entryNode, TreeNode node);
 
         /// <summary> EntryNodeに接続されているTreeNode群を同期する </summary>
         public void SyncTreeNodes(EntryNode entryNode, IEnumerable<TreeNode> connectedNodes);
+#endif
     }
 
     public interface ICSVDataLoadRepository

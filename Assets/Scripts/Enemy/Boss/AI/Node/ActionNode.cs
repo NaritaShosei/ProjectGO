@@ -10,10 +10,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 行動の実行を行うNode(最終的なTree構造の最深部となるノード) </summary>
     #region ActionNode
     [Serializable]
-    public abstract class ActionNode<TActionNode> : 
-        BossCharacterAIBehaviourTreeNode<TActionNode>
-        where TActionNode : ActionNode<TActionNode>
-
+    public abstract class ActionNode : BossAITreeNode
     {
         /// <summary> 何らかの不具合で処理が詰まった際にツリーを強制再走させる秒数を設定 </summary>
         public void SetTimeOutValue(float timeOut)
@@ -26,7 +23,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             nextNode = this;
             return NodeCondition.Running;
@@ -62,7 +59,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 鎧が壊れた際に行う行動ノード </summary>
     #region ArmorRepairAction
     [Serializable]
-    public class ArmorRepairAction : ActionNode<ArmorRepairAction>
+    public class ArmorRepairAction : ActionNode
     {
         public void SetRepairArmor(ArmorAttachmentType repairArmor)
         {
@@ -94,7 +91,7 @@ namespace Boss.AI.BehaviourTree
             base.OnUpdate();
         }
 
-        public override ArmorRepairAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new ArmorRepairAction();
             clone.SetRepairArmor(_repairArmor);
@@ -108,7 +105,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 時間を計測し、規定時間でツリーの再走を行う行動ノード(時間計測中は何もしない) </summary>
     #region WaitForTimeAction
     [Serializable]
-    public class WaitForTimeAction : ActionNode<WaitForTimeAction>
+    public class WaitForTimeAction : ActionNode
     {
         public void SetWaitTime(float waitTime)
         {
@@ -136,7 +133,7 @@ namespace Boss.AI.BehaviourTree
             }
         }
 
-        public override WaitForTimeAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new WaitForTimeAction();
             clone.SetWaitTime(_waitTime);
@@ -154,20 +151,20 @@ namespace Boss.AI.BehaviourTree
     /// <summary> ツリーのエントリー挑戦時に探索を打ち切り現在の行動を続行させる行動ノード </summary>
     #region CancelSearchAction
     [Serializable]
-    public class CancelSearchAction : ActionNode<CancelSearchAction>
+    public class CancelSearchAction : ActionNode
     {
         public override NodeCondition TryEntry()
         {
             return NodeCondition.Failure;
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             nextNode = null;
             return NodeCondition.Failure;
         }
 
-        public override CancelSearchAction Clone()
+        public override TreeNode Clone()
         {
             return new CancelSearchAction();
         }
@@ -177,7 +174,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 姿勢変更を行う行動ノード </summary>
     #region PostureChangeAction
     [Serializable]
-    public class PostureChangeAction : ActionNode<PostureChangeAction>
+    public class PostureChangeAction : ActionNode
     {
         public void SetChangePosture(PostureType postureType)
         {
@@ -206,7 +203,7 @@ namespace Boss.AI.BehaviourTree
             base.OnUpdate();
         }
 
-        public override PostureChangeAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new PostureChangeAction();
             clone.SetChangePosture(_changePosture);
@@ -221,7 +218,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 攻撃の選択を行う行動ノード </summary>
     #region SelectAttackAction
     [Serializable]
-    public class SelectAttackAction : ActionNode<SelectAttackAction>
+    public class SelectAttackAction : ActionNode
     {
         public void SetAttackSelectPoolID(int id)
         {
@@ -248,7 +245,7 @@ namespace Boss.AI.BehaviourTree
             _selectionVersion++;
         }
 
-        public override SelectAttackAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new SelectAttackAction();
             clone.SetAttackSelectPoolID(_attackSelectPoolID);
@@ -278,7 +275,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> ターゲットを一定距離に近づくまで追跡する行動ノード </summary>
     #region TargetChaseAction
     [Serializable]
-    public class TargetChaseAction : ActionNode<TargetChaseAction>
+    public class TargetChaseAction : ActionNode
     {
         public void SetChaseSpeed(float moveSpeed)
         {
@@ -338,7 +335,7 @@ namespace Boss.AI.BehaviourTree
             _bossCharacterEntity.SetVelocity(Vector3.zero);
         }
 
-        public override TargetChaseAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new TargetChaseAction();
             clone.SetChaseSpeed(_moveSpeed);
@@ -379,7 +376,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> ターゲットの方向を振り返る行動ノード </summary>
     #region LookAtTargetAction
     [Serializable]
-    public class LookAtTargetAction : ActionNode<LookAtTargetAction>
+    public class LookAtTargetAction : ActionNode
     {
         public void SetLookConditions(float lookSpeed, float finishAngleThreshold)
         {
@@ -411,7 +408,7 @@ namespace Boss.AI.BehaviourTree
             _bossCharacterEntity.SetVelocity(Vector3.zero);
         }
 
-        public override LookAtTargetAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new LookAtTargetAction();
             clone.SetLookConditions(_lookSpeed, _finishAngleThreshold);
@@ -429,7 +426,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 攻撃選択後に攻撃を実行する行動ノード(選択後前提) </summary>
     #region AttackExecuteAction
     [Serializable]
-    public class AttackExecuteAction : ActionNode<AttackExecuteAction>
+    public class AttackExecuteAction : ActionNode
     {
         public override void OnEnter()
         {
@@ -462,7 +459,7 @@ namespace Boss.AI.BehaviourTree
             }
         }
 
-        public override AttackExecuteAction Clone()
+        public override TreeNode Clone()
         {
             return new AttackExecuteAction();
         }
@@ -474,7 +471,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 死亡した際の行動ノード </summary>
     #region DeadAction
     [Serializable]
-    public class DeadAction : ActionNode<DeadAction>
+    public class DeadAction : ActionNode
     {
         public override void OnEnter()
         {
@@ -486,7 +483,7 @@ namespace Boss.AI.BehaviourTree
             return;
         }
 
-        public override DeadAction Clone()
+        public override TreeNode Clone()
         {
             return new DeadAction();
         }
@@ -496,7 +493,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> フェーズ切り替え行動ノード </summary>
     #region PhaseChangeAction
     [Serializable]
-    public class PhaseChangeAction : ActionNode<PhaseChangeAction>
+    public class PhaseChangeAction : ActionNode
     {
         public override void OnEnter()
         {
@@ -524,7 +521,7 @@ namespace Boss.AI.BehaviourTree
             _isFinishAction = true;
         }
 
-        public override PhaseChangeAction Clone()
+        public override TreeNode Clone()
         {
             return new PhaseChangeAction();
         }
@@ -536,7 +533,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> ノードを抜けた後も動き続ける非同期処理を停止させるための非同期停止用行動ノード </summary>
     #region CancelAsyncAction
     [Serializable]
-    public class CancelAsyncAction : ActionNode<CancelAsyncAction>
+    public class CancelAsyncAction : ActionNode
     {
         public override void OnEnter()
         {
@@ -547,7 +544,7 @@ namespace Boss.AI.BehaviourTree
 
         public override void OnUpdate() { return; }
 
-        public override CancelAsyncAction Clone()
+        public override TreeNode Clone()
         {
             return new CancelAsyncAction();
         }
@@ -557,7 +554,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> ノードエントリー後に一定時間経過で姿勢を変更する行動ノード(時間計測を開始したら即座にツリーの再走を行う) </summary>
     #region RevertPostureInSecondsAsyncAction
     [Serializable]
-    public class RevertPostureInSecondsAsyncAction : ActionNode<RevertPostureInSecondsAsyncAction>
+    public class RevertPostureInSecondsAsyncAction : ActionNode
     {
         public override void Dispose()
         {
@@ -592,7 +589,7 @@ namespace Boss.AI.BehaviourTree
 
         public override void OnUpdate() { return; }
 
-        public override RevertPostureInSecondsAsyncAction Clone()
+        public override TreeNode Clone()
         {
             var clone = new RevertPostureInSecondsAsyncAction();
             clone.SetConditions(_changePosture, _revertInSeconds);

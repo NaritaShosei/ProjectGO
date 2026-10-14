@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Boss.Interface
 {
-    public interface IBossAIBehaviourTreeNode
+    public interface IBossAITreeNode
     {
         /// <summary> 初期化 </summary>
         public void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier);

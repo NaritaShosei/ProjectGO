@@ -1,6 +1,7 @@
 using Boss.AI.BehaviourTree;
 using Boss.Attack;
 using Boss.Enum;
+using Boss.Interface;
 using System;
 using Unity.GraphToolkit.Editor;
 using UnityEngine;

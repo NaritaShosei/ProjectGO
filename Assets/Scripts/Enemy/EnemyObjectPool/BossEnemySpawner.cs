@@ -80,6 +80,8 @@ public class BossEnemySpawner : MonoBehaviour
 
             if (bossEnemyHPUI is BossCharacterHPUIView hpUI)
                 HandleEnemyDeath(_id, characterEntity, enemyView, hpUI);
+
+            _bossAIBehaviourTreeNodeRepository.ReleaseNode(entryNode);
         };
         characterEntity.OnDespawnCompleted += despawnHandler;
 

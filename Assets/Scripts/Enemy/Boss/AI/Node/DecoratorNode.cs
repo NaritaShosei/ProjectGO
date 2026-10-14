@@ -1,5 +1,6 @@
 using Boss.Character;
 using Boss.Enum;
+using Boss.Interface;
 using System;
 using UniRx;
 using UnityEngine;
@@ -9,9 +10,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 条件判定を行い、通過した際に子ノードを実行する機能装飾ノードの基底クラス </summary>
     #region DecoratorNode
     [Serializable]
-    public abstract class DecoratorNode<TDecoratorNode> 
-        : BossCharacterAIBehaviourTreeNode<TDecoratorNode> 
-        where TDecoratorNode : DecoratorNode<TDecoratorNode>
+    public abstract class DecoratorNode : BossAITreeNode
     {
         public DecoratorNode()
         {
@@ -19,7 +18,7 @@ namespace Boss.AI.BehaviourTree
             _childrenNode = new TreeNode[childrenLength];
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             int topPriorityChildIndex = 0;
 
@@ -47,7 +46,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 初回行動が未開始の場合にエントリーを許可し行動を開始させる機能装飾ノード </summary>
     #region NotBeginActionDecoratorNode
     [Serializable]
-    public class NotBeginActionDecoratorNode : DecoratorNode<NotBeginActionDecoratorNode>
+    public class NotBeginActionDecoratorNode : DecoratorNode
     {
         public override NodeCondition TryEntry()
         {
@@ -61,7 +60,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override NotBeginActionDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new NotBeginActionDecoratorNode();
             return clone;
@@ -72,7 +71,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 現在のボスの行動状態が指定条件と一致する場合にエントリーを許可する機能装飾ノード </summary>
     #region CurrentCharacterActionDecoratorNode
     [Serializable]
-    public class CurrentCharacterActionDecoratorNode : DecoratorNode<CurrentCharacterActionDecoratorNode>
+    public class CurrentCharacterActionDecoratorNode : DecoratorNode
     {
         public void SetCanEntryCondition(CharacterAction canEntryArmorConditions)
         {
@@ -89,7 +88,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override CurrentCharacterActionDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new CurrentCharacterActionDecoratorNode();
             clone.SetCanEntryCondition(_canEntryCharacterAction);
@@ -103,7 +102,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 鎧が破損中である場合にエントリーを許可する機能装飾ノード </summary>
     #region BreakingArmorDecoratorNode
     [Serializable]
-    public class BreakingArmorDecoratorNode : DecoratorNode<BreakingArmorDecoratorNode>
+    public class BreakingArmorDecoratorNode : DecoratorNode
     {
         public override NodeCondition TryEntry()
         {
@@ -115,7 +114,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override BreakingArmorDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new BreakingArmorDecoratorNode();
             return clone;
@@ -126,7 +125,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 指定した鎧部位がすべて破壊されている場合にエントリーを許可する機能装飾ノード </summary>
     #region ArmorBrokenDecoratorNode
     [Serializable]
-    public class ArmorBrokenDecoratorNode : DecoratorNode<ArmorBrokenDecoratorNode>
+    public class ArmorBrokenDecoratorNode : DecoratorNode
     {
         public void SetCanEntryCondition(ArmorAttachmentType[] canEntryArmorConditions)
         {
@@ -157,7 +156,7 @@ namespace Boss.AI.BehaviourTree
             return hasArmorCondition ? NodeCondition.Success : NodeCondition.Failure;
         }
 
-        public override ArmorBrokenDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new ArmorBrokenDecoratorNode();
             clone.SetCanEntryCondition(_canEntryArmorConditions);
@@ -171,7 +170,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 現在のボスの姿勢が指定条件と一致する場合にエントリーを許可する機能装飾ノード </summary>
     #region BossCharacterPostureDecoratorNode
     [Serializable]
-    public class BossCharacterPostureDecoratorNode : DecoratorNode<BossCharacterPostureDecoratorNode>
+    public class BossCharacterPostureDecoratorNode : DecoratorNode
     {
         /// <summary> Entry可能になる現在の姿勢を設定する </summary>
         public void SetCanEntryCondition(PostureType postureType)
@@ -189,7 +188,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override BossCharacterPostureDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new BossCharacterPostureDecoratorNode();
             clone.SetCanEntryCondition(_canEntryPosture);
@@ -203,7 +202,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> ターゲットとの距離が指定距離未満の場合にエントリーを許可する機能装飾ノード </summary>
     #region TargetDistanceDecoratorNode
     [Serializable]
-    public class TargetDistanceDecoratorNode : DecoratorNode<TargetDistanceDecoratorNode>
+    public class TargetDistanceDecoratorNode : DecoratorNode
     {
         public void SetCanEntryCondition(float distance)
         {
@@ -226,7 +225,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override TargetDistanceDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new TargetDistanceDecoratorNode();
             clone.SetCanEntryCondition(_canEntryDistance);
@@ -240,7 +239,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 現在のフェーズ数が指定フェーズと一致する場合にエントリーを許可する機能装飾ノード </summary>
     #region CurrentPhaseDecoratorNode
     [Serializable]
-    public class CurrentPhaseDecoratorNode : DecoratorNode<CurrentPhaseDecoratorNode>
+    public class CurrentPhaseDecoratorNode : DecoratorNode
     {
         public void SetCanEntryCondition(int canEntryPhase)
         {
@@ -257,7 +256,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override CurrentPhaseDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new CurrentPhaseDecoratorNode();
             clone.SetCanEntryCondition(_canEntryPhase);
@@ -271,7 +270,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 現在のボスのHPが指定した比較条件を満たす場合にエントリーを許可する機能装飾ノード </summary>
     #region CharacterHPDecoratorNode
     [Serializable]
-    public class CharacterHPDecoratorNode : DecoratorNode<CharacterHPDecoratorNode>
+    public class CharacterHPDecoratorNode : DecoratorNode
     {
         public void SetCanEntryCondition(InequalityType numericalComparisonType, int canEntryRemainingHP)
         {
@@ -313,7 +312,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override CharacterHPDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new CharacterHPDecoratorNode();
             clone.SetCanEntryCondition(_numericalComparisonType, _canEntryRemainingHP);
@@ -329,7 +328,7 @@ namespace Boss.AI.BehaviourTree
     /// <summary> 指定回数の試行ごとにエントリーを許可するカウントダウン式機能装飾ノード </summary>
     #region CountDownDecoratorNode
     [Serializable]
-    public class CountDownDecoratorNode : DecoratorNode<CountDownDecoratorNode>
+    public class CountDownDecoratorNode : DecoratorNode
     {
         public void SetCanEntryCondition(int canEntryCount)
         {
@@ -348,7 +347,7 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public override CountDownDecoratorNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new CountDownDecoratorNode();
             clone.SetCanEntryCondition(_canEntryCount);

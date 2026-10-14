@@ -56,13 +56,16 @@ namespace Boss.AI.Editor.BehaviourGraph
             _isVisible = false;
         }
 
+        /// <summary> Graphに変更があった際の処理 </summary>
         public virtual void OnGraphChanged(GraphLogger graphLogger)
         {
             ResetConnectedNodes();
 
             if (GetNodeOptionByName(RUNNING_PRIORITY_OPTION_NAME).TryGetValue(out int runningPriority))
             {
-                _behaviourTreeNode.SetRunningPriority(runningPriority);
+                Debug.Assert(runningPriority >= 0, $"実行優先度にマイナスの値が設定されています");
+
+                _behaviourTreeNode.SetRunningPriority((uint)runningPriority);
             }
         }
 
@@ -81,14 +84,16 @@ namespace Boss.AI.Editor.BehaviourGraph
             foreach (var port in connectedPorts)
             {
                 INode node = port.GetNode();
+
                 if (node is IBehaviourTreeGraphNode graphNode &&
                     graphNode.IsVisible &&
                     graphNode.BehaviourTreeNode != null)
                 {
-                    if (!connectTreeNodes.Contains(graphNode.BehaviourTreeNode))
+                    if (graphNode.BehaviourTreeNode is TreeNode treeNode)
                     {
-                        connectTreeNodes.Add(graphNode.BehaviourTreeNode);
+                        if (!connectTreeNodes.Contains(treeNode)) connectTreeNodes.Add(treeNode);
                     }
+                    else Debug.LogError("graphNode.BehaviourTreeNodeのTreeNodeへの型変換が失敗しました");
                 }
             }
 
@@ -102,15 +107,19 @@ namespace Boss.AI.Editor.BehaviourGraph
             return Guid.NewGuid().ToString(); 
         }
 
-        protected List<string> _connectedNodesKey = new List<string>();
-
-        protected TTreeNode _behaviourTreeNode;
-
+        [Header("各ノードが持つユニークな接続コード")]
         [SerializeField] protected string _nodeAccesskey;
 
+        // 接続先の接続コードリスト
+        protected List<string> _connectedNodesKey = new List<string>();
+
+        // Runtimeで使用するTreeNode
+        protected TTreeNode _behaviourTreeNode;
+
+        // 現在の表示状況
         private bool _isVisible = true;
 
-
+        /// <summary> NodeにOptionを追加する </summary>
         protected override void OnDefineOptions(IOptionDefinitionContext context)
         {
             context.AddOption<int>(RUNNING_PRIORITY_OPTION_NAME).Build();

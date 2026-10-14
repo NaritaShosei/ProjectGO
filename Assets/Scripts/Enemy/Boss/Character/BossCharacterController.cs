@@ -13,7 +13,7 @@ namespace Boss.Character
             IBossEnemyCharacterView bossEnemyCharacterView,
             EnemyServices enemyServices,
             IBossCharacterAnimationEventReceiver animationEventReceiver,
-            ITreeNode entryNode,
+            TreeNode entryNode,
             IBossCharacterEntity bossCharacterEntity)
         {
             if(bossCharacterEntity  == null) Debug.LogWarning("null");

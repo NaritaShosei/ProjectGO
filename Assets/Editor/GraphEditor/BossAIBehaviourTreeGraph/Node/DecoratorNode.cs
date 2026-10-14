@@ -1,16 +1,15 @@
 using Boss.AI.BehaviourTree;
 using Boss.Character;
 using Boss.Enum;
+using Boss.Interface;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
-using UnityEngine;
-using static Unity.GraphToolkit.Editor.Node;
 
 namespace Boss.AI.Editor.BehaviourGraph
 {
     [Serializable]
-    public class DecoratorNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : BehaviourTree.DecoratorNode
+    public class DecoratorNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : DecoratorNode
     {
         public override void OnGraphChanged(GraphLogger graphLogger)
         {

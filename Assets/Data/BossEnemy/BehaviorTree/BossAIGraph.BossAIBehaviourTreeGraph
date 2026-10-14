@@ -225,10 +225,10 @@ MonoBehaviour:
         m_LocalSubgraphs: []
         m_LastKnownBounds:
           serializedVersion: 2
-          x: -35
-          y: -1588
-          width: 5076
-          height: 5912
+          x: -58
+          y: -1574
+          width: 5099
+          height: 5898
         m_GraphElementMetaData:
         - m_Guid:
             m_Value0: 9061396110884096570
@@ -1587,7 +1587,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 3a4a5ae6c08bc07d4be75369e64123b2
         m_Version: 2
-        m_Position: {x: -4.264206, y: -1362.6559}
+        m_Position: {x: -28.069204, y: -1361.3334}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -1595,9 +1595,9 @@ MonoBehaviour:
         m_State: 0
         m_InputConstantsById:
           m_KeyList:
-          - __option_CharacterID
+          - __option_TreeID
           m_ValueList:
-          - rid: 3429809030414991366
+          - rid: 3429809191791624592
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -1613,10 +1613,6 @@ MonoBehaviour:
           m_HasUserColor: 0
         m_Node:
           rid: 3429809030414991367
-    - rid: 3429809030414991366
-      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 1
     - rid: 3429809030414991367
       type: {class: EntryNode, ns: Boss.AI.Editor.BehaviourGraph, asm: Assembly-CSharp-Editor}
       data:
@@ -1631,7 +1627,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 880d341cf430e2f22d1228df43ea2109
         m_Version: 2
-        m_Position: {x: -22.814713, y: -1588.2555}
+        m_Position: {x: 28.352478, y: -1574.2634}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -1660,7 +1656,7 @@ MonoBehaviour:
     - rid: 3429809030414991369
       type: {class: 'Constant`1[[System.Boolean, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 1
+        m_Value: 0
     - rid: 3429809030414991370
       type: {class: GraphChangedSaveNode, ns: Boss.AI.Editor.BehaviourGraph, asm: Assembly-CSharp-Editor}
       data: 
@@ -1674,7 +1670,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: f3fdbd44cf3fff9a33b12131c16dc180
         m_Version: 2
-        m_Position: {x: 150.00603, y: -1364.7947}
+        m_Position: {x: 140.19308, y: -1361.7231}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -1763,8 +1759,8 @@ MonoBehaviour:
         m_TitleAlignment: 0
         m_Position:
           serializedVersion: 2
-          x: -34.658096
-          y: -1390.4069
+          x: -58.463097
+          y: -1389.0844
           width: 447
           height: 172.71608
         m_Comment: 
@@ -3484,7 +3480,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 206bc016da503f9a8f1908da7d0ffc6c
         m_Version: 2
-        m_Position: {x: 1757.4982, y: 99.34976}
+        m_Position: {x: 1717.5979, y: 96.68974}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -3495,14 +3491,14 @@ MonoBehaviour:
           - "__option_\u5B9F\u884C\u512A\u5148\u5EA6\uFF1A"
           - "__option_Entry\u6761\u4EF6\u3068\u306A\u308B\u93A7\u7834\u58CA\u500B\u6240\u306E\u7DCF\u6570"
           - 8f9ebae9-991c-4174-bc1b-7273221c6421
-          - "__option_\u7834\u58CA\u3055\u308C\u305F\u93A7\u306E\u88C5\u5099\u30F6\u6240_0"
           - "__option_\u7834\u58CA\u3055\u308C\u305F\u93A7\u306E\u88C5\u5099\u30F6\u6240_1"
+          - "__option_\u7834\u58CA\u3055\u308C\u305F\u93A7\u306E\u88C5\u5099\u30F6\u6240_0"
           m_ValueList:
           - rid: 3429809052375842985
           - rid: 3429809052375842986
           - rid: 3429809052375842987
-          - rid: 3429809052375842989
-          - rid: 3429809052375842990
+          - rid: 3429809194641391616
+          - rid: 3429809194641391617
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3536,28 +3532,6 @@ MonoBehaviour:
       type: {class: ArmorBrokenDecoratorNode, ns: Boss.AI.Editor.BehaviourGraph, asm: Assembly-CSharp-Editor}
       data:
         _nodeAccesskey: 8f9ebae9-991c-4174-bc1b-7273221c6421
-    - rid: 3429809052375842989
-      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value:
-          m_EnumType:
-            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-              Culture=neutral, PublicKeyToken=null
-          m_Value: 4
-        m_EnumType:
-          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
-    - rid: 3429809052375842990
-      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value:
-          m_EnumType:
-            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-              Culture=neutral, PublicKeyToken=null
-          m_Value: 3
-        m_EnumType:
-          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
     - rid: 3429809052375843011
       type: {class: WireModel, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -3616,7 +3590,7 @@ MonoBehaviour:
           - rid: 3429809052375843013
           - rid: 3429809052375843014
           - rid: 3429809052375843015
-          - rid: 3429809052375843020
+          - rid: 3429809194641391618
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3682,17 +3656,6 @@ MonoBehaviour:
           m_PortDirection: 1
           m_PortOrientation: 0
           m_Title: "\u89AA\u30CE\u30FC\u30C9\u63A5\u7D9A"
-    - rid: 3429809052375843020
-      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value:
-          m_EnumType:
-            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-              Culture=neutral, PublicKeyToken=null
-          m_Value: 3
-        m_EnumType:
-          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
     - rid: 3429809052375843021
       type: {class: UserNodeModelImp, ns: Unity.GraphToolkit.Editor.Implementation, asm: Unity.GraphToolkit.Editor}
       data:
@@ -3719,7 +3682,7 @@ MonoBehaviour:
           - rid: 3429809052375843022
           - rid: 3429809052375843023
           - rid: 3429809052375843024
-          - rid: 3429809052375843026
+          - rid: 3429809194641391619
         m_InputPortInfos:
           expandedPortsById:
             m_KeyList: []
@@ -3753,17 +3716,6 @@ MonoBehaviour:
       type: {class: ArmorBrokenDecoratorNode, ns: Boss.AI.Editor.BehaviourGraph, asm: Assembly-CSharp-Editor}
       data:
         _nodeAccesskey: 8755af16-8197-40d3-957d-5fb750efdda0
-    - rid: 3429809052375843026
-      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value:
-          m_EnumType:
-            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-              Culture=neutral, PublicKeyToken=null
-          m_Value: 4
-        m_EnumType:
-          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
     - rid: 3429809052375843027
       type: {class: WireModel, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -5933,10 +5885,10 @@ MonoBehaviour:
         m_TitleAlignment: 0
         m_Position:
           serializedVersion: 2
-          x: 1736
+          x: 1690.7797
           y: 55
-          width: 2286
-          height: 456.45175
+          width: 2331.2202
+          height: 456
         m_Comment: 
         m_ElementColor:
           m_Color: {r: 0.20784314, g: 0.22745098, b: 0.2784314, a: 1}
@@ -9669,3 +9621,51 @@ MonoBehaviour:
         m_ElementColor:
           m_Color: {r: 0.20784314, g: 0.22745098, b: 0.2784314, a: 1}
           m_HasUserColor: 0
+    - rid: 3429809191791624592
+      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value: 1
+    - rid: 3429809194641391616
+      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value:
+          m_EnumType:
+            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+              Culture=neutral, PublicKeyToken=null
+          m_Value: 0
+        m_EnumType:
+          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+    - rid: 3429809194641391617
+      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value:
+          m_EnumType:
+            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+              Culture=neutral, PublicKeyToken=null
+          m_Value: 0
+        m_EnumType:
+          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+    - rid: 3429809194641391618
+      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value:
+          m_EnumType:
+            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+              Culture=neutral, PublicKeyToken=null
+          m_Value: 0
+        m_EnumType:
+          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+    - rid: 3429809194641391619
+      type: {class: EnumConstant, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Value:
+          m_EnumType:
+            m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+              Culture=neutral, PublicKeyToken=null
+          m_Value: 0
+        m_EnumType:
+          m_Identification: Boss.Enum.ArmorAttachmentType, Assembly-CSharp, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null

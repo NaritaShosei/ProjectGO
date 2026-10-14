@@ -58,7 +58,7 @@ namespace Boss.AI.BehaviourTree
     /// </summary>
     public class BehaviourController : IDisposable
     {
-        public BehaviourController(ITreeNode origin)
+        public BehaviourController(TreeNode origin)
         {
             _originNode = origin;
             _nodeRunningEndNotifier = origin.NodeRunningConditionNotifier;
@@ -83,7 +83,7 @@ namespace Boss.AI.BehaviourTree
         {
             if(_originNode == null) return;
 
-            ITreeNode nextNode = _originNode;
+            TreeNode nextNode = _originNode;
             NodeCondition runningCondition = NodeCondition.Success;
             int count = 0;
 
@@ -115,16 +115,16 @@ namespace Boss.AI.BehaviourTree
         }
 
         /// <summary> 現在のNode </summary>
-        private ITreeNode _currentNode = null;
+        private TreeNode _currentNode = null;
 
         /// <summary> Entry地点のNode </summary>
-        private readonly ITreeNode _originNode = null;
+        private readonly TreeNode _originNode = null;
 
         private readonly NodeRunningConditionNotifier _nodeRunningEndNotifier;
 
         /// <summary> 現在のNodeを変更する </summary>
         /// <param name="nextNode"> 次のNode </param>
-        private void ChangeNode(ITreeNode nextNode)
+        private void ChangeNode(TreeNode nextNode)
         {
             if (nextNode == null) return;
             if(_currentNode != null) _currentNode.OnExit();
@@ -138,52 +138,13 @@ namespace Boss.AI.BehaviourTree
     }
     #endregion
 
-    #region 各BehaviourTreeNodeの基本機能のInterface
-    /// <summary> TreeNodeのInterface </summary>
-    public interface ITreeNode : IDisposable
-    {
-        /// <summary> 初期化済み判定フラグ </summary>
-        public bool IsInit { get; }
-
-        /// <summary> 実行優先度 </summary>
-        public int RunningPriority { get; }
-
-        /// <summary> ノードの実行状況通知クラス </summary>
-        public NodeRunningConditionNotifier NodeRunningConditionNotifier { get; }
-
-        /// <summary> BehaviourTreeをSetする </summary>
-        void Init(NodeRunningConditionNotifier nodeRunningEndNotifier);
-
-        /// <summary> このNodeへの遷移条件を確認して結果を返す </summary>
-        NodeCondition TryEntry();
-
-        /// <summary> 子ノードから遷移可能なノードを選出して渡す </summary>
-        /// <param name="nextNode"> 次のNode </param>
-        /// <returns> 
-        /// 次のNodeへの遷移結果フラグ
-        /// このフラグがFalseなら現在のNodeをゴールとする
-        /// </returns>
-        NodeCondition TryEntryNextNode(out ITreeNode nextNode);
-
-        /// <summary> このNodeへの遷移が成功した際の処理 </summary>
-        void OnEnter();
-
-        /// <summary> このNodeの実行中の処理 </summary>
-        void OnUpdate();
-
-        /// <summary> このNodeを離れる際の処理 </summary>
-        void OnExit();
-    }
-    #endregion
-
     #region 各NodeのベースとなるClass
-    /// <summary> BehaviorTreeのNodeの基底クラス </summary>
+    /// <summary> BehaviorTreeのノードクラス </summary>
     [Serializable]
-    public class TreeNode : ITreeNode
+    public class TreeNode : IPrototype<TreeNode>
     {
-        public bool IsInit => _isInit;
-
-        public int RunningPriority => _runningPriority;
+        /// <summary> 実行優先度(0に近いほど優先度：高) </summary>
+        public uint RunningPriority => _runningPriority;
 
         public NodeRunningConditionNotifier NodeRunningConditionNotifier => _nodeRunningConditionNotifier;
 
@@ -199,7 +160,7 @@ namespace Boss.AI.BehaviourTree
             _nodeRunningConditionNotifier = null;
         }
 
-        public void SetRunningPriority(int priority) => _runningPriority = priority;
+        public void SetRunningPriority(uint priority) => _runningPriority = priority;
 
         public void SetChildren(TreeNode[] childrenNode) => _childrenNode = childrenNode;
 
@@ -210,10 +171,15 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Failure;
         }
 
-        public virtual NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public virtual NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             nextNode = null;
             return NodeCondition.Failure;
+        }
+
+        public virtual TreeNode Clone()
+        {
+            return null;
         }
 
         public virtual void OnEnter() { return; }
@@ -226,7 +192,7 @@ namespace Boss.AI.BehaviourTree
 
         [SerializeReference] protected TreeNode[] _childrenNode = null;
 
-        [SerializeField] private int _runningPriority = 0;
+        [SerializeField] private uint _runningPriority = 0;
 
         protected void HandleRunningEnd()
         {

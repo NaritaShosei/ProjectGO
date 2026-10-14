@@ -5,8 +5,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public abstract class BossCharacterAIBehaviourTreeNode<T> : 
-    TreeNode, IBossAIBehaviourTreeNode, IPrototype<T> where T : TreeNode
+public abstract class BossAITreeNode : TreeNode, IBossAITreeNode
 {
     public virtual void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
     {
@@ -42,12 +41,6 @@ public abstract class BossCharacterAIBehaviourTreeNode<T> :
         }
     }
 
-    public virtual T Clone()
-    {
-        Debug.LogError($"{ typeof(T) } クラス内でCloneメソッドが正しく実装されていません");
-        return default;
-    }
-
     protected IBossCharacterEntity _bossCharacterEntity = null;
 
     /// <summary> 子ノードを初期化 </summary>
@@ -59,7 +52,7 @@ public abstract class BossCharacterAIBehaviourTreeNode<T> :
             return;
         }
 
-        if (treeNode is IBossAIBehaviourTreeNode bossCharacterBehaviourTreeNode)
+        if (treeNode is IBossAITreeNode bossCharacterBehaviourTreeNode)
         {
             bossCharacterBehaviourTreeNode.Init(_bossCharacterEntity, nodeRunningEndNotifier);
             return;

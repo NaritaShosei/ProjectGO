@@ -5,16 +5,16 @@ using UnityEngine;
 namespace Boss.AI.BehaviourTree
 {
     [Serializable]
-    public class EntryNode : BossCharacterAIBehaviourTreeNode<EntryNode>
+    public class EntryNode : BossAITreeNode
     {
-        public int PlayableCharactersID => _playableCharactersID;
+        public int BehaviourTreeID => _playableCharactersID;
 
         public override NodeCondition TryEntry()
         {
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             if (_childrenNode == null)
             {
@@ -27,10 +27,10 @@ namespace Boss.AI.BehaviourTree
             return NodeCondition.Success;
         }
 
-        public override EntryNode Clone()
+        public override TreeNode Clone()
         {
             var clone = new EntryNode();
-            clone.SetPlayableCharacterID(PlayableCharactersID);
+            clone.SetPlayableCharacterID(BehaviourTreeID);
             return clone;
         }
 

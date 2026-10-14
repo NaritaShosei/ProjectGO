@@ -13,7 +13,7 @@ namespace Boss.Interface
             IBossEnemyCharacterView bossEnemyCharacterView,
             EnemyServices enemyServices,
             IBossCharacterAnimationEventReceiver animationEventReceiver,
-            ITreeNode entryNode,
+            TreeNode entryNode,
             IBossCharacterEntity bossCharacterEntity);
 
         /// <summary>
