@@ -39,7 +39,7 @@ namespace Boss.AI.BehaviourTree
             if (IsTimeOut()) HandleRunningEnd();
         }
 
-        [SerializeField] private float _timeOutValue = 10f;
+        [SerializeField] protected float _timeOutValue = 10f;
 
         protected float _timeOutTimer = 0;
 
@@ -94,6 +94,7 @@ namespace Boss.AI.BehaviourTree
         public override TreeNode Clone()
         {
             var clone = new ArmorRepairAction();
+            clone.SetTimeOutValue(_timeOutValue);
             clone.SetRepairArmor(_repairArmor);
             return clone;
         }
@@ -136,6 +137,7 @@ namespace Boss.AI.BehaviourTree
         public override TreeNode Clone()
         {
             var clone = new WaitForTimeAction();
+            clone.SetTimeOutValue(_timeOutValue);
             clone.SetWaitTime(_waitTime);
             return clone;
         }
@@ -166,7 +168,9 @@ namespace Boss.AI.BehaviourTree
 
         public override TreeNode Clone()
         {
-            return new CancelSearchAction();
+            var clone = new CancelSearchAction();
+            clone.SetTimeOutValue(_timeOutValue);
+            return clone;
         }
     }
     #endregion
@@ -206,6 +210,7 @@ namespace Boss.AI.BehaviourTree
         public override TreeNode Clone()
         {
             var clone = new PostureChangeAction();
+            clone.SetTimeOutValue(_timeOutValue);
             clone.SetChangePosture(_changePosture);
             return clone;
         }
@@ -248,6 +253,7 @@ namespace Boss.AI.BehaviourTree
         public override TreeNode Clone()
         {
             var clone = new SelectAttackAction();
+            clone.SetTimeOutValue(_timeOutValue);
             clone.SetAttackSelectPoolID(_attackSelectPoolID);
             return clone;
         }
@@ -338,6 +344,7 @@ namespace Boss.AI.BehaviourTree
         public override TreeNode Clone()
         {
             var clone = new TargetChaseAction();
+            clone.SetTimeOutValue(_timeOutValue);
             clone.SetChaseSpeed(_moveSpeed);
             return clone;
         }
@@ -411,6 +418,7 @@ namespace Boss.AI.BehaviourTree
         public override TreeNode Clone()
         {
             var clone = new LookAtTargetAction();
+            clone.SetTimeOutValue(_timeOutValue);
             clone.SetLookConditions(_lookSpeed, _finishAngleThreshold);
             return clone;
         }
@@ -461,7 +469,9 @@ namespace Boss.AI.BehaviourTree
 
         public override TreeNode Clone()
         {
-            return new AttackExecuteAction();
+            var clone = new AttackExecuteAction();
+            clone.SetTimeOutValue(_timeOutValue);
+            return clone;
         }
 
         private bool _hasFinished;
@@ -485,7 +495,9 @@ namespace Boss.AI.BehaviourTree
 
         public override TreeNode Clone()
         {
-            return new DeadAction();
+            var clone = new DeadAction();
+            clone.SetTimeOutValue(_timeOutValue);
+            return clone;
         }
     }
     #endregion
@@ -523,7 +535,9 @@ namespace Boss.AI.BehaviourTree
 
         public override TreeNode Clone()
         {
-            return new PhaseChangeAction();
+            var clone = new PhaseChangeAction();
+            clone.SetTimeOutValue(_timeOutValue);
+            return clone;
         }
 
         private bool _isFinishAction = true;
@@ -546,7 +560,9 @@ namespace Boss.AI.BehaviourTree
 
         public override TreeNode Clone()
         {
-            return new CancelAsyncAction();
+            var clone = new CancelAsyncAction();
+            clone.SetTimeOutValue(_timeOutValue);
+            return clone;
         }
     }
     #endregion
@@ -593,6 +609,7 @@ namespace Boss.AI.BehaviourTree
         {
             var clone = new RevertPostureInSecondsAsyncAction();
             clone.SetConditions(_changePosture, _revertInSeconds);
+            clone.SetTimeOutValue(_timeOutValue);
             return clone;
         }
 

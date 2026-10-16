@@ -65,7 +65,7 @@ namespace Boss.AI.Editor.BehaviourGraph
             {
                 Debug.Assert(runningPriority >= 0, $"実行優先度にマイナスの値が設定されています");
 
-                _behaviourTreeNode.SetRunningPriority((uint)runningPriority);
+                _behaviourTreeNode.SetRunningPriority((uint)Math.Max(0, runningPriority));
             }
         }
 

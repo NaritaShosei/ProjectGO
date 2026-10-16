@@ -335,6 +335,12 @@ namespace Boss.AI.BehaviourTree
             _canEntryCount = canEntryCount;
         }
 
+        public override void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
+        {
+            base.Init(bossCharacterEntity, nodeRunningEndNotifier);
+            _currentCount = 0;
+        }
+
         public override NodeCondition TryEntry()
         {
             if(_canEntryCount <= _currentCount)
