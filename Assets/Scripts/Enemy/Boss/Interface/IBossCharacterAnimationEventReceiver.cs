@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
  
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface IBossCharacterAnimationEventReceiver
     {

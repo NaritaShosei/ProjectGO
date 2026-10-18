@@ -1,11 +1,11 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.Character;
+using Boss.Enum;
 using System.Threading;
 
-namespace BossEnemy.Armor
+namespace Boss.Armor
 {
     /// <summary> ボスの装備するアーマー </summary>
     public class BossArmorView : MonoBehaviour, IArmorHealth, IDisposable

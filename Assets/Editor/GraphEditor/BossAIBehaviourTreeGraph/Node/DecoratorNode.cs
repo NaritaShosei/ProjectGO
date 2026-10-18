@@ -1,16 +1,15 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.AI.BehaviourTree;
+using Boss.Character;
+using Boss.Enum;
+using Boss.Interface;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
-using UnityEngine;
-using static Unity.GraphToolkit.Editor.Node;
 
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     [Serializable]
-    public class DecoratorNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : BehaviourTree.DecoratorNode
+    public class DecoratorNode<TNode> : BehaviourTreeNodeView<TNode> where TNode : DecoratorNode
     {
         public override void OnGraphChanged(GraphLogger graphLogger)
         {
@@ -116,6 +115,8 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
         {
             base.OnEnable();
 
+            if (GetNodeOptionByName(BROKEN_ARMOR_COUNT) == null) return;
+
             if (GetNodeOptionByName(BROKEN_ARMOR_COUNT).TryGetValue(out int brokenArmorCount))
             {
                 _brokenArmorCount = brokenArmorCount;
@@ -135,6 +136,8 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
             for (int i = 0; i < _brokenArmorCount; i++)
             {
+                if (GetNodeOptionByName(BROKEN_ARMOR_ATTACHMENT_NAME + "_" + i) == null) return;
+
                 if (GetNodeOptionByName(BROKEN_ARMOR_ATTACHMENT_NAME + "_" + i).TryGetValue(out ArmorAttachmentType brokenConditionArmor))
                 {
                     brokenConditionArmorArray[i] = brokenConditionArmor;
@@ -144,7 +147,7 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             _behaviourTreeNode.SetCanEntryCondition(brokenConditionArmorArray);
         }
 
-        private int _brokenArmorCount = 1;
+        private int _brokenArmorCount = 0;
 
         protected override void OnDefineOptions(IOptionDefinitionContext context)
         {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Armor
+namespace Boss.Armor
 {
     public interface IBossArmorPresenter
     {

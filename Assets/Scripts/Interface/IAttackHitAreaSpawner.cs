@@ -1,5 +1,5 @@
-using BossEnemy.Effect;
-using BossEnemy.Enum;
+using Boss.Effect;
+using Boss.Enum;
 using UnityEngine;
 
 public interface IAttackHitAreaSpawner

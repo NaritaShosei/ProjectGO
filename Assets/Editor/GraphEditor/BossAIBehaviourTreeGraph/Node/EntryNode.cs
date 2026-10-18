@@ -1,9 +1,9 @@
-using BossEnemy.AI.BehaviourTree;
+using Boss.AI.BehaviourTree;
 using System;
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     [Serializable]
     public class EntryNode : BehaviourTreeNodeView<BehaviourTree.EntryNode>
@@ -13,13 +13,13 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             _behaviourTreeNode = new BehaviourTree.EntryNode();
         }
 
-        private const string CHARACTER_ID_OPTION_NAME = "CharacterID";
+        private const string BEHAVIOUR_TREE_ID_OPTION_NAME = "TreeID";
 
         public override void OnGraphChanged(GraphLogger graphLogger)
         {
             ResetConnectedNodes();
 
-            if (GetNodeOptionByName(CHARACTER_ID_OPTION_NAME).TryGetValue(out int characterID))
+            if (GetNodeOptionByName(BEHAVIOUR_TREE_ID_OPTION_NAME).TryGetValue(out int characterID))
             {
                 _behaviourTreeNode.SetPlayableCharacterID(characterID);
             }
@@ -51,7 +51,7 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
         protected override void OnDefineOptions(IOptionDefinitionContext context)
         {
-            context.AddOption<int>(CHARACTER_ID_OPTION_NAME).Build();
+            context.AddOption<int>(BEHAVIOUR_TREE_ID_OPTION_NAME).Build();
         }
     }
 }

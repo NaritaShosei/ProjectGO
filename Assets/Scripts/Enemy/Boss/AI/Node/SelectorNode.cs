@@ -1,19 +1,19 @@
 using System;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     #region 子ノードを順番に実行して一番最初にSuccessになったNodeを実行するSelectorNode
     /// <summary> 子ノードを順番に実行して一番最初にSuccessになったNodeを実行する </summary>
     [Serializable]
-    public class SelectorNode : BossCharacterBehaviourTreeNode
+    public class SelectorNode : BossAITreeNode
     {
         public override NodeCondition TryEntry()
         {
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             foreach (var child in _childrenNode)
             {
@@ -35,6 +35,11 @@ namespace BossEnemy.AI.BehaviourTree
             Debug.LogError("ノードの選択に失敗しました");
             nextNode = null;
             return NodeCondition.Failure;
+        }
+
+        public override TreeNode Clone()
+        {
+            return new SelectorNode();
         }
     }
     #endregion

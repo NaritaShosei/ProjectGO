@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface ICanMoveAreaChecker 
     {

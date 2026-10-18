@@ -1,19 +1,20 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     [Serializable]
-    public class EntryNode : BossCharacterBehaviourTreeNode
+    public class EntryNode : BossAITreeNode
     {
-        public int PlayableCharactersID => _playableCharactersID;
+        public int BehaviourTreeID => _playableCharactersID;
 
         public override NodeCondition TryEntry()
         {
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             if (_childrenNode == null)
             {
@@ -24,6 +25,13 @@ namespace BossEnemy.AI.BehaviourTree
 
             nextNode = _childrenNode[0];
             return NodeCondition.Success;
+        }
+
+        public override TreeNode Clone()
+        {
+            var clone = new EntryNode();
+            clone.SetPlayableCharacterID(BehaviourTreeID);
+            return clone;
         }
 
         /// <summary> 操作対象となるキャラクターのIDを設定する </summary>

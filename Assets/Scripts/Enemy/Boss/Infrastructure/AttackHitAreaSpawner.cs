@@ -2,10 +2,10 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
 
-using BossEnemy.Enum;
-using BossEnemy.Effect;
+using Boss.Enum;
+using Boss.Effect;
 
-namespace BossEnemy.Infrastructure
+namespace Boss.Infrastructure
 {
     public class AttackHitAreaSpawner : MonoBehaviour, IAttackHitAreaSpawner
     {

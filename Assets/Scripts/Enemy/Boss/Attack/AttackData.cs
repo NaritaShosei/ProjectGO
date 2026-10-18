@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Attack
+namespace Boss.Attack
 {
     /// <summary> BossEnemyの攻撃データ </summary>
     public struct AttackData

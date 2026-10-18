@@ -1,11 +1,11 @@
-using BossEnemy.Effect;
+using Boss.Effect;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
 
-namespace BossEnemy.SMB
+namespace Boss.SMB
 {
     public class StompingLeftSMB : AttackSMB
     {

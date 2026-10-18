@@ -1,9 +1,9 @@
-using BossEnemy.Enum;
-using BossEnemy.Interface;
+using Boss.Enum;
+using Boss.Interface;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.Animation
+namespace Boss.Animation
 {
     public class BossEnemyAnimator : IBossEnemyAnimator
     {

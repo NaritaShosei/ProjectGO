@@ -3,14 +3,14 @@ using System;
 using UniRx;
 using UnityEngine;
 using System.Collections.Generic;
-using BossEnemy.Armor;
-using BossEnemy.Animation;
-using BossEnemy.Interface;
-using BossEnemy.Enum;
-using BossEnemy.SMB;
+using Boss.Armor;
+using Boss.Animation;
+using Boss.Interface;
+using Boss.Enum;
+using Boss.SMB;
 using UnityEngine.Rendering;
 
-namespace BossEnemy.Character
+namespace Boss.Character
 {
     /// <summary>
     /// ボス本体のViewClass

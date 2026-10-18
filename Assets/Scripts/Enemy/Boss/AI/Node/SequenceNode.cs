@@ -1,14 +1,14 @@
 
-using BossEnemy.Character;
+using Boss.Character;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.AI.BehaviourTree
+namespace Boss.AI.BehaviourTree
 {
     #region 子ノードをすべて順番に実行するSequenceNode
     /// <summary> 子ノードをすべて順番に実行する </summary>
     [Serializable]
-    public class SequenceNode : BossCharacterBehaviourTreeNode
+    public class SequenceNode : BossAITreeNode
     {
         public override void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
         {
@@ -51,7 +51,7 @@ namespace BossEnemy.AI.BehaviourTree
             return NodeCondition.Success;
         }
 
-        public override NodeCondition TryEntryNextNode(out ITreeNode nextNode)
+        public override NodeCondition TryEntryNextNode(out TreeNode nextNode)
         {
             nextNode = this;
             return NodeCondition.Running;
@@ -84,10 +84,15 @@ namespace BossEnemy.AI.BehaviourTree
             _sequenceChildNodeRunningEndNotifier.OnResearchBehaviourTree -= ProceedSequence;
         }
 
+        public override TreeNode Clone()
+        {
+            return new SequenceNode();
+        }
+
         private int _sequenceCount = 0;
 
         /// <summary> 現在実行中のノード </summary>
-        private ITreeNode _currentNode = null;
+        private TreeNode _currentNode = null;
 
         /// <summary> シーケンス内の子ノード専用Notifier </summary>
         private NodeRunningConditionNotifier _sequenceChildNodeRunningEndNotifier = new();
@@ -101,12 +106,12 @@ namespace BossEnemy.AI.BehaviourTree
                 return;
             };
 
-            ITreeNode nextRunningNode = _childrenNode[_sequenceCount];
+            TreeNode nextRunningNode = _childrenNode[_sequenceCount];
             _sequenceCount++;
             EntryNextChildNode(nextRunningNode);
         }
 
-        private void EntryNextChildNode(ITreeNode nextNode)
+        private void EntryNextChildNode(TreeNode nextNode)
         {
             if (nextNode == null) return;
 
@@ -114,11 +119,11 @@ namespace BossEnemy.AI.BehaviourTree
         }
 
         /// <summary> 次の行動を決める </summary>
-        private void SearchNextRunningNode(ITreeNode searchNode)
+        private void SearchNextRunningNode(TreeNode searchNode)
         {
             if (searchNode == null) return;
 
-            ITreeNode nextNode = searchNode;
+            TreeNode nextNode = searchNode;
             NodeCondition runningCondition = NodeCondition.Success;
             int count = 0;
 
@@ -138,7 +143,7 @@ namespace BossEnemy.AI.BehaviourTree
 
         /// <summary> 現在のNodeを変更する </summary>
         /// <param name="nextNode"> 次のNode </param>
-        private void ChangeNode(ITreeNode nextNode)
+        private void ChangeNode(TreeNode nextNode)
         {
             if (nextNode == null) return;
             if(_currentNode != null) _currentNode.OnExit();
