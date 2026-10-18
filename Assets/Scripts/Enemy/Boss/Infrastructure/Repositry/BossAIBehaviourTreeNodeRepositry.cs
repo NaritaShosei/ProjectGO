@@ -193,16 +193,19 @@ namespace Boss.Infrastructure.Repository
         /// <returns> クローンしたビヘイビアツリーノード </returns>
         private EntryNode GetBehaviourTreeNodeClone(EntryNode prototype)
         {
-            // 子ノード設定対象のノードをまとめたDictionary
-            Dictionary<TreeNode, TreeNode[]> setChildrenTargetsDict = new Dictionary<TreeNode, TreeNode[]>();
+            // 子ノード未設定の複製ノードをまとめたDictionary
+            Dictionary<TreeNode, TreeNode[]> notSetChildrenCloneNodeDict = new Dictionary<TreeNode, TreeNode[]>();
 
             // EntryNodeのクローンを生成
             EntryNode cloneEntryNode = (EntryNode)prototype.Clone();
-            setChildrenTargetsDict.Add(cloneEntryNode, prototype.Children);
+            notSetChildrenCloneNodeDict.Add(cloneEntryNode, prototype.Children);
 
             // クローン対象のノードが0になるまでループ
-            while (setChildrenTargetsDict.Count != 0)
+            while (notSetChildrenCloneNodeDict.Count != 0)
             {
+                // クローンを生成済みのノードをまとめたリスト
+                List<TreeNode> clonedNodes = new List<TreeNode>();
+
                 // 子ノード設定済みノードリスト
                 List<TreeNode> setChildrenNodes = new List<TreeNode>();
 
@@ -210,33 +213,42 @@ namespace Boss.Infrastructure.Repository
                 Dictionary<TreeNode, TreeNode[]> setChildrenNodesInNextLoopDist = new Dictionary<TreeNode, TreeNode[]>();
 
                 // クローン対象からクローンを生成
-                foreach (var setChildrenTarget in setChildrenTargetsDict.Keys)
+                foreach (var setChildrenTarget in notSetChildrenCloneNodeDict.Keys)
                 {
                     // 子ノード設定済みListにターゲットクローンを追加
                     setChildrenNodes.Add(setChildrenTarget);
 
                     // クローン対象に子ノードが含まれていなければループを再開
-                    if (setChildrenTargetsDict[setChildrenTarget] == null ||
-                        setChildrenTargetsDict[setChildrenTarget].Length == 0)
+                    if (notSetChildrenCloneNodeDict[setChildrenTarget] == null ||
+                        notSetChildrenCloneNodeDict[setChildrenTarget].Length == 0)
                     {
                         Debug.Log($"{ setChildrenTarget.GetType() } 子ノードの存在が確認されませんでした、よって終着点となります");
                         continue;
                     }
                     
                     // クローンしたノードの子ノードクローンを補完する配列
-                    TreeNode[] children = new TreeNode[setChildrenTargetsDict[setChildrenTarget].Length];
+                    TreeNode[] children = new TreeNode[notSetChildrenCloneNodeDict[setChildrenTarget].Length];
 
                     // 次のクローン対象となる子ノードをListに追加
                     for(int index = 0; index < children.Length; index++)
                     {
+                        // クローン済みのノードを複製し、クローン複製の無限ループが起こるケースの削除
+                        if (clonedNodes.Contains(notSetChildrenCloneNodeDict[setChildrenTarget][index]))
+                        {
+                            throw new Exception("クローン済みの上位ノードが下位ノードとしてクローン対象に指定されています。");
+                        }
+
                         // 子ノードを生成
-                        TreeNode childClone = setChildrenTargetsDict[setChildrenTarget][index].Clone();
+                        TreeNode childClone = notSetChildrenCloneNodeDict[setChildrenTarget][index].Clone();
 
                         // 子ノードを子ノードクローンを補完する配列に追加
                         children[index] = childClone;
 
                         // 生成した子ノードを次の子ノードクローン設定対象にする
-                        setChildrenNodesInNextLoopDist.Add(childClone, setChildrenTargetsDict[setChildrenTarget][index].Children);
+                        setChildrenNodesInNextLoopDist.Add(childClone, notSetChildrenCloneNodeDict[setChildrenTarget][index].Children);
+
+                        // クローン済みのノードをクローン済みノードリストに追加する
+                        clonedNodes.Add(notSetChildrenCloneNodeDict[setChildrenTarget][index]);
                     }
 
                     // 子ノードを設定
@@ -249,7 +261,7 @@ namespace Boss.Infrastructure.Repository
                 // 子ノード設定済みノードを子ノード設定ターゲットから削除
                 foreach (var setChildrenNode in setChildrenNodes)
                 {
-                    setChildrenTargetsDict.Remove(setChildrenNode);
+                    notSetChildrenCloneNodeDict.Remove(setChildrenNode);
                 }
 
                 // 次のループで子ノード設定を行うノードがなければそのままループを再開
@@ -258,7 +270,7 @@ namespace Boss.Infrastructure.Repository
                 // 次のループで子ノード設定を行うノードを子ノード設定ターゲット
                 foreach (var setChildrenNode in setChildrenNodesInNextLoopDist.Keys)
                 {
-                    setChildrenTargetsDict.Add(setChildrenNode, setChildrenNodesInNextLoopDist[setChildrenNode]);
+                    notSetChildrenCloneNodeDict.Add(setChildrenNode, setChildrenNodesInNextLoopDist[setChildrenNode]);
                 }
             }
 
