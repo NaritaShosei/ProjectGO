@@ -33,6 +33,7 @@ public sealed class TutorialState : ISequenceState
         context.Player.OnModeChanged += HandleModeChanged;
         context.Player.OnModeChangeCompleted += HandleModeChangeCompleted;
         context.Player.OnBeforeDead += HandleBeforePlayerDead;
+        context.Player.OnDownRecoveryEnded += HandleDownRecoveryEnded;
         context.EnemyManager.OnEnemyDefeated += HandleEnemyDefeated;
 
         if (ServiceLocator.TryGet(out CameraManager cameraManager))
@@ -81,6 +82,7 @@ public sealed class TutorialState : ISequenceState
         context.Player.OnModeChanged -= HandleModeChanged;
         context.Player.OnModeChangeCompleted -= HandleModeChangeCompleted;
         context.Player.OnBeforeDead -= HandleBeforePlayerDead;
+        context.Player.OnDownRecoveryEnded -= HandleDownRecoveryEnded;
         context.EnemyManager.OnEnemyDefeated -= HandleEnemyDefeated;
         context.InputHandler.SetModeChangeEnabled(true);
         context.InputHandler.SetLockOnEnabled(true);
@@ -496,6 +498,16 @@ public sealed class TutorialState : ISequenceState
         _context.InputHandler?.EnableInput(false);
         _context.Player.StartDownRecovery();
         return true;
+    }
+
+    /// <summary>ダウン復帰後、説明やスキル選択で停止中でなければ入力を戻す。</summary>
+    private void HandleDownRecoveryEnded()
+    {
+        if (_context == null || _phase != Phase.Battle || _panelIsOpen
+            || _pauseHandle != null || _transitionRequested)
+            return;
+
+        _context.InputHandler?.EnableInput(true);
     }
 
     private static void HideCursor() => Cursor.visible = false;

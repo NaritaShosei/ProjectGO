@@ -18,19 +18,21 @@ public class PlayerModeController : MonoBehaviour, IModeController
     }
 
     /// <summary>
-    /// モードを切り替える。
-    /// 雷神モードへの切替はゲージが残っている場合のみ許可する。
+    /// 状態を変更せずに切替可能かを判定する。
+    /// 雷神モードへの切替は使用可能なゲージが残っている場合のみ許可する。
     /// </summary>
+    public bool CanSwitchMode(PlayerMode newMode)
+    {
+        return _currentMode != newMode
+            && (newMode != PlayerMode.Thunder
+                || _playerStats == null
+                || _playerStats.CanUseThunder);
+    }
+
+    /// <summary>切替条件を再確認し、成立した場合だけモード変更を通知する。</summary>
     public void SwitchMode(PlayerMode newMode)
     {
-        if (_currentMode == newMode) return;
-
-        if (newMode == PlayerMode.Thunder
-            && _playerStats != null
-            && !_playerStats.CanUseThunder)
-        {
-            return;
-        }
+        if (!CanSwitchMode(newMode)) return;
 
         _currentMode = newMode;
         OnModeChanged?.Invoke(newMode);
