@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.SMB
+namespace Boss.SMB
 {
     public class EdwardSMB : AttackSMB
     {

@@ -1,12 +1,12 @@
-using BossEnemy.Effect;
-using BossEnemy.Interface;
+using Boss.Effect;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
-namespace BossEnemy.SMB
+namespace Boss.SMB
 {
     public abstract class AttackSMB : BossCharacterSMB, IUpdater
     {

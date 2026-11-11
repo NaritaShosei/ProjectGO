@@ -1,10 +1,11 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Character;
+using Boss.AI.BehaviourTree;
+using Boss.Character;
+using Boss.Interface;
 using System;
 using UnityEngine;
 
 [Serializable]
-public abstract class BossCharacterBehaviourTreeNode : TreeNode
+public abstract class BossAITreeNode : TreeNode, IBossAITreeNode
 {
     public virtual void Init(IBossCharacterEntity bossCharacterEntity, NodeRunningConditionNotifier nodeRunningEndNotifier)
     {
@@ -51,7 +52,7 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
             return;
         }
 
-        if (treeNode is BossCharacterBehaviourTreeNode bossCharacterBehaviourTreeNode)
+        if (treeNode is IBossAITreeNode bossCharacterBehaviourTreeNode)
         {
             bossCharacterBehaviourTreeNode.Init(_bossCharacterEntity, nodeRunningEndNotifier);
             return;
@@ -59,6 +60,4 @@ public abstract class BossCharacterBehaviourTreeNode : TreeNode
 
         treeNode.Init(nodeRunningEndNotifier);
     }
-
-
 }

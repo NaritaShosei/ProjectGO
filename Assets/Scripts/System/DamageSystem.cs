@@ -3,8 +3,8 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 // Boss関連
-using BossEnemy.Enum;
-using BossEnemy.Character;
+using Boss.Enum;
+using Boss.Character;
 
 public class DamageSystem
 {

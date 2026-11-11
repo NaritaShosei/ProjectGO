@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using BossEnemy.Interface;
+using Boss.Interface;
 
 /// <summary>
 /// アニメーションのイベントを受け取り、外部へ中継する薄いクラス。
@@ -8,7 +8,7 @@ using BossEnemy.Interface;
 /// IEnemyAnimationControllerを継承したIBossEnemyAnimationControllerを実装し、SMBからanimator.TryGetComponent()で取得される。
 /// </summary>
 
-namespace BossEnemy.Infrastructure
+namespace Boss.Infrastructure
 {
     public class BossCharacterAnimationEventReceiver : IBossCharacterAnimationEventReceiver
     {

@@ -1,9 +1,9 @@
-using BossEnemy.UI;
+using Boss.UI;
 using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface IBossHPView 
     {

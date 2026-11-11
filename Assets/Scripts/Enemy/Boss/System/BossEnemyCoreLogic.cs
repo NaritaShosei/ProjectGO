@@ -1,12 +1,12 @@
-using BossEnemy.Armor;
-using BossEnemy.Attack;
-using BossEnemy.Character;
-using BossEnemy.Enum;
+using Boss.Armor;
+using Boss.Attack;
+using Boss.Character;
+using Boss.Enum;
 using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine;
 
-namespace BossEnemy.Logic
+namespace Boss.Logic
 { 
 
     #region 攻撃処理

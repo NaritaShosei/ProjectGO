@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace BossEnemy.Attack
+namespace Boss.Attack
 {
     [Serializable]
     public struct AttackCondition

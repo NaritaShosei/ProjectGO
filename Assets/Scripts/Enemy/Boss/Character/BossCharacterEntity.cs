@@ -1,6 +1,6 @@
-using BossEnemy.Armor;
-using BossEnemy.Enum;
-using BossEnemy.Interface;
+using Boss.Armor;
+using Boss.Enum;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using UniRx;
 using UnityEngine;
 
 // BossEnemyに関するData
-namespace BossEnemy.Character
+namespace Boss.Character
 {
     #region キャラクターの行動列挙型
     public enum CharacterAction

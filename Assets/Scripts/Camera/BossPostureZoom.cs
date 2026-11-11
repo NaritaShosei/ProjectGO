@@ -1,5 +1,5 @@
 using System;
-using BossEnemy.Enum;
+using Boss.Enum;
 using UnityEngine;
 
 /// <summary>ボスの姿勢（体制）ごとのFOVズーム設定。</summary>

@@ -1,4 +1,4 @@
-namespace BossEnemy.Interface
+namespace Boss.Interface
 {
     public interface IBossAttackView
     {

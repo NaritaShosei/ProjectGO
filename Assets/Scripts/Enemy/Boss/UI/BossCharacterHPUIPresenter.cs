@@ -1,10 +1,10 @@
-using BossEnemy.Character;
-using BossEnemy.Interface;
+using Boss.Character;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using System;
 using UniRx;
 
-namespace BossEnemy.UI
+namespace Boss.UI
 {
     public class BossCharacterHPUIPresenter : IDisposable
     {

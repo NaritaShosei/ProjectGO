@@ -1,6 +1,6 @@
-using BossEnemy.AI.BehaviourTree;
-using BossEnemy.Infrastructure.Repository;
-using BossEnemy.Interface;
+using Boss.AI.BehaviourTree;
+using Boss.Infrastructure.Repository;
+using Boss.Interface;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using System;
@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 
 #if UNITY_EDITOR
-namespace BossEnemy.AI.Editor.BehaviourGraph
+namespace Boss.AI.Editor.BehaviourGraph
 {
     #region BehaviorTreeを構築するTreeGraph生成用のEditor拡張
     /// <summary> BehaviorTreeを構築するGraphView </summary>
@@ -93,7 +93,7 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
                 if (!TryGetEntryNode()) return;
 
                 // Graphから削除されたNodeを完全に取り除く
-                RemoveUnwantedNodes();
+                RemoveDeletedNodes();
 
                 // 全てのbehaviourTreeNodeを更新する
                 UpdateAllBehaviorTreeNodes(graphLogger);
@@ -101,6 +101,7 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
                 // EntryNodeから接続されているツリー内のノードを収集してリポジトリに同期
                 SyncTreeNodesToRepository();
 
+                // 
                 _presenter.SaveRepository();
 
                 Debug.Log("オートセーブが完了しました");
@@ -151,8 +152,8 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             return true;
         }
 
-        /// <summary> 削除されたNodeを完全に取り除く </summary>
-        private void RemoveUnwantedNodes()
+        /// <summary> Graphから削除されたNodeをListから取り除く </summary>
+        private void RemoveDeletedNodes()
         {
             List<IBehaviourTreeGraphNode> removeNode = new List<IBehaviourTreeGraphNode>();
             foreach (var behaviourTreeNode in _behaviourTreeNodes)
@@ -220,9 +221,12 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
 
                 foreach (var child in children)
                 {
-                    if (child != null && !ReferenceEquals(child, entryNode) && connectedNodes.Add(child))
+                    if (child != null 
+                        && !ReferenceEquals(child, entryNode) 
+                        && child is TreeNode childNode
+                        && connectedNodes.Add(childNode))
                     {
-                        queue.Enqueue(child);
+                        queue.Enqueue(childNode);
                     }
                 }
             }
@@ -254,7 +258,9 @@ namespace BossEnemy.AI.Editor.BehaviourGraph
             return false;
         }
     }
+    #endregion
 
+    #region BehaviourTreeGraph上での変更をRepositoryに保存するPresenterクラス
     public class BehaviourTreeGraphPresenter
     {
         public BehaviourTreeGraphPresenter(BehaviourTreeGraphView behaviourTreeGraphView)

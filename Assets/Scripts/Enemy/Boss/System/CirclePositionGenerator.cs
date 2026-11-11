@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Logic
+namespace Boss.Logic
 {
     public class CirclePositionGenerator
     {

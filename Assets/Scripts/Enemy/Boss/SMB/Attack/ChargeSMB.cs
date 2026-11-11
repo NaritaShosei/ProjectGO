@@ -1,12 +1,12 @@
-using BossEnemy.Effect;
-using BossEnemy.Logic;
+using Boss.Effect;
+using Boss.Logic;
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
 
 
-namespace BossEnemy.SMB
+namespace Boss.SMB
 {
     public class ChargeSMB : AttackSMB
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Enum
+namespace Boss.Enum
 {
     /// <summary> ボスエネミーを構成する各パーツの種類 </summary>
     public enum TakeDamageType

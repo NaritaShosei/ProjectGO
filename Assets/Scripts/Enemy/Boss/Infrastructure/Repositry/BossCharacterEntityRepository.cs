@@ -1,13 +1,13 @@
-using BossEnemy.Armor;
-using BossEnemy.Character;
-using BossEnemy.Enum;
-using BossEnemy.Interface;
+using Boss.Armor;
+using Boss.Character;
+using Boss.Enum;
+using Boss.Interface;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-namespace BossEnemy.Infrastructure.Repository
+namespace Boss.Infrastructure.Repository
 {
     [CreateAssetMenu(fileName = "BossCharacterEntityRepository", menuName = "Repository/BossCharacterEntityRepository")]
     public class BossCharacterEntityRepository : ScriptableObject, IBossCharacterEntityRepository

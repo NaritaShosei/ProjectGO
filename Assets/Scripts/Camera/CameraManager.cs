@@ -1,5 +1,5 @@
 using System;
-using BossEnemy.Enum;
+using Boss.Enum;
 using Cysharp.Threading.Tasks;
 using Unity.Cinemachine;
 using UnityEngine;

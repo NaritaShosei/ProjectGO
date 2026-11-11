@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Enum
+namespace Boss.Enum
 {
     public enum PostureType
     {

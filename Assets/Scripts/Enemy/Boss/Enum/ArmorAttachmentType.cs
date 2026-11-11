@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Enum
+namespace Boss.Enum
 {
     /// <summary> ボスの鎧の装着部位 </summary>
     public enum ArmorAttachmentType

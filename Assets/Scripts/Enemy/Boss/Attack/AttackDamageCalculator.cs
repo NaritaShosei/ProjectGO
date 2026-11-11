@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace BossEnemy.Attack
+namespace Boss.Attack
 {
     /// <summary> ボスの攻撃計算機 </summary>
     public class AttackDamageCalculator
