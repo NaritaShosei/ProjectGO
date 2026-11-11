@@ -503,6 +503,13 @@ public sealed class TutorialState : ISequenceState
     /// <summary>ダウン復帰後、説明やスキル選択で停止中でなければ入力を戻す。</summary>
     private void HandleDownRecoveryEnded()
     {
+        // 雷神への切替自体は成立した後に演出が中断された場合、復帰時に説明へ進める。
+        if (_step == TutorialStep.WaitingModeChangeComplete)
+        {
+            HandleModeChangeCompleted();
+            return;
+        }
+
         if (_context == null || _phase != Phase.Battle || _panelIsOpen
             || _pauseHandle != null || _transitionRequested)
             return;
