@@ -215,6 +215,15 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         _animator.SetTrigger(AnimParams.Dodge);
     }
 
+    /// <summary>回避終了通知が欠落した場合、古い通知を無効にして移動へ戻す。</summary>
+    public void RecoverInterruptedDodge()
+    {
+        if (_stateManager == null || !_stateManager.IsDodging()) return;
+        CombatAnimationVersion++;
+        _animator.ResetTrigger(AnimParams.Dodge);
+        MoveCrossFade();
+    }
+
     // ── ヒットストップ ───────────────────────────────────────
 
     public void SetAnimSpeed(float speed)
@@ -285,6 +294,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
     private float _beforeAnimSpeed = 1f;
     private bool _isSpeedChanging = false;
     private bool _isLockedOn = false;
+    private bool _modeChangePendingDuringDodge;
 
     private static class AnimParams
     {
@@ -342,6 +352,12 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
             or PlayerState.Damaged or PlayerState.Down or PlayerState.Dead)
             CombatAnimationVersion++;
 
+        if (oldState == PlayerState.Dodge && _modeChangePendingDuringDodge)
+        {
+            _modeChangePendingDuringDodge = false;
+            ApplyModeChange(_modeController.CurrentMode, true);
+        }
+
         switch (newState)
         {
             case PlayerState.Charging:
@@ -369,21 +385,43 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
 
     private void OnModeChanged(PlayerMode newMode)
     {
-        // Dodge中にバージョンを更新するとDodgeSMBから終了通知が来なくなるため、先に回避を終了させる
-        if (_stateManager.CurrentState == PlayerState.Dodge)
-            AnimEvent_DodgeEnd();
+        // 回避は現在のモーションのまま完了させる。バージョンも維持して終了通知を受け取る。
+        // モードの見た目の反映は回避終了・中断時まで保留する。
+        if (_stateManager.IsDodging())
+        {
+            _modeChangePendingDuringDodge = true;
+            return;
+        }
 
+        ApplyModeChange(newMode, false);
+    }
+
+    /// <summary>
+    /// モード変更をアニメーションに反映する。
+    /// 通常の切替と、回避中に保留した切替の両方から呼ぶ。
+    /// </summary>
+    /// <param name="newMode">反映するモード</param>
+    /// <param name="isDeferred">回避終了時に保留分を反映する場合は true</param>
+    private void ApplyModeChange(PlayerMode newMode, bool isDeferred)
+    {
+        // 切替前の攻撃・切替トリガーが、切替後のモーションへ混入しないようにする。
         CombatAnimationVersion++;
         _animator.ResetTrigger(AnimParams.Attack);
         _animator.ResetTrigger(AnimParams.ModeChange);
         ApplyLockedOnAnimationParameter(newMode);
 
-        // Thunder→Warriorは演出なし。ゲージ切れでも旧攻撃モーションを残さない。
-        if (newMode == PlayerMode.Warrior)
+        // 次の場合は、雷神切替の演出を再生せずに即座に反映する。
+        // ・Thunder→Warrior：もともと演出がない
+        // ・保留分の反映：ModeChanging 状態ではないため、演出完了通知
+        //   （AnimEvent_ModeChangeComplete）を受け取れない
+        if (newMode == PlayerMode.Warrior || isDeferred)
         {
             _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
+
+            // 被弾・ダウン・死亡へ移った場合は、そちらのモーションを優先する。
             if (_stateManager.CurrentState is PlayerState.Idle or PlayerState.ModeChanging)
                 MoveCrossFade();
+
             OnModeChangeComplete?.Invoke();
             return;
         }

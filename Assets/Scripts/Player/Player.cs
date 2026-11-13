@@ -292,8 +292,17 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         if (!gameObject.activeSelf)
             gameObject.SetActive(true);
 
-        if (_playerStateManager.IsDead() || _playerStateManager.IsDown())
+        // 雑魚戦のダウン中に時間切れ・ムービーへ進むと、起き上がりの終了通知が
+        // 届かないことがある。ボス戦開始時にはDownも解除し、無敵・操作不能を持ち越さない。
+        // 通常の死亡はゲームオーバーに任せ、ここでは復活させない。
+        if (_playerStateManager.IsDead())
             return;
+
+        // ダウン中は起き上がり完了と同じ処理でHPを回復し、Idleへ戻す。
+        // アニメーションと雷ゲージの復帰は、以降の共通処理で行う。
+        // ダウン中に呼ばれた場合にHP:0のまま戦闘に戻ることがないようにする
+        if (_playerStateManager.IsDown()) 
+            HandleDownRecoveryEnd();
 
         _move?.CancelDodge();
         _attack?.InterruptByDamage();
