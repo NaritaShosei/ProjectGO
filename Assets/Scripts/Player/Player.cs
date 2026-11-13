@@ -298,6 +298,12 @@ public class Player : MonoBehaviour, IPlayer, ISpeedChange
         if (_playerStateManager.IsDead())
             return;
 
+        // ダウン中は起き上がり完了と同じ処理でHPを回復し、Idleへ戻す。
+        // アニメーションと雷ゲージの復帰は、以降の共通処理で行う。
+        // ダウン中に呼ばれた場合にHP:0のまま戦闘に戻ることがないようにする
+        if (_playerStateManager.IsDown()) 
+            HandleDownRecoveryEnd();
+
         _move?.CancelDodge();
         _attack?.InterruptByDamage();
         _playerStateManager.ChangeState(PlayerState.Idle);
