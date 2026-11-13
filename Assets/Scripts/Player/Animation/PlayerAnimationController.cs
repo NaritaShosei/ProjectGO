@@ -355,10 +355,7 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
         if (oldState == PlayerState.Dodge && _modeChangePendingDuringDodge)
         {
             _modeChangePendingDuringDodge = false;
-            _animator.SetInteger(AnimParams.PlayerMode, (int)_modeController.CurrentMode);
-            ApplyLockedOnAnimationParameter(_modeController.CurrentMode);
-            if (newState == PlayerState.Idle)
-                MoveCrossFade();
+            ApplyModeChange(_modeController.CurrentMode, true);
         }
 
         switch (newState)
@@ -396,17 +393,35 @@ public class PlayerAnimationController : MonoBehaviour, IAnimationController, IM
             return;
         }
 
+        ApplyModeChange(newMode, false);
+    }
+
+    /// <summary>
+    /// モード変更をアニメーションに反映する。
+    /// 通常の切替と、回避中に保留した切替の両方から呼ぶ。
+    /// </summary>
+    /// <param name="newMode">反映するモード</param>
+    /// <param name="isDeferred">回避終了時に保留分を反映する場合は true</param>
+    private void ApplyModeChange(PlayerMode newMode, bool isDeferred)
+    {
+        // 切替前の攻撃・切替トリガーが、切替後のモーションへ混入しないようにする。
         CombatAnimationVersion++;
         _animator.ResetTrigger(AnimParams.Attack);
         _animator.ResetTrigger(AnimParams.ModeChange);
         ApplyLockedOnAnimationParameter(newMode);
 
-        // Thunder→Warriorは演出なし。ゲージ切れでも旧攻撃モーションを残さない。
-        if (newMode == PlayerMode.Warrior)
+        // 次の場合は、雷神切替の演出を再生せずに即座に反映する。
+        // ・Thunder→Warrior：もともと演出がない
+        // ・保留分の反映：ModeChanging 状態ではないため、演出完了通知
+        //   （AnimEvent_ModeChangeComplete）を受け取れない
+        if (newMode == PlayerMode.Warrior || isDeferred)
         {
             _animator.SetInteger(AnimParams.PlayerMode, (int)newMode);
+
+            // 被弾・ダウン・死亡へ移った場合は、そちらのモーションを優先する。
             if (_stateManager.CurrentState is PlayerState.Idle or PlayerState.ModeChanging)
                 MoveCrossFade();
+
             OnModeChangeComplete?.Invoke();
             return;
         }
