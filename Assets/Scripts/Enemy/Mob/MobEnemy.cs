@@ -166,7 +166,19 @@ public class MobEnemy : Enemy,IFormationParticipant
 
         // -------- 追加効果 --------
 
-        ApplyAdditionalEffects(context);
+
+        if(isArmorBreak)
+        {
+            //鎧破壊時のみノックバックPowerを変更
+            ApplyArmorBreakKnockback(context);
+
+            //ノックバック以外は通常道理適応
+            ApplyElectricShock(context);
+        }
+        else
+        {
+            ApplyAdditionalEffects(context);
+        }
     }
 
     public override void OnConditionInterrupt()
@@ -543,6 +555,33 @@ public class MobEnemy : Enemy,IFormationParticipant
                 knockbackLevel,
                 _data.KnockbackStunDuration,
                 _data.KnockbackDeceleration));
+    }
+
+    /// <summary>
+    /// 鎧破壊時の強いノックバックを適応する
+    /// </summary>
+    /// <param name="context"></param>
+    protected void ApplyArmorBreakKnockback(DamageContext context)
+    {
+        if (!CanReceiveCondition || context.Knockback == null) return;
+
+        //攻撃空受け取ったノックバック情報を取得
+        KnockbackContext knockback = context.Knockback.Value;
+
+        //通常よりも強いPowerに変更
+        knockback.Power *= 2f;
+
+        _lastHitDirection = knockback.Direction;
+
+        //強化後のPowerからノックバックレベルを判定する
+        KnockbackLevel knockbackLevel = DetermineKnockbackLevel(knockback.Power);
+
+        _conditionController.ApplyCondition(
+        new KnockbackCondition(
+            knockback,
+            knockbackLevel,
+            _data.KnockbackStunDuration,
+            _data.KnockbackDeceleration));
     }
 
     /// <summary>
