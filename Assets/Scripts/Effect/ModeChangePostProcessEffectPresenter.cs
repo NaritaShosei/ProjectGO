@@ -50,8 +50,9 @@ public sealed class ModeChangePostProcessEffectPresenter : IDisposable
 
         _previousMode = newMode;
 
-        // 共用 Vignette の一時値を次の演出の復元先として保存しない。
-        if (_justDodgeEffectPlayer != null)
+        // 雷神切替の画面演出は Vignette を共有するため、再生前にジャスト回避を終了する。
+        // 闘神へ戻る場合は切替演出が Vignette を使わないため、回避演出を継続する。
+        if (shouldPlay && _justDodgeEffectPlayer != null)
             _justDodgeEffectPlayer.Stop();
 
         // Playerが無効な間は状態だけ追跡し、演出の再生やマテリアル操作を行わない。

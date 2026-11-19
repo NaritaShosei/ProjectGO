@@ -88,21 +88,26 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public void CancelDodge()
     {
-        if (!_isDodging) return;
-
+        bool wasDodging = _isDodging;
         _isDodging = false;
+        _dodgeInvincibilityStarted = false;
+        _dodgeInvincibleRemaining = 0f;
+        _dodgeRecoveryRemaining = 0f;
 
         _dodgeMoveCts?.Cancel();
         _dodgeMoveCts?.Dispose();
         _dodgeMoveCts = null;
 
-        _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+        _playerStateManager?.RemoveInvincible(InvincibleType.Dodge);
 
-        if (_rb != null)
+        if (wasDodging && _rb != null)
             _rb.linearVelocity = Vector3.zero;
     }
 
     [SerializeField] private Rigidbody _rb;
+
+    [SerializeField, Min(1f), Tooltip("回避終了通知が来ない場合の復帰時間（プレイヤー時間・秒）。回避時間より短くはしない。")]
+    private float _dodgeRecoveryTimeout = 3f;
 
     [Header("Damage Reaction")]
     [SerializeField, Min(0f)] private float _mediumReactionDistance = 1.5f;
@@ -136,6 +141,9 @@ public class PlayerMovement : MonoBehaviour
 
     private bool _wasMoving;
     private bool _isDodging;
+    private bool _dodgeInvincibilityStarted;
+    private float _dodgeInvincibleRemaining;
+    private float _dodgeRecoveryRemaining;
     private CancellationTokenSource _dodgeMoveCts;
     private CancellationTokenSource _attackMoveCts;
     private CancellationTokenSource _damageReactionMoveCts;
@@ -172,6 +180,7 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         if (_playerStateManager == null) return;
+        TickDodge(Time.deltaTime);
 
         if (!_isAttackMoving)
         {
@@ -187,6 +196,13 @@ public class PlayerMovement : MonoBehaviour
 
         if (!_isAttackMoving)
             Move();
+    }
+
+    private void OnDisable()
+    {
+        CancelDodge();
+        if (_playerStateManager != null && _playerStateManager.IsDodging())
+            _playerStateManager.ChangeState(PlayerState.Idle);
     }
 
     private void OnDestroy()
@@ -205,8 +221,7 @@ public class PlayerMovement : MonoBehaviour
             _animationController.OnDodgeInvincibilityStart -= HandleDodgeInvincibilityStart;
             _animationController.OnDodgeEnd -= HandleDodgeEnd;
         }
-        _dodgeMoveCts?.Cancel();
-        _dodgeMoveCts?.Dispose();
+        CancelDodge();
         _attackMoveCts?.Cancel();
         _attackMoveCts?.Dispose();
         _damageReactionMoveCts?.Cancel();
@@ -319,14 +334,7 @@ public class PlayerMovement : MonoBehaviour
             _isAttackMoving = false;
         }
 
-        _dodgeMoveCts?.Cancel();
-        _dodgeMoveCts?.Dispose();
-        _dodgeMoveCts = new CancellationTokenSource();
-
-        _isDodging = true;
-        _playerStateManager.ChangeState(PlayerState.Dodge);
-
-        _currentDodgeData = _moveData.GetDodge(_modeController.CurrentMode);
+        BeginDodge(_moveData.GetDodge(_modeController.CurrentMode));
         Vector3 dodgeDir = GetDodgeDirection();
 
         if (_lockOnTarget != null || isCancelDodge)
@@ -373,8 +381,10 @@ public class PlayerMovement : MonoBehaviour
                 await UniTask.Yield(ct);
             }
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException) { return; }
 
+        // 古い回避で新しい回避・被弾移動の速度を上書きしない。
+        if (ct.IsCancellationRequested) return;
         if (_rb) _rb.linearVelocity = Vector3.zero;
         // ステート復帰は HandleDodgeEnd（DodgeSMBのOnStateExit通知）を待つ
     }
@@ -384,38 +394,47 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void HandleDodgeInvincibilityStart()
     {
-        // 回避開始のタイミングでステートをDodgeに変更する。これにより、回避中は移動や攻撃ができなくなる。
-        if (!_isDodging) return;
+        if (!_isDodging || !_playerStateManager.IsDodging() || _dodgeInvincibilityStarted) return;
 
+        _dodgeInvincibilityStarted = true;
+        _dodgeInvincibleRemaining = Mathf.Max(0f, InvincibleDuration);
+        _dodgeRecoveryRemaining = Mathf.Max(_dodgeRecoveryRemaining, _dodgeInvincibleRemaining + 0.5f);
+        if (_dodgeInvincibleRemaining > 0f)
+            _playerStateManager.AddInvincible(InvincibleType.Dodge);
         OnStartDodgeInvincible?.Invoke();
-
-        _playerStateManager.AddInvincible(InvincibleType.Dodge);
-
-        HandleDodgeInvincibilityEnd().Forget();
     }
 
-    /// <summary>
-    ///　回避無敵状態を終了する非同期メソッド。回避開始から一定時間が経過したら、無敵状態を解除する。
-    /// </summary>
-    private async UniTaskVoid HandleDodgeInvincibilityEnd()
+    private void BeginDodge(DodgeData data)
     {
-        float elapsed = 0f;
+        CancelDodge();
+        _currentDodgeData = data;
+        _dodgeMoveCts = new CancellationTokenSource();
+        _isDodging = true;
+        _dodgeRecoveryRemaining = Mathf.Max(_dodgeRecoveryTimeout, data.Duration + 0.5f);
+        _playerStateManager.ChangeState(PlayerState.Dodge);
+    }
 
-        try
+    /// <summary>Animatorの進行と独立して無敵を終了し、終了通知の欠落から復帰する。</summary>
+    private void TickDodge(float deltaTime)
+    {
+        if (!_isDodging) return;
+        if (!_playerStateManager.IsDodging())
         {
-            while (elapsed < InvincibleDuration)
-            {
-                elapsed += Time.deltaTime * _timeScale;
-                await UniTask.Yield(_dodgeMoveCts.Token, false);
-            }
+            CancelDodge();
+            return;
         }
-        catch (OperationCanceledException)
-        {
-            // 回避移動がキャンセルされた場合も無敵状態を解除するため、ここで例外をキャッチして処理を続行する。
-        }
-        finally
-        {
+
+        // 正規のポーズ・ヒットストップ中は進めない。
+        float elapsed = Mathf.Max(0f, deltaTime * _timeScale);
+        _dodgeInvincibleRemaining -= elapsed;
+        if (_dodgeInvincibleRemaining <= 0f)
             _playerStateManager.RemoveInvincible(InvincibleType.Dodge);
+
+        _dodgeRecoveryRemaining -= elapsed;
+        if (_dodgeRecoveryRemaining <= 0f)
+        {
+            _animationController?.RecoverInterruptedDodge();
+            HandleDodgeEnd();
         }
     }
 
@@ -425,8 +444,9 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void HandleDodgeEnd()
     {
-        if (!_isDodging) return;
-        _isDodging = false;
+        bool wasDodging = _isDodging;
+        CancelDodge();
+        if (!wasDodging) return;
         // 遅れて届いた終了通知で、ダウンや死亡などの遷移先を上書きしない。
         if (_playerStateManager.IsDodging())
             _playerStateManager.ChangeState(PlayerState.Idle);
@@ -457,14 +477,10 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void CancelDodgeByDamage()
     {
-        if (!_isDodging) return;
-
-        _isDodging = false;
-        _dodgeMoveCts?.Cancel();
-        _dodgeMoveCts?.Dispose();
-        _dodgeMoveCts = null;
-        _rb.linearVelocity = Vector3.zero;
-        OnEndDodge?.Invoke();
+        bool wasDodging = _isDodging;
+        CancelDodge();
+        if (wasDodging)
+            OnEndDodge?.Invoke();
     }
 
     /// <summary>

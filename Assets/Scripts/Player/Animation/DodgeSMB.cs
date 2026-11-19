@@ -12,9 +12,9 @@ public class DodgeSMB : StateMachineBehaviour
         _isDodgeEnded = false;
         _stateLength = stateInfo.length;
 
-        if (animator.TryGetComponent(out PlayerAnimationController controller))
-            _playerAnimationController = controller;
-        _animationVersion = controller != null ? controller.CombatAnimationVersion : -1;
+        _playerAnimationController = animator.GetComponentInParent<PlayerAnimationController>();
+        _animationVersion = _playerAnimationController != null
+            ? _playerAnimationController.CombatAnimationVersion : -1;
     }
 
     public override void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

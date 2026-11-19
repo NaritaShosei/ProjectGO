@@ -109,7 +109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 98, y: 32}
+  m_AnchoredPosition: {x: 143.9, y: -11.9}
   m_SizeDelta: {x: 2473.9, y: 14.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8572727666269350807
@@ -142,8 +142,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u7D2B\u7D0B\u306E\u5CA9\u738B\u30D9\u30D8\u30EB\u30E8\u30C8\u30A5\u30F3"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 9675f3f9f3d7a044a8af5dd67f86bba6, type: 2}
-  m_sharedMaterial: {fileID: 5139381610417544147, guid: 9675f3f9f3d7a044a8af5dd67f86bba6, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: c53246874463c39428c8189e5d3415d4, type: 2}
+  m_sharedMaterial: {fileID: 2649257169248792476, guid: c53246874463c39428c8189e5d3415d4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -173,11 +173,11 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
-  m_characterSpacing: 2
+  m_characterSpacing: 10.15
   m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
@@ -436,7 +436,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 86.4}
-  m_SizeDelta: {x: 2169, y: 526}
+  m_SizeDelta: {x: 2574.18, y: 540.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6369146032739126624
 CanvasRenderer:
@@ -609,7 +609,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.7529412, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
