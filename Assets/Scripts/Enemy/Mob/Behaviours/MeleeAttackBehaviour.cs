@@ -57,6 +57,11 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
+
+        // スポーン後の初回旋回が完了していなければ攻撃しない
+        if (_enemy is MobEnemy mobEnemy && !mobEnemy.CanStartAttack())
+            return false;
+
         if (_player == null) return false;
         if (!_enemyServices.PlayerInformationService.CanAttackPlayer()) return false;
         if (_enemyServices.AttackerSlot == null) return false;

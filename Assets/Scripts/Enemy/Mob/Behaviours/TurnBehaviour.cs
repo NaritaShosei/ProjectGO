@@ -111,6 +111,37 @@ public class TurnBehaviour : IEnemyBehaviour
         );
     }
 
+    /// <summary>
+    /// 現在プレイヤー方向を向いているか
+    /// </summary>
+    public bool IsFacingPlayer
+    {
+        get
+        {
+            if (_self == null || _player == null) return false;
+
+            Vector3 direction = _player.position - _self.position;
+            direction.y = 0f;
+
+            if (direction.sqrMagnitude < 0.0001f) return true;
+
+            float angle = Vector3.Angle(_self.forward, direction);
+
+            return angle < 0.5f;
+        }
+    }
+
+    /// <summary>
+    /// スポーン時の旋回状態を初期化する
+    /// </summary>
+    public void ResetForSpawn()
+    {
+        // 前回のRoamで設定された方向を解除
+        _overrideDirection = null;
+
+        IsFinished = false;
+    }
+
     private Transform _self;
     private Transform _player;
     private readonly TurnProfile _profile;

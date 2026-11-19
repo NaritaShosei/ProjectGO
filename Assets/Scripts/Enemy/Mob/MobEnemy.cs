@@ -88,6 +88,10 @@ public class MobEnemy : Enemy,IFormationParticipant
 
         ResetRuntime();
 
+        // 初回旋回が終わるまで攻撃を待機
+        _turn?.ResetForSpawn();
+        _waitForInitialTurn = true;
+
         _conditionController.ApplyImmediate(new SpawnCondition());
 
         // TODO: _stats.ResetHP() — EnemyStatsにリセットメソッドが追加されたら呼ぶ
@@ -204,6 +208,29 @@ public class MobEnemy : Enemy,IFormationParticipant
         }
         _armor.OnBroken -= BreakArmor;
         _armor.OnBroken += BreakArmor;
+    }
+
+    /// <summary>
+    /// 初回旋回が完了しているか確認する
+    /// </summary>
+    public bool CanStartAttack()
+    {
+        // 初回旋回の待機が不要なら攻撃可能
+        if (!_waitForInitialTurn) return true;
+
+        // Turnが存在しない場合は待機させない
+        if (_turn == null)
+        {
+            _waitForInitialTurn = false;
+            return true;
+        }
+
+        // プレイヤー方向を向いていなければ待機
+        if (!_turn.IsFacingPlayer) return false;
+
+        // 旋回完了。以降は通常どおり攻撃可能
+        _waitForInitialTurn = false;
+        return true;
     }
 
     /// <summary>
@@ -422,7 +449,10 @@ public class MobEnemy : Enemy,IFormationParticipant
         ConsumeRetreatIfUnnecessary();
     }
 
-    /// <summary>
+    // スポーン後、初回旋回が完了するまで攻撃を待機する
+    private bool _waitForInitialTurn;
+
+        /// <summary>
     /// 硬直明けの時点ですでにRetreatDistance以上離れている場合、
     /// 後退リクエストを消費する（放置するとApproach後に不要な後退が発生するため）
     /// </summary>
