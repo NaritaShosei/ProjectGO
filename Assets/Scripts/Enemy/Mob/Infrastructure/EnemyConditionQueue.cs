@@ -35,13 +35,24 @@ public sealed class EnemyConditionQueue
     /// </summary>
     public void Enqueue(IEnemy enemy, IEnemyCondition condition)
     {
-        if (Has(condition.Type))
+
+        // アクティブなConditionがある場合
+        if (_active.TryGetValue(condition.Type, out var activeCondition))
         {
-            _active[condition.Type].OnExit(enemy);
+            if (!CanReplace(activeCondition, condition))return;
+
+            activeCondition.OnExit(enemy);
             _active[condition.Type] = condition;
             condition.OnEnter(enemy);
             return;
         }
+
+        // pending中のConditionがある場合
+    if (_pending.TryGetValue(condition.Type, out var pendingCondition))
+    {
+        if (!CanReplace(pendingCondition, condition))
+            return;
+    }
 
         // Dictionaryによる上書きで同一フレーム内の同種重複を防ぐ
         _pending[condition.Type] = condition;
@@ -53,8 +64,12 @@ public sealed class EnemyConditionQueue
     /// </summary>
     public void Apply(IEnemy enemy, IEnemyCondition condition)
     {
-        if (_active.ContainsKey(condition.Type))
+        if (_active.TryGetValue(condition.Type, out var activeCondition))
         {
+            // 新しいConditionの方が弱ければ適用しない
+            if (!CanReplace(activeCondition, condition))
+                return;
+
             _active[condition.Type].OnExit(enemy);
         }
         _active[condition.Type] = condition;
@@ -121,6 +136,25 @@ public sealed class EnemyConditionQueue
             condition.OnExit(enemy);
         _active.Clear();
         _pending.Clear();
+    }
+
+    /// <summary>
+    /// 新しいConditionで現在のConditionを上書きできるか判定する
+    /// </summary>
+    private bool CanReplace(
+    IEnemyCondition current,
+    IEnemyCondition next)
+    {
+        // Knockback同士の場合はレベルを比較する
+        if (current is KnockbackCondition currentKnockback &&
+            next is KnockbackCondition nextKnockback)
+        {
+            // 現在より強いノックバックの場合のみ上書きする
+            return nextKnockback.Level > currentKnockback.Level;
+        }
+
+        // Knockback以外は従来どおり上書きを許可する
+        return true;
     }
 
     private readonly Dictionary<ConditionType, IEnemyCondition> _active = new();

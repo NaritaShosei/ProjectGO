@@ -10,7 +10,7 @@ using static EnemyRuntimeContext;
 // ※鎧が残っているかはEnemyTypeで判定
 // ※鎧持ちでも感電する
 
-public class MobEnemy : Enemy,IFormationParticipant
+public class MobEnemy : Enemy, IFormationParticipant
 {
     public override IEnemyConditionController ConditionController { get => _conditionController; }
 
@@ -47,7 +47,7 @@ public class MobEnemy : Enemy,IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
- 
+
 
     public override void Init()
     {
@@ -171,7 +171,7 @@ public class MobEnemy : Enemy,IFormationParticipant
         // -------- 追加効果 --------
 
 
-        if(isArmorBreak)
+        if (isArmorBreak)
         {
             //鎧破壊時のみノックバックPowerを変更
             ApplyArmorBreakKnockback(context);
@@ -272,6 +272,10 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     [SerializeField, Tooltip("root直下に配置するゲージUI用の固定Transform")]
     private Transform _uiAnchor;
+
+    [Header("Armor Break Knockback")]
+    [SerializeField, Tooltip("アーマー破壊時のノックバックパワー")] private float _armorBreakKnockbackPower = 5f;
+    [SerializeField, Tooltip("アーマー破壊時の垂直初速")] private float _armorBreakKnockbackUpward = 0f;
 
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
@@ -452,7 +456,7 @@ public class MobEnemy : Enemy,IFormationParticipant
     // スポーン後、初回旋回が完了するまで攻撃を待機する
     private bool _waitForInitialTurn;
 
-        /// <summary>
+    /// <summary>
     /// 硬直明けの時点ですでにRetreatDistance以上離れている場合、
     /// 後退リクエストを消費する（放置するとApproach後に不要な後退が発生するため）
     /// </summary>
@@ -593,23 +597,24 @@ public class MobEnemy : Enemy,IFormationParticipant
     /// <param name="context"></param>
     protected void ApplyArmorBreakKnockback(DamageContext context)
     {
-        if (!CanReceiveCondition || context.Knockback == null) return;
+        //攻撃方向の引継ぎ
+        Vector3 direction = context.Knockback?.Direction ?? (transform.position - _playerTransform.position).normalized;
 
-        //攻撃空受け取ったノックバック情報を取得
-        KnockbackContext knockback = context.Knockback.Value;
+        //鎧破壊時のノックバックを生成
+        KnockbackContext knockbackContext = new KnockbackContext
+        {
+            Direction = direction,
+            Power = _armorBreakKnockbackPower,
+            Upward = _armorBreakKnockbackUpward
+        };
 
-        //通常よりも強いPowerに変更
-        knockback.Power *= 2f;
+        _lastHitDirection = direction;
 
-        _lastHitDirection = knockback.Direction;
-
-        //強化後のPowerからノックバックレベルを判定する
-        KnockbackLevel knockbackLevel = DetermineKnockbackLevel(knockback.Power);
-
+        //鎧破壊時はかならずLevelをLargeにする
         _conditionController.ApplyCondition(
-        new KnockbackCondition(
-            knockback,
-            knockbackLevel,
+            new KnockbackCondition(
+            knockbackContext,
+            KnockbackLevel.Large,
             _data.KnockbackStunDuration,
             _data.KnockbackDeceleration));
     }
