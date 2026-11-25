@@ -221,17 +221,24 @@ public class MobEnemy : Enemy, IFormationParticipant
         // Turnが存在しない場合は待機させない
         if (_turn == null)
         {
-            _waitForInitialTurn = false;
             return true;
         }
 
         // プレイヤー方向を向いていなければ待機
-        if (!_turn.IsFacingPlayer) return false;
-
-        // 旋回完了。以降は通常どおり攻撃可能
-        _waitForInitialTurn = false;
-        return true;
+        return _turn.IsFacingPlayer;
     }
+
+    /// <summary>
+    /// 初回攻撃が実際に開始されたときに呼び出す。
+    /// </summary>
+    public void NotifyAttackStarted()
+    {
+        if (!_waitForInitialTurn) return;
+
+        // 攻撃開始時に初回旋回の待機を解除
+        _waitForInitialTurn = false;
+    }
+
 
     /// <summary>
     /// 現在有効な鎧を返す。サブクラスが独自の防御システム（盾など）を持つ場合はオーバーライドする。

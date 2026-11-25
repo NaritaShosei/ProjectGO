@@ -57,11 +57,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public bool CanEnter()
     {
-
-        // スポーン後の初回旋回が完了していなければ攻撃しない
-        if (_enemy is MobEnemy mobEnemy && !mobEnemy.CanStartAttack())
-            return false;
-
         if (_player == null) return false;
         if (!_enemyServices.PlayerInformationService.CanAttackPlayer()) return false;
         if (_enemyServices.AttackerSlot == null) return false;
@@ -97,6 +92,10 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
             }
         }
 
+        // スポーン後の初回旋回が完了していなければ攻撃しない
+        if (_enemy is MobEnemy mobEnemy && !mobEnemy.CanStartAttack())
+            return false;
+
         return true;
     }
 
@@ -108,6 +107,12 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnEnter()
     {
+        // 初回攻撃が実際に開始されたことを通知
+        if (_enemy is MobEnemy mobEnemy)
+        {
+            mobEnemy.NotifyAttackStarted();
+        }
+
         _isAttacking = true;
         _timer = 0f;
         _hitCount = 0;
