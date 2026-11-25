@@ -15,6 +15,11 @@ public sealed class KnockbackCondition : IEnemyCondition
     public bool IsFinished => _isFinished;
 
     /// <summary>
+    /// 現在のノックバックレベル
+    /// </summary>
+    public KnockbackLevel Level => _level;
+
+    /// <summary>
     /// ノックバック条件を初期化する
     /// </summary>
     /// <param name="level">ノックバックレベル（0=Hit / 1=Small / 2=Large）</param>

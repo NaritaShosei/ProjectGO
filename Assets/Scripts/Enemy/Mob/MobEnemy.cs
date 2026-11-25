@@ -10,7 +10,7 @@ using static EnemyRuntimeContext;
 // ※鎧が残っているかはEnemyTypeで判定
 // ※鎧持ちでも感電する
 
-public class MobEnemy : Enemy,IFormationParticipant
+public class MobEnemy : Enemy, IFormationParticipant
 {
     public override IEnemyConditionController ConditionController { get => _conditionController; }
 
@@ -47,7 +47,7 @@ public class MobEnemy : Enemy,IFormationParticipant
     // _contextはInit後に生成されるためnullチェックが必要
     public bool IsInAttackCooldown => _context != null && _context.AttackCooldownRemaining > 0f;
 
- 
+
 
     public override void Init()
     {
@@ -87,6 +87,10 @@ public class MobEnemy : Enemy,IFormationParticipant
         ResetArmor();
 
         ResetRuntime();
+
+        // 初回旋回が終わるまで攻撃を待機
+        _turn?.ResetForSpawn();
+        _waitForInitialTurn = true;
 
         _conditionController.ApplyImmediate(new SpawnCondition());
 
@@ -166,7 +170,19 @@ public class MobEnemy : Enemy,IFormationParticipant
 
         // -------- 追加効果 --------
 
-        ApplyAdditionalEffects(context);
+
+        if (isArmorBreak)
+        {
+            //鎧破壊時のみノックバックPowerを変更
+            ApplyArmorBreakKnockback(context);
+
+            //ノックバック以外は通常道理適応
+            ApplyElectricShock(context);
+        }
+        else
+        {
+            ApplyAdditionalEffects(context);
+        }
     }
 
     public override void OnConditionInterrupt()
@@ -193,6 +209,36 @@ public class MobEnemy : Enemy,IFormationParticipant
         _armor.OnBroken -= BreakArmor;
         _armor.OnBroken += BreakArmor;
     }
+
+    /// <summary>
+    /// 初回旋回が完了しているか確認する
+    /// </summary>
+    public bool CanStartAttack()
+    {
+        // 初回旋回の待機が不要なら攻撃可能
+        if (!_waitForInitialTurn) return true;
+
+        // Turnが存在しない場合は待機させない
+        if (_turn == null)
+        {
+            return true;
+        }
+
+        // プレイヤー方向を向いていなければ待機
+        return _turn.IsFacingPlayer;
+    }
+
+    /// <summary>
+    /// 初回攻撃が実際に開始されたときに呼び出す。
+    /// </summary>
+    public void NotifyAttackStarted()
+    {
+        if (!_waitForInitialTurn) return;
+
+        // 攻撃開始時に初回旋回の待機を解除
+        _waitForInitialTurn = false;
+    }
+
 
     /// <summary>
     /// 現在有効な鎧を返す。サブクラスが独自の防御システム（盾など）を持つ場合はオーバーライドする。
@@ -233,6 +279,10 @@ public class MobEnemy : Enemy,IFormationParticipant
 
     [SerializeField, Tooltip("root直下に配置するゲージUI用の固定Transform")]
     private Transform _uiAnchor;
+
+    [Header("Armor Break Knockback")]
+    [SerializeField, Tooltip("アーマー破壊時のノックバックパワー")] private float _armorBreakKnockbackPower = 5f;
+    [SerializeField, Tooltip("アーマー破壊時の垂直初速")] private float _armorBreakKnockbackUpward = 0f;
 
     private EnemyRuntimeContext _context;
     private EnemyStateContext _state;
@@ -410,6 +460,9 @@ public class MobEnemy : Enemy,IFormationParticipant
         ConsumeRetreatIfUnnecessary();
     }
 
+    // スポーン後、初回旋回が完了するまで攻撃を待機する
+    private bool _waitForInitialTurn;
+
     /// <summary>
     /// 硬直明けの時点ですでにRetreatDistance以上離れている場合、
     /// 後退リクエストを消費する（放置するとApproach後に不要な後退が発生するため）
@@ -543,6 +596,34 @@ public class MobEnemy : Enemy,IFormationParticipant
                 knockbackLevel,
                 _data.KnockbackStunDuration,
                 _data.KnockbackDeceleration));
+    }
+
+    /// <summary>
+    /// 鎧破壊時の強いノックバックを適応する
+    /// </summary>
+    /// <param name="context"></param>
+    protected void ApplyArmorBreakKnockback(DamageContext context)
+    {
+        //攻撃方向の引継ぎ
+        Vector3 direction = context.Knockback?.Direction ?? (transform.position - _playerTransform.position).normalized;
+
+        //鎧破壊時のノックバックを生成
+        KnockbackContext knockbackContext = new KnockbackContext
+        {
+            Direction = direction,
+            Power = _armorBreakKnockbackPower,
+            Upward = _armorBreakKnockbackUpward
+        };
+
+        _lastHitDirection = direction;
+
+        //鎧破壊時はかならずLevelをLargeにする
+        _conditionController.ApplyCondition(
+            new KnockbackCondition(
+            knockbackContext,
+            KnockbackLevel.Large,
+            _data.KnockbackStunDuration,
+            _data.KnockbackDeceleration));
     }
 
     /// <summary>

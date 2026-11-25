@@ -77,6 +77,9 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         float triggerRange = _context.SelectedPattern.AttackRange * _context.SelectedPattern.AttackTriggerRatio;
         if (sqrDist > triggerRange * triggerRange) return false;
 
+        // スポーン後の初回旋回が完了していなければ攻撃しない
+        if (_enemy is MobEnemy mobEnemy && !mobEnemy.CanStartAttack()) return false;
+
         if (_enemyServices.PlayerInformationService.IsBehaindPlayer(_self))
         {
             // Playerが接敵していなければ確率キャンセルを行わない
@@ -91,7 +94,6 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
                 if (UnityEngine.Random.value < _profile.BackAttackSuppressChance) return false;
             }
         }
-
         return true;
     }
 
@@ -103,6 +105,12 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     public void OnEnter()
     {
+        // 初回攻撃が実際に開始されたことを通知
+        if (_enemy is MobEnemy mobEnemy)
+        {
+            mobEnemy.NotifyAttackStarted();
+        }
+
         _isAttacking = true;
         _timer = 0f;
         _hitCount = 0;
@@ -229,7 +237,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         {
             if (hit.TryGetComponent<IPlayer>(out _))
             {
-                _enemyServices.PlayerInformationService.TakeDamage(pattern.BaseDamage,_reactionType);
+                _enemyServices.PlayerInformationService.TakeDamage(pattern.BaseDamage, _reactionType);
             }
         }
 
@@ -239,17 +247,17 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
 
     private void TickAttackMovement(EnemyAttackPattern pattern, float deltaTime)
     {
-        if(pattern.EnableHoming && _timer <= pattern.HomingDuration && _player != null)
+        if (pattern.EnableHoming && _timer <= pattern.HomingDuration && _player != null)
         {
             Vector3 toPlayer = _player.position - _self.position;
             toPlayer.y = 0f;
 
-            if(toPlayer.sqrMagnitude > 0.1f && toPlayer.sqrMagnitude <= pattern.HomingRadius * pattern.HomingRadius)
+            if (toPlayer.sqrMagnitude > 0.1f && toPlayer.sqrMagnitude <= pattern.HomingRadius * pattern.HomingRadius)
             {
                 Quaternion targetRot = Quaternion.LookRotation(toPlayer.normalized);
                 float angle = Quaternion.Angle(_self.rotation, targetRot);
 
-                if(angle <= pattern.HomingAngle)
+                if (angle <= pattern.HomingAngle)
                 {
                     _self.rotation = Quaternion.RotateTowards(_self.rotation, targetRot, pattern.HomingStrength * deltaTime);
                 }
@@ -293,7 +301,7 @@ public class MeleeAttackBehaviour : IEnemyBehaviour
         if (!_isAttacking) return;
         _isAttacking = false;
 
-         var pattern = _context.SelectedPattern;
+        var pattern = _context.SelectedPattern;
 
         // 攻撃後クールダウンをセット
         float cooldown = _cooldownOverride > 0f ? _cooldownOverride : (_context.SelectedPattern?.Cooldown ?? 1.5f);
